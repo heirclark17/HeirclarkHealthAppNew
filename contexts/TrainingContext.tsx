@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useGoalWizard } from './GoalWizardContext';
 import { trainingService } from '../services/trainingService';
+import { planGenerator } from '../services/planGenerator';
+import { trainingStorage } from '../services/trainingStorage';
 import {
   WeeklyTrainingPlan,
   TrainingDay,
@@ -11,6 +13,10 @@ import {
   TrainingProgram,
   GoalWorkoutAlignment,
   DifficultyLevel,
+  PlanSummary,
+  ProgramTemplate,
+  Exercise,
+  ExerciseAlternative,
 } from '../types/training';
 
 const STORAGE_KEY = 'hc_training_plan_cache';
@@ -18,29 +24,39 @@ const STORAGE_KEY = 'hc_training_plan_cache';
 interface TrainingState {
   weeklyPlan: WeeklyTrainingPlan | null;
   currentWeek: number;
-  selectedProgram: TrainingProgram | null;
+  selectedProgram: TrainingProgram | ProgramTemplate | null;
   isGenerating: boolean;
   error: string | null;
   goalAlignment: GoalWorkoutAlignment | null;
   selectedDayIndex: number;
   lastGeneratedAt: string | null;
   preferences: TrainingPreferences | null;
+  planSummary: PlanSummary | null;
+  selectedExercise: Exercise | null;
+  showAlternativesModal: boolean;
 }
 
 interface TrainingContextType {
   state: TrainingState;
-  generateWeeklyPlan: () => Promise<boolean>;
+  generateWeeklyPlan: (programId?: string) => Promise<boolean>;
   regeneratePlan: () => Promise<boolean>;
-  selectProgram: (program: TrainingProgram) => void;
+  selectProgram: (program: TrainingProgram | ProgramTemplate) => void;
+  selectProgramAndGenerate: (program: TrainingProgram | ProgramTemplate) => Promise<boolean>;
   setSelectedDay: (index: number) => void;
   markExerciseComplete: (dayIndex: number, exerciseId: string) => void;
   markWorkoutComplete: (dayIndex: number) => void;
   goToNextWeek: () => void;
   goToPreviousWeek: () => void;
   swapExercise: (dayIndex: number, exerciseId: string) => void;
-  getAllPrograms: () => TrainingProgram[];
+  swapExerciseWithAlternative: (dayIndex: number, exerciseId: string, alternative: ExerciseAlternative) => void;
+  getAllPrograms: () => (TrainingProgram | ProgramTemplate)[];
+  getEnhancedPrograms: () => ProgramTemplate[];
   clearPlan: () => void;
   loadCachedPlan: () => Promise<void>;
+  showExerciseAlternatives: (exercise: Exercise) => void;
+  hideExerciseAlternatives: () => void;
+  hasPlan: () => boolean;
+  getPlanSummary: () => PlanSummary | null;
 }
 
 const initialState: TrainingState = {
@@ -53,6 +69,9 @@ const initialState: TrainingState = {
   selectedDayIndex: 0,
   lastGeneratedAt: null,
   preferences: null,
+  planSummary: null,
+  selectedExercise: null,
+  showAlternativesModal: false,
 };
 
 const TrainingContext = createContext<TrainingContextType | undefined>(undefined);
@@ -116,9 +135,10 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     };
   }, [goalWizardContext?.state]);
 
-  // Generate weekly training plan
-  const generateWeeklyPlan = useCallback(async (): Promise<boolean> => {
-    console.log('[Training] generateWeeklyPlan called');
+  // Generate weekly training plan with enhanced plan generator
+  // If programId is provided, use that specific program
+  const generateWeeklyPlan = useCallback(async (programId?: string): Promise<boolean> => {
+    console.log('[Training] generateWeeklyPlan called', programId ? `with program: ${programId}` : '');
     setState(prev => ({ ...prev, isGenerating: true, error: null }));
 
     try {
@@ -127,15 +147,11 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       console.log('[Training] Preferences:', JSON.stringify(preferences, null, 2));
       console.log('[Training] Cardio preference:', preferences.cardioPreference);
 
-      // Get recommended program
-      console.log('[Training] Getting recommended program...');
-      const program = state.selectedProgram || trainingService.getRecommendedProgram(preferences);
-      console.log('[Training] Program selected:', program?.name);
-
-      // Generate the weekly plan
-      console.log('[Training] Generating weekly plan...');
-      const weeklyPlan = trainingService.generateWeeklyPlan(preferences, state.currentWeek);
-      console.log('[Training] Weekly plan generated:', weeklyPlan?.days?.length, 'days');
+      // Use the enhanced plan generator to get plan with summary
+      // Pass programId to use specific program if provided
+      console.log('[Training] Using planGenerator for enhanced plan...');
+      const { weeklyPlan, program, summary } = planGenerator.generateCompletePlan(preferences, undefined, programId);
+      console.log('[Training] Plan generated with program:', program.name);
 
       // Calculate goal alignment
       console.log('[Training] Calculating goal alignment...');
@@ -147,6 +163,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       const todayIndex = today === 0 ? 6 : today - 1; // Convert to Monday = 0
 
       console.log('[Training] Updating state with new plan...');
+      const lastGeneratedAt = new Date().toISOString();
+
       setState(prev => ({
         ...prev,
         weeklyPlan,
@@ -154,20 +172,25 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         goalAlignment: alignment,
         isGenerating: false,
         selectedDayIndex: todayIndex,
-        lastGeneratedAt: new Date().toISOString(),
+        lastGeneratedAt,
         preferences,
+        planSummary: summary,
       }));
 
-      // Cache the plan
-      console.log('[Training] Caching plan to AsyncStorage...');
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({
+      // Cache the plan using trainingStorage
+      console.log('[Training] Caching plan...');
+      await trainingStorage.savePlanCache({
         weeklyPlan,
         selectedProgram: program,
         goalAlignment: alignment,
         currentWeek: state.currentWeek,
-        lastGeneratedAt: new Date().toISOString(),
+        lastGeneratedAt,
         preferences,
-      }));
+        planSummary: summary,
+      });
+
+      // Update goal hash to track changes
+      await trainingStorage.updateGoalHash(goalWizardContext?.state);
 
       console.log('[Training] ✅ Training plan generated successfully!');
       return true;
@@ -180,17 +203,25 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       }));
       return false;
     }
-  }, [buildPreferencesFromGoals, state.selectedProgram, state.currentWeek]);
+  }, [buildPreferencesFromGoals, state.currentWeek, goalWizardContext?.state]);
 
   // Regenerate plan with current settings
   const regeneratePlan = useCallback(async (): Promise<boolean> => {
     return generateWeeklyPlan();
   }, [generateWeeklyPlan]);
 
-  // Select a specific program
-  const selectProgram = useCallback((program: TrainingProgram) => {
+  // Select a specific program (state only - doesn't regenerate)
+  const selectProgram = useCallback((program: TrainingProgram | ProgramTemplate) => {
     setState(prev => ({ ...prev, selectedProgram: program }));
   }, []);
+
+  // Select a program AND generate a new plan with it
+  const selectProgramAndGenerate = useCallback(async (program: TrainingProgram | ProgramTemplate): Promise<boolean> => {
+    console.log('[Training] selectProgramAndGenerate called with:', program.name);
+    setState(prev => ({ ...prev, selectedProgram: program }));
+    // Generate plan with the specific program
+    return generateWeeklyPlan(program.id);
+  }, [generateWeeklyPlan]);
 
   // Set selected day
   const setSelectedDay = useCallback((index: number) => {
@@ -221,11 +252,16 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
       const updatedPlan = { ...prev.weeklyPlan, days: updatedDays };
 
-      // Save to storage
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({
-        ...prev,
+      // Save to storage asynchronously
+      trainingStorage.savePlanCache({
         weeklyPlan: updatedPlan,
-      }));
+        selectedProgram: prev.selectedProgram,
+        goalAlignment: prev.goalAlignment,
+        currentWeek: prev.currentWeek,
+        lastGeneratedAt: prev.lastGeneratedAt || new Date().toISOString(),
+        preferences: prev.preferences,
+        planSummary: prev.planSummary,
+      });
 
       return { ...prev, weeklyPlan: updatedPlan };
     });
@@ -268,10 +304,15 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       };
 
       // Save to storage
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({
-        ...prev,
+      trainingStorage.savePlanCache({
         weeklyPlan: updatedPlan,
-      }));
+        selectedProgram: prev.selectedProgram,
+        goalAlignment: prev.goalAlignment,
+        currentWeek: prev.currentWeek,
+        lastGeneratedAt: prev.lastGeneratedAt || new Date().toISOString(),
+        preferences: prev.preferences,
+        planSummary: prev.planSummary,
+      });
 
       return { ...prev, weeklyPlan: updatedPlan };
     });
@@ -286,7 +327,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, currentWeek: Math.max(1, prev.currentWeek - 1) }));
   }, []);
 
-  // Swap exercise for an alternative
+  // Swap exercise for a random alternative
   const swapExercise = useCallback((dayIndex: number, exerciseId: string) => {
     setState(prev => {
       if (!prev.weeklyPlan || !prev.preferences) return prev;
@@ -335,31 +376,118 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Get all programs
-  const getAllPrograms = useCallback((): TrainingProgram[] => {
+  // Swap exercise with a specific alternative
+  const swapExerciseWithAlternative = useCallback((
+    dayIndex: number,
+    exerciseId: string,
+    alternative: ExerciseAlternative
+  ) => {
+    setState(prev => {
+      if (!prev.weeklyPlan) return prev;
+
+      const updatedDays = [...prev.weeklyPlan.days];
+      const day = updatedDays[dayIndex];
+
+      if (day.workout) {
+        const exerciseIndex = day.workout.exercises.findIndex(ex => ex.id === exerciseId);
+        if (exerciseIndex === -1) return prev;
+
+        const currentExercise = day.workout.exercises[exerciseIndex];
+
+        // Create a new exercise from the alternative
+        const newExercise: Exercise = {
+          id: alternative.id,
+          name: alternative.name,
+          equipment: alternative.equipment,
+          muscleGroups: currentExercise.exercise.muscleGroups,
+          category: currentExercise.exercise.category,
+          difficulty: currentExercise.exercise.difficulty,
+          caloriesPerMinute: currentExercise.exercise.caloriesPerMinute,
+          instructions: alternative.formCues,
+        };
+
+        const updatedExercises = [...day.workout.exercises];
+        updatedExercises[exerciseIndex] = {
+          ...currentExercise,
+          exerciseId: newExercise.id,
+          exercise: newExercise,
+          completed: false,
+        };
+
+        updatedDays[dayIndex] = {
+          ...day,
+          workout: {
+            ...day.workout,
+            exercises: updatedExercises,
+          },
+        };
+      }
+
+      const updatedPlan = { ...prev.weeklyPlan, days: updatedDays };
+
+      // Save the update
+      trainingStorage.savePlanCache({
+        weeklyPlan: updatedPlan,
+        selectedProgram: prev.selectedProgram,
+        goalAlignment: prev.goalAlignment,
+        currentWeek: prev.currentWeek,
+        lastGeneratedAt: prev.lastGeneratedAt || new Date().toISOString(),
+        preferences: prev.preferences,
+        planSummary: prev.planSummary,
+      });
+
+      return { ...prev, weeklyPlan: updatedPlan, showAlternativesModal: false };
+    });
+  }, []);
+
+  // Show exercise alternatives modal
+  const showExerciseAlternatives = useCallback((exercise: Exercise) => {
+    setState(prev => ({
+      ...prev,
+      selectedExercise: exercise,
+      showAlternativesModal: true,
+    }));
+  }, []);
+
+  // Hide exercise alternatives modal
+  const hideExerciseAlternatives = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      selectedExercise: null,
+      showAlternativesModal: false,
+    }));
+  }, []);
+
+  // Get all programs (basic)
+  const getAllPrograms = useCallback((): (TrainingProgram | ProgramTemplate)[] => {
     return trainingService.getAllPrograms();
+  }, []);
+
+  // Get enhanced program templates
+  const getEnhancedPrograms = useCallback((): ProgramTemplate[] => {
+    return planGenerator.getAllPrograms();
   }, []);
 
   // Clear plan
   const clearPlan = useCallback(() => {
     setState(initialState);
-    AsyncStorage.removeItem(STORAGE_KEY);
+    trainingStorage.clearPlan();
   }, []);
 
   // Load cached plan
   const loadCachedPlan = useCallback(async () => {
     try {
-      const cached = await AsyncStorage.getItem(STORAGE_KEY);
+      const cached = await trainingStorage.loadPlanCache();
       if (cached) {
-        const parsed = JSON.parse(cached);
         setState(prev => ({
           ...prev,
-          weeklyPlan: parsed.weeklyPlan,
-          selectedProgram: parsed.selectedProgram,
-          goalAlignment: parsed.goalAlignment,
-          currentWeek: parsed.currentWeek || 1,
-          lastGeneratedAt: parsed.lastGeneratedAt,
-          preferences: parsed.preferences,
+          weeklyPlan: cached.weeklyPlan,
+          selectedProgram: cached.selectedProgram,
+          goalAlignment: cached.goalAlignment,
+          currentWeek: cached.currentWeek || 1,
+          lastGeneratedAt: cached.lastGeneratedAt,
+          preferences: cached.preferences,
+          planSummary: cached.planSummary || null,
         }));
       }
     } catch (error) {
@@ -367,25 +495,63 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Check if plan exists
+  const hasPlan = useCallback((): boolean => {
+    return state.weeklyPlan !== null;
+  }, [state.weeklyPlan]);
+
+  // Get plan summary
+  const getPlanSummary = useCallback((): PlanSummary | null => {
+    return state.planSummary;
+  }, [state.planSummary]);
+
   // Load cached data on mount
   useEffect(() => {
     loadCachedPlan();
   }, [loadCachedPlan]);
+
+  // Check if goals changed and plan should be regenerated
+  useEffect(() => {
+    const checkGoalChanges = async () => {
+      if (goalWizardContext?.state && state.weeklyPlan) {
+        const changed = await trainingStorage.haveGoalsChanged(goalWizardContext.state);
+        if (changed) {
+          console.log('[Training] Goals changed - clearing plan for regeneration');
+          // Don't auto-regenerate, just clear so user can generate new plan
+          await trainingStorage.clearPlan();
+          setState(prev => ({
+            ...prev,
+            weeklyPlan: null,
+            planSummary: null,
+          }));
+        }
+      }
+    };
+
+    checkGoalChanges();
+  }, [goalWizardContext?.state]);
 
   const value: TrainingContextType = {
     state,
     generateWeeklyPlan,
     regeneratePlan,
     selectProgram,
+    selectProgramAndGenerate,
     setSelectedDay,
     markExerciseComplete,
     markWorkoutComplete,
     goToNextWeek,
     goToPreviousWeek,
     swapExercise,
+    swapExerciseWithAlternative,
     getAllPrograms,
+    getEnhancedPrograms,
     clearPlan,
     loadCachedPlan,
+    showExerciseAlternatives,
+    hideExerciseAlternatives,
+    hasPlan,
+    getPlanSummary,
   };
 
   return (
