@@ -229,7 +229,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       };
 
       console.log('[Training] Calling AI service for workout plan...');
-      const aiPlan = await aiService.generateAIWorkoutPlan(aiPreferences, 4);
+      const aiPlan = await aiService.generateAIWorkoutPlan(aiPreferences, 2); // 2 weeks for faster generation
 
       if (aiPlan) {
         // Convert AI plan to app format
@@ -238,7 +238,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             weekNumber: week.weekNumber || weekIndex + 1,
             focus: week.focus || 'Training Week',
             days: week.workouts.map((workout: any) => ({
-              day: workout.dayOfWeek,
+              day: workout.day || workout.dayOfWeek, // Support both compact (day) and verbose (dayOfWeek) formats
               workout: workout ? {
                 id: `ai-workout-${Date.now()}-${Math.random()}`,
                 name: workout.workoutType || 'Training Session',
