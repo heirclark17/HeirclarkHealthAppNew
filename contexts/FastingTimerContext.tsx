@@ -110,15 +110,38 @@ export function FastingTimerProvider({ children }: { children: React.ReactNode }
     // GoalWizard context may not be available
   }
 
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousStateRef = useRef<string | null>(null);
+
   // Load saved state on mount
   useEffect(() => {
     loadSavedState();
   }, []);
 
-  // Save state whenever it changes
+  // Debounced save - only saves if state actually changed
   useEffect(() => {
-    saveState();
-  }, [state]);
+    const currentStateStr = JSON.stringify(state);
+    if (previousStateRef.current === currentStateStr) return;
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Debounce save by 500ms
+    saveTimeoutRef.current = setTimeout(() => {
+      previousStateRef.current = currentStateStr;
+      saveState();
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [state.isActive, state.isPaused, state.currentState, state.fastingStartTime,
+      state.fastingEndTime, state.selectedPreset, state.completedFastsThisWeek,
+      state.totalFastingMinutesThisWeek, state.currentStreak, state.longestStreak]);
 
   // Check for week reset
   useEffect(() => {

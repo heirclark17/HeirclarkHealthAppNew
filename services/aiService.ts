@@ -423,10 +423,12 @@ class AIService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('[AIService] Meal plan generation error:', response.status, errorText);
+        console.error('[AIService] Request URL:', `${this.baseUrl}/api/v1/ai/generate-meal-plan`);
         return null;
       }
 
       const data = await response.json();
+      console.log('[AIService] Meal plan response:', JSON.stringify(data).substring(0, 200));
 
       if (data.ok && data.plan) {
         // Cache the plan
@@ -434,6 +436,7 @@ class AIService {
         return data.plan;
       }
 
+      console.error('[AIService] Unexpected response structure:', data);
       return null;
     } catch (error) {
       console.error('[AIService] generateAIMealPlan error:', error);

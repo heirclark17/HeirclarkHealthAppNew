@@ -510,7 +510,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   // Load cached data on mount
   useEffect(() => {
     loadCachedPlan();
-  }, [loadCachedPlan]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only load once on mount
 
   // Check if goals changed and plan should be regenerated
   // Use a ref to track whether we've already checked to avoid repeated checks

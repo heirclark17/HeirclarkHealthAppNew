@@ -75,7 +75,8 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only load once on mount
 
   const refreshData = useCallback(async () => {
     await loadData();

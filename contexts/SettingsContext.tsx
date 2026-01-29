@@ -126,18 +126,42 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previousSettingsRef = useRef<string | null>(null);
 
   // Load settings on mount
   useEffect(() => {
     loadSettings();
   }, []);
 
-  // Save settings whenever they change (except on initial load)
+  // Debounced save - only saves if settings actually changed
   useEffect(() => {
-    if (settings.isLoaded) {
-      saveSettings();
+    if (!settings.isLoaded) return;
+
+    const currentSettingsStr = JSON.stringify(settings);
+    if (previousSettingsRef.current === currentSettingsStr) return;
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
-  }, [settings]);
+
+    // Debounce save by 500ms
+    saveTimeoutRef.current = setTimeout(() => {
+      previousSettingsRef.current = currentSettingsStr;
+      saveSettings();
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [settings.isLoaded, settings.liveAvatar, settings.captions, settings.autoplayCoach,
+      settings.mealReminders, settings.waterTracking, settings.dailyWaterGoal,
+      settings.unitSystem, settings.themeMode, settings.backgroundImage,
+      settings.customBackgroundUri, settings.profileImageUri, settings.pushNotifications,
+      settings.dailySummary, settings.achievementAlerts]);
 
   const loadSettings = async () => {
     try {
