@@ -397,6 +397,59 @@ class AIService {
   }
 
   // ============================================================================
+  // Recipe Details Fetching
+  // ============================================================================
+
+  /**
+   * Fetch detailed recipe (ingredients + instructions) for a meal
+   * This is used when AI-generated meals need recipe details on-demand
+   */
+  async getRecipeDetails(dishName: string, mealType?: string, calories?: number, macros?: { protein: number; carbs: number; fat: number }): Promise<{
+    ingredients: Array<{ name: string; quantity: number; unit: string }>;
+    instructions: string[];
+    prepMinutes: number;
+    cookMinutes: number;
+    tips?: string;
+  } | null> {
+    try {
+      console.log('[AIService] Fetching recipe details for:', dishName);
+
+      const response = await fetch(`${this.baseUrl}/api/v1/ai/recipe-details`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Customer-Id': 'guest_ios_app',
+        },
+        body: JSON.stringify({
+          dishName,
+          mealType,
+          calories,
+          macros,
+          shopifyCustomerId: 'guest_ios_app',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[AIService] Recipe details error:', response.status, errorText);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log('[AIService] Recipe details response:', JSON.stringify(data).substring(0, 200));
+
+      if (data.ok && data.recipe) {
+        return data.recipe;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('[AIService] getRecipeDetails error:', error);
+      return null;
+    }
+  }
+
+  // ============================================================================
   // AI Meal Plan Generation
   // ============================================================================
 

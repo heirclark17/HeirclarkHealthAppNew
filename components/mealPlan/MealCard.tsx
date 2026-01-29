@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Platform,
   Modal,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -23,6 +24,7 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
 import { Meal } from '../../types/mealPlan';
+import { aiService } from '../../services/aiService';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -39,6 +41,14 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [isAddingToMeals, setIsAddingToMeals] = useState(false);
   const [isAddingToInstacart, setIsAddingToInstacart] = useState(false);
+  const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
+  const [recipeDetails, setRecipeDetails] = useState<{
+    ingredients: Array<{ name: string; quantity: number; unit: string }>;
+    instructions: string[];
+    prepMinutes?: number;
+    cookMinutes?: number;
+    tips?: string;
+  } | null>(null);
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
 
@@ -51,6 +61,41 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   // Flip animation for view recipe (entrance animations removed)
   const flipRotateY = useSharedValue(0);
   const isFlipping = useSharedValue(false);
+
+  // Fetch recipe details when modal opens and no ingredients exist
+  useEffect(() => {
+    if (showRecipeModal && (!meal.ingredients || meal.ingredients.length === 0) && !recipeDetails && !isLoadingRecipe) {
+      const fetchRecipe = async () => {
+        setIsLoadingRecipe(true);
+        try {
+          console.log('[MealCard] Fetching recipe details for:', meal.name);
+          const details = await aiService.getRecipeDetails(
+            meal.name,
+            meal.mealType,
+            meal.calories,
+            { protein: meal.protein, carbs: meal.carbs, fat: meal.fat }
+          );
+          if (details) {
+            console.log('[MealCard] Recipe details fetched:', details.ingredients?.length, 'ingredients');
+            setRecipeDetails(details);
+          }
+        } catch (error) {
+          console.error('[MealCard] Error fetching recipe details:', error);
+        } finally {
+          setIsLoadingRecipe(false);
+        }
+      };
+      fetchRecipe();
+    }
+  }, [showRecipeModal, meal, recipeDetails, isLoadingRecipe]);
+
+  // Use fetched recipe details if meal doesn't have them
+  const displayIngredients = meal.ingredients && meal.ingredients.length > 0
+    ? meal.ingredients
+    : recipeDetails?.ingredients || [];
+  const displayInstructions = meal.instructions && meal.instructions.length > 0
+    ? meal.instructions
+    : recipeDetails?.instructions || [];
 
   const handleViewRecipe = () => {
     console.log('[MealCard] View Recipe pressed for:', meal.name);
@@ -300,15 +345,22 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               {/* Ingredients Section */}
               <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>Ingredients</Text>
-                {meal.ingredients && meal.ingredients.length > 0 ? (
+                {isLoadingRecipe ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color={colors.primary} />
+                    <Text style={[styles.loadingText, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>
+                      Loading recipe details...
+                    </Text>
+                  </View>
+                ) : displayIngredients.length > 0 ? (
                   <View style={styles.ingredientsList}>
-                    {meal.ingredients.map((ingredient, idx) => (
+                    {displayIngredients.map((ingredient: any, idx: number) => (
                       <View key={idx} style={styles.ingredientRow}>
                         <View style={[styles.ingredientCheck, { borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)' }]}>
                           <View style={styles.ingredientCheckInner} />
                         </View>
                         <Text style={[styles.ingredientText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>
-                          <Text style={[styles.ingredientAmount, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>{ingredient.amount} {ingredient.unit}</Text>
+                          <Text style={[styles.ingredientAmount, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>{ingredient.amount || ingredient.quantity} {ingredient.unit}</Text>
                           {'  '}{ingredient.name}
                         </Text>
                       </View>
@@ -316,25 +368,31 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   </View>
                 ) : (
                   <Text style={[styles.emptyRecipeText, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>
-                    Recipe details not available for AI-generated meals. Search online for "{meal.name}" recipe.
+                    Recipe details not available. Search online for "{meal.name}" recipe.
                   </Text>
                 )}
               </View>
 
               {/* Instructions Section */}
-              {meal.instructions && meal.instructions.length > 0 && (
+              {(displayInstructions.length > 0 || isLoadingRecipe) && (
                 <View style={styles.section}>
                   <Text style={[styles.sectionTitle, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>Instructions</Text>
-                  <View style={styles.instructionsList}>
-                    {meal.instructions.map((instruction, idx) => (
-                      <View key={idx} style={styles.instructionRow}>
-                        <View style={[styles.instructionNumberBadge, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)' }]}>
-                          <Text style={[styles.instructionNumber, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>{idx + 1}</Text>
+                  {isLoadingRecipe ? (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator size="small" color={colors.primary} />
+                    </View>
+                  ) : (
+                    <View style={styles.instructionsList}>
+                      {displayInstructions.map((instruction: string, idx: number) => (
+                        <View key={idx} style={styles.instructionRow}>
+                          <View style={[styles.instructionNumberBadge, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)' }]}>
+                            <Text style={[styles.instructionNumber, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>{idx + 1}</Text>
+                          </View>
+                          <Text style={[styles.instructionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>{instruction}</Text>
                         </View>
-                        <Text style={[styles.instructionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>{instruction}</Text>
-                      </View>
-                    ))}
-                  </View>
+                      ))}
+                    </View>
+                  )}
                 </View>
               )}
 
@@ -669,6 +727,16 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.thin,
     lineHeight: 20,
     fontStyle: 'italic',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: Fonts.thin,
   },
   instructionsList: {
     gap: 16,
