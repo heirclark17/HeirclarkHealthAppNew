@@ -420,17 +420,11 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
 const styles = StyleSheet.create({
   cardContainer: {
     marginBottom: 12,
-    height: 200,
   },
   animatedWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    // No longer using absolute positioning - allows dynamic height
   },
   card: {
-    flex: 1,
     borderRadius: 20,
   },
   mealTypeRow: {
