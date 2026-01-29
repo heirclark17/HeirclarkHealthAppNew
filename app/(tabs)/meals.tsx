@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
@@ -23,6 +22,7 @@ import {
 
 export default function MealsScreen() {
   const { settings } = useSettings();
+  const insets = useSafeAreaInsets();
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -194,6 +194,7 @@ export default function MealsScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: 'transparent' }]} edges={['top', 'left', 'right']}>
       <ScrollView
         style={styles.container}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.text} />
@@ -234,7 +235,7 @@ export default function MealsScreen() {
 
         {/* Generate Plan Section - show when no plan exists */}
         {!weeklyPlan && !isGenerating && (
-          <Animated.View entering={FadeIn}>
+          <View>
             <GlassCard
               style={[
                 styles.card,
@@ -285,22 +286,22 @@ export default function MealsScreen() {
                 </GlassCard>
               </View>
             </GlassCard>
-          </Animated.View>
+          </View>
         )}
 
         {/* Loading State */}
         {isGenerating && (
-          <Animated.View entering={FadeIn} exiting={FadeOut}>
+          <View>
             <View style={styles.loadingHeader}>
               <Text style={[styles.loadingText, { color: colors.textMuted }]}>Generating your personalized meal plan...</Text>
             </View>
             <LoadingState count={4} />
-          </Animated.View>
+          </View>
         )}
 
         {/* Error State */}
         {error && !isGenerating && (
-          <Animated.View entering={FadeIn}>
+          <View>
             <GlassCard
               style={[
                 styles.errorCard,
@@ -315,12 +316,12 @@ export default function MealsScreen() {
                 <Text style={[styles.retryButtonText, { color: colors.primaryText }]}>Try Again</Text>
               </TouchableOpacity>
             </GlassCard>
-          </Animated.View>
+          </View>
         )}
 
         {/* Meal Plan Content - show when plan exists */}
         {weeklyPlan && !isGenerating && (
-          <Animated.View entering={FadeInDown.delay(100)}>
+          <View>
             {/* Day Selector */}
             <DaySelector
               weeklyPlan={weeklyPlan}
@@ -433,7 +434,7 @@ export default function MealsScreen() {
                 </GlassCard>
               </View>
             </View>
-          </Animated.View>
+          </View>
         )}
 
         {/* Action Buttons */}
@@ -474,7 +475,8 @@ export default function MealsScreen() {
           </View>
         )}
 
-        <View style={{ height: 100 }} />
+        {/* Bottom spacer for tab bar */}
+        <View style={{ height: insets.bottom + 120 }} />
       </ScrollView>
 
       {/* Grocery List Modal */}

@@ -1,8 +1,8 @@
 // Heirclark AI Service - Backend Proxy Integration
 // Proxies AI requests through backend to keep API keys secure
 
-// Use local backend for development with GPT-4.1-mini
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+// Railway Backend for AI endpoints
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://heirclarkinstacartbackend-production.up.railway.app';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NutritionVerificationResult } from '../types/nutritionAccuracy';

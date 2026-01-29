@@ -98,8 +98,16 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   };
 
   // Get short day name (Mon, Tue, etc.)
-  const getShortDayName = (dayName: string) => {
-    return dayName.slice(0, 3);
+  const getShortDayName = (dayName: string | undefined, date?: string) => {
+    if (dayName) {
+      return dayName.slice(0, 3);
+    }
+    // Fallback: derive day name from date
+    if (date) {
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      return dayNames[new Date(date).getDay()];
+    }
+    return 'Day';
   };
 
   // Get day number from date
@@ -127,7 +135,8 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
         >
           {weeklyPlan.map((day, index) => {
             const isSelected = index === selectedDayIndex;
-            const accessibilityLabel = `${getShortDayName(day.dayName)} ${getDayNumber(day.date)}${isSelected ? ', Selected' : ''}`;
+            const shortDayName = getShortDayName(day.dayName, day.date);
+            const accessibilityLabel = `${shortDayName} ${getDayNumber(day.date)}${isSelected ? ', Selected' : ''}`;
 
             return (
               <Animated.View
@@ -151,7 +160,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     { color: dayNameColor },
                     isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff' },
                   ]}>
-                    {getShortDayName(day.dayName)}
+                    {shortDayName}
                   </Text>
                   <Text style={[
                     styles.dayNumber,

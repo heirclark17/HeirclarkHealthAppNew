@@ -86,8 +86,22 @@ export default function ProgramsScreen() {
     // Context not available
   }
 
+  // Get all days from weekly plan (handles both old days[] and new weeks[].days[] formats)
+  const allDays = useMemo(() => {
+    if (!weeklyPlan) return [];
+    if (weeklyPlan.weeks && Array.isArray(weeklyPlan.weeks)) {
+      // New format: weeks[].days[]
+      const weekIndex = Math.floor(selectedDayIndex / 7);
+      const currentWeekData = weeklyPlan.weeks[currentWeek - 1] || weeklyPlan.weeks[0];
+      return currentWeekData?.days || [];
+    }
+    // Old format: days[]
+    return weeklyPlan.days || [];
+  }, [weeklyPlan, currentWeek, selectedDayIndex]);
+
   // Get current day's workout
-  const currentDay = weeklyPlan?.days[selectedDayIndex];
+  const dayIndexInWeek = selectedDayIndex % 7;
+  const currentDay = allDays[dayIndexInWeek];
   const currentWorkout = currentDay?.workout;
 
   // Available programs - use enhanced program templates
@@ -197,14 +211,20 @@ export default function ProgramsScreen() {
     return `Training for: ${goalLabels[goalWizardState.primaryGoal] || 'General Fitness'}`;
   };
 
-  // Weekly stats
-  const weeklyStats = weeklyPlan
-    ? {
-        completedWorkouts: weeklyPlan.completedWorkouts,
-        totalWorkouts: weeklyPlan.totalWorkouts,
-        caloriesBurned: weeklyPlan.totalCaloriesBurned,
-      }
-    : null;
+  // Weekly stats - handle both old and new formats
+  const weeklyStats = useMemo(() => {
+    if (!weeklyPlan) return null;
+
+    // Calculate from days if direct properties don't exist
+    const workoutsWithData = allDays.filter(d => d?.workout);
+    const completedCount = workoutsWithData.filter(d => d?.workout?.isCompleted).length;
+
+    return {
+      completedWorkouts: weeklyPlan.completedWorkouts ?? completedCount,
+      totalWorkouts: weeklyPlan.totalWorkouts ?? workoutsWithData.length,
+      caloriesBurned: weeklyPlan.totalCaloriesBurned ?? 0,
+    };
+  }, [weeklyPlan, allDays]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: 'transparent' }]} edges={['top', 'left', 'right']}>
@@ -379,7 +399,7 @@ export default function ProgramsScreen() {
               {currentWorkout ? (
                 <WorkoutCard
                   workout={currentWorkout}
-                  dayName={currentDay.dayOfWeek}
+                  dayName={currentDay?.day || currentDay?.dayOfWeek || 'Today'}
                   index={0}
                   weekNumber={currentWeek}
                   onMarkComplete={() => markWorkoutComplete(selectedDayIndex)}

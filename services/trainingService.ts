@@ -13,6 +13,7 @@ import {
   GoalWorkoutAlignment,
   Equipment,
   CardioPreference,
+  PlanSummary,
 } from '../types/training';
 
 // Cardio exercise IDs grouped by preference
@@ -860,8 +861,9 @@ export const trainingService = {
     let muscleGrowthPotential = 50;
     let cardiovascularHealth = 50;
 
-    // Analyze workouts in the plan
-    const workouts = weeklyPlan.days.filter(d => d.workout).map(d => d.workout!);
+    // Analyze workouts in the plan - flatten weeks into days
+    const allDays = weeklyPlan.weeks?.flatMap(w => w.days) || weeklyPlan.days || [];
+    const workouts = allDays.filter(d => d?.workout).map(d => d.workout!);
     const hiitCount = workouts.filter(w => w.type === 'hiit').length;
     const cardioCount = workouts.filter(w => w.type === 'cardio' || w.type === 'hiit').length;
     const strengthCount = workouts.filter(w => w.type === 'strength' || w.type === 'hypertrophy').length;
@@ -875,7 +877,7 @@ export const trainingService = {
 
         if (cardioCount < 2) recommendations.push('Add more cardio sessions to maximize calorie burn');
         if (strengthCount < 2) recommendations.push('Include strength training to preserve muscle during weight loss');
-        if (weeklyPlan.totalCaloriesBurned < 1500) recommendations.push('Increase workout intensity to burn more calories');
+        if ((weeklyPlan.totalCaloriesBurned || 0) < 1500) recommendations.push('Increase workout intensity to burn more calories');
         break;
 
       case 'build_muscle':
@@ -926,7 +928,60 @@ export const trainingService = {
   // Get today's workout from a weekly plan
   getTodaysWorkout(weeklyPlan: WeeklyTrainingPlan): TrainingDay | null {
     const today = new Date().toISOString().split('T')[0];
-    return weeklyPlan.days.find(d => d.date === today) || null;
+    const allDays = weeklyPlan.weeks?.flatMap(w => w.days) || weeklyPlan.days || [];
+    return allDays.find(d => d?.date === today) || null;
+  },
+
+  // Get plan summary for display
+  getPlanSummary(weeklyPlan: WeeklyTrainingPlan, preferences: TrainingPreferences): PlanSummary {
+    const allDays = weeklyPlan.weeks?.flatMap(w => w.days) || weeklyPlan.days || [];
+    const workouts = allDays.filter(d => d?.workout).map(d => d.workout!);
+    const workoutCount = workouts.length;
+    const totalDuration = workouts.reduce((sum, w) => sum + (w.duration || 0), 0);
+
+    const goalText = {
+      lose_weight: 'weight loss',
+      build_muscle: 'muscle building',
+      maintain: 'maintenance',
+      improve_health: 'overall health',
+      general_fitness: 'general fitness',
+    }[preferences.primaryGoal || 'general_fitness'] || 'fitness';
+
+    return {
+      overview: `A personalized ${workoutCount}-day per week training plan designed for ${goalText}.`,
+      weeklyStructure: `${workoutCount} training sessions averaging ${Math.round(totalDuration / Math.max(workoutCount, 1))} minutes each.`,
+      strengthFocus: workouts.some(w => w.type === 'strength' || w.type === 'hypertrophy')
+        ? 'Includes progressive strength training to build and maintain muscle.'
+        : 'Focus on bodyweight and functional movements.',
+      cardioFocus: workouts.some(w => w.type === 'cardio' || w.type === 'hiit')
+        ? 'Cardiovascular sessions included for heart health and calorie burn.'
+        : 'Active recovery and mobility work for cardiovascular benefits.',
+      expectedOutcomes: [
+        { metric: 'Strength', targetValue: '+5-10%', timeframe: '4 weeks', confidence: 'high' as const },
+        { metric: 'Endurance', targetValue: 'Improved', timeframe: '2-3 weeks', confidence: 'medium' as const },
+      ],
+      weekByWeekProgression: [
+        'Week 1: Foundation and form focus',
+        'Week 2: Gradual intensity increase',
+        'Week 3: Progressive overload',
+        'Week 4: Deload and assessment',
+      ],
+      nutritionIntegration: 'Ensure adequate protein intake (1.6-2.2g/kg) and stay hydrated.',
+      recoveryRecommendations: [
+        'Get 7-9 hours of sleep per night',
+        'Stay hydrated throughout the day',
+        'Include rest days for muscle recovery',
+      ],
+      keyMetricsToTrack: [
+        'Weight lifted progression',
+        'Reps completed',
+        'Workout consistency',
+      ],
+      adjustmentTriggers: [
+        'If progress stalls for 2+ weeks, increase volume or intensity',
+        'If feeling overtrained, add an extra rest day',
+      ],
+    };
   },
 };
 

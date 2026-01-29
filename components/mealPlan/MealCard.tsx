@@ -324,35 +324,43 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               {/* Ingredients Section */}
               <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>Ingredients</Text>
-                <View style={styles.ingredientsList}>
-                  {meal.ingredients.map((ingredient, idx) => (
-                    <View key={idx} style={styles.ingredientRow}>
-                      <View style={[styles.ingredientCheck, { borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)' }]}>
-                        <View style={styles.ingredientCheckInner} />
+                {meal.ingredients && meal.ingredients.length > 0 ? (
+                  <View style={styles.ingredientsList}>
+                    {meal.ingredients.map((ingredient, idx) => (
+                      <View key={idx} style={styles.ingredientRow}>
+                        <View style={[styles.ingredientCheck, { borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)' }]}>
+                          <View style={styles.ingredientCheckInner} />
+                        </View>
+                        <Text style={[styles.ingredientText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>
+                          <Text style={[styles.ingredientAmount, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>{ingredient.amount} {ingredient.unit}</Text>
+                          {'  '}{ingredient.name}
+                        </Text>
                       </View>
-                      <Text style={[styles.ingredientText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>
-                        <Text style={[styles.ingredientAmount, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>{ingredient.amount} {ingredient.unit}</Text>
-                        {'  '}{ingredient.name}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
+                    ))}
+                  </View>
+                ) : (
+                  <Text style={[styles.emptyRecipeText, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>
+                    Recipe details not available for AI-generated meals. Search online for "{meal.name}" recipe.
+                  </Text>
+                )}
               </View>
 
               {/* Instructions Section */}
-              <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>Instructions</Text>
-                <View style={styles.instructionsList}>
-                  {meal.instructions.map((instruction, idx) => (
-                    <View key={idx} style={styles.instructionRow}>
-                      <View style={[styles.instructionNumberBadge, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)' }]}>
-                        <Text style={[styles.instructionNumber, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>{idx + 1}</Text>
+              {meal.instructions && meal.instructions.length > 0 && (
+                <View style={styles.section}>
+                  <Text style={[styles.sectionTitle, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>Instructions</Text>
+                  <View style={styles.instructionsList}>
+                    {meal.instructions.map((instruction, idx) => (
+                      <View key={idx} style={styles.instructionRow}>
+                        <View style={[styles.instructionNumberBadge, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)' }]}>
+                          <Text style={[styles.instructionNumber, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>{idx + 1}</Text>
+                        </View>
+                        <Text style={[styles.instructionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>{instruction}</Text>
                       </View>
-                      <Text style={[styles.instructionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>{instruction}</Text>
-                    </View>
-                  ))}
+                    ))}
+                  </View>
                 </View>
-              </View>
+              )}
 
               <View style={{ height: 100 }} />
             </ScrollView>
@@ -685,6 +693,12 @@ const styles = StyleSheet.create({
   ingredientAmount: {
     color: 'rgba(255, 255, 255, 0.5)',
     fontFamily: Fonts.thin,
+  },
+  emptyRecipeText: {
+    fontSize: 14,
+    fontFamily: Fonts.thin,
+    lineHeight: 20,
+    fontStyle: 'italic',
   },
   instructionsList: {
     gap: 16,
