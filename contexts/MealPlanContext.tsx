@@ -215,10 +215,14 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
       if (aiPlan) {
         // Convert AI plan to app format
-        const weeklyPlan: DayPlan[] = aiPlan.days.map((day, index) => ({
-          day: index + 1,
-          date: new Date(Date.now() + index * 86400000).toISOString().split('T')[0],
-          meals: day.meals.map((meal: any) => ({
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const weeklyPlan: DayPlan[] = aiPlan.days.map((day, index) => {
+          const planDate = new Date(Date.now() + index * 86400000);
+          return {
+            dayNumber: index + 1,
+            date: planDate.toISOString().split('T')[0],
+            dayName: dayNames[planDate.getDay()],
+            meals: day.meals.map((meal: any) => ({
             id: `ai-meal-${Date.now()}-${Math.random()}`,
             mealType: meal.mealType.toLowerCase(),
             name: meal.dishName,
@@ -240,7 +244,8 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
             carbs: day.meals.reduce((sum: number, m: any) => sum + m.macros.carbs, 0),
             fat: day.meals.reduce((sum: number, m: any) => sum + m.macros.fat, 0),
           },
-        }));
+        };
+        });
 
         const now = new Date().toISOString();
 
