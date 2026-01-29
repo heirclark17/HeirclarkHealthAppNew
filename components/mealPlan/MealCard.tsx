@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -62,11 +62,26 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   const flipRotateY = useSharedValue(0);
   const isFlipping = useSharedValue(false);
 
+  // Ref to track if we've already fetched recipe for this meal
+  const hasFetchedRef = useRef(false);
+  const fetchingRef = useRef(false);
+
+  // Reset fetch tracking when meal changes
+  useEffect(() => {
+    hasFetchedRef.current = false;
+    setRecipeDetails(null);
+  }, [meal.name]);
+
   // Fetch recipe details when modal opens and no ingredients exist
   useEffect(() => {
-    if (showRecipeModal && (!meal.ingredients || meal.ingredients.length === 0) && !recipeDetails && !isLoadingRecipe) {
+    const needsRecipe = !meal.ingredients || meal.ingredients.length === 0;
+    const shouldFetch = showRecipeModal && needsRecipe && !hasFetchedRef.current && !fetchingRef.current;
+
+    if (shouldFetch) {
+      fetchingRef.current = true;
+      setIsLoadingRecipe(true);
+
       const fetchRecipe = async () => {
-        setIsLoadingRecipe(true);
         try {
           console.log('[MealCard] Fetching recipe details for:', meal.name);
           const details = await aiService.getRecipeDetails(
@@ -78,16 +93,18 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
           if (details) {
             console.log('[MealCard] Recipe details fetched:', details.ingredients?.length, 'ingredients');
             setRecipeDetails(details);
+            hasFetchedRef.current = true;
           }
         } catch (error) {
           console.error('[MealCard] Error fetching recipe details:', error);
         } finally {
           setIsLoadingRecipe(false);
+          fetchingRef.current = false;
         }
       };
       fetchRecipe();
     }
-  }, [showRecipeModal, meal, recipeDetails, isLoadingRecipe]);
+  }, [showRecipeModal, meal.name, meal.mealType, meal.calories, meal.protein, meal.carbs, meal.fat, meal.ingredients]);
 
   // Use fetched recipe details if meal doesn't have them
   const displayIngredients = meal.ingredients && meal.ingredients.length > 0
