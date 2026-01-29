@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,8 +14,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withDelay,
-  withSpring,
   Easing,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
@@ -50,30 +48,9 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
 
-  // Entrance animation values
-  const entranceRotateY = useSharedValue(-90);
-  const entranceOpacity = useSharedValue(0);
-  const entranceScale = useSharedValue(0.8);
-
-  // Flip animation for view recipe
+  // Flip animation for view recipe (entrance animations removed)
   const flipRotateY = useSharedValue(0);
   const isFlipping = useSharedValue(false);
-
-  useEffect(() => {
-    const delay = index * 120;
-    entranceRotateY.value = withDelay(
-      delay,
-      withSpring(0, { damping: 12, stiffness: 90 })
-    );
-    entranceOpacity.value = withDelay(
-      delay,
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) })
-    );
-    entranceScale.value = withDelay(
-      delay,
-      withSpring(1, { damping: 12, stiffness: 90 })
-    );
-  }, []);
 
   const handleViewRecipe = () => {
     console.log('[MealCard] View Recipe pressed for:', meal.name);
@@ -98,14 +75,13 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     }, 400);
   };
 
-  const entranceAnimatedStyle = useAnimatedStyle(() => {
+  // Animated style for flip animation only (no entrance animation)
+  const cardAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
         { perspective: 1000 },
-        { rotateY: `${entranceRotateY.value + flipRotateY.value}deg` },
-        { scale: entranceScale.value },
+        { rotateY: `${flipRotateY.value}deg` },
       ],
-      opacity: entranceOpacity.value,
     } as any;
   });
 
@@ -146,7 +122,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   return (
     <>
       <View style={styles.cardContainer}>
-        <Animated.View style={[styles.animatedWrapper, entranceAnimatedStyle]}>
+        <Animated.View style={[styles.animatedWrapper, cardAnimatedStyle]}>
           <GlassCard
             style={styles.card}
             intensity={80}

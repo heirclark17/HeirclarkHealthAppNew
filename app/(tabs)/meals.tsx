@@ -194,7 +194,7 @@ export default function MealsScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: 'transparent' }]} edges={['top', 'left', 'right']}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 160 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.text} />
@@ -476,7 +476,7 @@ export default function MealsScreen() {
         )}
 
         {/* Bottom spacer for tab bar */}
-        <View style={{ height: insets.bottom + 120 }} />
+        <View style={{ height: insets.bottom + 200 }} />
       </ScrollView>
 
       {/* Grocery List Modal */}
