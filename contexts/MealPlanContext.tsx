@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
 import { mealPlanService } from '../services/mealPlanService';
 import { instacartService } from '../services/instacartService';
+import { aiService } from '../services/aiService';
 import {
   DayPlan,
   GroceryCategory,
@@ -32,6 +33,7 @@ interface MealPlanContextType {
 
   // Actions
   generateMealPlan: () => Promise<boolean>;
+  generateAIMealPlan: () => Promise<boolean>;
   swapMeal: (dayIndex: number, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack', reason?: string) => Promise<boolean>;
   setSelectedDay: (index: number) => void;
   clearPlan: () => void;
@@ -175,6 +177,115 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('[MealPlanContext] Generate error:', error);
+      setState(prev => ({
+        ...prev,
+        isGenerating: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      }));
+      return false;
+    }
+  }, [getUserGoals, getPreferences]);
+
+  // Generate AI-powered meal plan using OpenAI
+  const generateAIMealPlan = useCallback(async (): Promise<boolean> => {
+    setState(prev => ({ ...prev, isGenerating: true, error: null }));
+
+    try {
+      const userGoals = await getUserGoals();
+      const preferences = getPreferences();
+
+      console.log('[MealPlanContext] Generating AI meal plan with:');
+      console.log('Goals:', userGoals);
+      console.log('Preferences:', preferences);
+
+      // Convert to AI service format
+      const aiPreferences = {
+        calorieTarget: userGoals.dailyCalories,
+        proteinTarget: userGoals.dailyProtein,
+        carbsTarget: userGoals.dailyCarbs,
+        fatTarget: userGoals.dailyFat,
+        dietType: preferences.dietStyle || 'balanced',
+        mealsPerDay: preferences.mealsPerDay || 3,
+        allergies: preferences.allergies || [],
+        favoriteProteins: [],
+        hatedFoods: '',
+      };
+
+      const aiPlan = await aiService.generateAIMealPlan(aiPreferences, 7);
+
+      if (aiPlan) {
+        // Convert AI plan to app format
+        const weeklyPlan: DayPlan[] = aiPlan.days.map((day, index) => ({
+          day: index + 1,
+          date: new Date(Date.now() + index * 86400000).toISOString().split('T')[0],
+          meals: day.meals.map((meal: any) => ({
+            id: `ai-meal-${Date.now()}-${Math.random()}`,
+            mealType: meal.mealType.toLowerCase(),
+            name: meal.dishName,
+            description: meal.description,
+            calories: meal.calories,
+            protein: meal.macros.protein,
+            carbs: meal.macros.carbs,
+            fat: meal.macros.fat,
+            servings: meal.servings,
+            prepTime: 15,
+            cookTime: 20,
+            imageUrl: meal.imageUrl,
+            ingredients: [],
+            instructions: [],
+          })),
+          dailyTotals: {
+            calories: day.meals.reduce((sum: number, m: any) => sum + m.calories, 0),
+            protein: day.meals.reduce((sum: number, m: any) => sum + m.macros.protein, 0),
+            carbs: day.meals.reduce((sum: number, m: any) => sum + m.macros.carbs, 0),
+            fat: day.meals.reduce((sum: number, m: any) => sum + m.macros.fat, 0),
+          },
+        }));
+
+        const now = new Date().toISOString();
+
+        setState(prev => ({
+          ...prev,
+          weeklyPlan,
+          groceryList: [], // AI plan doesn't include grocery list yet
+          weekSummary: {
+            avgDailyCalories: userGoals.dailyCalories,
+            avgDailyProtein: userGoals.dailyProtein,
+            avgDailyCarbs: userGoals.dailyCarbs,
+            avgDailyFat: userGoals.dailyFat,
+            totalMeals: weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0),
+          },
+          isGenerating: false,
+          error: null,
+          lastGeneratedAt: now,
+        }));
+
+        // Cache the plan
+        const cacheData = {
+          weeklyPlan,
+          groceryList: [],
+          weekSummary: {
+            avgDailyCalories: userGoals.dailyCalories,
+            avgDailyProtein: userGoals.dailyProtein,
+            avgDailyCarbs: userGoals.dailyCarbs,
+            avgDailyFat: userGoals.dailyFat,
+            totalMeals: weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0),
+          },
+          lastGeneratedAt: now,
+        };
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+
+        return true;
+      } else {
+        setState(prev => ({
+          ...prev,
+          isGenerating: false,
+          error: 'Failed to generate AI meal plan',
+        }));
+        return false;
+      }
+    } catch (error) {
+      console.error('[MealPlanContext] AI Generate error:', error);
       setState(prev => ({
         ...prev,
         isGenerating: false,
@@ -376,9 +487,11 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     toggleGroceryItem,
     openInstacart,
     loadCachedPlan,
+    generateAIMealPlan,
   }), [
     state,
     generateMealPlan,
+    generateAIMealPlan,
     swapMeal,
     setSelectedDay,
     clearPlan,

@@ -4,6 +4,7 @@ import { useGoalWizard } from './GoalWizardContext';
 import { trainingService } from '../services/trainingService';
 import { planGenerator } from '../services/planGenerator';
 import { trainingStorage } from '../services/trainingStorage';
+import { aiService } from '../services/aiService';
 import {
   WeeklyTrainingPlan,
   TrainingDay,
@@ -39,6 +40,7 @@ interface TrainingState {
 interface TrainingContextType {
   state: TrainingState;
   generateWeeklyPlan: (programId?: string) => Promise<boolean>;
+  generateAIWorkoutPlan: () => Promise<boolean>;
   regeneratePlan: () => Promise<boolean>;
   selectProgram: (program: TrainingProgram | ProgramTemplate) => void;
   selectProgramAndGenerate: (program: TrainingProgram | ProgramTemplate) => Promise<boolean>;
@@ -206,6 +208,137 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
   }, [buildPreferencesFromGoals, state.currentWeek, goalPrimaryGoal, goalActivityLevel, goalWorkoutsPerWeek]);
+
+  // Generate AI-powered workout plan using OpenAI
+  const generateAIWorkoutPlan = useCallback(async (): Promise<boolean> => {
+    console.log('[Training] generateAIWorkoutPlan called');
+    setState(prev => ({ ...prev, isGenerating: true, error: null }));
+
+    try {
+      console.log('[Training] Building preferences from goals...');
+      const preferences = buildPreferencesFromGoals();
+
+      // Convert to AI service format
+      const aiPreferences = {
+        fitnessGoal: preferences.fitnessGoal || 'general_fitness',
+        experienceLevel: preferences.experienceLevel || 'intermediate',
+        daysPerWeek: preferences.workoutsPerWeek || 3,
+        sessionDuration: 60,
+        availableEquipment: ['dumbbells', 'barbell', 'gym'],
+        injuries: [],
+      };
+
+      console.log('[Training] Calling AI service for workout plan...');
+      const aiPlan = await aiService.generateAIWorkoutPlan(aiPreferences, 4);
+
+      if (aiPlan) {
+        // Convert AI plan to app format
+        const weeklyPlan: WeeklyTrainingPlan = {
+          weeks: aiPlan.weeks.map((week: any, weekIndex: number) => ({
+            weekNumber: week.weekNumber || weekIndex + 1,
+            focus: week.focus || 'Training Week',
+            days: week.workouts.map((workout: any) => ({
+              day: workout.dayOfWeek,
+              workout: workout ? {
+                id: `ai-workout-${Date.now()}-${Math.random()}`,
+                name: workout.workoutType || 'Training Session',
+                type: workout.workoutType || 'strength',
+                duration: workout.duration || 60,
+                difficulty: preferences.difficultyLevel || 'intermediate' as DifficultyLevel,
+                exercises: workout.exercises.map((ex: any) => ({
+                  exerciseId: `ai-ex-${Date.now()}-${Math.random()}`,
+                  exercise: {
+                    id: `ai-ex-${Date.now()}-${Math.random()}`,
+                    name: ex.name,
+                    category: 'Strength',
+                    primaryMuscles: [],
+                    secondaryMuscles: [],
+                    equipment: [],
+                    difficulty: 'intermediate' as DifficultyLevel,
+                    instructions: [],
+                  },
+                  sets: ex.sets || 3,
+                  reps: ex.reps || '10',
+                  restSeconds: parseInt(ex.rest?.split(' ')[0]) || 60,
+                  notes: ex.notes || '',
+                  isCompleted: false,
+                  weight: undefined,
+                })),
+                isCompleted: false,
+              } : null,
+            })),
+          })),
+          generatedAt: new Date().toISOString(),
+          preferences,
+        };
+
+        // Create a basic program reference
+        const program: ProgramTemplate = {
+          id: 'ai-generated',
+          name: 'AI-Powered Workout Plan',
+          description: aiPlan.progressionGuidelines || 'Personalized AI workout plan',
+          difficulty: preferences.difficultyLevel || 'intermediate',
+          duration: 4,
+          daysPerWeek: preferences.workoutsPerWeek || 3,
+          goal: preferences.fitnessGoal || 'general_fitness',
+          muscleGroups: [],
+          equipment: [],
+        };
+
+        // Calculate goal alignment
+        console.log('[Training] Calculating goal alignment...');
+        const alignment = trainingService.calculateGoalAlignment(preferences, weeklyPlan);
+
+        // Get plan summary
+        const summary = trainingService.getPlanSummary(weeklyPlan, preferences);
+
+        const today = new Date().getDay();
+        const todayIndex = today === 0 ? 6 : today - 1;
+        const lastGeneratedAt = new Date().toISOString();
+
+        setState(prev => ({
+          ...prev,
+          weeklyPlan,
+          selectedProgram: program,
+          goalAlignment: alignment,
+          isGenerating: false,
+          selectedDayIndex: todayIndex,
+          lastGeneratedAt,
+          preferences,
+          planSummary: summary,
+        }));
+
+        // Cache the plan
+        console.log('[Training] Caching AI plan...');
+        await trainingStorage.savePlanCache({
+          weeklyPlan,
+          selectedProgram: program,
+          goalAlignment: alignment,
+          currentWeek: state.currentWeek,
+          lastGeneratedAt,
+          preferences,
+          planSummary: summary,
+        });
+
+        return true;
+      } else {
+        setState(prev => ({
+          ...prev,
+          isGenerating: false,
+          error: 'Failed to generate AI workout plan',
+        }));
+        return false;
+      }
+    } catch (error) {
+      console.error('[Training] AI workout generation failed:', error);
+      setState(prev => ({
+        ...prev,
+        isGenerating: false,
+        error: error instanceof Error ? error.message : 'AI workout generation failed',
+      }));
+      return false;
+    }
+  }, [buildPreferencesFromGoals, state.currentWeek]);
 
   // Regenerate plan with current settings
   const regeneratePlan = useCallback(async (): Promise<boolean> => {
@@ -571,9 +704,11 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     hideExerciseAlternatives,
     hasPlan,
     getPlanSummary,
+    generateAIWorkoutPlan,
   }), [
     state,
     generateWeeklyPlan,
+    generateAIWorkoutPlan,
     regeneratePlan,
     selectProgram,
     selectProgramAndGenerate,
