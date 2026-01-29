@@ -19,6 +19,7 @@ import {
   MacroProgressBar,
   MealPlanCoachingModal,
 } from '../../components/mealPlan';
+import { FoodPreferencesModal } from '../../components/FoodPreferences';
 
 export default function MealsScreen() {
   const { settings } = useSettings();
@@ -32,6 +33,7 @@ export default function MealsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [showGroceryModal, setShowGroceryModal] = useState(false);
   const [showCoachingModal, setShowCoachingModal] = useState(false);
+  const [showFoodPrefsModal, setShowFoodPrefsModal] = useState(false);
 
   // Daily targets from API
   const [dailyTargets, setDailyTargets] = useState({
@@ -248,7 +250,8 @@ export default function MealsScreen() {
                 AI will generate a 7-day meal plan based on your saved food preferences and macro goals
               </Text>
 
-              <TouchableOpacity style={styles.linkButton}>
+              <TouchableOpacity style={styles.linkButton} onPress={() => setShowFoodPrefsModal(true)}>
+                <Ionicons name="settings-outline" size={16} color={colors.accent} style={{ marginRight: 6 }} />
                 <Text style={[styles.linkButtonText, { color: colors.accent }]}>Edit Food Preferences</Text>
               </TouchableOpacity>
 
@@ -503,6 +506,12 @@ export default function MealsScreen() {
           }}
         />
       )}
+
+      {/* Food Preferences Modal */}
+      <FoodPreferencesModal
+        visible={showFoodPrefsModal}
+        onClose={() => setShowFoodPrefsModal(false)}
+      />
     </SafeAreaView>
   );
 }
