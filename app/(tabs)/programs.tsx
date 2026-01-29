@@ -45,6 +45,7 @@ export default function ProgramsScreen() {
   const {
     state: trainingState,
     generateWeeklyPlan,
+    generateAIWorkoutPlan,
     setSelectedDay,
     markExerciseComplete,
     markWorkoutComplete,
@@ -137,9 +138,9 @@ export default function ProgramsScreen() {
     }, [loadCachedPlan])
   );
 
-  // Handle generate button press
+  // Handle quick generate (template-based)
   const handleGenerate = async () => {
-    console.log('[Programs] Generate button clicked');
+    console.log('[Programs] Quick generate button clicked');
     console.log('[Programs] Goal wizard state:', goalWizardState?.primaryGoal);
     mediumImpact();
     console.log('[Programs] Calling generateWeeklyPlan()...');
@@ -147,6 +148,19 @@ export default function ProgramsScreen() {
     console.log('[Programs] generateWeeklyPlan returned:', success);
     if (!success && error) {
       console.error('[Programs] Failed to generate training plan:', error);
+    }
+  };
+
+  // Handle AI-powered generate
+  const handleAIGenerate = async () => {
+    console.log('[Programs] AI generate button clicked');
+    console.log('[Programs] Goal wizard state:', goalWizardState?.primaryGoal);
+    mediumImpact();
+    console.log('[Programs] Calling generateAIWorkoutPlan()...');
+    const success = await generateAIWorkoutPlan();
+    console.log('[Programs] generateAIWorkoutPlan returned:', success);
+    if (!success && error) {
+      console.error('[Programs] Failed to generate AI training plan:', error);
     }
   };
 
@@ -283,16 +297,27 @@ export default function ProgramsScreen() {
                 </TouchableOpacity>
               )}
 
-              {/* Frosted Glass Generate Button */}
-              <GlassButton
-                title="Generate My Training Plan"
-                icon="sparkles-outline"
-                variant="secondary"
-                size="large"
-                fullWidth
-                disabled={isGenerating || !goalWizardState?.primaryGoal}
-                onPress={handleGenerate}
-              />
+              {/* Generate Buttons Row */}
+              <View style={styles.generateButtonsRow}>
+                <GlassButton
+                  title="Quick Generate"
+                  icon="flash-outline"
+                  variant="secondary"
+                  size="large"
+                  disabled={isGenerating || !goalWizardState?.primaryGoal}
+                  onPress={handleGenerate}
+                  style={{ flex: 1 }}
+                />
+                <GlassButton
+                  title="AI-Powered"
+                  icon="sparkles"
+                  variant="primary"
+                  size="large"
+                  disabled={isGenerating || !goalWizardState?.primaryGoal}
+                  onPress={handleAIGenerate}
+                  style={{ flex: 1 }}
+                />
+              </View>
             </GlassCard>
           </Animated.View>
         )}

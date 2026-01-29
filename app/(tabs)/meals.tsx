@@ -45,6 +45,7 @@ export default function MealsScreen() {
   const {
     state: mealPlanState,
     generateMealPlan,
+    generateAIMealPlan,
     swapMeal,
     setSelectedDay,
     toggleGroceryItem,
@@ -97,11 +98,19 @@ export default function MealsScreen() {
     }, [])
   );
 
-  // Handle generate button press
+  // Handle quick generate (template-based)
   const handleGenerate = async () => {
     const success = await generateMealPlan();
     if (!success && error) {
       console.error('Failed to generate meal plan:', error);
+    }
+  };
+
+  // Handle AI-powered generate
+  const handleAIGenerate = async () => {
+    const success = await generateAIMealPlan();
+    if (!success && error) {
+      console.error('Failed to generate AI meal plan:', error);
     }
   };
 
@@ -242,13 +251,25 @@ export default function MealsScreen() {
                 <Text style={[styles.linkButtonText, { color: colors.accent }]}>Edit Food Preferences</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.primaryButton, { backgroundColor: colors.primary }]}
-                onPress={handleGenerate}
-                disabled={isGenerating}
-              >
-                <Text style={[styles.primaryButtonText, { color: colors.primaryText }]}>Generate My 7-Day Plan</Text>
-              </TouchableOpacity>
+              <View style={styles.generateButtonsRow}>
+                <TouchableOpacity
+                  style={[styles.halfButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)', borderColor: colors.primary, borderWidth: 1 }]}
+                  onPress={handleGenerate}
+                  disabled={isGenerating}
+                >
+                  <Ionicons name="flash-outline" size={20} color={colors.primary} />
+                  <Text style={[styles.halfButtonText, { color: colors.primary }]}>Quick Generate</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.halfButton, { backgroundColor: colors.primary }]}
+                  onPress={handleAIGenerate}
+                  disabled={isGenerating}
+                >
+                  <Ionicons name="sparkles" size={20} color={colors.primaryText} />
+                  <Text style={[styles.halfButtonText, { color: colors.primaryText }]}>AI-Powered</Text>
+                </TouchableOpacity>
+              </View>
             </GlassCard>
           </Animated.View>
         )}
@@ -537,6 +558,23 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: Colors.primaryText,
     fontSize: 16,
+    fontFamily: Fonts.semiBold,
+  },
+  generateButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  halfButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: Spacing.borderRadius,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  halfButtonText: {
+    fontSize: 15,
     fontFamily: Fonts.semiBold,
   },
   loadingHeader: {
