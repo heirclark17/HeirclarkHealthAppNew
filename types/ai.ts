@@ -65,6 +65,7 @@ export interface AIWeeklyMealPlan {
 
 export interface MealPlanPreferences {
   dietStyle?: 'standard' | 'vegetarian' | 'vegan' | 'keto' | 'paleo' | 'mediterranean';
+  dietType?: string; // More flexible diet type string
   allergies?: string[];
   excludeIngredients?: string[];
   cuisinePreferences?: string[];
@@ -74,6 +75,19 @@ export interface MealPlanPreferences {
   proteinTarget?: number;
   carbsTarget?: number;
   fatTarget?: number;
+
+  // Extended food preferences (from FoodPreferencesContext)
+  favoriteProteins?: string[];
+  favoriteFruits?: string[];
+  favoriteVegetables?: string[];
+  favoriteStarches?: string[];
+  favoriteSnacks?: string[];
+  favoriteCuisines?: string[];
+  hatedFoods?: string; // Comma-separated or free text of foods to avoid
+  mealStyle?: 'threePlusSnacks' | 'fewerLarger' | '';
+  mealDiversity?: 'diverse' | 'sameDaily' | '';
+  cheatDays?: string[];
+  cookingSkill?: 'beginner' | 'intermediate' | 'advanced' | '';
 }
 
 // ============================================================================

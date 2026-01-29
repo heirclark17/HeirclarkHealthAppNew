@@ -93,3 +93,10 @@ export {
   HydrationProvider,
   useHydration,
 } from './HydrationContext';
+
+export {
+  FoodPreferencesProvider,
+  useFoodPreferences,
+  useFoodPreferencesSafe,
+  type FoodPreferences,
+} from './FoodPreferencesContext';

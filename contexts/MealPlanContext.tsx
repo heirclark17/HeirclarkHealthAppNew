@@ -14,6 +14,9 @@ import {
   UserGoalsForMealPlan,
 } from '../types/mealPlan';
 import { useGoalWizard } from './GoalWizardContext';
+import { useFoodPreferencesSafe, FoodPreferences } from './FoodPreferencesContext';
+
+const FOOD_PREFS_STORAGE_KEY = 'hc_food_preferences';
 
 const STORAGE_KEY = 'hc_meal_plan_cache';
 
@@ -65,6 +68,27 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
   } catch {
     // GoalWizardContext not available - we'll use default preferences
   }
+
+  // Get food preferences context
+  const foodPrefsContext = useFoodPreferencesSafe();
+
+  // Load food preferences from storage (fallback if context not available)
+  const getFoodPreferences = useCallback(async (): Promise<FoodPreferences | null> => {
+    // First try context
+    if (foodPrefsContext?.preferences) {
+      return foodPrefsContext.preferences;
+    }
+    // Fallback to direct storage read
+    try {
+      const stored = await AsyncStorage.getItem(FOOD_PREFS_STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (error) {
+      console.error('[MealPlanContext] Error loading food preferences:', error);
+    }
+    return null;
+  }, [foodPrefsContext]);
 
   // Get preferences from GoalWizard context or use defaults
   const getPreferences = useCallback((): MealPlanPreferences => {
@@ -193,22 +217,45 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     try {
       const userGoals = await getUserGoals();
       const preferences = getPreferences();
+      const foodPrefs = await getFoodPreferences();
 
       console.log('[MealPlanContext] Generating AI meal plan with:');
       console.log('Goals:', userGoals);
       console.log('Preferences:', preferences);
+      console.log('Food Preferences:', foodPrefs);
 
-      // Convert to AI service format
+      // Combine allergens from both sources
+      const allAllergens = [
+        ...(preferences.allergies || []),
+        ...(foodPrefs?.allergens || []),
+      ].filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
+
+      // Get diet type from food preferences or goal wizard
+      const dietType = foodPrefs?.dietaryPreferences?.length
+        ? foodPrefs.dietaryPreferences[0].toLowerCase().replace(' ', '-')
+        : preferences.dietStyle || 'balanced';
+
+      // Convert to AI service format with full food preferences
       const aiPreferences = {
         calorieTarget: userGoals.dailyCalories,
         proteinTarget: userGoals.dailyProtein,
         carbsTarget: userGoals.dailyCarbs,
         fatTarget: userGoals.dailyFat,
-        dietType: preferences.dietStyle || 'balanced',
+        dietType: dietType,
         mealsPerDay: preferences.mealsPerDay || 3,
-        allergies: preferences.allergies || [],
-        favoriteProteins: [],
-        hatedFoods: '',
+        allergies: allAllergens,
+        // Food preferences from dedicated preferences screen
+        favoriteProteins: foodPrefs?.favoriteProteins || [],
+        favoriteFruits: foodPrefs?.favoriteFruits || [],
+        favoriteVegetables: foodPrefs?.favoriteVegetables || [],
+        favoriteStarches: foodPrefs?.favoriteStarches || [],
+        favoriteSnacks: foodPrefs?.favoriteSnacks || [],
+        favoriteCuisines: foodPrefs?.favoriteCuisines || [],
+        hatedFoods: foodPrefs?.hatedFoods || '',
+        mealStyle: foodPrefs?.mealStyle || '',
+        mealDiversity: foodPrefs?.mealDiversity || '',
+        cheatDays: foodPrefs?.cheatDays || [],
+        cookingSkill: foodPrefs?.cookingSkill || '',
       };
 
       const aiPlan = await aiService.generateAIMealPlan(aiPreferences, 7);
@@ -298,7 +345,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       }));
       return false;
     }
-  }, [getUserGoals, getPreferences]);
+  }, [getUserGoals, getPreferences, getFoodPreferences]);
 
   // Swap a single meal
   const swapMeal = useCallback(async (

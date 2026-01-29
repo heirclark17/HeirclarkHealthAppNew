@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing } from '../constants/Theme';
+import { useFoodPreferences, useFoodPreferencesSafe } from '../contexts/FoodPreferencesContext';
 
 interface Preference {
   id: string;
@@ -9,119 +12,172 @@ interface Preference {
   selected: boolean;
 }
 
+// Available options for each category
+const DIETARY_OPTIONS = [
+  'Vegan', 'Vegetarian', 'Pescatarian', 'Keto', 'Paleo',
+  'Low Carb', 'Gluten Free', 'Dairy Free', 'Halal', 'Kosher'
+];
+
+const ALLERGEN_OPTIONS = [
+  'Dairy', 'Eggs', 'Fish', 'Shellfish', 'Tree Nuts',
+  'Peanuts', 'Wheat', 'Soy', 'Gluten', 'Sesame'
+];
+
+const CUISINE_OPTIONS = [
+  'American', 'Italian', 'Mexican', 'Chinese', 'Japanese',
+  'Indian', 'Thai', 'Mediterranean', 'Greek', 'Korean', 'Vietnamese'
+];
+
+const PROTEIN_OPTIONS = [
+  'Chicken', 'Beef', 'Pork', 'Fish', 'Shrimp',
+  'Tofu', 'Eggs', 'Turkey', 'Salmon', 'Lamb'
+];
+
+const VEGETABLE_OPTIONS = [
+  'Broccoli', 'Spinach', 'Carrots', 'Bell Peppers', 'Zucchini',
+  'Asparagus', 'Green Beans', 'Kale', 'Mushrooms', 'Cauliflower'
+];
+
+const STARCH_OPTIONS = [
+  'Rice', 'Potatoes', 'Pasta', 'Quinoa', 'Sweet Potatoes',
+  'Bread', 'Oats', 'Couscous', 'Beans', 'Lentils'
+];
+
+const SNACK_OPTIONS = [
+  'Nuts', 'Yogurt', 'Fruit', 'Protein Bars', 'Cheese',
+  'Vegetables & Hummus', 'Trail Mix', 'Smoothies', 'Hard Boiled Eggs', 'Cottage Cheese'
+];
+
+const DISLIKED_OPTIONS = [
+  'Mushrooms', 'Cilantro', 'Olives', 'Onions', 'Tomatoes',
+  'Avocado', 'Broccoli', 'Seafood', 'Spicy Food', 'Red Meat'
+];
+
 export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  // Dietary Preferences
-  const [diets, setDiets] = useState<Preference[]>([
-    { id: 'vegan', name: 'Vegan', selected: false },
-    { id: 'vegetarian', name: 'Vegetarian', selected: false },
-    { id: 'pescatarian', name: 'Pescatarian', selected: false },
-    { id: 'keto', name: 'Keto', selected: false },
-    { id: 'paleo', name: 'Paleo', selected: false },
-    { id: 'low-carb', name: 'Low Carb', selected: false },
-    { id: 'gluten-free', name: 'Gluten Free', selected: false },
-    { id: 'dairy-free', name: 'Dairy Free', selected: false },
-    { id: 'halal', name: 'Halal', selected: false },
-    { id: 'kosher', name: 'Kosher', selected: false },
-  ]);
+  const foodPrefsContext = useFoodPreferencesSafe();
 
-  // Allergens
-  const [allergens, setAllergens] = useState<Preference[]>([
-    { id: 'dairy', name: 'Dairy', selected: false },
-    { id: 'eggs', name: 'Eggs', selected: false },
-    { id: 'fish', name: 'Fish', selected: false },
-    { id: 'shellfish', name: 'Shellfish', selected: false },
-    { id: 'tree-nuts', name: 'Tree Nuts', selected: false },
-    { id: 'peanuts', name: 'Peanuts', selected: false },
-    { id: 'wheat', name: 'Wheat', selected: false },
-    { id: 'soy', name: 'Soy', selected: false },
-    { id: 'gluten', name: 'Gluten', selected: false },
-    { id: 'sesame', name: 'Sesame', selected: false },
-  ]);
+  // Local state for editing
+  const [diets, setDiets] = useState<string[]>([]);
+  const [allergens, setAllergens] = useState<string[]>([]);
+  const [cuisines, setCuisines] = useState<string[]>([]);
+  const [proteins, setProteins] = useState<string[]>([]);
+  const [vegetables, setVegetables] = useState<string[]>([]);
+  const [starches, setStarches] = useState<string[]>([]);
+  const [snacks, setSnacks] = useState<string[]>([]);
+  const [disliked, setDisliked] = useState<string[]>([]);
+  const [hatedFoodsText, setHatedFoodsText] = useState('');
+  const [mealStyle, setMealStyle] = useState<'threePlusSnacks' | 'fewerLarger' | ''>('');
+  const [mealDiversity, setMealDiversity] = useState<'diverse' | 'sameDaily' | ''>('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Favorite Cuisines
-  const [cuisines, setCuisines] = useState<Preference[]>([
-    { id: 'american', name: 'American', selected: false },
-    { id: 'italian', name: 'Italian', selected: false },
-    { id: 'mexican', name: 'Mexican', selected: false },
-    { id: 'chinese', name: 'Chinese', selected: false },
-    { id: 'japanese', name: 'Japanese', selected: false },
-    { id: 'indian', name: 'Indian', selected: false },
-    { id: 'thai', name: 'Thai', selected: false },
-    { id: 'mediterranean', name: 'Mediterranean', selected: false },
-    { id: 'french', name: 'French', selected: false },
-    { id: 'greek', name: 'Greek', selected: false },
-    { id: 'korean', name: 'Korean', selected: false },
-    { id: 'vietnamese', name: 'Vietnamese', selected: false },
-  ]);
+  // Load saved preferences when modal opens
+  useEffect(() => {
+    if (visible && foodPrefsContext?.preferences) {
+      const prefs = foodPrefsContext.preferences;
+      setDiets(prefs.dietaryPreferences || []);
+      setAllergens(prefs.allergens || []);
+      setCuisines(prefs.favoriteCuisines || []);
+      setProteins(prefs.favoriteProteins || []);
+      setVegetables(prefs.favoriteVegetables || []);
+      setStarches(prefs.favoriteStarches || []);
+      setSnacks(prefs.favoriteSnacks || []);
+      // Convert hatedFoods text to disliked array for display
+      const hatedArray = prefs.hatedFoods ? prefs.hatedFoods.split(',').map(s => s.trim()).filter(Boolean) : [];
+      setDisliked(hatedArray.filter(h => DISLIKED_OPTIONS.includes(h)));
+      setHatedFoodsText(prefs.hatedFoods || '');
+      setMealStyle(prefs.mealStyle || '');
+      setMealDiversity(prefs.mealDiversity || '');
+    }
+  }, [visible, foodPrefsContext?.preferences]);
 
-  // Disliked Foods
-  const [disliked, setDisliked] = useState<Preference[]>([
-    { id: 'mushrooms', name: 'Mushrooms', selected: false },
-    { id: 'cilantro', name: 'Cilantro', selected: false },
-    { id: 'olives', name: 'Olives', selected: false },
-    { id: 'onions', name: 'Onions', selected: false },
-    { id: 'tomatoes', name: 'Tomatoes', selected: false },
-    { id: 'avocado', name: 'Avocado', selected: false },
-    { id: 'broccoli', name: 'Broccoli', selected: false },
-    { id: 'seafood', name: 'Seafood', selected: false },
-    { id: 'spicy-food', name: 'Spicy Food', selected: false },
-    { id: 'red-meat', name: 'Red Meat', selected: false },
-  ]);
-
-  const togglePreference = (category: string, id: string) => {
-    const setters = {
-      diets: setDiets,
-      allergens: setAllergens,
-      cuisines: setCuisines,
-      disliked: setDisliked,
-    };
-
-    const states = {
-      diets,
-      allergens,
-      cuisines,
-      disliked,
-    };
-
-    const setter = setters[category as keyof typeof setters];
-    const state = states[category as keyof typeof states];
-
-    setter(
-      state.map((item) =>
-        item.id === id ? { ...item, selected: !item.selected } : item
-      )
-    );
+  const toggleItem = (array: string[], setArray: (arr: string[]) => void, item: string) => {
+    if (array.includes(item)) {
+      setArray(array.filter(i => i !== item));
+    } else {
+      setArray([...array, item]);
+    }
   };
 
-  const handleSave = () => {
-    // Save preferences to API or AsyncStorage
-    onClose();
+  const handleSave = async () => {
+    if (!foodPrefsContext) {
+      console.warn('[FoodPreferences] Context not available');
+      onClose();
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Combine disliked selections with any custom hated foods text
+      const allHatedFoods = [...new Set([...disliked, ...hatedFoodsText.split(',').map(s => s.trim()).filter(Boolean)])];
+
+      await foodPrefsContext.updatePreferences({
+        dietaryPreferences: diets,
+        allergens: allergens,
+        favoriteCuisines: cuisines,
+        favoriteProteins: proteins,
+        favoriteVegetables: vegetables,
+        favoriteStarches: starches,
+        favoriteSnacks: snacks,
+        hatedFoods: allHatedFoods.join(', '),
+        mealStyle: mealStyle,
+        mealDiversity: mealDiversity,
+      });
+
+      console.log('[FoodPreferences] Saved successfully');
+      onClose();
+    } catch (error) {
+      console.error('[FoodPreferences] Save error:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const PreferenceChip = ({
     item,
-    category,
+    isSelected,
+    onToggle,
     variant = 'default',
   }: {
-    item: Preference;
-    category: string;
-    variant?: 'default' | 'allergen';
+    item: string;
+    isSelected: boolean;
+    onToggle: () => void;
+    variant?: 'default' | 'allergen' | 'disliked';
   }) => (
     <TouchableOpacity
       style={[
         styles.chip,
-        item.selected && styles.chipSelected,
-        variant === 'allergen' && item.selected && styles.chipAllergen,
+        isSelected && styles.chipSelected,
+        variant === 'allergen' && isSelected && styles.chipAllergen,
+        variant === 'disliked' && isSelected && styles.chipDisliked,
       ]}
-      onPress={() => togglePreference(category, item.id)}
+      onPress={onToggle}
     >
       <Text
         style={[
           styles.chipText,
-          item.selected && styles.chipTextSelected,
+          isSelected && styles.chipTextSelected,
         ]}
       >
-        {item.name}
+        {item}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const OptionButton = ({
+    label,
+    isSelected,
+    onPress,
+  }: {
+    label: string;
+    isSelected: boolean;
+    onPress: () => void;
+  }) => (
+    <TouchableOpacity
+      style={[styles.optionButton, isSelected && styles.optionButtonSelected]}
+      onPress={onPress}
+    >
+      <Text style={[styles.optionButtonText, isSelected && styles.optionButtonTextSelected]}>
+        {label}
       </Text>
     </TouchableOpacity>
   );
@@ -144,21 +200,62 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>FOOD PREFERENCES</Text>
-            <Text style={styles.headerSubtitle}>Customize your meal recommendations</Text>
+            <Text style={styles.headerSubtitle}>Customize your AI meal plans</Text>
           </View>
-          <TouchableOpacity onPress={onClose}>
-            <Text style={styles.closeButton}>✕</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButtonContainer}>
+            <Ionicons name="close" size={28} color={Colors.text} />
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          {/* Meal Style */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>MEAL STYLE</Text>
+            <Text style={styles.sectionDesc}>How many meals do you prefer per day?</Text>
+            <View style={styles.optionsRow}>
+              <OptionButton
+                label="3 meals + snacks"
+                isSelected={mealStyle === 'threePlusSnacks'}
+                onPress={() => setMealStyle('threePlusSnacks')}
+              />
+              <OptionButton
+                label="Fewer, larger meals"
+                isSelected={mealStyle === 'fewerLarger'}
+                onPress={() => setMealStyle('fewerLarger')}
+              />
+            </View>
+          </View>
+
+          {/* Meal Diversity */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>MEAL VARIETY</Text>
+            <Text style={styles.sectionDesc}>Do you want different meals each day or meal prep friendly?</Text>
+            <View style={styles.optionsRow}>
+              <OptionButton
+                label="Diverse daily"
+                isSelected={mealDiversity === 'diverse'}
+                onPress={() => setMealDiversity('diverse')}
+              />
+              <OptionButton
+                label="Same meals (meal prep)"
+                isSelected={mealDiversity === 'sameDaily'}
+                onPress={() => setMealDiversity('sameDaily')}
+              />
+            </View>
+          </View>
+
           {/* Dietary Preferences */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>DIETARY PREFERENCES</Text>
             <Text style={styles.sectionDesc}>Select your dietary lifestyle</Text>
             <View style={styles.chipsContainer}>
-              {diets.map((diet) => (
-                <PreferenceChip key={diet.id} item={diet} category="diets" />
+              {DIETARY_OPTIONS.map((diet) => (
+                <PreferenceChip
+                  key={diet}
+                  item={diet}
+                  isSelected={diets.includes(diet)}
+                  onToggle={() => toggleItem(diets, setDiets, diet)}
+                />
               ))}
             </View>
           </View>
@@ -166,14 +263,79 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
           {/* Allergens */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>ALLERGENS & RESTRICTIONS</Text>
-            <Text style={styles.sectionDesc}>Foods you must avoid</Text>
+            <Text style={styles.sectionDesc}>Foods you must avoid (will be excluded)</Text>
             <View style={styles.chipsContainer}>
-              {allergens.map((allergen) => (
+              {ALLERGEN_OPTIONS.map((allergen) => (
                 <PreferenceChip
-                  key={allergen.id}
+                  key={allergen}
                   item={allergen}
-                  category="allergens"
+                  isSelected={allergens.includes(allergen)}
+                  onToggle={() => toggleItem(allergens, setAllergens, allergen)}
                   variant="allergen"
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Favorite Proteins */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>FAVORITE PROTEINS</Text>
+            <Text style={styles.sectionDesc}>Select proteins you enjoy</Text>
+            <View style={styles.chipsContainer}>
+              {PROTEIN_OPTIONS.map((protein) => (
+                <PreferenceChip
+                  key={protein}
+                  item={protein}
+                  isSelected={proteins.includes(protein)}
+                  onToggle={() => toggleItem(proteins, setProteins, protein)}
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Favorite Vegetables */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>FAVORITE VEGETABLES</Text>
+            <Text style={styles.sectionDesc}>Select vegetables you enjoy</Text>
+            <View style={styles.chipsContainer}>
+              {VEGETABLE_OPTIONS.map((veg) => (
+                <PreferenceChip
+                  key={veg}
+                  item={veg}
+                  isSelected={vegetables.includes(veg)}
+                  onToggle={() => toggleItem(vegetables, setVegetables, veg)}
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Favorite Starches */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>FAVORITE CARBS & STARCHES</Text>
+            <Text style={styles.sectionDesc}>Select starches you enjoy</Text>
+            <View style={styles.chipsContainer}>
+              {STARCH_OPTIONS.map((starch) => (
+                <PreferenceChip
+                  key={starch}
+                  item={starch}
+                  isSelected={starches.includes(starch)}
+                  onToggle={() => toggleItem(starches, setStarches, starch)}
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Favorite Snacks */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>FAVORITE SNACKS</Text>
+            <Text style={styles.sectionDesc}>Select snacks you enjoy</Text>
+            <View style={styles.chipsContainer}>
+              {SNACK_OPTIONS.map((snack) => (
+                <PreferenceChip
+                  key={snack}
+                  item={snack}
+                  isSelected={snacks.includes(snack)}
+                  onToggle={() => toggleItem(snacks, setSnacks, snack)}
                 />
               ))}
             </View>
@@ -184,8 +346,13 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
             <Text style={styles.sectionTitle}>FAVORITE CUISINES</Text>
             <Text style={styles.sectionDesc}>Cuisines you enjoy most</Text>
             <View style={styles.chipsContainer}>
-              {cuisines.map((cuisine) => (
-                <PreferenceChip key={cuisine.id} item={cuisine} category="cuisines" />
+              {CUISINE_OPTIONS.map((cuisine) => (
+                <PreferenceChip
+                  key={cuisine}
+                  item={cuisine}
+                  isSelected={cuisines.includes(cuisine)}
+                  onToggle={() => toggleItem(cuisines, setCuisines, cuisine)}
+                />
               ))}
             </View>
           </View>
@@ -193,21 +360,42 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
           {/* Disliked Foods */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>DISLIKED FOODS</Text>
-            <Text style={styles.sectionDesc}>Foods you prefer to avoid</Text>
+            <Text style={styles.sectionDesc}>Foods you prefer to avoid (AI will exclude these)</Text>
             <View style={styles.chipsContainer}>
-              {disliked.map((food) => (
-                <PreferenceChip key={food.id} item={food} category="disliked" />
+              {DISLIKED_OPTIONS.map((food) => (
+                <PreferenceChip
+                  key={food}
+                  item={food}
+                  isSelected={disliked.includes(food)}
+                  onToggle={() => toggleItem(disliked, setDisliked, food)}
+                  variant="disliked"
+                />
               ))}
             </View>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Add other foods you dislike (comma separated)"
+              placeholderTextColor={Colors.textMuted}
+              value={hatedFoodsText}
+              onChangeText={setHatedFoodsText}
+              multiline
+            />
           </View>
 
-          <View style={{ height: 100 }} />
+          <View style={{ height: 120 }} />
         </ScrollView>
 
         {/* Save Button */}
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Save Preferences</Text>
+          <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
+          <TouchableOpacity
+            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+            onPress={handleSave}
+            disabled={isSaving}
+          >
+            <Text style={styles.saveButtonText}>
+              {isSaving ? 'Saving...' : 'Save Preferences'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -240,17 +428,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontFamily: Fonts.regular,
   },
-  closeButton: {
-    fontSize: 28,
-    color: Colors.text,
-    fontFamily: Fonts.regular,
+  closeButtonContainer: {
+    padding: 4,
   },
   scrollView: {
     flex: 1,
   },
   section: {
     paddingHorizontal: 16,
-    marginBottom: 32,
+    marginBottom: 28,
   },
   sectionTitle: {
     fontSize: 12,
@@ -262,7 +448,7 @@ const styles = StyleSheet.create({
   sectionDesc: {
     fontSize: 13,
     color: Colors.textSecondary,
-    marginBottom: 16,
+    marginBottom: 12,
     fontFamily: Fonts.regular,
   },
   chipsContainer: {
@@ -272,8 +458,8 @@ const styles = StyleSheet.create({
   },
   chip: {
     backgroundColor: 'transparent',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -283,8 +469,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   chipAllergen: {
-    backgroundColor: Colors.warning + '30',
-    borderColor: Colors.warning,
+    backgroundColor: '#ef444430',
+    borderColor: '#ef4444',
+  },
+  chipDisliked: {
+    backgroundColor: '#f9731630',
+    borderColor: '#f97316',
   },
   chipText: {
     fontSize: 13,
@@ -295,19 +485,65 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontFamily: Fonts.semiBold,
   },
+  optionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  optionButton: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+  },
+  optionButtonSelected: {
+    backgroundColor: Colors.primary + '30',
+    borderColor: Colors.primary,
+  },
+  optionButtonText: {
+    fontSize: 13,
+    color: Colors.text,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+  },
+  optionButtonTextSelected: {
+    color: Colors.text,
+    fontFamily: Fonts.semiBold,
+  },
+  textInput: {
+    marginTop: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    padding: 12,
+    color: Colors.text,
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingHorizontal: 16,
     paddingVertical: 16,
     paddingBottom: 32,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    backgroundColor: Colors.background,
+    overflow: 'hidden',
   },
   saveButton: {
     backgroundColor: Colors.primary,
     paddingVertical: 16,
     borderRadius: Spacing.borderRadius,
     alignItems: 'center',
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
   },
   saveButtonText: {
     color: Colors.primaryText,
