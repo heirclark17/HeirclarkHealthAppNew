@@ -541,7 +541,7 @@ function LiquidGlassIndicator({
           }}
         />
       </View>
-    </Animated.View>
+    </AnimatedViewComponent>
   );
 }
 
