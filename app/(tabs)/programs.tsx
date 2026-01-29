@@ -24,12 +24,14 @@ import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { ExerciseAlternative, WorkoutExercise, WeightLog } from '../../types/training';
 import { WorkoutFormCoachCard } from '../../components/agents/workoutFormCoach';
+import { CoachChatModal } from '../../components/agents/aiCoach';
 
 export default function ProgramsScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [showProgramModal, setShowProgramModal] = useState(false);
   const [showWeightModal, setShowWeightModal] = useState(false);
+  const [showCoachModal, setShowCoachModal] = useState(false);
   const [selectedExerciseForWeight, setSelectedExerciseForWeight] = useState<WorkoutExercise | null>(null);
   const { settings } = useSettings();
 
@@ -447,7 +449,7 @@ export default function ProgramsScreen() {
                 </View>
               </GlassCard>
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.7} style={styles.actionButtonWrapper}>
+            <TouchableOpacity onPress={() => setShowCoachModal(true)} activeOpacity={0.7} style={styles.actionButtonWrapper}>
               <GlassCard style={styles.actionButton} interactive>
                 <View style={styles.actionButtonInner}>
                   <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
@@ -529,6 +531,24 @@ export default function ProgramsScreen() {
           setSelectedExerciseForWeight(null);
         }}
         onSave={handleSaveWeight}
+      />
+
+      {/* AI Coach Chat Modal - Training Mode */}
+      <CoachChatModal
+        visible={showCoachModal}
+        onClose={() => setShowCoachModal(false)}
+        mode="training"
+        context={{
+          userGoals: {
+            fitnessGoal: trainingState.program?.goal || 'general_fitness',
+            activityLevel: 'active',
+          },
+          recentWorkouts: trainingState.completedExercises?.slice(-5).map(ex => ({
+            type: ex.exerciseName || 'Unknown',
+            duration: 45,
+            date: new Date().toISOString(),
+          })),
+        }}
       />
     </SafeAreaView>
   );

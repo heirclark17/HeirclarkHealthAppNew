@@ -177,6 +177,13 @@ const TAB_CONFIG: TabConfig[] = [
     label: 'Saved'
   },
   {
+    name: 'ai-test',
+    href: '/ai-test',
+    icon: 'flask-outline',
+    iconFilled: 'flask',
+    label: 'AI Test'
+  },
+  {
     name: 'programs',
     href: '/programs',
     icon: 'barbell-outline',
