@@ -382,22 +382,28 @@ export default function MealsScreen() {
               )}
             </View>
 
-            {/* Regenerate button */}
+            {/* Regenerate buttons */}
             <View style={styles.regenerateSection}>
-              <GlassCard
-                style={styles.glassButton}
-                intensity={isDark ? 40 : 60}
-                interactive
-              >
+              <Text style={[styles.regenerateLabel, { color: colors.textMuted }]}>Regenerate Plan</Text>
+              <View style={styles.generateButtonsRow}>
                 <TouchableOpacity
+                  style={[styles.halfButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)', borderColor: colors.primary, borderWidth: 1 }]}
                   onPress={handleGenerate}
                   disabled={isGenerating}
-                  style={styles.regenerateButtonInner}
                 >
-                  <Ionicons name="refresh-outline" size={18} color={colors.textMuted} />
-                  <Text style={[styles.regenerateButtonText, { color: colors.textMuted }]}>Regenerate Plan</Text>
+                  <Ionicons name="flash-outline" size={18} color={colors.primary} />
+                  <Text style={[styles.halfButtonText, { color: colors.primary }]}>Quick</Text>
                 </TouchableOpacity>
-              </GlassCard>
+
+                <TouchableOpacity
+                  style={[styles.halfButton, { backgroundColor: colors.primary }]}
+                  onPress={handleAIGenerate}
+                  disabled={isGenerating}
+                >
+                  <Ionicons name="sparkles" size={18} color={colors.primaryText} />
+                  <Text style={[styles.halfButtonText, { color: colors.primaryText }]}>AI-Powered</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </Animated.View>
         )}
@@ -640,6 +646,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 8,
     marginBottom: 16,
+  },
+  regenerateLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.urbanist.medium,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   glassButton: {
     borderRadius: 24,

@@ -447,16 +447,28 @@ export default function ProgramsScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Regenerate Button - Frosted Liquid Glass */}
+            {/* Regenerate Buttons - Frosted Liquid Glass */}
             <View style={styles.regenerateSection}>
-              <TouchableOpacity onPress={handleGenerate} disabled={isGenerating} activeOpacity={0.7}>
-                <GlassCard style={styles.regenerateButton} interactive>
-                  <View style={styles.regenerateButtonInner}>
-                    <Ionicons name="refresh-outline" size={18} color={colors.textMuted} />
-                    <Text style={[styles.regenerateButtonText, { color: colors.textMuted }]}>Regenerate Plan</Text>
-                  </View>
-                </GlassCard>
-              </TouchableOpacity>
+              <Text style={[styles.regenerateLabel, { color: colors.textMuted }]}>Regenerate Plan</Text>
+              <View style={styles.generateButtonsRow}>
+                <TouchableOpacity
+                  style={[styles.halfButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)', borderColor: colors.primary, borderWidth: 1 }]}
+                  onPress={handleGenerate}
+                  disabled={isGenerating}
+                >
+                  <Ionicons name="flash-outline" size={18} color={colors.primary} />
+                  <Text style={[styles.halfButtonText, { color: colors.primary }]}>Quick</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.halfButton, { backgroundColor: colors.primary }]}
+                  onPress={handleAIGenerate}
+                  disabled={isGenerating}
+                >
+                  <Ionicons name="sparkles" size={18} color={colors.primaryText} />
+                  <Text style={[styles.halfButtonText, { color: colors.primaryText }]}>AI-Powered</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </Animated.View>
         )}
@@ -590,6 +602,25 @@ const styles = StyleSheet.create({
   generateButtonsRow: {
     flexDirection: 'row',
     gap: 12,
+  },
+  halfButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: Spacing.borderRadius,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  halfButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.urbanist.semiBold,
+  },
+  regenerateLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.urbanist.medium,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',
