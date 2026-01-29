@@ -252,23 +252,37 @@ export default function MealsScreen() {
               </TouchableOpacity>
 
               <View style={styles.generateButtonsRow}>
-                <TouchableOpacity
-                  style={[styles.halfButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)', borderColor: colors.primary, borderWidth: 1 }]}
-                  onPress={handleGenerate}
-                  disabled={isGenerating}
+                <GlassCard
+                  style={styles.halfButtonGlass}
+                  intensity={isDark ? 40 : 60}
+                  interactive
                 >
-                  <Ionicons name="flash-outline" size={20} color={colors.primary} />
-                  <Text style={[styles.halfButtonText, { color: colors.primary }]}>Quick Generate</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleGenerate}
+                    disabled={isGenerating}
+                    activeOpacity={0.7}
+                    style={styles.halfButtonInner}
+                  >
+                    <Ionicons name="flash-outline" size={20} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
+                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick Generate</Text>
+                  </TouchableOpacity>
+                </GlassCard>
 
-                <TouchableOpacity
-                  style={[styles.halfButton, { backgroundColor: colors.primary }]}
-                  onPress={handleAIGenerate}
-                  disabled={isGenerating}
+                <GlassCard
+                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)' }]}
+                  intensity={isDark ? 50 : 70}
+                  interactive
                 >
-                  <Ionicons name="sparkles" size={20} color={colors.primaryText} />
-                  <Text style={[styles.halfButtonText, { color: colors.primaryText }]}>AI-Powered</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleAIGenerate}
+                    disabled={isGenerating}
+                    activeOpacity={0.7}
+                    style={styles.halfButtonInner}
+                  >
+                    <Ionicons name="sparkles" size={20} color={isDark ? '#a5b4fc' : '#6366f1'} />
+                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI-Powered</Text>
+                  </TouchableOpacity>
+                </GlassCard>
               </View>
             </GlassCard>
           </Animated.View>
@@ -386,23 +400,37 @@ export default function MealsScreen() {
             <View style={styles.regenerateSection}>
               <Text style={[styles.regenerateLabel, { color: colors.textMuted }]}>Regenerate Plan</Text>
               <View style={styles.generateButtonsRow}>
-                <TouchableOpacity
-                  style={[styles.halfButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)', borderColor: colors.primary, borderWidth: 1 }]}
-                  onPress={handleGenerate}
-                  disabled={isGenerating}
+                <GlassCard
+                  style={styles.halfButtonGlass}
+                  intensity={isDark ? 40 : 60}
+                  interactive
                 >
-                  <Ionicons name="flash-outline" size={18} color={colors.primary} />
-                  <Text style={[styles.halfButtonText, { color: colors.primary }]}>Quick</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleGenerate}
+                    disabled={isGenerating}
+                    activeOpacity={0.7}
+                    style={styles.halfButtonInner}
+                  >
+                    <Ionicons name="flash-outline" size={18} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
+                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick</Text>
+                  </TouchableOpacity>
+                </GlassCard>
 
-                <TouchableOpacity
-                  style={[styles.halfButton, { backgroundColor: colors.primary }]}
-                  onPress={handleAIGenerate}
-                  disabled={isGenerating}
+                <GlassCard
+                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)' }]}
+                  intensity={isDark ? 50 : 70}
+                  interactive
                 >
-                  <Ionicons name="sparkles" size={18} color={colors.primaryText} />
-                  <Text style={[styles.halfButtonText, { color: colors.primaryText }]}>AI-Powered</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleAIGenerate}
+                    disabled={isGenerating}
+                    activeOpacity={0.7}
+                    style={styles.halfButtonInner}
+                  >
+                    <Ionicons name="sparkles" size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
+                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI-Powered</Text>
+                  </TouchableOpacity>
+                </GlassCard>
               </View>
             </View>
           </Animated.View>
@@ -579,6 +607,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
+  halfButtonGlass: {
+    flex: 1,
+    borderRadius: Spacing.borderRadius,
+  },
+  halfButtonInner: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
   halfButtonText: {
     fontSize: 15,
     fontFamily: Fonts.semiBold,
@@ -649,7 +688,7 @@ const styles = StyleSheet.create({
   },
   regenerateLabel: {
     fontSize: 13,
-    fontFamily: Fonts.urbanist.medium,
+    fontFamily: Fonts.medium,
     marginBottom: 10,
     textAlign: 'center',
   },
