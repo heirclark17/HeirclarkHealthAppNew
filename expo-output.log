@@ -1,0 +1,107 @@
+env: load .env
+env: export EXPO_PUBLIC_API_URL
+Starting project at C:\Users\derri\HeirclarkHealthAppNew
+Starting Metro Bundler
+Waiting on http://localhost:8085
+Logs for your project will appear below.
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web .\index.js ▓▓▓▓▓▓▓▓░░░░░░░░ 54.7% (633/868)
+Web Bundled 6264ms index.js (1306 modules)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 310ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 581ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 680ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 643ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 614ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 376ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 259ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 689ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 209ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 403ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 5957ms index.js (1 module)
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 183ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 1094ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 711ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 242ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 296ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 449ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 194ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 248ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 783ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 314ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 231ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 435ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 248ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 3279ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 367ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 383ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 235ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 200ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 1278ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 191ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 208ms index.js (1 module)
+ LOG  [web] Logs will appear in the browser console

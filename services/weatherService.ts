@@ -1,8 +1,7 @@
-// Heirclark Weather Service
-// Fetches weather data from OpenWeatherMap API
+// Heirclark Weather Service - Backend Proxy Integration
+// Proxies weather requests through backend to keep API keys secure
 
-const WEATHER_API_KEY = process.env.OPENWEATHERMAP_API_KEY || '';
-const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://heirclarkinstacartbackend-production.up.railway.app';
 
 export interface WeatherData {
   temp: number;
@@ -19,42 +18,50 @@ export interface WeatherData {
 }
 
 class WeatherService {
-  private apiKey: string;
+  private baseUrl: string;
 
   constructor() {
-    this.apiKey = WEATHER_API_KEY;
+    this.baseUrl = API_BASE_URL;
   }
 
-  // Get weather by coordinates
+  // Get weather by coordinates via backend proxy
   async getWeatherByCoords(latitude: number, longitude: number): Promise<WeatherData | null> {
     try {
-      if (!this.apiKey) {
-        console.warn('Weather API key not configured');
-        return null;
-      }
+      const url = `${this.baseUrl}/api/v1/weather/current?lat=${latitude}&lon=${longitude}&units=imperial`;
+      console.log('Fetching weather from:', url);
 
-      const url = `${WEATHER_API_URL}?lat=${latitude}&lon=${longitude}&appid=${this.apiKey}&units=imperial`;
       const response = await fetch(url);
 
       if (!response.ok) {
-        console.error('Weather API error:', response.status);
+        console.error('Backend weather API error:', response.status);
         return null;
       }
 
       const data = await response.json();
+      console.log('Weather response:', JSON.stringify(data).substring(0, 200));
+
+      // Validate response has required fields (backend uses custom format, not OpenWeatherMap)
+      if (!data || !data.success || !data.weather) {
+        console.error('Invalid weather data format:', data);
+        return null;
+      }
+
+      // Backend returns custom format with {success, weather: {...}, location: {...}}
+      const weather = data.weather;
+      const location = data.location;
 
       return {
-        temp: Math.round(data.main.temp),
-        feels_like: Math.round(data.main.feels_like),
-        temp_min: Math.round(data.main.temp_min),
-        temp_max: Math.round(data.main.temp_max),
-        condition: data.weather[0].main,
-        description: data.weather[0].description,
-        icon: this.getWeatherEmoji(data.weather[0].main),
-        city: data.name,
-        humidity: data.main.humidity,
-        wind_speed: Math.round(data.wind.speed),
-        rain_chance: data.rain ? Math.round((data.rain['1h'] || 0) * 10) : 0,
+        temp: Math.round(weather.temp),
+        feels_like: Math.round(weather.feelsLike),
+        temp_min: Math.round(weather.tempMin),
+        temp_max: Math.round(weather.tempMax),
+        condition: weather.condition,
+        description: weather.description,
+        icon: this.getWeatherEmoji(weather.condition),
+        city: location.name,
+        humidity: weather.humidity,
+        wind_speed: Math.round(weather.wind.speed),
+        rain_chance: weather.rain ? Math.round((weather.rain['1h'] || 0) * 10) : 0,
       };
     } catch (error) {
       console.error('Weather fetch error:', error);
@@ -62,36 +69,41 @@ class WeatherService {
     }
   }
 
-  // Get weather by city name
+  // Get weather by city name via backend proxy
   async getWeatherByCity(city: string): Promise<WeatherData | null> {
     try {
-      if (!this.apiKey) {
-        console.warn('Weather API key not configured');
-        return null;
-      }
-
-      const url = `${WEATHER_API_URL}?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=imperial`;
+      const url = `${this.baseUrl}/api/v1/weather/current?city=${encodeURIComponent(city)}&units=imperial`;
       const response = await fetch(url);
 
       if (!response.ok) {
-        console.error('Weather API error:', response.status);
+        console.error('Backend weather API error:', response.status);
         return null;
       }
 
       const data = await response.json();
 
+      // Validate response has required fields (backend uses custom format)
+      if (!data || !data.success || !data.weather) {
+        console.error('Invalid weather data format:', data);
+        return null;
+      }
+
+      // Backend returns custom format with {success, weather: {...}, location: {...}}
+      const weather = data.weather;
+      const location = data.location;
+
       return {
-        temp: Math.round(data.main.temp),
-        feels_like: Math.round(data.main.feels_like),
-        temp_min: Math.round(data.main.temp_min),
-        temp_max: Math.round(data.main.temp_max),
-        condition: data.weather[0].main,
-        description: data.weather[0].description,
-        icon: this.getWeatherEmoji(data.weather[0].main),
-        city: data.name,
-        humidity: data.main.humidity,
-        wind_speed: Math.round(data.wind.speed),
-        rain_chance: data.rain ? Math.round((data.rain['1h'] || 0) * 10) : 0,
+        temp: Math.round(weather.temp),
+        feels_like: Math.round(weather.feelsLike),
+        temp_min: Math.round(weather.tempMin),
+        temp_max: Math.round(weather.tempMax),
+        condition: weather.condition,
+        description: weather.description,
+        icon: this.getWeatherEmoji(weather.condition),
+        city: location.name,
+        humidity: weather.humidity,
+        wind_speed: Math.round(weather.wind.speed),
+        rain_chance: weather.rain ? Math.round((weather.rain['1h'] || 0) * 10) : 0,
       };
     } catch (error) {
       console.error('Weather fetch error:', error);

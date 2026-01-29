@@ -1,0 +1,1390 @@
+{
+  "crawl_date": "2026-01-17T14:11:33.935606",
+  "base_url": "https://heirclark.com",
+  "pages": [
+    {
+      "url": "https://heirclark.com",
+      "title": "Heirclark, LLC",
+      "screenshot": "screenshots/heirclark.com.png",
+      "components": [
+        {
+          "name": "Date Selector",
+          "working": true,
+          "type": "calendar"
+        }
+      ],
+      "buttons": [
+        {
+          "text": "Skip to content",
+          "classes": "skip-to-content-link button-secondary"
+        },
+        {
+          "text": "Clear",
+          "classes": "button-unstyled predictive-search__reset-button"
+        },
+        {
+          "text": "View all",
+          "classes": "button button-primary predictive-search__search-button"
+        }
+      ],
+      "forms": [
+        {
+          "type": "search",
+          "placeholder": "Search",
+          "name": "q"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "options[prefix]"
+        }
+      ],
+      "cards": [
+        {
+          "text": "Skip to content\nFeatures\nTry App\nTrack Smarter.\nEat Better.\n\nAI-powered calorie tracking that understands your meals through voice, photo, or text. No more guessing.\n\nAI\nPOWERED\n0\nADS\nGood Morning\n1,8",
+          "classes": "page-width-normal card-hover-effect-none"
+        },
+        {
+          "text": "Features\nTry App\nTrack Smarter.\nEat Better.\n\nAI-powered calorie tracking that understands your meals through voice, photo, or text. No more guessing.\n\nAI\nPOWERED\n0\nADS\nGood Morning\n1,847\nCALORIES\n2,10",
+          "classes": "shopify-section"
+        },
+        {
+          "text": "BREAKFAST\nGreek Yogurt Bowl\n320 cal",
+          "classes": "hc-mock-plan-card"
+        },
+        {
+          "text": "LUNCH\nGrilled Chicken Salad\n480 cal",
+          "classes": "hc-mock-plan-card"
+        },
+        {
+          "text": "DINNER\nSalmon & Vegetables\n550 cal",
+          "classes": "hc-mock-plan-card"
+        },
+        {
+          "text": "Daily Calories\n2,200 cal",
+          "classes": "hc-mock-goal-card"
+        },
+        {
+          "text": "Protein Target\n150g",
+          "classes": "hc-mock-goal-card"
+        },
+        {
+          "text": "Target Weight\n165 lbs",
+          "classes": "hc-mock-goal-card"
+        },
+        {
+          "text": "Activity Level\nActive",
+          "classes": "hc-mock-goal-card"
+        },
+        {
+          "text": "FEATURES\nEverything you need to reach your goals",
+          "classes": "hc-section-header"
+        },
+        {
+          "text": "FEATURES",
+          "classes": "hc-section-badge"
+        },
+        {
+          "text": "Everything you need to reach your goals",
+          "classes": "hc-section-title"
+        },
+        {
+          "text": "\"I had a chicken salad with avocado\"\nGrilled Chicken Salad\n420 cal\n38g protein\n12g carbs\n24g fat",
+          "classes": "hc-feature-card"
+        },
+        {
+          "text": "1,847\n+\n2,100 in\n-\n253 out",
+          "classes": "hc-feature-card"
+        },
+        {
+          "text": "M\nT\nW\nT\nF\nS\nS\nThis Week",
+          "classes": "hc-feature-card"
+        },
+        {
+          "text": "Start your journey today\n\nCreate an account to track your nutrition and reach your goals.\n\nGet Started",
+          "classes": "hc-cta-section"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "predictive-search-results__card predictive-search-results__card--product"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "resource-card"
+        },
+        {
+          "text": "Broiled Salmon Recipe",
+          "classes": "resource-card__link"
+        }
+      ],
+      "modals": [
+        {
+          "visible": false,
+          "classes": "search-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal__content dialog-modal"
+        },
+        {
+          "visible": false,
+          "classes": "button predictive-search__close-modal-button"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal dialog-modal color-scheme-1"
+        },
+        {
+          "visible": true,
+          "classes": "button button-unstyled close-button quick-add-modal__close"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal__content"
+        }
+      ]
+    },
+    {
+      "url": "https://heirclark.com/pages/calorie-counter",
+      "title": "HeirClark - AI Nutrition Tracker | Log Meals with Photos",
+      "screenshot": "screenshots/calorie-counter.png",
+      "components": [
+        {
+          "name": "Date Selector",
+          "working": true,
+          "type": "calendar"
+        },
+        {
+          "name": "Sync Button",
+          "working": true,
+          "type": "button"
+        }
+      ],
+      "buttons": [
+        {
+          "text": "Skip to content",
+          "classes": "skip-to-content-link button-secondary"
+        },
+        {
+          "text": "DARK MODE",
+          "classes": "hc-theme-toggle-btn"
+        },
+        {
+          "text": "VIEW FULL CALENDAR",
+          "classes": "hc-calendar-toggle"
+        },
+        {
+          "text": "Today",
+          "classes": "hc-back-to-today"
+        },
+        {
+          "text": "Today",
+          "classes": "hc-go-today-btn"
+        },
+        {
+          "text": "SYNC NOW",
+          "classes": "hc-sync-now-btn"
+        },
+        {
+          "text": "Get Recommendations",
+          "classes": "hc-btn hc-btn-primary"
+        },
+        {
+          "text": "Sync Now",
+          "classes": "hc-sync-btn"
+        },
+        {
+          "text": "Sync Now",
+          "classes": "hc-sync-btn"
+        },
+        {
+          "text": "Sync Now",
+          "classes": "hc-sync-btn"
+        },
+        {
+          "text": "Sync All Providers",
+          "classes": "hc-btn hc-btn-primary hc-sync-all-btn"
+        },
+        {
+          "text": "Log Meal",
+          "classes": "hc-add-meal-btn"
+        },
+        {
+          "text": "Manual",
+          "classes": "hc-mode-card active"
+        },
+        {
+          "text": "AI Voice",
+          "classes": "hc-mode-card"
+        }
+      ],
+      "forms": [
+        {
+          "type": "date",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "number",
+          "placeholder": "e.g. 500",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "e.g., 2 eggs, toast with butter, coffee with milk",
+          "name": ""
+        },
+        {
+          "type": "number",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "Example: 2 scrambled eggs, toast with butter, and orange juice",
+          "name": ""
+        },
+        {
+          "type": "file",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "Enter barcode or scan",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "Search food database...",
+          "name": ""
+        },
+        {
+          "type": "text",
+          "placeholder": "Recipe name",
+          "name": ""
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "number",
+          "placeholder": "0",
+          "name": ""
+        },
+        {
+          "type": "number",
+          "placeholder": "0",
+          "name": ""
+        },
+        {
+          "type": "number",
+          "placeholder": "0",
+          "name": ""
+        },
+        {
+          "type": "number",
+          "placeholder": "0",
+          "name": ""
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "search",
+          "placeholder": "Search",
+          "name": "q"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "options[prefix]"
+        }
+      ],
+      "cards": [
+        {
+          "text": "Skip to content\nDARK MODE\nAFTERNOON\nTHERE\n\nEnergy flows where intention goes.\n\nLocation\n72\n\nClear\n65/78\n0%\nN 5mph\nTHIS WEEK\nSUN\n11\nMON\n12\nTUE\n13\nWED\n14\nTHU\n15\nFRI\n16\nSAT\n17\nWED\n14\nTHU\n15\nFRI\n16\nSAT\n17",
+          "classes": "page-width-normal card-hover-effect-none hc-dark-theme hc-ux-enhanced hc-is-free"
+        },
+        {
+          "text": "DARK MODE\nAFTERNOON\nTHERE\n\nEnergy flows where intention goes.\n\nLocation\n72\n\nClear\n65/78\n0%\nN 5mph\nTHIS WEEK\nSUN\n11\nMON\n12\nTUE\n13\nWED\n14\nTHU\n15\nFRI\n16\nSAT\n17\nWED\n14\nTHU\n15\nFRI\n16\nSAT\n17\nSUN\n18\nMON\n19\nT",
+          "classes": "shopify-section hc-app"
+        },
+        {
+          "text": "AFTERNOON\nTHERE\n\nEnergy flows where intention goes.\n\nLocation\n72\n\nClear\n65/78\n0%\nN 5mph",
+          "classes": "hc-header-cards hc-stagger"
+        },
+        {
+          "text": "AFTERNOON\nTHERE\n\nEnergy flows where intention goes.",
+          "classes": "hc-greeting-card hc-greeting hc-card-animated hc-fade-in-up"
+        },
+        {
+          "text": "Location\n72\n\nClear\n65/78\n0%\nN 5mph",
+          "classes": "hc-weather-card hc-card-animated hc-fade-in-up"
+        },
+        {
+          "text": "SUN\n11",
+          "classes": "hc-day-card"
+        },
+        {
+          "text": "MON\n12",
+          "classes": "hc-day-card"
+        },
+        {
+          "text": "TUE\n13",
+          "classes": "hc-day-card"
+        },
+        {
+          "text": "WED\n14",
+          "classes": "hc-day-card"
+        },
+        {
+          "text": "THU\n15",
+          "classes": "hc-day-card"
+        },
+        {
+          "text": "FRI\n16",
+          "classes": "hc-day-card"
+        },
+        {
+          "text": "SAT\n17",
+          "classes": "hc-day-card active today"
+        },
+        {
+          "text": "DAILY BALANCE\n0\nkcal\nof 2,200 kcal goal\nCALORIES IN\n0 kcal\nCALORIES OUT\n0 kcal\nSYNC NOW\nNOT SYNCED YET",
+          "classes": "hc-calories-section"
+        },
+        {
+          "text": "0\nkcal\nof 2,200 kcal goal",
+          "classes": "hc-gauge-container"
+        },
+        {
+          "text": "SYNC NOW\nNOT SYNCED YET",
+          "classes": "hc-sync-now-section"
+        },
+        {
+          "text": "PROTEIN\n0\ng\n150g\nFAT\n0\ng\n65g\nCARBS\n0\ng\n250g",
+          "classes": "hc-macro-cards"
+        },
+        {
+          "text": "PROTEIN\n0\ng\n150g",
+          "classes": "hc-macro-card"
+        },
+        {
+          "text": "PROTEIN",
+          "classes": "hc-macro-card-label"
+        },
+        {
+          "text": "0\ng",
+          "classes": "hc-mini-gauge-container"
+        },
+        {
+          "text": "FAT\n0\ng\n65g",
+          "classes": "hc-macro-card"
+        }
+      ],
+      "modals": [
+        {
+          "visible": false,
+          "classes": "hc-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-modal-backdrop"
+        },
+        {
+          "visible": false,
+          "classes": "hc-modal-panel"
+        },
+        {
+          "visible": false,
+          "classes": "hc-modal-header"
+        },
+        {
+          "visible": false,
+          "classes": "hc-modal-body"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal__content dialog-modal"
+        },
+        {
+          "visible": false,
+          "classes": "button predictive-search__close-modal-button"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal dialog-modal color-scheme-1"
+        },
+        {
+          "visible": true,
+          "classes": "button button-unstyled close-button quick-add-modal__close"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal__content"
+        },
+        {
+          "visible": false,
+          "classes": "hc-confirm-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-confirm-modal__box"
+        },
+        {
+          "visible": false,
+          "classes": "hc-confirm-modal__icon"
+        },
+        {
+          "visible": false,
+          "classes": "hc-confirm-modal__title"
+        },
+        {
+          "visible": false,
+          "classes": "hc-confirm-modal__desc"
+        },
+        {
+          "visible": false,
+          "classes": "hc-confirm-modal__actions"
+        },
+        {
+          "visible": false,
+          "classes": "hc-confirm-modal__btn hc-confirm-modal__btn--cancel"
+        },
+        {
+          "visible": false,
+          "classes": "hc-confirm-modal__btn hc-confirm-modal__btn--danger"
+        }
+      ]
+    },
+    {
+      "url": "https://heirclark.com/pages/steps",
+      "title": "Steps – Heirclark, LLC",
+      "screenshot": "screenshots/steps.png",
+      "components": [
+        {
+          "name": "Sync Button",
+          "working": true,
+          "type": "button"
+        }
+      ],
+      "buttons": [
+        {
+          "text": "Skip to content",
+          "classes": "skip-to-content-link button-secondary"
+        },
+        {
+          "text": "Sync Now",
+          "classes": "hc-sync-now-btn"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Clear",
+          "classes": "button-unstyled predictive-search__reset-button"
+        },
+        {
+          "text": "View all",
+          "classes": "button button-primary predictive-search__search-button"
+        }
+      ],
+      "forms": [
+        {
+          "type": "search",
+          "placeholder": "Search",
+          "name": "q"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "options[prefix]"
+        }
+      ],
+      "cards": [
+        {
+          "text": "Skip to content\nGOOD MORNING\nTHERE\nTHIS WEEK\nSTEPS\n\nTrack the number of steps you take each day.\n\n0\n/7000\nSTEPS TODAY\n\nSee how far your feet have carried you today\n\nSync Now\nNot synced yet\n0.00\nMI\nDIS",
+          "classes": "page-width-normal card-hover-effect-none"
+        },
+        {
+          "text": "GOOD MORNING\nTHERE\nTHIS WEEK\nSTEPS\n\nTrack the number of steps you take each day.\n\n0\n/7000\nSTEPS TODAY\n\nSee how far your feet have carried you today\n\nSync Now\nNot synced yet\n0.00\nMI\nDISTANCE\nWEEKLY PRO",
+          "classes": "shopify-section hc-steps-section"
+        },
+        {
+          "text": "STEPS\n\nTrack the number of steps you take each day.",
+          "classes": "hc-steps-section-header"
+        },
+        {
+          "text": "STEPS\n\nTrack the number of steps you take each day.",
+          "classes": "hc-steps-section-info"
+        },
+        {
+          "text": "STEPS",
+          "classes": "hc-steps-section-title"
+        },
+        {
+          "text": "Track the number of steps you take each day.",
+          "classes": "hc-steps-section-desc"
+        },
+        {
+          "text": "0\n/7000\nSTEPS TODAY\n\nSee how far your feet have carried you today\n\nSync Now\nNot synced yet",
+          "classes": "hc-steps-gauge-card"
+        },
+        {
+          "text": "0\n/7000\nSTEPS TODAY",
+          "classes": "hc-steps-gauge-container"
+        },
+        {
+          "text": "Sync Now\nNot synced yet",
+          "classes": "hc-sync-now-section"
+        },
+        {
+          "text": "WEEKLY PROGRESS\n0%\nTOTAL STEPS\n0\nof 49,000\nACTIVE CALORIES\n0 kcal\nAVG DAILY\n0 steps",
+          "classes": "hc-steps-weekly-card"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "predictive-search-results__card predictive-search-results__card--product"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "resource-card"
+        },
+        {
+          "text": "Broiled Salmon Recipe",
+          "classes": "resource-card__link"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "resource-card__content"
+        }
+      ],
+      "modals": [
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal__content dialog-modal"
+        },
+        {
+          "visible": false,
+          "classes": "button predictive-search__close-modal-button"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal dialog-modal color-scheme-1"
+        },
+        {
+          "visible": true,
+          "classes": "button button-unstyled close-button quick-add-modal__close"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal__content"
+        }
+      ]
+    },
+    {
+      "url": "https://heirclark.com/pages/meals",
+      "title": "404 Not Found – Heirclark, LLC",
+      "screenshot": "screenshots/meals.png",
+      "components": [],
+      "buttons": [
+        {
+          "text": "Skip to content",
+          "classes": "skip-to-content-link button-secondary"
+        },
+        {
+          "text": "Continue shopping",
+          "classes": "\n    size-style\n    button\n    button--Ad1R2SmNacFRUaXcxV__button_PAQMwR\n  "
+        },
+        {
+          "text": "Add\n    \n    \n      \n\n\n\n      Added",
+          "classes": "button button quick-add__button quick-add__button--add"
+        },
+        {
+          "text": "Clear",
+          "classes": "button-unstyled predictive-search__reset-button"
+        },
+        {
+          "text": "View all",
+          "classes": "button button-primary predictive-search__search-button"
+        }
+      ],
+      "forms": [
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "form_type"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "utf8"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "id"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "quantity"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "product-id"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "section-id"
+        },
+        {
+          "type": "search",
+          "placeholder": "Search",
+          "name": "q"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "options[prefix]"
+        }
+      ],
+      "cards": [
+        {
+          "text": "Skip to content\nPage not found\n\nThe link may be incorrect, or the page has been removed.\n\nContinue shopping\n\nDiscover something new\n\nBroiled Salmon Recipe\n\nBroiled Salmon Recipe\n\n$1.00",
+          "classes": "page-width-normal card-hover-effect-none"
+        },
+        {
+          "text": "Page not found\n\nThe link may be incorrect, or the page has been removed.\n\nContinue shopping",
+          "classes": "shopify-section section-wrapper"
+        },
+        {
+          "text": "Page not found\n\nThe link may be incorrect, or the page has been removed.\n\nContinue shopping",
+          "classes": "\n    section section--page-width color-scheme-1\n     section--height-small\n  "
+        },
+        {
+          "text": "Page not found\n\nThe link may be incorrect, or the page has been removed.\n\nContinue shopping",
+          "classes": "\n        spacing-style\n        layout-panel-flex\n        layout-panel-flex--column\n        section-content-wrapper\n        mobile-column\n      "
+        },
+        {
+          "text": "Discover something new\n\nBroiled Salmon Recipe\n\nBroiled Salmon Recipe\n\n$1.00",
+          "classes": "shopify-section ui-test-product-list"
+        },
+        {
+          "text": "Discover something new\n\nBroiled Salmon Recipe\n\nBroiled Salmon Recipe\n\n$1.00",
+          "classes": "\n    section\n    section--page-width\n    color-scheme-1\n    section-resource-list\n    spacing-style\n    gap-style\n  "
+        },
+        {
+          "text": "Discover something new",
+          "classes": "section-resource-list__header"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n\nBroiled Salmon Recipe\n\n$1.00",
+          "classes": "product-card"
+        },
+        {
+          "text": "Broiled Salmon Recipe",
+          "classes": "product-card__link"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n\n$1.00",
+          "classes": "\n      product-card__content\n      layout-panel-flex\n      layout-panel-flex--column\n      product-grid__card\n      spacing-style\n      border-style\n      gap-style\n      \n    "
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "predictive-search-results__card predictive-search-results__card--product"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "resource-card"
+        },
+        {
+          "text": "Broiled Salmon Recipe",
+          "classes": "resource-card__link"
+        }
+      ],
+      "modals": [
+        {
+          "visible": false,
+          "classes": "search-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal__content dialog-modal"
+        },
+        {
+          "visible": false,
+          "classes": "button predictive-search__close-modal-button"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal dialog-modal color-scheme-1"
+        },
+        {
+          "visible": true,
+          "classes": "button button-unstyled close-button quick-add-modal__close"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal__content"
+        }
+      ]
+    },
+    {
+      "url": "https://heirclark.com/pages/programs",
+      "title": "Programs – Heirclark, LLC",
+      "screenshot": "screenshots/programs.png",
+      "components": [],
+      "buttons": [
+        {
+          "text": "Skip to content",
+          "classes": "skip-to-content-link button-secondary"
+        },
+        {
+          "text": "Continue as Guest",
+          "classes": "hc-login-btn hc-login-btn-guest"
+        },
+        {
+          "text": "Start a Program\n          Join a structured 7-day program to build healthy habits and reach your goals",
+          "classes": "hc-choice-card"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Clear",
+          "classes": "button-unstyled predictive-search__reset-button"
+        },
+        {
+          "text": "View all",
+          "classes": "button button-primary predictive-search__search-button"
+        }
+      ],
+      "forms": [
+        {
+          "type": "search",
+          "placeholder": "Search",
+          "name": "q"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "options[prefix]"
+        }
+      ],
+      "cards": [
+        {
+          "text": "Skip to content\n\nSign in to track your nutrition journey and get personalized meal plans\n\nSign In\nCreate Account\nOR\nContinue as Guest\n\nGuest data is stored locally and may be lost if you clear your br",
+          "classes": "page-width-normal card-hover-effect-none"
+        },
+        {
+          "text": "Sign in to track your nutrition journey and get personalized meal plans\n\nSign In\nCreate Account\nOR\nContinue as Guest\n\nGuest data is stored locally and may be lost if you clear your browser data\n\nMEALS",
+          "classes": "shopify-section hc-onboarding-section"
+        },
+        {
+          "text": "Sign in to track your nutrition journey and get personalized meal plans\n\nSign In\nCreate Account\nOR\nContinue as Guest\n\nGuest data is stored locally and may be lost if you clear your browser data",
+          "classes": "hc-login-container"
+        },
+        {
+          "text": "Welcome to Heirclark\n        Choose how you'd like to get started\n      \n\n      \n        \n        \n          \n            \n              \n              \n              \n            \n          \n        ",
+          "classes": "hc-choice-container"
+        },
+        {
+          "text": "Set Up Goals\n          Define your nutrition goals, target weight, and daily calorie targets",
+          "classes": "hc-choice-card"
+        },
+        {
+          "text": "Set Up Goals",
+          "classes": "hc-choice-card-title"
+        },
+        {
+          "text": "Define your nutrition goals, target weight, and daily calorie targets",
+          "classes": "hc-choice-card-desc"
+        },
+        {
+          "text": "Start a Program\n          Join a structured 7-day program to build healthy habits and reach your goals",
+          "classes": "hc-choice-card"
+        },
+        {
+          "text": "Start a Program",
+          "classes": "hc-choice-card-title"
+        },
+        {
+          "text": "Join a structured 7-day program to build healthy habits and reach your goals",
+          "classes": "hc-choice-card-desc"
+        },
+        {
+          "text": "Food Preferences\n          Set your favorite foods, cuisines, and meal preferences for personalized plans",
+          "classes": "hc-choice-card"
+        },
+        {
+          "text": "Food Preferences",
+          "classes": "hc-choice-card-title"
+        },
+        {
+          "text": "Set your favorite foods, cuisines, and meal preferences for personalized plans",
+          "classes": "hc-choice-card-desc"
+        },
+        {
+          "text": "Loading programs...",
+          "classes": "hc-onboarding-container"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "predictive-search-results__card predictive-search-results__card--product"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "resource-card"
+        },
+        {
+          "text": "Broiled Salmon Recipe",
+          "classes": "resource-card__link"
+        }
+      ],
+      "modals": [
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal__content dialog-modal"
+        },
+        {
+          "visible": false,
+          "classes": "button predictive-search__close-modal-button"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal dialog-modal color-scheme-1"
+        },
+        {
+          "visible": true,
+          "classes": "button button-unstyled close-button quick-add-modal__close"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal__content"
+        }
+      ]
+    },
+    {
+      "url": "https://heirclark.com/pages/settings",
+      "title": "Settings – Heirclark, LLC",
+      "screenshot": "screenshots/settings.png",
+      "components": [],
+      "buttons": [
+        {
+          "text": "Skip to content",
+          "classes": "skip-to-content-link button-secondary"
+        },
+        {
+          "text": "Cancel",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-cancel"
+        },
+        {
+          "text": "Connect",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-primary"
+        },
+        {
+          "text": "Done",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-cancel"
+        },
+        {
+          "text": "Sync Now",
+          "classes": "hc-ios-modal-btn"
+        },
+        {
+          "text": "Disconnect",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-confirm"
+        },
+        {
+          "text": "Cancel",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-cancel"
+        },
+        {
+          "text": "Delete",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-confirm"
+        },
+        {
+          "text": "Cancel",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-cancel"
+        },
+        {
+          "text": "Remove",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-secondary"
+        },
+        {
+          "text": "Save",
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-primary"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Don't show again",
+          "classes": "hc-tutorial-skip"
+        },
+        {
+          "text": "Got it",
+          "classes": "hc-tutorial-done"
+        },
+        {
+          "text": "Clear",
+          "classes": "button-unstyled predictive-search__reset-button"
+        },
+        {
+          "text": "View all",
+          "classes": "button button-primary predictive-search__search-button"
+        }
+      ],
+      "forms": [
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "checkbox",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "file",
+          "placeholder": "",
+          "name": ""
+        },
+        {
+          "type": "search",
+          "placeholder": "Search",
+          "name": "q"
+        },
+        {
+          "type": "hidden",
+          "placeholder": "",
+          "name": "options[prefix]"
+        }
+      ],
+      "cards": [
+        {
+          "text": "Skip to content\nBack\nSettings\nGuest\nSign in to save your progress\nAI COACH AVATAR\nLive Avatar\nOn\n\nYour AI coach provides real-time personalized guidance\n\nNUTRITION TRACKING\nDaily Goals\nRedo Goals Setu",
+          "classes": "page-width-normal card-hover-effect-none hc-dark-theme"
+        },
+        {
+          "text": "Back\nSettings\nGuest\nSign in to save your progress\nAI COACH AVATAR\nLive Avatar\nOn\n\nYour AI coach provides real-time personalized guidance\n\nNUTRITION TRACKING\nDaily Goals\nRedo Goals Setup\nMeal Reminders",
+          "classes": "shopify-section hc-settings-section-wrapper"
+        },
+        {
+          "text": "Guest\nSign in to save your progress",
+          "classes": "hc-ios-profile-row hc-card-animated hc-fade-in-up"
+        },
+        {
+          "text": "1,450\n              kcal",
+          "classes": "hc-preview-gauge-container"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Click to watch tutorial",
+          "classes": "hc-tutorial-video-container"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "predictive-search-results__card predictive-search-results__card--product"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n    \n  \n  \n      \n\n\n\n  \n    Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "resource-card"
+        },
+        {
+          "text": "Broiled Salmon Recipe",
+          "classes": "resource-card__link"
+        },
+        {
+          "text": "Broiled Salmon Recipe\n\n    \n      \n  \n\n  \n    $1.00",
+          "classes": "resource-card__content"
+        },
+        {
+          "text": "Broiled Salmon Recipe",
+          "classes": "resource-card__title paragraph"
+        }
+      ],
+      "modals": [
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-overlay"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal hc-ios-modal-large"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-title"
+        },
+        {
+          "visible": false,
+          "classes": "hc-wearable-modal-content"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-actions"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-cancel"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-primary"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-actions"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-cancel"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-confirm"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-overlay"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-title"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-message"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-actions"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-cancel"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-confirm"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-overlay"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal hc-ios-modal-bg"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-title"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-actions hc-ios-modal-actions-bg"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-cancel"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-secondary"
+        },
+        {
+          "visible": false,
+          "classes": "hc-ios-modal-btn hc-ios-modal-btn-primary"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "hc-tutorial-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal"
+        },
+        {
+          "visible": false,
+          "classes": "search-modal__content dialog-modal"
+        },
+        {
+          "visible": false,
+          "classes": "button predictive-search__close-modal-button"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal dialog-modal color-scheme-1"
+        },
+        {
+          "visible": true,
+          "classes": "button button-unstyled close-button quick-add-modal__close"
+        },
+        {
+          "visible": true,
+          "classes": "quick-add-modal__content"
+        }
+      ]
+    }
+  ],
+  "features": [
+    {
+      "name": "Daily Balance",
+      "present": true
+    },
+    {
+      "name": "Macros",
+      "present": true
+    },
+    {
+      "name": "Today's Meals",
+      "present": false
+    },
+    {
+      "name": "Daily Fat Loss",
+      "present": false
+    },
+    {
+      "name": "Weekly Progress",
+      "present": true
+    },
+    {
+      "name": "Dining Out",
+      "present": true
+    },
+    {
+      "name": "Wearable Sync",
+      "present": true
+    },
+    {
+      "name": "Log Meal",
+      "present": false
+    }
+  ],
+  "components": [],
+  "errors": []
+}

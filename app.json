@@ -1,29 +1,130 @@
 {
   "expo": {
-    "name": "HeirclarkHealthAppNew",
-    "slug": "HeirclarkHealthAppNew",
+    "owner": "heirclarks-organization",
+    "name": "Heirclark",
+    "slug": "heirclark",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.heirclark.health",
+      "buildNumber": "9",
+      "deploymentTarget": "15.0",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "This app needs access to your health data to track your fitness and nutrition goals.",
+        "NSHealthUpdateUsageDescription": "This app needs permission to update your health data with tracked meals and activities.",
+        "NSCameraUsageDescription": "This app needs camera access to take photos of your meals for AI nutrition analysis.",
+        "NSMicrophoneUsageDescription": "This app needs microphone access to record voice descriptions of your meals.",
+        "NSPhotoLibraryUsageDescription": "This app needs photo library access to select meal photos for AI nutrition analysis.",
+        "NSLocationWhenInUseUsageDescription": "This app needs your location to provide weather information and local dining recommendations.",
+        "UIRequiresFullScreen": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSExceptionDomains": {
+            "ngrok.io": {
+              "NSExceptionAllowsInsecureHTTPLoads": true,
+              "NSIncludesSubdomains": true
+            }
+          }
+        }
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": [],
+        "com.apple.developer.applesignin": ["Default"]
+      },
+      "usesAppleSignIn": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.heirclark.health",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
+        "android.permission.health.READ_DISTANCE"
+      ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "plugins": [
+      "expo-router",
+      [
+        "expo-dev-client",
+        {
+          "addGeneratedScheme": false
+        }
+      ],
+      "expo-health-connect",
+      [
+        "react-native-health",
+        {
+          "isClinicalDataEnabled": false,
+          "healthSharePermission": "This app needs access to your health data to track your fitness and nutrition goals.",
+          "healthUpdatePermission": "This app needs permission to update your health data with tracked meals and activities."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Heirclark to access your camera to take photos of meals for AI nutrition analysis and scan barcodes.",
+          "microphonePermission": "Allow Heirclark to access your microphone to record voice meal descriptions.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Heirclark to use your location to provide weather information and local dining recommendations."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Heirclark to access your photo library to select meal photos for AI nutrition analysis."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow Heirclark to access your microphone to record voice meal descriptions."
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-apple-authentication"
+    ],
+    "scheme": "heirclark",
+    "privacy": "public",
+    "extra": {
+      "router": {},
+      "network": "tunnel",
+      "eas": {
+        "projectId": "f55aef9f-1d85-4d01-a2ae-7279eaf2c2db"
+      }
+    },
+    "cli": {
+      "appVersionSource": "remote"
     }
   }
 }

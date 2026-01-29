@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityLevel, GoalType, Sex, CalculatedResults } from '../constants/goals';
 import { calculateGoals } from '../utils/goalCalculations';
@@ -25,6 +25,7 @@ export interface WizardState {
   heightUnit: HeightUnit;
   age: number;
   sex: Sex;
+  startDate: string | null; // When user wants to start (ISO date string)
   targetDate: string | null; // When user wants to reach goal (ISO date string)
 
   // Step 3: Activity & Lifestyle
@@ -72,6 +73,7 @@ interface GoalWizardContextType {
   setHeightUnit: (unit: HeightUnit) => void;
   setAge: (age: number) => void;
   setSex: (sex: Sex) => void;
+  setStartDate: (date: string | null) => void;
   setTargetDate: (date: string | null) => void;
 
   // Step 3
@@ -107,6 +109,7 @@ const initialState: WizardState = {
   heightUnit: 'ft_in',
   age: 30,
   sex: 'male',
+  startDate: new Date().toISOString().split('T')[0],
   targetDate: null,
   activityLevel: 'moderate',
   workoutsPerWeek: 3,
@@ -245,6 +248,10 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setState(prev => ({ ...prev, sex }));
   }, []);
 
+  const setStartDate = useCallback((date: string | null) => {
+    setState(prev => ({ ...prev, startDate: date }));
+  }, []);
+
   const setTargetDate = useCallback((date: string | null) => {
     setState(prev => ({ ...prev, targetDate: date }));
   }, []);
@@ -301,14 +308,14 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
       const targetLbs = getWeightInLbs(prev.targetWeight, prev.weightUnit);
       const goalType = getGoalType(prev.primaryGoal);
 
-      // Calculate end date based on goal or use user-specified target date
-      const today = new Date();
+      // Use user-specified start date or today
+      const startDate = prev.startDate ? new Date(prev.startDate) : new Date();
       let endDate: Date;
 
       if (prev.targetDate) {
         endDate = new Date(prev.targetDate);
       } else {
-        endDate = new Date(today);
+        endDate = new Date(startDate);
         if (goalType === 'lose') {
           // Assume 1 lb/week loss rate
           const lbsToLose = weightLbs - targetLbs;
@@ -331,7 +338,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
         targetWeight: targetLbs,
         activity: prev.activityLevel,
         goalType,
-        startDate: today.toISOString().split('T')[0],
+        startDate: startDate.toISOString().split('T')[0],
         endDate: endDate.toISOString().split('T')[0],
       };
 
@@ -439,7 +446,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     }
   }, [state]);
 
-  const value: GoalWizardContextType = {
+  const value = useMemo<GoalWizardContextType>(() => ({
     state,
     nextStep,
     prevStep,
@@ -455,6 +462,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setHeightUnit,
     setAge,
     setSex,
+    setStartDate,
     setTargetDate,
     setActivityLevel,
     setWorkoutsPerWeek,
@@ -469,7 +477,38 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     saveGoals,
     resetWizard,
     loadSavedProgress,
-  };
+  }), [
+    state,
+    nextStep,
+    prevStep,
+    goToStep,
+    startEditing,
+    setPrimaryGoal,
+    setCurrentWeight,
+    setTargetWeight,
+    setWeightUnit,
+    setHeightFt,
+    setHeightIn,
+    setHeightCm,
+    setHeightUnit,
+    setAge,
+    setSex,
+    setStartDate,
+    setTargetDate,
+    setActivityLevel,
+    setWorkoutsPerWeek,
+    setWorkoutDuration,
+    setCardioPreference,
+    setDietStyle,
+    setMealsPerDay,
+    setIntermittentFasting,
+    setFastingWindow,
+    toggleAllergy,
+    calculateResults,
+    saveGoals,
+    resetWizard,
+    loadSavedProgress,
+  ]);
 
   return (
     <GoalWizardContext.Provider value={value}>

@@ -36,6 +36,8 @@ export interface UserGoals {
   dailyFat: number;
   dailySteps: number;
   targetWeight?: number;
+  weeklyWeightChange?: number; // Negative for loss, positive for gain (in lbs)
+  goalType?: 'lose' | 'maintain' | 'gain';
 }
 
 class HeirclarkAPI {
@@ -113,7 +115,7 @@ class HeirclarkAPI {
   async getMetricsByDate(date: string): Promise<HealthMetrics | null> {
     try {
       const response = await fetch(
-        `${this.baseUrl}/api/v1/health/metrics?shopifyCustomerId=${this.shopifyCustomerId}`,
+        `${this.baseUrl}/api/v1/health/metrics?shopifyCustomerId=${this.shopifyCustomerId}&date=${date}`,
         { headers: this.getHeaders() }
       );
       if (!response.ok) {
@@ -131,13 +133,29 @@ class HeirclarkAPI {
   // Submit health data (calories, steps, weight, etc.)
   async ingestHealthData(data: Partial<HealthMetrics>): Promise<boolean> {
     try {
-      const payload = {
+      // Build payload with only defined values
+      const payload: any = {
         shopifyCustomerId: this.shopifyCustomerId,
         date: data.date || new Date().toISOString().split('T')[0],
-        steps: data.steps,
-        caloriesOut: data.caloriesOut,
-        restingEnergy: data.restingEnergy,
       };
+
+      // Only include fields that have values
+      if (data.steps !== undefined && data.steps !== null) {
+        payload.steps = data.steps;
+      }
+      if (data.caloriesOut !== undefined && data.caloriesOut !== null) {
+        payload.caloriesOut = data.caloriesOut;
+      }
+      if (data.restingEnergy !== undefined && data.restingEnergy !== null) {
+        payload.restingEnergy = data.restingEnergy;
+      }
+
+      // Calculate activeEnergy only if we have the required data
+      if (data.caloriesOut !== undefined && data.restingEnergy !== undefined) {
+        payload.activeEnergy = (data.caloriesOut || 0) - (data.restingEnergy || 0);
+      }
+
+      console.log('[API] Ingesting health data:', payload);
 
       const response = await fetch(`${this.baseUrl}/api/v1/health/ingest-simple`, {
         method: 'POST',
@@ -147,14 +165,22 @@ class HeirclarkAPI {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // console.warn('Auth required for ingest');
+          console.warn('[API] Auth required for ingest');
           return false;
         }
-        throw new Error('Failed to ingest data');
+        const errorText = await response.text();
+        console.warn('[API] Ingest error:', response.status, errorText);
+        console.warn('[API] Payload that failed:', JSON.stringify(payload, null, 2));
+        // Don't throw - just return false to avoid LogBox errors
+        return false;
       }
+
+      const result = await response.json();
+      console.log('[API] Ingest success:', result);
       return true;
     } catch (error) {
-      // console.error('Ingest data error:', error);
+      // Silently handle network errors - they're not critical for app functionality
+      console.warn('[API] Ingest data error (non-critical):', error);
       return false;
     }
   }
@@ -219,12 +245,26 @@ class HeirclarkAPI {
   // Log a meal
   async logMeal(meal: Omit<MealData, 'odooId' | 'odooContactId'>): Promise<boolean> {
     try {
+      // Backend expects mealType at root level and foods in 'items' array
       const payload = {
-        ...meal,
         shopifyCustomerId: this.shopifyCustomerId,
-        odooId: this.odooId, // Keep for backward compatibility
-        odooContactId: this.odooId,
+        mealType: meal.mealType,
+        date: meal.date,
+        items: [
+          {
+            name: meal.name,
+            calories: meal.calories,
+            protein: meal.protein,
+            carbs: meal.carbs,
+            fat: meal.fat,
+            odooId: this.odooId,
+            odooContactId: this.odooId,
+          }
+        ],
       };
+
+      console.log('[API] Logging meal to:', `${this.baseUrl}/api/v1/meals`);
+      console.log('[API] Payload:', JSON.stringify(payload, null, 2));
 
       const response = await fetch(`${this.baseUrl}/api/v1/meals`, {
         method: 'POST',
@@ -232,16 +272,23 @@ class HeirclarkAPI {
         body: JSON.stringify(payload),
       });
 
+      console.log('[API] Response status:', response.status);
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Meal log error response:', response.status, errorText);
         if (response.status === 401) {
-          // console.warn('Auth required for meal logging');
+          console.warn('[API] Auth required for meal logging');
           return false;
         }
-        throw new Error('Failed to log meal');
+        throw new Error(`Failed to log meal: ${response.status} - ${errorText}`);
       }
+
+      const result = await response.json();
+      console.log('[API] Meal log success:', JSON.stringify(result, null, 2));
       return true;
     } catch (error) {
-      // console.error('Log meal error:', error);
+      console.error('[API] Log meal error:', error);
       return false;
     }
   }
@@ -249,20 +296,80 @@ class HeirclarkAPI {
   // Get meals for a date
   async getMeals(date: string): Promise<MealData[]> {
     try {
+      console.log('[API] Fetching meals for date:', date);
       const response = await fetch(
         `${this.baseUrl}/api/v1/meals?shopifyCustomerId=${this.shopifyCustomerId}&date=${date}`,
         { headers: this.getHeaders() }
       );
+      console.log('[API] getMeals response status:', response.status);
+
       if (!response.ok) {
         if (response.status === 404 || response.status === 401) return [];
         throw new Error('Failed to fetch meals');
       }
       const data = await response.json();
-      // Handle both array and object with meals property
-      return Array.isArray(data) ? data : (data.meals || []);
+      console.log('[API] getMeals raw response:', JSON.stringify(data, null, 2));
+
+      // Backend returns: { meals: [{ mealType, items: [{name, calories, ...}] }] }
+      // We need to flatten this to: [{ mealType, name, calories, ... }]
+      let meals: MealData[] = [];
+
+      if (data.meals && Array.isArray(data.meals)) {
+        // Flatten nested structure - each item becomes a MealData entry
+        for (const meal of data.meals) {
+          if (meal.items && Array.isArray(meal.items)) {
+            for (const item of meal.items) {
+              meals.push({
+                id: meal.id,  // Use parent meal ID for deletion
+                date: date,
+                mealType: meal.mealType,
+                name: item.name,
+                calories: item.calories || 0,
+                protein: item.protein || 0,
+                carbs: item.carbs || 0,
+                fat: item.fat || 0,
+              });
+            }
+          }
+        }
+      } else if (Array.isArray(data)) {
+        meals = data;
+      }
+
+      console.log('[API] Parsed meals:', meals.length, 'items');
+      console.log('[API] Flattened meals data:', JSON.stringify(meals, null, 2));
+      return meals;
     } catch (error) {
-      // console.error('Get meals error:', error);
+      console.error('[API] Get meals error:', error);
       return [];
+    }
+  }
+
+  // Delete a meal
+  async deleteMeal(mealId: string): Promise<boolean> {
+    try {
+      console.log('[API] Deleting meal:', mealId);
+
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/meals/${mealId}?shopifyCustomerId=${this.shopifyCustomerId}`,
+        {
+          method: 'DELETE',
+          headers: this.getHeaders(),
+        }
+      );
+
+      console.log('[API] Delete response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Delete meal error:', response.status, errorText);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('[API] Delete meal error:', error);
+      return false;
     }
   }
 
@@ -288,14 +395,26 @@ class HeirclarkAPI {
   async getGoals(): Promise<UserGoals | null> {
     try {
       const response = await fetch(
-        `${this.baseUrl}/api/v1/health/goals?shopifyCustomerId=${this.shopifyCustomerId}`,
+        `${this.baseUrl}/api/v1/user/goals`,
         { headers: this.getHeaders() }
       );
       if (!response.ok) {
         if (response.status === 404 || response.status === 401 || response.status === 400) return null;
         throw new Error('Failed to fetch goals');
       }
-      return await response.json();
+      const data = await response.json();
+      if (data.ok && data.goals) {
+        // Map backend format to frontend UserGoals format
+        return {
+          dailyCalories: data.goals.calories || 2200,
+          dailyProtein: data.goals.protein || 190,
+          dailyCarbs: data.goals.carbs || 190,
+          dailyFat: data.goals.fat || 60,
+          dailySteps: 10000, // Backend doesn't store steps goal, use default
+          targetWeight: data.goals.goalWeight || undefined,
+        };
+      }
+      return null;
     } catch (error) {
       // console.error('Get goals error:', error);
       return null;
@@ -305,28 +424,39 @@ class HeirclarkAPI {
   // Update user goals
   async updateGoals(goals: Partial<UserGoals>): Promise<boolean> {
     try {
+      // Map frontend UserGoals format to backend format
+      const backendGoals = {
+        calories: goals.dailyCalories,
+        protein: goals.dailyProtein,
+        carbs: goals.dailyCarbs,
+        fat: goals.dailyFat,
+        goalWeight: goals.targetWeight || null,
+      };
+
+      const payload = { goals: backendGoals };
+      console.log('[API] Updating goals with payload:', JSON.stringify(payload, null, 2));
+
       const response = await fetch(
-        `${this.baseUrl}/api/v1/health/goals`,
+        `${this.baseUrl}/api/v1/user/goals`,
         {
           method: 'POST',
           headers: this.getHeaders(true),
-          body: JSON.stringify({
-            shopifyCustomerId: this.shopifyCustomerId,
-            ...goals,
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Update goals failed:', response.status, errorText);
         if (response.status === 401 || response.status === 404) {
           // console.warn('Auth required for updating goals or endpoint not found');
           return false;
         }
-        throw new Error('Failed to update goals');
+        throw new Error(`Failed to update goals: ${response.status} - ${errorText}`);
       }
       return true;
     } catch (error) {
-      // console.error('Update goals error:', error);
+      console.error('[API] Update goals error:', error);
       return false;
     }
   }

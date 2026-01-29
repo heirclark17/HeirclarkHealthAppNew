@@ -1,0 +1,1010 @@
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Fonts, Spacing } from '../constants/Theme';
+import { BarcodeScanningResult, CameraView } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import { aiService, NutritionAnalysis } from '../services/aiService';
+import { api, MealData } from '../services/api';
+
+type LogMode = 'select' | 'manual' | 'voice' | 'photo' | 'barcode';
+
+interface AIMealLoggerProps {
+  visible: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  selectedDate: string;
+}
+
+export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMealLoggerProps) {
+  const [mode, setMode] = useState<LogMode>('select');
+  const [mealType, setMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch');
+
+  // Manual + AI
+  const [manualText, setManualText] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
+
+  // Voice
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+
+  // Photo
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+
+  // Barcode
+  const [barcode, setBarcode] = useState('');
+  const [scannerActive, setScannerActive] = useState(false);
+
+  // Analysis results
+  const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const cameraRef = useRef<CameraView>(null);
+
+  const resetState = () => {
+    setMode('select');
+    setManualText('');
+    setAnalyzing(false);
+    setRecording(null);
+    setIsRecording(false);
+    setPhotoUri(null);
+    setCameraActive(false);
+    setBarcode('');
+    setScannerActive(false);
+    setAnalysis(null);
+    setSaving(false);
+  };
+
+  const handleClose = () => {
+    resetState();
+    onClose();
+  };
+
+  // Manual AI Analysis
+  const handleManualAnalyze = async () => {
+    if (!manualText.trim()) {
+      Alert.alert('Error', 'Please describe your meal');
+      return;
+    }
+
+    setAnalyzing(true);
+    const result = await aiService.analyzeMealText(manualText);
+    setAnalyzing(false);
+
+    if (result) {
+      setAnalysis(result);
+    } else {
+      // AI failed - show error
+      Alert.alert(
+        'AI Unavailable',
+        'AI analysis is currently unavailable. Please try again later or use a different logging method.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  // Voice Recording
+  const startRecording = async () => {
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission Required', 'Please allow microphone access');
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(recording);
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+      Alert.alert('Error', 'Failed to start recording');
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!recording) return;
+
+    setIsRecording(false);
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
+
+    if (uri) {
+      // Transcribe audio using Whisper API
+      setAnalyzing(true);
+      const transcribedText = await aiService.transcribeVoice(uri);
+
+      if (transcribedText) {
+        // Analyze transcribed text
+        const result = await aiService.analyzeMealText(transcribedText);
+        setAnalyzing(false);
+
+        if (result) {
+          setAnalysis(result);
+        } else {
+          Alert.alert('Error', 'Failed to analyze meal. Please try again.');
+        }
+      } else {
+        setAnalyzing(false);
+        Alert.alert('Error', 'Failed to transcribe audio. Please try again.');
+      }
+    }
+
+    setRecording(null);
+  };
+
+  // Photo Upload
+  const handlePickPhoto = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission Required', 'Please allow photo library access');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
+      await analyzePhoto(result.assets[0].uri);
+    }
+  };
+
+  const handleTakePhoto = () => {
+    setCameraActive(true);
+  };
+
+  const capturePhoto = async () => {
+    if (!cameraRef.current) return;
+
+    const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+    if (photo) {
+      setPhotoUri(photo.uri);
+      setCameraActive(false);
+      await analyzePhoto(photo.uri);
+    }
+  };
+
+  const analyzePhoto = async (uri: string) => {
+    setAnalyzing(true);
+
+    try {
+      // Read file as base64 (use string encoding type for compatibility)
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: 'base64' as any,
+      });
+
+      const result = await aiService.analyzeMealPhoto(base64);
+      setAnalyzing(false);
+
+      if (result) {
+        setAnalysis(result);
+      } else {
+        Alert.alert('Error', 'Failed to analyze photo. Please try again.');
+      }
+    } catch (error) {
+      console.error('Photo analysis error:', error);
+      setAnalyzing(false);
+      Alert.alert('Error', 'Failed to analyze photo');
+    }
+  };
+
+  // Barcode Scanner
+  const handleBarcodeScan = (result: BarcodeScanningResult) => {
+    if (result.data) {
+      setBarcode(result.data);
+      setScannerActive(false);
+      lookupBarcode(result.data);
+    }
+  };
+
+  const lookupBarcode = async (code: string) => {
+    setAnalyzing(true);
+    const result = await aiService.lookupBarcode(code);
+    setAnalyzing(false);
+
+    if (result) {
+      setAnalysis(result);
+    } else {
+      Alert.alert('Error', 'Product not found. Try entering manually.');
+    }
+  };
+
+  // Save Meal (from AI analysis)
+  const handleSaveMeal = async () => {
+    if (!analysis) return;
+
+    setSaving(true);
+
+    const meal: Omit<MealData, 'odooId' | 'odooContactId'> = {
+      date: selectedDate,
+      mealType,
+      name: analysis.mealName,
+      calories: analysis.calories,
+      protein: analysis.protein,
+      carbs: analysis.carbs,
+      fat: analysis.fat,
+      time: new Date().toISOString(),
+    };
+
+    const success = await api.logMeal(meal);
+    setSaving(false);
+
+    if (success) {
+      Alert.alert('Success', 'Meal logged successfully!');
+      handleClose();
+      onSuccess();
+    } else {
+      Alert.alert('Error', 'Failed to log meal. Please try again.');
+    }
+  };
+
+  // Render mode selection
+  const renderModeSelect = () => (
+    <View style={styles.modeSelect}>
+      <Text style={styles.title}>How would you like to log?</Text>
+
+      <TouchableOpacity style={styles.modeCard} onPress={() => setMode('manual')}>
+        <Ionicons name="text" size={32} color={Colors.primary} />
+        <Text style={styles.modeLabel}>Text Description</Text>
+        <Text style={styles.modeDesc}>Describe meal, AI calculates macros</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.modeCard} onPress={() => setMode('voice')}>
+        <Ionicons name="mic" size={32} color={Colors.primary} />
+        <Text style={styles.modeLabel}>Voice</Text>
+        <Text style={styles.modeDesc}>Speak what you ate</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.modeCard} onPress={() => setMode('photo')}>
+        <Ionicons name="camera" size={32} color={Colors.primary} />
+        <Text style={styles.modeLabel}>Photo</Text>
+        <Text style={styles.modeDesc}>Take or upload meal photo</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.modeCard} onPress={() => setMode('barcode')}>
+        <Ionicons name="barcode" size={32} color={Colors.primary} />
+        <Text style={styles.modeLabel}>Barcode</Text>
+        <Text style={styles.modeDesc}>Scan packaged food</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Render manual entry with AI
+  const renderManual = () => (
+    <View style={styles.content}>
+      <Text style={styles.label}>Describe your meal</Text>
+      <TextInput
+        style={styles.textArea}
+        placeholder="E.g., 2 scrambled eggs, toast with butter, and orange juice"
+        placeholderTextColor={Colors.textMuted}
+        value={manualText}
+        onChangeText={setManualText}
+        multiline
+        numberOfLines={4}
+      />
+
+      {analyzing ? (
+        <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />
+      ) : (
+        <TouchableOpacity style={styles.aiButton} onPress={handleManualAnalyze}>
+          <Ionicons name="sparkles" size={20} color={Colors.primaryText} />
+          <Text style={styles.aiButtonText}>Analyze with AI</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  // Render voice
+  const renderVoice = () => (
+    <View style={styles.content}>
+      <Text style={styles.label}>Tap to speak</Text>
+
+      <TouchableOpacity
+        style={[styles.voiceButton, isRecording && styles.voiceButtonActive]}
+        onPress={isRecording ? stopRecording : startRecording}
+      >
+        <Ionicons
+          name={isRecording ? 'stop-circle' : 'mic'}
+          size={64}
+          color={isRecording ? Colors.error : Colors.primary}
+        />
+        <Text style={styles.voiceText}>
+          {isRecording ? 'Tap to stop' : 'Tap to record'}
+        </Text>
+      </TouchableOpacity>
+
+      {isRecording && (
+        <View style={styles.waveform}>
+          <Text style={styles.recordingText}>Recording...</Text>
+        </View>
+      )}
+    </View>
+  );
+
+  // Render photo
+  const renderPhoto = () => {
+    if (cameraActive) {
+      return (
+        <View style={styles.cameraContainer}>
+          <CameraView
+            ref={cameraRef}
+            style={styles.camera}
+            facing="back"
+          />
+          <View style={styles.cameraControls}>
+            <TouchableOpacity style={styles.captureButton} onPress={capturePhoto}>
+              <View style={styles.captureButtonInner} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setCameraActive(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.content}>
+        <Text style={styles.label}>Take or upload photo</Text>
+
+        {photoUri && (
+          <View style={styles.photoPreview}>
+            <Image source={{ uri: photoUri }} style={styles.photoImage} />
+            <TouchableOpacity
+              style={styles.removePhoto}
+              onPress={() => setPhotoUri(null)}
+            >
+              <Ionicons name="close-circle" size={32} color={Colors.error} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {!photoUri && !analyzing && (
+          <View style={styles.photoButtons}>
+            <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
+              <Ionicons name="camera" size={24} color={Colors.primaryText} />
+              <Text style={styles.photoButtonText}>Take Photo</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.photoButton} onPress={handlePickPhoto}>
+              <Ionicons name="images" size={24} color={Colors.primaryText} />
+              <Text style={styles.photoButtonText}>Choose Photo</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {analyzing && (
+          <View style={styles.analyzing}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.analyzingText}>Analyzing your meal...</Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  // Render barcode scanner
+  const renderBarcode = () => {
+    if (scannerActive) {
+      return (
+        <View style={styles.scannerContainer}>
+          <CameraView
+            style={styles.scanner}
+            facing="back"
+            barcodeScannerSettings={{
+              barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e'],
+            }}
+            onBarcodeScanned={handleBarcodeScan}
+          />
+          <View style={styles.scannerOverlay}>
+            <View style={styles.scannerFrame} />
+            <Text style={styles.scannerText}>Align barcode in frame</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.cancelScanButton}
+            onPress={() => setScannerActive(false)}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.content}>
+        <Text style={styles.label}>Scan or enter barcode</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Enter barcode number"
+          placeholderTextColor={Colors.textMuted}
+          value={barcode}
+          onChangeText={setBarcode}
+          keyboardType="numeric"
+        />
+
+        <View style={styles.barcodeButtons}>
+          <TouchableOpacity
+            style={styles.scanButton}
+            onPress={() => setScannerActive(true)}
+          >
+            <Ionicons name="barcode-outline" size={24} color={Colors.primaryText} />
+            <Text style={styles.scanButtonText}>Scan Barcode</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.lookupButton}
+            onPress={() => lookupBarcode(barcode)}
+            disabled={!barcode}
+          >
+            <Text style={styles.lookupButtonText}>Lookup</Text>
+          </TouchableOpacity>
+        </View>
+
+        {analyzing && (
+          <View style={styles.analyzing}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.analyzingText}>Looking up product...</Text>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  // Render analysis results
+  const renderAnalysis = () => {
+    if (!analysis) return null;
+
+    return (
+      <View style={styles.analysis}>
+        <View style={styles.analysisHeader}>
+          <Text style={styles.analysisTitle}>{analysis.mealName}</Text>
+          <Text style={styles.confidence}>Confidence: {analysis.confidence}</Text>
+        </View>
+
+        <View style={styles.macros}>
+          <View style={styles.macroItem}>
+            <Text style={styles.macroValue}>{analysis.calories}</Text>
+            <Text style={styles.macroLabel}>Calories</Text>
+          </View>
+          <View style={styles.macroItem}>
+            <Text style={styles.macroValue}>{analysis.protein}g</Text>
+            <Text style={styles.macroLabel}>Protein</Text>
+          </View>
+          <View style={styles.macroItem}>
+            <Text style={styles.macroValue}>{analysis.carbs}g</Text>
+            <Text style={styles.macroLabel}>Carbs</Text>
+          </View>
+          <View style={styles.macroItem}>
+            <Text style={styles.macroValue}>{analysis.fat}g</Text>
+            <Text style={styles.macroLabel}>Fat</Text>
+          </View>
+        </View>
+
+        {analysis.foods && analysis.foods.length > 0 && (
+          <View style={styles.foodList}>
+            <Text style={styles.foodListTitle}>Detected Foods:</Text>
+            {analysis.foods.map((food, index) => (
+              <View key={index} style={styles.foodItem}>
+                <Text style={styles.foodName}>• {food.name}</Text>
+                <Text style={styles.foodPortion}>{food.portion}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  // Render meal type selector
+  const renderMealTypeSelector = () => (
+    <View style={styles.mealTypeSelector}>
+      <Text style={styles.label}>Meal Type</Text>
+      <View style={styles.mealTypes}>
+        {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map((type) => (
+          <TouchableOpacity
+            key={type}
+            style={[styles.mealTypeButton, mealType === type && styles.mealTypeButtonActive]}
+            onPress={() => setMealType(type)}
+          >
+            <Text style={[styles.mealTypeText, mealType === type && styles.mealTypeTextActive]}>
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={handleClose}
+    >
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleClose}>
+            <Ionicons name="close" size={28} color={Colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Log Meal</Text>
+          <View style={{ width: 28 }} />
+        </View>
+
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+          {mode === 'select' && renderModeSelect()}
+          {mode === 'manual' && renderManual()}
+          {mode === 'voice' && renderVoice()}
+          {mode === 'photo' && renderPhoto()}
+          {mode === 'barcode' && renderBarcode()}
+
+          {analysis && mode !== 'select' && (
+            <>
+              {renderAnalysis()}
+              {renderMealTypeSelector()}
+
+              <TouchableOpacity
+                style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+                onPress={handleSaveMeal}
+                disabled={saving}
+              >
+                {saving ? (
+                  <ActivityIndicator color={Colors.primaryText} />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save Meal</Text>
+                )}
+              </TouchableOpacity>
+            </>
+          )}
+
+          {mode !== 'select' && !analysis && (
+            <TouchableOpacity style={styles.backButton} onPress={() => setMode('select')}>
+              <Ionicons name="arrow-back" size={20} color={Colors.text} />
+              <Text style={styles.backButtonText}>Back</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontFamily: Fonts.semiBold,
+    color: Colors.text,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: Spacing.md,
+  },
+  title: {
+    fontSize: 20,
+    fontFamily: Fonts.bold,
+    color: Colors.text,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  modeSelect: {
+    gap: Spacing.md,
+  },
+  modeCard: {
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radiusMD,
+    padding: Spacing.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modeLabel: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    color: Colors.text,
+    marginTop: Spacing.sm,
+  },
+  modeDesc: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    color: Colors.textMuted,
+    marginTop: 4,
+  },
+  content: {
+    gap: Spacing.md,
+  },
+  macroRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  label: {
+    fontSize: 14,
+    fontFamily: Fonts.semiBold,
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radiusSM,
+    padding: Spacing.md,
+    fontSize: 16,
+    fontFamily: Fonts.regular,
+    color: Colors.text,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  textArea: {
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radiusSM,
+    padding: Spacing.md,
+    fontSize: 16,
+    fontFamily: Fonts.regular,
+    color: Colors.text,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    minHeight: 120,
+    textAlignVertical: 'top',
+  },
+  aiButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: Spacing.radiusSM,
+    padding: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  aiButtonText: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    color: Colors.primaryText,
+  },
+  loader: {
+    marginVertical: Spacing.lg,
+  },
+  voiceButton: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.xxl,
+    borderRadius: 100,
+    backgroundColor: Colors.card,
+    borderWidth: 2,
+    borderColor: Colors.border,
+  },
+  voiceButtonActive: {
+    borderColor: Colors.error,
+  },
+  voiceText: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    color: Colors.text,
+    marginTop: Spacing.sm,
+  },
+  waveform: {
+    alignItems: 'center',
+    marginTop: Spacing.lg,
+  },
+  recordingText: {
+    fontSize: 16,
+    fontFamily: Fonts.medium,
+    color: Colors.error,
+  },
+  photoButtons: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  photoButton: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    borderRadius: Spacing.radiusSM,
+    padding: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  photoButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.semiBold,
+    color: Colors.primaryText,
+  },
+  photoPreview: {
+    position: 'relative',
+    borderRadius: Spacing.radiusMD,
+    overflow: 'hidden',
+  },
+  photoImage: {
+    width: '100%',
+    height: 300,
+    borderRadius: Spacing.radiusMD,
+  },
+  removePhoto: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  analyzing: {
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  analyzingText: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    color: Colors.text,
+    marginTop: Spacing.sm,
+  },
+  cameraContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  camera: {
+    flex: 1,
+  },
+  cameraControls: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    alignItems: 'center',
+  },
+  captureButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureButtonInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.text,
+  },
+  cancelButton: {
+    marginTop: Spacing.md,
+    padding: Spacing.sm,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    color: Colors.text,
+  },
+  barcodeButtons: {
+    gap: Spacing.md,
+  },
+  scanButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: Spacing.radiusSM,
+    padding: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  scanButtonText: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    color: Colors.primaryText,
+  },
+  lookupButton: {
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radiusSM,
+    padding: Spacing.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  lookupButtonText: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    color: Colors.text,
+  },
+  scannerContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  scanner: {
+    flex: 1,
+  },
+  scannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scannerFrame: {
+    width: 250,
+    height: 250,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    borderRadius: Spacing.radiusMD,
+  },
+  scannerText: {
+    fontSize: 16,
+    fontFamily: Fonts.medium,
+    color: Colors.text,
+    marginTop: Spacing.lg,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: Spacing.sm,
+    borderRadius: Spacing.radiusSM,
+  },
+  cancelScanButton: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    padding: Spacing.md,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderRadius: Spacing.radiusSM,
+  },
+  analysis: {
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radiusMD,
+    padding: Spacing.md,
+    marginTop: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  analysisHeader: {
+    marginBottom: Spacing.md,
+  },
+  analysisTitle: {
+    fontSize: 18,
+    fontFamily: Fonts.bold,
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  confidence: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    color: Colors.textMuted,
+  },
+  macros: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: Spacing.md,
+  },
+  macroItem: {
+    alignItems: 'center',
+  },
+  macroValue: {
+    fontSize: 20,
+    fontFamily: Fonts.bold,
+    color: Colors.text,
+  },
+  macroLabel: {
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+    color: Colors.textMuted,
+    marginTop: 4,
+  },
+  foodList: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  foodListTitle: {
+    fontSize: 14,
+    fontFamily: Fonts.semiBold,
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  foodItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  foodName: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    color: Colors.text,
+  },
+  foodPortion: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    color: Colors.textMuted,
+  },
+  mealTypeSelector: {
+    marginTop: Spacing.lg,
+  },
+  mealTypes: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  mealTypeButton: {
+    flex: 1,
+    backgroundColor: Colors.card,
+    borderRadius: Spacing.radiusSM,
+    padding: Spacing.sm,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  mealTypeButtonActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  mealTypeText: {
+    fontSize: 12,
+    fontFamily: Fonts.medium,
+    color: Colors.text,
+  },
+  mealTypeTextActive: {
+    color: Colors.primaryText,
+  },
+  saveButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: Spacing.radiusSM,
+    padding: Spacing.md,
+    alignItems: 'center',
+    marginTop: Spacing.lg,
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    color: Colors.primaryText,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: Spacing.lg,
+    padding: Spacing.sm,
+  },
+  backButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    color: Colors.text,
+  },
+});

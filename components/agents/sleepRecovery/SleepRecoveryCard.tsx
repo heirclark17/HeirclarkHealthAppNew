@@ -1,0 +1,468 @@
+/**
+ * Sleep & Recovery Card Component
+ * Frosted Liquid Glass Design
+ */
+
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  TextInput,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { GlassCard } from '../../GlassCard';
+import { useGlassTheme } from '../../liquidGlass';
+import { useSleepRecovery } from '../../../contexts/SleepRecoveryContext';
+import { Fonts } from '../../../constants/Theme';
+
+const QUALITY_OPTIONS = [
+  { value: 1 as const, label: 'Poor', emoji: '😫' },
+  { value: 2 as const, label: 'Fair', emoji: '😕' },
+  { value: 3 as const, label: 'Okay', emoji: '😐' },
+  { value: 4 as const, label: 'Good', emoji: '😊' },
+  { value: 5 as const, label: 'Great', emoji: '😴' },
+];
+
+export default function SleepRecoveryCard() {
+  const { colors } = useGlassTheme();
+  const {
+    state,
+    logSleep,
+    calculateRecoveryScore,
+    getSleepTip,
+    getTodaySleep,
+  } = useSleepRecovery();
+
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [bedtime, setBedtime] = useState('22:30');
+  const [wakeTime, setWakeTime] = useState('06:30');
+  const [quality, setQuality] = useState<1 | 2 | 3 | 4 | 5>(3);
+  const [notes, setNotes] = useState('');
+  const [tip, setTip] = useState('');
+  const [todayRecovery, setTodayRecovery] = useState<number | null>(null);
+
+  const todaySleep = getTodaySleep();
+
+  useEffect(() => {
+    setTip(getSleepTip());
+
+    // Get or calculate today's recovery score
+    const today = new Date().toISOString().split('T')[0];
+    const existingScore = state.recoveryScores.find((s) => s.date === today);
+    if (existingScore) {
+      setTodayRecovery(existingScore.score);
+    }
+  }, [getSleepTip, state.recoveryScores]);
+
+  const calculateDuration = useCallback((bed: string, wake: string): number => {
+    const [bedH, bedM] = bed.split(':').map(Number);
+    const [wakeH, wakeM] = wake.split(':').map(Number);
+
+    let bedMinutes = bedH * 60 + bedM;
+    let wakeMinutes = wakeH * 60 + wakeM;
+
+    // If wake time is earlier than bedtime, it's the next day
+    if (wakeMinutes <= bedMinutes) {
+      wakeMinutes += 24 * 60;
+    }
+
+    return wakeMinutes - bedMinutes;
+  }, []);
+
+  const formatDuration = useCallback((minutes: number): string => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}m`;
+  }, []);
+
+  const handleLogSleep = useCallback(async () => {
+    const duration = calculateDuration(bedtime, wakeTime);
+    const today = new Date().toISOString().split('T')[0];
+
+    await logSleep({
+      date: today,
+      bedtime,
+      wakeTime,
+      duration,
+      quality,
+      notes,
+    });
+
+    // Calculate recovery score after logging sleep
+    const score = await calculateRecoveryScore();
+    setTodayRecovery(score.score);
+
+    // Reset form
+    setBedtime('22:30');
+    setWakeTime('06:30');
+    setQuality(3);
+    setNotes('');
+    setShowLogModal(false);
+  }, [bedtime, wakeTime, quality, notes, logSleep, calculateDuration, calculateRecoveryScore]);
+
+  const getRecoveryColor = useCallback((score: number): string => {
+    if (score >= 80) return colors.success;
+    if (score >= 60) return colors.primary;
+    if (score >= 40) return colors.warning;
+    return colors.danger;
+  }, [colors]);
+
+  const getSleepDebtStatus = useCallback(() => {
+    const debtHours = state.sleepDebt / 60;
+    if (debtHours <= 0) return { text: 'No debt', color: colors.success };
+    if (debtHours <= 2) return { text: `${debtHours.toFixed(1)}h debt`, color: colors.warning };
+    return { text: `${debtHours.toFixed(1)}h debt`, color: colors.danger };
+  }, [state.sleepDebt, colors]);
+
+  const sleepDebtStatus = getSleepDebtStatus();
+
+  return (
+    <>
+      <GlassCard variant="elevated" material="thick" style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
+              <Ionicons name="moon" size={20} color={colors.primary} />
+            </View>
+            <View>
+              <Text style={[styles.title, { color: colors.text }]}>Sleep & Recovery</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                Track your rest
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={[styles.viewButton, { backgroundColor: colors.cardGlass }]}
+            onPress={() => setShowStatsModal(true)}
+          >
+            <Text style={[styles.viewButtonText, { color: colors.primary }]}>Stats</Text>
+            <Ionicons name="arrow-forward" size={14} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Stats Row */}
+        <View style={styles.statsRow}>
+          <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
+            <Text style={[styles.statValue, { color: colors.text }]}>
+              {formatDuration(state.averageSleepDuration)}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Avg Sleep</Text>
+          </View>
+
+          <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
+            <Text style={[styles.statValue, { color: sleepDebtStatus.color }]}>
+              {sleepDebtStatus.text}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Sleep Debt</Text>
+          </View>
+
+          <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
+            <Text
+              style={[
+                styles.statValue,
+                { color: todayRecovery ? getRecoveryColor(todayRecovery) : colors.textMuted },
+              ]}
+            >
+              {todayRecovery ? `${todayRecovery}%` : '--'}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Recovery</Text>
+          </View>
+        </View>
+
+        {/* Today's Sleep */}
+        {todaySleep ? (
+          <View style={[styles.todaySleep, { backgroundColor: colors.success + '15' }]}>
+            <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+            <View style={styles.todaySleepInfo}>
+              <Text style={[styles.todaySleepText, { color: colors.text }]}>
+                Logged: {formatDuration(todaySleep.duration)}
+              </Text>
+              <Text style={[styles.todaySleepTime, { color: colors.textMuted }]}>
+                {todaySleep.bedtime} → {todaySleep.wakeTime}
+              </Text>
+            </View>
+            <Text style={styles.qualityEmoji}>
+              {QUALITY_OPTIONS.find((q) => q.value === todaySleep.quality)?.emoji}
+            </Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[styles.logButton, { backgroundColor: colors.primary }]}
+            onPress={() => setShowLogModal(true)}
+          >
+            <Ionicons name="add-circle" size={20} color="#FFF" />
+            <Text style={styles.logButtonText}>Log Last Night's Sleep</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Tip */}
+        <View style={[styles.tipContainer, { backgroundColor: colors.primary + '10' }]}>
+          <Ionicons name="bulb" size={16} color={colors.primary} />
+          <Text style={[styles.tipText, { color: colors.textSecondary }]}>{tip}</Text>
+        </View>
+      </GlassCard>
+
+      {/* Log Sleep Modal */}
+      <Modal
+        visible={showLogModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowLogModal(false)}
+      >
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Log Sleep</Text>
+            <TouchableOpacity
+              style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
+              onPress={() => setShowLogModal(false)}
+            >
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            {/* Bedtime */}
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Bedtime</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: colors.cardGlass, color: colors.text, borderColor: colors.glassBorder }]}
+              value={bedtime}
+              onChangeText={setBedtime}
+              placeholder="22:30"
+              placeholderTextColor={colors.textMuted}
+              keyboardType="numbers-and-punctuation"
+            />
+
+            {/* Wake Time */}
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Wake Time</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: colors.cardGlass, color: colors.text, borderColor: colors.glassBorder }]}
+              value={wakeTime}
+              onChangeText={setWakeTime}
+              placeholder="06:30"
+              placeholderTextColor={colors.textMuted}
+              keyboardType="numbers-and-punctuation"
+            />
+
+            {/* Duration Preview */}
+            <View style={[styles.durationPreview, { backgroundColor: colors.primary + '15' }]}>
+              <Ionicons name="time" size={18} color={colors.primary} />
+              <Text style={[styles.durationText, { color: colors.text }]}>
+                Duration: {formatDuration(calculateDuration(bedtime, wakeTime))}
+              </Text>
+            </View>
+
+            {/* Quality */}
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Sleep Quality</Text>
+            <View style={styles.qualityGrid}>
+              {QUALITY_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.qualityOption,
+                    {
+                      backgroundColor: quality === option.value ? colors.primary : colors.cardGlass,
+                      borderColor: quality === option.value ? colors.primary : colors.glassBorder,
+                    },
+                  ]}
+                  onPress={() => setQuality(option.value)}
+                >
+                  <Text style={styles.qualityEmoji}>{option.emoji}</Text>
+                  <Text
+                    style={[
+                      styles.qualityLabel,
+                      { color: quality === option.value ? '#FFF' : colors.text },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Notes */}
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Notes (Optional)</Text>
+            <TextInput
+              style={[
+                styles.input,
+                styles.notesInput,
+                { backgroundColor: colors.cardGlass, color: colors.text, borderColor: colors.glassBorder },
+              ]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="How did you sleep?"
+              placeholderTextColor={colors.textMuted}
+              multiline
+              numberOfLines={3}
+            />
+
+            {/* Save Button */}
+            <TouchableOpacity
+              style={[styles.saveButton, { backgroundColor: colors.primary }]}
+              onPress={handleLogSleep}
+            >
+              <Ionicons name="checkmark" size={20} color="#FFF" />
+              <Text style={styles.saveButtonText}>Save Sleep Log</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* Stats Modal */}
+      <Modal
+        visible={showStatsModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowStatsModal(false)}
+      >
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Sleep Statistics</Text>
+            <TouchableOpacity
+              style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
+              onPress={() => setShowStatsModal(false)}
+            >
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            {/* Weekly Overview */}
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>This Week</Text>
+            <View style={styles.weeklyStats}>
+              <View style={[styles.weeklyStat, { backgroundColor: colors.cardGlass }]}>
+                <Ionicons name="bed" size={24} color={colors.primary} />
+                <Text style={[styles.weeklyValue, { color: colors.text }]}>
+                  {formatDuration(state.averageSleepDuration)}
+                </Text>
+                <Text style={[styles.weeklyLabel, { color: colors.textMuted }]}>Avg Duration</Text>
+              </View>
+              <View style={[styles.weeklyStat, { backgroundColor: colors.cardGlass }]}>
+                <Ionicons name="trending-down" size={24} color={sleepDebtStatus.color} />
+                <Text style={[styles.weeklyValue, { color: sleepDebtStatus.color }]}>
+                  {sleepDebtStatus.text}
+                </Text>
+                <Text style={[styles.weeklyLabel, { color: colors.textMuted }]}>Sleep Debt</Text>
+              </View>
+            </View>
+
+            {/* Recent Sleep */}
+            <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 20 }]}>
+              Recent Sleep Logs
+            </Text>
+            {state.sleepEntries.slice(0, 7).map((entry, index) => (
+              <View key={entry.id || index} style={[styles.sleepEntry, { backgroundColor: colors.cardGlass }]}>
+                <View style={styles.entryLeft}>
+                  <Text style={[styles.entryDate, { color: colors.text }]}>
+                    {new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </Text>
+                  <Text style={[styles.entryTimes, { color: colors.textMuted }]}>
+                    {entry.bedtime} → {entry.wakeTime}
+                  </Text>
+                </View>
+                <View style={styles.entryRight}>
+                  <Text style={[styles.entryDuration, { color: colors.primary }]}>
+                    {formatDuration(entry.duration)}
+                  </Text>
+                  <Text style={styles.entryQuality}>
+                    {QUALITY_OPTIONS.find((q) => q.value === entry.quality)?.emoji}
+                  </Text>
+                </View>
+              </View>
+            ))}
+
+            {state.sleepEntries.length === 0 && (
+              <View style={[styles.emptyState, { backgroundColor: colors.cardGlass }]}>
+                <Ionicons name="moon-outline" size={40} color={colors.textMuted} />
+                <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                  No sleep logs yet. Start tracking tonight!
+                </Text>
+              </View>
+            )}
+
+            {/* Sleep Goal */}
+            <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 20 }]}>Your Goal</Text>
+            <View style={[styles.goalBox, { backgroundColor: colors.cardGlass }]}>
+              <View style={styles.goalRow}>
+                <Text style={[styles.goalLabel, { color: colors.textMuted }]}>Target Bedtime</Text>
+                <Text style={[styles.goalValue, { color: colors.text }]}>{state.sleepGoal.targetBedtime}</Text>
+              </View>
+              <View style={styles.goalRow}>
+                <Text style={[styles.goalLabel, { color: colors.textMuted }]}>Target Wake Time</Text>
+                <Text style={[styles.goalValue, { color: colors.text }]}>{state.sleepGoal.targetWakeTime}</Text>
+              </View>
+              <View style={styles.goalRow}>
+                <Text style={[styles.goalLabel, { color: colors.textMuted }]}>Target Duration</Text>
+                <Text style={[styles.goalValue, { color: colors.text }]}>
+                  {formatDuration(state.sleepGoal.targetDuration)}
+                </Text>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { padding: 16 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  iconContainer: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 16, fontFamily: Fonts.semiBold },
+  subtitle: { fontSize: 12, fontFamily: Fonts.regular, marginTop: 2 },
+  viewButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
+  viewButtonText: { fontSize: 13, fontFamily: Fonts.medium },
+  statsRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  statBox: { flex: 1, padding: 12, borderRadius: 10, alignItems: 'center' },
+  statValue: { fontSize: 15, fontFamily: Fonts.semiBold },
+  statLabel: { fontSize: 10, fontFamily: Fonts.regular, marginTop: 2 },
+  todaySleep: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 10, marginBottom: 12, gap: 10 },
+  todaySleepInfo: { flex: 1 },
+  todaySleepText: { fontSize: 13, fontFamily: Fonts.medium },
+  todaySleepTime: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 2 },
+  qualityEmoji: { fontSize: 20 },
+  logButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14, borderRadius: 10, marginBottom: 12 },
+  logButtonText: { color: '#FFF', fontSize: 14, fontFamily: Fonts.semiBold },
+  tipContainer: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10 },
+  tipText: { flex: 1, fontSize: 12, fontFamily: Fonts.regular },
+  modalContainer: { flex: 1 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' },
+  modalTitle: { fontSize: 18, fontFamily: Fonts.semiBold },
+  closeButton: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  modalContent: { flex: 1, padding: 16 },
+  inputLabel: { fontSize: 14, fontFamily: Fonts.medium, marginBottom: 8, marginTop: 12 },
+  input: { padding: 14, borderRadius: 10, fontSize: 16, fontFamily: Fonts.regular, borderWidth: 1 },
+  notesInput: { height: 80, textAlignVertical: 'top' },
+  durationPreview: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10, marginTop: 12 },
+  durationText: { fontSize: 14, fontFamily: Fonts.medium },
+  qualityGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  qualityOption: { alignItems: 'center', padding: 12, borderRadius: 10, borderWidth: 1, minWidth: 60 },
+  qualityLabel: { fontSize: 11, fontFamily: Fonts.medium, marginTop: 4 },
+  saveButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, borderRadius: 12, marginTop: 24 },
+  saveButtonText: { color: '#FFF', fontSize: 16, fontFamily: Fonts.semiBold },
+  sectionTitle: { fontSize: 15, fontFamily: Fonts.semiBold, marginBottom: 12 },
+  weeklyStats: { flexDirection: 'row', gap: 12 },
+  weeklyStat: { flex: 1, alignItems: 'center', padding: 16, borderRadius: 12 },
+  weeklyValue: { fontSize: 18, fontFamily: Fonts.semiBold, marginTop: 8 },
+  weeklyLabel: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 4 },
+  sleepEntry: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderRadius: 10, marginBottom: 8 },
+  entryLeft: { flex: 1 },
+  entryDate: { fontSize: 13, fontFamily: Fonts.medium },
+  entryTimes: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 2 },
+  entryRight: { alignItems: 'flex-end' },
+  entryDuration: { fontSize: 14, fontFamily: Fonts.semiBold },
+  entryQuality: { fontSize: 16, marginTop: 2 },
+  emptyState: { alignItems: 'center', padding: 24, borderRadius: 12 },
+  emptyText: { fontSize: 13, fontFamily: Fonts.regular, textAlign: 'center', marginTop: 12 },
+  goalBox: { padding: 16, borderRadius: 12 },
+  goalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
+  goalLabel: { fontSize: 13, fontFamily: Fonts.regular },
+  goalValue: { fontSize: 14, fontFamily: Fonts.semiBold },
+});

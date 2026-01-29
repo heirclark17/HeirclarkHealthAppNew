@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Pressable } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Animated, {
   useSharedValue,
@@ -17,8 +17,10 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback, rigidImpact } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 48 - 12) / 2; // 2 columns with gap
+// Tab bar constants (must match _layout.tsx)
+const TAB_BAR_HEIGHT = 64;
+const TAB_BAR_MARGIN_BOTTOM = 12;
+const FOOTER_EXTRA_PADDING = 24;
 
 interface GoalOption {
   id: PrimaryGoal;
@@ -73,9 +75,10 @@ interface GoalCardProps {
   index: number;
   colors: typeof DarkColors;
   isDark: boolean;
+  cardWidth: number;
 }
 
-function GoalCard({ option, isSelected, onSelect, index, colors, isDark }: GoalCardProps) {
+function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWidth }: GoalCardProps) {
   const scale = useSharedValue(1);
   const colorProgress = useSharedValue(isSelected ? 1 : 0);
 
@@ -113,7 +116,7 @@ function GoalCard({ option, isSelected, onSelect, index, colors, isDark }: GoalC
   });
 
   return (
-    <Animated.View style={[styles.cardWrapper, entranceStyle, { opacity: 0 }]}>
+    <Animated.View style={[styles.cardWrapper, entranceStyle, { opacity: 0, width: cardWidth }]}>
       <TouchableOpacity activeOpacity={0.8} onPress={handlePress}>
         <Animated.View style={animatedStyle}>
           <GlassCard
@@ -161,6 +164,13 @@ interface PrimaryGoalStepProps {
 export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
   const { state, setPrimaryGoal } = useGoalWizard();
   const { settings } = useSettings();
+  const { width: screenWidth } = useWindowDimensions();
+
+  // Calculate card width dynamically for 2-column grid
+  const cardWidth = (screenWidth - 48 - 12) / 2; // screenWidth - horizontal padding - gap
+
+  // Calculate footer bottom position to sit above the tab bar
+  const footerBottom = TAB_BAR_HEIGHT + TAB_BAR_MARGIN_BOTTOM + FOOTER_EXTRA_PADDING;
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -226,29 +236,37 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>What's Your Goal?</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Select your primary fitness objective. This helps us personalize your nutrition plan.
-        </Text>
-      </View>
+      {/* Scrollable content area */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>What's Your Goal?</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            Select your primary fitness objective. This helps us personalize your nutrition plan.
+          </Text>
+        </View>
 
-      <View style={styles.grid}>
-        {GOAL_OPTIONS.map((option, index) => (
-          <GoalCard
-            key={option.id}
-            option={option}
-            isSelected={state.primaryGoal === option.id}
-            onSelect={() => handleSelect(option.id)}
-            index={index}
-            colors={colors}
-            isDark={isDark}
-          />
-        ))}
-      </View>
+        <View style={styles.grid}>
+          {GOAL_OPTIONS.map((option, index) => (
+            <GoalCard
+              key={option.id}
+              option={option}
+              isSelected={state.primaryGoal === option.id}
+              onSelect={() => handleSelect(option.id)}
+              index={index}
+              colors={colors}
+              isDark={isDark}
+              cardWidth={cardWidth}
+            />
+          ))}
+        </View>
+      </ScrollView>
 
-      {/* Frosted Liquid Glass Continue Button */}
-      <View style={styles.footer}>
+      {/* Frosted Liquid Glass Continue Button - Fixed at bottom above tab bar */}
+      <View style={[styles.footer, { bottom: footerBottom }]}>
         <Animated.View style={animatedButtonStyle}>
           <Pressable
             onPress={handleContinue}
@@ -302,6 +320,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 120, // Space to scroll past the fixed footer button
+  },
   header: {
     marginTop: 16,
     marginBottom: 24,
@@ -326,7 +350,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cardWrapper: {
-    width: CARD_WIDTH,
+    // width is set dynamically via style prop
   },
   card: {
     width: '100%',
@@ -370,9 +394,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   footer: {
-    marginTop: 'auto',
-    paddingTop: 24,
-    paddingBottom: 100, // Extra padding to avoid nav bar overlap
+    ...Platform.select({
+      web: {
+        position: 'fixed' as any,
+      },
+      default: {
+        position: 'absolute' as any,
+      },
+    }),
+    left: 16,
+    right: 16,
+    paddingVertical: 0,
+    backgroundColor: 'transparent',
+    // bottom is set dynamically to sit above the floating tab bar
   },
   continueButton: {
     flexDirection: 'row',

@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-01-17T22:51:15.963Z",
+  "summary": {
+    "errors": 2,
+    "warnings": 0,
+    "info": 2
+  },
+  "errors": [
+    {
+      "type": "reference.error",
+      "message": "ReferenceError: )(.*): (.*) \\((\\d+):(\\d+)\\)\\n\\n([\\s\\S]+)/;",
+      "timestamp": "2026-01-17T22:50:55.142Z"
+    },
+    {
+      "type": "page.error",
+      "message": "Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\n  - react:      19.1.0\n  - react-dom:  19.2.3\nLearn more: https://react.dev/warnings/version-mismatch",
+      "stack": "Error: Incompatible React versions: The \"react\" and \"react-dom\" packages must have the exact same version. Instead got:\n  - react:      19.1.0\n  - react-dom:  19.2.3\nLearn more: https://react.dev/warnings/version-mismatch\n    at http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63103:61\n    at http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63104:7\n    at http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:63189:4\n    at loadModuleImplementation (http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:254:34)\n    at guardedLoadModule (http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:166:14)\n    at metroRequire (http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:79:75)\n    at http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:48059:22\n    at loadModuleImplementation (http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:254:34)\n    at guardedLoadModule (http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:166:14)\n    at metroRequire (http://localhost:8081/index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable:79:75)",
+      "timestamp": "2026-01-17T22:51:09.510Z"
+    }
+  ],
+  "warnings": [],
+  "info": [
+    {
+      "type": "metro.status",
+      "message": "Metro bundler running",
+      "timestamp": "2026-01-17T22:49:54.817Z"
+    },
+    {
+      "type": "bundle.size",
+      "message": "6796.50 KB",
+      "timestamp": "2026-01-17T22:50:55.099Z"
+    }
+  ]
+}

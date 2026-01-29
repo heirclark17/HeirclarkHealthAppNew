@@ -1,0 +1,8 @@
+env: load .env
+env: export EXPO_PUBLIC_API_URL
+Starting project at C:\Users\derri\HeirclarkHealthAppNew
+Starting Metro Bundler
+Tunnel connected.
+Tunnel ready.
+Waiting on http://localhost:8081
+Logs for your project will appear below.

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useGoalWizard } from './GoalWizardContext';
 import { trainingService } from '../services/trainingService';
@@ -87,33 +87,35 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     // GoalWizard context may not be available
   }
 
+  // Extract specific goal values to use in dependencies (avoids object reference issues)
+  const goalPrimaryGoal = goalWizardContext?.state?.primaryGoal;
+  const goalActivityLevel = goalWizardContext?.state?.activityLevel;
+  const goalWorkoutsPerWeek = goalWizardContext?.state?.workoutsPerWeek;
+  const goalWorkoutDuration = goalWizardContext?.state?.workoutDuration;
+  const goalCardioPreference = goalWizardContext?.state?.cardioPreference;
+
   // Build training preferences from goals
   const buildPreferencesFromGoals = useCallback((): TrainingPreferences => {
-    const goalState = goalWizardContext?.state;
-
     console.log('[Training] buildPreferencesFromGoals - goalState:', {
-      primaryGoal: goalState?.primaryGoal,
-      cardioPreference: goalState?.cardioPreference,
-      activityLevel: goalState?.activityLevel,
-      workoutsPerWeek: goalState?.workoutsPerWeek,
+      primaryGoal: goalPrimaryGoal,
+      cardioPreference: goalCardioPreference,
+      activityLevel: goalActivityLevel,
+      workoutsPerWeek: goalWorkoutsPerWeek,
     });
 
     // Map primary goal
     let primaryGoal: TrainingPreferences['primaryGoal'] = 'maintain';
-    if (goalState?.primaryGoal === 'lose_weight') primaryGoal = 'lose_weight';
-    else if (goalState?.primaryGoal === 'build_muscle') primaryGoal = 'build_muscle';
-    else if (goalState?.primaryGoal === 'improve_health') primaryGoal = 'improve_health';
-    else if (goalState?.primaryGoal === 'maintain') primaryGoal = 'maintain';
+    if (goalPrimaryGoal === 'lose_weight') primaryGoal = 'lose_weight';
+    else if (goalPrimaryGoal === 'build_muscle') primaryGoal = 'build_muscle';
+    else if (goalPrimaryGoal === 'improve_health') primaryGoal = 'improve_health';
+    else if (goalPrimaryGoal === 'maintain') primaryGoal = 'maintain';
 
     // Map activity level
-    let activityLevel: TrainingPreferences['activityLevel'] = 'moderate';
-    if (goalState?.activityLevel) {
-      activityLevel = goalState.activityLevel;
-    }
+    let activityLevel: TrainingPreferences['activityLevel'] = goalActivityLevel || 'moderate';
 
     // Determine fitness level based on activity and workouts per week
     let fitnessLevel: DifficultyLevel = 'beginner';
-    const workoutsPerWeek = goalState?.workoutsPerWeek || 3;
+    const workoutsPerWeek = goalWorkoutsPerWeek || 3;
     if (workoutsPerWeek >= 5 && activityLevel === 'very_active') {
       fitnessLevel = 'advanced';
     } else if (workoutsPerWeek >= 3 || activityLevel === 'active' || activityLevel === 'moderate') {
@@ -121,19 +123,19 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Get cardio preference - this is critical for workout generation
-    const cardioPreference = goalState?.cardioPreference || 'walking';
+    const cardioPreference = goalCardioPreference || 'walking';
     console.log('[Training] Using cardio preference:', cardioPreference);
 
     return {
       primaryGoal,
       workoutsPerWeek,
-      workoutDuration: goalState?.workoutDuration || 30,
+      workoutDuration: goalWorkoutDuration || 30,
       activityLevel,
       fitnessLevel,
       availableEquipment: ['dumbbells', 'barbell', 'bodyweight', 'cable_machine'], // Default equipment
       cardioPreference, // User's preferred cardio type
     };
-  }, [goalWizardContext?.state]);
+  }, [goalPrimaryGoal, goalActivityLevel, goalWorkoutsPerWeek, goalWorkoutDuration, goalCardioPreference]);
 
   // Generate weekly training plan with enhanced plan generator
   // If programId is provided, use that specific program
@@ -203,7 +205,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       }));
       return false;
     }
-  }, [buildPreferencesFromGoals, state.currentWeek, goalWizardContext?.state]);
+  }, [buildPreferencesFromGoals, state.currentWeek, goalPrimaryGoal, goalActivityLevel, goalWorkoutsPerWeek]);
 
   // Regenerate plan with current settings
   const regeneratePlan = useCallback(async (): Promise<boolean> => {
@@ -511,9 +513,24 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   }, [loadCachedPlan]);
 
   // Check if goals changed and plan should be regenerated
+  // Use a ref to track whether we've already checked to avoid repeated checks
+  const goalCheckRef = useRef<string | null>(null);
   useEffect(() => {
     const checkGoalChanges = async () => {
       if (goalWizardContext?.state && state.weeklyPlan) {
+        // Create a stable hash of goal state to avoid repeated checks
+        const goalHash = JSON.stringify({
+          primaryGoal: goalWizardContext.state.primaryGoal,
+          activityLevel: goalWizardContext.state.activityLevel,
+          workoutsPerWeek: goalWizardContext.state.workoutsPerWeek,
+        });
+
+        // Skip if we already checked this goal state
+        if (goalCheckRef.current === goalHash) {
+          return;
+        }
+        goalCheckRef.current = goalHash;
+
         const changed = await trainingStorage.haveGoalsChanged(goalWizardContext.state);
         if (changed) {
           console.log('[Training] Goals changed - clearing plan for regeneration');
@@ -529,9 +546,10 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     };
 
     checkGoalChanges();
-  }, [goalWizardContext?.state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goalWizardContext?.state?.primaryGoal, goalWizardContext?.state?.activityLevel, goalWizardContext?.state?.workoutsPerWeek]);
 
-  const value: TrainingContextType = {
+  const value = useMemo<TrainingContextType>(() => ({
     state,
     generateWeeklyPlan,
     regeneratePlan,
@@ -552,7 +570,28 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     hideExerciseAlternatives,
     hasPlan,
     getPlanSummary,
-  };
+  }), [
+    state,
+    generateWeeklyPlan,
+    regeneratePlan,
+    selectProgram,
+    selectProgramAndGenerate,
+    setSelectedDay,
+    markExerciseComplete,
+    markWorkoutComplete,
+    goToNextWeek,
+    goToPreviousWeek,
+    swapExercise,
+    swapExerciseWithAlternative,
+    getAllPrograms,
+    getEnhancedPrograms,
+    clearPlan,
+    loadCachedPlan,
+    showExerciseAlternatives,
+    hideExerciseAlternatives,
+    hasPlan,
+    getPlanSummary,
+  ]);
 
   return (
     <TrainingContext.Provider value={value}>

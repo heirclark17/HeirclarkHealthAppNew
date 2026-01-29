@@ -1,0 +1,235 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║           SEMICIRCULAR GAUGE LAYOUT - TEXT CUTOFF DIAGNOSIS                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+CURRENT LAYOUT (340px gauge, 72px font)
+─────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────┐
+│  CONTAINER (268px height)                                   │  ← Total container
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ paddingTop: 20px                                    │    │  ← Top padding
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                                                      │    │
+│  │   ╭────────────────────────────────────╮            │    │
+│  │  ╱                                      ╲           │    │  ← SVG Arc
+│  │ │          SVG (188px height)            │          │    │    (semi-circle)
+│  │  ╲                                      ╱           │    │
+│  │   ╰─┬──────────────────────────────┬───╯            │    │
+│  │     │                              │                │    │
+│  │     │                              │                │    │
+│  │     │   ┌──────────────────────┐   │                │    │
+│  │     │   │                      │   │                │    │  ← Text positioned here
+│  │     │   │   -044 kcal          │   │                │    │    bottom: 50px
+│  │     │   │   (72px font)        │   │                │    │    Font with line-height
+│  │     │   │   [~100px actual]    │   │                │    │    may be ~100px tall
+│  │     │   │                      │   │                │    │
+│  │     │   └──────────────────────┘   │                │    │
+│  │     │                              │                │    │
+│  │     ├──────────────────────────────┤                │    │
+│  │     │    bottom: 50px from here    │                │    │  ← 50px from bottom
+│  └─────┴──────────────────────────────┴────────────────┘    │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+
+PROBLEM VISUALIZATION:
+─────────────────────────────────────────────────────────────────────────────
+
+Position Calculation:
+  Container height:          268px
+  Text bottom position:     - 50px
+  ─────────────────────────────────
+  Text top edge:            218px from container top
+
+  Text height (with line-height): ~100px
+  Text top:                 218px - 100px = 118px from container top
+
+  Padding top:              20px
+  ─────────────────────────────────
+  Clearance:                118px - 20px = 98px
+
+  ⚠️  ISSUE: Text may extend beyond expected bounds!
+
+Visual representation of the overlap:
+
+     ┌─────────────────────────────┐  ← 0px (Container top)
+     │  paddingTop: 20px           │
+     ├─────────────────────────────┤  ← 20px
+     │                             │
+     │  [Should have text space]   │
+     │                             │
+     ├─────────────────────────────┤  ← ~118px (Text top with 100px height)
+     │  ╔═══════════════════════╗  │
+     │  ║   Text starts here    ║  │  ← Text bounding box
+     │  ║                       ║  │     (including line-height)
+     │  ║                       ║  │
+     │  ║   -044                ║  │
+     │  ║                       ║  │
+     │  ║                       ║  │
+     │  ╚═══════════════════════╝  │  ← ~218px (Text bottom)
+     │                             │
+     ├─────────────────────────────┤  ← 218px
+     │  (bottom spacing)           │
+     ├─────────────────────────────┤  ← 268px (Container bottom)
+     └─────────────────────────────┘
+
+WHY IT GETS CUT OFF ON DEVICE:
+
+  1. Line-height expansion: Font size 72px → actual box ~100px
+  2. Font ascenders: Numbers extend above expected bounds
+  3. React Native rendering: Different from web preview
+  4. Absolute positioning: Baseline vs bounding box confusion
+
+
+RECOMMENDED FIX LAYOUT (Container +100, padding +10)
+─────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────┐
+│  CONTAINER (288px height) ← +20px                           │  ← More space
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ paddingTop: 30px ← +10px                            │    │  ← More padding
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                                                      │    │
+│  │   ╭────────────────────────────────────╮            │    │
+│  │  ╱                                      ╲           │    │  ← SVG Arc
+│  │ │          SVG (188px height)            │          │    │    (unchanged)
+│  │  ╲                                      ╱           │    │
+│  │   ╰─┬──────────────────────────────┬───╯            │    │
+│  │     │                              │                │    │
+│  │     │                              │                │    │
+│  │     │                              │                │    │  ← More space here
+│  │     │   ┌──────────────────────┐   │                │    │
+│  │     │   │                      │   │                │    │  ← Text positioned lower
+│  │     │   │   -044 kcal          │   │                │    │    Still bottom: 50px
+│  │     │   │   (72px font)        │   │                │    │    But more clearance above
+│  │     │   │   [~100px actual]    │   │                │    │
+│  │     │   │                      │   │                │    │
+│  │     │   └──────────────────────┘   │                │    │
+│  │     │                              │                │    │
+│  │     ├──────────────────────────────┤                │    │
+│  │     │    bottom: 50px from here    │                │    │  ← Still 50px from bottom
+│  └─────┴──────────────────────────────┴────────────────┘    │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+
+IMPROVED CALCULATION:
+  Container height:          288px ← +20px
+  Text bottom position:     - 50px
+  ─────────────────────────────────
+  Text top edge:            238px from container top
+
+  Text height (with line-height): ~100px
+  Text top:                 238px - 100px = 138px from container top
+
+  Padding top:              30px ← +10px
+  ─────────────────────────────────
+  Clearance:                138px - 30px = 108px ✅
+
+  ✅  FIXED: Substantial clearance above text!
+
+Visual representation of the fix:
+
+     ┌─────────────────────────────┐  ← 0px (Container top)
+     │  paddingTop: 30px ✅        │
+     ├─────────────────────────────┤  ← 30px
+     │                             │
+     │                             │
+     │  [Generous text space] ✅   │
+     │                             │
+     │                             │
+     ├─────────────────────────────┤  ← ~138px (Text top with 100px height)
+     │  ╔═══════════════════════╗  │
+     │  ║   Text starts here    ║  │  ← Text bounding box
+     │  ║                       ║  │     (with safe clearance)
+     │  ║                       ║  │
+     │  ║   -044                ║  │
+     │  ║                       ║  │
+     │  ║                       ║  │
+     │  ╚═══════════════════════╝  │  ← ~238px (Text bottom)
+     │                             │
+     ├─────────────────────────────┤  ← 238px
+     │  (bottom spacing)           │
+     ├─────────────────────────────┤  ← 288px (Container bottom)
+     └─────────────────────────────┘
+
+
+COMPARISON TABLE
+─────────────────────────────────────────────────────────────────────────────
+
+Metric                      Current     Fixed       Difference
+────────────────────────────────────────────────────────────────────────────
+Container height            268px       288px       +20px
+Padding top                 20px        30px        +10px
+Text position from top      218px       238px       +20px
+Text top (with line-height) 118px       138px       +20px
+Clearance above text        98px        108px       +10px
+Status                      ⚠️ Risky    ✅ Safe     Improvement
+
+
+CODE CHANGES REQUIRED
+─────────────────────────────────────────────────────────────────────────────
+
+File: C:\Users\derri\HeirclarkHealthAppNew\components\SemiCircularGauge.tsx
+
+Change 1 (Line 84):
+  BEFORE: height: size / 2 + strokeWidth / 2 + 80
+  AFTER:  height: size / 2 + strokeWidth / 2 + 100
+
+Change 2 (Line 156 in styles):
+  BEFORE: paddingTop: 20,
+  AFTER:  paddingTop: 30,
+
+
+ALTERNATIVE: If more space needed, use +120 instead of +100
+─────────────────────────────────────────────────────────────────────────────
+
+For extra safety on all devices:
+  Container height: size / 2 + strokeWidth / 2 + 120  (instead of +100)
+  Result: 308px container height
+  Clearance: 128px above text
+
+This provides maximum safety but increases vertical space usage.
+
+
+SMALL GAUGE (100px) ANALYSIS
+─────────────────────────────────────────────────────────────────────────────
+
+Small gauges (Protein, Fat, Carbs) should be fine because:
+  - Font size: 24px (much smaller)
+  - Actual height: ~30px (with line-height)
+  - centerContentBottom: size * 0.25 = 25px
+  - Container height: 137px
+  - Text position from top: 137 - 25 = 112px
+  - Text top: 112 - 30 = 82px
+  - Clearance: 82 - 20 = 62px ✅ (plenty of space)
+
+No changes needed for small gauges.
+
+
+TESTING ON ACTUAL DEVICE
+─────────────────────────────────────────────────────────────────────────────
+
+After applying fixes, verify on:
+  □ iPhone 12/13/14/15 (iOS 16+)
+  □ Android Pixel / Samsung (Android 12+)
+  □ Different calorie values:
+    - Negative: -1234, -044, -5
+    - Positive: 1234, 044, 5
+  □ Different screen sizes
+  □ Portrait and landscape
+  □ With/without dynamic type/font scaling
+
+Look for:
+  ✓ Top of numbers fully visible
+  ✓ Minus sign not clipped
+  ✓ No overlap with arc
+  ✓ Consistent spacing
+  ✓ Centered appearance maintained
+
+═════════════════════════════════════════════════════════════════════════════
+                           END OF LAYOUT DIAGRAM
+═════════════════════════════════════════════════════════════════════════════

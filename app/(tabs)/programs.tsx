@@ -23,6 +23,7 @@ import { PlanSummaryCard } from '../../components/goals';
 import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { ExerciseAlternative, WorkoutExercise, WeightLog } from '../../types/training';
+import { WorkoutFormCoachCard } from '../../components/agents/workoutFormCoach';
 
 export default function ProgramsScreen() {
   const router = useRouter();
@@ -458,6 +459,11 @@ export default function ProgramsScreen() {
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Form Coach Card - Workout Form Analysis */}
+        <View style={{ marginHorizontal: 16, marginTop: 16 }}>
+          <WorkoutFormCoachCard />
+        </View>
 
         <View style={{ height: 100 }} />
       </ScrollView>
