@@ -587,6 +587,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  generateButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
