@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -107,9 +107,11 @@ interface SuccessScreenProps {
   onViewAvatar?: () => void;
   onStartMealPlan?: () => void;
   onStartTrainingPlan?: () => void;
+  isGeneratingMealPlan?: boolean;
+  isGeneratingTrainingPlan?: boolean;
 }
 
-export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvatar, onStartMealPlan, onStartTrainingPlan }: SuccessScreenProps) {
+export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvatar, onStartMealPlan, onStartTrainingPlan, isGeneratingMealPlan, isGeneratingTrainingPlan }: SuccessScreenProps) {
   const { state, resetWizard } = useGoalWizard();
   const { settings } = useSettings();
   const hasPlayedHaptic = useRef(false);
@@ -552,19 +554,28 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             testID="start-meal-plan-button"
             accessibilityRole="button"
             accessibilityLabel="Start your 7-day meal plan"
+            disabled={isGeneratingMealPlan || isGeneratingTrainingPlan}
           >
-            <GlassCard style={styles.mealPlanButtonCard} interactive>
+            <GlassCard style={[styles.mealPlanButtonCard, (isGeneratingMealPlan || isGeneratingTrainingPlan) && { opacity: 0.7 }]} interactive>
               <View style={styles.mealPlanButtonInner}>
                 <View style={styles.mealPlanIconContainer}>
                   <View style={styles.mealPlanIconCircle}>
-                    <Ionicons name="restaurant" size={20} color="#fff" />
+                    {isGeneratingMealPlan ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Ionicons name="restaurant" size={20} color="#fff" />
+                    )}
                   </View>
                 </View>
                 <View style={styles.coachingTextContainer}>
-                  <Text style={[styles.mealPlanButtonTitle, { color: colors.text }]}>Start Your 7-Day Meal Plan</Text>
-                  <Text style={[styles.mealPlanButtonSubtitle, { color: colors.textMuted }]}>AI-generated meals tailored to your goals</Text>
+                  <Text style={[styles.mealPlanButtonTitle, { color: colors.text }]}>
+                    {isGeneratingMealPlan ? 'Generating AI Meal Plan...' : 'Start Your 7-Day Meal Plan'}
+                  </Text>
+                  <Text style={[styles.mealPlanButtonSubtitle, { color: colors.textMuted }]}>
+                    {isGeneratingMealPlan ? 'Please wait while AI creates your plan' : 'AI-generated meals tailored to your goals'}
+                  </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                {!isGeneratingMealPlan && <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
               </View>
             </GlassCard>
           </Pressable>
@@ -579,21 +590,31 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             testID="start-training-plan-button"
             accessibilityRole="button"
             accessibilityLabel="Start your training plan"
+            disabled={isGeneratingMealPlan || isGeneratingTrainingPlan}
           >
-            <GlassCard style={styles.trainingPlanButtonCard} interactive>
+            <GlassCard style={[styles.trainingPlanButtonCard, (isGeneratingMealPlan || isGeneratingTrainingPlan) && { opacity: 0.7 }]} interactive>
               <View style={styles.trainingPlanButtonInner}>
                 <View style={styles.trainingPlanIconContainer}>
                   <View style={styles.trainingPlanIconCircle}>
-                    <Ionicons name="barbell" size={20} color="#fff" />
+                    {isGeneratingTrainingPlan ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Ionicons name="barbell" size={20} color="#fff" />
+                    )}
                   </View>
                 </View>
                 <View style={styles.coachingTextContainer}>
-                  <Text style={[styles.trainingPlanButtonTitle, { color: colors.text }]}>Start Your Training Plan</Text>
+                  <Text style={[styles.trainingPlanButtonTitle, { color: colors.text }]}>
+                    {isGeneratingTrainingPlan ? 'Generating AI Training Plan...' : 'Start Your Training Plan'}
+                  </Text>
                   <Text style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted }]}>
-                    {state.workoutsPerWeek || 3} days/week • {state.primaryGoal === 'lose_weight' ? 'Fat burning' : state.primaryGoal === 'build_muscle' ? 'Muscle building' : 'Fitness'} focused
+                    {isGeneratingTrainingPlan
+                      ? 'Please wait while AI creates your plan'
+                      : `${state.workoutsPerWeek || 3} days/week • ${state.primaryGoal === 'lose_weight' ? 'Fat burning' : state.primaryGoal === 'build_muscle' ? 'Muscle building' : 'Fitness'} focused`
+                    }
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                {!isGeneratingTrainingPlan && <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
               </View>
             </GlassCard>
           </Pressable>

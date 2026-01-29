@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -29,6 +30,8 @@ import {
   GoalWizardProvider,
   useGoalWizard,
 } from '../../contexts/GoalWizardContext';
+import { useMealPlan } from '../../contexts/MealPlanContext';
+import { useTraining } from '../../contexts/TrainingContext';
 import { StepProgressBar } from '../../components/goals/StepProgressBar';
 import { PrimaryGoalStep } from '../../components/goals/PrimaryGoalStep';
 import { BodyMetricsStep } from '../../components/goals/BodyMetricsStep';
@@ -62,9 +65,13 @@ function AnimatedStep({ children, direction, stepKey }: AnimatedStepProps) {
 function GoalWizardContent() {
   const router = useRouter();
   const { state, nextStep, prevStep, loadSavedProgress, resetWizard, startEditing } = useGoalWizard();
+  const { generateAIMealPlan, state: mealPlanState } = useMealPlan();
+  const { generateAIWorkoutPlan, state: trainingState } = useTraining();
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showCoachingModal, setShowCoachingModal] = useState(false);
+  const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false);
+  const [isGeneratingTrainingPlan, setIsGeneratingTrainingPlan] = useState(false);
   const { settings } = useSettings();
 
   // Dynamic theme colors
@@ -118,14 +125,62 @@ function GoalWizardContent() {
     router.push('/');
   };
 
-  const handleStartMealPlan = () => {
-    // Navigate to meals tab to start 7-day meal plan
-    router.push('/meals');
+  const handleStartMealPlan = async () => {
+    // Generate AI meal plan then navigate to meals tab
+    setIsGeneratingMealPlan(true);
+    try {
+      const success = await generateAIMealPlan();
+      if (success) {
+        router.push('/meals');
+      } else {
+        Alert.alert(
+          'Generation Started',
+          'Your AI meal plan is being created. Head to the Meals tab to see it!',
+          [{ text: 'Go to Meals', onPress: () => router.push('/meals') }]
+        );
+      }
+    } catch (error) {
+      console.error('Failed to generate AI meal plan:', error);
+      Alert.alert(
+        'Could not generate plan',
+        'Would you like to try again or go to Meals to generate manually?',
+        [
+          { text: 'Try Again', onPress: handleStartMealPlan },
+          { text: 'Go to Meals', onPress: () => router.push('/meals') },
+        ]
+      );
+    } finally {
+      setIsGeneratingMealPlan(false);
+    }
   };
 
-  const handleStartTrainingPlan = () => {
-    // Navigate to programs tab to start training plan
-    router.push('/programs');
+  const handleStartTrainingPlan = async () => {
+    // Generate AI workout plan then navigate to programs tab
+    setIsGeneratingTrainingPlan(true);
+    try {
+      const success = await generateAIWorkoutPlan();
+      if (success) {
+        router.push('/programs');
+      } else {
+        Alert.alert(
+          'Generation Started',
+          'Your AI training plan is being created. Head to the Programs tab to see it!',
+          [{ text: 'Go to Programs', onPress: () => router.push('/programs') }]
+        );
+      }
+    } catch (error) {
+      console.error('Failed to generate AI workout plan:', error);
+      Alert.alert(
+        'Could not generate plan',
+        'Would you like to try again or go to Programs to generate manually?',
+        [
+          { text: 'Try Again', onPress: handleStartTrainingPlan },
+          { text: 'Go to Programs', onPress: () => router.push('/programs') },
+        ]
+      );
+    } finally {
+      setIsGeneratingTrainingPlan(false);
+    }
   };
 
   const handleClose = async () => {
@@ -172,6 +227,8 @@ function GoalWizardContent() {
           onViewAvatar={handleWatchCoaching}
           onStartMealPlan={handleStartMealPlan}
           onStartTrainingPlan={handleStartTrainingPlan}
+          isGeneratingMealPlan={isGeneratingMealPlan}
+          isGeneratingTrainingPlan={isGeneratingTrainingPlan}
         />
         <CoachingModal
           visible={showCoachingModal}
