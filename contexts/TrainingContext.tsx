@@ -218,15 +218,18 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       console.log('[Training] Building preferences from goals...');
       const preferences = buildPreferencesFromGoals();
 
-      // Convert to AI service format
+      // Convert to AI service format - use actual user preferences from Goal Wizard
       const aiPreferences = {
-        fitnessGoal: preferences.fitnessGoal || 'general_fitness',
-        experienceLevel: preferences.experienceLevel || 'intermediate',
+        fitnessGoal: preferences.primaryGoal || 'general_fitness',
+        experienceLevel: preferences.fitnessLevel || 'intermediate',
         daysPerWeek: preferences.workoutsPerWeek || 3,
-        sessionDuration: 60,
-        availableEquipment: ['dumbbells', 'barbell', 'gym'],
+        sessionDuration: preferences.workoutDuration || 45,
+        availableEquipment: preferences.availableEquipment || ['dumbbells', 'barbell', 'gym'],
         injuries: [],
+        cardioPreference: preferences.cardioPreference || 'walking',
       };
+
+      console.log('[Training] AI preferences from user settings:', JSON.stringify(aiPreferences, null, 2));
 
       console.log('[Training] Calling AI service for workout plan...');
       const aiPlan = await aiService.generateAIWorkoutPlan(aiPreferences, 2); // 2 weeks for faster generation
