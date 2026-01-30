@@ -288,24 +288,25 @@ class HeirclarkAPI {
 
   async updateGoals(goals: Partial<UserGoals>): Promise<boolean> {
     try {
-      // Ensure we only send valid numeric values
-      const sanitizedGoals = {
-        dailyCalories: Math.round(goals.dailyCalories || 2000),
-        dailyProtein: Math.round(goals.dailyProtein || 150),
-        dailyCarbs: Math.round(goals.dailyCarbs || 200),
-        dailyFat: Math.round(goals.dailyFat || 65),
-        dailySteps: Math.round(goals.dailySteps || 10000),
-        dailyWaterOz: Math.round(goals.dailyWaterOz || 64),
-        sleepHours: goals.sleepHours || 8,
-        workoutDaysPerWeek: Math.round(goals.workoutDaysPerWeek || 4),
+      // Backend expects: { goals: { calories, protein, carbs, fat, hydration, goalWeight, timezone } }
+      const payload = {
+        goals: {
+          calories: Math.round(goals.dailyCalories || 2000),
+          protein: Math.round(goals.dailyProtein || 150),
+          carbs: Math.round(goals.dailyCarbs || 200),
+          fat: Math.round(goals.dailyFat || 65),
+          hydration: Math.round((goals.dailyWaterOz || 64) * 29.5735), // Convert oz to ml
+          goalWeight: goals.targetWeight || null,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+        },
       };
 
-      console.log('[API] Sending goals:', JSON.stringify(sanitizedGoals));
+      console.log('[API] Sending goals:', JSON.stringify(payload));
 
       const response = await fetch(`${this.baseUrl}/api/v1/user/goals`, {
         method: 'POST',
         headers: this.getHeaders(true),
-        body: JSON.stringify(sanitizedGoals),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
