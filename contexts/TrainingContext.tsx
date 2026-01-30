@@ -232,44 +232,93 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       const aiPlan = await aiService.generateAIWorkoutPlan(aiPreferences, 2); // 2 weeks for faster generation
 
       if (aiPlan) {
-        // Convert AI plan to app format
-        const weeklyPlan: WeeklyTrainingPlan = {
-          weeks: aiPlan.weeks.map((week: any, weekIndex: number) => ({
-            weekNumber: week.weekNumber || weekIndex + 1,
-            focus: week.focus || 'Training Week',
-            days: week.workouts.map((workout: any) => ({
-              day: workout.day || workout.dayOfWeek, // Support both compact (day) and verbose (dayOfWeek) formats
-              workout: workout ? {
-                id: `ai-workout-${Date.now()}-${Math.random()}`,
-                name: workout.workoutType || 'Training Session',
-                type: workout.workoutType || 'strength',
-                duration: workout.duration || 60,
-                difficulty: preferences.difficultyLevel || 'intermediate' as DifficultyLevel,
-                exercises: workout.exercises.map((ex: any) => ({
-                  exerciseId: `ai-ex-${Date.now()}-${Math.random()}`,
-                  exercise: {
-                    id: `ai-ex-${Date.now()}-${Math.random()}`,
-                    name: ex.name,
-                    category: 'Strength',
-                    primaryMuscles: [],
-                    secondaryMuscles: [],
-                    equipment: [],
-                    difficulty: 'intermediate' as DifficultyLevel,
-                    instructions: [],
-                  },
-                  sets: ex.sets || 3,
-                  reps: ex.reps || '10',
-                  restSeconds: ex.restSeconds || 60,
-                  notes: ex.notes || '',
-                  isCompleted: false,
-                  weight: undefined,
-                })),
-                isCompleted: false,
-              } : null,
+        // Get the first week's workouts from AI plan
+        const firstWeek = aiPlan.weeks?.[0];
+        const workouts = firstWeek?.workouts || [];
+
+        // Day names for mapping
+        const dayNames: Array<'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'> =
+          ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        // Calculate start date (most recent Monday)
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - daysToMonday);
+        startDate.setHours(0, 0, 0, 0);
+
+        // Convert AI plan to app format - create 7 days for the week
+        const days: TrainingDay[] = dayNames.map((dayName, index) => {
+          const dayDate = new Date(startDate);
+          dayDate.setDate(startDate.getDate() + index);
+          const dateStr = dayDate.toISOString().split('T')[0];
+
+          // Find matching workout from AI plan (by day name or index)
+          const aiWorkout = workouts.find((w: any) => {
+            const wDay = w.day || w.dayOfWeek || '';
+            return wDay.toLowerCase().startsWith(dayName.toLowerCase().slice(0, 3));
+          });
+
+          // Create workout if AI provided one for this day
+          const workout: Workout | null = aiWorkout ? {
+            id: `ai-workout-${Date.now()}-${index}`,
+            name: aiWorkout.workoutType || aiWorkout.name || 'Training Session',
+            type: aiWorkout.workoutType || 'strength',
+            duration: aiWorkout.duration || 60,
+            difficulty: preferences.difficultyLevel || 'intermediate' as DifficultyLevel,
+            estimatedCaloriesBurned: aiWorkout.duration ? Math.round(aiWorkout.duration * 8) : 400,
+            exercises: (aiWorkout.exercises || []).map((ex: any, exIndex: number) => ({
+              id: `ai-ex-${Date.now()}-${index}-${exIndex}`,
+              exerciseId: `ai-ex-${Date.now()}-${index}-${exIndex}`,
+              exercise: {
+                id: `ai-ex-${Date.now()}-${index}-${exIndex}`,
+                name: ex.name || 'Exercise',
+                category: 'Strength',
+                muscleGroups: [],
+                primaryMuscles: [],
+                secondaryMuscles: [],
+                equipment: [],
+                difficulty: 'intermediate' as DifficultyLevel,
+                instructions: [],
+              },
+              sets: ex.sets || 3,
+              reps: ex.reps || '10',
+              restSeconds: ex.restSeconds || 60,
+              notes: ex.notes || '',
+              isCompleted: false,
+              weight: undefined,
             })),
-          })),
-          generatedAt: new Date().toISOString(),
-          preferences,
+            isCompleted: false,
+          } : null;
+
+          return {
+            id: `day-${dateStr}`,
+            dayOfWeek: dayName,
+            dayNumber: index + 1,
+            date: dateStr,
+            workout,
+            isRestDay: !workout,
+            completed: false,
+          };
+        });
+
+        // Calculate totals
+        const totalWorkouts = days.filter(d => d.workout !== null).length;
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+
+        // Create properly structured WeeklyTrainingPlan
+        const weeklyPlan: WeeklyTrainingPlan = {
+          id: `plan-${Date.now()}`,
+          weekNumber: 1,
+          startDate: startDate.toISOString().split('T')[0],
+          endDate: endDate.toISOString().split('T')[0],
+          days,
+          totalWorkouts,
+          completedWorkouts: 0,
+          totalCaloriesBurned: 0,
+          focusAreas: [],
         };
 
         // Create a basic program reference

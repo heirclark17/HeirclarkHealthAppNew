@@ -68,6 +68,14 @@ export const trainingStorage = {
       const cached = await AsyncStorage.getItem(STORAGE_KEYS.TRAINING_PLAN);
       if (cached) {
         const parsed = JSON.parse(cached);
+
+        // Validate the cached plan structure - must have weeklyPlan.days array
+        if (!parsed.weeklyPlan?.days || !Array.isArray(parsed.weeklyPlan.days)) {
+          console.warn('[TrainingStorage] Invalid cached plan structure (missing days), clearing cache');
+          await AsyncStorage.removeItem(STORAGE_KEYS.TRAINING_PLAN);
+          return null;
+        }
+
         console.log('[TrainingStorage] Plan cache loaded successfully');
         return parsed;
       }
