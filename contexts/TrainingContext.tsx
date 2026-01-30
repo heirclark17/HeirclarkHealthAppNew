@@ -341,8 +341,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         // Get plan summary
         const summary = trainingService.getPlanSummary(weeklyPlan, preferences);
 
-        const today = new Date().getDay();
-        const todayIndex = today === 0 ? 6 : today - 1;
+        // Use dayOfWeek already calculated above for todayIndex
+        const todayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         const lastGeneratedAt = new Date().toISOString();
 
         setState(prev => ({
