@@ -259,7 +259,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
                   },
                   sets: ex.sets || 3,
                   reps: ex.reps || '10',
-                  restSeconds: parseInt(ex.rest?.split(' ')[0]) || 60,
+                  restSeconds: ex.restSeconds || 60,
                   notes: ex.notes || '',
                   isCompleted: false,
                   weight: undefined,

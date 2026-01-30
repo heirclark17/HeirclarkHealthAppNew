@@ -374,33 +374,78 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setState(prev => ({ ...prev, isSaving: true }));
 
     try {
-      // Save to AsyncStorage for local persistence
+      // Save to AsyncStorage for local persistence first (always works)
       console.log('[GoalWizard] Saving goals to AsyncStorage with cardioPreference:', state.cardioPreference);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const stateToSave = { ...state, isComplete: true };
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
 
-      // Save to backend API - Only send fields the backend currently supports
+      // Calculate weights in kg for backend profile
+      const currentWeightKg = state.weightUnit === 'kg'
+        ? state.currentWeight
+        : state.currentWeight * 0.453592;
+      const targetWeightKg = state.weightUnit === 'kg'
+        ? state.targetWeight
+        : state.targetWeight * 0.453592;
+      const heightCm = state.heightUnit === 'cm'
+        ? state.heightCm
+        : (state.heightFt * 12 + state.heightIn) * 2.54;
+
+      // Save profile data to backend (includes targetWeight & targetDate for weight goal alignment)
+      try {
+        const profileSuccess = await api.updateProfile({
+          heightCm,
+          weightKg: currentWeightKg,
+          age: state.age,
+          sex: state.sex,
+          activityLevel: state.activityLevel,
+          goalType: state.primaryGoal === 'lose_weight' ? 'lose'
+                   : state.primaryGoal === 'build_muscle' ? 'gain'
+                   : 'maintain',
+          targetWeightKg,
+          targetDate: state.targetDate || undefined,
+        });
+
+        if (profileSuccess) {
+          console.log('[GoalWizard] Profile synced to backend (including targetWeight & targetDate)');
+        } else {
+          console.warn('[GoalWizard] Profile sync failed - profile data saved locally only');
+        }
+      } catch (profileError) {
+        console.warn('[GoalWizard] Profile sync error:', profileError);
+      }
+
+      // Save nutritional goals to backend (targetWeight removed - stored in profile instead)
       const goalsToSave: any = {
         dailyCalories: state.results.calories,
         dailyProtein: state.results.protein,
         dailyCarbs: state.results.carbs,
         dailyFat: state.results.fat,
         dailySteps: 10000, // Default step goal
+        dailyWaterOz: 64,  // Default water goal
+        sleepHours: 8,     // Default sleep goal
+        workoutDaysPerWeek: state.workoutsPerWeek || 3,
       };
-
-      // Only add targetWeight if it's valid
-      const targetWeightLbs = getWeightInLbs(state.targetWeight, state.weightUnit);
-      if (targetWeightLbs && targetWeightLbs > 0) {
-        goalsToSave.targetWeight = targetWeightLbs;
-      }
 
       console.log('[GoalWizard] Saving goals to API:', JSON.stringify(goalsToSave, null, 2));
 
-      const success = await api.updateGoals(goalsToSave);
+      // Try to sync with backend - but don't block on failure
+      let apiSuccess = false;
+      try {
+        apiSuccess = await api.updateGoals(goalsToSave);
+        if (apiSuccess) {
+          console.log('[GoalWizard] Goals synced to backend successfully');
+        } else {
+          console.warn('[GoalWizard] Backend sync failed (400 error) - goals saved locally only');
+        }
+      } catch (apiError) {
+        console.warn('[GoalWizard] Backend sync error - goals saved locally only:', apiError);
+      }
 
+      // Always mark as complete since local storage succeeded
       setState(prev => ({ ...prev, isSaving: false, isComplete: true }));
-      return success;
+      return true; // Return true since local save succeeded
     } catch (error) {
-      console.error('Failed to save goals:', error);
+      console.error('[GoalWizard] Failed to save goals:', error);
       setState(prev => ({ ...prev, isSaving: false }));
       return false;
     }

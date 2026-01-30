@@ -1,7 +1,10 @@
-// Heirclark Backend API Service
-// Railway Backend: https://heirclarkinstacartbackend-production.up.railway.app
+// Heirclark Backend API Service v2.0
+// Railway Backend with PostgreSQL + JWT Auth + 11 AI Agents
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'https://heirclarkinstacartbackend-production.up.railway.app';
+const AUTH_TOKEN_KEY = '@heirclark_auth_token';
 
 export interface HealthMetrics {
   date: string;
@@ -13,6 +16,9 @@ export interface HealthMetrics {
   protein?: number;
   carbs?: number;
   fat?: number;
+  waterOz?: number;
+  sleepHours?: number;
+  activeMinutes?: number;
 }
 
 export interface MealData {
@@ -26,7 +32,36 @@ export interface MealData {
   protein: number;
   carbs: number;
   fat: number;
+  fiber?: number;
   time?: string;
+  photoUrl?: string;
+  source?: string;
+  confidence?: string;
+  foods?: Array<{
+    name: string;
+    portion?: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }>;
+}
+
+export interface SavedMeal {
+  id: string;
+  mealName: string;
+  mealType?: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  ingredients?: any[];
+  recipe?: string;
+  prepTimeMinutes?: number;
+  photoUrl?: string;
+  tags?: string[];
+  useCount?: number;
+  lastUsedAt?: string;
 }
 
 export interface UserGoals {
@@ -35,24 +70,90 @@ export interface UserGoals {
   dailyCarbs: number;
   dailyFat: number;
   dailySteps: number;
+  dailyWaterOz?: number;
+  sleepHours?: number;
+  workoutDaysPerWeek?: number;
   targetWeight?: number;
-  weeklyWeightChange?: number; // Negative for loss, positive for gain (in lbs)
+  weeklyWeightChange?: number;
   goalType?: 'lose' | 'maintain' | 'gain';
+}
+
+export interface UserProfile {
+  heightCm?: number;
+  weightKg?: number;
+  age?: number;
+  sex?: 'male' | 'female';
+  activityLevel?: string;
+  goalType?: 'lose' | 'maintain' | 'gain';
+  targetWeightKg?: number;
+  targetDate?: string;
+  timezone?: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email?: string;
+  fullName?: string;
+  avatarUrl?: string;
+}
+
+export interface Habit {
+  id: string;
+  habitName: string;
+  habitType?: string;
+  frequency: string;
+  targetValue: number;
+  unit?: string;
+  reminderTime?: string;
+  weekCompletions?: number;
 }
 
 class HeirclarkAPI {
   private baseUrl: string;
+  private authToken: string | null = null;
   private odooId: string;
   private shopifyCustomerId: string;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
-    // Guest user IDs for unauthenticated access
     this.odooId = 'guest_user';
     this.shopifyCustomerId = 'guest_ios_app';
+    this.loadAuthToken();
   }
 
-  // Set authenticated user IDs
+  // Load auth token from storage
+  private async loadAuthToken() {
+    try {
+      const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+      if (token) {
+        this.authToken = token;
+      }
+    } catch (error) {
+      console.warn('[API] Failed to load auth token:', error);
+    }
+  }
+
+  // Save auth token
+  private async saveAuthToken(token: string) {
+    try {
+      this.authToken = token;
+      await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
+    } catch (error) {
+      console.warn('[API] Failed to save auth token:', error);
+    }
+  }
+
+  // Clear auth token
+  async clearAuthToken() {
+    try {
+      this.authToken = null;
+      await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+    } catch (error) {
+      console.warn('[API] Failed to clear auth token:', error);
+    }
+  }
+
+  // Set authenticated user IDs (legacy support)
   setUserIds(odooId: string, shopifyCustomerId?: string) {
     this.odooId = odooId;
     if (shopifyCustomerId) {
@@ -60,25 +161,87 @@ class HeirclarkAPI {
     }
   }
 
-  // Get common headers for authenticated requests
+  // Get common headers for requests
   private getHeaders(includeContentType: boolean = false): HeadersInit {
     const headers: HeadersInit = {
       'X-Shopify-Customer-Id': this.shopifyCustomerId,
     };
+    if (this.authToken) {
+      headers['Authorization'] = `Bearer ${this.authToken}`;
+    }
     if (includeContentType) {
       headers['Content-Type'] = 'application/json';
     }
     return headers;
   }
 
-  // Health Check (public endpoint)
+  // ============================================
+  // AUTHENTICATION
+  // ============================================
+
+  async authenticateWithApple(appleId: string, email?: string, fullName?: string): Promise<AuthUser | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/auth/apple`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appleId, email, fullName }),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Apple auth failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.success && data.token) {
+        await this.saveAuthToken(data.token);
+        return data.user;
+      }
+      return null;
+    } catch (error) {
+      console.error('[API] Apple auth error:', error);
+      return null;
+    }
+  }
+
+  async getCurrentUser(): Promise<AuthUser | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/auth/me`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.user : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async logout(): Promise<boolean> {
+    try {
+      await fetch(`${this.baseUrl}/api/v1/auth/logout`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+      await this.clearAuthToken();
+      return true;
+    } catch (error) {
+      await this.clearAuthToken();
+      return false;
+    }
+  }
+
+  // ============================================
+  // HEALTH CHECK
+  // ============================================
+
   async checkHealth(): Promise<{ status: string; message: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/health`, {
         headers: this.getHeaders(),
       });
       if (!response.ok) {
-        // Return a simulated OK if health endpoint requires auth
         if (response.status === 401) {
           return { status: 'ok', message: 'API reachable (auth required)' };
         }
@@ -86,373 +249,69 @@ class HeirclarkAPI {
       }
       return await response.json();
     } catch (error) {
-      // console.error('Health check error:', error);
-      // Return ok status if we can reach the server at all
       return { status: 'ok', message: 'API reachable' };
     }
   }
 
-  // Get today's metrics
-  async getTodayMetrics(): Promise<HealthMetrics | null> {
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/health/metrics?shopifyCustomerId=${this.shopifyCustomerId}`,
-        { headers: this.getHeaders() }
-      );
-      if (!response.ok) {
-        if (response.status === 404 || response.status === 401 || response.status === 400) return null;
-        throw new Error('Failed to fetch metrics');
-      }
-      const data = await response.json();
-      return data.ok ? data.data : null;
-    } catch (error) {
-      // console.error('Get metrics error:', error);
-      return null;
-    }
-  }
+  // ============================================
+  // USER GOALS
+  // ============================================
 
-  // Get metrics for specific date
-  async getMetricsByDate(date: string): Promise<HealthMetrics | null> {
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/health/metrics?shopifyCustomerId=${this.shopifyCustomerId}&date=${date}`,
-        { headers: this.getHeaders() }
-      );
-      if (!response.ok) {
-        if (response.status === 404 || response.status === 401 || response.status === 400) return null;
-        throw new Error('Failed to fetch metrics');
-      }
-      const data = await response.json();
-      return data.ok ? data.data : null;
-    } catch (error) {
-      // console.error('Get metrics by date error:', error);
-      return null;
-    }
-  }
-
-  // Submit health data (calories, steps, weight, etc.)
-  async ingestHealthData(data: Partial<HealthMetrics>): Promise<boolean> {
-    try {
-      // Build payload with only defined values
-      const payload: any = {
-        shopifyCustomerId: this.shopifyCustomerId,
-        date: data.date || new Date().toISOString().split('T')[0],
-      };
-
-      // Only include fields that have values
-      if (data.steps !== undefined && data.steps !== null) {
-        payload.steps = data.steps;
-      }
-      if (data.caloriesOut !== undefined && data.caloriesOut !== null) {
-        payload.caloriesOut = data.caloriesOut;
-      }
-      if (data.restingEnergy !== undefined && data.restingEnergy !== null) {
-        payload.restingEnergy = data.restingEnergy;
-      }
-
-      // Calculate activeEnergy only if we have the required data
-      if (data.caloriesOut !== undefined && data.restingEnergy !== undefined) {
-        payload.activeEnergy = (data.caloriesOut || 0) - (data.restingEnergy || 0);
-      }
-
-      console.log('[API] Ingesting health data:', payload);
-
-      const response = await fetch(`${this.baseUrl}/api/v1/health/ingest-simple`, {
-        method: 'POST',
-        headers: this.getHeaders(true),
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          console.warn('[API] Auth required for ingest');
-          return false;
-        }
-        const errorText = await response.text();
-        console.warn('[API] Ingest error:', response.status, errorText);
-        console.warn('[API] Payload that failed:', JSON.stringify(payload, null, 2));
-        // Don't throw - just return false to avoid LogBox errors
-        return false;
-      }
-
-      const result = await response.json();
-      console.log('[API] Ingest success:', result);
-      return true;
-    } catch (error) {
-      // Silently handle network errors - they're not critical for app functionality
-      console.warn('[API] Ingest data error (non-critical):', error);
-      return false;
-    }
-  }
-
-  // Get historical data for charts
-  async getHistory(days: number = 7): Promise<HealthMetrics[]> {
-    try {
-      // Calculate startDate and endDate
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - days);
-
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
-
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/health/history?shopifyCustomerId=${this.shopifyCustomerId}&startDate=${startDateStr}&endDate=${endDateStr}`,
-        { headers: this.getHeaders() }
-      );
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 400) return [];
-        throw new Error('Failed to fetch history');
-      }
-      const data = await response.json();
-      // Backend returns history as object with dates as keys, convert to array
-      if (data.ok && data.history) {
-        return Object.entries(data.history).map(([date, metrics]: [string, any]) => ({
-          date,
-          caloriesIn: 0, // Not provided by backend
-          caloriesOut: metrics.activeCalories || 0,
-          restingEnergy: metrics.restingEnergy || 0,
-          steps: metrics.steps || 0,
-          weight: 0, // Not provided by backend
-        }));
-      }
-      return [];
-    } catch (error) {
-      // console.error('Get history error:', error);
-      return [];
-    }
-  }
-
-  // Get connected devices
-  async getConnectedDevices(): Promise<string[]> {
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/health/devices?shopifyCustomerId=${this.shopifyCustomerId}`,
-        { headers: this.getHeaders() }
-      );
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 404) return [];
-        throw new Error('Failed to fetch devices');
-      }
-      const data = await response.json();
-      return data.devices || [];
-    } catch (error) {
-      // console.error('Get devices error:', error);
-      return [];
-    }
-  }
-
-  // Log a meal
-  async logMeal(meal: Omit<MealData, 'odooId' | 'odooContactId'>): Promise<boolean> {
-    try {
-      // Backend expects mealType at root level and foods in 'items' array
-      const payload = {
-        shopifyCustomerId: this.shopifyCustomerId,
-        mealType: meal.mealType,
-        date: meal.date,
-        items: [
-          {
-            name: meal.name,
-            calories: meal.calories,
-            protein: meal.protein,
-            carbs: meal.carbs,
-            fat: meal.fat,
-            odooId: this.odooId,
-            odooContactId: this.odooId,
-          }
-        ],
-      };
-
-      console.log('[API] Logging meal to:', `${this.baseUrl}/api/v1/meals`);
-      console.log('[API] Payload:', JSON.stringify(payload, null, 2));
-
-      const response = await fetch(`${this.baseUrl}/api/v1/meals`, {
-        method: 'POST',
-        headers: this.getHeaders(true),
-        body: JSON.stringify(payload),
-      });
-
-      console.log('[API] Response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[API] Meal log error response:', response.status, errorText);
-        if (response.status === 401) {
-          console.warn('[API] Auth required for meal logging');
-          return false;
-        }
-        throw new Error(`Failed to log meal: ${response.status} - ${errorText}`);
-      }
-
-      const result = await response.json();
-      console.log('[API] Meal log success:', JSON.stringify(result, null, 2));
-      return true;
-    } catch (error) {
-      console.error('[API] Log meal error:', error);
-      return false;
-    }
-  }
-
-  // Get meals for a date
-  async getMeals(date: string): Promise<MealData[]> {
-    try {
-      console.log('[API] Fetching meals for date:', date);
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/meals?shopifyCustomerId=${this.shopifyCustomerId}&date=${date}`,
-        { headers: this.getHeaders() }
-      );
-      console.log('[API] getMeals response status:', response.status);
-
-      if (!response.ok) {
-        if (response.status === 404 || response.status === 401) return [];
-        throw new Error('Failed to fetch meals');
-      }
-      const data = await response.json();
-      console.log('[API] getMeals raw response:', JSON.stringify(data, null, 2));
-
-      // Backend returns: { meals: [{ mealType, items: [{name, calories, ...}] }] }
-      // We need to flatten this to: [{ mealType, name, calories, ... }]
-      let meals: MealData[] = [];
-
-      if (data.meals && Array.isArray(data.meals)) {
-        // Flatten nested structure - each item becomes a MealData entry
-        for (const meal of data.meals) {
-          if (meal.items && Array.isArray(meal.items)) {
-            for (const item of meal.items) {
-              meals.push({
-                id: meal.id,  // Use parent meal ID for deletion
-                date: date,
-                mealType: meal.mealType,
-                name: item.name,
-                calories: item.calories || 0,
-                protein: item.protein || 0,
-                carbs: item.carbs || 0,
-                fat: item.fat || 0,
-              });
-            }
-          }
-        }
-      } else if (Array.isArray(data)) {
-        meals = data;
-      }
-
-      console.log('[API] Parsed meals:', meals.length, 'items');
-      console.log('[API] Flattened meals data:', JSON.stringify(meals, null, 2));
-      return meals;
-    } catch (error) {
-      console.error('[API] Get meals error:', error);
-      return [];
-    }
-  }
-
-  // Delete a meal
-  async deleteMeal(mealId: string): Promise<boolean> {
-    try {
-      console.log('[API] Deleting meal:', mealId);
-
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/meals/${mealId}?shopifyCustomerId=${this.shopifyCustomerId}`,
-        {
-          method: 'DELETE',
-          headers: this.getHeaders(),
-        }
-      );
-
-      console.log('[API] Delete response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[API] Delete meal error:', response.status, errorText);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('[API] Delete meal error:', error);
-      return false;
-    }
-  }
-
-  // Search food database
-  async searchFood(query: string): Promise<any[]> {
-    try {
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/food/search?q=${encodeURIComponent(query)}`,
-        { headers: this.getHeaders() }
-      );
-      if (!response.ok) {
-        if (response.status === 401) return [];
-        throw new Error('Failed to search food');
-      }
-      return await response.json();
-    } catch (error) {
-      // console.error('Search food error:', error);
-      return [];
-    }
-  }
-
-  // Get user goals
   async getGoals(): Promise<UserGoals | null> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/user/goals`,
-        { headers: this.getHeaders() }
-      );
+      const response = await fetch(`${this.baseUrl}/api/v1/user/goals`, {
+        headers: this.getHeaders(),
+      });
       if (!response.ok) {
         if (response.status === 404 || response.status === 401 || response.status === 400) return null;
         throw new Error('Failed to fetch goals');
       }
       const data = await response.json();
-      if (data.ok && data.goals) {
-        // Map backend format to frontend UserGoals format
+      if (data.success && data.goals) {
         return {
-          dailyCalories: data.goals.calories || 2200,
-          dailyProtein: data.goals.protein || 190,
-          dailyCarbs: data.goals.carbs || 190,
-          dailyFat: data.goals.fat || 60,
-          dailySteps: 10000, // Backend doesn't store steps goal, use default
-          targetWeight: data.goals.goalWeight || undefined,
+          dailyCalories: data.goals.dailyCalories || 2000,
+          dailyProtein: data.goals.dailyProtein || 150,
+          dailyCarbs: data.goals.dailyCarbs || 200,
+          dailyFat: data.goals.dailyFat || 65,
+          dailySteps: data.goals.dailySteps || 10000,
+          dailyWaterOz: data.goals.dailyWaterOz || 64,
+          sleepHours: data.goals.sleepHours || 8,
+          workoutDaysPerWeek: data.goals.workoutDaysPerWeek || 4,
+          targetWeight: data.goals.targetWeight,
         };
       }
       return null;
     } catch (error) {
-      // console.error('Get goals error:', error);
       return null;
     }
   }
 
-  // Update user goals
   async updateGoals(goals: Partial<UserGoals>): Promise<boolean> {
     try {
-      // Map frontend UserGoals format to backend format
-      const backendGoals = {
-        calories: goals.dailyCalories,
-        protein: goals.dailyProtein,
-        carbs: goals.dailyCarbs,
-        fat: goals.dailyFat,
-        goalWeight: goals.targetWeight || null,
+      // Ensure we only send valid numeric values
+      const sanitizedGoals = {
+        dailyCalories: Math.round(goals.dailyCalories || 2000),
+        dailyProtein: Math.round(goals.dailyProtein || 150),
+        dailyCarbs: Math.round(goals.dailyCarbs || 200),
+        dailyFat: Math.round(goals.dailyFat || 65),
+        dailySteps: Math.round(goals.dailySteps || 10000),
+        dailyWaterOz: Math.round(goals.dailyWaterOz || 64),
+        sleepHours: goals.sleepHours || 8,
+        workoutDaysPerWeek: Math.round(goals.workoutDaysPerWeek || 4),
       };
 
-      const payload = { goals: backendGoals };
-      console.log('[API] Updating goals with payload:', JSON.stringify(payload, null, 2));
+      console.log('[API] Sending goals:', JSON.stringify(sanitizedGoals));
 
-      const response = await fetch(
-        `${this.baseUrl}/api/v1/user/goals`,
-        {
-          method: 'POST',
-          headers: this.getHeaders(true),
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${this.baseUrl}/api/v1/user/goals`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(sanitizedGoals),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('[API] Update goals failed:', response.status, errorText);
-        if (response.status === 401 || response.status === 404) {
-          // console.warn('Auth required for updating goals or endpoint not found');
-          return false;
-        }
-        throw new Error(`Failed to update goals: ${response.status} - ${errorText}`);
+        return false;
       }
       return true;
     } catch (error) {
@@ -461,30 +320,829 @@ class HeirclarkAPI {
     }
   }
 
-  // Sync with fitness provider (Apple Health, Fitbit, etc.)
+  // ============================================
+  // USER PROFILE (Weight Goal Alignment)
+  // ============================================
+
+  async getProfile(): Promise<UserProfile | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/user/profile`, {
+        headers: this.getHeaders(),
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.profile : null;
+    } catch (error) {
+      console.error('[API] Get profile error:', error);
+      return null;
+    }
+  }
+
+  async updateProfile(profile: Partial<UserProfile>): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/user/profile`, {
+        method: 'PATCH',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({
+          height_cm: profile.heightCm,
+          weight_kg: profile.weightKg,
+          age: profile.age,
+          sex: profile.sex,
+          activity_level: profile.activityLevel,
+          goal_type: profile.goalType,
+          target_weight_kg: profile.targetWeightKg,
+          target_date: profile.targetDate,
+          timezone: profile.timezone,
+        }),
+      });
+      if (!response.ok) {
+        console.error('[API] Update profile failed:', response.status);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('[API] Update profile error:', error);
+      return false;
+    }
+  }
+
+  // ============================================
+  // MEALS
+  // ============================================
+
+  async logMeal(meal: Omit<MealData, 'odooId' | 'odooContactId'>): Promise<boolean> {
+    try {
+      const payload = {
+        mealName: meal.name,
+        mealType: meal.mealType,
+        calories: meal.calories,
+        protein: meal.protein,
+        carbs: meal.carbs,
+        fat: meal.fat,
+        fiber: meal.fiber,
+        photoUrl: meal.photoUrl,
+        source: meal.source || 'manual',
+        confidence: meal.confidence || 'medium',
+        foods: meal.foods,
+      };
+
+      const response = await fetch(`${this.baseUrl}/api/v1/meals`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Meal log error:', response.status, errorText);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('[API] Log meal error:', error);
+      return false;
+    }
+  }
+
+  async getMeals(date: string): Promise<MealData[]> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/meals?date=${date}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return [];
+        throw new Error('Failed to fetch meals');
+      }
+
+      const data = await response.json();
+      if (data.success && data.meals) {
+        return data.meals.map((m: any) => ({
+          id: m.id,
+          date: date,
+          mealType: m.meal_type,
+          name: m.meal_name,
+          calories: m.calories || 0,
+          protein: parseFloat(m.protein) || 0,
+          carbs: parseFloat(m.carbs) || 0,
+          fat: parseFloat(m.fat) || 0,
+          fiber: parseFloat(m.fiber) || 0,
+          photoUrl: m.photo_url,
+          source: m.source,
+          confidence: m.confidence,
+          foods: m.foods || [],
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('[API] Get meals error:', error);
+      return [];
+    }
+  }
+
+  async deleteMeal(mealId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/meals/${mealId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error('[API] Delete meal error:', error);
+      return false;
+    }
+  }
+
+  // ============================================
+  // SAVED MEALS (Favorites)
+  // ============================================
+
+  async getSavedMeals(): Promise<SavedMeal[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/meals/saved`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? data.savedMeals : [];
+    } catch (error) {
+      console.error('[API] Get saved meals error:', error);
+      return [];
+    }
+  }
+
+  async saveMeal(meal: Omit<SavedMeal, 'id'>): Promise<SavedMeal | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/meals/saved`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(meal),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.savedMeal : null;
+    } catch (error) {
+      console.error('[API] Save meal error:', error);
+      return null;
+    }
+  }
+
+  async deleteSavedMeal(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/meals/saved/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // ============================================
+  // HEALTH METRICS
+  // ============================================
+
+  async getTodayMetrics(): Promise<HealthMetrics | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/health/metrics`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401 || response.status === 400) return null;
+        throw new Error('Failed to fetch metrics');
+      }
+
+      const data = await response.json();
+      if (data.success && data.metrics) {
+        const m = data.metrics;
+        return {
+          date: new Date().toISOString().split('T')[0],
+          caloriesIn: m.calories || 0,
+          caloriesOut: m.steps ? Math.round(m.steps * 0.04) : 0,
+          restingEnergy: 0,
+          steps: m.steps || 0,
+          weight: m.weight || 0,
+          protein: m.protein || 0,
+          carbs: m.carbs || 0,
+          fat: m.fat || 0,
+          waterOz: m.waterOz || 0,
+          sleepHours: m.sleepHours || 0,
+          activeMinutes: m.activeMinutes || 0,
+        };
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getMetricsByDate(date: string): Promise<HealthMetrics | null> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/health/metrics?date=${date}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401 || response.status === 400) return null;
+        throw new Error('Failed to fetch metrics');
+      }
+
+      const data = await response.json();
+      if (data.success && data.metrics) {
+        const m = data.metrics;
+        return {
+          date,
+          caloriesIn: m.calories || 0,
+          caloriesOut: m.steps ? Math.round(m.steps * 0.04) : 0,
+          restingEnergy: 0,
+          steps: m.steps || 0,
+          weight: m.weight || 0,
+          protein: m.protein || 0,
+          carbs: m.carbs || 0,
+          fat: m.fat || 0,
+          waterOz: m.waterOz || 0,
+          sleepHours: m.sleepHours || 0,
+        };
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async ingestHealthData(data: Partial<HealthMetrics>): Promise<boolean> {
+    try {
+      const payload: any = {
+        date: data.date || new Date().toISOString().split('T')[0],
+      };
+
+      if (data.steps !== undefined) payload.steps = data.steps;
+      if (data.caloriesOut !== undefined) payload.activeCalories = data.caloriesOut;
+      if (data.weight !== undefined) payload.weight = data.weight;
+      if (data.sleepHours !== undefined) payload.sleepHours = data.sleepHours;
+
+      const response = await fetch(`${this.baseUrl}/api/v1/health/ingest-simple`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(payload),
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.warn('[API] Ingest data error:', error);
+      return false;
+    }
+  }
+
+  async getHistory(days: number = 7): Promise<HealthMetrics[]> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/health/history?days=${days}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 400) return [];
+        throw new Error('Failed to fetch history');
+      }
+
+      const data = await response.json();
+      if (data.success && data.history) {
+        const { weights, calories, steps } = data.history;
+
+        // Merge data by date
+        const dateMap = new Map<string, HealthMetrics>();
+
+        steps?.forEach((s: any) => {
+          const date = s.date;
+          if (!dateMap.has(date)) {
+            dateMap.set(date, {
+              date,
+              caloriesIn: 0,
+              caloriesOut: 0,
+              restingEnergy: 0,
+              steps: 0,
+              weight: 0,
+            });
+          }
+          dateMap.get(date)!.steps = s.steps;
+        });
+
+        calories?.forEach((c: any) => {
+          const date = c.date;
+          if (!dateMap.has(date)) {
+            dateMap.set(date, {
+              date,
+              caloriesIn: 0,
+              caloriesOut: 0,
+              restingEnergy: 0,
+              steps: 0,
+              weight: 0,
+            });
+          }
+          dateMap.get(date)!.caloriesIn = c.calories_consumed || 0;
+          dateMap.get(date)!.caloriesOut = c.calories_burned || 0;
+        });
+
+        weights?.forEach((w: any) => {
+          const date = new Date(w.logged_at).toISOString().split('T')[0];
+          if (dateMap.has(date)) {
+            dateMap.get(date)!.weight = w.weight;
+          }
+        });
+
+        return Array.from(dateMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+      }
+      return [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async getConnectedDevices(): Promise<string[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/health/devices`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 404) return [];
+        throw new Error('Failed to fetch devices');
+      }
+
+      const data = await response.json();
+      return data.success ? data.devices.map((d: any) => d.provider) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
   async syncFitnessData(provider: string, data: any): Promise<boolean> {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/health/sync`, {
         method: 'POST',
         headers: this.getHeaders(true),
-        body: JSON.stringify({
-          shopifyCustomerId: this.shopifyCustomerId,
-          provider,
-          data,
-        }),
+        body: JSON.stringify({ provider, data }),
+      });
+
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // ============================================
+  // WEIGHT LOGGING
+  // ============================================
+
+  async logWeight(weight: number, unit: string = 'lbs', bodyFatPercent?: number): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/health/weight`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ weight, unit, bodyFatPercent }),
+      });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // ============================================
+  // HYDRATION
+  // ============================================
+
+  async logHydration(amountOz: number, date?: string): Promise<{ success: boolean; todayTotal: number }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/health/hydration`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ amountOz, date }),
+      });
+
+      if (!response.ok) return { success: false, todayTotal: 0 };
+      const data = await response.json();
+      return { success: data.success, todayTotal: data.todayTotal || 0 };
+    } catch (error) {
+      return { success: false, todayTotal: 0 };
+    }
+  }
+
+  // ============================================
+  // SLEEP
+  // ============================================
+
+  async logSleep(sleepData: {
+    date?: string;
+    bedTime?: string;
+    wakeTime?: string;
+    totalHours?: number;
+    qualityScore?: number;
+  }): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/health/sleep`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(sleepData),
+      });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async getSleepHistory(days: number = 14): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/health/sleep?days=${days}`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? data.sleepLogs : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  // ============================================
+  // HABITS
+  // ============================================
+
+  async getHabits(): Promise<Habit[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/habits`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? data.habits : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async createHabit(habit: Omit<Habit, 'id' | 'weekCompletions'>): Promise<Habit | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/habits`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(habit),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.habit : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async completeHabit(habitId: string, date?: string, value?: number): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/habits/${habitId}/complete`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ date, value }),
+      });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // ============================================
+  // FASTING
+  // ============================================
+
+  async startFast(fastingType: string = '16:8', targetHours: number = 16): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/fasting/start`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ fastingType, targetHours }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.session : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async endFast(): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/fasting/end`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.session : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getCurrentFast(): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/fasting/current`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.session : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // ============================================
+  // FOOD SEARCH
+  // ============================================
+
+  async searchFood(query: string): Promise<any[]> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/food/search?query=${encodeURIComponent(query)}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401) return [];
+        throw new Error('Failed to search food');
+      }
+
+      const data = await response.json();
+      return data.success ? data.foods : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  // ============================================
+  // AI AGENTS
+  // ============================================
+
+  async generateMealPlan(options: {
+    goals?: UserGoals;
+    preferences?: any;
+    restrictions?: string[];
+    days?: number;
+  }): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/ai/generate-meal-plan`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(options),
       });
 
       if (!response.ok) {
-        if (response.status === 401 || response.status === 404) {
-          // console.warn('Auth required for sync or endpoint not found');
-          return false;
-        }
-        throw new Error('Failed to sync fitness data');
+        console.error('[API] Generate meal plan failed:', response.status);
+        return null;
       }
-      return true;
+
+      const data = await response.json();
+      return data.success ? data : null;
     } catch (error) {
-      // console.error('Sync fitness data error:', error);
-      return false;
+      console.error('[API] Generate meal plan error:', error);
+      return null;
+    }
+  }
+
+  async generateWorkoutPlan(options: {
+    goals?: any;
+    fitnessLevel?: string;
+    equipment?: string[];
+    daysPerWeek?: number;
+    preferences?: any;
+  }): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/ai/generate-workout-plan`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(options),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.workoutPlan : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async sendCoachMessage(message: string, conversationType?: string, context?: any): Promise<string | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/ai/coach-message`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ message, conversationType, context }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.message : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getRecipeDetails(mealName: string, basicInfo?: any): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/ai/recipe-details`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ mealName, basicInfo }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.recipe : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Smart Meal Logger Agent
+  async getSmartMealSuggestions(timeOfDay?: string, recentMeals?: any[]): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/smart-meal-logger/suggestions`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ timeOfDay, recentMeals }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Accountability Agent
+  async getAccountabilityCheckIn(todayProgress: any, goals: any, streak?: number): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/accountability/check-in`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ todayProgress, goals, streak }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Progress Prediction Agent
+  async getProgressForecast(currentWeight: number, targetWeight: number, averageDeficit: number): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/prediction/forecast`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ currentWeight, targetWeight, averageDeficit }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Habit Formation Agent
+  async analyzeHabits(habits: any[], completions: any[]): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/habits/analyze`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ habits, completions }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Restaurant Menu Agent
+  async analyzeRestaurantMenu(restaurantName: string, menuItems: any[], goals?: UserGoals): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/restaurant/analyze`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ restaurantName, menuItems, goals }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Sleep Recovery Agent
+  async analyzeSleep(recentSleep: any[], goals?: any): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/sleep/analyze`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ recentSleep, goals }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Hydration Agent
+  async getHydrationStatus(todayIntake: number, goal: number, activityLevel?: string, weather?: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/hydration/status`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ todayIntake, goal, activityLevel, weather }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Calorie Banking Agent
+  async calculateCalorieBanking(weeklyBudget: number, dailyLogs: any[], specialEvents?: any[]): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/banking/calculate`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ weeklyBudget, dailyLogs, specialEvents }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Workout Form Coach Agent
+  async analyzeExerciseForm(exercise: string, userDescription?: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/form-coach/analyze`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ exercise, userDescription }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Nutrition Accuracy Agent
+  async verifyNutrition(meal: string, estimatedNutrition: any, source?: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/agents/nutrition-accuracy/verify`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ meal, estimatedNutrition, source }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      return null;
     }
   }
 }
