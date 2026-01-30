@@ -42,7 +42,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
 
   useEffect(() => {
     // Scroll to selected day after data is loaded (week view only)
-    if (viewMode === 'week' && weeklyPlan?.days.length > 0 && scrollViewRef.current) {
+    if (viewMode === 'week' && weeklyPlan?.days?.length > 0 && scrollViewRef.current) {
       setTimeout(() => {
         const offset = selectedDayIndex * 54; // 48px width + 6px gap
         scrollViewRef.current?.scrollTo({ x: Math.max(0, offset - 100), y: 0, animated: true });
@@ -90,12 +90,12 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
       const dateStr = date.toISOString().split('T')[0];
 
       // Find matching day in weekly plan
-      const planIndex = weeklyPlan?.days.findIndex(d => {
+      const planIndex = weeklyPlan?.days?.findIndex(d => {
         const planDate = new Date(d.date).toISOString().split('T')[0];
         return planDate === dateStr;
-      });
+      }) ?? -1;
 
-      const dayPlan = planIndex !== undefined && planIndex >= 0 ? weeklyPlan?.days[planIndex] : undefined;
+      const dayPlan = planIndex >= 0 ? weeklyPlan?.days?.[planIndex] : undefined;
 
       calendarDays.push({
         date,
@@ -158,7 +158,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
         <View style={styles.headerLeft}>
           <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
           <Text style={[styles.weekTitle, { color: colors.textSecondary }]}>
-            {viewMode === 'week' ? `Week ${weeklyPlan.weekNumber || 1}` : monthName}
+            {viewMode === 'week' ? `Week ${weeklyPlan?.weekNumber || 1}` : monthName}
           </Text>
         </View>
 
@@ -203,7 +203,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
             decelerationRate="fast"
             accessibilityRole="tablist"
           >
-            {weeklyPlan.days.map((day, index) => {
+            {(weeklyPlan?.days || []).map((day, index) => {
               const isSelected = selectedDayIndex === index;
               const dayShort = day.dayOfWeek.slice(0, 3);
               const dayNumber = new Date(day.date).getDate();
@@ -363,19 +363,19 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
         <View style={styles.summaryItem}>
           <View style={[styles.summaryDot, { backgroundColor: colors.protein }]} />
           <Text style={[styles.summaryText, { color: colors.textMuted }]}>
-            {weeklyPlan.days.filter(d => !d.isRestDay && d.workout).length} Workouts
+            {(weeklyPlan?.days || []).filter(d => !d.isRestDay && d.workout).length} Workouts
           </Text>
         </View>
         <View style={styles.summaryItem}>
           <Ionicons name="bed-outline" size={12} color={colors.textMuted} />
           <Text style={[styles.summaryText, { color: colors.textMuted }]}>
-            {weeklyPlan.days.filter(d => d.isRestDay).length} Rest Days
+            {(weeklyPlan?.days || []).filter(d => d.isRestDay).length} Rest Days
           </Text>
         </View>
         <View style={styles.summaryItem}>
           <Ionicons name="checkmark-circle" size={12} color={colors.protein} />
           <Text style={[styles.summaryText, { color: colors.textMuted }]}>
-            {weeklyPlan.completedWorkouts}/{weeklyPlan.totalWorkouts} Done
+            {weeklyPlan?.completedWorkouts || 0}/{weeklyPlan?.totalWorkouts || 0} Done
           </Text>
         </View>
       </View>
