@@ -455,44 +455,100 @@ class AIService {
 
   /**
    * Generate AI-powered meal plan based on user preferences
+   * Includes timeout handling for better network reliability
    */
   async generateAIMealPlan(preferences: MealPlanPreferences, days: number = 7): Promise<AIWeeklyMealPlan | null> {
+    const TIMEOUT_MS = 120000; // 2 minute timeout for AI generation (can be slow on cold starts)
+
     try {
-      console.log('[AIService] Generating AI meal plan with preferences:', preferences);
+      console.log('[AIService] Generating AI meal plan with preferences:', JSON.stringify(preferences, null, 2));
+      console.log('[AIService] Backend URL:', this.baseUrl);
 
-      const response = await fetch(`${this.baseUrl}/api/v1/ai/generate-meal-plan`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
-        body: JSON.stringify({
-          preferences,
-          days,
-          shopifyCustomerId: 'guest_ios_app',
-        }),
-      });
+      // Create an abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[AIService] Meal plan generation error:', response.status, errorText);
-        console.error('[AIService] Request URL:', `${this.baseUrl}/api/v1/ai/generate-meal-plan`);
+      try {
+        const response = await fetch(`${this.baseUrl}/api/v1/ai/generate-meal-plan`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Shopify-Customer-Id': 'guest_ios_app',
+          },
+          body: JSON.stringify({
+            preferences,
+            days,
+            shopifyCustomerId: 'guest_ios_app',
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[AIService] Meal plan generation error:', response.status, errorText);
+          console.error('[AIService] Request URL:', `${this.baseUrl}/api/v1/ai/generate-meal-plan`);
+          return null;
+        }
+
+        const data = await response.json();
+        console.log('[AIService] Meal plan response (first 300 chars):', JSON.stringify(data).substring(0, 300));
+
+        // Handle different response formats from Railway backend
+        if (data.success && data.weeklyPlan) {
+          // Railway backend format: { success: true, weeklyPlan: [...] }
+          const plan: AIWeeklyMealPlan = {
+            days: data.weeklyPlan.map((day: any) => ({
+              dayName: day.dayName,
+              dayIndex: day.dayIndex,
+              meals: day.meals.map((meal: any) => ({
+                mealType: meal.mealType,
+                dishName: meal.name || meal.dishName,
+                description: meal.description || '',
+                calories: meal.calories || 0,
+                macros: {
+                  protein: meal.protein || meal.macros?.protein || 0,
+                  carbs: meal.carbs || meal.macros?.carbs || 0,
+                  fat: meal.fat || meal.macros?.fat || 0,
+                },
+                servings: meal.servings || 1,
+                imageUrl: meal.imageUrl,
+              })),
+            })),
+            generatedAt: data.generatedAt || new Date().toISOString(),
+          };
+          await this.cacheMealPlan(plan);
+          return plan;
+        }
+
+        if (data.ok && data.plan) {
+          // Legacy format: { ok: true, plan: {...} }
+          await this.cacheMealPlan(data.plan);
+          return data.plan;
+        }
+
+        console.error('[AIService] Unexpected response structure:', Object.keys(data));
         return null;
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+
+        if (fetchError.name === 'AbortError') {
+          console.error('[AIService] Meal plan generation timed out after', TIMEOUT_MS, 'ms');
+          return null;
+        }
+        throw fetchError;
       }
-
-      const data = await response.json();
-      console.log('[AIService] Meal plan response:', JSON.stringify(data).substring(0, 200));
-
-      if (data.ok && data.plan) {
-        // Cache the plan
-        await this.cacheMealPlan(data.plan);
-        return data.plan;
+    } catch (error: any) {
+      console.error('[AIService] generateAIMealPlan error:', error.message || error);
+      console.error('[AIService] Error type:', error.name);
+      // Log additional network details for debugging
+      if (error.message?.includes('Network request failed')) {
+        console.error('[AIService] Network error - possible causes:');
+        console.error('  1. Backend server not reachable at:', this.baseUrl);
+        console.error('  2. No internet connection');
+        console.error('  3. Request blocked by firewall/proxy');
       }
-
-      console.error('[AIService] Unexpected response structure:', data);
-      return null;
-    } catch (error) {
-      console.error('[AIService] generateAIMealPlan error:', error);
       return null;
     }
   }
