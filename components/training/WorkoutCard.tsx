@@ -270,7 +270,7 @@ export function WorkoutCard({
             {/* Exercise Preview */}
             <View style={styles.exercisePreview}>
               {workout.exercises.slice(0, 3).map((ex, i) => (
-                <Text key={ex.id} style={[styles.exercisePreviewText, { color: colors.textSecondary }]} numberOfLines={1}>
+                <Text key={ex.id || `preview-${i}`} style={[styles.exercisePreviewText, { color: colors.textSecondary }]} numberOfLines={1}>
                   • {ex.exercise.name}
                 </Text>
               ))}
@@ -330,9 +330,9 @@ export function WorkoutCard({
             {/* Exercise List */}
             <ScrollView style={styles.exerciseList} showsVerticalScrollIndicator={false}>
               <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>EXERCISES</Text>
-              {workout.exercises.map((exercise) => (
+              {workout.exercises.map((exercise, index) => (
                 <ExerciseRow
-                  key={exercise.id}
+                  key={exercise.id || `exercise-${index}`}
                   exercise={exercise}
                   onToggle={() => onExerciseToggle(exercise.id)}
                   onSwap={() => onSwapExercise(exercise.id)}
