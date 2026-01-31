@@ -929,6 +929,92 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
 });
 
 // ============================================
+// AI CHEAT DAY GUIDANCE
+// ============================================
+
+app.post('/api/v1/ai/cheat-day-guidance', authenticateToken, async (req, res) => {
+  try {
+    const { dayName, userGoals, userName } = req.body;
+
+    console.log(`[Cheat Day Guidance] Request for ${dayName} from user ${req.userId}`);
+
+    // Get user profile for context
+    let userContext = '';
+    try {
+      const userData = await pool.query(
+        `SELECT up.*, ug.daily_calories, ug.daily_protein, ug.goal_type
+         FROM user_profiles up
+         LEFT JOIN user_goals ug ON up.user_id = ug.user_id AND ug.is_active = true
+         WHERE up.user_id = $1`,
+        [req.userId]
+      );
+
+      if (userData.rows.length > 0) {
+        const profile = userData.rows[0];
+        userContext = `User's calorie goal: ${profile.daily_calories || 'not set'}, ` +
+          `protein goal: ${profile.daily_protein || 'not set'}g, ` +
+          `goal type: ${profile.goal_type || userGoals?.goalType || 'general fitness'}`;
+      }
+    } catch (dbError) {
+      console.warn('[Cheat Day Guidance] Could not fetch user data:', dbError.message);
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a supportive, encouraging health coach specializing in balanced nutrition and sustainable wellness.
+
+Your task is to provide warm, personalized guidance for someone on their designated cheat day. Be positive and understanding - cheat days are important for mental health and sustainability!
+
+Return a JSON object with exactly this structure:
+{
+  "greeting": "A warm, personalized greeting acknowledging their cheat day (1-2 sentences)",
+  "encouragement": "Positive encouragement about enjoying their day without guilt (2-3 sentences)",
+  "mindfulTips": [
+    "3-4 practical tips for mindful indulgence that won't derail progress"
+  ],
+  "hydrationReminder": "A friendly reminder about staying hydrated (1 sentence)",
+  "balanceTip": "One tip about getting back on track tomorrow (1-2 sentences)",
+  "motivationalQuote": "An inspiring quote about balance, self-care, or enjoying life"
+}
+
+Keep the tone warm, supportive, and non-judgmental. Avoid using words like "cheat" in a negative way - frame it as a "flexible" or "enjoyment" day.`
+        },
+        {
+          role: 'user',
+          content: `Today is ${dayName} and it's the user's planned cheat/flexible day.
+${userContext ? `Context: ${userContext}` : ''}
+${userName ? `User's name: ${userName}` : ''}
+
+Generate personalized, encouraging guidance for their cheat day that helps them enjoy it mindfully without guilt.`
+        }
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.85,
+      max_tokens: 800,
+    });
+
+    const guidance = JSON.parse(completion.choices[0].message.content);
+
+    console.log(`[Cheat Day Guidance] Generated successfully for ${dayName}`);
+    res.json({
+      success: true,
+      guidance,
+      dayName,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[Cheat Day Guidance] Error:', error);
+    res.status(500).json({
+      error: 'Failed to generate cheat day guidance',
+      message: error.message
+    });
+  }
+});
+
+// ============================================
 // AI RECIPE DETAILS
 // ============================================
 
