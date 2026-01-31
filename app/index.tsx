@@ -38,11 +38,25 @@ export default function LoginScreen() {
     loadCachedName();
   }, []);
 
-  // Redirect to dashboard if already authenticated
+  // Redirect to onboarding or dashboard based on status
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace('/(tabs)');
-    }
+    const checkOnboardingStatus = async () => {
+      if (!isLoading && isAuthenticated) {
+        try {
+          const hasCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
+          if (hasCompleted === 'true') {
+            router.replace('/(tabs)');
+          } else {
+            router.replace('/onboarding');
+          }
+        } catch (error) {
+          console.error('Error checking onboarding status:', error);
+          // Default to showing onboarding on error
+          router.replace('/onboarding');
+        }
+      }
+    };
+    checkOnboardingStatus();
   }, [isLoading, isAuthenticated]);
 
   const handleSignIn = async () => {
