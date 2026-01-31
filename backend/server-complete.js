@@ -755,10 +755,23 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
       ],
       response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 8000,
+      max_tokens: 16000,
     });
 
-    const mealPlan = JSON.parse(completion.choices[0].message.content);
+    const rawContent = completion.choices[0].message.content;
+    let mealPlan;
+    try {
+      mealPlan = JSON.parse(rawContent);
+    } catch (parseError) {
+      console.error('[Meal Plan] JSON parse error, attempting recovery...');
+      // Try to fix truncated JSON by finding last complete day
+      const fixedContent = rawContent.replace(/,\s*$/, '') + ']}';
+      try {
+        mealPlan = JSON.parse(fixedContent);
+      } catch {
+        throw new Error('AI response was truncated. Please try again.');
+      }
+    }
 
     // Save to database
     const weekStart = new Date();
