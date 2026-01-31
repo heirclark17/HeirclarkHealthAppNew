@@ -89,13 +89,13 @@ function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWid
   const selectedBorder = option.color + '40';
 
   React.useEffect(() => {
-    colorProgress.value = withTiming(isSelected ? 1 : 0, { duration: 200 });
+    colorProgress.value = withSpring(isSelected ? 1 : 0, GLASS_SPRING);
   }, [isSelected, colorProgress]);
 
   const handlePress = async () => {
     await selectionFeedback();
     scale.value = withSequence(
-      withTiming(0.95, { duration: 50 }),
+      withSpring(0.95, GLASS_SPRING),
       withSpring(1.02, { damping: 10, stiffness: 400 }),
       withSpring(1, { damping: 15, stiffness: 300 })
     );
@@ -111,7 +111,7 @@ function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWid
   // Staggered entrance animation
   const entranceStyle = useAnimatedStyle(() => {
     return {
-      opacity: withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) }),
+      opacity: withSpring(1, { duration: 300, easing: Easing.out(Easing.ease, GLASS_SPRING) }),
     };
   });
 
@@ -188,13 +188,13 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
   const handlePressIn = useCallback(() => {
     buttonScale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
-    buttonOpacity.value = withTiming(0.8, { duration: 80 });
+    buttonOpacity.value = withSpring(0.8, GLASS_SPRING);
     rigidImpact();
   }, []);
 
   const handlePressOut = useCallback(() => {
     buttonScale.value = withSpring(1, { damping: 15, stiffness: 300 });
-    buttonOpacity.value = withTiming(1, { duration: 150 });
+    buttonOpacity.value = withSpring(1, GLASS_SPRING);
   }, []);
 
   const handleContinue = async () => {

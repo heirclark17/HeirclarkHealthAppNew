@@ -37,7 +37,7 @@ function StepDot({ stepNumber, currentStep, label, colors, isDark }: StepDotProp
   const unselectedText = colors.textMuted;
 
   useEffect(() => {
-    progress.value = withTiming(isActive ? 1 : 0, { duration: 300 });
+    progress.value = withSpring(isActive ? 1 : 0, GLASS_SPRING);
     if (isCurrent) {
       scale.value = withSpring(1.1, { damping: 10, stiffness: 200 });
     } else {
@@ -98,7 +98,7 @@ function Connector({ isActive, colors }: ConnectorProps) {
   const progress = useSharedValue(isActive ? 1 : 0);
 
   useEffect(() => {
-    progress.value = withTiming(isActive ? 1 : 0, { duration: 400 });
+    progress.value = withSpring(isActive ? 1 : 0, GLASS_SPRING);
   }, [isActive, progress]);
 
   const fillStyle = useAnimatedStyle(() => ({

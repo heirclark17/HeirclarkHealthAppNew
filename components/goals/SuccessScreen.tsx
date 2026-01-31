@@ -40,16 +40,16 @@ function Confetti({ index, color }: ConfettiProps) {
 
     translateY.value = withDelay(
       delay,
-      withTiming(height + 100, {
-        duration: 2500 + Math.random() * 1000,
+      withSpring(height + 100, {
+        duration: 2500 + Math.random(, GLASS_SPRING) * 1000,
         easing: Easing.out(Easing.quad),
       })
     );
 
     translateX.value = withDelay(
       delay,
-      withTiming(endX - startX, {
-        duration: 2500 + Math.random() * 1000,
+      withSpring(endX - startX, {
+        duration: 2500 + Math.random(, GLASS_SPRING) * 1000,
         easing: Easing.inOut(Easing.sin),
       })
     );
@@ -57,7 +57,7 @@ function Confetti({ index, color }: ConfettiProps) {
     rotate.value = withDelay(
       delay,
       withRepeat(
-        withTiming(360, { duration: 1000 + Math.random() * 500 }),
+        withSpring(360, { duration: 1000 + Math.random(, GLASS_SPRING) * 500 }),
         -1,
         false
       )
@@ -65,7 +65,7 @@ function Confetti({ index, color }: ConfettiProps) {
 
     opacity.value = withDelay(
       delay + 1500,
-      withTiming(0, { duration: 1000 })
+      withSpring(0, GLASS_SPRING)
     );
   }, [translateY, translateX, rotate, opacity, endX, startX]);
 
@@ -149,12 +149,12 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
     // Ring burst animation
     ringScale.value = withSequence(
-      withTiming(1.5, { duration: 400, easing: Easing.out(Easing.ease) }),
-      withTiming(2, { duration: 300 })
+      withSpring(1.5, { duration: 400, easing: Easing.out(Easing.ease, GLASS_SPRING) }),
+      withSpring(2, GLASS_SPRING)
     );
     ringOpacity.value = withSequence(
-      withTiming(0.5, { duration: 200 }),
-      withDelay(200, withTiming(0, { duration: 300 }))
+      withSpring(0.5, GLASS_SPRING),
+      withDelay(200, withSpring(0, GLASS_SPRING))
     );
 
     // Checkmark animation
@@ -162,18 +162,18 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       200,
       withSpring(1, { damping: 8, stiffness: 150 })
     );
-    checkOpacity.value = withDelay(200, withTiming(1, { duration: 300 }));
+    checkOpacity.value = withDelay(200, withSpring(1, GLASS_SPRING));
 
     // Text animation
-    textOpacity.value = withDelay(500, withTiming(1, { duration: 400 }));
+    textOpacity.value = withDelay(500, withSpring(1, GLASS_SPRING));
     textTranslateY.value = withDelay(500, withSpring(0, { damping: 12 }));
 
     // Card animation
-    cardOpacity.value = withDelay(700, withTiming(1, { duration: 400 }));
+    cardOpacity.value = withDelay(700, withSpring(1, GLASS_SPRING));
     cardScale.value = withDelay(700, withSpring(1, { damping: 12 }));
 
     // Button animation
-    buttonOpacity.value = withDelay(1000, withTiming(1, { duration: 400 }));
+    buttonOpacity.value = withDelay(1000, withSpring(1, GLASS_SPRING));
     buttonTranslateY.value = withDelay(1000, withSpring(0, { damping: 12 }));
   }, [
     ringScale, ringOpacity, checkScale, checkOpacity,

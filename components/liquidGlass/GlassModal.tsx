@@ -119,18 +119,18 @@ export const GlassModal: React.FC<GlassModalProps> = ({
 
   useEffect(() => {
     if (visible) {
-      opacity.value = withTiming(1, { duration: 200 });
+      opacity.value = withSpring(1, GLASS_SPRING);
       if (variant === 'center') {
         scale.value = withSpring(1, { damping: 15, stiffness: 150 });
       } else {
         translateY.value = withSpring(0, { damping: 20, stiffness: 200 });
       }
     } else {
-      opacity.value = withTiming(0, { duration: 150 });
+      opacity.value = withSpring(0, GLASS_SPRING);
       if (variant === 'center') {
-        scale.value = withTiming(0.9, { duration: 150 });
+        scale.value = withSpring(0.9, GLASS_SPRING);
       } else {
-        translateY.value = withTiming(SCREEN_HEIGHT, { duration: 200 });
+        translateY.value = withSpring(SCREEN_HEIGHT, GLASS_SPRING);
       }
     }
   }, [visible, variant]);
@@ -161,7 +161,7 @@ export const GlassModal: React.FC<GlassModalProps> = ({
     })
     .onEnd((event) => {
       if (event.translationY > 100 || event.velocityY > 500) {
-        translateY.value = withTiming(SCREEN_HEIGHT, { duration: 200 });
+        translateY.value = withSpring(SCREEN_HEIGHT, GLASS_SPRING);
         runOnJS(onDismiss)();
       } else {
         translateY.value = withSpring(0, { damping: 20, stiffness: 200 });

@@ -138,7 +138,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       setTimeout(() => {
         setIsContentReady(true);
         setBlurKey(prev => prev + 1);
-        blurOpacity.value = withTiming(1, { duration: 200 });
+        blurOpacity.value = withSpring(1, GLASS_SPRING);
       }, 50);
     });
 

@@ -33,7 +33,7 @@ export function LandingNavbar() {
     const handleScroll = () => {
       const y = window.scrollY;
       scrollY.value = y;
-      hasScrolled.value = withTiming(y > 50 ? 1 : 0, { duration: 200 });
+      hasScrolled.value = withSpring(y > 50 ? 1 : 0, GLASS_SPRING);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });

@@ -141,7 +141,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
     // Reset and replay card entrance animation
     cardOpacity.value = 0;
     cardScale.value = 0.9;
-    cardOpacity.value = withTiming(1, { duration: 400 });
+    cardOpacity.value = withSpring(1, GLASS_SPRING);
     cardScale.value = withSpring(1, { damping: 12, stiffness: 100 });
   }, [calculationKey, calculateResults, cardOpacity, cardScale]);
 
@@ -211,12 +211,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
 
     // Animate button press
     buttonScale.value = withSequence(
-      withTiming(0.95, { duration: 100 }),
+      withSpring(0.95, GLASS_SPRING),
       withSpring(1, { damping: 10 })
     );
 
     // Progress fill animation
-    buttonProgress.value = withTiming(1, { duration: 800 }, () => {
+    buttonProgress.value = withSpring(1, { duration: 800 }, (, GLASS_SPRING) => {
       runOnJS(handleSaveComplete)();
     });
   };

@@ -77,7 +77,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
 
       // Calculate streak progress (7 days = 100%)
       const streak = Math.min(history.length, 7);
-      progressWidth.value = withTiming((streak / 7) * 100, { duration: 500 });
+      progressWidth.value = withSpring((streak / 7) * 100, GLASS_SPRING);
     } catch (error) {
       console.error('[WeightLoggingCard] Error loading weight data:', error);
     }

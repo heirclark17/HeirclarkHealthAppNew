@@ -93,7 +93,7 @@ export function LandingGlassCard({
         setIsContentReady(true);
         setBlurKey(prev => prev + 1);
         // Smooth fade-in for blur effect
-        blurOpacity.value = withTiming(1, { duration: 200 });
+        blurOpacity.value = withSpring(1, GLASS_SPRING);
       }, 50);
     });
 

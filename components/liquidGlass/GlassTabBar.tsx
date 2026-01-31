@@ -80,7 +80,7 @@ const TabItem: React.FC<TabItemProps> = ({
   const opacity = useSharedValue(isActive ? 1 : 0.6);
 
   React.useEffect(() => {
-    opacity.value = withTiming(isActive ? 1 : 0.6, { duration: 200 });
+    opacity.value = withSpring(isActive ? 1 : 0.6, GLASS_SPRING);
   }, [isActive]);
 
   const handlePressIn = () => {

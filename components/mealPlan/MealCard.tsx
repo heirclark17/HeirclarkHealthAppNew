@@ -118,12 +118,12 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     console.log('[MealCard] View Recipe pressed for:', meal.name);
     isFlipping.value = true;
     // Flip card to 90 degrees (edge-on), then show modal
-    flipRotateY.value = withTiming(90, { duration: 300, easing: Easing.inOut(Easing.cubic) });
+    flipRotateY.value = withSpring(90, { duration: 300, easing: Easing.inOut(Easing.cubic, GLASS_SPRING) });
     // Show modal when flip reaches halfway
     setTimeout(() => {
       setShowRecipeModal(true);
       // Continue flip to 180 for full rotation effect
-      flipRotateY.value = withTiming(180, { duration: 300, easing: Easing.out(Easing.cubic) });
+      flipRotateY.value = withSpring(180, { duration: 300, easing: Easing.out(Easing.cubic, GLASS_SPRING) });
     }, 300);
   };
 
@@ -131,7 +131,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     console.log('[MealCard] Closing modal');
     setShowRecipeModal(false);
     // Flip back
-    flipRotateY.value = withTiming(0, { duration: 400, easing: Easing.inOut(Easing.cubic) });
+    flipRotateY.value = withSpring(0, { duration: 400, easing: Easing.inOut(Easing.cubic, GLASS_SPRING) });
     setTimeout(() => {
       isFlipping.value = false;
     }, 400);

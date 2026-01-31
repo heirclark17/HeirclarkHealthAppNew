@@ -75,7 +75,7 @@ export default function CalorieBankingCard({
         });
         // Animate bank progress
         const maxBank = 1500; // Default max
-        bankProgress.value = withTiming((sum.bankedCalories / maxBank) * 100, { duration: 500 });
+        bankProgress.value = withSpring((sum.bankedCalories / maxBank) * 100, GLASS_SPRING);
       }
     };
     loadData();

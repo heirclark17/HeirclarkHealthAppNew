@@ -229,7 +229,7 @@ const GlassTabButton = forwardRef<View, GlassTabButtonProps>(
       // iOS 26 glass press: subtle scale with rigid haptic
       if (withSpring && withTiming) {
         scale.value = withSpring(0.92, PRESS_SPRING);
-        opacity.value = withTiming(0.7, { duration: 80 });
+        opacity.value = withSpring(0.7, GLASS_SPRING);
       }
       rigidImpact(); // Glass-like rigid feedback
     }, []);
@@ -237,7 +237,7 @@ const GlassTabButton = forwardRef<View, GlassTabButtonProps>(
     const handlePressOut = useCallback(() => {
       if (withSpring && withTiming) {
         scale.value = withSpring(1, GLASS_SPRING);
-        opacity.value = withTiming(1, { duration: 150 });
+        opacity.value = withSpring(1, GLASS_SPRING);
       }
     }, []);
 

@@ -125,14 +125,14 @@ export const GlassInput: React.FC<GlassInputProps> = ({
 
   const handleFocus = (e: any) => {
     setIsFocused(true);
-    borderOpacity.value = withTiming(1, { duration: 200 });
+    borderOpacity.value = withSpring(1, GLASS_SPRING);
     scale.value = withSpring(1.01, { damping: 15, stiffness: 300 });
     onFocus?.(e);
   };
 
   const handleBlur = (e: any) => {
     setIsFocused(false);
-    borderOpacity.value = withTiming(0, { duration: 200 });
+    borderOpacity.value = withSpring(0, GLASS_SPRING);
     scale.value = withSpring(1, { damping: 15, stiffness: 300 });
     onBlur?.(e);
   };

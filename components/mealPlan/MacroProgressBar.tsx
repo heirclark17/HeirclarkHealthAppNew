@@ -39,7 +39,7 @@ const MacroBar = ({ label, value, goal, color, unit = '', colors, isDark }: Macr
   const barBg = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
 
   React.useEffect(() => {
-    widthValue.value = withTiming(percentage, { duration: 800 });
+    widthValue.value = withSpring(percentage, GLASS_SPRING);
   }, [percentage]);
 
   const animatedStyle = useAnimatedStyle(() => ({

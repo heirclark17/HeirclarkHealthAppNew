@@ -359,8 +359,8 @@ export function CoachingModal({
     if (isSpeaking) {
       pulseScale.value = withRepeat(
         withSequence(
-          withTiming(1.03, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
+          withSpring(1.03, { duration: 800, easing: Easing.inOut(Easing.ease, GLASS_SPRING) }),
+          withSpring(1, { duration: 800, easing: Easing.inOut(Easing.ease, GLASS_SPRING) })
         ),
         -1,
         true

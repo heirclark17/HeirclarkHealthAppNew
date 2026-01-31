@@ -28,8 +28,8 @@ const SkeletonCard = ({ index, colors, isDark }: { index: number; colors: typeof
       index * 100,
       withRepeat(
         withSequence(
-          withTiming(0.7, { duration: 800 }),
-          withTiming(0.3, { duration: 800 })
+          withSpring(0.7, GLASS_SPRING),
+          withSpring(0.3, GLASS_SPRING)
         ),
         -1,
         true

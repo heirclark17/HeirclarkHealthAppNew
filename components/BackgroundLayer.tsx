@@ -56,8 +56,8 @@ function AnimatedGradientBackground({ isDark }: { isDark: boolean }) {
     if (withRepeat && withSequence && withTiming && Easing) {
       animatedOpacity.value = withRepeat(
         withSequence(
-          withTiming(0.95, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) })
+          withSpring(0.95, { duration: 3000, easing: Easing.inOut(Easing.ease, GLASS_SPRING) }),
+          withSpring(1, { duration: 3000, easing: Easing.inOut(Easing.ease, GLASS_SPRING) })
         ),
         -1,
         true
