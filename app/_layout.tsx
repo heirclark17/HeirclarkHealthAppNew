@@ -15,6 +15,7 @@ import {
 import { GoalWizardProvider, MealPlanProvider, TrainingProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
 import { AuthProvider } from '../contexts/AuthContext';
 import { BackgroundLayer } from '../components/BackgroundLayer';
+import { ProviderComposer } from '../utils/ProviderComposer';
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
@@ -40,99 +41,48 @@ export default function RootLayout() {
     return null;
   }
 
+  // Define providers array (order matters - outer to inner)
+  const providers = [
+    SafeAreaProvider,
+    AuthProvider,
+    SettingsProvider,
+    BackgroundLayer,
+    GoalWizardProvider,
+    FoodPreferencesProvider,
+    AdaptiveTDEEProvider,
+    SmartMealLoggerProvider,
+    CalorieBankingProvider,
+    MealPlanProvider,
+    TrainingProvider,
+    FastingTimerProvider,
+    WorkoutTrackingProvider,
+    AccountabilityPartnerProvider,
+    ProgressPredictionProvider,
+    WorkoutFormCoachProvider,
+    HabitFormationProvider,
+    RestaurantMenuProvider,
+    SleepRecoveryProvider,
+    HydrationProvider,
+  ];
+
   // Web: Force mobile view with iPhone dimensions
   if (Platform.OS === 'web') {
     return (
-      <SafeAreaProvider>
-        <AuthProvider>
-          <SettingsProvider>
-            <BackgroundLayer>
-              <GoalWizardProvider>
-                <FoodPreferencesProvider>
-                  <AdaptiveTDEEProvider>
-                    <SmartMealLoggerProvider>
-                      <CalorieBankingProvider>
-                        <MealPlanProvider>
-                          <TrainingProvider>
-                            <FastingTimerProvider>
-                              <WorkoutTrackingProvider>
-                                <AccountabilityPartnerProvider>
-                                  <ProgressPredictionProvider>
-                                    <WorkoutFormCoachProvider>
-                                      <HabitFormationProvider>
-                                        <RestaurantMenuProvider>
-                                          <SleepRecoveryProvider>
-                                            <HydrationProvider>
-                                              <View style={styles.webContainer}>
-                                                <View style={styles.mobileFrame}>
-                                                  <Slot />
-                                                </View>
-                                              </View>
-                                            </HydrationProvider>
-                                          </SleepRecoveryProvider>
-                                        </RestaurantMenuProvider>
-                                      </HabitFormationProvider>
-                                    </WorkoutFormCoachProvider>
-                                  </ProgressPredictionProvider>
-                                </AccountabilityPartnerProvider>
-                              </WorkoutTrackingProvider>
-                            </FastingTimerProvider>
-                          </TrainingProvider>
-                        </MealPlanProvider>
-                      </CalorieBankingProvider>
-                    </SmartMealLoggerProvider>
-                  </AdaptiveTDEEProvider>
-                </FoodPreferencesProvider>
-              </GoalWizardProvider>
-            </BackgroundLayer>
-          </SettingsProvider>
-        </AuthProvider>
-      </SafeAreaProvider>
+      <ProviderComposer providers={providers}>
+        <View style={styles.webContainer}>
+          <View style={styles.mobileFrame}>
+            <Slot />
+          </View>
+        </View>
+      </ProviderComposer>
     );
   }
 
+  // Mobile: Normal layout
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <SettingsProvider>
-          <BackgroundLayer>
-            <GoalWizardProvider>
-              <FoodPreferencesProvider>
-                <AdaptiveTDEEProvider>
-                <SmartMealLoggerProvider>
-                  <CalorieBankingProvider>
-                    <MealPlanProvider>
-                      <TrainingProvider>
-                        <FastingTimerProvider>
-                          <WorkoutTrackingProvider>
-                            <AccountabilityPartnerProvider>
-                              <ProgressPredictionProvider>
-                                <WorkoutFormCoachProvider>
-                                  <HabitFormationProvider>
-                                    <RestaurantMenuProvider>
-                                      <SleepRecoveryProvider>
-                                        <HydrationProvider>
-                                          <Slot />
-                                        </HydrationProvider>
-                                      </SleepRecoveryProvider>
-                                    </RestaurantMenuProvider>
-                                  </HabitFormationProvider>
-                                </WorkoutFormCoachProvider>
-                              </ProgressPredictionProvider>
-                            </AccountabilityPartnerProvider>
-                          </WorkoutTrackingProvider>
-                        </FastingTimerProvider>
-                      </TrainingProvider>
-                    </MealPlanProvider>
-                  </CalorieBankingProvider>
-                </SmartMealLoggerProvider>
-                </AdaptiveTDEEProvider>
-              </FoodPreferencesProvider>
-            </GoalWizardProvider>
-          </BackgroundLayer>
-        </SettingsProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <ProviderComposer providers={providers}>
+      <Slot />
+    </ProviderComposer>
   );
 }
 
