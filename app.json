@@ -19,7 +19,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.heirclark.health",
       "buildNumber": "9",
-      "deploymentTarget": "15.0",
       "infoPlist": {
         "NSHealthShareUsageDescription": "This app needs access to your health data to track your fitness and nutrition goals.",
         "NSHealthUpdateUsageDescription": "This app needs permission to update your health data with tracked meals and activities.",
@@ -42,7 +41,6 @@
         "com.apple.developer.healthkit": true,
         "com.apple.developer.healthkit.access": [],
         "com.apple.developer.applesignin": [
-          "Default",
           "Default"
         ]
       },
@@ -59,17 +57,6 @@
         "backgroundColor": "#000000"
       },
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACTIVITY_RECOGNITION",
-        "android.permission.health.READ_STEPS",
-        "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
-        "android.permission.health.READ_DISTANCE",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -130,16 +117,12 @@
       "expo-apple-authentication"
     ],
     "scheme": "heirclark",
-    "privacy": "public",
     "extra": {
       "router": {},
       "network": "tunnel",
       "eas": {
         "projectId": "f55aef9f-1d85-4d01-a2ae-7279eaf2c2db"
       }
-    },
-    "cli": {
-      "appVersionSource": "remote"
     },
     "runtimeVersion": {
       "policy": "appVersion"

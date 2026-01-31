@@ -4,23 +4,46 @@ import { BlurView } from 'expo-blur';
 import { Spacing } from '../constants/Theme';
 import { useSettings } from '../contexts/SettingsContext';
 
-// Conditionally import Reanimated only on iOS to avoid web infinite loops
+// Conditionally import Reanimated only on native platforms to avoid web infinite loops
 let Animated: any = View;
 let useSharedValue: any = null;
 let useAnimatedStyle: any = null;
 let withTiming: any = null;
+let withSpring: any = null;
 
-if (Platform.OS === 'ios') {
+if (Platform.OS !== 'web') {
   try {
     const Reanimated = require('react-native-reanimated');
     Animated = Reanimated.default;
     useSharedValue = Reanimated.useSharedValue;
     useAnimatedStyle = Reanimated.useAnimatedStyle;
     withTiming = Reanimated.withTiming;
+    withSpring = Reanimated.withSpring;
   } catch (e) {
     // Reanimated not available, will use fallback
   }
 }
+
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
+// iOS 26 Liquid Glass colors - Fixed for authentic translucency
+const GLASS_COLORS = {
+  light: {
+    background: 'rgba(255, 255, 255, 0.40)',  // Reduced opacity for lighter glass
+    border: 'rgba(0, 0, 0, 0.08)',             // Dark border for light mode contrast
+    shadow: 'rgba(0, 0, 0, 0.08)',
+  },
+  dark: {
+    background: 'rgba(255, 255, 255, 0.15)',   // Increased opacity for visibility
+    border: 'rgba(255, 255, 255, 0.15)',       // Slightly higher for definition
+    shadow: 'rgba(0, 0, 0, 0.25)',
+  },
+};
 
 // Try to import Liquid Glass (only works after rebuild)
 let LiquidGlassView: any = null;
@@ -55,7 +78,7 @@ const IOSGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLayoutSt
   contentLayoutStyle,
   ...rest
 }) => {
-  const effectiveIntensity = intensity ?? (isDark ? 20 : 35);
+  const effectiveIntensity = intensity ?? (isDark ? 40 : 35);  // Dark mode needs MORE blur for definition
   const effectiveTint = tint || (isDark ? 'dark' : 'light');
 
   // Track when content is ready before rendering BlurView
@@ -70,8 +93,8 @@ const IOSGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLayoutSt
     const handle = InteractionManager.runAfterInteractions(() => {
       setTimeout(() => {
         setIsContentReady(true);
-        if (withTiming) {
-          blurOpacity.value = withTiming(1, { duration: 200 });
+        if (withSpring) {
+          blurOpacity.value = withSpring(1, GLASS_SPRING);  // iOS 26 spring physics
         } else {
           blurOpacity.value = 1;
         }
@@ -104,18 +127,30 @@ const IOSGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLayoutSt
     );
   }
 
-  // BlurView fallback with proper render order
-  const blurTintColor = tintColor || (isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)');
-  const borderColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)';
+  // BlurView fallback with iOS 26 Liquid Glass styling
+  const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
+  const blurTintColor = tintColor || glassColors.background;
+  const borderColor = glassColors.border;
 
   // Determine if we should use Animated.View or regular View
   const AnimatedViewComponent = Animated !== View ? Animated.View : View;
+
+  // iOS 26 soft shadow
+  const shadowStyle = Platform.OS === 'ios' ? {
+    shadowColor: glassColors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+  } : {
+    elevation: 4,
+  };
 
   return (
     <View
       style={[
         styles.glassCardWrapper,
         { borderRadius: 24 },
+        shadowStyle,
         style,
       ]}
       {...rest}
@@ -161,8 +196,9 @@ const FallbackGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLay
   contentLayoutStyle,
   ...rest
 }) => {
-  const fallbackBg = tintColor || (isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)');
-  const fallbackBorder = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)';
+  const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
+  const fallbackBg = tintColor || glassColors.background;
+  const fallbackBorder = glassColors.border;
 
   return (
     <View
@@ -172,6 +208,8 @@ const FallbackGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLay
           backgroundColor: fallbackBg,
           borderColor: fallbackBorder,
           borderWidth: 1,
+          // Soft shadow for depth
+          elevation: 4,
         },
         style,
         contentLayoutStyle,

@@ -341,82 +341,83 @@ export const GlassSpacing = {
 
 /**
  * Typography for glass surfaces with text shadows for legibility
+ * Now includes Urbanist fontFamily to prevent system font leakage on Android
  */
 export const GlassTypography = {
   // Large title
   largeTitle: {
     fontSize: 34,
-    fontWeight: '700' as const,
+    fontFamily: 'Urbanist_700Bold',
     letterSpacing: 0.37,
   },
 
   // Title 1
   title1: {
     fontSize: 28,
-    fontWeight: '700' as const,
+    fontFamily: 'Urbanist_700Bold',
     letterSpacing: 0.36,
   },
 
   // Title 2
   title2: {
     fontSize: 22,
-    fontWeight: '700' as const,
+    fontFamily: 'Urbanist_700Bold',
     letterSpacing: 0.35,
   },
 
   // Title 3
   title3: {
     fontSize: 20,
-    fontWeight: '600' as const,
+    fontFamily: 'Urbanist_600SemiBold',
     letterSpacing: 0.38,
   },
 
   // Headline
   headline: {
     fontSize: 17,
-    fontWeight: '600' as const,
+    fontFamily: 'Urbanist_600SemiBold',
     letterSpacing: -0.41,
   },
 
   // Body
   body: {
     fontSize: 17,
-    fontWeight: '400' as const,
+    fontFamily: 'Urbanist_400Regular',
     letterSpacing: -0.41,
   },
 
   // Callout
   callout: {
     fontSize: 16,
-    fontWeight: '400' as const,
+    fontFamily: 'Urbanist_400Regular',
     letterSpacing: -0.32,
   },
 
   // Subheadline
   subheadline: {
     fontSize: 15,
-    fontWeight: '400' as const,
+    fontFamily: 'Urbanist_400Regular',
     letterSpacing: -0.24,
   },
 
   // Footnote
   footnote: {
     fontSize: 13,
-    fontWeight: '400' as const,
+    fontFamily: 'Urbanist_400Regular',
     letterSpacing: -0.08,
   },
 
   // Caption 1
   caption1: {
     fontSize: 12,
-    fontWeight: '400' as const,
+    fontFamily: 'Urbanist_400Regular',
     letterSpacing: 0,
   },
 
   // Caption 2
   caption2: {
     fontSize: 11,
-    fontWeight: '400' as const,
+    fontFamily: 'Urbanist_400Regular',
     letterSpacing: 0.07,
   },
 };
