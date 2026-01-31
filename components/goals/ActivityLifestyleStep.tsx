@@ -163,7 +163,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                 <Text style={[styles.activityExample, { color: colors.textMuted }]}>{option.example}</Text>
               </View>
               {isSelected && (
-                <Ionicons name="checkmark-circle" size={24} color=Colors.success />
+                <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
               )}
             </View>
           </GlassCard>
