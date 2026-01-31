@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AppleAuthentication from 'expo-apple-authentication';
+import { api } from '../services/api';
 
 // User interface
 interface User {
@@ -19,12 +20,14 @@ interface AuthContextType {
   isLoading: boolean;
   signInWithApple: () => Promise<boolean>;
   signOut: () => Promise<void>;
+  refreshAuth: () => Promise<void>;
   isAppleSignInAvailable: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = '@heirclark_auth_user';
+const AUTH_TOKEN_KEY = '@heirclark_auth_token';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -42,15 +45,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAvailability();
   }, []);
 
-  // Load saved user on mount
+  // Load saved user and verify token on mount
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const savedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-        if (savedUser) {
-          const parsedUser = JSON.parse(savedUser);
-          setUser(parsedUser);
-          console.log('[Auth] Loaded saved user:', parsedUser.firstName || parsedUser.email);
+        // First check if we have a token
+        const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+        if (token) {
+          // Token exists - verify it with backend
+          await refreshAuth();
+        } else {
+          // No token - load cached user info if available (for display purposes)
+          const savedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+          if (savedUser) {
+            const parsedUser = JSON.parse(savedUser);
+            console.log('[Auth] Cached user data found (not authenticated):', parsedUser.firstName || parsedUser.email);
+            // Don't set user state - they need to re-authenticate
+          }
         }
       } catch (error) {
         console.error('[Auth] Error loading user:', error);
@@ -59,11 +70,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     loadUser();
-  }, []);
+  }, [refreshAuth]);
 
   // Sign in with Apple
   const signInWithApple = useCallback(async (): Promise<boolean> => {
     try {
+      // Step 1: Get Apple credential from device
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -71,8 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ],
       });
 
-      // Build user object
-      const newUser: User = {
+      // Step 2: Build user object from Apple credential
+      let newUser: User = {
         id: credential.user,
         email: credential.email,
         fullName: credential.fullName
@@ -98,11 +110,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Save user
+      // Step 3: Authenticate with backend and get JWT token
+      console.log('[Auth] Authenticating with backend...');
+      const backendUser = await api.authenticateWithApple(
+        credential.user,
+        newUser.email || undefined,
+        newUser.fullName || undefined
+      );
+
+      if (!backendUser) {
+        console.error('[Auth] Backend authentication failed');
+        Alert.alert('Authentication Failed', 'Could not verify your identity with the server. Please try again.');
+        return false;
+      }
+
+      // Step 4: Merge backend user data with local user data
+      // Backend returns: { id, email, fullName, avatarUrl }
+      newUser = {
+        id: backendUser.id,
+        email: backendUser.email || newUser.email,
+        fullName: backendUser.fullName || newUser.fullName,
+        firstName: newUser.firstName, // Keep local firstName/lastName
+        lastName: newUser.lastName,
+      };
+
+      // Step 5: Save user to local storage
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
       setUser(newUser);
 
       console.log('[Auth] Signed in successfully:', newUser.firstName || newUser.email || newUser.id);
+      console.log('[Auth] JWT token received and stored');
       return true;
     } catch (error: any) {
       if (error.code === 'ERR_REQUEST_CANCELED') {
@@ -116,18 +153,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Refresh authentication - verify token with backend
+  const refreshAuth = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+      if (!token) {
+        console.log('[Auth] No token found, user not authenticated');
+        setUser(null);
+        return;
+      }
+
+      // Verify token with backend
+      const backendUser = await api.getCurrentUser();
+      if (!backendUser) {
+        console.warn('[Auth] Token invalid or expired, clearing session');
+        await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+        await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+        setUser(null);
+        return;
+      }
+
+      // Load local user data to merge with backend user
+      const savedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        const mergedUser: User = {
+          id: backendUser.id,
+          email: backendUser.email || parsed.email,
+          fullName: backendUser.fullName || parsed.fullName,
+          firstName: parsed.firstName,
+          lastName: parsed.lastName,
+        };
+        setUser(mergedUser);
+        console.log('[Auth] Token refreshed successfully');
+      }
+    } catch (error) {
+      console.error('[Auth] Token refresh error:', error);
+      setUser(null);
+    }
+  }, []);
+
   // Sign out
   const signOut = useCallback(async () => {
     try {
+      // Call backend logout endpoint
+      await api.logout();
+
+      // Clear local storage
       await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+      await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
       setUser(null);
-      console.log('[Auth] Signed out');
+
+      console.log('[Auth] Signed out successfully');
     } catch (error) {
       console.error('[Auth] Sign out error:', error);
+      // Even if backend call fails, clear local state
+      setUser(null);
     }
   }, []);
 
   const isAuthenticated = !!user;
+
+  // Periodic token refresh (every 15 minutes)
+  useEffect(() => {
+    if (!isAuthenticated || isLoading) return;
+
+    const refreshInterval = setInterval(() => {
+      console.log('[Auth] Periodic token refresh');
+      refreshAuth();
+    }, 15 * 60 * 1000); // 15 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, [isAuthenticated, isLoading, refreshAuth]);
 
   const value = useMemo<AuthContextType>(() => ({
     user,
@@ -135,6 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     signInWithApple,
     signOut,
+    refreshAuth,
     isAppleSignInAvailable,
   }), [
     user,
@@ -142,6 +240,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     signInWithApple,
     signOut,
+    refreshAuth,
     isAppleSignInAvailable,
   ]);
 

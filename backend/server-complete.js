@@ -212,7 +212,7 @@ app.post('/api/v1/auth/apple', async (req, res) => {
     // Generate JWT
     const token = jwt.sign(
       { userId: user.rows[0].id, email: user.rows[0].email },
-      JWT_SECRET,
+      EFFECTIVE_JWT_SECRET,
       { expiresIn: '30d' }
     );
 
