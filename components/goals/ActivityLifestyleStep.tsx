@@ -258,7 +258,7 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
                 </View>
               </View>
               {isSelected && (
-                <Ionicons name="checkmark-circle" size={24} color=Colors.error />
+                <Ionicons name="checkmark-circle" size={24} color={Colors.error} />
               )}
             </View>
           </GlassCard>
@@ -399,7 +399,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Summary Card */}
       <GlassCard style={styles.summaryCard} interactive>
         <View style={styles.summaryCardInner}>
-          <Ionicons name="bulb-outline" size={28} color=Colors.warning />
+          <Ionicons name="bulb-outline" size={28} color={Colors.warning} />
           <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
             Based on your activity level, we'll calculate your Total Daily Energy Expenditure (TDEE)
             to determine the right calorie target for your goal.
