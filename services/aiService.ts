@@ -18,6 +18,7 @@ import {
   SavedMeal,
   AIMeal,
   AI_CONSTANTS,
+  CheatDayGuidance,
 } from '../types/ai';
 
 // Storage keys
@@ -502,7 +503,10 @@ class AIService {
             days: data.weeklyPlan.map((day: any) => ({
               dayName: day.dayName,
               dayIndex: day.dayIndex,
-              meals: day.meals.map((meal: any) => ({
+              isCheatDay: day.isCheatDay || false,
+              cheatDayAdvice: day.cheatDayAdvice || null,
+              // Handle cheat days that don't have meals
+              meals: day.isCheatDay ? [] : (day.meals || []).map((meal: any) => ({
                 mealType: meal.mealType,
                 dishName: meal.name || meal.dishName,
                 description: meal.description || '',
@@ -760,6 +764,87 @@ class AIService {
     } catch (error) {
       console.error('[AIService] Error clearing coach history:', error);
     }
+  }
+
+  // ============================================================================
+  // Cheat Day Guidance
+  // ============================================================================
+
+  /**
+   * Generate AI-powered cheat day guidance and encouragement
+   * Uses GPT-4.1-mini to provide personalized, supportive guidance
+   */
+  async generateCheatDayGuidance(dayName: string, userGoals?: { goalType?: string; dailyCalories?: number }): Promise<CheatDayGuidance | null> {
+    const CACHE_KEY = `hc_cheat_day_guidance_${dayName}`;
+    const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
+
+    try {
+      // Check cache first
+      const cached = await AsyncStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { guidance, cachedAt } = JSON.parse(cached);
+        if (Date.now() - new Date(cachedAt).getTime() < CACHE_DURATION) {
+          console.log('[AIService] Using cached cheat day guidance');
+          return guidance;
+        }
+      }
+
+      console.log('[AIService] Generating cheat day guidance for:', dayName);
+
+      const response = await fetch(`${this.baseUrl}/api/v1/ai/cheat-day-guidance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Customer-Id': 'guest_ios_app',
+        },
+        body: JSON.stringify({
+          dayName,
+          userGoals,
+          shopifyCustomerId: 'guest_ios_app',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[AIService] Cheat day guidance error:', response.status, errorText);
+        return this.getFallbackCheatDayGuidance(dayName);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.guidance) {
+        // Cache the result
+        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify({
+          guidance: data.guidance,
+          cachedAt: new Date().toISOString(),
+        }));
+        return data.guidance;
+      }
+
+      return this.getFallbackCheatDayGuidance(dayName);
+    } catch (error) {
+      console.error('[AIService] generateCheatDayGuidance error:', error);
+      return this.getFallbackCheatDayGuidance(dayName);
+    }
+  }
+
+  /**
+   * Fallback guidance if API fails
+   */
+  private getFallbackCheatDayGuidance(dayName: string): CheatDayGuidance {
+    return {
+      greeting: `Happy ${dayName}! Today is your flexible eating day.`,
+      encouragement: "Enjoy this day guilt-free! Flexible eating days are an important part of a sustainable wellness journey. They help prevent feelings of deprivation and support your mental well-being.",
+      mindfulTips: [
+        "Eat slowly and savor each bite - mindful eating enhances enjoyment",
+        "Start with a protein-rich breakfast to set a balanced tone",
+        "Choose one or two treats you truly love rather than grazing on everything",
+        "Listen to your body's hunger and fullness cues"
+      ],
+      hydrationReminder: "Don't forget to stay hydrated! Water helps with digestion and keeps you feeling your best.",
+      balanceTip: "Tomorrow is a new day to return to your regular eating pattern. No need to restrict or compensate - just get back to your normal routine.",
+      motivationalQuote: "\"Balance is not something you find, it's something you create.\" - Jana Kingsford"
+    };
   }
 
   // ============================================================================

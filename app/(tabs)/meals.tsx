@@ -5,6 +5,7 @@ import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
+import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { instacartService } from '../../services/instacartService';
 import { mealPlanService } from '../../services/mealPlanService';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -18,6 +19,7 @@ import {
   GroceryListModal,
   MacroProgressBar,
   MealPlanCoachingModal,
+  CheatDayGuidanceCard,
 } from '../../components/mealPlan';
 import { FoodPreferencesModal } from '../../components/FoodPreferences';
 
@@ -68,6 +70,30 @@ export default function MealsScreen() {
   const currentDayPlan = weeklyPlan ? weeklyPlan[selectedDayIndex] : null;
   const currentDayMeals = currentDayPlan?.meals || [];
   const currentDayTotals = currentDayPlan?.dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
+  // Food preferences for cheat day detection
+  const foodPrefsContext = useFoodPreferencesSafe();
+  const cheatDays = foodPrefsContext?.preferences?.cheatDays || [];
+
+  // Determine if current selected day is a cheat day
+  const isCheatDay = useMemo(() => {
+    if (!currentDayPlan || cheatDays.length === 0) return false;
+
+    // Get the day name from the plan (e.g., "Monday", "Tuesday")
+    const dayName = currentDayPlan.dayName || currentDayPlan.dayOfWeek;
+    if (!dayName) return false;
+
+    // Normalize day name for comparison
+    const normalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1).toLowerCase();
+
+    return cheatDays.includes(normalizedDayName);
+  }, [currentDayPlan, cheatDays]);
+
+  // Get display day name for cheat day guidance
+  const currentDayName = useMemo(() => {
+    if (!currentDayPlan) return 'Today';
+    return currentDayPlan.dayName || currentDayPlan.dayOfWeek || 'Today';
+  }, [currentDayPlan]);
 
   // Fetch goals from API
   const fetchGoals = async () => {
@@ -332,116 +358,128 @@ export default function MealsScreen() {
               onSelectDay={setSelectedDay}
             />
 
-            {/* Meals List */}
-            <View style={styles.mealsContainer}>
-              {currentDayMeals.length > 0 ? (
-                <>
-                  {/* Breakfast */}
-                  {mealsByType.breakfast.map((meal, index) => (
-                    <MealCard
-                      key={`breakfast-${index}`}
-                      meal={meal}
-                      index={index}
-                      onSwap={() => handleSwapMeal('breakfast')}
-                      isSwapping={isSwapping}
-                      onAddToTodaysMeals={handleAddToTodaysMeals}
-                      onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
-                    />
-                  ))}
+            {/* Cheat Day Guidance - Show instead of meals on cheat days */}
+            {isCheatDay ? (
+              <CheatDayGuidanceCard
+                dayName={currentDayName}
+                userGoals={{
+                  dailyCalories: dailyTargets.calories,
+                }}
+              />
+            ) : (
+              <>
+                {/* Meals List - Only show on non-cheat days */}
+                <View style={styles.mealsContainer}>
+                  {currentDayMeals.length > 0 ? (
+                    <>
+                      {/* Breakfast */}
+                      {mealsByType.breakfast.map((meal, index) => (
+                        <MealCard
+                          key={`breakfast-${index}`}
+                          meal={meal}
+                          index={index}
+                          onSwap={() => handleSwapMeal('breakfast')}
+                          isSwapping={isSwapping}
+                          onAddToTodaysMeals={handleAddToTodaysMeals}
+                          onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
+                        />
+                      ))}
 
-                  {/* Lunch */}
-                  {mealsByType.lunch.map((meal, index) => (
-                    <MealCard
-                      key={`lunch-${index}`}
-                      meal={meal}
-                      index={mealsByType.breakfast.length + index}
-                      onSwap={() => handleSwapMeal('lunch')}
-                      isSwapping={isSwapping}
-                      onAddToTodaysMeals={handleAddToTodaysMeals}
-                      onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
-                    />
-                  ))}
+                      {/* Lunch */}
+                      {mealsByType.lunch.map((meal, index) => (
+                        <MealCard
+                          key={`lunch-${index}`}
+                          meal={meal}
+                          index={mealsByType.breakfast.length + index}
+                          onSwap={() => handleSwapMeal('lunch')}
+                          isSwapping={isSwapping}
+                          onAddToTodaysMeals={handleAddToTodaysMeals}
+                          onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
+                        />
+                      ))}
 
-                  {/* Dinner */}
-                  {mealsByType.dinner.map((meal, index) => (
-                    <MealCard
-                      key={`dinner-${index}`}
-                      meal={meal}
-                      index={mealsByType.breakfast.length + mealsByType.lunch.length + index}
-                      onSwap={() => handleSwapMeal('dinner')}
-                      isSwapping={isSwapping}
-                      onAddToTodaysMeals={handleAddToTodaysMeals}
-                      onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
-                    />
-                  ))}
+                      {/* Dinner */}
+                      {mealsByType.dinner.map((meal, index) => (
+                        <MealCard
+                          key={`dinner-${index}`}
+                          meal={meal}
+                          index={mealsByType.breakfast.length + mealsByType.lunch.length + index}
+                          onSwap={() => handleSwapMeal('dinner')}
+                          isSwapping={isSwapping}
+                          onAddToTodaysMeals={handleAddToTodaysMeals}
+                          onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
+                        />
+                      ))}
 
-                  {/* Snacks */}
-                  {mealsByType.snack.map((meal, index) => (
-                    <MealCard
-                      key={`snack-${index}`}
-                      meal={meal}
-                      index={
-                        mealsByType.breakfast.length +
-                        mealsByType.lunch.length +
-                        mealsByType.dinner.length +
-                        index
-                      }
-                      onSwap={() => handleSwapMeal('snack')}
-                      isSwapping={isSwapping}
-                      onAddToTodaysMeals={handleAddToTodaysMeals}
-                      onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
-                    />
-                  ))}
-                </>
-              ) : (
-                <View style={styles.emptyDayState}>
-                  <Text style={[styles.emptyDayText, { color: colors.textMuted }]}>No meals planned for this day</Text>
+                      {/* Snacks */}
+                      {mealsByType.snack.map((meal, index) => (
+                        <MealCard
+                          key={`snack-${index}`}
+                          meal={meal}
+                          index={
+                            mealsByType.breakfast.length +
+                            mealsByType.lunch.length +
+                            mealsByType.dinner.length +
+                            index
+                          }
+                          onSwap={() => handleSwapMeal('snack')}
+                          isSwapping={isSwapping}
+                          onAddToTodaysMeals={handleAddToTodaysMeals}
+                          onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
+                        />
+                      ))}
+                    </>
+                  ) : (
+                    <View style={styles.emptyDayState}>
+                      <Text style={[styles.emptyDayText, { color: colors.textMuted }]}>No meals planned for this day</Text>
+                    </View>
+                  )}
                 </View>
-              )}
-            </View>
 
-            {/* Regenerate buttons */}
-            <View style={styles.regenerateSection}>
-              <Text style={[styles.regenerateLabel, { color: colors.textMuted }]}>Regenerate Plan</Text>
-              <View style={styles.generateButtonsRow}>
-                <GlassCard
-                  style={styles.halfButtonGlass}
-                  intensity={isDark ? 40 : 60}
-                  interactive
-                >
-                  <TouchableOpacity
-                    onPress={handleGenerate}
-                    disabled={isGenerating}
-                    activeOpacity={0.7}
-                    style={styles.halfButtonInner}
-                  >
-                    <Ionicons name="flash-outline" size={18} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick</Text>
-                  </TouchableOpacity>
-                </GlassCard>
+                {/* Regenerate buttons - Only show on non-cheat days */}
+                <View style={styles.regenerateSection}>
+                  <Text style={[styles.regenerateLabel, { color: colors.textMuted }]}>Regenerate Plan</Text>
+                  <View style={styles.generateButtonsRow}>
+                    <GlassCard
+                      style={styles.halfButtonGlass}
+                      intensity={isDark ? 40 : 60}
+                      interactive
+                    >
+                      <TouchableOpacity
+                        onPress={handleGenerate}
+                        disabled={isGenerating}
+                        activeOpacity={0.7}
+                        style={styles.halfButtonInner}
+                      >
+                        <Ionicons name="flash-outline" size={18} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
+                        <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick</Text>
+                      </TouchableOpacity>
+                    </GlassCard>
 
-                <GlassCard
-                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)' }]}
-                  intensity={isDark ? 50 : 70}
-                  interactive
-                >
-                  <TouchableOpacity
-                    onPress={handleAIGenerate}
-                    disabled={isGenerating}
-                    activeOpacity={0.7}
-                    style={styles.halfButtonInner}
-                  >
-                    <Ionicons name="sparkles" size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI-Powered</Text>
-                  </TouchableOpacity>
-                </GlassCard>
-              </View>
-            </View>
+                    <GlassCard
+                      style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)' }]}
+                      intensity={isDark ? 50 : 70}
+                      interactive
+                    >
+                      <TouchableOpacity
+                        onPress={handleAIGenerate}
+                        disabled={isGenerating}
+                        activeOpacity={0.7}
+                        style={styles.halfButtonInner}
+                      >
+                        <Ionicons name="sparkles" size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
+                        <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI-Powered</Text>
+                      </TouchableOpacity>
+                    </GlassCard>
+                  </View>
+                </View>
+              </>
+            )}
           </View>
         )}
 
-        {/* Action Buttons */}
-        {weeklyPlan && (
+        {/* Action Buttons - Only show on non-cheat days */}
+        {weeklyPlan && !isCheatDay && (
           <View style={styles.actionRow}>
             <GlassCard
               style={styles.glassActionButton}

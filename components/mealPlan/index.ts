@@ -5,3 +5,4 @@ export { MealCard } from './MealCard';
 export { GroceryListModal } from './GroceryListModal';
 export { MacroProgressBar } from './MacroProgressBar';
 export { MealPlanCoachingModal } from './MealPlanCoachingModal';
+export { CheatDayGuidanceCard } from './CheatDayGuidanceCard';

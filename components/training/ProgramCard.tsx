@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Animated, {
   FadeInUp,
   useAnimatedStyle,
@@ -8,13 +8,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
-import { TrainingProgram } from '../../types/training';
+import { TrainingProgram, ProgramTemplate } from '../../types/training';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
 
 interface ProgramCardProps {
-  program: TrainingProgram;
+  program: TrainingProgram | ProgramTemplate;
   isSelected: boolean;
   onSelect: () => void;
   index?: number;
@@ -30,8 +30,19 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
   }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
 
-  // Theme-aware backgrounds for inner elements
+  // Theme-aware colors
   const secondaryBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+
+  // Green selection colors for liquid glass effect
+  const greenColor = isDark ? '#34D399' : '#10B981';
+  const greenBgLight = isDark ? 'rgba(52, 211, 153, 0.12)' : 'rgba(16, 185, 129, 0.10)';
+  const greenBgMedium = isDark ? 'rgba(52, 211, 153, 0.18)' : 'rgba(16, 185, 129, 0.15)';
+  const greenBorder = isDark ? 'rgba(52, 211, 153, 0.35)' : 'rgba(16, 185, 129, 0.30)';
+
+  // Difficulty colors (theme-aware)
+  const successColor = isDark ? '#34D399' : '#10B981';
+  const warningColor = isDark ? '#FBBF24' : '#F59E0B';
+  const dangerColor = isDark ? '#F87171' : '#EF4444';
 
   const handlePressIn = () => {
     scale.value = withSpring(0.98);
@@ -48,17 +59,17 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
-        return '#2ECC71';
+        return successColor;
       case 'intermediate':
-        return Colors.protein;
+        return warningColor;
       case 'advanced':
-        return Colors.calories;
+        return dangerColor;
       default:
-        return Colors.textMuted;
+        return colors.textMuted;
     }
   };
 
-  const getProgramIcon = (id: string) => {
+  const getProgramIcon = (id: string): keyof typeof Ionicons.glyphMap => {
     if (id.includes('fat-loss') || id.includes('hiit')) return 'flame-outline';
     if (id.includes('muscle') || id.includes('strength')) return 'barbell-outline';
     if (id.includes('health') || id.includes('wellness')) return 'heart-outline';
@@ -66,7 +77,7 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
   };
 
   return (
-    <Animated.View entering={FadeInUp.delay(index * 100).springify()}>
+    <Animated.View entering={FadeInUp.delay(index * 80).springify()}>
       <Animated.View style={animatedStyle}>
         <TouchableOpacity
           style={styles.cardWrapper}
@@ -76,58 +87,148 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
           }}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          activeOpacity={0.8}
+          activeOpacity={0.9}
         >
-        <GlassCard style={[styles.card, isSelected && styles.cardSelected]} interactive>
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={[styles.iconContainer, { backgroundColor: secondaryBg }, isSelected && { backgroundColor: colors.primary }]}>
-              <Ionicons
-                name={getProgramIcon(program.id)}
-                size={24}
-                color={isSelected ? colors.primaryText : colors.text}
-              />
+          <GlassCard
+            style={[
+              styles.card,
+              isSelected && [
+                styles.cardSelected,
+                {
+                  backgroundColor: greenBgLight,
+                  borderColor: greenBorder,
+                  borderWidth: 1.5,
+                },
+              ],
+            ]}
+            interactive
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: isSelected ? greenBgMedium : secondaryBg },
+                ]}
+              >
+                <Ionicons
+                  name={getProgramIcon(program.id)}
+                  size={24}
+                  color={isSelected ? greenColor : colors.text}
+                />
+              </View>
+              <View style={styles.headerText}>
+                <Text
+                  style={[
+                    styles.programName,
+                    { color: isSelected ? greenColor : colors.text },
+                  ]}
+                >
+                  {program.name}
+                </Text>
+                <View
+                  style={[
+                    styles.difficultyBadge,
+                    { backgroundColor: `${getDifficultyColor(program.difficulty)}20` },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.difficultyText,
+                      { color: getDifficultyColor(program.difficulty) },
+                    ]}
+                  >
+                    {program.difficulty}
+                  </Text>
+                </View>
+              </View>
+              {isSelected && (
+                <View style={[styles.selectedBadge, { backgroundColor: greenBgMedium }]}>
+                  <Ionicons name="checkmark-circle" size={22} color={greenColor} />
+                </View>
+              )}
             </View>
-            <View style={styles.headerText}>
-              <Text style={[styles.programName, { color: colors.text }]}>{program.name}</Text>
-              <View style={[styles.difficultyBadge, { backgroundColor: `${getDifficultyColor(program.difficulty)}20` }]}>
-                <Text style={[styles.difficultyText, { color: getDifficultyColor(program.difficulty) }]}>
-                  {program.difficulty}
+
+            {/* Description */}
+            <Text
+              style={[
+                styles.description,
+                { color: isSelected ? colors.text : colors.textSecondary },
+              ]}
+              numberOfLines={2}
+            >
+              {program.description}
+            </Text>
+
+            {/* Stats Row */}
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Ionicons
+                  name="calendar-outline"
+                  size={15}
+                  color={isSelected ? greenColor : colors.textMuted}
+                />
+                <Text
+                  style={[
+                    styles.statText,
+                    { color: isSelected ? greenColor : colors.textMuted },
+                  ]}
+                >
+                  {program.duration} weeks
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Ionicons
+                  name="repeat-outline"
+                  size={15}
+                  color={isSelected ? greenColor : colors.textMuted}
+                />
+                <Text
+                  style={[
+                    styles.statText,
+                    { color: isSelected ? greenColor : colors.textMuted },
+                  ]}
+                >
+                  {program.daysPerWeek} days/week
                 </Text>
               </View>
             </View>
-            {isSelected && (
-              <View style={[styles.selectedBadge, { backgroundColor: colors.primary }]}>
-                <Ionicons name="checkmark" size={18} color={colors.primaryText} />
-              </View>
-            )}
-          </View>
 
-          {/* Description */}
-          <Text style={[styles.description, { color: colors.textSecondary }]}>{program.description}</Text>
-
-          {/* Stats Row */}
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
-              <Text style={[styles.statText, { color: colors.textMuted }]}>{program.duration} weeks</Text>
+            {/* Focus Tags */}
+            <View style={styles.tagsRow}>
+              {program.focus.slice(0, 3).map((tag, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.tag,
+                    {
+                      backgroundColor: isSelected ? greenBgLight : secondaryBg,
+                      borderWidth: isSelected ? 1 : 0,
+                      borderColor: isSelected ? greenBorder : 'transparent',
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.tagText,
+                      { color: isSelected ? greenColor : colors.textSecondary },
+                    ]}
+                  >
+                    {tag}
+                  </Text>
+                </View>
+              ))}
             </View>
-            <View style={styles.statItem}>
-              <Ionicons name="repeat-outline" size={16} color={colors.textMuted} />
-              <Text style={[styles.statText, { color: colors.textMuted }]}>{program.daysPerWeek} days/week</Text>
-            </View>
-          </View>
 
-          {/* Focus Tags */}
-          <View style={styles.tagsRow}>
-            {program.focus.slice(0, 3).map((tag, i) => (
-              <View key={i} style={[styles.tag, { backgroundColor: secondaryBg }]}>
-                <Text style={[styles.tagText, { color: colors.textSecondary }]}>{tag}</Text>
-              </View>
-            ))}
-          </View>
-        </GlassCard>
-      </TouchableOpacity>
+            {/* View Details hint */}
+            <View style={styles.viewDetailsRow}>
+              <Text style={[styles.viewDetailsText, { color: colors.textMuted }]}>
+                Tap to preview program details
+              </Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+            </View>
+          </GlassCard>
+        </TouchableOpacity>
       </Animated.View>
     </Animated.View>
   );
@@ -136,36 +237,53 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
 const styles = StyleSheet.create({
   cardWrapper: {
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   card: {
-    // GlassCard handles styling
+    borderWidth: 0,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   cardSelected: {
-    // Selected state visual handled by icon badge
+    ...Platform.select({
+      ios: {
+        shadowColor: '#10B981',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.2,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconContainerSelected: {
-    backgroundColor: Colors.primary,
   },
   headerText: {
     flex: 1,
     marginLeft: 12,
   },
   programName: {
-    fontSize: 17,
-    color: Colors.text,
+    fontSize: 16,
     fontFamily: Fonts.semiBold,
     marginBottom: 4,
   },
@@ -173,56 +291,69 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   difficultyText: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: Fonts.medium,
     textTransform: 'capitalize',
+    letterSpacing: 0.3,
   },
   selectedBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.primary,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   description: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+    fontSize: 13,
     fontFamily: Fonts.regular,
-    lineHeight: 20,
-    marginBottom: 12,
+    lineHeight: 19,
+    marginBottom: 10,
   },
   statsRow: {
     flexDirection: 'row',
-    gap: 20,
-    marginBottom: 12,
+    gap: 16,
+    marginBottom: 10,
   },
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
   statText: {
-    fontSize: 13,
-    color: Colors.textMuted,
+    fontSize: 12,
     fontFamily: Fonts.regular,
   },
   tagsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
+    marginBottom: 10,
   },
   tag: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   tagText: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+  },
+  viewDetailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingTop: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(128, 128, 128, 0.2)',
+  },
+  viewDetailsText: {
+    fontSize: 11,
     fontFamily: Fonts.regular,
   },
 });
+
+export default ProgramCard;

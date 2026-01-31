@@ -46,21 +46,27 @@ export interface AIMeal {
 }
 
 export interface AIDailyMealPlan {
-  date: string; // ISO date string
-  dayOfWeek: string;
+  date?: string; // ISO date string
+  dayOfWeek?: string;
+  dayName?: string; // Alternative field name from backend
+  dayIndex?: number;
   meals: AIMeal[];
-  totalNutrients: AIMealNutrients;
+  totalNutrients?: AIMealNutrients;
+  // Cheat day support
+  isCheatDay?: boolean;
+  cheatDayAdvice?: string | null;
 }
 
 export interface AIWeeklyMealPlan {
-  id: string;
-  createdAt: string;
-  startDate: string;
-  endDate: string;
+  id?: string;
+  createdAt?: string;
+  generatedAt?: string; // Alternative field name from backend
+  startDate?: string;
+  endDate?: string;
   days: AIDailyMealPlan[];
-  targetNutrients: AIMealNutrients;
-  preferences: MealPlanPreferences;
-  source: 'ai' | 'template';
+  targetNutrients?: AIMealNutrients;
+  preferences?: MealPlanPreferences;
+  source?: 'ai' | 'template';
 }
 
 export interface MealPlanPreferences {
@@ -88,6 +94,19 @@ export interface MealPlanPreferences {
   mealDiversity?: 'diverse' | 'sameDaily' | '';
   cheatDays?: string[];
   cookingSkill?: 'beginner' | 'intermediate' | 'advanced' | '';
+}
+
+// ============================================================================
+// Cheat Day Guidance Types
+// ============================================================================
+
+export interface CheatDayGuidance {
+  greeting: string;
+  encouragement: string;
+  mindfulTips: string[];
+  hydrationReminder: string;
+  balanceTip: string;
+  motivationalQuote: string;
 }
 
 // ============================================================================

@@ -16,6 +16,7 @@ import {
   WorkoutCalendarCard,
   GoalAlignmentCard,
   ProgramCard,
+  ProgramPreviewModal,
   ExerciseAlternativesModal,
   WeightInputModal,
 } from '../../components/training';
@@ -29,6 +30,8 @@ export default function ProgramsScreen() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [showProgramModal, setShowProgramModal] = useState(false);
+  const [showProgramPreview, setShowProgramPreview] = useState(false);
+  const [previewProgram, setPreviewProgram] = useState<any>(null);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [showCoachModal, setShowCoachModal] = useState(false);
   const [selectedExerciseForWeight, setSelectedExerciseForWeight] = useState<WorkoutExercise | null>(null);
@@ -177,17 +180,38 @@ export default function ProgramsScreen() {
     }
   };
 
-  // Handle program selection - generates a new plan with the selected program
-  const handleSelectProgram = async (program: any) => {
-    console.log('[Programs] User selected program:', program.name);
+  // Handle program tap - shows preview modal
+  const handleProgramTap = (program: any) => {
+    console.log('[Programs] User tapped program:', program.name);
+    lightImpact();
+    setPreviewProgram(program);
+    setShowProgramPreview(true);
+  };
+
+  // Handle confirming program selection - generates the plan
+  const handleConfirmProgram = async () => {
+    if (!previewProgram) return;
+
+    console.log('[Programs] User confirmed program:', previewProgram.name);
     mediumImpact();
+    setShowProgramPreview(false);
     setShowProgramModal(false);
+
     // Generate a new training plan using the selected program
-    const success = await selectProgramAndGenerate(program);
+    const success = await selectProgramAndGenerate(previewProgram);
     console.log('[Programs] Plan generated with selected program:', success);
+
     if (!success) {
       console.error('[Programs] Failed to generate plan with selected program');
     }
+
+    setPreviewProgram(null);
+  };
+
+  // Handle closing preview modal
+  const handleClosePreview = () => {
+    setShowProgramPreview(false);
+    // Don't clear previewProgram so selection state persists in the list
   };
 
   // Navigate to goals page
@@ -472,7 +496,6 @@ export default function ProgramsScreen() {
               <View style={styles.generateButtonsRow}>
                 <GlassCard
                   style={styles.halfButtonGlass}
-                  intensity={isDark ? 40 : 60}
                   interactive
                 >
                   <TouchableOpacity
@@ -481,14 +504,13 @@ export default function ProgramsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <Ionicons name="flash-outline" size={18} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick</Text>
+                    <Ionicons name="flash-outline" size={18} color={colors.textSecondary} />
+                    <Text style={[styles.halfButtonText, { color: colors.textSecondary }]}>Quick</Text>
                   </TouchableOpacity>
                 </GlassCard>
 
                 <GlassCard
-                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)' }]}
-                  intensity={isDark ? 50 : 70}
+                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.15)' }]}
                   interactive
                 >
                   <TouchableOpacity
@@ -497,8 +519,8 @@ export default function ProgramsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <Ionicons name="sparkles" size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI-Powered</Text>
+                    <Ionicons name="sparkles" size={18} color={colors.primary} />
+                    <Text style={[styles.halfButtonText, { color: colors.primary }]}>AI-Powered</Text>
                   </TouchableOpacity>
                 </GlassCard>
               </View>
@@ -543,15 +565,15 @@ export default function ProgramsScreen() {
         onRequestClose={() => setShowProgramModal(false)}
       >
         <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-          <BlurView intensity={isDark ? 20 : 35} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+          <BlurView intensity={isDark ? 25 : 40} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <TouchableOpacity
-                style={styles.modalCloseButton}
                 onPress={() => setShowProgramModal(false)}
+                style={styles.closeButtonWrapper}
               >
                 <GlassCard style={styles.modalCloseButtonGlass} interactive>
-                  <Ionicons name="close" size={24} color={colors.text} />
+                  <Ionicons name="close" size={22} color={colors.text} />
                 </GlassCard>
               </TouchableOpacity>
               <Text style={[styles.modalTitle, { color: colors.text }]}>Training Programs</Text>
@@ -559,7 +581,7 @@ export default function ProgramsScreen() {
             </View>
 
             <Text style={[styles.modalSubtitle, { color: colors.textMuted }]}>
-              Choose a program that matches your goals
+              Tap a program to preview details
             </Text>
 
             <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
@@ -567,8 +589,8 @@ export default function ProgramsScreen() {
                 <ProgramCard
                   key={program.id}
                   program={program}
-                  isSelected={selectedProgram?.id === program.id}
-                  onSelect={() => handleSelectProgram(program)}
+                  isSelected={selectedProgram?.id === program.id || previewProgram?.id === program.id}
+                  onSelect={() => handleProgramTap(program)}
                   index={index}
                 />
               ))}
@@ -577,6 +599,15 @@ export default function ProgramsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Program Preview Modal */}
+      <ProgramPreviewModal
+        visible={showProgramPreview}
+        program={previewProgram}
+        onClose={handleClosePreview}
+        onConfirm={handleConfirmProgram}
+        isGenerating={isGenerating}
+      />
 
       {/* Exercise Alternatives Modal */}
       <ExerciseAlternativesModal
@@ -964,13 +995,16 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
   },
-  modalCloseButton: {
+  closeButtonWrapper: {
     width: 40,
     height: 40,
   },
   modalCloseButtonGlass: {
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 20,
   },
   modalTitle: {
     fontSize: 18,
