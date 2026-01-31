@@ -2202,10 +2202,32 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
+// AUTO-MIGRATIONS (run on startup)
+// ============================================
+
+async function runMigrations() {
+  try {
+    console.log('[Migrations] Running database migrations...');
+
+    // Add workout_days_per_week column if missing
+    await pool.query(`
+      ALTER TABLE user_goals
+      ADD COLUMN IF NOT EXISTS workout_days_per_week INTEGER DEFAULT 3
+    `);
+
+    console.log('[Migrations] Completed successfully');
+  } catch (error) {
+    console.error('[Migrations] Error:', error.message);
+    // Don't crash - the column might already exist in a different form
+  }
+}
+
+// ============================================
 // START SERVER
 // ============================================
 
-app.listen(PORT, () => {
+runMigrations().then(() => {
+  app.listen(PORT, () => {
   console.log(`\n🚀 Heirclark Health Backend running on http://localhost:${PORT}`);
   console.log(`📊 AI Service: OpenAI GPT-4.1-mini with Vision + Whisper`);
   console.log(`🗄️  Database: PostgreSQL ${process.env.DATABASE_URL ? '(configured)' : '(not configured)'}`);
@@ -2223,6 +2245,7 @@ app.listen(PORT, () => {
   console.log(`   - Fasting: /api/v1/fasting/*`);
   console.log(`   - Avatar: /api/v1/avatar/coach/*`);
   console.log(`\n✅ All 11 AI agents implemented!`);
+  });
 });
 
 module.exports = app;
