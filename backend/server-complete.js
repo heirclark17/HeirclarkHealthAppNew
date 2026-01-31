@@ -2266,6 +2266,149 @@ app.post('/api/v1/agents/tdee/insights', authenticateToken, async (req, res) => 
 });
 
 // ============================================
+// PUSH NOTIFICATIONS
+// ============================================
+
+// Register push token
+app.post('/api/v1/notifications/register', authenticateToken, async (req, res) => {
+  try {
+    const { expoPushToken, platform } = req.body;
+
+    if (!expoPushToken) {
+      return res.status(400).json({ error: 'Push token required' });
+    }
+
+    // Create push_tokens table if doesn't exist
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS push_tokens (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        expo_push_token VARCHAR(255) NOT NULL UNIQUE,
+        platform VARCHAR(20),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    // Upsert token
+    await pool.query(`
+      INSERT INTO push_tokens (user_id, expo_push_token, platform)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (expo_push_token)
+      DO UPDATE SET user_id = $1, platform = $3, updated_at = NOW()
+    `, [req.userId, expoPushToken, platform]);
+
+    console.log(`[Notifications] Registered push token for user ${req.userId}`);
+    res.json({ success: true, message: 'Push token registered' });
+  } catch (error) {
+    console.error('[Notifications] Register error:', error);
+    res.status(500).json({ error: 'Failed to register push token' });
+  }
+});
+
+// Unregister push token
+app.post('/api/v1/notifications/unregister', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM push_tokens WHERE user_id = $1', [req.userId]);
+    res.json({ success: true, message: 'Push token unregistered' });
+  } catch (error) {
+    console.error('[Notifications] Unregister error:', error);
+    res.status(500).json({ error: 'Failed to unregister push token' });
+  }
+});
+
+// Send test notification
+app.post('/api/v1/notifications/test', authenticateToken, async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    // Get user's push token
+    const result = await pool.query(
+      'SELECT expo_push_token FROM push_tokens WHERE user_id = $1',
+      [req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No push token found for user' });
+    }
+
+    const pushToken = result.rows[0].expo_push_token;
+
+    // Send push notification via Expo Push Notification service
+    const expoPushMessage = {
+      to: pushToken,
+      sound: 'default',
+      title: 'Heirclark Health',
+      body: message || 'Test notification',
+      data: { type: 'test' },
+    };
+
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(expoPushMessage),
+    });
+
+    const data = await response.json();
+    console.log('[Notifications] Test notification sent:', data);
+
+    res.json({ success: true, message: 'Test notification sent', data });
+  } catch (error) {
+    console.error('[Notifications] Send test error:', error);
+    res.status(500).json({ error: 'Failed to send test notification' });
+  }
+});
+
+// Send notification to specific user (internal use by AI agents)
+async function sendPushNotification(userId, title, body, data = {}) {
+  try {
+    const result = await pool.query(
+      'SELECT expo_push_token FROM push_tokens WHERE user_id = $1',
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      console.log(`[Notifications] No push token for user ${userId}`);
+      return false;
+    }
+
+    const pushToken = result.rows[0].expo_push_token;
+
+    const expoPushMessage = {
+      to: pushToken,
+      sound: 'default',
+      title,
+      body,
+      data,
+      priority: 'high',
+      channelId: 'default',
+    };
+
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(expoPushMessage),
+    });
+
+    const responseData = await response.json();
+    console.log('[Notifications] Push sent:', responseData);
+    return true;
+  } catch (error) {
+    console.error('[Notifications] Send error:', error);
+    return false;
+  }
+}
+
+// Export for use by other endpoints/agents
+module.exports.sendPushNotification = sendPushNotification;
+
+// ============================================
 // ERROR HANDLING
 // ============================================
 

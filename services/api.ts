@@ -1146,6 +1146,51 @@ class HeirclarkAPI {
       return null;
     }
   }
+
+  // ============================================
+  // PUSH NOTIFICATIONS
+  // ============================================
+
+  async savePushToken(token: string, platform: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/notifications/register`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ expoPushToken: token, platform }),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('[API] Save push token error:', error);
+      return false;
+    }
+  }
+
+  async removePushToken(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/notifications/unregister`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('[API] Remove push token error:', error);
+      return false;
+    }
+  }
+
+  async sendTestNotification(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/notifications/test`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ message: 'Test notification from Heirclark Health App' }),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('[API] Send test notification error:', error);
+      return false;
+    }
+  }
 }
 
 // Export singleton instance

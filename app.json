@@ -113,6 +113,15 @@
           "microphonePermission": "Allow Heirclark to access your microphone to record voice meal descriptions."
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#22C55E",
+          "sounds": ["./assets/notification-sound.wav"],
+          "mode": "production"
+        }
+      ],
       "@react-native-community/datetimepicker",
       "expo-apple-authentication"
     ],

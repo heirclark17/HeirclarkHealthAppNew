@@ -14,6 +14,7 @@ import {
 } from '@expo-google-fonts/urbanist';
 import { GoalWizardProvider, MealPlanProvider, TrainingProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
 import { AuthProvider } from '../contexts/AuthContext';
+import { NotificationProvider } from '../contexts/NotificationContext';
 import { BackgroundLayer } from '../components/BackgroundLayer';
 import { ProviderComposer } from '../utils/ProviderComposer';
 
@@ -45,6 +46,7 @@ export default function RootLayout() {
   const providers = [
     SafeAreaProvider,
     AuthProvider,
+    NotificationProvider, // Must come after AuthProvider (depends on auth state)
     SettingsProvider,
     BackgroundLayer,
     GoalWizardProvider,
