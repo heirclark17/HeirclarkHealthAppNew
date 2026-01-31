@@ -3,6 +3,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const OpenAI = require('openai');
 const { Pool } = require('pg');
@@ -36,7 +37,55 @@ pool.query('SELECT NOW()', (err, res) => {
 // MIDDLEWARE
 // ============================================
 
-app.use(cors());
+// CORS Configuration - Restrict to allowed origins
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:19006', 'http://localhost:8081', 'exp://192.168.1.*'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+
+    // Check if origin is allowed
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (allowed.includes('*')) {
+        const pattern = allowed.replace(/\*/g, '.*');
+        return new RegExp(pattern).test(origin);
+      }
+      return allowed === origin;
+    });
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Rate Limiting - Prevent API abuse
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit auth attempts to 10 per 15 minutes
+  message: 'Too many authentication attempts, please try again later',
+  skipSuccessfulRequests: true,
+});
+
+app.use('/api/', limiter);
+app.use('/api/v1/auth/', authLimiter);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -51,8 +100,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET || 'heirclark-health-secret-key-change-in-production';
+// JWT Secret - MUST be set in production
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET environment variable is required in production');
+}
+// Use crypto.randomBytes for dev fallback
+const EFFECTIVE_JWT_SECRET = JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
 // ============================================
 // AUTHENTICATION MIDDLEWARE
@@ -62,21 +116,27 @@ const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  // Allow guest access for certain endpoints
+  // Allow guest access for certain endpoints (no token provided)
   if (!token) {
     req.userId = process.env.GUEST_USER_ID || '00000000-0000-0000-0000-000000000001';
+    req.isGuest = true;
     return next();
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET);
     req.userId = decoded.userId;
     req.user = decoded;
+    req.isGuest = false;
     next();
   } catch (error) {
-    // Fall back to guest user
-    req.userId = process.env.GUEST_USER_ID || '00000000-0000-0000-0000-000000000001';
-    next();
+    // Invalid token - return error instead of silent fallback
+    console.error('[Auth] Invalid token:', error.message);
+    return res.status(401).json({
+      error: 'Invalid or expired token',
+      message: 'Please log in again',
+      code: 'TOKEN_INVALID'
+    });
   }
 };
 
