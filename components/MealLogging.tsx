@@ -290,7 +290,7 @@ export function MealLoggingModal({
     >
       <View style={styles.container}>
         <LinearGradient
-          colors={['#000000', '#1a1a1a', '#000000']}
+          colors={[Colors.background, Colors.card, Colors.background]}
           locations={[0, 0.5, 1]}
           style={StyleSheet.absoluteFill}
         />

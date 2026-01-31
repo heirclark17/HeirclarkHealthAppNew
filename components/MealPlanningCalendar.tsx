@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Fonts, Spacing } from '../constants/Theme';
@@ -21,7 +21,17 @@ interface DayPlan {
 }
 
 export function MealPlanningCalendarModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
+  // Get Sunday of the current week
+  const getSundayOfWeek = () => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - dayOfWeek); // Go back to Sunday
+    sunday.setHours(0, 0, 0, 0);
+    return sunday;
+  };
+
+  const [currentWeekStart] = useState(getSundayOfWeek());
   const [weekDays, setWeekDays] = useState<DayPlan[]>([]);
   const [showMealLibrary, setShowMealLibrary] = useState(false);
   const [selectedDayMealTime, setSelectedDayMealTime] = useState<{ date: string; mealTime: string } | null>(null);
@@ -29,8 +39,8 @@ export function MealPlanningCalendarModal({ visible, onClose }: { visible: boole
 
   const mealTimes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 
-  // Generate week days
-  useState(() => {
+  // Generate week days starting from Sunday
+  useEffect(() => {
     generateWeekDays(currentWeekStart);
   }, [currentWeekStart]);
 
@@ -45,23 +55,12 @@ export function MealPlanningCalendarModal({ visible, onClose }: { visible: boole
 
       days.push({
         date: dateStr,
-        dayName: dayNames[date.getDay()],
+        dayName: dayNames[i], // Use index directly since we start from Sunday
         meals: [],
       });
     }
 
     setWeekDays(days);
-  };
-
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    const newDate = new Date(currentWeekStart);
-    if (direction === 'prev') {
-      newDate.setDate(newDate.getDate() - 7);
-    } else {
-      newDate.setDate(newDate.getDate() + 7);
-    }
-    setCurrentWeekStart(newDate);
-    generateWeekDays(newDate);
   };
 
   const openMealLibrary = (date: string, mealTime: string) => {
@@ -162,7 +161,7 @@ export function MealPlanningCalendarModal({ visible, onClose }: { visible: boole
     >
       <View style={styles.container}>
         <LinearGradient
-          colors={['#000000', '#1a1a1a', '#000000']}
+          colors={[Colors.background, Colors.card, Colors.background]}
           locations={[0, 0.5, 1]}
           style={StyleSheet.absoluteFill}
         />
@@ -178,14 +177,9 @@ export function MealPlanningCalendarModal({ visible, onClose }: { visible: boole
           </TouchableOpacity>
         </View>
 
-        {/* Week Navigation */}
-        <View style={styles.weekNav}>
-          <TouchableOpacity style={styles.navButton} onPress={() => navigateWeek('prev')}>
-            <Text style={styles.navButtonText}>← Prev Week</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navButton} onPress={() => navigateWeek('next')}>
-            <Text style={styles.navButtonText}>Next Week →</Text>
-          </TouchableOpacity>
+        {/* Current Week Label */}
+        <View style={styles.weekLabel}>
+          <Text style={styles.weekLabelText}>This Week</Text>
         </View>
 
         {/* Shopping List Button */}
@@ -285,7 +279,7 @@ export function MealPlanningCalendarModal({ visible, onClose }: { visible: boole
         >
           <View style={styles.container}>
             <LinearGradient
-              colors={['#000000', '#1a1a1a', '#000000']}
+              colors={[Colors.background, Colors.card, Colors.background]}
               locations={[0, 0.5, 1]}
               style={StyleSheet.absoluteFill}
             />
@@ -357,24 +351,16 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontFamily: Fonts.regular,
   },
-  weekNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  weekLabel: {
     paddingHorizontal: 16,
     marginBottom: 12,
   },
-  navButton: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: Spacing.borderRadius,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  navButtonText: {
-    color: Colors.text,
+  weekLabelText: {
+    color: Colors.textMuted,
     fontSize: 13,
     fontFamily: Fonts.medium,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   shoppingListButton: {
     backgroundColor: Colors.primary,

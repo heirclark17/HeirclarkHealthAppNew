@@ -62,7 +62,7 @@ export function ProgramPreviewModal({
       case 'beginner':
         return greenColor;
       case 'intermediate':
-        return colors.protein || '#F59E0B';
+        return colors.protein || Colors.warningOrange;
       case 'advanced':
         return colors.calories || '#EF4444';
       default:

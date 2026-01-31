@@ -37,7 +37,7 @@ export function CheatDayGuidanceCard({ dayName, userGoals }: CheatDayGuidanceCar
   // Theme-aware styling
   const glassOverlay = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.5)';
   const tipBg = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)';
-  const accentColor = isDark ? '#FBBF24' : '#F59E0B'; // Amber/gold for cheat day
+  const accentColor = isDark ? Colors.warning : Colors.warningOrange; // Amber/gold for cheat day
   const accentBg = isDark ? 'rgba(251, 191, 36, 0.15)' : 'rgba(245, 158, 11, 0.12)';
   const quoteBg = isDark ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.10)';
 
@@ -147,7 +147,7 @@ export function CheatDayGuidanceCard({ dayName, userGoals }: CheatDayGuidanceCar
         {/* Hydration Reminder */}
         <Animated.View entering={FadeInDown.delay(500)}>
           <View style={[styles.reminderCard, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.10)' }]}>
-            <Ionicons name="water-outline" size={20} color={isDark ? '#60A5FA' : '#3B82F6'} />
+            <Ionicons name="water-outline" size={20} color={isDark ? Colors.restingEnergy : '#3B82F6'} />
             <Text style={[styles.reminderText, { color: colors.textSecondary }]}>
               {guidance.hydrationReminder}
             </Text>
@@ -157,7 +157,7 @@ export function CheatDayGuidanceCard({ dayName, userGoals }: CheatDayGuidanceCar
         {/* Balance Tip */}
         <Animated.View entering={FadeInDown.delay(600)}>
           <View style={[styles.balanceCard, { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.10)' }]}>
-            <Ionicons name="refresh-outline" size={20} color={isDark ? '#4ADE80' : '#22C55E'} />
+            <Ionicons name="refresh-outline" size={20} color={isDark ? Colors.successStrong : Colors.successStrong} />
             <Text style={[styles.balanceText, { color: colors.textSecondary }]}>
               {guidance.balanceTip}
             </Text>
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: Colors.background,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.05,
         shadowRadius: 8,

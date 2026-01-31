@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -56,7 +57,7 @@ export default function ProgressPredictionCard() {
   const getTrendIcon = useCallback(() => {
     switch (trendDirection) {
       case 'losing':
-        return { icon: 'trending-down', color: '#22C55E' };
+        return { icon: 'trending-down', color: Colors.successStrong };
       case 'gaining':
         return { icon: 'trending-up', color: '#EF4444' };
       default:
@@ -91,14 +92,14 @@ export default function ProgressPredictionCard() {
           styles.milestoneIcon,
           {
             backgroundColor: milestone.achieved ? '#22C55E20' : colors.cardGlass,
-            borderColor: milestone.achieved ? '#22C55E' : colors.glassBorder,
+            borderColor: milestone.achieved ? Colors.successStrong : colors.glassBorder,
           },
         ]}
       >
         <Ionicons
           name={milestone.achieved ? 'checkmark' : 'flag'}
           size={18}
-          color={milestone.achieved ? '#22C55E' : colors.textMuted}
+          color={milestone.achieved ? Colors.successStrong : colors.textMuted}
         />
       </View>
       <View style={styles.milestoneInfo}>
@@ -106,7 +107,7 @@ export default function ProgressPredictionCard() {
           {milestone.label}
         </Text>
         {milestone.achieved ? (
-          <Text style={[styles.milestoneSubtext, { color: '#22C55E' }]}>
+          <Text style={[styles.milestoneSubtext, { color: Colors.successStrong }]}>
             Achieved {milestone.achievedDate}
           </Text>
         ) : (
@@ -287,9 +288,9 @@ export default function ProgressPredictionCard() {
         {/* Plateau Warning */}
         {inPlateau && (
           <View style={[styles.plateauBanner, { backgroundColor: '#F59E0B20' }]}>
-            <Ionicons name="pause-circle" size={18} color="#F59E0B" />
+            <Ionicons name="pause-circle" size={18} color=Colors.warningOrange />
             <View style={styles.plateauContent}>
-              <Text style={[styles.plateauTitle, { color: '#F59E0B' }]}>
+              <Text style={[styles.plateauTitle, { color: Colors.warningOrange }]}>
                 Plateau Detected
               </Text>
               <Text style={[styles.plateauText, { color: colors.textSecondary }]}>
@@ -455,7 +456,7 @@ export default function ProgressPredictionCard() {
             {/* Plateau Info */}
             {inPlateau && (
               <GlassCard style={styles.detailCard}>
-                <Text style={[styles.detailTitle, { color: '#F59E0B' }]}>Plateau Analysis</Text>
+                <Text style={[styles.detailTitle, { color: Colors.warningOrange }]}>Plateau Analysis</Text>
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Duration:</Text>
                   <Text style={[styles.detailValue, { color: colors.text }]}>
@@ -473,7 +474,7 @@ export default function ProgressPredictionCard() {
                 <Text style={[styles.suggestionsTitle, { color: colors.text }]}>Suggestions:</Text>
                 {plateauSuggestions.map((suggestion, index) => (
                   <View key={index} style={styles.suggestionItem}>
-                    <Ionicons name="bulb" size={16} color="#F59E0B" />
+                    <Ionicons name="bulb" size={16} color=Colors.warningOrange />
                     <Text style={[styles.suggestionText, { color: colors.textSecondary }]}>
                       {suggestion}
                     </Text>

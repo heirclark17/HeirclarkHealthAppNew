@@ -30,10 +30,19 @@ export const DarkColors = {
   // Input
   inputBg: '#111111',             // Dark input background
 
-  // Status Colors (BLACK & WHITE ONLY)
-  success: '#4ECDC4',             // Teal for success
-  error: '#FF6B6B',               // Red for error
+  // Status Colors
+  success: '#4ECDC4',             // Teal for success (primary)
+  successStrong: '#4ADE80',       // Bright green for strong success
+  successMuted: '#96CEB4',        // Muted green for subtle success
+  error: '#FF6B6B',               // Red for error (primary)
+  errorStrong: '#FF3B30',         // Apple red for critical errors
   warning: '#FFD93D',             // Yellow for warning
+  warningOrange: '#FB923C',       // Orange warning variant
+
+  // Accent Colors
+  accentPurple: '#7B61FF',        // Purple accent
+  accentCyan: '#00D9F5',          // Cyan accent
+  accentGold: '#FFD700',          // Gold highlight
 
   // Macro Colors - Matching Nutrition Cards
   calories: '#E74C3C',            // Red (nutrition card calories color)
@@ -136,9 +145,18 @@ export const LightColors = {
   inputBg: '#FFFFFF',             // White input background
 
   // Status Colors
-  success: '#34C759',             // iOS green
-  error: '#FF3B30',               // iOS red
+  success: '#34C759',             // iOS green (primary)
+  successStrong: '#4ADE80',       // Bright green for strong success
+  successMuted: '#96CEB4',        // Muted green for subtle success
+  error: '#FF3B30',               // iOS red (primary)
+  errorStrong: '#FF3B30',         // Same as primary for consistency
   warning: '#FF9500',             // iOS orange
+  warningOrange: '#FB923C',       // Orange warning variant
+
+  // Accent Colors
+  accentPurple: '#7B61FF',        // Purple accent
+  accentCyan: '#00D9F5',          // Cyan accent
+  accentGold: '#FFD700',          // Gold highlight
 
   // Macro Colors - Same as dark mode for consistency
   calories: '#E74C3C',            // Red

@@ -1,16 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Fonts, Spacing } from '../constants/Theme';
-import { useFoodPreferences, useFoodPreferencesSafe } from '../contexts/FoodPreferencesContext';
-
-interface Preference {
-  id: string;
-  name: string;
-  selected: boolean;
-}
+import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../constants/Theme';
+import { useFoodPreferencesSafe } from '../contexts/FoodPreferencesContext';
+import { useSettings } from '../contexts/SettingsContext';
+import { GlassCard } from './GlassCard';
+import { selectionFeedback, lightImpact } from '../utils/haptics';
 
 // Available options for each category
 const DIETARY_OPTIONS = [
@@ -53,8 +49,24 @@ const DISLIKED_OPTIONS = [
   'Avocado', 'Broccoli', 'Seafood', 'Spicy Food', 'Red Meat'
 ];
 
+// iOS 26 Liquid Glass Section wrapper
+function GlassSection({ children, isDark, style }: { children: React.ReactNode; isDark: boolean; style?: any }) {
+  return (
+    <GlassCard style={[styles.glassSection, style]} interactive>
+      {children}
+    </GlassCard>
+  );
+}
+
 export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const foodPrefsContext = useFoodPreferencesSafe();
+  const { settings } = useSettings();
+
+  // Dynamic theme colors
+  const colors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
+  const isDark = settings.themeMode === 'dark';
 
   // Local state for editing
   const [diets, setDiets] = useState<string[]>([]);
@@ -81,7 +93,6 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
       setVegetables(prefs.favoriteVegetables || []);
       setStarches(prefs.favoriteStarches || []);
       setSnacks(prefs.favoriteSnacks || []);
-      // Convert hatedFoods text to disliked array for display
       const hatedArray = prefs.hatedFoods ? prefs.hatedFoods.split(',').map(s => s.trim()).filter(Boolean) : [];
       setDisliked(hatedArray.filter(h => DISLIKED_OPTIONS.includes(h)));
       setHatedFoodsText(prefs.hatedFoods || '');
@@ -90,7 +101,8 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
     }
   }, [visible, foodPrefsContext?.preferences]);
 
-  const toggleItem = (array: string[], setArray: (arr: string[]) => void, item: string) => {
+  const toggleItem = async (array: string[], setArray: (arr: string[]) => void, item: string) => {
+    await selectionFeedback();
     if (array.includes(item)) {
       setArray(array.filter(i => i !== item));
     } else {
@@ -105,9 +117,9 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
       return;
     }
 
+    await lightImpact();
     setIsSaving(true);
     try {
-      // Combine disliked selections with any custom hated foods text
       const allHatedFoods = [...new Set([...disliked, ...hatedFoodsText.split(',').map(s => s.trim()).filter(Boolean)])];
 
       await foodPrefsContext.updatePreferences({
@@ -132,6 +144,7 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
     }
   };
 
+  // iOS 26 Liquid Glass Chip
   const PreferenceChip = ({
     item,
     isSelected,
@@ -142,27 +155,49 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
     isSelected: boolean;
     onToggle: () => void;
     variant?: 'default' | 'allergen' | 'disliked';
-  }) => (
-    <TouchableOpacity
-      style={[
-        styles.chip,
-        isSelected && styles.chipSelected,
-        variant === 'allergen' && isSelected && styles.chipAllergen,
-        variant === 'disliked' && isSelected && styles.chipDisliked,
-      ]}
-      onPress={onToggle}
-    >
-      <Text
-        style={[
-          styles.chipText,
-          isSelected && styles.chipTextSelected,
-        ]}
-      >
-        {item}
-      </Text>
-    </TouchableOpacity>
-  );
+  }) => {
+    const selectedBg = variant === 'allergen'
+      ? (isDark ? 'rgba(239, 68, 68, 0.18)' : 'rgba(239, 68, 68, 0.15)')
+      : variant === 'disliked'
+        ? (isDark ? 'rgba(249, 115, 22, 0.18)' : 'rgba(249, 115, 22, 0.15)')
+        : (isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)');
 
+    const selectedColor = variant === 'allergen' ? '#ef4444'
+      : variant === 'disliked' ? '#f97316'
+        : Colors.successMuted;
+
+    return (
+      <TouchableOpacity onPress={onToggle} activeOpacity={0.7}>
+        <GlassCard
+          style={[
+            styles.chip,
+            isSelected && { backgroundColor: selectedBg }
+          ]}
+          interactive
+        >
+          <Text
+            style={[
+              styles.chipText,
+              { color: colors.text },
+              isSelected && { color: selectedColor }
+            ]}
+          >
+            {item}
+          </Text>
+          {isSelected && (
+            <Ionicons
+              name={variant === 'allergen' || variant === 'disliked' ? 'close-circle' : 'checkmark-circle'}
+              size={16}
+              color={selectedColor}
+              style={{ marginLeft: 4 }}
+            />
+          )}
+        </GlassCard>
+      </TouchableOpacity>
+    );
+  };
+
+  // iOS 26 Liquid Glass Option Button
   const OptionButton = ({
     label,
     isSelected,
@@ -171,116 +206,76 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
     label: string;
     isSelected: boolean;
     onPress: () => void;
-  }) => (
-    <TouchableOpacity
-      style={[styles.optionButton, isSelected && styles.optionButtonSelected]}
-      onPress={onPress}
-    >
-      <Text style={[styles.optionButtonText, isSelected && styles.optionButtonTextSelected]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+  }) => {
+    const selectedBg = isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)';
+
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={{ flex: 1 }}>
+        <GlassCard
+          style={[
+            styles.optionButton,
+            isSelected && { backgroundColor: selectedBg }
+          ]}
+          interactive
+        >
+          <Text style={[
+            styles.optionButtonText,
+            { color: colors.text },
+            isSelected && { color: Colors.successMuted }
+          ]}>
+            {label}
+          </Text>
+        </GlassCard>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Modal
       visible={visible}
       animationType="slide"
-      transparent={false}
+      presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        <LinearGradient
-          colors={['#000000', '#1a1a1a', '#000000']}
-          locations={[0, 0.5, 1]}
-          style={StyleSheet.absoluteFill}
-        />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <BlurView intensity={100} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
 
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>FOOD PREFERENCES</Text>
-            <Text style={styles.headerSubtitle}>Customize your AI meal plans</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Food Preferences</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>Customize your AI meal plans</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.closeButtonContainer}>
-            <Ionicons name="close" size={28} color={Colors.text} />
+            <GlassCard style={styles.closeButton} interactive>
+              <Ionicons name="close" size={24} color={colors.text} />
+            </GlassCard>
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          {/* Meal Style */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>MEAL STYLE</Text>
-            <Text style={styles.sectionDesc}>How many meals do you prefer per day?</Text>
-            <View style={styles.optionsRow}>
-              <OptionButton
-                label="3 meals + snacks"
-                isSelected={mealStyle === 'threePlusSnacks'}
-                onPress={() => setMealStyle('threePlusSnacks')}
-              />
-              <OptionButton
-                label="Fewer, larger meals"
-                isSelected={mealStyle === 'fewerLarger'}
-                onPress={() => setMealStyle('fewerLarger')}
-              />
-            </View>
-          </View>
-
-          {/* Meal Diversity */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>MEAL VARIETY</Text>
-            <Text style={styles.sectionDesc}>Do you want different meals each day or meal prep friendly?</Text>
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* Meal Variety */}
+          <GlassSection isDark={isDark}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>MEAL VARIETY</Text>
+            <Text style={[styles.sectionDesc, { color: colors.textSecondary }]}>Different meals daily or meal prep friendly?</Text>
             <View style={styles.optionsRow}>
               <OptionButton
                 label="Diverse daily"
                 isSelected={mealDiversity === 'diverse'}
-                onPress={() => setMealDiversity('diverse')}
+                onPress={async () => { await selectionFeedback(); setMealDiversity('diverse'); }}
               />
               <OptionButton
-                label="Same meals (meal prep)"
+                label="Same meals (prep)"
                 isSelected={mealDiversity === 'sameDaily'}
-                onPress={() => setMealDiversity('sameDaily')}
+                onPress={async () => { await selectionFeedback(); setMealDiversity('sameDaily'); }}
               />
             </View>
-          </View>
-
-          {/* Dietary Preferences */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>DIETARY PREFERENCES</Text>
-            <Text style={styles.sectionDesc}>Select your dietary lifestyle</Text>
-            <View style={styles.chipsContainer}>
-              {DIETARY_OPTIONS.map((diet) => (
-                <PreferenceChip
-                  key={diet}
-                  item={diet}
-                  isSelected={diets.includes(diet)}
-                  onToggle={() => toggleItem(diets, setDiets, diet)}
-                />
-              ))}
-            </View>
-          </View>
-
-          {/* Allergens */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>ALLERGENS & RESTRICTIONS</Text>
-            <Text style={styles.sectionDesc}>Foods you must avoid (will be excluded)</Text>
-            <View style={styles.chipsContainer}>
-              {ALLERGEN_OPTIONS.map((allergen) => (
-                <PreferenceChip
-                  key={allergen}
-                  item={allergen}
-                  isSelected={allergens.includes(allergen)}
-                  onToggle={() => toggleItem(allergens, setAllergens, allergen)}
-                  variant="allergen"
-                />
-              ))}
-            </View>
-          </View>
+          </GlassSection>
 
           {/* Favorite Proteins */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>FAVORITE PROTEINS</Text>
-            <Text style={styles.sectionDesc}>Select proteins you enjoy</Text>
+          <GlassSection isDark={isDark}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE PROTEINS</Text>
+            <Text style={[styles.sectionDesc, { color: colors.textSecondary }]}>Select proteins you enjoy</Text>
             <View style={styles.chipsContainer}>
               {PROTEIN_OPTIONS.map((protein) => (
                 <PreferenceChip
@@ -291,12 +286,12 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
                 />
               ))}
             </View>
-          </View>
+          </GlassSection>
 
           {/* Favorite Vegetables */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>FAVORITE VEGETABLES</Text>
-            <Text style={styles.sectionDesc}>Select vegetables you enjoy</Text>
+          <GlassSection isDark={isDark}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE VEGETABLES</Text>
+            <Text style={[styles.sectionDesc, { color: colors.textSecondary }]}>Select vegetables you enjoy</Text>
             <View style={styles.chipsContainer}>
               {VEGETABLE_OPTIONS.map((veg) => (
                 <PreferenceChip
@@ -307,12 +302,12 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
                 />
               ))}
             </View>
-          </View>
+          </GlassSection>
 
           {/* Favorite Starches */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>FAVORITE CARBS & STARCHES</Text>
-            <Text style={styles.sectionDesc}>Select starches you enjoy</Text>
+          <GlassSection isDark={isDark}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE CARBS & STARCHES</Text>
+            <Text style={[styles.sectionDesc, { color: colors.textSecondary }]}>Select starches you enjoy</Text>
             <View style={styles.chipsContainer}>
               {STARCH_OPTIONS.map((starch) => (
                 <PreferenceChip
@@ -323,12 +318,12 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
                 />
               ))}
             </View>
-          </View>
+          </GlassSection>
 
           {/* Favorite Snacks */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>FAVORITE SNACKS</Text>
-            <Text style={styles.sectionDesc}>Select snacks you enjoy</Text>
+          <GlassSection isDark={isDark}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE SNACKS</Text>
+            <Text style={[styles.sectionDesc, { color: colors.textSecondary }]}>Select snacks you enjoy</Text>
             <View style={styles.chipsContainer}>
               {SNACK_OPTIONS.map((snack) => (
                 <PreferenceChip
@@ -339,12 +334,12 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
                 />
               ))}
             </View>
-          </View>
+          </GlassSection>
 
           {/* Favorite Cuisines */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>FAVORITE CUISINES</Text>
-            <Text style={styles.sectionDesc}>Cuisines you enjoy most</Text>
+          <GlassSection isDark={isDark}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE CUISINES</Text>
+            <Text style={[styles.sectionDesc, { color: colors.textSecondary }]}>Cuisines you enjoy most</Text>
             <View style={styles.chipsContainer}>
               {CUISINE_OPTIONS.map((cuisine) => (
                 <PreferenceChip
@@ -355,12 +350,12 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
                 />
               ))}
             </View>
-          </View>
+          </GlassSection>
 
           {/* Disliked Foods */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>DISLIKED FOODS</Text>
-            <Text style={styles.sectionDesc}>Foods you prefer to avoid (AI will exclude these)</Text>
+          <GlassSection isDark={isDark}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DISLIKED FOODS</Text>
+            <Text style={[styles.sectionDesc, { color: colors.textSecondary }]}>Foods to avoid in your meal plans</Text>
             <View style={styles.chipsContainer}>
               {DISLIKED_OPTIONS.map((food) => (
                 <PreferenceChip
@@ -372,30 +367,42 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
                 />
               ))}
             </View>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Add other foods you dislike (comma separated)"
-              placeholderTextColor={Colors.textMuted}
-              value={hatedFoodsText}
-              onChangeText={setHatedFoodsText}
-              multiline
-            />
-          </View>
+            <GlassCard style={styles.textInputContainer} interactive>
+              <TextInput
+                style={[styles.textInput, { color: colors.text }]}
+                placeholder="Add other foods (comma separated)"
+                placeholderTextColor={colors.textMuted}
+                value={hatedFoodsText}
+                onChangeText={setHatedFoodsText}
+                multiline
+              />
+            </GlassCard>
+          </GlassSection>
 
           <View style={{ height: 120 }} />
         </ScrollView>
 
         {/* Save Button */}
         <View style={styles.footer}>
-          <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
+          <BlurView intensity={80} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
           <TouchableOpacity
-            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
             onPress={handleSave}
             disabled={isSaving}
+            activeOpacity={0.7}
+            style={{ width: '100%' }}
           >
-            <Text style={styles.saveButtonText}>
-              {isSaving ? 'Saving...' : 'Save Preferences'}
-            </Text>
+            <GlassCard
+              style={[
+                styles.saveButton,
+                { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' },
+                isSaving && { opacity: 0.6 }
+              ]}
+              interactive
+            >
+              <Text style={[styles.saveButtonText, { color: Colors.successMuted }]}>
+                {isSaving ? 'Saving...' : 'Save Preferences'}
+              </Text>
+            </GlassCard>
           </TouchableOpacity>
         </View>
       </View>
@@ -406,50 +413,58 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 16,
   },
   headerTitle: {
-    fontSize: 20,
-    color: Colors.text,
-    letterSpacing: 2,
-    fontFamily: Fonts.bold,
+    fontSize: 28,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    marginTop: 4,
+    fontSize: 14,
     fontFamily: Fonts.regular,
   },
   closeButtonContainer: {
-    padding: 4,
+    marginTop: 4,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 0,
   },
   scrollView: {
     flex: 1,
   },
-  section: {
+  scrollContent: {
     paddingHorizontal: 16,
-    marginBottom: 28,
+  },
+  glassSection: {
+    marginBottom: 20,
+    padding: 16,
   },
   sectionTitle: {
     fontSize: 12,
-    color: Colors.textMuted,
-    letterSpacing: 1,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
     marginBottom: 4,
-    fontFamily: Fonts.semiBold,
   },
   sectionDesc: {
     fontSize: 13,
-    color: Colors.textSecondary,
-    marginBottom: 12,
     fontFamily: Fonts.regular,
+    marginBottom: 12,
   },
   chipsContainer: {
     flexDirection: 'row',
@@ -457,70 +472,38 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  chipSelected: {
-    backgroundColor: Colors.primary + '30',
-    borderColor: Colors.primary,
-  },
-  chipAllergen: {
-    backgroundColor: '#ef444430',
-    borderColor: '#ef4444',
-  },
-  chipDisliked: {
-    backgroundColor: '#f9731630',
-    borderColor: '#f97316',
+    paddingVertical: 10,
   },
   chipText: {
     fontSize: 13,
-    color: Colors.text,
-    fontFamily: Fonts.medium,
-  },
-  chipTextSelected: {
-    color: Colors.text,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
   },
   optionsRow: {
     flexDirection: 'row',
     gap: 12,
   },
   optionButton: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
     alignItems: 'center',
-  },
-  optionButtonSelected: {
-    backgroundColor: Colors.primary + '30',
-    borderColor: Colors.primary,
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
   },
   optionButtonText: {
     fontSize: 13,
-    color: Colors.text,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
     textAlign: 'center',
   },
-  optionButtonTextSelected: {
-    color: Colors.text,
-    fontFamily: Fonts.semiBold,
+  textInputContainer: {
+    marginTop: 12,
+    padding: 0,
   },
   textInput: {
-    marginTop: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
     padding: 12,
-    color: Colors.text,
     fontFamily: Fonts.regular,
     fontSize: 14,
     minHeight: 60,
@@ -533,21 +516,18 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    paddingBottom: 32,
+    paddingBottom: 40,
     overflow: 'hidden',
   },
   saveButton: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 16,
-    borderRadius: Spacing.borderRadius,
     alignItems: 'center',
-  },
-  saveButtonDisabled: {
-    opacity: 0.6,
+    justifyContent: 'center',
+    paddingVertical: 16,
   },
   saveButtonText: {
-    color: Colors.primaryText,
-    fontSize: 16,
-    fontFamily: Fonts.semiBold,
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    letterSpacing: 1,
   },
 });

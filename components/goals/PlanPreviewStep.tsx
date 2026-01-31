@@ -275,7 +275,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               name={state.primaryGoal === 'lose_weight' ? 'trending-down' :
                     state.primaryGoal === 'build_muscle' ? 'trending-up' : 'remove'}
               size={14}
-              color="#4ECDC4"
+              color=Colors.success
             />
             <Text style={styles.goalBadgeText}>{getGoalMessage()}</Text>
           </View>
@@ -315,17 +315,17 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       {/* Stats Cards */}
       <Animated.View entering={FadeInDown.delay(600).duration(400)} style={styles.statsRow}>
         <GlassCard style={styles.statCard} interactive>
-          <Ionicons name="flame-outline" size={20} color="#FF6B6B" />
+          <Ionicons name="flame-outline" size={20} color=Colors.error />
           <Text style={[styles.statValue, { color: colors.text }]}>{results.bmr.toLocaleString()}</Text>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMR</Text>
         </GlassCard>
         <GlassCard style={styles.statCard} interactive>
-          <Ionicons name="flash-outline" size={20} color="#FFD93D" />
+          <Ionicons name="flash-outline" size={20} color=Colors.warning />
           <Text style={[styles.statValue, { color: colors.text }]}>{results.tdee.toLocaleString()}</Text>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>TDEE</Text>
         </GlassCard>
         <GlassCard style={styles.statCard} interactive>
-          <Ionicons name="body-outline" size={20} color="#4ECDC4" />
+          <Ionicons name="body-outline" size={20} color=Colors.success />
           <Text style={[styles.statValue, { color: colors.text }]}>{results.bmi.toFixed(1)}</Text>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
         </GlassCard>
@@ -339,7 +339,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             <Ionicons
               name={state.primaryGoal === 'lose_weight' ? 'trending-down' : 'trending-up'}
               size={28}
-              color={state.primaryGoal === 'lose_weight' ? '#FF6B6B' : '#4ECDC4'}
+              color={state.primaryGoal === 'lose_weight' ? Colors.error : Colors.success}
             />
           </View>
           <View style={styles.weeklyRateContent}>
@@ -349,7 +349,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             <View style={styles.weeklyRateRow}>
               <Text style={[
                 styles.weeklyRateValue,
-                { color: state.primaryGoal === 'lose_weight' ? '#FF6B6B' : '#4ECDC4' }
+                { color: state.primaryGoal === 'lose_weight' ? Colors.error : Colors.success }
               ]}>
                 {Math.abs(results.weeklyChange).toFixed(1)}
               </Text>
@@ -377,7 +377,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       <Animated.View entering={FadeInDown.delay(800).duration(400)}>
         <GlassCard style={styles.timelineCard} interactive>
           <View style={styles.timelineIcon}>
-            <Ionicons name="calendar-outline" size={24} color="#96CEB4" />
+            <Ionicons name="calendar-outline" size={24} color=Colors.successMuted />
           </View>
           <View style={styles.timelineContent}>
             <Text style={[styles.timelineTitle, { color: colors.textMuted }]}>Estimated Timeline</Text>
@@ -411,8 +411,8 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               name={state.primaryGoal === 'lose_weight' ? 'flame' :
                     state.primaryGoal === 'build_muscle' ? 'barbell' : 'heart'}
               size={24}
-              color={state.primaryGoal === 'lose_weight' ? '#FF6B6B' :
-                     state.primaryGoal === 'build_muscle' ? colors.protein : '#4ECDC4'}
+              color={state.primaryGoal === 'lose_weight' ? Colors.error :
+                     state.primaryGoal === 'build_muscle' ? colors.protein : Colors.success}
             />
           </View>
           <View style={styles.workoutPlanHeaderText}>
@@ -457,7 +457,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         {/* Workout Commentary */}
         <View style={styles.workoutCommentary}>
           <View style={styles.workoutCommentaryItem}>
-            <Ionicons name="checkmark-circle" size={16} color="#4ECDC4" />
+            <Ionicons name="checkmark-circle" size={16} color=Colors.success />
             <Text style={[styles.workoutCommentaryText, { color: colors.textSecondary }]}>
               {state.primaryGoal === 'lose_weight' && (
                 state.cardioPreference === 'walking'
@@ -477,7 +477,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             </Text>
           </View>
           <View style={styles.workoutCommentaryItem}>
-            <Ionicons name="checkmark-circle" size={16} color="#4ECDC4" />
+            <Ionicons name="checkmark-circle" size={16} color=Colors.success />
             <Text style={[styles.workoutCommentaryText, { color: colors.textSecondary }]}>
               {state.primaryGoal === 'lose_weight' &&
                 `Combined with your ${results.dailyDelta ? Math.abs(results.dailyDelta).toFixed(0) : '500'} cal deficit for optimal fat loss`}
@@ -492,7 +492,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             </Text>
           </View>
           <View style={styles.workoutCommentaryItem}>
-            <Ionicons name="checkmark-circle" size={16} color="#4ECDC4" />
+            <Ionicons name="checkmark-circle" size={16} color=Colors.success />
             <Text style={[styles.workoutCommentaryText, { color: colors.textSecondary }]}>
               {state.primaryGoal === 'lose_weight' &&
                 `Rest days strategically placed to prevent overtraining and muscle loss`}
@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.light,
     fontWeight: '200',
-    color: '#4ECDC4',
+    color: Colors.success,
   },
   macroSection: {
     gap: 12,
@@ -785,7 +785,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: Fonts.light,
     fontWeight: '200',
-    color: '#96CEB4',
+    color: Colors.successMuted,
   },
   dietCard: {
     flexDirection: 'row',
@@ -827,7 +827,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200',
     letterSpacing: 1.5,
-    color: '#4ECDC4',
+    color: Colors.success,
     marginBottom: 2,
   },
   workoutPlanSubtitle: {

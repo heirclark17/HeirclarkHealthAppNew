@@ -151,7 +151,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                   <Ionicons
                     name={option.icon}
                     size={22}
-                    color={isSelected ? '#4ECDC4' : colors.textMuted}
+                    color={isSelected ? Colors.success : colors.textMuted}
                   />
                 </View>
               </View>
@@ -163,7 +163,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                 <Text style={[styles.activityExample, { color: colors.textMuted }]}>{option.example}</Text>
               </View>
               {isSelected && (
-                <Ionicons name="checkmark-circle" size={24} color="#4ECDC4" />
+                <Ionicons name="checkmark-circle" size={24} color=Colors.success />
               )}
             </View>
           </GlassCard>
@@ -181,7 +181,7 @@ interface ChipProps {
 }
 
 function Chip({ label, isSelected, onSelect, colors }: ChipProps) {
-  const selectedBg = isSelected ? '#4ECDC4' : undefined;
+  const selectedBg = isSelected ? Colors.success : undefined;
 
   return (
     <TouchableOpacity
@@ -237,7 +237,7 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
                   <Ionicons
                     name={option.icon}
                     size={24}
-                    color={isSelected ? '#FF6B6B' : colors.textMuted}
+                    color={isSelected ? Colors.error : colors.textMuted}
                   />
                 </View>
               </View>
@@ -258,7 +258,7 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
                 </View>
               </View>
               {isSelected && (
-                <Ionicons name="checkmark-circle" size={24} color="#FF6B6B" />
+                <Ionicons name="checkmark-circle" size={24} color=Colors.error />
               )}
             </View>
           </GlassCard>
@@ -327,7 +327,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         <View style={styles.workoutChips}>
           {[0, 1, 2, 3, 4, 5, 6, 7].map((num) => {
             const isSelected = state.workoutsPerWeek === num;
-            const selectedBg = isSelected ? '#4ECDC4' : undefined;
+            const selectedBg = isSelected ? Colors.success : undefined;
             return (
               <TouchableOpacity
                 key={num}
@@ -399,7 +399,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Summary Card */}
       <GlassCard style={styles.summaryCard} interactive>
         <View style={styles.summaryCardInner}>
-          <Ionicons name="bulb-outline" size={28} color="#FFD93D" />
+          <Ionicons name="bulb-outline" size={28} color=Colors.warning />
           <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
             Based on your activity level, we'll calculate your Total Daily Energy Expenditure (TDEE)
             to determine the right calorie target for your goal.
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   activityTitleSelected: {
-    color: '#4ECDC4',
+    color: Colors.success,
   },
   activityDescription: {
     fontSize: 13,
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     lineHeight: 18, // Match fontSize for precise centering
   },
   workoutChipTextSelected: {
-    color: '#000',
+    color: Colors.background,
   },
   durationChips: {
     flexDirection: 'row',
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   chipTextSelected: {
-    color: '#000',
+    color: Colors.background,
   },
   summaryCard: {
     marginBottom: 24,
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200',
     letterSpacing: 1.5,
-    color: '#FF6B6B',
+    color: Colors.error,
     textTransform: 'uppercase',
     marginBottom: 4,
   },
@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   cardioTitleSelected: {
-    color: '#FF6B6B',
+    color: Colors.error,
   },
   cardioDescription: {
     fontSize: 13,

@@ -7,6 +7,7 @@
 import React from 'react';
 import { TouchableOpacity, View, StyleSheet, ViewStyle, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Colors } from '../../constants/Theme';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -152,8 +153,8 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       case 'accent':
         return {
           backgroundColor: colors.semantic.info,
-          textColor: '#FFFFFF',
-          iconColor: '#FFFFFF',
+          textColor: Colors.text,
+          iconColor: Colors.text,
           borderWidth: 0,
         };
       default:

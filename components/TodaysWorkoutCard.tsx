@@ -23,21 +23,21 @@ import { lightImpact, selectionFeedback } from '../utils/haptics';
 
 // Workout type icons and colors
 const WORKOUT_TYPE_CONFIG: Record<string, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-  'Leg Day': { icon: 'fitness', color: '#FF6B6B' },
-  'Upper Body': { icon: 'barbell', color: '#4ECDC4' },
-  'Lower Body': { icon: 'fitness', color: '#FF6B6B' },
+  'Leg Day': { icon: 'fitness', color: Colors.error },
+  'Upper Body': { icon: 'barbell', color: Colors.success },
+  'Lower Body': { icon: 'fitness', color: Colors.error },
   'Push Day': { icon: 'arrow-up-circle', color: '#F39C12' },
   'Pull Day': { icon: 'arrow-down-circle', color: '#9B59B6' },
   'Full Body': { icon: 'body', color: '#3498DB' },
   'Core': { icon: 'radio-button-on', color: '#E74C3C' },
-  'Walking Session': { icon: 'walk', color: '#4ECDC4' },
-  'Running Session': { icon: 'footsteps', color: '#FF6B6B' },
+  'Walking Session': { icon: 'walk', color: Colors.success },
+  'Running Session': { icon: 'footsteps', color: Colors.error },
   'HIIT': { icon: 'flash', color: '#F39C12' },
   'Cardio': { icon: 'heart', color: '#E74C3C' },
-  'Recovery': { icon: 'leaf', color: '#96CEB4' },
+  'Recovery': { icon: 'leaf', color: Colors.successMuted },
   'Yoga': { icon: 'leaf', color: '#9B59B6' },
-  'Rest Day': { icon: 'bed', color: '#888888' },
-  'Workout': { icon: 'fitness', color: '#4ECDC4' },
+  'Rest Day': { icon: 'bed', color: Colors.textMuted },
+  'Workout': { icon: 'fitness', color: Colors.success },
 };
 
 const getWorkoutConfig = (workoutType: string) => {
@@ -99,7 +99,7 @@ export function TodaysWorkoutCard({
 
   const displayType = isRestDay ? 'Rest Day' : workoutType;
   const config = getWorkoutConfig(isRestDay ? 'Rest Day' : workoutType);
-  const displayColor = isCompleted ? '#4ECDC4' : config.color;
+  const displayColor = isCompleted ? Colors.success : config.color;
 
   // Truncate long workout names
   const truncatedType = displayType.length > 12 ? displayType.substring(0, 10) + '...' : displayType;
@@ -142,7 +142,7 @@ export function TodaysWorkoutCard({
         >
           <Animated.View
             entering={FadeInUp.duration(300)}
-            style={[styles.modalContent, { backgroundColor: isDark ? '#1a1a1a' : '#ffffff' }]}
+            style={[styles.modalContent, { backgroundColor: isDark ? Colors.card : Colors.text }]}
           >
             <View style={[styles.modalIconContainer, { backgroundColor: `${displayColor}20` }]}>
               <Ionicons name={config.icon} size={48} color={displayColor} />
@@ -155,9 +155,9 @@ export function TodaysWorkoutCard({
               <Ionicons
                 name={isCompleted ? 'checkmark-circle' : isRestDay ? 'bed' : 'time'}
                 size={16}
-                color={isCompleted ? '#4ECDC4' : isRestDay ? '#888888' : '#FF6B6B'}
+                color={isCompleted ? Colors.success : isRestDay ? Colors.textMuted : Colors.error}
               />
-              <Text style={[styles.statusBadgeText, { color: isCompleted ? '#4ECDC4' : isRestDay ? '#888888' : '#FF6B6B' }]}>
+              <Text style={[styles.statusBadgeText, { color: isCompleted ? Colors.success : isRestDay ? Colors.textMuted : Colors.error }]}>
                 {isCompleted ? 'Completed' : isRestDay ? 'Rest Day' : 'Scheduled'}
               </Text>
             </View>

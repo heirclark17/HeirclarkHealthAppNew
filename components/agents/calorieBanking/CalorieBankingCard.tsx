@@ -2,6 +2,7 @@
 // Shows weekly calorie budget with banking/borrowing status
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -53,9 +54,9 @@ export default function CalorieBankingCard({
   const scale = useSharedValue(1);
   const bankProgress = useSharedValue(0);
 
-  const textColor = isDark ? '#ffffff' : '#1a1a1a';
-  const subtextColor = isDark ? '#999999' : '#666666';
-  const mutedColor = isDark ? '#666666' : '#999999';
+  const textColor = isDark ? Colors.text : Colors.card;
+  const subtextColor = isDark ? Colors.textMuted : Colors.textMuted;
+  const mutedColor = isDark ? Colors.textMuted : Colors.textMuted;
 
   // Load data
   useEffect(() => {
@@ -138,15 +139,15 @@ export default function CalorieBankingCard({
   // Get status config
   const getStatusConfig = () => {
     if (!summary) {
-      return { icon: 'wallet-outline' as const, color: '#60A5FA', label: 'Loading' };
+      return { icon: 'wallet-outline' as const, color: Colors.restingEnergy, label: 'Loading' };
     }
 
     if (summary.bankedCalories > 200) {
-      return { icon: 'trending-up' as const, color: '#4ADE80', label: 'Banked' };
+      return { icon: 'trending-up' as const, color: Colors.successStrong, label: 'Banked' };
     } else if (summary.bankedCalories < -200) {
-      return { icon: 'trending-down' as const, color: '#FB923C', label: 'Borrowed' };
+      return { icon: 'trending-down' as const, color: Colors.warningOrange, label: 'Borrowed' };
     }
-    return { icon: 'remove-outline' as const, color: '#60A5FA', label: 'Balanced' };
+    return { icon: 'remove-outline' as const, color: Colors.restingEnergy, label: 'Balanced' };
   };
 
   const statusConfig = getStatusConfig();
@@ -188,7 +189,7 @@ export default function CalorieBankingCard({
           {/* Bank Balance Display */}
           <View style={styles.balanceContainer}>
             <View style={styles.balanceMain}>
-              <Text style={[styles.balanceValue, { color: summary && summary.bankedCalories < 0 ? '#FB923C' : '#4ADE80' }]}>
+              <Text style={[styles.balanceValue, { color: summary && summary.bankedCalories < 0 ? Colors.warningOrange : Colors.successStrong }]}>
                 {summary ? (summary.bankedCalories >= 0 ? '+' : '') + summary.bankedCalories : '0'}
               </Text>
               <Text style={[styles.balanceUnit, { color: subtextColor }]}>cal banked</Text>
@@ -201,7 +202,7 @@ export default function CalorieBankingCard({
                   style={[
                     styles.progressFill,
                     progressStyle,
-                    { backgroundColor: summary && summary.bankedCalories < 0 ? '#FB923C' : '#4ADE80' },
+                    { backgroundColor: summary && summary.bankedCalories < 0 ? Colors.warningOrange : Colors.successStrong },
                   ]}
                 />
               </View>
@@ -219,7 +220,7 @@ export default function CalorieBankingCard({
                 <Ionicons
                   name={recommendation.type === 'bank' ? 'arrow-down-circle' : 'arrow-up-circle'}
                   size={20}
-                  color={recommendation.type === 'bank' ? '#4ADE80' : '#FB923C'}
+                  color={recommendation.type === 'bank' ? Colors.successStrong : Colors.warningOrange}
                 />
                 <View style={styles.recommendationText}>
                   <Text style={[styles.recommendationTitle, { color: textColor }]}>
@@ -233,7 +234,7 @@ export default function CalorieBankingCard({
               <TouchableOpacity
                 style={[
                   styles.actionButton,
-                  { backgroundColor: recommendation.type === 'bank' ? '#4ADE80' : '#FB923C' },
+                  { backgroundColor: recommendation.type === 'bank' ? Colors.successStrong : Colors.warningOrange },
                 ]}
                 onPress={recommendation.type === 'bank' ? handleBank : handleBorrow}
                 disabled={isActing}
@@ -266,9 +267,9 @@ export default function CalorieBankingCard({
                 <Ionicons
                   name={summary.onTrack ? 'checkmark-circle' : 'alert-circle'}
                   size={18}
-                  color={summary.onTrack ? '#4ADE80' : '#FB923C'}
+                  color={summary.onTrack ? Colors.successStrong : Colors.warningOrange}
                 />
-                <Text style={[styles.statLabel, { color: summary.onTrack ? '#4ADE80' : '#FB923C' }]}>
+                <Text style={[styles.statLabel, { color: summary.onTrack ? Colors.successStrong : Colors.warningOrange }]}>
                   {summary.onTrack ? 'On track' : 'Behind'}
                 </Text>
               </View>
@@ -402,7 +403,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   actionButtonText: {
-    color: '#ffffff',
+    color: Colors.text,
     fontSize: 14,
     fontWeight: '700',
   },

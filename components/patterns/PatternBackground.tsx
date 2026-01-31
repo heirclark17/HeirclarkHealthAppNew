@@ -3,6 +3,7 @@
 
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
+import { Colors } from '../../constants/Theme';
 import Svg, {
   Defs,
   Pattern,
@@ -80,7 +81,7 @@ function NoiseGrainPattern({ isDark }: { isDark: boolean }) {
           cx={x}
           cy={y}
           r={size}
-          fill={isDark ? '#ffffff' : '#000000'}
+          fill={isDark ? Colors.text : Colors.background}
           opacity={opacity}
         />
       );
@@ -95,9 +96,9 @@ function NoiseGrainPattern({ isDark }: { isDark: boolean }) {
       <Rect width="100%" height="100%" fill={bgColor} />
       <Defs>
         <LinearGradient id="grainOverlay" x1="0%" y1="0%" x2="100%" y2="100%">
-          <Stop offset="0%" stopColor={isDark ? '#1a1a1a' : '#f0f0f0'} stopOpacity={0.4} />
+          <Stop offset="0%" stopColor={isDark ? Colors.card : '#f0f0f0'} stopOpacity={0.4} />
           <Stop offset="50%" stopColor={isDark ? '#0d0d0d' : '#fafafa'} stopOpacity={0.2} />
-          <Stop offset="100%" stopColor={isDark ? '#1a1a1a' : '#f0f0f0'} stopOpacity={0.4} />
+          <Stop offset="100%" stopColor={isDark ? Colors.card : '#f0f0f0'} stopOpacity={0.4} />
         </LinearGradient>
       </Defs>
       <Rect width="100%" height="100%" fill="url(#grainOverlay)" />
@@ -136,7 +137,7 @@ function GeometricHexagonsPattern({ isDark }: { isDark: boolean }) {
             key={`hex-${row}-${col}`}
             d={hexPath(x, y, hexSize - 2)}
             fill="none"
-            stroke={isDark ? '#ffffff' : '#000000'}
+            stroke={isDark ? Colors.text : Colors.background}
             strokeWidth={0.5}
             opacity={opacity}
           />
@@ -335,7 +336,7 @@ function DotsGridPattern({ isDark }: { isDark: boolean }) {
             cx={x}
             cy={y}
             r={size}
-            fill={isDark ? '#ffffff' : '#000000'}
+            fill={isDark ? Colors.text : Colors.background}
             opacity={opacity}
           />
         );
@@ -376,7 +377,7 @@ function CircuitBoardPattern({ isDark }: { isDark: boolean }) {
               cx={x}
               cy={y}
               r={2}
-              fill={isDark ? '#4ecdc4' : '#2a9d8f'}
+              fill={isDark ? Colors.success : '#2a9d8f'}
               opacity={0.4}
             />
           );
@@ -391,7 +392,7 @@ function CircuitBoardPattern({ isDark }: { isDark: boolean }) {
               y1={y}
               x2={x + gridSize}
               y2={y}
-              stroke={isDark ? '#4ecdc4' : '#2a9d8f'}
+              stroke={isDark ? Colors.success : '#2a9d8f'}
               strokeWidth={0.5}
               opacity={0.2}
             />
@@ -407,7 +408,7 @@ function CircuitBoardPattern({ isDark }: { isDark: boolean }) {
               y1={y}
               x2={x}
               y2={y + gridSize}
-              stroke={isDark ? '#4ecdc4' : '#2a9d8f'}
+              stroke={isDark ? Colors.success : '#2a9d8f'}
               strokeWidth={0.5}
               opacity={0.2}
             />
@@ -489,7 +490,7 @@ function BokehPattern({ isDark }: { isDark: boolean }) {
       const r = seededRandom(i * 34) * 60 + 20;
       const opacity = seededRandom(i * 45) * 0.15 + 0.03;
 
-      const darkColors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8dadc'];
+      const darkColors = [Colors.error, Colors.success, '#ffe66d', '#a8dadc'];
       const lightColors = ['#ff9999', '#7eeee5', '#fff3a3', '#c5e8ea'];
       const colors = isDark ? darkColors : lightColors;
       const color = colors[i % colors.length];
@@ -608,7 +609,7 @@ function MarblePattern({ isDark }: { isDark: boolean }) {
           key={i}
           d={path}
           fill="none"
-          stroke={isDark ? '#888888' : '#cccccc'}
+          stroke={isDark ? Colors.textMuted : Colors.textSecondary}
           strokeWidth={seededRandom(i * 58) * 2 + 0.5}
           opacity={opacity}
         />
@@ -697,7 +698,7 @@ function FabricWeavePattern({ isDark }: { isDark: boolean }) {
           y1={y}
           x2={SCREEN_WIDTH}
           y2={y}
-          stroke={isDark ? '#888888' : '#999999'}
+          stroke={isDark ? Colors.textMuted : Colors.textMuted}
           strokeWidth={0.5}
           opacity={opacity}
         />
@@ -715,7 +716,7 @@ function FabricWeavePattern({ isDark }: { isDark: boolean }) {
           y1={0}
           x2={x}
           y2={SCREEN_HEIGHT}
-          stroke={isDark ? '#888888' : '#999999'}
+          stroke={isDark ? Colors.textMuted : Colors.textMuted}
           strokeWidth={0.5}
           opacity={opacity}
         />
@@ -753,7 +754,7 @@ function StarfieldPattern({ isDark }: { isDark: boolean }) {
           cx={x}
           cy={y}
           r={size}
-          fill={isDark ? '#ffffff' : '#aaaaaa'}
+          fill={isDark ? Colors.text : '#aaaaaa'}
           opacity={opacity}
         />
       );
@@ -766,7 +767,7 @@ function StarfieldPattern({ isDark }: { isDark: boolean }) {
             cx={x}
             cy={y}
             r={size * 3}
-            fill={isDark ? '#ffffff' : '#aaaaaa'}
+            fill={isDark ? Colors.text : '#aaaaaa'}
             opacity={opacity * 0.15}
           />
         );
@@ -872,7 +873,7 @@ function MidnightGoldLeopardPattern({ isDark }: { isDark: boolean }) {
 
     // Midnight Gold color palette - adapts to light/dark mode
     const goldPrimary = isDark ? '#C9A227' : '#8B6914'; // Gold (darker in light mode for contrast)
-    const goldLight = isDark ? '#FFD700' : '#DAA520'; // Shimmer
+    const goldLight = isDark ? Colors.accentGold : '#DAA520'; // Shimmer
     const goldDark = isDark ? '#8B7320' : '#5C4A15'; // Shadow spots
     const innerSpot = isDark ? '#0D0D0D' : '#3D2B10'; // Center (brown in light mode)
 
@@ -1344,7 +1345,7 @@ function ObsidianLeopardPattern({ isDark }: { isDark: boolean }) {
     // Obsidian color palette - adapts for light/dark
     const rosettePrimary = isDark ? '#3D3D3D' : '#9CA3AF'; // Gray (lighter in light mode)
     const rosetteSecondary = isDark ? '#525252' : '#6B7280'; // Medium gray
-    const innerSpot = isDark ? '#1A1A1A' : '#374151'; // Center spot
+    const innerSpot = isDark ? Colors.card : '#374151'; // Center spot
 
     for (let i = 0; i < rosetteCount; i++) {
       const cx = seededRandom(i * 25) * SCREEN_WIDTH;
@@ -1425,8 +1426,8 @@ function ObsidianLeopardPattern({ isDark }: { isDark: boolean }) {
 
   // Dark mode: soft black, Light mode: clean white/light gray
   const bgColors = isDark
-    ? ['#1A1A1A', '#151515', '#1C1C1C'] // Soft black
-    : ['#F9FAFB', '#F3F4F6', '#FFFFFF']; // Clean white/light gray
+    ? [Colors.card, '#151515', '#1C1C1C'] // Soft black
+    : ['#F9FAFB', '#F3F4F6', Colors.text]; // Clean white/light gray
 
   return (
     <Svg width={SCREEN_WIDTH} height={SCREEN_HEIGHT} style={StyleSheet.absoluteFill}>
@@ -1451,7 +1452,7 @@ function CheetahLuxePattern({ isDark }: { isDark: boolean }) {
     // Cheetah Luxe color palette - adapts to light/dark
     const spotColor = isDark ? '#1A1008' : '#2C1810'; // Dark brown/black
     const goldAccent = isDark ? '#DAA520' : '#C9A227'; // Gold accent (brighter in dark mode)
-    const goldLight = isDark ? '#FFD700' : '#F5C842'; // Bright gold shimmer
+    const goldLight = isDark ? Colors.accentGold : '#F5C842'; // Bright gold shimmer
 
     // Cheetah spots are solid circles, not rosettes
     const spotCount = 180;
@@ -1554,8 +1555,8 @@ function CheetahLuxePattern({ isDark }: { isDark: boolean }) {
           <Stop offset="100%" stopColor={bgColors[2]} />
         </LinearGradient>
         <RadialGradient id="cheetahGlow" cx="30%" cy="20%" r="50%">
-          <Stop offset="0%" stopColor="#FFD700" stopOpacity={glowOpacity} />
-          <Stop offset="100%" stopColor="#FFD700" stopOpacity={0} />
+          <Stop offset="0%" stopColor=Colors.accentGold stopOpacity={glowOpacity} />
+          <Stop offset="100%" stopColor=Colors.accentGold stopOpacity={0} />
         </RadialGradient>
       </Defs>
       <Rect width="100%" height="100%" fill="url(#cheetahBg)" />
@@ -1578,8 +1579,8 @@ function ChristmasFestivePattern({ isDark }: { isDark: boolean }) {
     // Christmas color palette
     const red = isDark ? '#C41E3A' : '#DC143C'; // Christmas red
     const green = isDark ? '#228B22' : '#2E8B57'; // Forest/Sea green
-    const gold = isDark ? '#FFD700' : '#DAA520'; // Gold
-    const white = isDark ? '#F5F5F5' : '#FFFFFF'; // Snow white
+    const gold = isDark ? Colors.accentGold : '#DAA520'; // Gold
+    const white = isDark ? '#F5F5F5' : Colors.text; // Snow white
     const darkGreen = isDark ? '#0B3D0B' : '#1B5E20'; // Deep green
 
     // Pine branch/needle decorations
@@ -1730,7 +1731,7 @@ function HalloweenSpookyPattern({ isDark }: { isDark: boolean }) {
     // Halloween color palette
     const orange = isDark ? '#FF6B00' : '#FF8C00'; // Pumpkin orange
     const purple = isDark ? '#6B2D7B' : '#8B4789'; // Spooky purple
-    const black = isDark ? '#1A1A1A' : '#2D2D2D'; // Deep black
+    const black = isDark ? Colors.card : '#2D2D2D'; // Deep black
     const green = isDark ? '#39FF14' : '#32CD32'; // Eerie green
     const white = isDark ? '#E8E8E8' : '#F0F0F0'; // Ghost white
 
@@ -1803,7 +1804,7 @@ function HalloweenSpookyPattern({ isDark }: { isDark: boolean }) {
           <Polygon
             key={`eye-l-${i}`}
             points={`${cx - size * 0.35},${cy - size * 0.1} ${cx - size * 0.2},${cy - size * 0.3} ${cx - size * 0.05},${cy - size * 0.1}`}
-            fill={isDark ? '#FFD700' : '#FFA500'}
+            fill={isDark ? Colors.accentGold : '#FFA500'}
             opacity={opacity * 0.8}
           />
         );
@@ -1812,7 +1813,7 @@ function HalloweenSpookyPattern({ isDark }: { isDark: boolean }) {
           <Polygon
             key={`eye-r-${i}`}
             points={`${cx + size * 0.35},${cy - size * 0.1} ${cx + size * 0.2},${cy - size * 0.3} ${cx + size * 0.05},${cy - size * 0.1}`}
-            fill={isDark ? '#FFD700' : '#FFA500'}
+            fill={isDark ? Colors.accentGold : '#FFA500'}
             opacity={opacity * 0.8}
           />
         );
@@ -1910,7 +1911,7 @@ function ThanksgivingHarvestPattern({ isDark }: { isDark: boolean }) {
     // Harvest color palette
     const orange = isDark ? '#D2691E' : '#E07830'; // Harvest orange
     const brown = isDark ? '#8B4513' : '#A0522D'; // Saddle brown
-    const gold = isDark ? '#DAA520' : '#FFD700'; // Golden rod
+    const gold = isDark ? '#DAA520' : Colors.accentGold; // Golden rod
     const red = isDark ? '#8B0000' : '#B22222'; // Dark/Fire brick red
     const wheat = isDark ? '#DEB887' : '#F5DEB3'; // Wheat
 
@@ -2075,7 +2076,7 @@ function FourthOfJulyPattern({ isDark }: { isDark: boolean }) {
 
     // Patriotic color palette
     const red = isDark ? '#B22234' : '#E31B23'; // Old Glory Red
-    const white = isDark ? '#E8E8E8' : '#FFFFFF'; // White
+    const white = isDark ? '#E8E8E8' : Colors.text; // White
     const blue = isDark ? '#3C3B6E' : '#002868'; // Old Glory Blue
 
     // Stars - scattered across the sky
@@ -2204,7 +2205,7 @@ function ValentinesHeartsPattern({ isDark }: { isDark: boolean }) {
     const red = isDark ? '#DC143C' : '#E31B23'; // Crimson red
     const pink = isDark ? '#FFB6C1' : '#FFC0CB'; // Light pink
     const rose = isDark ? '#C71585' : '#DB7093'; // Medium violet red
-    const white = isDark ? '#FFF0F5' : '#FFFFFF'; // Lavender blush
+    const white = isDark ? '#FFF0F5' : Colors.text; // Lavender blush
 
     // Hearts
     const heartCount = 35;
@@ -2323,7 +2324,7 @@ function EasterSpringPattern({ isDark }: { isDark: boolean }) {
     const pastelYellow = isDark ? '#F0E68C' : '#FFFACD';
     const pastelGreen = isDark ? '#90EE90' : '#98FB98';
     const pastelPurple = isDark ? '#DDA0DD' : '#E6E6FA';
-    const white = isDark ? '#F0F0F0' : '#FFFFFF';
+    const white = isDark ? '#F0F0F0' : Colors.text;
 
     const pastels = [pastelPink, pastelBlue, pastelYellow, pastelGreen, pastelPurple];
 
@@ -2457,7 +2458,7 @@ function EasterSpringPattern({ isDark }: { isDark: boolean }) {
       );
       // Body
       result.push(
-        <Ellipse key={`body-${i}`} cx={x} cy={y} rx={size * 0.15} ry={size * 0.5} fill={isDark ? '#4A4A4A' : '#666666'} opacity={opacity} />
+        <Ellipse key={`body-${i}`} cx={x} cy={y} rx={size * 0.15} ry={size * 0.5} fill={isDark ? '#4A4A4A' : Colors.textMuted} opacity={opacity} />
       );
     }
 
@@ -2499,9 +2500,9 @@ function CincoDeMayoPattern({ isDark }: { isDark: boolean }) {
     const green = isDark ? '#00A550' : '#009F4D'; // Mexican green
     const orange = isDark ? '#FF6B00' : '#FF8C00'; // Vibrant orange
     const pink = isDark ? '#FF1493' : '#FF69B4'; // Hot pink
-    const yellow = isDark ? '#FFD700' : '#FFFF00'; // Bright yellow
+    const yellow = isDark ? Colors.accentGold : '#FFFF00'; // Bright yellow
     const purple = isDark ? '#9B30FF' : '#8B008B'; // Purple
-    const white = isDark ? '#F5F5F5' : '#FFFFFF';
+    const white = isDark ? '#F5F5F5' : Colors.text;
 
     // Background color for cutouts
     const cutoutBg = isDark ? '#1A1008' : '#FFF8E8';

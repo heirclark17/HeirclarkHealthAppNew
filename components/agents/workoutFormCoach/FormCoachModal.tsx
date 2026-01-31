@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -125,12 +126,12 @@ export function FormCoachModal({
         <Ionicons
           name={icon as any}
           size={16}
-          color={isActive ? '#FFFFFF' : colors.textSecondary}
+          color={isActive ? Colors.text : colors.textSecondary}
         />
         <Text
           style={[
             styles.tabButtonText,
-            { color: isActive ? '#FFFFFF' : colors.textSecondary },
+            { color: isActive ? Colors.text : colors.textSecondary },
           ]}
         >
           {label}
@@ -208,7 +209,7 @@ export function FormCoachModal({
               <Ionicons
                 name="warning"
                 size={16}
-                color={mistake.severity === 'serious' ? '#ef4444' : mistake.severity === 'moderate' ? '#f59e0b' : '#6b7280'}
+                color={mistake.severity === 'serious' ? '#ef4444' : mistake.severity === 'moderate' ? Colors.warningOrange : '#6b7280'}
               />
               <Text style={[styles.mistakeTitle, { color: colors.text }]}>
                 {mistake.mistake}
@@ -287,7 +288,7 @@ export function FormCoachModal({
           style={[styles.header, { paddingTop: insets.top }]}
         >
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="chevron-down" size={24} color="#FFFFFF" />
+            <Ionicons name="chevron-down" size={24} color=Colors.text />
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {displayName}
@@ -386,7 +387,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 17,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: Colors.text,
     textAlign: 'center',
     textTransform: 'capitalize',
   },
@@ -408,7 +409,7 @@ const styles = StyleSheet.create({
   exerciseGif: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: Colors.card,
   },
   mediaPlaceholder: {
     flex: 1,

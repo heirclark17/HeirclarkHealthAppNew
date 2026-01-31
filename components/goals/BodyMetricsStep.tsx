@@ -607,7 +607,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={handleStartDateChange}
             minimumDate={new Date()}
-            textColor={isDark ? "#FFFFFF" : "#000000"}
+            textColor={isDark ? Colors.text : Colors.background}
             accentColor={colors.primary}
             themeVariant={isDark ? "dark" : "light"}
           />
@@ -646,7 +646,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               onChange={handleTargetDateChange}
               minimumDate={new Date()}
               maximumDate={new Date(Date.now() + 365 * 2 * 24 * 60 * 60 * 1000)}
-              textColor={isDark ? "#FFFFFF" : "#000000"}
+              textColor={isDark ? Colors.text : Colors.background}
               accentColor={colors.primary}
               themeVariant={isDark ? "dark" : "light"}
             />

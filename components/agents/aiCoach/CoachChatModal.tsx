@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   StyleSheet,
   Text,
@@ -16,13 +17,52 @@ import {
   Platform,
   ActivityIndicator,
   Keyboard,
+  useColorScheme,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { aiService } from '../../../services/aiService';
 import { CoachMode, CoachMessage, CoachContext, CoachResponse } from '../../../types/ai';
 import { mediumImpact, lightImpact } from '../../../utils/haptics';
+
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
+// iOS 26 Liquid Glass colors
+const GLASS_COLORS = {
+  light: {
+    background: '#F8F8F8',
+    headerBg: 'rgba(255, 255, 255, 0.85)',
+    inputBg: 'rgba(255, 255, 255, 0.85)',
+    userBubble: 'rgba(0, 122, 255, 0.9)',
+    assistantBubble: 'rgba(255, 255, 255, 0.75)',
+    text: '#1D1D1F',
+    textSecondary: 'rgba(60, 60, 67, 0.6)',
+    border: 'rgba(0, 0, 0, 0.08)',
+    inputBorder: 'rgba(0, 0, 0, 0.12)',
+  },
+  dark: {
+    background: '#0A0A0A',
+    headerBg: 'rgba(44, 44, 46, 0.85)',
+    inputBg: 'rgba(44, 44, 46, 0.85)',
+    userBubble: 'rgba(10, 132, 255, 0.9)',
+    assistantBubble: 'rgba(255, 255, 255, 0.08)',
+    text: Colors.text,
+    textSecondary: 'rgba(235, 235, 245, 0.6)',
+    border: 'rgba(255, 255, 255, 0.1)',
+    inputBorder: 'rgba(255, 255, 255, 0.12)',
+  },
+};
 
 interface CoachChatModalProps {
   visible: boolean;
@@ -40,7 +80,7 @@ const MODE_CONFIG: Record<CoachMode, {
   meal: {
     title: 'Meal Coach',
     icon: 'nutrition',
-    accentColor: '#22c55e',
+    accentColor: Colors.successStrong,
     placeholder: 'Ask about meals, nutrition, recipes...',
   },
   training: {
@@ -64,6 +104,9 @@ export function CoachChatModal({
   initialMessage,
 }: CoachChatModalProps) {
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
   const config = MODE_CONFIG[mode];
   const flatListRef = useRef<FlatList>(null);
 
@@ -71,6 +114,13 @@ export function CoachChatModal({
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
+
+  // Spring animation for send button
+  const sendButtonScale = useSharedValue(1);
+
+  const sendButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: sendButtonScale.value }],
+  }));
 
   // Load conversation history on mount
   useEffect(() => {
@@ -202,9 +252,14 @@ export function CoachChatModal({
         )}
         <View style={[
           styles.messageContent,
-          isUser ? styles.userMessageContent : styles.assistantMessageContent,
+          isUser
+            ? [styles.userMessageContent, { backgroundColor: glassColors.userBubble }]
+            : [styles.assistantMessageContent, { backgroundColor: glassColors.assistantBubble }],
         ]}>
-          <Text style={[styles.messageText, isUser && styles.userMessageText]}>
+          <Text style={[
+            styles.messageText,
+            { color: isUser ? Colors.text : glassColors.text }
+          ]}>
             {item.content}
           </Text>
         </View>
@@ -217,8 +272,8 @@ export function CoachChatModal({
       <View style={[styles.emptyIcon, { backgroundColor: `${config.accentColor}20` }]}>
         <Ionicons name={config.icon as any} size={32} color={config.accentColor} />
       </View>
-      <Text style={styles.emptyTitle}>Start a Conversation</Text>
-      <Text style={styles.emptySubtitle}>
+      <Text style={[styles.emptyTitle, { color: glassColors.text }]}>Start a Conversation</Text>
+      <Text style={[styles.emptySubtitle, { color: glassColors.textSecondary }]}>
         Ask me anything about {mode === 'meal' ? 'nutrition and meal planning' : mode === 'training' ? 'workouts and exercise form' : 'your health and fitness goals'}
       </Text>
     </View>
@@ -233,19 +288,23 @@ export function CoachChatModal({
     >
       <View style={styles.container}>
         {/* Background */}
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a0a0a' }]} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: glassColors.background }]} />
 
-        {/* Header */}
-        <BlurView intensity={80} tint="dark" style={[styles.header, { paddingTop: insets.top }]}>
+        {/* Header with Liquid Glass */}
+        <BlurView
+          intensity={isDark ? 60 : 80}
+          tint={isDark ? 'dark' : 'light'}
+          style={[styles.header, { paddingTop: insets.top, borderBottomColor: glassColors.border }]}
+        >
           <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-            <Ionicons name="chevron-down" size={24} color="#FFFFFF" />
+            <Ionicons name="chevron-down" size={24} color={glassColors.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Ionicons name={config.icon as any} size={18} color={config.accentColor} />
-            <Text style={styles.headerTitle}>{config.title}</Text>
+            <Text style={[styles.headerTitle, { color: glassColors.text }]}>{config.title}</Text>
           </View>
           <TouchableOpacity onPress={handleClearHistory} style={styles.headerButton}>
-            <Ionicons name="trash-outline" size={20} color="rgba(255,255,255,0.5)" />
+            <Ionicons name="trash-outline" size={20} color={glassColors.textSecondary} />
           </TouchableOpacity>
         </BlurView>
 
@@ -278,43 +337,63 @@ export function CoachChatModal({
               <View style={[styles.avatarBadge, { backgroundColor: `${config.accentColor}20` }]}>
                 <Ionicons name={config.icon as any} size={14} color={config.accentColor} />
               </View>
-              <View style={styles.typingDots}>
+              <View style={[styles.typingDots, { backgroundColor: glassColors.assistantBubble }]}>
                 <ActivityIndicator size="small" color={config.accentColor} />
-                <Text style={styles.typingText}>Thinking...</Text>
+                <Text style={[styles.typingText, { color: glassColors.textSecondary }]}>Thinking...</Text>
               </View>
             </View>
           )}
 
-          {/* Input Area */}
-          <BlurView intensity={60} tint="dark" style={[styles.inputContainer, { paddingBottom: insets.bottom + 8 }]}>
+          {/* Input Area with Liquid Glass */}
+          <BlurView
+            intensity={isDark ? 60 : 80}
+            tint={isDark ? 'dark' : 'light'}
+            style={[styles.inputContainer, { paddingBottom: insets.bottom + 8, borderTopColor: glassColors.border }]}
+          >
             <View style={styles.inputRow}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                  color: glassColors.text,
+                  borderColor: glassColors.inputBorder,
+                }]}
                 value={inputText}
                 onChangeText={setInputText}
                 placeholder={config.placeholder}
-                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholderTextColor={glassColors.textSecondary}
                 multiline
                 maxLength={500}
                 returnKeyType="send"
                 onSubmitEditing={() => handleSendMessage()}
               />
-              <TouchableOpacity
-                style={[
-                  styles.sendButton,
-                  {
-                    backgroundColor: inputText.trim() ? config.accentColor : 'rgba(255,255,255,0.1)',
-                  },
-                ]}
-                onPress={() => handleSendMessage()}
-                disabled={!inputText.trim() || isLoading}
-              >
-                <Ionicons
-                  name="arrow-up"
-                  size={20}
-                  color={inputText.trim() ? '#FFFFFF' : 'rgba(255,255,255,0.3)'}
-                />
-              </TouchableOpacity>
+              <Animated.View style={sendButtonAnimatedStyle}>
+                <TouchableOpacity
+                  style={[
+                    styles.sendButton,
+                    {
+                      backgroundColor: inputText.trim() ? config.accentColor : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'),
+                      shadowColor: inputText.trim() ? config.accentColor : 'transparent',
+                      shadowOpacity: inputText.trim() ? 0.3 : 0,
+                      shadowRadius: 8,
+                      shadowOffset: { width: 0, height: 4 },
+                    },
+                  ]}
+                  onPress={() => {
+                    sendButtonScale.value = withSpring(0.9, GLASS_SPRING);
+                    setTimeout(() => {
+                      sendButtonScale.value = withSpring(1, GLASS_SPRING);
+                    }, 100);
+                    handleSendMessage();
+                  }}
+                  disabled={!inputText.trim() || isLoading}
+                >
+                  <Ionicons
+                    name="arrow-up"
+                    size={20}
+                    color={inputText.trim() ? Colors.text : glassColors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </Animated.View>
             </View>
           </BlurView>
         </KeyboardAvoidingView>
@@ -334,13 +413,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
   },
   headerButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 22,
   },
   headerCenter: {
     flexDirection: 'row',
@@ -350,7 +429,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#FFFFFF',
   },
   content: {
     flex: 1,
@@ -377,12 +455,10 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -412,21 +488,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   userMessageContent: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
     borderBottomRightRadius: 4,
     marginLeft: 'auto',
   },
   assistantMessageContent: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
     borderBottomLeftRadius: 4,
   },
   messageText: {
     fontSize: 15,
-    color: 'rgba(255,255,255,0.9)',
     lineHeight: 21,
-  },
-  userMessageText: {
-    color: '#FFFFFF',
   },
   typingIndicator: {
     flexDirection: 'row',
@@ -438,20 +508,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
   typingText: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.5)',
   },
   inputContainer: {
     paddingTop: 12,
     paddingHorizontal: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
   },
   inputRow: {
     flexDirection: 'row',
@@ -460,13 +527,12 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 20,
+    borderWidth: 1,
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 10,
     fontSize: 15,
-    color: '#FFFFFF',
     maxHeight: 100,
   },
   sendButton: {

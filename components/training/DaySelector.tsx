@@ -79,14 +79,14 @@ function DayPill({
         <Text style={[
           styles.dayName,
           { color: dayNameColor },
-          isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff' },
+          isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : Colors.text },
         ]}>
           {dayShort}
         </Text>
         <Text style={[
           styles.dayNumber,
           { color: colors.text },
-          isSelected && { color: isDark ? '#000000' : '#ffffff' },
+          isSelected && { color: isDark ? Colors.background : Colors.text },
         ]}>
           {dayNumber}
         </Text>
@@ -97,7 +97,7 @@ function DayPill({
           <Ionicons
             name="checkmark-circle"
             size={14}
-            color={isSelected ? (isDark ? '#000000' : '#ffffff') : colors.text}
+            color={isSelected ? (isDark ? Colors.background : Colors.text) : colors.text}
             style={styles.completedIcon}
           />
         )}
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   dayPillSelected: Platform.select({
     ios: {
-      shadowColor: '#ffffff',
+      shadowColor: Colors.text,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.3,
       shadowRadius: 20,

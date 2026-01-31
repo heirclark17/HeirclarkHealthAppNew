@@ -21,13 +21,53 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
+import { BlurView } from 'expo-blur';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { avatarService, StreamingSession } from '../../services/avatarService';
-import { lightImpact } from '../../utils/haptics';
+import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DayPlan } from '../../types/mealPlan';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
+// iOS 26 Liquid Glass colors
+const GLASS_COLORS = {
+  light: {
+    background: '#F8F8F8',
+    card: 'rgba(255, 255, 255, 0.75)',
+    cardBorder: 'rgba(255, 255, 255, 0.5)',
+    header: 'rgba(255, 255, 255, 0.85)',
+    text: '#1D1D1F',
+    textMuted: 'rgba(60, 60, 67, 0.6)',
+    textSecondary: 'rgba(60, 60, 67, 0.4)',
+    border: 'rgba(0, 0, 0, 0.08)',
+    accent: 'rgba(78, 205, 196, 0.9)',
+    accentBg: 'rgba(78, 205, 196, 0.15)',
+    buttonBg: 'rgba(255, 255, 255, 0.6)',
+    buttonBorder: 'rgba(255, 255, 255, 0.8)',
+  },
+  dark: {
+    background: '#0A0A0A',
+    card: 'rgba(255, 255, 255, 0.08)',
+    cardBorder: 'rgba(255, 255, 255, 0.12)',
+    header: 'rgba(44, 44, 46, 0.85)',
+    text: Colors.text,
+    textMuted: 'rgba(235, 235, 245, 0.6)',
+    textSecondary: 'rgba(235, 235, 245, 0.4)',
+    border: 'rgba(255, 255, 255, 0.1)',
+    accent: 'rgba(78, 205, 196, 0.9)',
+    accentBg: 'rgba(78, 205, 196, 0.1)',
+    buttonBg: 'rgba(255, 255, 255, 0.1)',
+    buttonBorder: 'rgba(255, 255, 255, 0.15)',
+  },
+};
 
 interface MealPlanCoachingModalProps {
   visible: boolean;
@@ -250,10 +290,19 @@ export function MealPlanCoachingModal({
     return settings.themeMode === 'light' ? LightColors : DarkColors;
   }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
+  const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
 
-  const containerBg = isDark ? colors.background : '#f5f5f7';
-  const cardBg = isDark ? colors.backgroundSecondary : 'rgba(255,255,255,0.95)';
-  const paragraphActiveBg = isDark ? 'rgba(78, 205, 196, 0.1)' : 'rgba(78, 205, 196, 0.15)';
+  // Button animation
+  const playButtonScale = useSharedValue(1);
+  const controlButtonScale = useSharedValue(1);
+
+  const playButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: playButtonScale.value }],
+  }));
+
+  const controlButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: controlButtonScale.value }],
+  }));
 
   const webViewRef = useRef<WebView>(null);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -400,7 +449,12 @@ export function MealPlanCoachingModal({
   };
 
   const handlePlayPause = async () => {
-    await lightImpact();
+    await mediumImpact();
+    playButtonScale.value = withSpring(0.9, GLASS_SPRING);
+    setTimeout(() => {
+      playButtonScale.value = withSpring(1, GLASS_SPRING);
+    }, 100);
+
     if (isSpeaking) {
       speakingRef.current = false;
       setIsSpeaking(false);
@@ -411,6 +465,11 @@ export function MealPlanCoachingModal({
 
   const handleReplay = async () => {
     await lightImpact();
+    controlButtonScale.value = withSpring(0.9, GLASS_SPRING);
+    setTimeout(() => {
+      controlButtonScale.value = withSpring(1, GLASS_SPRING);
+    }, 100);
+
     speakingRef.current = false;
     setCurrentParagraph(0);
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -419,6 +478,10 @@ export function MealPlanCoachingModal({
 
   const handleClose = async () => {
     await lightImpact();
+    controlButtonScale.value = withSpring(0.9, GLASS_SPRING);
+    setTimeout(() => {
+      controlButtonScale.value = withSpring(1, GLASS_SPRING);
+    }, 100);
     cleanup();
     onClose();
   };
@@ -431,9 +494,11 @@ export function MealPlanCoachingModal({
     if (state === 'loading') {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4ECDC4" />
-          <Text style={[styles.loadingText, { color: colors.text }]}>Analyzing your meal plan...</Text>
-          <Text style={[styles.loadingSubtext, { color: colors.textMuted }]}>Your AI coach is reviewing {dayName}'s meals</Text>
+          <View style={[styles.loadingIndicator, { backgroundColor: glassColors.accentBg }]}>
+            <ActivityIndicator size="large" color={glassColors.accent} />
+          </View>
+          <Text style={[styles.loadingText, { color: glassColors.text }]}>Analyzing your meal plan...</Text>
+          <Text style={[styles.loadingSubtext, { color: glassColors.textMuted }]}>Your AI coach is reviewing {dayName}'s meals</Text>
         </View>
       );
     }
@@ -441,10 +506,10 @@ export function MealPlanCoachingModal({
     if (state === 'error') {
       return (
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color="#FF6B6B" />
-          <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
-          <Pressable style={[styles.retryButton, { backgroundColor: colors.primary }]} onPress={initializeCoaching}>
-            <Text style={[styles.retryButtonText, { color: colors.primaryText }]}>Try Again</Text>
+          <Ionicons name="alert-circle-outline" size={48} color=Colors.error />
+          <Text style={[styles.errorText, { color: glassColors.textSecondary }]}>{error}</Text>
+          <Pressable style={[styles.retryButton, { backgroundColor: glassColors.accent }]} onPress={initializeCoaching}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
           </Pressable>
         </View>
       );
@@ -456,7 +521,7 @@ export function MealPlanCoachingModal({
         {settings.liveAvatar && (
           <Animated.View style={[styles.avatarSection, pulseAnimatedStyle]}>
             {session && token ? (
-              <View style={styles.webViewContainer}>
+              <View style={[styles.webViewContainer, { borderColor: glassColors.cardBorder }]}>
                 <WebView
                   ref={webViewRef}
                   source={{ html: getLiveAvatarHTML(session, script, token) }}
@@ -472,15 +537,15 @@ export function MealPlanCoachingModal({
                 />
               </View>
             ) : (
-              <View style={styles.avatarFallback}>
-                <View style={styles.avatarCircle}>
-                  <Ionicons name="nutrition" size={48} color="#4ECDC4" />
+              <View style={[styles.avatarFallback, { borderColor: glassColors.cardBorder }]}>
+                <View style={[styles.avatarCircle, { backgroundColor: glassColors.accentBg, borderColor: glassColors.accent }]}>
+                  <Ionicons name="nutrition" size={48} color={glassColors.accent} />
                 </View>
               </View>
             )}
-            <View style={[styles.statusBadge, { backgroundColor: cardBg }]}>
-              <View style={[styles.statusDot, { backgroundColor: colors.textMuted }, isSpeaking && styles.statusDotActive]} />
-              <Text style={[styles.statusText, { color: colors.text }]}>
+            <View style={[styles.statusBadge, { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder }]}>
+              <View style={[styles.statusDot, { backgroundColor: glassColors.textMuted }, isSpeaking && { backgroundColor: glassColors.accent }]} />
+              <Text style={[styles.statusText, { color: glassColors.text }]}>
                 {state === 'loading' ? 'Loading...' :
                  state === 'ready' ? 'Ready' :
                  isSpeaking ? 'Speaking' : 'Completed'}
@@ -492,13 +557,13 @@ export function MealPlanCoachingModal({
         {/* Text-only header when avatar is disabled */}
         {!settings.liveAvatar && (
           <View style={styles.textOnlyHeader}>
-            <View style={styles.coachIconSmall}>
-              <Ionicons name="nutrition" size={24} color="#4ECDC4" />
+            <View style={[styles.coachIconSmall, { backgroundColor: glassColors.accentBg }]}>
+              <Ionicons name="nutrition" size={24} color={glassColors.accent} />
             </View>
-            <Text style={[styles.textOnlyTitle, { color: colors.text }]}>{dayName}'s Meal Coaching</Text>
-            <View style={[styles.statusBadge, { backgroundColor: cardBg }]}>
-              <View style={[styles.statusDot, { backgroundColor: colors.textMuted }, isSpeaking && styles.statusDotActive]} />
-              <Text style={[styles.statusText, { color: colors.text }]}>
+            <Text style={[styles.textOnlyTitle, { color: glassColors.text }]}>{dayName}'s Meal Coaching</Text>
+            <View style={[styles.statusBadge, { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder }]}>
+              <View style={[styles.statusDot, { backgroundColor: glassColors.textMuted }, isSpeaking && { backgroundColor: glassColors.accent }]} />
+              <Text style={[styles.statusText, { color: glassColors.text }]}>
                 {state === 'ready' ? 'Ready' : isSpeaking ? 'Reading...' : 'Complete'}
               </Text>
             </View>
@@ -514,56 +579,65 @@ export function MealPlanCoachingModal({
                 entering={FadeIn.delay(index * 100)}
                 style={[
                   styles.paragraphContainer,
-                  index === currentParagraph && isSpeaking && [styles.paragraphActive, { backgroundColor: paragraphActiveBg }],
+                  { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder },
+                  index === currentParagraph && isSpeaking && [styles.paragraphActive, { backgroundColor: glassColors.accentBg, borderLeftColor: glassColors.accent }],
                 ]}
               >
                 <Text
                   style={[
                     styles.paragraphText,
-                    { color: colors.textSecondary },
-                    index === currentParagraph && isSpeaking && { color: colors.text },
-                    index < currentParagraph && { color: colors.textMuted },
+                    { color: glassColors.textSecondary },
+                    index === currentParagraph && isSpeaking && { color: glassColors.text },
+                    index < currentParagraph && { color: glassColors.textMuted },
                   ]}
                 >
                   {paragraph}
                 </Text>
               </Animated.View>
             ))}
-            <View style={{ height: 100 }} />
+            <View style={{ height: 120 }} />
           </ScrollView>
         </View>
 
-        {/* Controls */}
-        <View style={styles.controlsSection}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.controlButton,
-              { backgroundColor: cardBg, borderColor: colors.border },
-              pressed && styles.controlButtonPressed,
-            ]}
-            onPress={handleReplay}
-          >
-            <Ionicons name="refresh" size={24} color={colors.text} />
-          </Pressable>
+        {/* Controls with Glass Effect */}
+        <BlurView
+          intensity={isDark ? 60 : 80}
+          tint={isDark ? 'dark' : 'light'}
+          style={[styles.controlsSection, { borderTopColor: glassColors.border }]}
+        >
+          <Animated.View style={controlButtonAnimatedStyle}>
+            <Pressable
+              style={[
+                styles.controlButton,
+                { backgroundColor: glassColors.buttonBg, borderColor: glassColors.buttonBorder },
+              ]}
+              onPress={handleReplay}
+            >
+              <Ionicons name="refresh" size={24} color={glassColors.text} />
+            </Pressable>
+          </Animated.View>
 
-          <Pressable
-            style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
-            onPress={handlePlayPause}
-          >
-            <Ionicons name={isSpeaking ? 'pause' : 'play'} size={32} color="#000" />
-          </Pressable>
+          <Animated.View style={playButtonAnimatedStyle}>
+            <Pressable
+              style={[styles.playButton, { backgroundColor: glassColors.accent, shadowColor: glassColors.accent }]}
+              onPress={handlePlayPause}
+            >
+              <Ionicons name={isSpeaking ? 'pause' : 'play'} size={32} color=Colors.background />
+            </Pressable>
+          </Animated.View>
 
-          <Pressable
-            style={({ pressed }) => [
-              styles.controlButton,
-              { backgroundColor: cardBg, borderColor: colors.border },
-              pressed && styles.controlButtonPressed,
-            ]}
-            onPress={handleClose}
-          >
-            <Ionicons name="checkmark" size={24} color={colors.text} />
-          </Pressable>
-        </View>
+          <Animated.View style={controlButtonAnimatedStyle}>
+            <Pressable
+              style={[
+                styles.controlButton,
+                { backgroundColor: glassColors.buttonBg, borderColor: glassColors.buttonBorder },
+              ]}
+              onPress={handleClose}
+            >
+              <Ionicons name="checkmark" size={24} color={glassColors.text} />
+            </Pressable>
+          </Animated.View>
+        </BlurView>
       </View>
     );
   };
@@ -575,18 +649,23 @@ export function MealPlanCoachingModal({
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View style={[styles.container, { backgroundColor: containerBg }]}>
-        <View style={styles.header}>
+      <View style={[styles.container, { backgroundColor: glassColors.background }]}>
+        {/* Header with Glass Effect */}
+        <BlurView
+          intensity={isDark ? 60 : 80}
+          tint={isDark ? 'dark' : 'light'}
+          style={[styles.header, { borderBottomColor: glassColors.border }]}
+        >
           <Pressable
-            style={[styles.closeButton, { backgroundColor: cardBg }]}
+            style={[styles.closeButton, { backgroundColor: glassColors.buttonBg, borderColor: glassColors.buttonBorder }]}
             onPress={handleClose}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="close" size={24} color={colors.text} />
+            <Ionicons name="close" size={24} color={glassColors.text} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>MEAL PLAN COACHING</Text>
+          <Text style={[styles.headerTitle, { color: glassColors.text }]}>MEAL PLAN COACHING</Text>
           <View style={styles.headerSpacer} />
-        </View>
+        </BlurView>
 
         {renderContent()}
       </View>
@@ -604,6 +683,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
+    borderBottomWidth: 1,
   },
   closeButton: {
     width: 40,
@@ -611,11 +691,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
+    borderWidth: 1,
   },
   headerTitle: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.semiBold,
     letterSpacing: 2,
   },
   headerSpacer: {
@@ -627,10 +707,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
+  loadingIndicator: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   loadingText: {
     fontSize: 18,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.medium,
     marginTop: 24,
     textAlign: 'center',
   },
@@ -656,13 +742,17 @@ const styles = StyleSheet.create({
     marginTop: 24,
     paddingHorizontal: 32,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 24,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   retryButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.semiBold,
     letterSpacing: 1,
+    color: Colors.text,
   },
   contentContainer: {
     flex: 1,
@@ -674,9 +764,10 @@ const styles = StyleSheet.create({
   webViewContainer: {
     width: SCREEN_WIDTH - 48,
     height: 220,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#1a1a2e',
+    borderWidth: 1,
   },
   webView: {
     flex: 1,
@@ -688,15 +779,14 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH - 48,
     height: 220,
     backgroundColor: '#1a1a2e',
-    borderRadius: 16,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   avatarCircle: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: 'rgba(78, 205, 196, 0.2)',
     borderWidth: 3,
-    borderColor: '#4ECDC4',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -707,15 +797,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    borderWidth: 1,
   },
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     marginRight: 8,
-  },
-  statusDotActive: {
-    backgroundColor: '#4ECDC4',
   },
   statusText: {
     fontSize: 13,
@@ -729,15 +817,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   paragraphContainer: {
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    marginBottom: 8,
-    borderRadius: 12,
-    backgroundColor: 'transparent',
+    marginBottom: 10,
+    borderRadius: 16,
+    borderWidth: 1,
   },
   paragraphActive: {
     borderLeftWidth: 3,
-    borderLeftColor: '#4ECDC4',
   },
   paragraphText: {
     fontSize: 15,
@@ -745,12 +832,17 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   controlsSection: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 24,
     paddingVertical: 24,
     paddingBottom: 40,
+    borderTopWidth: 1,
   },
   controlButton: {
     width: 56,
@@ -760,21 +852,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
   },
-  controlButtonPressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.95 }],
-  },
   playButton: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#4ECDC4',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  playButtonPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.95 }],
+    // Glow shadow
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
   },
   textOnlyHeader: {
     flexDirection: 'row',
@@ -788,14 +876,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(78, 205, 196, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   textOnlyTitle: {
     fontSize: 18,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.medium,
     flex: 1,
   },
 });

@@ -158,21 +158,21 @@ function BackgroundThumbnail({
           {/* Selected checkmark */}
           {isSelected && (
             <View style={[styles.checkmark, { backgroundColor: colors.success }]}>
-              <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+              <Ionicons name="checkmark" size={12} color=Colors.text />
             </View>
           )}
 
           {/* Premium badge */}
           {background.premium && (
             <View style={[styles.premiumBadge, { backgroundColor: colors.warning }]}>
-              <Ionicons name="star" size={8} color="#FFFFFF" />
+              <Ionicons name="star" size={8} color=Colors.text />
             </View>
           )}
 
           {/* Pattern indicator badge */}
           {background.type === 'pattern' && (
             <View style={[styles.patternBadge, { backgroundColor: isDark ? 'rgba(78, 205, 196, 0.8)' : 'rgba(78, 205, 196, 0.9)' }]}>
-              <Ionicons name="grid-outline" size={8} color="#FFFFFF" />
+              <Ionicons name="grid-outline" size={8} color=Colors.text />
             </View>
           )}
         </View>
@@ -458,12 +458,12 @@ export function BackgroundSelector({ visible, onClose }: BackgroundSelectorProps
                         onPress={handleClearCustomPhoto}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                       >
-                        <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
+                        <Ionicons name="trash-outline" size={18} color=Colors.error />
                       </TouchableOpacity>
                     )}
                     {currentBackground === 'custom' && (
                       <View style={[styles.customPhotoCheckmark, { backgroundColor: colors.success }]}>
-                        <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                        <Ionicons name="checkmark" size={14} color=Colors.text />
                       </View>
                     )}
                   </TouchableOpacity>

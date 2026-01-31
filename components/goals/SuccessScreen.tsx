@@ -138,7 +138,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   const buttonTranslateY = useSharedValue(20);
 
   // Confetti colors
-  const confettiColors = ['#4ECDC4', '#FF6B6B', '#FFD93D', '#96CEB4', '#DDA0DD', '#45B7D1'];
+  const confettiColors = [Colors.success, Colors.error, Colors.warning, Colors.successMuted, '#DDA0DD', '#45B7D1'];
 
   useEffect(() => {
     // Play haptic once
@@ -314,7 +314,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         <Animated.View style={[styles.ring, ringStyle]} />
         <Animated.View style={[styles.checkContainer, checkStyle]}>
           <View style={styles.checkCircle}>
-            <Ionicons name="checkmark" size={48} color="#000" />
+            <Ionicons name="checkmark" size={48} color=Colors.background />
           </View>
         </Animated.View>
       </View>
@@ -333,7 +333,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           <Text style={[styles.targetsSectionHeader, { color: colors.textMuted }]}>YOUR DAILY TARGETS</Text>
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
-              <Ionicons name="flame" size={20} color="#FF6B6B" />
+              <Ionicons name="flame" size={20} color=Colors.error />
               <Text style={[styles.targetValue, { color: colors.text }]}>{state.results.calories.toLocaleString()}</Text>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Calories</Text>
             </GlassCard>
@@ -360,7 +360,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <Animated.View entering={FadeInDown.delay(750).duration(400)}>
         <GlassCard style={styles.workoutPlanCard} interactive>
           <View style={styles.workoutPlanHeader}>
-            <Ionicons name="barbell" size={20} color="#FF6B6B" />
+            <Ionicons name="barbell" size={20} color=Colors.error />
             <Text style={styles.workoutPlanTitle}>YOUR WORKOUT PLAN</Text>
           </View>
 
@@ -396,7 +396,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <Ionicons
                 name={state.cardioPreference === 'walking' ? 'walk' : state.cardioPreference === 'running' ? 'fitness' : 'flash'}
                 size={16}
-                color="#FF6B6B"
+                color=Colors.error
               />
               <Text style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
                 {state.cardioPreference === 'walking' && 'Walking-based cardio'}
@@ -437,7 +437,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <Animated.View entering={FadeInDown.delay(850).duration(400)}>
         <GlassCard style={styles.profileCard} interactive>
           <View style={styles.profileHeader}>
-            <Ionicons name="person-outline" size={20} color="#4ECDC4" />
+            <Ionicons name="person-outline" size={20} color=Colors.success />
             <Text style={styles.profileTitle}>YOUR PROFILE SUMMARY</Text>
           </View>
 
@@ -480,17 +480,17 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           {state.results && (
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Ionicons name="flame-outline" size={16} color="#FF6B6B" />
+                <Ionicons name="flame-outline" size={16} color=Colors.error />
                 <Text style={[styles.statValue, { color: colors.text }]}>{state.results.bmr.toLocaleString()}</Text>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMR</Text>
               </View>
               <View style={styles.statItem}>
-                <Ionicons name="flash-outline" size={16} color="#FFD93D" />
+                <Ionicons name="flash-outline" size={16} color=Colors.warning />
                 <Text style={[styles.statValue, { color: colors.text }]}>{state.results.tdee.toLocaleString()}</Text>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>TDEE</Text>
               </View>
               <View style={styles.statItem}>
-                <Ionicons name="body-outline" size={16} color="#4ECDC4" />
+                <Ionicons name="body-outline" size={16} color=Colors.success />
                 <Text style={[styles.statValue, { color: colors.text }]}>{state.results.bmi.toFixed(1)}</Text>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
               </View>
@@ -503,7 +503,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <Animated.View entering={FadeInDown.delay(900).duration(400)}>
         <GlassCard style={styles.guidanceCard} interactive>
           <View style={styles.guidanceHeader}>
-            <Ionicons name="bulb-outline" size={20} color="#FFD93D" />
+            <Ionicons name="bulb-outline" size={20} color=Colors.warning />
             <Text style={styles.guidanceTitle}>DAILY GUIDANCE</Text>
           </View>
           <Text style={[styles.guidanceText, { color: colors.textSecondary }]}>
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 3,
-    borderColor: '#4ECDC4',
+    borderColor: Colors.success,
   },
   checkContainer: {
     alignItems: 'center',
@@ -714,7 +714,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#4ECDC4',
+    backgroundColor: Colors.success,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -793,7 +793,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200',
     letterSpacing: 1.5,
-    color: '#FF6B6B',
+    color: Colors.error,
   },
   workoutPlanDescription: {
     fontSize: 13,
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200',
     letterSpacing: 1.5,
-    color: '#4ECDC4',
+    color: Colors.success,
   },
   profileGrid: {
     flexDirection: 'row',
@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200',
     letterSpacing: 1.5,
-    color: '#FFD93D',
+    color: Colors.warning,
   },
   guidanceText: {
     fontSize: 13,
@@ -959,7 +959,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: Colors.error,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -996,7 +996,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#4ECDC4',
+    backgroundColor: Colors.success,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1025,7 +1025,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#4ECDC4',
+    backgroundColor: Colors.success,
     alignItems: 'center',
     justifyContent: 'center',
     paddingLeft: 2,

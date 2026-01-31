@@ -1,8 +1,10 @@
 // Weight Logging Card Component
 // Allows users to log daily weight with liquid glass design
 // Essential for Adaptive TDEE calculations
+// iOS 26 Liquid Glass Design
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -24,10 +26,10 @@ import Animated, {
   FadeIn,
   FadeOut,
 } from 'react-native-reanimated';
-import { GlassCard } from '../../liquidGlass/GlassCard';
-import { useGlassTheme } from '../../liquidGlass/useGlassTheme';
+import { GlassCard } from '../../GlassCard';
 import { useAdaptiveTDEE } from '../../../contexts/AdaptiveTDEEContext';
 import { useSettings } from '../../../contexts/SettingsContext';
+import { Fonts } from '../../../constants/Theme';
 import { BodyWeightLog } from '../../../types/adaptiveTDEE';
 
 interface WeightLoggingCardProps {
@@ -37,7 +39,7 @@ interface WeightLoggingCardProps {
 export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardProps) {
   const { state, logWeight, getWeightHistory, getLatestWeight } = useAdaptiveTDEE();
   const { settings } = useSettings();
-  const { isDark, colors } = useGlassTheme();
+  const isDark = settings.themeMode === 'dark';
 
   const [showModal, setShowModal] = useState(false);
   const [weightInput, setWeightInput] = useState('');
@@ -53,9 +55,9 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
   const weightUnit = settings.weightUnit || 'lb';
 
   // Text colors for theme
-  const textColor = isDark ? '#ffffff' : '#1a1a1a';
-  const subtextColor = isDark ? '#999999' : '#666666';
-  const mutedColor = isDark ? '#666666' : '#999999';
+  const textColor = isDark ? Colors.text : Colors.card;
+  const subtextColor = isDark ? Colors.textMuted : Colors.textMuted;
+  const mutedColor = isDark ? Colors.textMuted : Colors.textMuted;
 
   // Load weight data
   const loadWeightData = useCallback(async () => {
@@ -162,12 +164,12 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
     const displayChange = weightUnit === 'kg' ? changeKg : change;
 
     if (Math.abs(displayChange) < 0.1) {
-      return { icon: 'remove-outline' as const, color: '#60A5FA', text: 'Stable' };
+      return { icon: 'remove-outline' as const, color: Colors.restingEnergy, text: 'Stable' };
     }
 
     return displayChange > 0
-      ? { icon: 'trending-up' as const, color: '#FB923C', text: `+${displayChange.toFixed(1)} ${weightUnit}` }
-      : { icon: 'trending-down' as const, color: '#4ADE80', text: `${displayChange.toFixed(1)} ${weightUnit}` };
+      ? { icon: 'trending-up' as const, color: Colors.warningOrange, text: `+${displayChange.toFixed(1)} ${weightUnit}` }
+      : { icon: 'trending-down' as const, color: Colors.successStrong, text: `${displayChange.toFixed(1)} ${weightUnit}` };
   };
 
   const weightChange = getWeightChange();
@@ -188,19 +190,19 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
 
   return (
     <>
-      <Animated.View style={[styles.container, animatedStyle]}>
+      <Animated.View style={animatedStyle}>
         <TouchableOpacity
           activeOpacity={0.9}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           onPress={() => setShowModal(true)}
         >
-          <GlassCard variant="elevated" material="thick" interactive animated>
+          <GlassCard style={styles.cardContainer} interactive>
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(96,165,250,0.15)' }]}>
-                  <Ionicons name="scale-outline" size={20} color="#60A5FA" />
+                  <Ionicons name="scale-outline" size={20} color=Colors.restingEnergy />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Weight Log</Text>
@@ -214,9 +216,9 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                 <Ionicons
                   name={todayLogged ? 'checkmark-circle' : 'time-outline'}
                   size={14}
-                  color={todayLogged ? '#4ADE80' : '#FB923C'}
+                  color={todayLogged ? Colors.successStrong : Colors.warningOrange}
                 />
-                <Text style={[styles.statusText, { color: todayLogged ? '#4ADE80' : '#FB923C' }]}>
+                <Text style={[styles.statusText, { color: todayLogged ? Colors.successStrong : Colors.warningOrange }]}>
                   {todayLogged ? 'Logged Today' : 'Not Logged'}
                 </Text>
               </View>
@@ -253,7 +255,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                               styles.chartBar,
                               {
                                 height: Math.max(4, height * 0.4),
-                                backgroundColor: index === chartData.length - 1 ? '#60A5FA' : (isDark ? '#444' : '#ddd'),
+                                backgroundColor: index === chartData.length - 1 ? Colors.restingEnergy : (isDark ? '#444' : '#ddd'),
                               },
                             ]}
                           />
@@ -265,7 +267,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                   {/* Streak Progress */}
                   <View style={styles.streakContainer}>
                     <View style={styles.streakHeader}>
-                      <Ionicons name="flame" size={14} color="#FB923C" />
+                      <Ionicons name="flame" size={14} color=Colors.warningOrange />
                       <Text style={[styles.streakLabel, { color: subtextColor }]}>
                         Logging Streak: {Math.min(recentWeights.length, 7)} days
                       </Text>
@@ -279,7 +281,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                 // No weight logged yet
                 <View style={styles.emptyState}>
                   <View style={[styles.emptyIcon, { backgroundColor: isDark ? 'rgba(96,165,250,0.1)' : 'rgba(96,165,250,0.15)' }]}>
-                    <Ionicons name="add-circle-outline" size={32} color="#60A5FA" />
+                    <Ionicons name="add-circle-outline" size={32} color=Colors.restingEnergy />
                   </View>
                   <Text style={[styles.emptyTitle, { color: textColor }]}>Start Tracking</Text>
                   <Text style={[styles.emptyDesc, { color: subtextColor }]}>
@@ -376,7 +378,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                         setWeightInput((current + delta).toFixed(1));
                       }}
                     >
-                      <Text style={[styles.adjustButtonText, { color: delta > 0 ? '#FB923C' : '#4ADE80' }]}>
+                      <Text style={[styles.adjustButtonText, { color: delta > 0 ? Colors.warningOrange : Colors.successStrong }]}>
                         {delta > 0 ? '+' : ''}{delta}
                       </Text>
                     </TouchableOpacity>
@@ -402,7 +404,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
 
               {/* Tips */}
               <View style={[styles.tipContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                <Ionicons name="bulb-outline" size={16} color="#FFD700" />
+                <Ionicons name="bulb-outline" size={16} color=Colors.accentGold />
                 <Text style={[styles.tipText, { color: subtextColor }]}>
                   Weigh yourself at the same time each day, ideally in the morning, for the most consistent results.
                 </Text>
@@ -416,9 +418,8 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: 16,
-    marginVertical: 8,
+  cardContainer: {
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
@@ -439,12 +440,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 18,
-    fontWeight: '400',
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
     letterSpacing: 0.3,
   },
   subtitle: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
     marginTop: 2,
   },
   statusBadge: {
@@ -457,7 +459,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
   },
   contentContainer: {
     alignItems: 'center',
@@ -468,7 +470,7 @@ const styles = StyleSheet.create({
   },
   weightValue: {
     fontSize: 42,
-    fontWeight: '200',
+    fontFamily: Fonts.light,
     letterSpacing: -1,
   },
   changeIndicator: {
@@ -482,7 +484,7 @@ const styles = StyleSheet.create({
   },
   changeText: {
     fontSize: 12,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
   },
   miniChart: {
     width: '100%',
@@ -490,6 +492,7 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     fontSize: 11,
+    fontFamily: Fonts.regular,
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -517,6 +520,7 @@ const styles = StyleSheet.create({
   },
   streakLabel: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
   },
   progressBar: {
     height: 6,
@@ -525,7 +529,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FB923C',
+    backgroundColor: Colors.warningOrange,
     borderRadius: 3,
   },
   emptyState: {
@@ -542,11 +546,12 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
     marginBottom: 4,
   },
   emptyDesc: {
     fontSize: 13,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -569,7 +574,7 @@ const styles = StyleSheet.create({
   },
   logButtonText: {
     fontSize: 14,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
   },
   // Modal styles
   modalOverlay: {
@@ -596,7 +601,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '400',
+    fontFamily: Fonts.semiBold,
   },
   closeButton: {
     padding: 4,
@@ -615,16 +620,17 @@ const styles = StyleSheet.create({
   weightInput: {
     flex: 1,
     fontSize: 36,
-    fontWeight: '300',
+    fontFamily: Fonts.light,
     textAlign: 'center',
   },
   unitLabel: {
     fontSize: 20,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
     marginLeft: 8,
   },
   lastWeight: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     marginTop: 12,
   },
@@ -633,6 +639,7 @@ const styles = StyleSheet.create({
   },
   quickAdjustLabel: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
     marginBottom: 8,
   },
   adjustButtons: {
@@ -647,7 +654,7 @@ const styles = StyleSheet.create({
   },
   adjustButtonText: {
     fontSize: 16,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
   },
   submitButton: {
     flexDirection: 'row',
@@ -666,7 +673,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 16,
-    fontWeight: '400',
+    fontFamily: Fonts.semiBold,
   },
   tipContainer: {
     flexDirection: 'row',
@@ -678,6 +685,7 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 12,
+    fontFamily: Fonts.regular,
     lineHeight: 18,
   },
 });

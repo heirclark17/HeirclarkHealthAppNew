@@ -21,10 +21,10 @@ import { lightImpact } from '../utils/haptics';
 // Heart Rate Zone Configuration
 const HEART_RATE_ZONES = [
   { zone: 1, name: 'Rest', min: 0, max: 50, color: '#8E8E93', description: 'Resting state' },
-  { zone: 2, name: 'Fat Burn', min: 50, max: 60, color: '#4ECDC4', description: 'Light activity, fat burning' },
-  { zone: 3, name: 'Cardio', min: 60, max: 70, color: '#96CEB4', description: 'Moderate aerobic training' },
+  { zone: 2, name: 'Fat Burn', min: 50, max: 60, color: Colors.success, description: 'Light activity, fat burning' },
+  { zone: 3, name: 'Cardio', min: 60, max: 70, color: Colors.successMuted, description: 'Moderate aerobic training' },
   { zone: 4, name: 'Aerobic', min: 70, max: 80, color: '#F39C12', description: 'Improved cardiovascular fitness' },
-  { zone: 5, name: 'Peak', min: 80, max: 90, color: '#FF6B6B', description: 'High intensity, anaerobic' },
+  { zone: 5, name: 'Peak', min: 80, max: 90, color: Colors.error, description: 'High intensity, anaerobic' },
   { zone: 6, name: 'Max', min: 90, max: 100, color: '#E74C3C', description: 'Maximum effort' },
 ];
 
@@ -87,9 +87,9 @@ export function HeartRateCard({
   // Blood pressure classification
   const getBPClassification = () => {
     if (systolic <= 0 || diastolic <= 0) return { status: 'No Data', color: colors.textMuted };
-    if (systolic < 120 && diastolic < 80) return { status: 'Normal', color: '#96CEB4' };
+    if (systolic < 120 && diastolic < 80) return { status: 'Normal', color: Colors.successMuted };
     if (systolic < 130 && diastolic < 80) return { status: 'Elevated', color: '#F39C12' };
-    if (systolic < 140 || diastolic < 90) return { status: 'High (Stage 1)', color: '#FF6B6B' };
+    if (systolic < 140 || diastolic < 90) return { status: 'High (Stage 1)', color: Colors.error };
     if (systolic >= 140 || diastolic >= 90) return { status: 'High (Stage 2)', color: '#E74C3C' };
     return { status: 'Unknown', color: colors.textMuted };
   };
@@ -148,7 +148,7 @@ export function HeartRateCard({
         >
           <Animated.View
             entering={FadeInUp.duration(300)}
-            style={[styles.modalContent, { backgroundColor: isDark ? '#1a1a1a' : '#ffffff' }]}
+            style={[styles.modalContent, { backgroundColor: isDark ? Colors.card : Colors.text }]}
           >
             <ScrollView showsVerticalScrollIndicator={false}>
               {/* Heart Rate Section */}

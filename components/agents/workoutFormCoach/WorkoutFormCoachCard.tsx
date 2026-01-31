@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -389,15 +390,15 @@ export default function WorkoutFormCoachCard() {
 
 // Helper functions
 function getScoreColor(score: number): string {
-  if (score >= 80) return '#22C55E';
-  if (score >= 60) return '#F59E0B';
+  if (score >= 80) return Colors.successStrong;
+  if (score >= 60) return Colors.warningOrange;
   return '#EF4444';
 }
 
 function getSeverityColor(severity: string): string {
   switch (severity) {
     case 'serious': return '#EF4444';
-    case 'moderate': return '#F59E0B';
+    case 'moderate': return Colors.warningOrange;
     default: return '#6B7280';
   }
 }

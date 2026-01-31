@@ -9,6 +9,7 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGlassTheme } from './useGlassTheme';
+import { Colors } from '../../constants/Theme';
 
 export type IconColorVariant = 'primary' | 'secondary' | 'tertiary' | 'accent';
 
@@ -71,7 +72,7 @@ export const AdaptiveIcon: React.FC<AdaptiveIconProps> = ({
   const shadowStyle = glassShadow
     ? Platform.select({
         ios: {
-          shadowColor: isDark ? '#000000' : '#FFFFFF',
+          shadowColor: isDark ? Colors.background : Colors.text,
           shadowOffset: { width: 0, height: 0.5 },
           shadowOpacity: isDark ? 0.5 : 0.3,
           shadowRadius: 1,

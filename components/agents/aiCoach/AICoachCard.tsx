@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   StyleSheet,
   Text,
@@ -38,7 +39,7 @@ const MODE_CONFIG: Record<CoachMode, {
     icon: 'nutrition',
     defaultTitle: 'Meal Coach',
     defaultSubtitle: 'Powered by GPT-4.1-mini',
-    accentColor: '#22c55e',
+    accentColor: Colors.successStrong,
     suggestions: [
       'What should I eat for dinner?',
       'High protein meal ideas',
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: Colors.text,
     marginBottom: 2,
   },
   subtitle: {

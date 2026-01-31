@@ -36,14 +36,14 @@ const GOAL_OPTIONS: GoalOption[] = [
     title: 'Lose Weight',
     subtitle: 'Burn fat, get lean',
     icon: 'flame-outline',
-    color: '#FF6B6B',
+    color: Colors.error,
   },
   {
     id: 'build_muscle',
     title: 'Build Muscle',
     subtitle: 'Get stronger',
     icon: 'barbell-outline',
-    color: '#4ECDC4',
+    color: Colors.success,
   },
   {
     id: 'maintain',
@@ -57,7 +57,7 @@ const GOAL_OPTIONS: GoalOption[] = [
     title: 'Improve Health',
     subtitle: 'Feel better daily',
     icon: 'heart-outline',
-    color: '#96CEB4',
+    color: Colors.successMuted,
   },
   {
     id: 'custom',
@@ -213,13 +213,13 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
     background: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
     backgroundActive: isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(0, 0, 0, 0.10)',
     border: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)',
-    text: isDark ? '#FFFFFF' : '#1D1D1F',
+    text: isDark ? Colors.text : '#1D1D1F',
     textDisabled: isDark ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.35)',
   };
 
   const shadowStyle = Platform.select({
     ios: {
-      shadowColor: '#000',
+      shadowColor: Colors.background,
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: isDark ? 0.4 : 0.12,
       shadowRadius: 16,

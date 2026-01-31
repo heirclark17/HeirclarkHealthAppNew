@@ -87,7 +87,7 @@ export function HourlyForecastCard() {
   if (loading) {
     return (
       <GlassCard style={styles.container} interactive>
-        <ActivityIndicator color="#FFFFFF" size="small" />
+        <ActivityIndicator color=Colors.text size="small" />
       </GlassCard>
     );
   }
@@ -108,7 +108,7 @@ export function HourlyForecastCard() {
             )}
             <View style={styles.hourlyCard}>
               <Text style={styles.time}>{forecast.time}</Text>
-              <Ionicons name={forecast.iconName} size={28} color="#FFFFFF" style={[styles.icon, { opacity: 0.9 }]} />
+              <Ionicons name={forecast.iconName} size={28} color=Colors.text style={[styles.icon, { opacity: 0.9 }]} />
               <Text style={styles.temp}>{forecast.temp}°</Text>
               <Text style={styles.date}>{forecast.date}</Text>
             </View>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 11,
     fontWeight: '300',
-    color: '#FFFFFF',
+    color: Colors.text,
     marginBottom: 12,
     opacity: 0.8,
   },
@@ -152,13 +152,13 @@ const styles = StyleSheet.create({
   temp: {
     fontSize: 18,
     fontWeight: '100',
-    color: '#FFFFFF',
+    color: Colors.text,
     marginBottom: 10,
   },
   date: {
     fontSize: 10,
     fontWeight: '100',
-    color: '#FFFFFF',
+    color: Colors.text,
     opacity: 0.7,
   },
   weekSeparator: {
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   weekLabel: {
     fontSize: 11,
     fontWeight: '500',
-    color: '#FFFFFF',
+    color: Colors.text,
     opacity: 0.6,
     letterSpacing: 1,
   },

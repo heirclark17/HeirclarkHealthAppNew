@@ -8,6 +8,7 @@ import { useBreakpoint, useResponsiveValue } from '../../hooks/useResponsive';
 import { LandingGlassButton } from './LandingGlassButton';
 import { LandingGlassPill } from './LandingGlassPill';
 import { Sparkles, ChevronDown, Apple } from 'lucide-react-native';
+import { Colors } from '../../constants/Theme';
 
 export function HeroSection() {
   const breakpoint = useBreakpoint();
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
     padding: 12,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: Colors.background,
         shadowOffset: { width: 0, height: 20 },
         shadowOpacity: 0.4,
         shadowRadius: 40,
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 38,
     overflow: 'hidden',
-    backgroundColor: '#000',
+    backgroundColor: Colors.background,
   },
   screenContent: {
     flex: 1,
@@ -342,7 +343,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 100,
     height: 28,
-    backgroundColor: '#000',
+    backgroundColor: Colors.background,
     borderRadius: 20,
   },
   phoneGlow: {

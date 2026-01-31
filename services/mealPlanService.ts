@@ -632,11 +632,18 @@ function generateMockWeeklyPlan(
   const usedDinner = new Set<number>();
   const usedSnack = new Set<number>();
 
+  // Calculate Sunday of the current week (always start from Sunday)
+  const startDateObj = new Date(startDate);
+  const dayOfWeek = startDateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const sunday = new Date(startDateObj);
+  sunday.setDate(startDateObj.getDate() - dayOfWeek); // Go back to Sunday
+  sunday.setHours(0, 0, 0, 0);
+
   for (let i = 0; i < 7; i++) {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + i);
+    const date = new Date(sunday);
+    date.setDate(sunday.getDate() + i);
     const dateStr = date.toISOString().split('T')[0];
-    const dayName = dayNames[date.getDay()];
+    const dayName = dayNames[i]; // Use index directly since we start from Sunday
 
     const meals: Meal[] = [];
 

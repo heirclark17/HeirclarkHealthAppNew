@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGlassTheme } from '../../liquidGlass/useGlassTheme';
 import { NutritionVerificationResult } from '../../../types/nutritionAccuracy';
+import { Colors } from '../../../constants/Theme';
 
 interface NutritionVerificationBadgeProps {
   verification: NutritionVerificationResult | null;
@@ -17,17 +18,17 @@ interface NutritionVerificationBadgeProps {
 const CONFIDENCE_CONFIG = {
   high: {
     icon: 'shield-checkmark' as const,
-    color: '#4ADE80',
+    color: Colors.successStrong,
     label: 'Verified',
   },
   medium: {
     icon: 'shield-half' as const,
-    color: '#60A5FA',
+    color: Colors.restingEnergy,
     label: 'Partial',
   },
   low: {
     icon: 'warning' as const,
-    color: '#FB923C',
+    color: Colors.warningOrange,
     label: 'Unverified',
   },
 };
@@ -72,7 +73,7 @@ export default function NutritionVerificationBadge({
         </Text>
       )}
       {hasFlags && size !== 'small' && (
-        <View style={[styles.flagDot, { backgroundColor: '#FB923C' }]} />
+        <View style={[styles.flagDot, { backgroundColor: Colors.warningOrange }]} />
       )}
     </View>
   );

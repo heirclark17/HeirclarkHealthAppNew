@@ -184,7 +184,7 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
                 <Text style={[
                   styles.dayName,
                   { color: dayNameColor },
-                  isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff' },
+                  isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : Colors.text },
                   item.isFuture && { color: dayNameDisabledColor }
                 ]}>
                   {item.day}
@@ -192,7 +192,7 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
                 <Text style={[
                   styles.dayNumber,
                   { color: colors.text },
-                  isSelected && { color: isDark ? '#000000' : '#ffffff' },
+                  isSelected && { color: isDark ? Colors.background : Colors.text },
                   item.isFuture && { color: dayNumberDisabledColor }
                 ]}>
                   {item.date}
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     // backgroundColor handled inline with colors.primary
     ...Platform.select({
       ios: {
-        shadowColor: '#ffffff',
+        shadowColor: Colors.text,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.3,
         shadowRadius: 20,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     fontWeight: '100',
   },
   dayNumberActive: {
-    color: '#000000', // Black text on white selected day
+    color: Colors.background, // Black text on white selected day
   },
   dayItemDisabled: {
     opacity: 0.3,

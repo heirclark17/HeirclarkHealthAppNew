@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -134,7 +135,7 @@ export default function AccountabilityPartnerCard() {
             <Text
               style={[
                 styles.ratingButtonText,
-                { color: value === rating ? '#FFFFFF' : colors.text },
+                { color: value === rating ? Colors.text : colors.text },
               ]}
             >
               {rating}
@@ -156,7 +157,7 @@ export default function AccountabilityPartnerCard() {
           <Ionicons
             name={ACTIVITY_ICONS[activity]}
             size={20}
-            color={isAtRisk ? '#FF6B6B' : colors.primary}
+            color={isAtRisk ? Colors.error : colors.primary}
           />
         </View>
         <View style={styles.streakInfo}>
@@ -171,7 +172,7 @@ export default function AccountabilityPartnerCard() {
           <Text
             style={[
               styles.streakValue,
-              { color: isAtRisk ? '#FF6B6B' : colors.primary },
+              { color: isAtRisk ? Colors.error : colors.primary },
             ]}
           >
             {streak.currentStreak}
@@ -179,7 +180,7 @@ export default function AccountabilityPartnerCard() {
           <Text style={[styles.streakUnit, { color: colors.textMuted }]}>days</Text>
           {isAtRisk && (
             <View style={styles.atRiskBadge}>
-              <Ionicons name="warning" size={12} color="#FF6B6B" />
+              <Ionicons name="warning" size={12} color=Colors.error />
             </View>
           )}
         </View>
@@ -273,8 +274,8 @@ export default function AccountabilityPartnerCard() {
         {/* At Risk Streaks Warning */}
         {atRiskStreaks.length > 0 && (
           <View style={[styles.warningBanner, { backgroundColor: '#FF6B6B20' }]}>
-            <Ionicons name="warning" size={16} color="#FF6B6B" />
-            <Text style={[styles.warningText, { color: '#FF6B6B' }]}>
+            <Ionicons name="warning" size={16} color=Colors.error />
+            <Text style={[styles.warningText, { color: Colors.error }]}>
               {atRiskStreaks.length} streak{atRiskStreaks.length > 1 ? 's' : ''} at risk!
               Log today to keep {atRiskStreaks.length > 1 ? 'them' : 'it'} going.
             </Text>
@@ -307,12 +308,12 @@ export default function AccountabilityPartnerCard() {
           <Ionicons
             name={hasCheckedIn ? 'checkmark-circle' : 'checkbox'}
             size={18}
-            color={hasCheckedIn ? colors.primary : '#FFFFFF'}
+            color={hasCheckedIn ? colors.primary : Colors.text}
           />
           <Text
             style={[
               styles.checkInButtonText,
-              { color: hasCheckedIn ? colors.primary : '#FFFFFF' },
+              { color: hasCheckedIn ? colors.primary : Colors.text },
             ]}
           >
             {hasCheckedIn
@@ -563,7 +564,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   badgeText: {
-    color: '#FFFFFF',
+    color: Colors.text,
     fontSize: 10,
     fontFamily: Fonts.semiBold,
   },
@@ -786,7 +787,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   submitButtonText: {
-    color: '#FFFFFF',
+    color: Colors.text,
     fontSize: 16,
     fontFamily: Fonts.semiBold,
   },

@@ -3,8 +3,10 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Modal
 import Animated, {
   FadeInRight,
 } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
+import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { GlassCard } from '../GlassCard';
 import { DayPlan } from '../../types/mealPlan';
 
@@ -18,9 +20,13 @@ interface DaySelectorProps {
 
 export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySelectorProps) {
   const { settings } = useSettings();
+  const foodPrefsContext = useFoodPreferencesSafe();
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState<any[]>([]);
+
+  // Get cheat days from preferences
+  const cheatDays = foodPrefsContext?.preferences?.cheatDays || [];
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -30,6 +36,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
 
   // Theme-aware styling (matching CalendarCard exactly)
   const dayItemBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+  const cheatDayBg = isDark ? 'rgba(251, 191, 36, 0.20)' : 'rgba(251, 191, 36, 0.25)';
   const dayNameColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
   const modalOverlayBg = isDark ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.5)';
 
@@ -57,6 +64,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
     }
 
     // Add all days in month
+    const fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, monthIndex, day);
       const dateStr = date.toISOString().split('T')[0];
@@ -66,6 +74,8 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
       const isInPlan = planDayIndex !== -1;
       const isSelected = planDayIndex === selectedDayIndex;
       const isToday = dateStr === today.toISOString().split('T')[0];
+      const dayOfWeek = fullDayNames[date.getDay()];
+      const isCheat = cheatDays.includes(dayOfWeek);
 
       days.push({
         day,
@@ -74,6 +84,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
         isSelected,
         isInPlan,
         planDayIndex,
+        isCheat,
       });
     }
 
@@ -116,6 +127,25 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
     return date.getDate();
   };
 
+  // Check if a day is a cheat day
+  const isCheatDay = (dayName: string | undefined, date?: string): boolean => {
+    const fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    let fullDayName = '';
+
+    if (dayName) {
+      // Convert short name to full name if needed
+      const shortToFull: { [key: string]: string } = {
+        'Sun': 'Sunday', 'Mon': 'Monday', 'Tue': 'Tuesday',
+        'Wed': 'Wednesday', 'Thu': 'Thursday', 'Fri': 'Friday', 'Sat': 'Saturday'
+      };
+      fullDayName = shortToFull[dayName.slice(0, 3)] || dayName;
+    } else if (date) {
+      fullDayName = fullDayNames[new Date(date).getDay()];
+    }
+
+    return cheatDays.includes(fullDayName);
+  };
+
   if (!weeklyPlan || weeklyPlan.length === 0) {
     return null;
   }
@@ -136,7 +166,8 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
           {weeklyPlan.map((day, index) => {
             const isSelected = index === selectedDayIndex;
             const shortDayName = getShortDayName(day.dayName, day.date);
-            const accessibilityLabel = `${shortDayName} ${getDayNumber(day.date)}${isSelected ? ', Selected' : ''}`;
+            const isCheat = isCheatDay(day.dayName, day.date);
+            const accessibilityLabel = `${shortDayName} ${getDayNumber(day.date)}${isSelected ? ', Selected' : ''}${isCheat ? ', Cheat Day' : ''}`;
 
             return (
               <Animated.View
@@ -146,8 +177,9 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                 <TouchableOpacity
                   style={[
                     styles.dayItem,
-                    { backgroundColor: dayItemBg },
-                    isSelected && [styles.dayItemActive, { backgroundColor: colors.primary }],
+                    { backgroundColor: isCheat ? cheatDayBg : dayItemBg },
+                    isCheat && !isSelected && styles.cheatDayItem,
+                    isSelected && [styles.dayItemActive, { backgroundColor: isCheat ? Colors.warning : colors.primary }],
                   ]}
                   onPress={() => onSelectDay(index)}
                   accessible={true}
@@ -155,17 +187,29 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                   accessibilityRole="tab"
                   accessibilityState={{ selected: isSelected }}
                 >
+                  {isCheat ? (
+                    <Ionicons
+                      name="pizza-outline"
+                      size={14}
+                      color={isSelected ? (isDark ? Colors.background : Colors.text) : Colors.warning}
+                      style={styles.cheatDayIcon}
+                    />
+                  ) : (
+                    <View style={styles.iconSpacer} />
+                  )}
                   <Text style={[
                     styles.dayName,
                     { color: dayNameColor },
-                    isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff' },
+                    isCheat && !isSelected && { color: Colors.warning },
+                    isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : Colors.text },
                   ]}>
                     {shortDayName}
                   </Text>
                   <Text style={[
                     styles.dayNumber,
                     { color: colors.text },
-                    isSelected && { color: isDark ? '#000000' : '#ffffff' },
+                    isCheat && !isSelected && { color: Colors.warning },
+                    isSelected && { color: isDark ? Colors.background : Colors.text },
                   ]}>
                     {getDayNumber(day.date)}
                   </Text>
@@ -236,23 +280,33 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     key={index}
                     style={[
                       styles.calendarDay,
-                      item.isToday && [styles.calendarDayToday, { borderColor: colors.primary }],
-                      item.isSelected && { backgroundColor: colors.text },
-                      item.isInPlan && !item.isSelected && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
-                      !item.isInPlan && styles.calendarDayDisabled,
+                      item.isToday && [styles.calendarDayToday, { borderColor: item.isCheat ? Colors.warning : colors.primary }],
+                      item.isCheat && !item.isSelected && { backgroundColor: cheatDayBg, borderWidth: 1, borderColor: 'rgba(251, 191, 36, 0.4)' },
+                      item.isSelected && { backgroundColor: item.isCheat ? Colors.warning : colors.text },
+                      item.isInPlan && !item.isSelected && !item.isCheat && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
+                      !item.isInPlan && !item.isCheat && styles.calendarDayDisabled,
                     ]}
                     onPress={() => handleCalendarDayPress(item)}
                     disabled={!item.isInPlan}
                     accessible={true}
-                    accessibilityLabel={`${monthNames[currentMonth.getMonth()]} ${item.day}${item.isToday ? ', Today' : ''}${item.isSelected ? ', Selected' : ''}${item.isInPlan ? ', Has meal plan' : ', No meal plan'}`}
+                    accessibilityLabel={`${monthNames[currentMonth.getMonth()]} ${item.day}${item.isToday ? ', Today' : ''}${item.isSelected ? ', Selected' : ''}${item.isCheat ? ', Cheat Day' : ''}${item.isInPlan ? ', Has meal plan' : ', No meal plan'}`}
                     accessibilityRole="button"
                     accessibilityState={{ selected: item.isSelected, disabled: !item.isInPlan }}
                   >
+                    {item.isCheat && (
+                      <Ionicons
+                        name="pizza-outline"
+                        size={10}
+                        color={item.isSelected ? (isDark ? Colors.background : Colors.text) : Colors.warning}
+                        style={{ position: 'absolute', top: 2, right: 2 }}
+                      />
+                    )}
                     <Text style={[
                       styles.calendarDayText,
                       { color: colors.text },
-                      item.isSelected && { color: colors.background },
-                      !item.isInPlan && { color: colors.textMuted },
+                      item.isCheat && !item.isSelected && { color: Colors.warning },
+                      item.isSelected && { color: item.isCheat ? (isDark ? Colors.background : Colors.text) : colors.background },
+                      !item.isInPlan && !item.isCheat && { color: colors.textMuted },
                     ]}>
                       {item.day}
                     </Text>
@@ -297,7 +351,7 @@ const styles = StyleSheet.create({
   },
   dayItemActive: Platform.select({
     ios: {
-      shadowColor: '#ffffff',
+      shadowColor: Colors.text,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.3,
       shadowRadius: 20,
@@ -320,6 +374,17 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontFamily: Fonts.regular,
     fontWeight: '100',
+  },
+  cheatDayItem: {
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.4)',
+  },
+  cheatDayIcon: {
+    marginBottom: 2,
+  },
+  iconSpacer: {
+    height: 14,
+    marginBottom: 2,
   },
   fullCalendarButton: {
     alignSelf: 'center',

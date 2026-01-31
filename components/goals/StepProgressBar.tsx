@@ -49,12 +49,12 @@ function StepDot({ stepNumber, currentStep, label, colors, isDark }: StepDotProp
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1],
-      [unselectedBg, '#4ECDC4']
+      [unselectedBg, Colors.success]
     );
     const borderColor = interpolateColor(
       progress.value,
       [0, 1],
-      [unselectedBorder, '#4ECDC4']
+      [unselectedBorder, Colors.success]
     );
 
     return {
@@ -68,7 +68,7 @@ function StepDot({ stepNumber, currentStep, label, colors, isDark }: StepDotProp
     const color = interpolateColor(
       progress.value,
       [0, 1],
-      [unselectedText, '#000']
+      [unselectedText, Colors.background]
     );
     return { color };
   });
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   labelActive: {
-    color: '#4ECDC4',
+    color: Colors.success,
   },
   connectorContainer: {
     flex: 1,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     height: 2,
-    backgroundColor: '#4ECDC4',
+    backgroundColor: Colors.success,
     borderRadius: 1,
   },
 });

@@ -37,7 +37,7 @@ export const SemiCircularGauge: React.FC<SemiCircularGaugeProps> = ({
   const isDark = settings.themeMode === 'dark';
 
   // Background arc color based on theme
-  const bgArcColor = isDark ? '#333333' : 'rgba(0, 0, 0, 0.15)';
+  const bgArcColor = isDark ? Colors.gaugeBg : 'rgba(0, 0, 0, 0.15)';
 
   const radius = (size - strokeWidth) / 2;
   const centerX = size / 2;

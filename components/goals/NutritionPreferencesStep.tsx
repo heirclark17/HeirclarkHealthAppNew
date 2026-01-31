@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   withTiming,
@@ -12,6 +12,7 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants
 import { GlassCard } from '../GlassCard';
 import { useGoalWizard, DietStyle } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
+import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 
 // iOS 26 Liquid Glass Section wrapper
@@ -49,6 +50,37 @@ const FASTING_PRESETS = [
   { label: '20:4', start: '16:00', end: '20:00', description: 'Advanced' },
 ];
 
+// Food preference options
+const CUISINE_OPTIONS = [
+  'American', 'Italian', 'Mexican', 'Chinese', 'Japanese',
+  'Indian', 'Thai', 'Mediterranean', 'Greek', 'Korean', 'Vietnamese'
+];
+
+const PROTEIN_OPTIONS = [
+  'Chicken', 'Beef', 'Pork', 'Fish', 'Shrimp',
+  'Tofu', 'Eggs', 'Turkey', 'Salmon', 'Lamb'
+];
+
+const VEGETABLE_OPTIONS = [
+  'Broccoli', 'Spinach', 'Carrots', 'Bell Peppers', 'Zucchini',
+  'Asparagus', 'Green Beans', 'Kale', 'Mushrooms', 'Cauliflower'
+];
+
+const STARCH_OPTIONS = [
+  'Rice', 'Potatoes', 'Pasta', 'Quinoa', 'Sweet Potatoes',
+  'Bread', 'Oats', 'Couscous', 'Beans', 'Lentils'
+];
+
+const SNACK_OPTIONS = [
+  'Nuts', 'Yogurt', 'Fruit', 'Protein Bars', 'Cheese',
+  'Vegetables & Hummus', 'Trail Mix', 'Smoothies', 'Hard Boiled Eggs', 'Cottage Cheese'
+];
+
+const DISLIKED_OPTIONS = [
+  'Mushrooms', 'Cilantro', 'Olives', 'Onions', 'Tomatoes',
+  'Avocado', 'Broccoli', 'Seafood', 'Spicy Food', 'Red Meat'
+];
+
 interface DietCardProps {
   option: DietOption;
   isSelected: boolean;
@@ -75,7 +107,7 @@ function DietCard({ option, isSelected, onSelect, colors, isDark }: DietCardProp
             <Ionicons
               name={option.icon}
               size={22}
-              color={isSelected ? '#96CEB4' : colors.textMuted}
+              color={isSelected ? Colors.successMuted : colors.textMuted}
             />
           </View>
           <View style={styles.dietContent}>
@@ -85,7 +117,7 @@ function DietCard({ option, isSelected, onSelect, colors, isDark }: DietCardProp
             <Text style={[styles.dietDescription, { color: colors.textMuted }]}>{option.description}</Text>
           </View>
           {isSelected && (
-            <Ionicons name="checkmark-circle" size={20} color="#96CEB4" />
+            <Ionicons name="checkmark-circle" size={20} color=Colors.successMuted />
           )}
         </View>
       </GlassCard>
@@ -108,6 +140,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
     toggleAllergy,
   } = useGoalWizard();
   const { settings } = useSettings();
+  const foodPrefsContext = useFoodPreferencesSafe();
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -116,6 +149,46 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
   const isDark = settings.themeMode === 'dark';
 
   const [showFastingOptions, setShowFastingOptions] = useState(state.intermittentFasting);
+
+  // Food preference state (inline editing - no modal)
+  const [cuisines, setCuisines] = useState<string[]>([]);
+  const [proteins, setProteins] = useState<string[]>([]);
+  const [vegetables, setVegetables] = useState<string[]>([]);
+  const [starches, setStarches] = useState<string[]>([]);
+  const [snacks, setSnacks] = useState<string[]>([]);
+  const [disliked, setDisliked] = useState<string[]>([]);
+  const [hatedFoodsText, setHatedFoodsText] = useState('');
+  const [mealDiversity, setMealDiversity] = useState<'diverse' | 'sameDaily' | ''>('');
+  const [mealStyle, setMealStyle] = useState<'threePlusSnacks' | 'fewerLarger' | ''>('');
+  const [cheatDays, setCheatDays] = useState<string[]>([]);
+
+  // Load food preferences on mount
+  useEffect(() => {
+    if (foodPrefsContext?.preferences) {
+      const prefs = foodPrefsContext.preferences;
+      setCuisines(prefs.favoriteCuisines || []);
+      setProteins(prefs.favoriteProteins || []);
+      setVegetables(prefs.favoriteVegetables || []);
+      setStarches(prefs.favoriteStarches || []);
+      setSnacks(prefs.favoriteSnacks || []);
+      const hatedArray = prefs.hatedFoods ? prefs.hatedFoods.split(',').map(s => s.trim()).filter(Boolean) : [];
+      setDisliked(hatedArray.filter(h => DISLIKED_OPTIONS.includes(h)));
+      setHatedFoodsText(prefs.hatedFoods || '');
+      setMealDiversity(prefs.mealDiversity || '');
+      setMealStyle(prefs.mealStyle || '');
+      setCheatDays(prefs.cheatDays || []);
+    }
+  }, [foodPrefsContext?.preferences]);
+
+  // Toggle helper for food preference arrays
+  const toggleFoodItem = async (array: string[], setArray: (arr: string[]) => void, item: string) => {
+    await selectionFeedback();
+    if (array.includes(item)) {
+      setArray(array.filter(i => i !== item));
+    } else {
+      setArray([...array, item]);
+    }
+  };
 
   const handleFastingToggle = async (enabled: boolean) => {
     await selectionFeedback();
@@ -130,6 +203,29 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
   const handleContinue = async () => {
     await lightImpact();
+
+    // Save food preferences before continuing
+    if (foodPrefsContext) {
+      try {
+        const allHatedFoods = [...new Set([...disliked, ...hatedFoodsText.split(',').map(s => s.trim()).filter(Boolean)])];
+
+        await foodPrefsContext.updatePreferences({
+          favoriteCuisines: cuisines,
+          favoriteProteins: proteins,
+          favoriteVegetables: vegetables,
+          favoriteStarches: starches,
+          favoriteSnacks: snacks,
+          hatedFoods: allHatedFoods.join(', '),
+          mealDiversity: mealDiversity,
+          mealStyle: mealStyle,
+          cheatDays: cheatDays,
+        });
+        console.log('[NutritionPreferences] Food preferences saved');
+      } catch (error) {
+        console.error('[NutritionPreferences] Error saving food preferences:', error);
+      }
+    }
+
     onNext();
   };
 
@@ -165,7 +261,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         <View style={styles.mealsRow}>
           {[2, 3, 4, 5, 6].map((num) => {
             const isSelected = state.mealsPerDay === num;
-            const selectedBg = isSelected ? '#96CEB4' : undefined;
+            const selectedBg = isSelected ? Colors.successMuted : undefined;
 
             return (
               <TouchableOpacity
@@ -216,7 +312,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           <Switch
             value={state.intermittentFasting}
             onValueChange={handleFastingToggle}
-            trackColor={{ false: colors.border, true: '#96CEB4' }}
+            trackColor={{ false: colors.border, true: Colors.successMuted }}
             thumbColor={colors.primary}
           />
         </View>
@@ -303,13 +399,282 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                     {allergy}
                   </Text>
                   {isSelected && (
-                    <Ionicons name="close-circle" size={16} color="#FF6B6B" />
+                    <Ionicons name="close-circle" size={16} color=Colors.error />
                   )}
                 </GlassCard>
               </TouchableOpacity>
             );
           })}
         </View>
+      </GlassSection>
+
+      {/* Meal Variety */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>MEAL VARIETY</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Different meals daily or meal prep friendly?
+        </Text>
+        <View style={styles.optionsRow}>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={async () => { await selectionFeedback(); setMealDiversity('diverse'); }}
+            activeOpacity={0.7}
+          >
+            <GlassCard
+              style={[
+                styles.optionButton,
+                mealDiversity === 'diverse' && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }
+              ]}
+              interactive
+            >
+              <Ionicons name="shuffle-outline" size={20} color={mealDiversity === 'diverse' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
+              <Text style={[styles.optionButtonText, { color: colors.text }, mealDiversity === 'diverse' && { color: Colors.successMuted }]}>Diverse daily</Text>
+            </GlassCard>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={async () => { await selectionFeedback(); setMealDiversity('sameDaily'); }}
+            activeOpacity={0.7}
+          >
+            <GlassCard
+              style={[
+                styles.optionButton,
+                mealDiversity === 'sameDaily' && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }
+              ]}
+              interactive
+            >
+              <Ionicons name="repeat-outline" size={20} color={mealDiversity === 'sameDaily' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
+              <Text style={[styles.optionButtonText, { color: colors.text }, mealDiversity === 'sameDaily' && { color: Colors.successMuted }]}>Same meals (prep)</Text>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
+      </GlassSection>
+
+      {/* Snack Preferences */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>SNACK PREFERENCES</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Include snacks or stick to main meals?
+        </Text>
+        <View style={styles.optionsRow}>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={async () => { await selectionFeedback(); setMealStyle('threePlusSnacks'); }}
+            activeOpacity={0.7}
+          >
+            <GlassCard
+              style={[
+                styles.optionButton,
+                mealStyle === 'threePlusSnacks' && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }
+              ]}
+              interactive
+            >
+              <Ionicons name="cafe-outline" size={20} color={mealStyle === 'threePlusSnacks' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
+              <Text style={[styles.optionButtonText, { color: colors.text }, mealStyle === 'threePlusSnacks' && { color: Colors.successMuted }]}>3 meals + snacks</Text>
+            </GlassCard>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={async () => { await selectionFeedback(); setMealStyle('fewerLarger'); }}
+            activeOpacity={0.7}
+          >
+            <GlassCard
+              style={[
+                styles.optionButton,
+                mealStyle === 'fewerLarger' && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }
+              ]}
+              interactive
+            >
+              <Ionicons name="restaurant-outline" size={20} color={mealStyle === 'fewerLarger' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
+              <Text style={[styles.optionButtonText, { color: colors.text }, mealStyle === 'fewerLarger' && { color: Colors.successMuted }]}>Fewer, larger meals</Text>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
+      </GlassSection>
+
+      {/* Cheat Days */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>CHEAT DAYS</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Select days when you want flexibility (no meal plan generated)
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.cheatDaysContainer}
+        >
+          {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => {
+            const isSelected = cheatDays.includes(day);
+            const shortDay = day.slice(0, 3); // Sun, Mon, Tue, etc.
+            return (
+              <TouchableOpacity
+                key={day}
+                onPress={() => toggleFoodItem(cheatDays, setCheatDays, day)}
+                activeOpacity={0.7}
+              >
+                <GlassCard
+                  style={[
+                    styles.cheatDayChip,
+                    isSelected && { backgroundColor: isDark ? 'rgba(251, 191, 36, 0.20)' : 'rgba(251, 191, 36, 0.18)' }
+                  ]}
+                  interactive
+                >
+                  {isSelected && <Ionicons name="pizza-outline" size={14} color=Colors.warning />}
+                  <Text style={[styles.cheatDayText, { color: colors.text }, isSelected && { color: Colors.warning }]}>
+                    {shortDay}
+                  </Text>
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+        {cheatDays.length > 0 && (
+          <Text style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
+            {cheatDays.length === 1 ? '1 cheat day' : `${cheatDays.length} cheat days`} selected - enjoy mindfully!
+          </Text>
+        )}
+      </GlassSection>
+
+      {/* Favorite Proteins */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE PROTEINS</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select proteins you enjoy</Text>
+        <View style={styles.foodChipsContainer}>
+          {PROTEIN_OPTIONS.map((protein) => {
+            const isSelected = proteins.includes(protein);
+            return (
+              <TouchableOpacity key={protein} onPress={() => toggleFoodItem(proteins, setProteins, protein)} activeOpacity={0.7}>
+                <GlassCard
+                  style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
+                  interactive
+                >
+                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{protein}</Text>
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </GlassSection>
+
+      {/* Favorite Vegetables */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE VEGETABLES</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select vegetables you enjoy</Text>
+        <View style={styles.foodChipsContainer}>
+          {VEGETABLE_OPTIONS.map((veg) => {
+            const isSelected = vegetables.includes(veg);
+            return (
+              <TouchableOpacity key={veg} onPress={() => toggleFoodItem(vegetables, setVegetables, veg)} activeOpacity={0.7}>
+                <GlassCard
+                  style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
+                  interactive
+                >
+                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{veg}</Text>
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </GlassSection>
+
+      {/* Favorite Starches */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE CARBS & STARCHES</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select starches you enjoy</Text>
+        <View style={styles.foodChipsContainer}>
+          {STARCH_OPTIONS.map((starch) => {
+            const isSelected = starches.includes(starch);
+            return (
+              <TouchableOpacity key={starch} onPress={() => toggleFoodItem(starches, setStarches, starch)} activeOpacity={0.7}>
+                <GlassCard
+                  style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
+                  interactive
+                >
+                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{starch}</Text>
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </GlassSection>
+
+      {/* Favorite Snacks */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE SNACKS</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select snacks you enjoy</Text>
+        <View style={styles.foodChipsContainer}>
+          {SNACK_OPTIONS.map((snack) => {
+            const isSelected = snacks.includes(snack);
+            return (
+              <TouchableOpacity key={snack} onPress={() => toggleFoodItem(snacks, setSnacks, snack)} activeOpacity={0.7}>
+                <GlassCard
+                  style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
+                  interactive
+                >
+                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{snack}</Text>
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </GlassSection>
+
+      {/* Favorite Cuisines */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE CUISINES</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Cuisines you enjoy most</Text>
+        <View style={styles.foodChipsContainer}>
+          {CUISINE_OPTIONS.map((cuisine) => {
+            const isSelected = cuisines.includes(cuisine);
+            return (
+              <TouchableOpacity key={cuisine} onPress={() => toggleFoodItem(cuisines, setCuisines, cuisine)} activeOpacity={0.7}>
+                <GlassCard
+                  style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
+                  interactive
+                >
+                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{cuisine}</Text>
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </GlassSection>
+
+      {/* Disliked Foods */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DISLIKED FOODS</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Foods to avoid in your meal plans</Text>
+        <View style={styles.foodChipsContainer}>
+          {DISLIKED_OPTIONS.map((food) => {
+            const isSelected = disliked.includes(food);
+            return (
+              <TouchableOpacity key={food} onPress={() => toggleFoodItem(disliked, setDisliked, food)} activeOpacity={0.7}>
+                <GlassCard
+                  style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(249, 115, 22, 0.18)' : 'rgba(249, 115, 22, 0.15)' }]}
+                  interactive
+                >
+                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: '#f97316' }]}>{food}</Text>
+                  {isSelected && <Ionicons name="close-circle" size={16} color="#f97316" style={{ marginLeft: 4 }} />}
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        <GlassCard style={styles.textInputContainer} interactive>
+          <TextInput
+            style={[styles.textInput, { color: colors.text }]}
+            placeholder="Add other foods to avoid (comma separated)"
+            placeholderTextColor={colors.textMuted}
+            value={hatedFoodsText}
+            onChangeText={setHatedFoodsText}
+            multiline
+          />
+        </GlassCard>
       </GlassSection>
 
       {/* Buttons */}
@@ -326,6 +691,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           </GlassCard>
         </TouchableOpacity>
       </View>
+
     </ScrollView>
   );
 }
@@ -404,7 +770,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   dietTitleSelected: {
-    color: '#96CEB4',
+    color: Colors.successMuted,
   },
   dietDescription: {
     fontSize: 12,
@@ -434,7 +800,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   mealChipTextSelected: {
-    color: '#000',
+    color: Colors.background,
   },
   mealsHint: {
     marginTop: 12,
@@ -497,7 +863,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   presetLabelSelected: {
-    color: '#96CEB4',
+    color: Colors.successMuted,
   },
   presetDesc: {
     fontSize: 10,
@@ -545,7 +911,76 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   allergyTextSelected: {
-    color: '#FF6B6B',
+    color: Colors.error,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  optionButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+  },
+  optionButtonText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    textAlign: 'center',
+  },
+  foodChipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  foodChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  foodChipText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+  },
+  cheatDaysContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingRight: 8,
+  },
+  cheatDayChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minWidth: 56,
+  },
+  cheatDayText: {
+    fontSize: 11,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+  },
+  cheatDaysHint: {
+    marginTop: 12,
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  textInputContainer: {
+    marginTop: 12,
+    padding: 0,
+  },
+  textInput: {
+    padding: 12,
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    minHeight: 60,
+    textAlignVertical: 'top',
   },
   buttonRow: {
     flexDirection: 'row',

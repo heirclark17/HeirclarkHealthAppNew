@@ -2,6 +2,7 @@
 // Shows quick-log suggestions and favorites with liquid glass design
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -68,9 +69,9 @@ export default function SmartMealLoggerCard({
   const currentMealType = getCurrentMealType();
 
   // Text colors
-  const textColor = isDark ? '#ffffff' : '#1a1a1a';
-  const subtextColor = isDark ? '#999999' : '#666666';
-  const mutedColor = isDark ? '#666666' : '#999999';
+  const textColor = isDark ? Colors.text : Colors.card;
+  const subtextColor = isDark ? Colors.textMuted : Colors.textMuted;
+  const mutedColor = isDark ? Colors.textMuted : Colors.textMuted;
 
   // Load favorites
   useEffect(() => {
@@ -173,7 +174,7 @@ export default function SmartMealLoggerCard({
                 style={[styles.quickAddButton, { backgroundColor: mealColor }]}
                 onPress={() => handleQuickLog(meal)}
               >
-                <Ionicons name="add" size={18} color="#ffffff" />
+                <Ionicons name="add" size={18} color=Colors.text />
               </TouchableOpacity>
             )}
           </View>
@@ -194,7 +195,7 @@ export default function SmartMealLoggerCard({
         disabled={isLogging === meal.id}
       >
         <View style={[styles.favoriteBadge, { backgroundColor: mealColor }]}>
-          <Ionicons name="star" size={10} color="#ffffff" />
+          <Ionicons name="star" size={10} color=Colors.text />
         </View>
         <Text style={[styles.favoriteName, { color: textColor }]} numberOfLines={1}>
           {meal.name}
@@ -225,7 +226,7 @@ export default function SmartMealLoggerCard({
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(74,222,128,0.15)' }]}>
-                  <Ionicons name="flash" size={20} color="#4ADE80" />
+                  <Ionicons name="flash" size={20} color=Colors.successStrong />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Quick Log</Text>
@@ -238,8 +239,8 @@ export default function SmartMealLoggerCard({
                 style={[styles.fullLoggerButton, { backgroundColor: 'rgba(74,222,128,0.1)' }]}
                 onPress={onOpenFullLogger}
               >
-                <Ionicons name="camera" size={16} color="#4ADE80" />
-                <Text style={[styles.fullLoggerText, { color: '#4ADE80' }]}>AI Log</Text>
+                <Ionicons name="camera" size={16} color=Colors.successStrong />
+                <Text style={[styles.fullLoggerText, { color: Colors.successStrong }]}>AI Log</Text>
               </TouchableOpacity>
             </View>
 
@@ -247,7 +248,7 @@ export default function SmartMealLoggerCard({
             {state.suggestions.length > 0 ? (
               <View style={styles.suggestionsContainer}>
                 <View style={styles.sectionHeader}>
-                  <Ionicons name="bulb" size={14} color="#FFD700" />
+                  <Ionicons name="bulb" size={14} color=Colors.accentGold />
                   <Text style={[styles.sectionTitle, { color: textColor }]}>Suggested for You</Text>
                 </View>
                 {displaySuggestions.map((suggestion, index) => renderSuggestionItem(suggestion, index))}
@@ -257,20 +258,20 @@ export default function SmartMealLoggerCard({
                     style={styles.showMoreButton}
                     onPress={() => setShowAllSuggestions(!showAllSuggestions)}
                   >
-                    <Text style={[styles.showMoreText, { color: '#4ADE80' }]}>
+                    <Text style={[styles.showMoreText, { color: Colors.successStrong }]}>
                       {showAllSuggestions ? 'Show Less' : `Show ${state.suggestions.length - 3} More`}
                     </Text>
                     <Ionicons
                       name={showAllSuggestions ? 'chevron-up' : 'chevron-down'}
                       size={16}
-                      color="#4ADE80"
+                      color=Colors.successStrong
                     />
                   </TouchableOpacity>
                 )}
               </View>
             ) : state.isLoading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color="#4ADE80" />
+                <ActivityIndicator size="small" color=Colors.successStrong />
                 <Text style={[styles.loadingText, { color: subtextColor }]}>Learning your patterns...</Text>
               </View>
             ) : (
@@ -286,7 +287,7 @@ export default function SmartMealLoggerCard({
             {favorites.length > 0 && (
               <View style={styles.favoritesContainer}>
                 <View style={styles.sectionHeader}>
-                  <Ionicons name="star" size={14} color="#FFD700" />
+                  <Ionicons name="star" size={14} color=Colors.accentGold />
                   <Text style={[styles.sectionTitle, { color: textColor }]}>Favorites</Text>
                 </View>
                 <ScrollView

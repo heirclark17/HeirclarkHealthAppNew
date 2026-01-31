@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -90,9 +91,9 @@ export default function HabitFormationCard() {
               <Ionicons
                 name={isCompleted ? 'checkmark-circle' : 'remove-circle'}
                 size={18}
-                color={isCompleted ? '#22C55E' : '#6B7280'}
+                color={isCompleted ? Colors.successStrong : '#6B7280'}
               />
-              <Text style={{ color: isCompleted ? '#22C55E' : '#6B7280', fontSize: 11, marginLeft: 4, fontFamily: Fonts.medium }}>
+              <Text style={{ color: isCompleted ? Colors.successStrong : '#6B7280', fontSize: 11, marginLeft: 4, fontFamily: Fonts.medium }}>
                 {isCompleted ? 'Done' : 'Skipped'}
               </Text>
             </View>

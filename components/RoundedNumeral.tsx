@@ -1,3 +1,5 @@
+import { Colors } from '../constants/Theme';
+
 import React from 'react';
 import { Text, TextStyle, StyleSheet, Platform, TextProps } from 'react-native';
 
@@ -66,7 +68,7 @@ const styles = StyleSheet.create({
       default: 'System',
     }),
     fontWeight: '400',
-    color: '#FFFFFF',
+    color: Colors.text,
     letterSpacing: -0.5,
     textAlign: 'center',
   },

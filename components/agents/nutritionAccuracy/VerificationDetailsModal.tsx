@@ -2,6 +2,7 @@
 // Shows detailed verification information with liquid glass design
 
 import React from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -24,9 +25,9 @@ interface VerificationDetailsModalProps {
 }
 
 const CONFIDENCE_CONFIG = {
-  high: { color: '#4ADE80', label: 'High Confidence', icon: 'shield-checkmark' as const },
-  medium: { color: '#60A5FA', label: 'Medium Confidence', icon: 'shield-half' as const },
-  low: { color: '#FB923C', label: 'Low Confidence', icon: 'warning' as const },
+  high: { color: Colors.successStrong, label: 'High Confidence', icon: 'shield-checkmark' as const },
+  medium: { color: Colors.restingEnergy, label: 'Medium Confidence', icon: 'shield-half' as const },
+  low: { color: Colors.warningOrange, label: 'Low Confidence', icon: 'warning' as const },
 };
 
 export default function VerificationDetailsModal({
@@ -39,16 +40,16 @@ export default function VerificationDetailsModal({
 
   if (!verification) return null;
 
-  const textColor = isDark ? '#ffffff' : '#1a1a1a';
-  const subtextColor = isDark ? '#999999' : '#666666';
-  const mutedColor = isDark ? '#666666' : '#999999';
+  const textColor = isDark ? Colors.text : Colors.card;
+  const subtextColor = isDark ? Colors.textMuted : Colors.textMuted;
+  const mutedColor = isDark ? Colors.textMuted : Colors.textMuted;
   const config = CONFIDENCE_CONFIG[verification.confidence];
 
   const renderFlag = (flag: NutritionFlag, index: number) => {
     const flagColors = {
       error: '#EF4444',
-      warning: '#FB923C',
-      info: '#60A5FA',
+      warning: Colors.warningOrange,
+      info: Colors.restingEnergy,
     };
     const flagIcons = {
       error: 'close-circle' as const,
@@ -138,10 +139,10 @@ export default function VerificationDetailsModal({
                       <View style={styles.adjustmentValues}>
                         <Text style={[styles.originalValue, { color: mutedColor }]}>{adj.originalValue}</Text>
                         <Ionicons name="arrow-forward" size={12} color={mutedColor} />
-                        <Text style={[styles.adjustedValue, { color: '#4ADE80' }]}>{adj.adjustedValue}</Text>
+                        <Text style={[styles.adjustedValue, { color: Colors.successStrong }]}>{adj.adjustedValue}</Text>
                         <Text style={[
                           styles.percentChange,
-                          { color: adj.percentChange > 0 ? '#FB923C' : '#4ADE80' }
+                          { color: adj.percentChange > 0 ? Colors.warningOrange : Colors.successStrong }
                         ]}>
                           ({adj.percentChange > 0 ? '+' : ''}{adj.percentChange}%)
                         </Text>
@@ -152,10 +153,10 @@ export default function VerificationDetailsModal({
 
                   {onApplyAdjustments && (
                     <TouchableOpacity
-                      style={[styles.applyButton, { backgroundColor: '#4ADE80' }]}
+                      style={[styles.applyButton, { backgroundColor: Colors.successStrong }]}
                       onPress={onApplyAdjustments}
                     >
-                      <Ionicons name="checkmark-circle" size={18} color="#ffffff" />
+                      <Ionicons name="checkmark-circle" size={18} color=Colors.text />
                       <Text style={styles.applyButtonText}>Apply Adjustments</Text>
                     </TouchableOpacity>
                   )}
@@ -198,7 +199,7 @@ export default function VerificationDetailsModal({
                         <Text style={[styles.nutritionValue, { color: isDifferent ? mutedColor : textColor }]}>
                           {orig}{field !== 'calories' ? 'g' : ''}
                         </Text>
-                        <Text style={[styles.nutritionValue, { color: isDifferent ? '#4ADE80' : textColor }]}>
+                        <Text style={[styles.nutritionValue, { color: isDifferent ? Colors.successStrong : textColor }]}>
                           {verified}{field !== 'calories' ? 'g' : ''}
                         </Text>
                       </View>
@@ -381,7 +382,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   applyButtonText: {
-    color: '#ffffff',
+    color: Colors.text,
     fontSize: 14,
     fontWeight: '600',
   },

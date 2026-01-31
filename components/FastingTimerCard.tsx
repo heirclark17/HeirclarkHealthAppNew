@@ -107,7 +107,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
 
   const selectedPreset = FASTING_PRESETS.find(p => p.id === state.selectedPreset);
   const isFasting = state.isActive && state.currentState === 'fasting';
-  const displayColor = isFasting ? '#FF6B6B' : state.isActive ? '#4ECDC4' : colors.textMuted;
+  const displayColor = isFasting ? Colors.error : state.isActive ? Colors.success : colors.textMuted;
 
   // Pulse animation for active fasting
   const pulseAnim = useSharedValue(1);
@@ -179,7 +179,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
         >
           <Animated.View
             entering={FadeInUp.duration(300)}
-            style={[styles.modalContent, { backgroundColor: isDark ? '#1a1a1a' : '#ffffff' }]}
+            style={[styles.modalContent, { backgroundColor: isDark ? Colors.card : Colors.text }]}
           >
             {/* Timer Circle */}
             <View style={[styles.timerCircle, { borderColor: displayColor }]}>
@@ -204,13 +204,13 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                 <Ionicons name="refresh" size={22} color={state.isActive ? colors.textMuted : 'rgba(128,128,128,0.3)'} />
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.playButton, { backgroundColor: state.isActive && !state.isPaused ? '#FF6B6B' : '#4ECDC4' }]}
+                style={[styles.playButton, { backgroundColor: state.isActive && !state.isPaused ? Colors.error : Colors.success }]}
                 onPress={handleStartPause}
               >
                 <Ionicons
                   name={!state.isActive ? 'play' : (state.isPaused ? 'play' : 'pause')}
                   size={28}
-                  color="#FFFFFF"
+                  color=Colors.text
                 />
               </TouchableOpacity>
               <TouchableOpacity
@@ -236,7 +236,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                     { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' },
                     state.selectedPreset === preset.id && {
                       backgroundColor: '#96CEB420',
-                      borderColor: '#96CEB4',
+                      borderColor: Colors.successMuted,
                       borderWidth: 1,
                     }
                   ]}
@@ -245,7 +245,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                   <Text style={[
                     styles.presetChipText,
                     { color: colors.text },
-                    state.selectedPreset === preset.id && { color: '#96CEB4' }
+                    state.selectedPreset === preset.id && { color: Colors.successMuted }
                   ]}>
                     {preset.label}
                   </Text>

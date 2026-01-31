@@ -3,6 +3,7 @@
 // Uses Liquid Glass design for frosted glass effect
 
 import React from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -34,9 +35,9 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
   const { isDark, getGlassBackground, getGlassBorder } = useGlassTheme();
 
   // Theme colors
-  const textColor = isDark ? '#ffffff' : '#1a1a1a';
-  const subtextColor = isDark ? '#999999' : '#666666';
-  const mutedColor = isDark ? '#666666' : '#999999';
+  const textColor = isDark ? Colors.text : Colors.card;
+  const subtextColor = isDark ? Colors.textMuted : Colors.textMuted;
+  const mutedColor = isDark ? Colors.textMuted : Colors.textMuted;
   const cardBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
   const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
 
@@ -44,7 +45,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
     <View style={[styles.header, { borderBottomColor: borderColor }]}>
       <View style={styles.headerContent}>
         <View style={styles.headerIcon}>
-          <Ionicons name="flame" size={24} color="#FF6B6B" />
+          <Ionicons name="flame" size={24} color=Colors.error />
         </View>
         <View>
           <Text style={[styles.headerTitle, { color: textColor }]}>Adaptive TDEE</Text>
@@ -80,10 +81,10 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
 
       <GlassCard variant="compact" material="thin" style={styles.tipCard}>
         <View style={styles.tipCardContent}>
-          <Ionicons name="bulb-outline" size={20} color="#FFD700" />
+          <Ionicons name="bulb-outline" size={20} color=Colors.accentGold />
           <View style={styles.tipContent}>
-            <Text style={[styles.tipTitle, { color: '#FFD700' }]}>Tips for Accuracy</Text>
-            <Text style={[styles.tipText, { color: isDark ? '#cccccc' : '#444444' }]}>
+            <Text style={[styles.tipTitle, { color: Colors.accentGold }]}>Tips for Accuracy</Text>
+            <Text style={[styles.tipText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>
               • Weigh yourself daily, same time (morning before eating){'\n'}
               • Log all meals and snacks{'\n'}
               • Be consistent for best results
@@ -110,9 +111,9 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
             <Ionicons
               name={result.confidence === 'high' ? 'checkmark-circle' : 'analytics'}
               size={14}
-              color={result.confidence === 'high' ? '#4ADE80' : '#60A5FA'}
+              color={result.confidence === 'high' ? Colors.successStrong : Colors.restingEnergy}
             />
-            <Text style={[styles.confidenceText, { color: isDark ? '#cccccc' : '#444444' }]}>
+            <Text style={[styles.confidenceText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>
               {result.confidence.charAt(0).toUpperCase() + result.confidence.slice(1)} Confidence
               ({result.confidenceScore}%)
             </Text>
@@ -130,7 +131,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
             <Text style={[styles.statBoxLabel, { color: mutedColor }]}>Difference</Text>
             <Text style={[
               styles.statBoxValue,
-              { color: result.difference >= 0 ? '#4ADE80' : '#FB923C' }
+              { color: result.difference >= 0 ? Colors.successStrong : Colors.warningOrange }
             ]}>
               {result.difference >= 0 ? '+' : ''}{result.difference}
             </Text>
@@ -143,7 +144,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
         {/* Recommended Calories */}
         <GlassCard variant="compact" material="thin" style={[styles.recommendedCard, { backgroundColor: 'rgba(74,222,128,0.1)' }]}>
           <View style={styles.recommendedHeader}>
-            <Ionicons name="nutrition" size={20} color="#4ADE80" />
+            <Ionicons name="nutrition" size={20} color=Colors.successStrong />
             <Text style={styles.recommendedTitle}>Recommended Daily Intake</Text>
           </View>
           <Text style={[styles.recommendedValue, { color: textColor }]}>
@@ -164,21 +165,21 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
       if (result.metabolismTrend === 'faster') {
         return {
           icon: 'happy-outline' as const,
-          color: '#4ADE80',
+          color: Colors.successStrong,
           title: 'Your Metabolism is Higher Than Average',
           desc: `Great news! Your body burns ${Math.abs(result.difference)} more calories per day than formula predictions. This could be due to genetics, muscle mass, or activity level.`,
         };
       } else if (result.metabolismTrend === 'slower') {
         return {
           icon: 'information-circle-outline' as const,
-          color: '#FB923C',
+          color: Colors.warningOrange,
           title: 'Your Metabolism is Lower Than Average',
           desc: `Your body burns ${Math.abs(result.difference)} fewer calories than predicted. This is common and simply means we need to adjust your targets. Many successful dieters have "slower" metabolisms.`,
         };
       }
       return {
         icon: 'thumbs-up-outline' as const,
-        color: '#60A5FA',
+        color: Colors.restingEnergy,
         title: 'Your Metabolism Matches Predictions',
         desc: `Your actual TDEE is within 8% of the formula prediction. The standard calculation works well for you!`,
       };
@@ -192,7 +193,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
           <Ionicons name={mood.icon} size={24} color={mood.color} />
           <Text style={[styles.insightTitle, { color: mood.color }]}>{mood.title}</Text>
         </View>
-        <Text style={[styles.insightDesc, { color: isDark ? '#cccccc' : '#444444' }]}>{mood.desc}</Text>
+        <Text style={[styles.insightDesc, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{mood.desc}</Text>
       </GlassCard>
     );
   };
@@ -215,11 +216,11 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
             </View>
             {recentWeeks.map((week, index) => (
               <View key={week.weekEndDate} style={[styles.historyRow, { borderBottomColor: borderColor }]}>
-                <Text style={[styles.historyText, { flex: 1.5, color: isDark ? '#cccccc' : '#444444' }]}>
+                <Text style={[styles.historyText, { flex: 1.5, color: isDark ? Colors.textSecondary : Colors.textMuted }]}>
                   {new Date(week.weekEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </Text>
-                <Text style={[styles.historyText, { color: isDark ? '#cccccc' : '#444444' }]}>{week.avgWeight} lb</Text>
-                <Text style={[styles.historyText, { color: isDark ? '#cccccc' : '#444444' }]}>{week.avgCalories}</Text>
+                <Text style={[styles.historyText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{week.avgWeight} lb</Text>
+                <Text style={[styles.historyText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{week.avgCalories}</Text>
                 <Text style={[styles.historyText, styles.historyTDEE]}>
                   {week.calculatedTDEE}
                 </Text>
@@ -240,8 +241,8 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
         {result.insights.map((insight, index) => (
           <GlassCard key={index} variant="flat" material="ultraThin" style={styles.insightItem}>
             <View style={styles.insightItemContent}>
-              <Ionicons name="sparkles" size={16} color="#FFD700" />
-              <Text style={[styles.insightText, { color: isDark ? '#cccccc' : '#444444' }]}>{insight}</Text>
+              <Ionicons name="sparkles" size={16} color=Colors.accentGold />
+              <Text style={[styles.insightText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{insight}</Text>
             </View>
           </GlassCard>
         ))}
@@ -409,7 +410,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 6,
-    borderColor: '#FFD700',
+    borderColor: Colors.accentGold,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,215,0,0.1)',
@@ -527,7 +528,7 @@ const styles = StyleSheet.create({
   },
   recommendedTitle: {
     fontSize: 13,
-    color: '#4ADE80',
+    color: Colors.successStrong,
     fontWeight: '600',
   },
   recommendedValue: {
@@ -592,7 +593,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   historyTDEE: {
-    color: '#60A5FA',
+    color: Colors.restingEnergy,
     fontWeight: '600',
   },
   insightsContainer: {
@@ -631,7 +632,7 @@ const styles = StyleSheet.create({
   stepNumberText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#60A5FA',
+    color: Colors.restingEnergy,
   },
   stepContent: {
     flex: 1,

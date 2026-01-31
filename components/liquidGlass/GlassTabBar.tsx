@@ -8,6 +8,7 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle, Platform, TouchableOpacity, Dimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '../../constants/Theme';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -101,7 +102,7 @@ const TabItem: React.FC<TabItemProps> = ({
   }));
 
   const iconName = isActive && item.activeIcon ? item.activeIcon : item.icon;
-  const activeColor = isDark ? '#FFFFFF' : '#000000';
+  const activeColor = isDark ? Colors.text : Colors.background;
   const inactiveColor = isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)';
 
   return (
@@ -123,7 +124,7 @@ const TabItem: React.FC<TabItemProps> = ({
             <View style={[styles.badge, { backgroundColor: colors.semantic.error }]}>
               <AdaptiveText
                 variant="caption2"
-                customColor="#FFFFFF"
+                customColor=Colors.text
                 weight="600"
               >
                 {item.badge > 99 ? '99+' : item.badge}

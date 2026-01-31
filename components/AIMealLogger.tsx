@@ -43,10 +43,10 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Colorful gradient colors for animations
 const GRADIENT_COLORS = {
-  primary: ['#FF6B6B', '#FF8E53', '#FFC857', '#4ECDC4', '#45B7D1', '#96E6A1'],
-  scanner: ['#00F5A0', '#00D9F5', '#7B61FF', '#FF61DC'],
-  voice: ['#FF6B6B', '#FF8E53', '#FFC857', '#45B7D1'],
-  camera: ['#7B61FF', '#00D9F5', '#00F5A0', '#FFC857'],
+  primary: [Colors.error, '#FF8E53', '#FFC857', Colors.success, '#45B7D1', '#96E6A1'],
+  scanner: ['#00F5A0', Colors.accentCyan, Colors.accentPurple, '#FF61DC'],
+  voice: [Colors.error, '#FF8E53', '#FFC857', '#45B7D1'],
+  camera: [Colors.accentPurple, Colors.accentCyan, '#00F5A0', '#FFC857'],
 };
 
 // Animated Barcode Scanner Line Component
@@ -154,22 +154,22 @@ const AnimatedCorners = () => {
     <Animated.View style={[animStyles.cornersContainer, { transform: [{ scale: pulseAnim }] }]}>
       {/* Top Left */}
       <LinearGradient
-        colors={['#00F5A0', '#00D9F5']}
+        colors={['#00F5A0', Colors.accentCyan]}
         style={[animStyles.corner, animStyles.cornerTopLeft]}
       />
       {/* Top Right */}
       <LinearGradient
-        colors={['#00D9F5', '#7B61FF']}
+        colors={[Colors.accentCyan, Colors.accentPurple]}
         style={[animStyles.corner, animStyles.cornerTopRight]}
       />
       {/* Bottom Left */}
       <LinearGradient
-        colors={['#FF61DC', '#FF6B6B']}
+        colors={['#FF61DC', Colors.error]}
         style={[animStyles.corner, animStyles.cornerBottomLeft]}
       />
       {/* Bottom Right */}
       <LinearGradient
-        colors={['#7B61FF', '#FF61DC']}
+        colors={[Colors.accentPurple, '#FF61DC']}
         style={[animStyles.corner, animStyles.cornerBottomRight]}
       />
     </Animated.View>
@@ -255,7 +255,7 @@ const AnimatedVoiceRings = ({ isRecording }: { isRecording: boolean }) => {
 
   return (
     <View style={animStyles.voiceRingsContainer}>
-      <Animated.View style={createRingStyle(ring1, '#FF6B6B', 80)} />
+      <Animated.View style={createRingStyle(ring1, Colors.error, 80)} />
       <Animated.View style={createRingStyle(ring2, '#FF8E53', 80)} />
       <Animated.View style={createRingStyle(ring3, '#FFC857', 80)} />
       <Animated.View style={createRingStyle(ring4, '#45B7D1', 80)} />
@@ -321,7 +321,7 @@ const AnimatedCameraScan = () => {
       {/* Scanning line */}
       <Animated.View style={[animStyles.cameraScanLine, { transform: [{ translateY }] }]}>
         <LinearGradient
-          colors={['transparent', '#7B61FF', '#00D9F5', '#7B61FF', 'transparent']}
+          colors={['transparent', Colors.accentPurple, Colors.accentCyan, Colors.accentPurple, 'transparent']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={animStyles.cameraScanLineGradient}
@@ -384,7 +384,7 @@ const AnimatedListeningDots = () => {
 
   return (
     <View style={animStyles.listeningDotsContainer}>
-      <Animated.View style={[animStyles.listeningDotAnimated, { opacity: dot1Anim, backgroundColor: '#FF6B6B' }]} />
+      <Animated.View style={[animStyles.listeningDotAnimated, { opacity: dot1Anim, backgroundColor: Colors.error }]} />
       <Animated.View style={[animStyles.listeningDotAnimated, { opacity: dot2Anim, backgroundColor: '#FFC857' }]} />
       <Animated.View style={[animStyles.listeningDotAnimated, { opacity: dot3Anim, backgroundColor: '#45B7D1' }]} />
     </View>
@@ -426,7 +426,7 @@ const AnimatedAnalyzing = ({ text }: { text: string }) => {
 
   const backgroundColor = colorAnim.interpolate({
     inputRange: [0, 0.25, 0.5, 0.75, 1],
-    outputRange: ['#FF6B6B', '#FFC857', '#4ECDC4', '#45B7D1', '#FF6B6B'],
+    outputRange: [Colors.error, '#FFC857', Colors.success, '#45B7D1', Colors.error],
   });
 
   return (
@@ -791,8 +791,8 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
     description: string;
     onPress: () => void;
   }) => {
-    const iconColor = isDark ? '#ffffff' : colors.text;
-    const textColor = isDark ? '#ffffff' : colors.text;
+    const iconColor = isDark ? Colors.text : colors.text;
+    const textColor = isDark ? Colors.text : colors.text;
     const subtextColor = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)';
     const chevronColor = isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.4)';
     const iconBgColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
@@ -815,7 +815,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   // Render Mode Selection
   const renderModeSelect = () => {
-    const titleColor = isDark ? '#ffffff' : colors.text;
+    const titleColor = isDark ? Colors.text : colors.text;
 
     return (
       <View style={styles.content}>
@@ -861,7 +861,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   // Render Full-Screen Camera (Photo Mode)
   const renderFullScreenCamera = () => (
-    <View style={{ flex: 1, backgroundColor: '#000' }}>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <StatusBar hidden />
       <CameraView
         ref={cameraRef}
@@ -883,7 +883,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
             <Ionicons name="close" size={30} color="#fff" />
           </TouchableOpacity>
           <LinearGradient
-            colors={['#7B61FF', '#00D9F5']}
+            colors={[Colors.accentPurple, Colors.accentCyan]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.cameraTitleBadge}
@@ -912,7 +912,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
             <TouchableOpacity style={styles.captureButton} onPress={capturePhoto}>
               <LinearGradient
-                colors={['#7B61FF', '#00D9F5', '#00F5A0']}
+                colors={[Colors.accentPurple, Colors.accentCyan, '#00F5A0']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.captureButtonGradient}
@@ -937,7 +937,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   // Render Full-Screen Barcode Scanner
   const renderFullScreenScanner = () => (
-    <View style={{ flex: 1, backgroundColor: '#000' }}>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <StatusBar hidden />
       <CameraView
         style={{ flex: 1 }}
@@ -1163,8 +1163,8 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   // Render Manual Text Entry
   const renderManual = () => {
-    const labelColor = isDark ? '#ffffff' : colors.text;
-    const textColor = isDark ? '#ffffff' : colors.text;
+    const labelColor = isDark ? Colors.text : colors.text;
+    const textColor = isDark ? Colors.text : colors.text;
     const placeholderColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
     const inputBgColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)';
     const inputBorderColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)';
@@ -1189,8 +1189,8 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
         ) : (
           <TouchableOpacity activeOpacity={0.7} onPress={handleManualAnalyze}>
             <GlassCard style={styles.aiButtonGlass}>
-              <Ionicons name="sparkles" size={20} color={isDark ? '#ffffff' : colors.text} />
-              <Text style={[styles.aiButtonText, { color: isDark ? '#ffffff' : colors.text }]}>Analyze with AI</Text>
+              <Ionicons name="sparkles" size={20} color={isDark ? Colors.text : colors.text} />
+              <Text style={[styles.aiButtonText, { color: isDark ? Colors.text : colors.text }]}>Analyze with AI</Text>
             </GlassCard>
           </TouchableOpacity>
         )}
@@ -1200,9 +1200,9 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   // Render Voice
   const renderVoice = () => {
-    const labelColor = isDark ? '#ffffff' : colors.text;
-    const textColor = isDark ? '#ffffff' : colors.text;
-    const iconColor = isDark ? '#ffffff' : colors.text;
+    const labelColor = isDark ? Colors.text : colors.text;
+    const textColor = isDark ? Colors.text : colors.text;
+    const iconColor = isDark ? Colors.text : colors.text;
     const transcriptBgColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)';
     const transcriptBorderColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)';
     const placeholderColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
@@ -1221,7 +1221,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
               <Ionicons
                 name={isRecording ? 'stop-circle' : 'mic'}
                 size={64}
-                color={isRecording ? '#FF6B6B' : iconColor}
+                color={isRecording ? Colors.error : iconColor}
               />
               <Text style={[styles.voiceText, { color: textColor }]}>
                 {isRecording ? 'Tap to stop' : 'Tap to record'}
@@ -1233,7 +1233,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
         {isRecording && (
           <View style={styles.waveform}>
             <LinearGradient
-              colors={['#FF6B6B', '#FF8E53', '#FFC857', '#45B7D1']}
+              colors={[Colors.error, '#FF8E53', '#FFC857', '#45B7D1']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.recordingBadge}
@@ -1269,9 +1269,9 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   // Render Photo Mode
   const renderPhoto = () => {
-    const labelColor = isDark ? '#ffffff' : colors.text;
-    const textColor = isDark ? '#ffffff' : colors.text;
-    const iconColor = isDark ? '#ffffff' : colors.text;
+    const labelColor = isDark ? Colors.text : colors.text;
+    const textColor = isDark ? Colors.text : colors.text;
+    const iconColor = isDark ? Colors.text : colors.text;
 
     return (
       <View style={styles.content}>
@@ -1281,7 +1281,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
           <TouchableOpacity activeOpacity={0.7} onPress={handleTakePhoto}>
             <GlassCard style={styles.largeButtonGlass}>
               <LinearGradient
-                colors={['#7B61FF', '#00D9F5']}
+                colors={[Colors.accentPurple, Colors.accentCyan]}
                 style={styles.iconGradientBg}
               >
                 <Ionicons name="camera" size={24} color="#fff" />
@@ -1293,7 +1293,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
           <TouchableOpacity activeOpacity={0.7} onPress={handlePickPhoto}>
             <GlassCard style={styles.largeButtonGlass}>
               <LinearGradient
-                colors={['#FF6B6B', '#FFC857']}
+                colors={[Colors.error, '#FFC857']}
                 style={styles.iconGradientBg}
               >
                 <Ionicons name="images" size={24} color="#fff" />
@@ -1312,9 +1312,9 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   // Render Barcode Mode
   const renderBarcode = () => {
-    const labelColor = isDark ? '#ffffff' : colors.text;
-    const textColor = isDark ? '#ffffff' : colors.text;
-    const iconColor = isDark ? '#ffffff' : colors.text;
+    const labelColor = isDark ? Colors.text : colors.text;
+    const textColor = isDark ? Colors.text : colors.text;
+    const iconColor = isDark ? Colors.text : colors.text;
 
     return (
       <View style={styles.content}>
@@ -1326,7 +1326,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
         >
           <GlassCard style={styles.largeButtonGlass}>
             <LinearGradient
-              colors={['#00F5A0', '#00D9F5', '#7B61FF']}
+              colors={['#00F5A0', Colors.accentCyan, Colors.accentPurple]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.iconGradientBg}
@@ -1346,8 +1346,8 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   // Render Dining Out
   const renderDiningOut = () => {
-    const labelColor = isDark ? '#ffffff' : colors.text;
-    const textColor = isDark ? '#ffffff' : colors.text;
+    const labelColor = isDark ? Colors.text : colors.text;
+    const textColor = isDark ? Colors.text : colors.text;
     const placeholderColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
 
     return (
@@ -1370,8 +1370,8 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
         ) : (
           <TouchableOpacity activeOpacity={0.7} onPress={handleManualAnalyze}>
             <GlassCard style={styles.aiButtonGlass}>
-              <Ionicons name="sparkles" size={20} color={isDark ? '#ffffff' : colors.text} />
-              <Text style={[styles.aiButtonText, { color: isDark ? '#ffffff' : colors.text }]}>Analyze with AI</Text>
+              <Ionicons name="sparkles" size={20} color={isDark ? Colors.text : colors.text} />
+              <Text style={[styles.aiButtonText, { color: isDark ? Colors.text : colors.text }]}>Analyze with AI</Text>
             </GlassCard>
           </TouchableOpacity>
         )}
@@ -1416,8 +1416,8 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
     return renderNutritionDetails();
   }
 
-  const headerTextColor = isDark ? '#ffffff' : colors.text;
-  const headerIconColor = isDark ? '#ffffff' : colors.text;
+  const headerTextColor = isDark ? Colors.text : colors.text;
+  const headerIconColor = isDark ? Colors.text : colors.text;
   const containerBgColor = isDark ? 'rgba(20, 20, 20, 0.4)' : 'rgba(255, 255, 255, 0.4)';
 
   return (
@@ -1455,8 +1455,8 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
           {mode !== 'select' && !analysis && (
             <TouchableOpacity activeOpacity={0.7} onPress={() => setMode('select')}>
               <GlassCard style={styles.backButtonGlass}>
-                <Ionicons name="arrow-back" size={20} color={isDark ? '#ffffff' : colors.text} />
-                <Text style={[styles.backButtonText, { color: isDark ? '#ffffff' : colors.text }]}>Back</Text>
+                <Ionicons name="arrow-back" size={20} color={isDark ? Colors.text : colors.text} />
+                <Text style={[styles.backButtonText, { color: isDark ? Colors.text : colors.text }]}>Back</Text>
               </GlassCard>
             </TouchableOpacity>
           )}
@@ -1650,7 +1650,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#000',
+    backgroundColor: Colors.background,
   },
   fullScreenCameraView: {
     flex: 1,
@@ -1771,7 +1771,7 @@ const styles = StyleSheet.create({
   // Nutrition Details Modal
   nutritionModal: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: Colors.background,
   },
   nutritionPhotoContainer: {
     width: SCREEN_WIDTH,
@@ -1784,7 +1784,7 @@ const styles = StyleSheet.create({
   nutritionPhotoPlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: Colors.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -2006,7 +2006,7 @@ const styles = StyleSheet.create({
   addMealButtonText: {
     fontSize: 16,
     fontFamily: Fonts.semiBold,
-    color: '#000',
+    color: Colors.background,
   },
   addMealButtonTextWhite: {
     fontSize: 16,
@@ -2246,7 +2246,7 @@ const animStyles = StyleSheet.create({
     position: 'absolute',
     width: 40,
     height: 40,
-    borderColor: '#7B61FF',
+    borderColor: Colors.accentPurple,
   },
   cameraCornerTL: {
     top: 0,
@@ -2261,7 +2261,7 @@ const animStyles = StyleSheet.create({
     borderTopWidth: 3,
     borderRightWidth: 3,
     borderTopRightRadius: 12,
-    borderColor: '#00D9F5',
+    borderColor: Colors.accentCyan,
   },
   cameraCornerBL: {
     bottom: 0,

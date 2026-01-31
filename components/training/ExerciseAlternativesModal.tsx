@@ -1,5 +1,6 @@
 // Exercise Alternatives Modal
 // Shows all equipment variations for a given exercise
+// iOS 26 Liquid Glass Design
 
 import React, { useMemo } from 'react';
 import {
@@ -12,12 +13,51 @@ import {
   Pressable,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInUp,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { Exercise, ExerciseAlternative, DifficultyModifier } from '../../types/training';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
+
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
+// iOS 26 Liquid Glass colors
+const GLASS_COLORS = {
+  light: {
+    background: '#F8F8F8',
+    card: 'rgba(255, 255, 255, 0.75)',
+    cardBorder: 'rgba(255, 255, 255, 0.5)',
+    text: '#1D1D1F',
+    textMuted: 'rgba(60, 60, 67, 0.6)',
+    textSecondary: 'rgba(60, 60, 67, 0.4)',
+    border: 'rgba(0, 0, 0, 0.08)',
+    buttonBg: 'rgba(255, 255, 255, 0.6)',
+    secondaryBg: 'rgba(0, 0, 0, 0.04)',
+  },
+  dark: {
+    background: '#0A0A0A',
+    card: 'rgba(255, 255, 255, 0.08)',
+    cardBorder: 'rgba(255, 255, 255, 0.12)',
+    text: Colors.text,
+    textMuted: 'rgba(235, 235, 245, 0.6)',
+    textSecondary: 'rgba(235, 235, 245, 0.4)',
+    border: 'rgba(255, 255, 255, 0.1)',
+    buttonBg: 'rgba(255, 255, 255, 0.1)',
+    secondaryBg: 'rgba(255, 255, 255, 0.06)',
+  },
+};
 
 interface ExerciseAlternativesModalProps {
   visible: boolean;
@@ -44,16 +84,16 @@ const getEquipmentIcon = (equipment: string): string => {
 };
 
 // Get color for difficulty modifier
-const getDifficultyColor = (modifier: DifficultyModifier): string => {
+const getDifficultyColor = (modifier: DifficultyModifier, isDark: boolean): string => {
   switch (modifier) {
     case 'easier':
-      return '#2ECC71'; // Green
+      return Colors.goalAchieved; // iOS Green
     case 'same':
-      return Colors.text;
+      return isDark ? GLASS_COLORS.dark.text : GLASS_COLORS.light.text;
     case 'harder':
-      return Colors.calories; // Red
+      return Colors.errorStrong; // iOS Red
     default:
-      return Colors.textMuted;
+      return isDark ? GLASS_COLORS.dark.textMuted : GLASS_COLORS.light.textMuted;
   }
 };
 
@@ -83,54 +123,63 @@ function AlternativeCard({
   alternative,
   index,
   onSelect,
-  colors,
+  glassColors,
   isDark,
 }: {
   alternative: ExerciseAlternative;
   index: number;
   onSelect: () => void;
-  colors: any;
+  glassColors: typeof GLASS_COLORS.dark;
   isDark: boolean;
 }) {
-  const cardBg = isDark ? Colors.card : 'rgba(255, 255, 255, 0.9)';
-  const borderColor = isDark ? Colors.border : 'rgba(0, 0, 0, 0.1)';
-  const secondaryBg = isDark ? Colors.backgroundSecondary : 'rgba(0, 0, 0, 0.05)';
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePress = () => {
+    mediumImpact();
+    scale.value = withSpring(0.98, GLASS_SPRING);
+    setTimeout(() => {
+      scale.value = withSpring(1, GLASS_SPRING);
+    }, 100);
+    onSelect();
+  };
+
   return (
-    <Animated.View entering={FadeInUp.delay(index * 50).springify().damping(15)}>
+    <Animated.View entering={FadeInUp.delay(index * 50).springify().damping(15)} style={animatedStyle}>
       <TouchableOpacity
-        style={[styles.alternativeCard, { backgroundColor: cardBg, borderColor }]}
-        onPress={() => {
-          mediumImpact();
-          onSelect();
-        }}
-        activeOpacity={0.7}
+        style={[styles.alternativeCard, { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder }]}
+        onPress={handlePress}
+        activeOpacity={1}
       >
         <View style={styles.cardHeader}>
-          <View style={[styles.iconContainer, { backgroundColor: secondaryBg }]}>
+          <View style={[styles.iconContainer, { backgroundColor: glassColors.secondaryBg }]}>
             <Ionicons
               name={getEquipmentIcon(alternative.equipment) as any}
               size={24}
-              color={colors.text}
+              color={glassColors.text}
             />
           </View>
           <View style={styles.cardHeaderText}>
-            <Text style={[styles.alternativeName, { color: colors.text }]}>{alternative.name}</Text>
+            <Text style={[styles.alternativeName, { color: glassColors.text }]}>{alternative.name}</Text>
             <View style={styles.badges}>
-              <View style={[styles.equipmentBadge, { backgroundColor: secondaryBg }]}>
-                <Text style={[styles.equipmentBadgeText, { color: colors.textSecondary }]}>
+              <View style={[styles.equipmentBadge, { backgroundColor: glassColors.secondaryBg }]}>
+                <Text style={[styles.equipmentBadgeText, { color: glassColors.textSecondary }]}>
                   {formatEquipment(alternative.equipment)}
                 </Text>
               </View>
               <View
                 style={[
                   styles.difficultyBadge,
-                  { borderColor: getDifficultyColor(alternative.difficultyModifier) },
+                  { borderColor: getDifficultyColor(alternative.difficultyModifier, isDark) },
                 ]}
               >
                 <Text
                   style={[
                     styles.difficultyBadgeText,
-                    { color: getDifficultyColor(alternative.difficultyModifier) },
+                    { color: getDifficultyColor(alternative.difficultyModifier, isDark) },
                   ]}
                 >
                   {getDifficultyLabel(alternative.difficultyModifier)}
@@ -138,17 +187,17 @@ function AlternativeCard({
               </View>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          <Ionicons name="chevron-forward" size={20} color={glassColors.textMuted} />
         </View>
 
-        <Text style={[styles.muscleActivation, { color: colors.textSecondary }]}>{alternative.muscleActivationNotes}</Text>
+        <Text style={[styles.muscleActivation, { color: glassColors.textSecondary }]}>{alternative.muscleActivationNotes}</Text>
 
         <View style={styles.whenToUse}>
-          <Text style={[styles.whenToUseLabel, { color: colors.textMuted }]}>WHEN TO USE</Text>
+          <Text style={[styles.whenToUseLabel, { color: glassColors.textMuted }]}>WHEN TO USE</Text>
           <View style={styles.useCaseTags}>
             {alternative.whenToUse.map((useCase, i) => (
-              <View key={i} style={[styles.useCaseTag, { backgroundColor: secondaryBg }]}>
-                <Text style={[styles.useCaseText, { color: colors.textSecondary }]}>{useCase}</Text>
+              <View key={i} style={[styles.useCaseTag, { backgroundColor: glassColors.secondaryBg }]}>
+                <Text style={[styles.useCaseText, { color: glassColors.textSecondary }]}>{useCase}</Text>
               </View>
             ))}
           </View>
@@ -156,11 +205,11 @@ function AlternativeCard({
 
         {alternative.formCues && alternative.formCues.length > 0 && (
           <View style={styles.formCues}>
-            <Text style={[styles.formCuesLabel, { color: colors.textMuted }]}>FORM CUES</Text>
+            <Text style={[styles.formCuesLabel, { color: glassColors.textMuted }]}>FORM CUES</Text>
             {alternative.formCues.map((cue, i) => (
               <View key={i} style={styles.formCueItem}>
-                <Text style={styles.formCueBullet}>•</Text>
-                <Text style={[styles.formCueText, { color: colors.textSecondary }]}>{cue}</Text>
+                <Text style={[styles.formCueBullet, { color: Colors.success }]}>•</Text>
+                <Text style={[styles.formCueText, { color: glassColors.textSecondary }]}>{cue}</Text>
               </View>
             ))}
           </View>
@@ -177,15 +226,23 @@ export function ExerciseAlternativesModal({
   onSelectAlternative,
 }: ExerciseAlternativesModalProps) {
   const { settings } = useSettings();
-
-  // Dynamic theme colors
-  const colors = useMemo(() => {
-    return settings.themeMode === 'light' ? LightColors : DarkColors;
-  }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
+  const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
 
-  // Theme-aware backgrounds
-  const cardBg = isDark ? Colors.card : 'rgba(255, 255, 255, 0.9)';
+  // Close button animation
+  const closeScale = useSharedValue(1);
+  const closeAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: closeScale.value }],
+  }));
+
+  const handleClose = () => {
+    lightImpact();
+    closeScale.value = withSpring(0.9, GLASS_SPRING);
+    setTimeout(() => {
+      closeScale.value = withSpring(1, GLASS_SPRING);
+    }, 100);
+    onClose();
+  };
 
   if (!exercise) return null;
 
@@ -198,30 +255,33 @@ export function ExerciseAlternativesModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-        <BlurView intensity={100} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+      <View style={[styles.modalContainer, { backgroundColor: glassColors.background }]}>
+        <BlurView intensity={isDark ? 60 : 80} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
         <View style={styles.modalContent}>
-          {/* Header */}
-          <View style={styles.modalHeader}>
-            <TouchableOpacity
-              style={[styles.closeButton, { backgroundColor: cardBg }]}
-              onPress={() => {
-                lightImpact();
-                onClose();
-              }}
-            >
-              <Ionicons name="close" size={24} color={colors.text} />
-            </TouchableOpacity>
+          {/* Header with Glass Effect */}
+          <BlurView
+            intensity={isDark ? 40 : 60}
+            tint={isDark ? 'dark' : 'light'}
+            style={[styles.modalHeader, { borderBottomColor: glassColors.border }]}
+          >
+            <Animated.View style={closeAnimatedStyle}>
+              <TouchableOpacity
+                style={[styles.closeButton, { backgroundColor: glassColors.buttonBg, borderColor: glassColors.cardBorder }]}
+                onPress={handleClose}
+              >
+                <Ionicons name="close" size={24} color={glassColors.text} />
+              </TouchableOpacity>
+            </Animated.View>
             <View style={styles.headerCenter}>
-              <Text style={[styles.modalTitle, { color: colors.textMuted }]}>Alternatives</Text>
-              <Text style={[styles.exerciseName, { color: colors.text }]}>{exercise.name}</Text>
+              <Text style={[styles.modalTitle, { color: glassColors.textMuted }]}>Alternatives</Text>
+              <Text style={[styles.exerciseName, { color: glassColors.text }]}>{exercise.name}</Text>
             </View>
             <View style={styles.headerSpacer} />
-          </View>
+          </BlurView>
 
           {/* Description */}
           <View style={styles.description}>
-            <Text style={[styles.descriptionText, { color: colors.textMuted }]}>
+            <Text style={[styles.descriptionText, { color: glassColors.textMuted }]}>
               Choose an alternative based on your available equipment and preferences.
               Each variation targets similar muscles with different equipment.
             </Text>
@@ -243,14 +303,14 @@ export function ExerciseAlternativesModal({
                     onSelectAlternative(alt);
                     onClose();
                   }}
-                  colors={colors}
+                  glassColors={glassColors}
                   isDark={isDark}
                 />
               ))
             ) : (
               <View style={styles.emptyState}>
-                <Ionicons name="information-circle-outline" size={48} color={colors.textMuted} />
-                <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                <Ionicons name="information-circle-outline" size={48} color={glassColors.textMuted} />
+                <Text style={[styles.emptyText, { color: glassColors.textMuted }]}>
                   No alternatives available for this exercise.
                 </Text>
               </View>
@@ -267,7 +327,6 @@ export function ExerciseAlternativesModal({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   modalContent: {
     flex: 1,
@@ -279,28 +338,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
     paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
   },
   headerCenter: {
     alignItems: 'center',
   },
   modalTitle: {
     fontSize: 12,
-    color: Colors.textMuted,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.semiBold,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   exerciseName: {
     fontSize: 18,
-    color: Colors.text,
     fontFamily: Fonts.semiBold,
     marginTop: 2,
   },
@@ -313,7 +371,6 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     fontSize: 14,
-    color: Colors.textMuted,
     fontFamily: Fonts.regular,
     lineHeight: 20,
     textAlign: 'center',
@@ -325,12 +382,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
   },
   alternativeCard: {
-    backgroundColor: 'transparent',
-    borderRadius: Spacing.borderRadius,
+    borderRadius: 20,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.border,
+    // Soft shadow
+    shadowColor: Colors.background,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -341,7 +402,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -351,7 +411,6 @@ const styles = StyleSheet.create({
   },
   alternativeName: {
     fontSize: 16,
-    color: Colors.text,
     fontFamily: Fonts.medium,
   },
   badges: {
@@ -360,14 +419,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   equipmentBadge: {
-    backgroundColor: Colors.backgroundSecondary,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
   },
   equipmentBadgeText: {
     fontSize: 11,
-    color: Colors.textSecondary,
     fontFamily: Fonts.medium,
   },
   difficultyBadge: {
@@ -382,7 +439,6 @@ const styles = StyleSheet.create({
   },
   muscleActivation: {
     fontSize: 14,
-    color: Colors.textSecondary,
     fontFamily: Fonts.regular,
     lineHeight: 20,
     marginBottom: Spacing.sm,
@@ -392,7 +448,6 @@ const styles = StyleSheet.create({
   },
   whenToUseLabel: {
     fontSize: 10,
-    color: Colors.textMuted,
     fontFamily: Fonts.semiBold,
     letterSpacing: 1,
     marginBottom: 6,
@@ -403,14 +458,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   useCaseTag: {
-    backgroundColor: Colors.backgroundSecondary,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   useCaseText: {
     fontSize: 12,
-    color: Colors.textSecondary,
     fontFamily: Fonts.regular,
   },
   formCues: {
@@ -419,7 +472,6 @@ const styles = StyleSheet.create({
   },
   formCuesLabel: {
     fontSize: 10,
-    color: Colors.textMuted,
     fontFamily: Fonts.semiBold,
     letterSpacing: 1,
     marginBottom: 6,
@@ -431,13 +483,11 @@ const styles = StyleSheet.create({
   },
   formCueBullet: {
     fontSize: 14,
-    color: Colors.protein,
     fontFamily: Fonts.regular,
     marginRight: 8,
   },
   formCueText: {
     fontSize: 13,
-    color: Colors.textSecondary,
     fontFamily: Fonts.regular,
     flex: 1,
   },
@@ -448,7 +498,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: Colors.textMuted,
     fontFamily: Fonts.regular,
     marginTop: Spacing.md,
     textAlign: 'center',

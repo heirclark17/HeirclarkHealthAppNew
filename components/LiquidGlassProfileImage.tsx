@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     // Blur effect for glow
     ...Platform.select({
       ios: {
-        shadowColor: '#FFFFFF',
+        shadowColor: Colors.text,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.3,
         shadowRadius: 15,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     // Liquid glass shadow
     ...Platform.select({
       ios: {
-        shadowColor: '#000000',
+        shadowColor: Colors.background,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
         shadowRadius: 12,
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     // Shadow
     ...Platform.select({
       ios: {
-        shadowColor: '#000000',
+        shadowColor: Colors.background,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 4,

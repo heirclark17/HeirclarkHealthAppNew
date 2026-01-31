@@ -360,7 +360,7 @@ export function WeightInputModal({
                             progress.trend === 'increasing'
                               ? '#4CD964'
                               : progress.trend === 'decreasing'
-                              ? '#FF3B30'
+                              ? Colors.errorStrong
                               : colors.textMuted,
                         },
                       ]}
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   prBadge: {
-    backgroundColor: '#FFD700',
+    backgroundColor: Colors.accentGold,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   prBadgeText: {
     fontSize: 10,
     fontFamily: Fonts.bold,
-    color: '#000',
+    color: Colors.background,
   },
   suggestion: {
     flexDirection: 'row',

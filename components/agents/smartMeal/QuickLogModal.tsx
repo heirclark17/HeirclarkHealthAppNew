@@ -2,6 +2,7 @@
 // Shows meal details and allows quick logging with liquid glass design
 
 import React, { useState } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -50,9 +51,9 @@ export default function QuickLogModal({
 
   if (!meal) return null;
 
-  const textColor = isDark ? '#ffffff' : '#1a1a1a';
-  const subtextColor = isDark ? '#999999' : '#666666';
-  const mutedColor = isDark ? '#666666' : '#999999';
+  const textColor = isDark ? Colors.text : Colors.card;
+  const subtextColor = isDark ? Colors.textMuted : Colors.textMuted;
+  const mutedColor = isDark ? Colors.textMuted : Colors.textMuted;
   const mealColor = MealTypeColors[meal.mealType];
 
   const handleLog = async () => {
@@ -119,12 +120,12 @@ export default function QuickLogModal({
               </View>
               <View style={styles.macroRow}>
                 <View style={styles.macroItem}>
-                  <View style={[styles.macroDot, { backgroundColor: '#FF6B6B' }]} />
+                  <View style={[styles.macroDot, { backgroundColor: Colors.error }]} />
                   <Text style={[styles.macroSmallValue, { color: textColor }]}>{meal.protein}g</Text>
                   <Text style={[styles.macroSmallLabel, { color: mutedColor }]}>Protein</Text>
                 </View>
                 <View style={styles.macroItem}>
-                  <View style={[styles.macroDot, { backgroundColor: '#4ECDC4' }]} />
+                  <View style={[styles.macroDot, { backgroundColor: Colors.success }]} />
                   <Text style={[styles.macroSmallValue, { color: textColor }]}>{meal.carbs}g</Text>
                   <Text style={[styles.macroSmallLabel, { color: mutedColor }]}>Carbs</Text>
                 </View>
@@ -159,10 +160,10 @@ export default function QuickLogModal({
               disabled={isLogging}
             >
               {isLogging ? (
-                <ActivityIndicator size="small" color="#ffffff" />
+                <ActivityIndicator size="small" color=Colors.text />
               ) : (
                 <>
-                  <Ionicons name="add-circle" size={22} color="#ffffff" />
+                  <Ionicons name="add-circle" size={22} color=Colors.text />
                   <Text style={styles.logButtonText}>Log for {displayDate}</Text>
                 </>
               )}
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   logButtonText: {
-    color: '#ffffff',
+    color: Colors.text,
     fontSize: 16,
     fontWeight: '700',
   },

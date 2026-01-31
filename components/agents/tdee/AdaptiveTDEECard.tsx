@@ -1,7 +1,9 @@
 // Adaptive TDEE Card Component
 // Displays the user's adaptive metabolism on the dashboard with Liquid Glass design
+// iOS 26 Liquid Glass Design
 
 import React, { useState } from 'react';
+import { Colors } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -17,8 +19,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useAdaptiveTDEE } from '../../../contexts/AdaptiveTDEEContext';
 import { TDEE_CONSTANTS } from '../../../types/adaptiveTDEE';
-import { GlassCard } from '../../liquidGlass/GlassCard';
-import { useGlassTheme } from '../../liquidGlass/useGlassTheme';
+import { GlassCard } from '../../GlassCard';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Fonts } from '../../../constants/Theme';
 import TDEEInsightModal from './TDEEInsightModal';
 
 interface AdaptiveTDEECardProps {
@@ -27,9 +30,10 @@ interface AdaptiveTDEECardProps {
 
 export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
   const { state, recalculateTDEE, getRecommendedCalories } = useAdaptiveTDEE();
+  const { settings } = useSettings();
   const [showModal, setShowModal] = useState(false);
   const scale = useSharedValue(1);
-  const { isDark } = useGlassTheme();
+  const isDark = settings.themeMode === 'dark';
 
   const { result, isCalculating, isEnabled, daysUntilReady } = state;
 
@@ -54,15 +58,15 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
   const metabolismTrend = result?.metabolismTrend || 'normal';
 
   // Colors for dark/light mode
-  const textColor = isDark ? '#ffffff' : '#1a1a1a';
-  const subtextColor = isDark ? '#999999' : '#666666';
-  const mutedColor = isDark ? '#666666' : '#999999';
+  const textColor = isDark ? Colors.text : Colors.card;
+  const subtextColor = isDark ? Colors.textMuted : Colors.textMuted;
+  const mutedColor = isDark ? Colors.textMuted : Colors.textMuted;
 
   // Determine status colors and icons
   const getStatusConfig = () => {
     if (!isEnabled) {
       return {
-        color: '#FFD700',
+        color: Colors.accentGold,
         icon: 'time-outline' as const,
         label: 'Learning',
         sublabel: `${daysUntilReady} days until ready`,
@@ -72,21 +76,21 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
     switch (confidence) {
       case 'high':
         return {
-          color: '#4ADE80',
+          color: Colors.successStrong,
           icon: 'checkmark-circle' as const,
           label: 'High Confidence',
           sublabel: `${dataPoints} weeks of data`,
         };
       case 'medium':
         return {
-          color: '#60A5FA',
+          color: Colors.restingEnergy,
           icon: 'analytics-outline' as const,
           label: 'Medium Confidence',
           sublabel: `${dataPoints} weeks of data`,
         };
       default:
         return {
-          color: '#FB923C',
+          color: Colors.warningOrange,
           icon: 'hourglass-outline' as const,
           label: 'Building Confidence',
           sublabel: `${dataPoints} weeks of data`,
@@ -104,19 +108,19 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
       case 'faster':
         return {
           icon: 'trending-up' as const,
-          color: '#4ADE80',
+          color: Colors.successStrong,
           text: `+${Math.abs(result?.differencePercent || 0)}% vs formula`,
         };
       case 'slower':
         return {
           icon: 'trending-down' as const,
-          color: '#FB923C',
+          color: Colors.warningOrange,
           text: `${result?.differencePercent || 0}% vs formula`,
         };
       default:
         return {
           icon: 'remove-outline' as const,
-          color: '#60A5FA',
+          color: Colors.restingEnergy,
           text: 'Matches formula',
         };
     }
@@ -126,19 +130,19 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
 
   return (
     <>
-      <Animated.View style={[styles.container, animatedStyle]}>
+      <Animated.View style={animatedStyle}>
         <TouchableOpacity
           activeOpacity={0.9}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           onPress={() => setShowModal(true)}
         >
-          <GlassCard variant="elevated" material="thick" interactive animated>
+          <GlassCard style={styles.cardContainer} interactive>
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name="flame" size={20} color="#FF6B6B" />
+                  <Ionicons name="flame" size={20} color=Colors.error />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Adaptive TDEE</Text>
@@ -156,7 +160,7 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
             {/* Main Content */}
             {isCalculating ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#60A5FA" />
+                <ActivityIndicator size="large" color=Colors.restingEnergy />
                 <Text style={[styles.loadingText, { color: subtextColor }]}>Calculating your metabolism...</Text>
               </View>
             ) : !isEnabled ? (
@@ -179,17 +183,17 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
                       <Ionicons
                         name="checkmark-circle"
                         size={16}
-                        color={state.weightHistory.length > 0 ? '#4ADE80' : mutedColor}
+                        color={state.weightHistory.length > 0 ? Colors.successStrong : mutedColor}
                       />
-                      <Text style={[styles.checklistText, { color: isDark ? '#cccccc' : '#444444' }]}>Log daily weight</Text>
+                      <Text style={[styles.checklistText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>Log daily weight</Text>
                     </View>
                     <View style={styles.checklistItem}>
                       <Ionicons
                         name="checkmark-circle"
                         size={16}
-                        color={state.calorieHistory.length > 0 ? '#4ADE80' : mutedColor}
+                        color={state.calorieHistory.length > 0 ? Colors.successStrong : mutedColor}
                       />
-                      <Text style={[styles.checklistText, { color: isDark ? '#cccccc' : '#444444' }]}>Track meals</Text>
+                      <Text style={[styles.checklistText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>Track meals</Text>
                     </View>
                   </View>
                 </View>
@@ -207,7 +211,7 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
                 <View style={[styles.comparisonRow, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }]}>
                   <View style={styles.comparisonItem}>
                     <Text style={[styles.comparisonLabel, { color: mutedColor }]}>Formula Estimate</Text>
-                    <Text style={[styles.comparisonValue, { color: isDark ? '#cccccc' : '#444444' }]}>{formulaTDEE.toLocaleString()}</Text>
+                    <Text style={[styles.comparisonValue, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{formulaTDEE.toLocaleString()}</Text>
                   </View>
                   <View style={[styles.divider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
                   <View style={styles.comparisonItem}>
@@ -249,9 +253,8 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: 16,
-    marginVertical: 8,
+  cardContainer: {
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
@@ -273,12 +276,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 18,
-    fontWeight: '400',
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
     letterSpacing: 0.3,
   },
   subtitle: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
     marginTop: 2,
   },
   statusBadge: {
@@ -291,7 +295,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 11,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
   },
   loadingContainer: {
     alignItems: 'center',
@@ -300,6 +304,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
+    fontFamily: Fonts.regular,
   },
   notReadyContainer: {
     flexDirection: 'row',
@@ -316,21 +321,23 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 24,
-    fontWeight: '300',
+    fontFamily: Fonts.light,
   },
   progressLabel: {
     fontSize: 10,
+    fontFamily: Fonts.regular,
   },
   notReadyInfo: {
     flex: 1,
   },
   notReadyTitle: {
     fontSize: 16,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
     marginBottom: 4,
   },
   notReadyDesc: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
     lineHeight: 18,
     marginBottom: 12,
   },
@@ -344,6 +351,7 @@ const styles = StyleSheet.create({
   },
   checklistText: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
   },
   tdeeContainer: {
     alignItems: 'center',
@@ -355,11 +363,12 @@ const styles = StyleSheet.create({
   },
   tdeeValue: {
     fontSize: 48,
-    fontWeight: '200',
+    fontFamily: Fonts.light,
     letterSpacing: -1,
   },
   tdeeUnit: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
     marginLeft: 8,
   },
   comparisonRow: {
@@ -377,14 +386,15 @@ const styles = StyleSheet.create({
   },
   comparisonLabel: {
     fontSize: 11,
+    fontFamily: Fonts.regular,
     marginBottom: 4,
   },
   comparisonValue: {
     fontSize: 18,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
   },
   recommendedValue: {
-    color: '#4ADE80',
+    color: Colors.successStrong,
   },
   divider: {
     width: 1,
@@ -400,7 +410,7 @@ const styles = StyleSheet.create({
   },
   trendText: {
     fontSize: 12,
-    fontWeight: '400',
+    fontFamily: Fonts.medium,
   },
   footer: {
     flexDirection: 'row',
@@ -412,6 +422,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
     marginRight: 4,
   },
 });

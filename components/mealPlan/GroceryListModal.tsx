@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
+  useColorScheme,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -15,8 +17,52 @@ import Animated, {
   FadeIn,
   SlideInUp,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing } from '../../constants/Theme';
 import { GroceryCategory, GroceryItem } from '../../types/mealPlan';
+import { lightImpact, mediumImpact } from '../../utils/haptics';
+
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
+// iOS 26 Liquid Glass colors
+const GLASS_COLORS = {
+  light: {
+    background: '#F8F8F8',
+    card: 'rgba(255, 255, 255, 0.75)',
+    cardBorder: 'rgba(255, 255, 255, 0.5)',
+    header: 'rgba(255, 255, 255, 0.85)',
+    text: '#1D1D1F',
+    textMuted: 'rgba(60, 60, 67, 0.6)',
+    textSecondary: 'rgba(60, 60, 67, 0.4)',
+    border: 'rgba(0, 0, 0, 0.08)',
+    checkbox: 'rgba(0, 0, 0, 0.1)',
+    checkboxChecked: 'rgba(0, 122, 255, 0.9)',
+    progressBg: 'rgba(0, 0, 0, 0.06)',
+    progressFill: 'rgba(0, 122, 255, 0.9)',
+    buttonBg: 'rgba(0, 122, 255, 0.9)',
+  },
+  dark: {
+    background: '#0A0A0A',
+    card: 'rgba(255, 255, 255, 0.08)',
+    cardBorder: 'rgba(255, 255, 255, 0.12)',
+    header: 'rgba(44, 44, 46, 0.85)',
+    text: Colors.text,
+    textMuted: 'rgba(235, 235, 245, 0.6)',
+    textSecondary: 'rgba(235, 235, 245, 0.4)',
+    border: 'rgba(255, 255, 255, 0.1)',
+    checkbox: 'rgba(255, 255, 255, 0.15)',
+    checkboxChecked: 'rgba(10, 132, 255, 0.9)',
+    progressBg: 'rgba(255, 255, 255, 0.1)',
+    progressFill: 'rgba(10, 132, 255, 0.9)',
+    buttonBg: 'rgba(10, 132, 255, 0.9)',
+  },
+};
 
 interface GroceryListModalProps {
   visible: boolean;
@@ -39,9 +85,11 @@ const CATEGORY_ICONS: Record<string, string> = {
 const CheckboxItem = ({
   item,
   onToggle,
+  glassColors,
 }: {
   item: GroceryItem;
   onToggle: () => void;
+  glassColors: typeof GLASS_COLORS.dark;
 }) => {
   const scale = useSharedValue(1);
 
@@ -49,10 +97,11 @@ const CheckboxItem = ({
     transform: [{ scale: scale.value }],
   }));
 
-  const handlePress = () => {
-    scale.value = withSpring(0.95, { damping: 15 });
+  const handlePress = async () => {
+    await lightImpact();
+    scale.value = withSpring(0.95, GLASS_SPRING);
     setTimeout(() => {
-      scale.value = withSpring(1, { damping: 15 });
+      scale.value = withSpring(1, GLASS_SPRING);
     }, 100);
     onToggle();
   };
@@ -61,16 +110,28 @@ const CheckboxItem = ({
     <Animated.View style={animatedStyle}>
       <Pressable
         onPress={handlePress}
-        style={[styles.itemRow, item.checked && styles.itemRowChecked]}
+        style={[
+          styles.itemRow,
+          { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder },
+          item.checked && styles.itemRowChecked,
+        ]}
       >
-        <View style={[styles.checkbox, item.checked && styles.checkboxChecked]}>
-          {item.checked && <Text style={styles.checkmark}>✓</Text>}
+        <View style={[
+          styles.checkbox,
+          { borderColor: glassColors.textMuted },
+          item.checked && { backgroundColor: glassColors.checkboxChecked, borderColor: glassColors.checkboxChecked },
+        ]}>
+          {item.checked && <Ionicons name="checkmark" size={14} color=Colors.text />}
         </View>
         <View style={styles.itemInfo}>
-          <Text style={[styles.itemName, item.checked && styles.itemNameChecked]}>
+          <Text style={[
+            styles.itemName,
+            { color: glassColors.text },
+            item.checked && { color: glassColors.textMuted, textDecorationLine: 'line-through' },
+          ]}>
             {item.name}
           </Text>
-          <Text style={styles.itemAmount}>
+          <Text style={[styles.itemAmount, { color: glassColors.textSecondary }]}>
             {item.totalAmount} {item.unit}
           </Text>
         </View>
@@ -83,10 +144,12 @@ const CategorySection = ({
   category,
   categoryIndex,
   onToggleItem,
+  glassColors,
 }: {
   category: GroceryCategory;
   categoryIndex: number;
   onToggleItem: (categoryIndex: number, itemIndex: number) => void;
+  glassColors: typeof GLASS_COLORS.dark;
 }) => {
   const checkedCount = category.items.filter(item => item.checked).length;
   const totalCount = category.items.length;
@@ -97,8 +160,8 @@ const CategorySection = ({
         <Text style={styles.categoryIcon}>
           {CATEGORY_ICONS[category.category] || '📦'}
         </Text>
-        <Text style={styles.categoryTitle}>{category.category}</Text>
-        <Text style={styles.categoryCount}>
+        <Text style={[styles.categoryTitle, { color: glassColors.text }]}>{category.category}</Text>
+        <Text style={[styles.categoryCount, { color: glassColors.textMuted }]}>
           {checkedCount}/{totalCount}
         </Text>
       </View>
@@ -107,6 +170,7 @@ const CategorySection = ({
           key={`${item.name}-${itemIndex}`}
           item={item}
           onToggle={() => onToggleItem(categoryIndex, itemIndex)}
+          glassColors={glassColors}
         />
       ))}
     </View>
@@ -120,6 +184,26 @@ export function GroceryListModal({
   onToggleItem,
   onOrderInstacart,
 }: GroceryListModalProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
+  const insets = useSafeAreaInsets();
+
+  // Button animation
+  const buttonScale = useSharedValue(1);
+  const buttonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: buttonScale.value }],
+  }));
+
+  const handleInstacartPress = async () => {
+    await mediumImpact();
+    buttonScale.value = withSpring(0.95, GLASS_SPRING);
+    setTimeout(() => {
+      buttonScale.value = withSpring(1, GLASS_SPRING);
+    }, 100);
+    onOrderInstacart();
+  };
+
   if (!groceryList) return null;
 
   const totalItems = groceryList.reduce((acc, cat) => acc + cat.items.length, 0);
@@ -127,6 +211,7 @@ export function GroceryListModal({
     (acc, cat) => acc + cat.items.filter(item => item.checked).length,
     0
   );
+  const progress = totalItems > 0 ? (checkedItems / totalItems) * 100 : 0;
 
   return (
     <Modal
@@ -135,33 +220,38 @@ export function GroceryListModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        {/* Header */}
-        <Animated.View
-          entering={FadeIn.delay(100)}
-          style={styles.header}
+      <View style={[styles.container, { backgroundColor: glassColors.background }]}>
+        {/* Header with Glass Effect */}
+        <BlurView
+          intensity={isDark ? 60 : 80}
+          tint={isDark ? 'dark' : 'light'}
+          style={[styles.header, { borderBottomColor: glassColors.border }]}
         >
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Grocery List</Text>
-          <View style={styles.placeholder} />
-        </Animated.View>
+          <Animated.View entering={FadeIn.delay(100)} style={styles.headerContent}>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={[styles.closeButtonText, { color: glassColors.checkboxChecked }]}>Close</Text>
+            </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: glassColors.text }]}>Grocery List</Text>
+            <View style={styles.placeholder} />
+          </Animated.View>
+        </BlurView>
 
-        {/* Progress */}
+        {/* Progress Section */}
         <Animated.View
           entering={FadeIn.delay(200)}
-          style={styles.progressSection}
+          style={[styles.progressSection, { borderBottomColor: glassColors.border }]}
         >
-          <View style={styles.progressBar}>
-            <View
+          <View style={[styles.progressBar, { backgroundColor: glassColors.progressBg }]}>
+            <Animated.View
               style={[
                 styles.progressFill,
-                { width: `${totalItems > 0 ? (checkedItems / totalItems) * 100 : 0}%` },
+                { width: `${progress}%`, backgroundColor: glassColors.progressFill },
               ]}
             />
+            {/* Glass highlight */}
+            <View style={styles.progressHighlight} />
           </View>
-          <Text style={styles.progressText}>
+          <Text style={[styles.progressText, { color: glassColors.textMuted }]}>
             {checkedItems} of {totalItems} items checked
           </Text>
         </Animated.View>
@@ -181,26 +271,33 @@ export function GroceryListModal({
                 category={category}
                 categoryIndex={categoryIndex}
                 onToggleItem={onToggleItem}
+                glassColors={glassColors}
               />
             </Animated.View>
           ))}
-          <View style={{ height: 100 }} />
+          <View style={{ height: 120 }} />
         </ScrollView>
 
-        {/* Instacart button */}
-        <Animated.View
-          entering={SlideInUp.delay(500).springify()}
-          style={styles.bottomSection}
+        {/* Instacart button with Glass Effect */}
+        <BlurView
+          intensity={isDark ? 60 : 80}
+          tint={isDark ? 'dark' : 'light'}
+          style={[styles.bottomSection, { paddingBottom: insets.bottom + 16, borderTopColor: glassColors.border }]}
         >
-          <TouchableOpacity
-            style={styles.instacartButton}
-            onPress={onOrderInstacart}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.instacartIcon}>🛒</Text>
-            <Text style={styles.instacartButtonText}>Order with Instacart</Text>
-          </TouchableOpacity>
-        </Animated.View>
+          <Animated.View entering={SlideInUp.delay(500).springify()} style={buttonAnimatedStyle}>
+            <TouchableOpacity
+              style={[styles.instacartButton, {
+                backgroundColor: glassColors.buttonBg,
+                shadowColor: glassColors.buttonBg,
+              }]}
+              onPress={handleInstacartPress}
+              activeOpacity={1}
+            >
+              <Text style={styles.instacartIcon}>🛒</Text>
+              <Text style={styles.instacartButtonText}>Order with Instacart</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </BlurView>
       </View>
     </Modal>
   );
@@ -209,29 +306,27 @@ export function GroceryListModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
+    borderBottomWidth: 1,
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   closeButton: {
     padding: 8,
   },
   closeButtonText: {
     fontSize: 16,
-    color: Colors.accent,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.medium,
   },
   headerTitle: {
     fontSize: 18,
-    color: Colors.text,
     fontFamily: Fonts.semiBold,
   },
   placeholder: {
@@ -241,22 +336,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   progressBar: {
-    height: 6,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 3,
+    height: 8,
+    borderRadius: 4,
     marginBottom: 8,
+    overflow: 'hidden',
+    position: 'relative',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
-    borderRadius: 3,
+    borderRadius: 4,
+  },
+  progressHighlight: {
+    position: 'absolute',
+    top: 1,
+    left: 4,
+    right: 4,
+    height: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 1,
   },
   progressText: {
     fontSize: 13,
-    color: Colors.textMuted,
     fontFamily: Fonts.regular,
     textAlign: 'center',
   },
@@ -280,13 +382,11 @@ const styles = StyleSheet.create({
   },
   categoryTitle: {
     fontSize: 16,
-    color: Colors.text,
     fontFamily: Fonts.semiBold,
     flex: 1,
   },
   categoryCount: {
     fontSize: 13,
-    color: Colors.textMuted,
     fontFamily: Fonts.regular,
   },
   itemRow: {
@@ -294,11 +394,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 12,
-    backgroundColor: 'transparent',
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
   },
   itemRowChecked: {
     opacity: 0.6,
@@ -308,36 +406,20 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: Colors.textMuted,
     marginRight: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  checkmark: {
-    fontSize: 14,
-    color: Colors.primaryText,
-    fontFamily: Fonts.bold,
   },
   itemInfo: {
     flex: 1,
   },
   itemName: {
     fontSize: 15,
-    color: Colors.text,
     fontFamily: Fonts.medium,
     marginBottom: 2,
   },
-  itemNameChecked: {
-    textDecorationLine: 'line-through',
-    color: Colors.textMuted,
-  },
   itemAmount: {
     fontSize: 13,
-    color: Colors.textMuted,
     fontFamily: Fonts.regular,
   },
   bottomSection: {
@@ -346,26 +428,27 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 16,
-    paddingBottom: 32,
-    backgroundColor: Colors.background,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
   },
   instacartButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
     paddingVertical: 16,
     borderRadius: Spacing.borderRadius,
     gap: 8,
+    // Glow shadow
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   instacartIcon: {
     fontSize: 20,
   },
   instacartButtonText: {
     fontSize: 16,
-    color: Colors.primaryText,
+    color: Colors.text,
     fontFamily: Fonts.semiBold,
   },
 });

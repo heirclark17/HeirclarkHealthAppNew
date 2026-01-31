@@ -1,5 +1,6 @@
 // Landing Page Testimonials Section
 import React, { useState, useRef, useEffect } from 'react';
+import { Colors } from '../../constants/Theme';
 import {
   View,
   Text,
@@ -249,7 +250,7 @@ function TestimonialCard({ testimonial, isActive, cardWidth }: TestimonialCardPr
         {/* Rating */}
         <View style={styles.rating}>
           {Array.from({ length: testimonial.rating }).map((_, i) => (
-            <Star key={i} size={16} color="#fbbf24" fill="#fbbf24" />
+            <Star key={i} size={16} color=Colors.warning fill=Colors.warning />
           ))}
         </View>
 

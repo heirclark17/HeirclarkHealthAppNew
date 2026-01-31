@@ -41,7 +41,7 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
 
   // Difficulty colors (theme-aware)
   const successColor = isDark ? '#34D399' : '#10B981';
-  const warningColor = isDark ? '#FBBF24' : '#F59E0B';
+  const warningColor = isDark ? Colors.warning : Colors.warningOrange;
   const dangerColor = isDark ? '#F87171' : '#EF4444';
 
   const handlePressIn = () => {
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: Colors.background,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.08,
         shadowRadius: 8,

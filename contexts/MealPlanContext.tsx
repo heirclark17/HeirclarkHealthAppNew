@@ -261,14 +261,24 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       const aiPlan = await aiService.generateAIMealPlan(aiPreferences, 7);
 
       if (aiPlan) {
-        // Convert AI plan to app format
+        // Convert AI plan to app format - always start from Sunday of current week
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        // Calculate Sunday of the current week
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const sunday = new Date(today);
+        sunday.setDate(today.getDate() - dayOfWeek); // Go back to Sunday
+        sunday.setHours(0, 0, 0, 0);
+
         const weeklyPlan: DayPlan[] = aiPlan.days.map((day, index) => {
-          const planDate = new Date(Date.now() + index * 86400000);
+          // Start from Sunday and add index days
+          const planDate = new Date(sunday);
+          planDate.setDate(sunday.getDate() + index);
           return {
             dayNumber: index + 1,
             date: planDate.toISOString().split('T')[0],
-            dayName: dayNames[planDate.getDay()],
+            dayName: dayNames[index], // Use index directly since we start from Sunday
             meals: day.meals.map((meal: any) => ({
             id: `ai-meal-${Date.now()}-${Math.random()}`,
             mealType: meal.mealType.toLowerCase(),

@@ -175,7 +175,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
             <Text style={[
               styles.toggleText,
               { color: colors.textMuted },
-              viewMode === 'week' && { color: isDark ? '#000' : '#fff' }
+              viewMode === 'week' && { color: isDark ? Colors.background : '#fff' }
             ]}>Week</Text>
           </View>
           <View style={[
@@ -185,7 +185,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
             <Text style={[
               styles.toggleText,
               { color: colors.textMuted },
-              viewMode === 'month' && { color: isDark ? '#000' : '#fff' }
+              viewMode === 'month' && { color: isDark ? Colors.background : '#fff' }
             ]}>Month</Text>
           </View>
         </TouchableOpacity>
@@ -228,7 +228,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                   <Text style={[
                     styles.dayName,
                     { color: dayNameColor },
-                    isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff' },
+                    isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : Colors.text },
                   ]}>
                     {dayShort}
                   </Text>
@@ -236,7 +236,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                   <Text style={[
                     styles.dayNumber,
                     { color: colors.text },
-                    isSelected && { color: isDark ? '#000000' : '#ffffff' },
+                    isSelected && { color: isDark ? Colors.background : Colors.text },
                   ]}>
                     {dayNumber}
                   </Text>
@@ -247,21 +247,21 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                         <Ionicons
                           name="bed-outline"
                           size={12}
-                          color={isSelected ? (isDark ? '#000000' : '#ffffff') : colors.textMuted}
+                          color={isSelected ? (isDark ? Colors.background : Colors.text) : colors.textMuted}
                         />
                       </View>
                     )}
                     {hasWorkout && !isCompleted && (
                       <View style={[
                         styles.workoutIndicator,
-                        { backgroundColor: isSelected ? (isDark ? '#000000' : '#ffffff') : colors.protein }
+                        { backgroundColor: isSelected ? (isDark ? Colors.background : Colors.text) : colors.protein }
                       ]} />
                     )}
                     {isCompleted && (
                       <Ionicons
                         name="checkmark-circle"
                         size={16}
-                        color={isSelected ? (isDark ? '#000000' : '#ffffff') : colors.protein}
+                        color={isSelected ? (isDark ? Colors.background : Colors.text) : colors.protein}
                       />
                     )}
                   </View>
@@ -320,7 +320,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                     styles.monthDayNumber,
                     { color: day.isCurrentMonth ? colors.text : colors.textMuted },
                     !day.isCurrentMonth && { opacity: 0.3 },
-                    day.isSelected && { color: isDark ? '#000' : '#fff' },
+                    day.isSelected && { color: isDark ? Colors.background : '#fff' },
                   ]}>
                     {day.dayNumber}
                   </Text>
@@ -334,13 +334,13 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                       {hasWorkout && !isCompleted && (
                         <View style={[
                           styles.monthIndicatorDot,
-                          { backgroundColor: day.isSelected ? (isDark ? '#000' : '#fff') : colors.protein }
+                          { backgroundColor: day.isSelected ? (isDark ? Colors.background : '#fff') : colors.protein }
                         ]} />
                       )}
                       {isCompleted && (
                         <View style={[
                           styles.monthIndicatorDot,
-                          { backgroundColor: day.isSelected ? (isDark ? '#000' : '#fff') : colors.protein }
+                          { backgroundColor: day.isSelected ? (isDark ? Colors.background : '#fff') : colors.protein }
                         ]}>
                           <Ionicons
                             name="checkmark"
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   dayItemActive: Platform.select({
     ios: {
-      shadowColor: '#ffffff',
+      shadowColor: Colors.text,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.3,
       shadowRadius: 20,
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
   },
   monthDayItemActive: Platform.select({
     ios: {
-      shadowColor: '#ffffff',
+      shadowColor: Colors.text,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.2,
       shadowRadius: 10,

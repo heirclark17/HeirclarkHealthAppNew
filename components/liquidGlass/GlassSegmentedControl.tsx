@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, ViewStyle, Platform, TouchableOpacity, LayoutChangeEvent } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Colors } from '../../constants/Theme';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -200,8 +201,8 @@ export const GlassSegmentedControl: React.FC<GlassSegmentedControlProps> = ({
                       ? colors.text.muted
                       : isSelected
                       ? isDark
-                        ? '#FFFFFF'
-                        : '#000000'
+                        ? Colors.text
+                        : Colors.background
                       : colors.text.secondary
                   }
                   style={segment.label ? styles.segmentIcon : undefined}
@@ -215,8 +216,8 @@ export const GlassSegmentedControl: React.FC<GlassSegmentedControlProps> = ({
                     ? colors.text.muted
                     : isSelected
                     ? isDark
-                      ? '#FFFFFF'
-                      : '#000000'
+                      ? Colors.text
+                      : Colors.background
                     : colors.text.secondary
                 }
               >

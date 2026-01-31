@@ -34,6 +34,7 @@ import { HabitFormationCard } from '../../components/agents/habitFormation';
 import { RestaurantMenuCard } from '../../components/agents/restaurantMenu';
 import { SleepRecoveryCard } from '../../components/agents/sleepRecovery';
 import { HydrationCard } from '../../components/agents/hydration';
+import WorkoutFormCoachCard from '../../components/agents/workoutFormCoach/WorkoutFormCoachCard';
 
 export default function AccountabilityScreen() {
   const { settings } = useSettings();
@@ -83,6 +84,16 @@ export default function AccountabilityScreen() {
             </View>
           </GlassCard>
 
+          {/* Section: Social - Moved to top */}
+          <View style={styles.sectionContainer}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>SOCIAL</Text>
+
+            {/* Accountability Partner */}
+            <View style={styles.cardWrapper}>
+              <AccountabilityPartnerCard />
+            </View>
+          </View>
+
           {/* Section: Daily Tracking */}
           <View style={styles.sectionContainer}>
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DAILY TRACKING</Text>
@@ -90,6 +101,11 @@ export default function AccountabilityScreen() {
             {/* Adaptive TDEE Card */}
             <View style={styles.cardWrapper}>
               <AdaptiveTDEECard />
+            </View>
+
+            {/* Weight Log Summary */}
+            <View style={styles.cardWrapper}>
+              <WeightLoggingCard />
             </View>
 
             {/* Hydration Card */}
@@ -111,10 +127,15 @@ export default function AccountabilityScreen() {
             <View style={styles.cardWrapper}>
               <ProgressPredictionCard />
             </View>
+          </View>
 
-            {/* Weight Log Summary - Links to Settings for full management */}
+          {/* Section: Training */}
+          <View style={styles.sectionContainer}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>TRAINING</Text>
+
+            {/* Form Coach */}
             <View style={styles.cardWrapper}>
-              <WeightLoggingCard />
+              <WorkoutFormCoachCard />
             </View>
           </View>
 
@@ -130,16 +151,6 @@ export default function AccountabilityScreen() {
             {/* Eating Out Guide */}
             <View style={styles.cardWrapper}>
               <RestaurantMenuCard />
-            </View>
-          </View>
-
-          {/* Section: Social */}
-          <View style={styles.sectionContainer}>
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>SOCIAL</Text>
-
-            {/* Accountability Partner */}
-            <View style={styles.cardWrapper}>
-              <AccountabilityPartnerCard />
             </View>
           </View>
 
