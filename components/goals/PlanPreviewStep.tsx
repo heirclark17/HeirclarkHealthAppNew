@@ -216,7 +216,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
     );
 
     // Progress fill animation
-    buttonProgress.value = withSpring(1, { duration: 800 }, (, GLASS_SPRING) => {
+    buttonProgress.value = withSpring(1, GLASS_SPRING, () => {
       runOnJS(handleSaveComplete)();
     });
   };
