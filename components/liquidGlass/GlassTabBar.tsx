@@ -124,7 +124,7 @@ const TabItem: React.FC<TabItemProps> = ({
             <View style={[styles.badge, { backgroundColor: colors.semantic.error }]}>
               <AdaptiveText
                 variant="caption2"
-                customColor=Colors.text
+                customColor={Colors.text}
                 weight="600"
               >
                 {item.badge > 99 ? '99+' : item.badge}
