@@ -118,7 +118,7 @@
         {
           "icon": "./assets/icon.png",
           "color": "#22C55E",
-          "sounds": ["./assets/notification-sound.wav"],
+          "sounds": [],
           "mode": "production"
         }
       ],
