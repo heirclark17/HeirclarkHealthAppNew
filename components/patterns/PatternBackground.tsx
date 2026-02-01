@@ -1555,8 +1555,8 @@ function CheetahLuxePattern({ isDark }: { isDark: boolean }) {
           <Stop offset="100%" stopColor={bgColors[2]} />
         </LinearGradient>
         <RadialGradient id="cheetahGlow" cx="30%" cy="20%" r="50%">
-          <Stop offset="0%" stopColor=Colors.accentGold stopOpacity={glowOpacity} />
-          <Stop offset="100%" stopColor=Colors.accentGold stopOpacity={0} />
+          <Stop offset="0%" stopColor={Colors.accentGold} stopOpacity={glowOpacity} />
+          <Stop offset="100%" stopColor={Colors.accentGold} stopOpacity={0} />
         </RadialGradient>
       </Defs>
       <Rect width="100%" height="100%" fill="url(#cheetahBg)" />
