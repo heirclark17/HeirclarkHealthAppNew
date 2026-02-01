@@ -45,7 +45,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
     <View style={[styles.header, { borderBottomColor: borderColor }]}>
       <View style={styles.headerContent}>
         <View style={styles.headerIcon}>
-          <Ionicons name="flame" size={24} color=Colors.error />
+          <Ionicons name="flame" size={24} color={Colors.error} />
         </View>
         <View>
           <Text style={[styles.headerTitle, { color: textColor }]}>Adaptive TDEE</Text>
@@ -81,7 +81,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
 
       <GlassCard variant="compact" material="thin" style={styles.tipCard}>
         <View style={styles.tipCardContent}>
-          <Ionicons name="bulb-outline" size={20} color=Colors.accentGold />
+          <Ionicons name="bulb-outline" size={20} color={Colors.accentGold} />
           <View style={styles.tipContent}>
             <Text style={[styles.tipTitle, { color: Colors.accentGold }]}>Tips for Accuracy</Text>
             <Text style={[styles.tipText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>
@@ -144,7 +144,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
         {/* Recommended Calories */}
         <GlassCard variant="compact" material="thin" style={[styles.recommendedCard, { backgroundColor: 'rgba(74,222,128,0.1)' }]}>
           <View style={styles.recommendedHeader}>
-            <Ionicons name="nutrition" size={20} color=Colors.successStrong />
+            <Ionicons name="nutrition" size={20} color={Colors.successStrong} />
             <Text style={styles.recommendedTitle}>Recommended Daily Intake</Text>
           </View>
           <Text style={[styles.recommendedValue, { color: textColor }]}>
@@ -241,7 +241,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
         {result.insights.map((insight, index) => (
           <GlassCard key={index} variant="flat" material="ultraThin" style={styles.insightItem}>
             <View style={styles.insightItemContent}>
-              <Ionicons name="sparkles" size={16} color=Colors.accentGold />
+              <Ionicons name="sparkles" size={16} color={Colors.accentGold} />
               <Text style={[styles.insightText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{insight}</Text>
             </View>
           </GlassCard>

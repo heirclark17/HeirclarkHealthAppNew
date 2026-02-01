@@ -40,7 +40,7 @@ const stats: Stat[] = [
     value: 4.9,
     suffix: '',
     label: 'App Store Rating',
-    icon: <Star size={28} color=Colors.warning fill=Colors.warning />,
+    icon: <Star size={28} color={Colors.warning} fill={Colors.warning} />,
     color: 'rgba(251, 191, 36, 0.3)',
   },
   {

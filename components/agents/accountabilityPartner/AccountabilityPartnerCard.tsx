@@ -180,7 +180,7 @@ export default function AccountabilityPartnerCard() {
           <Text style={[styles.streakUnit, { color: colors.textMuted }]}>days</Text>
           {isAtRisk && (
             <View style={styles.atRiskBadge}>
-              <Ionicons name="warning" size={12} color=Colors.error />
+              <Ionicons name="warning" size={12} color={Colors.error} />
             </View>
           )}
         </View>
@@ -274,7 +274,7 @@ export default function AccountabilityPartnerCard() {
         {/* At Risk Streaks Warning */}
         {atRiskStreaks.length > 0 && (
           <View style={[styles.warningBanner, { backgroundColor: '#FF6B6B20' }]}>
-            <Ionicons name="warning" size={16} color=Colors.error />
+            <Ionicons name="warning" size={16} color={Colors.error} />
             <Text style={[styles.warningText, { color: Colors.error }]}>
               {atRiskStreaks.length} streak{atRiskStreaks.length > 1 ? 's' : ''} at risk!
               Log today to keep {atRiskStreaks.length > 1 ? 'them' : 'it'} going.

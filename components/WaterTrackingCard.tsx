@@ -259,7 +259,7 @@ export function WaterTrackingCard({ date }: WaterTrackingCardProps) {
               ]}
               onPress={handleAddWater}
             >
-              <Ionicons name="add" size={24} color=Colors.text />
+              <Ionicons name="add" size={24} color={Colors.text} />
               <Text style={styles.addButtonText}>Add Glass</Text>
             </TouchableOpacity>
           </Animated.View>

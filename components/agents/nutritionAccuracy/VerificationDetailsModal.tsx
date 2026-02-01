@@ -156,7 +156,7 @@ export default function VerificationDetailsModal({
                       style={[styles.applyButton, { backgroundColor: Colors.successStrong }]}
                       onPress={onApplyAdjustments}
                     >
-                      <Ionicons name="checkmark-circle" size={18} color=Colors.text />
+                      <Ionicons name="checkmark-circle" size={18} color={Colors.text} />
                       <Text style={styles.applyButtonText}>Apply Adjustments</Text>
                     </TouchableOpacity>
                   )}

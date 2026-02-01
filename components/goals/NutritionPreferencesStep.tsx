@@ -117,7 +117,7 @@ function DietCard({ option, isSelected, onSelect, colors, isDark }: DietCardProp
             <Text style={[styles.dietDescription, { color: colors.textMuted }]}>{option.description}</Text>
           </View>
           {isSelected && (
-            <Ionicons name="checkmark-circle" size={20} color=Colors.successMuted />
+            <Ionicons name="checkmark-circle" size={20} color={Colors.successMuted} />
           )}
         </View>
       </GlassCard>
@@ -399,7 +399,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                     {allergy}
                   </Text>
                   {isSelected && (
-                    <Ionicons name="close-circle" size={16} color=Colors.error />
+                    <Ionicons name="close-circle" size={16} color={Colors.error} />
                   )}
                 </GlassCard>
               </TouchableOpacity>
@@ -519,7 +519,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   ]}
                   interactive
                 >
-                  {isSelected && <Ionicons name="pizza-outline" size={14} color=Colors.warning />}
+                  {isSelected && <Ionicons name="pizza-outline" size={14} color={Colors.warning} />}
                   <Text style={[styles.cheatDayText, { color: colors.text }, isSelected && { color: Colors.warning }]}>
                     {shortDay}
                   </Text>
@@ -549,7 +549,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{protein}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -571,7 +571,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{veg}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -593,7 +593,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{starch}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -615,7 +615,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{snack}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -637,7 +637,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{cuisine}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color=Colors.successMuted style={{ marginLeft: 4 }} />}
+                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );

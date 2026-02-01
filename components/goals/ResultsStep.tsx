@@ -150,19 +150,19 @@ export function ResultsStep({
       <View style={[styles.card, { backgroundColor: cardBg, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.text }]}>Key Tips</Text>
         <View style={styles.tipItem}>
-          <Ionicons name="checkmark-circle" size={20} color=Colors.successStrong />
+          <Ionicons name="checkmark-circle" size={20} color={Colors.successStrong} />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>
             Hit your protein target of {results.protein}g daily to preserve muscle.
           </Text>
         </View>
         <View style={styles.tipItem}>
-          <Ionicons name="checkmark-circle" size={20} color=Colors.successStrong />
+          <Ionicons name="checkmark-circle" size={20} color={Colors.successStrong} />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>
             Track your food for at least 2 weeks to build awareness.
           </Text>
         </View>
         <View style={styles.tipItem}>
-          <Ionicons name="checkmark-circle" size={20} color=Colors.successStrong />
+          <Ionicons name="checkmark-circle" size={20} color={Colors.successStrong} />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>
             {goalType === 'lose'
               ? 'Strength train 2-3x weekly to maintain muscle while losing fat.'

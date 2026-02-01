@@ -142,7 +142,7 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name="flame" size={20} color=Colors.error />
+                  <Ionicons name="flame" size={20} color={Colors.error} />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Adaptive TDEE</Text>
@@ -160,7 +160,7 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
             {/* Main Content */}
             {isCalculating ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color=Colors.restingEnergy />
+                <ActivityIndicator size="large" color={Colors.restingEnergy} />
                 <Text style={[styles.loadingText, { color: subtextColor }]}>Calculating your metabolism...</Text>
               </View>
             ) : !isEnabled ? (

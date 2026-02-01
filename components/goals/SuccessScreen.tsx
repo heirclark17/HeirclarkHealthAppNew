@@ -314,7 +314,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         <Animated.View style={[styles.ring, ringStyle]} />
         <Animated.View style={[styles.checkContainer, checkStyle]}>
           <View style={styles.checkCircle}>
-            <Ionicons name="checkmark" size={48} color=Colors.background />
+            <Ionicons name="checkmark" size={48} color={Colors.background} />
           </View>
         </Animated.View>
       </View>
@@ -333,7 +333,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           <Text style={[styles.targetsSectionHeader, { color: colors.textMuted }]}>YOUR DAILY TARGETS</Text>
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
-              <Ionicons name="flame" size={20} color=Colors.error />
+              <Ionicons name="flame" size={20} color={Colors.error} />
               <Text style={[styles.targetValue, { color: colors.text }]}>{state.results.calories.toLocaleString()}</Text>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Calories</Text>
             </GlassCard>
@@ -360,7 +360,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <Animated.View entering={FadeInDown.delay(750).duration(400)}>
         <GlassCard style={styles.workoutPlanCard} interactive>
           <View style={styles.workoutPlanHeader}>
-            <Ionicons name="barbell" size={20} color=Colors.error />
+            <Ionicons name="barbell" size={20} color={Colors.error} />
             <Text style={styles.workoutPlanTitle}>YOUR WORKOUT PLAN</Text>
           </View>
 
@@ -396,7 +396,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <Ionicons
                 name={state.cardioPreference === 'walking' ? 'walk' : state.cardioPreference === 'running' ? 'fitness' : 'flash'}
                 size={16}
-                color=Colors.error
+                color={Colors.error}
               />
               <Text style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
                 {state.cardioPreference === 'walking' && 'Walking-based cardio'}
@@ -437,7 +437,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <Animated.View entering={FadeInDown.delay(850).duration(400)}>
         <GlassCard style={styles.profileCard} interactive>
           <View style={styles.profileHeader}>
-            <Ionicons name="person-outline" size={20} color=Colors.success />
+            <Ionicons name="person-outline" size={20} color={Colors.success} />
             <Text style={styles.profileTitle}>YOUR PROFILE SUMMARY</Text>
           </View>
 
@@ -480,17 +480,17 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           {state.results && (
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Ionicons name="flame-outline" size={16} color=Colors.error />
+                <Ionicons name="flame-outline" size={16} color={Colors.error} />
                 <Text style={[styles.statValue, { color: colors.text }]}>{state.results.bmr.toLocaleString()}</Text>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMR</Text>
               </View>
               <View style={styles.statItem}>
-                <Ionicons name="flash-outline" size={16} color=Colors.warning />
+                <Ionicons name="flash-outline" size={16} color={Colors.warning} />
                 <Text style={[styles.statValue, { color: colors.text }]}>{state.results.tdee.toLocaleString()}</Text>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>TDEE</Text>
               </View>
               <View style={styles.statItem}>
-                <Ionicons name="body-outline" size={16} color=Colors.success />
+                <Ionicons name="body-outline" size={16} color={Colors.success} />
                 <Text style={[styles.statValue, { color: colors.text }]}>{state.results.bmi.toFixed(1)}</Text>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
               </View>
@@ -503,7 +503,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <Animated.View entering={FadeInDown.delay(900).duration(400)}>
         <GlassCard style={styles.guidanceCard} interactive>
           <View style={styles.guidanceHeader}>
-            <Ionicons name="bulb-outline" size={20} color=Colors.warning />
+            <Ionicons name="bulb-outline" size={20} color={Colors.warning} />
             <Text style={styles.guidanceTitle}>DAILY GUIDANCE</Text>
           </View>
           <Text style={[styles.guidanceText, { color: colors.textSecondary }]}>

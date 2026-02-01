@@ -160,10 +160,10 @@ export default function QuickLogModal({
               disabled={isLogging}
             >
               {isLogging ? (
-                <ActivityIndicator size="small" color=Colors.text />
+                <ActivityIndicator size="small" color={Colors.text} />
               ) : (
                 <>
-                  <Ionicons name="add-circle" size={22} color=Colors.text />
+                  <Ionicons name="add-circle" size={22} color={Colors.text} />
                   <Text style={styles.logButtonText}>Log for {displayDate}</Text>
                 </>
               )}

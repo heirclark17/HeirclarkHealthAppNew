@@ -288,7 +288,7 @@ export default function ProgressPredictionCard() {
         {/* Plateau Warning */}
         {inPlateau && (
           <View style={[styles.plateauBanner, { backgroundColor: '#F59E0B20' }]}>
-            <Ionicons name="pause-circle" size={18} color=Colors.warningOrange />
+            <Ionicons name="pause-circle" size={18} color={Colors.warningOrange} />
             <View style={styles.plateauContent}>
               <Text style={[styles.plateauTitle, { color: Colors.warningOrange }]}>
                 Plateau Detected
@@ -474,7 +474,7 @@ export default function ProgressPredictionCard() {
                 <Text style={[styles.suggestionsTitle, { color: colors.text }]}>Suggestions:</Text>
                 {plateauSuggestions.map((suggestion, index) => (
                   <View key={index} style={styles.suggestionItem}>
-                    <Ionicons name="bulb" size={16} color=Colors.warningOrange />
+                    <Ionicons name="bulb" size={16} color={Colors.warningOrange} />
                     <Text style={[styles.suggestionText, { color: colors.textSecondary }]}>
                       {suggestion}
                     </Text>

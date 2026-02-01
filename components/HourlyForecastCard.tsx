@@ -87,7 +87,7 @@ export function HourlyForecastCard() {
   if (loading) {
     return (
       <GlassCard style={styles.container} interactive>
-        <ActivityIndicator color=Colors.text size="small" />
+        <ActivityIndicator color={Colors.text} size="small" />
       </GlassCard>
     );
   }
@@ -108,7 +108,7 @@ export function HourlyForecastCard() {
             )}
             <View style={styles.hourlyCard}>
               <Text style={styles.time}>{forecast.time}</Text>
-              <Ionicons name={forecast.iconName} size={28} color=Colors.text style={[styles.icon, { opacity: 0.9 }]} />
+              <Ionicons name={forecast.iconName} size={28} color={Colors.text} style={[styles.icon, { opacity: 0.9 }]} />
               <Text style={styles.temp}>{forecast.temp}°</Text>
               <Text style={styles.date}>{forecast.date}</Text>
             </View>

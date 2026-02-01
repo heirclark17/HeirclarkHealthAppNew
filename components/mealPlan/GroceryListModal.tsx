@@ -121,7 +121,7 @@ const CheckboxItem = ({
           { borderColor: glassColors.textMuted },
           item.checked && { backgroundColor: glassColors.checkboxChecked, borderColor: glassColors.checkboxChecked },
         ]}>
-          {item.checked && <Ionicons name="checkmark" size={14} color=Colors.text />}
+          {item.checked && <Ionicons name="checkmark" size={14} color={Colors.text} />}
         </View>
         <View style={styles.itemInfo}>
           <Text style={[

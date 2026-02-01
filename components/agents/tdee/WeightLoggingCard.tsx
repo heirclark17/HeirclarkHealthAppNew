@@ -202,7 +202,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(96,165,250,0.15)' }]}>
-                  <Ionicons name="scale-outline" size={20} color=Colors.restingEnergy />
+                  <Ionicons name="scale-outline" size={20} color={Colors.restingEnergy} />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Weight Log</Text>
@@ -267,7 +267,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                   {/* Streak Progress */}
                   <View style={styles.streakContainer}>
                     <View style={styles.streakHeader}>
-                      <Ionicons name="flame" size={14} color=Colors.warningOrange />
+                      <Ionicons name="flame" size={14} color={Colors.warningOrange} />
                       <Text style={[styles.streakLabel, { color: subtextColor }]}>
                         Logging Streak: {Math.min(recentWeights.length, 7)} days
                       </Text>
@@ -281,7 +281,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                 // No weight logged yet
                 <View style={styles.emptyState}>
                   <View style={[styles.emptyIcon, { backgroundColor: isDark ? 'rgba(96,165,250,0.1)' : 'rgba(96,165,250,0.15)' }]}>
-                    <Ionicons name="add-circle-outline" size={32} color=Colors.restingEnergy />
+                    <Ionicons name="add-circle-outline" size={32} color={Colors.restingEnergy} />
                   </View>
                   <Text style={[styles.emptyTitle, { color: textColor }]}>Start Tracking</Text>
                   <Text style={[styles.emptyDesc, { color: subtextColor }]}>
@@ -404,7 +404,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
 
               {/* Tips */}
               <View style={[styles.tipContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                <Ionicons name="bulb-outline" size={16} color=Colors.accentGold />
+                <Ionicons name="bulb-outline" size={16} color={Colors.accentGold} />
                 <Text style={[styles.tipText, { color: subtextColor }]}>
                   Weigh yourself at the same time each day, ideally in the morning, for the most consistent results.
                 </Text>

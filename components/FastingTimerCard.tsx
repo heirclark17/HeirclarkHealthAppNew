@@ -210,7 +210,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                 <Ionicons
                   name={!state.isActive ? 'play' : (state.isPaused ? 'play' : 'pause')}
                   size={28}
-                  color=Colors.text
+                  color={Colors.text}
                 />
               </TouchableOpacity>
               <TouchableOpacity

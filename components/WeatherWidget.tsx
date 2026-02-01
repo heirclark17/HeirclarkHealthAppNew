@@ -65,7 +65,7 @@ export function WeatherWidget() {
   if (loading) {
     return (
       <GlassCard style={styles.container} interactive>
-        <ActivityIndicator color=Colors.text size="large" />
+        <ActivityIndicator color={Colors.text} size="large" />
       </GlassCard>
     );
   }
@@ -82,7 +82,7 @@ export function WeatherWidget() {
   return (
     <GlassCard style={styles.container} interactive>
       {/* Weather Icon */}
-      <Ionicons name={getWeatherIcon(weather.condition)} size={64} color=Colors.text style={[styles.icon, { opacity: 0.9 }]} />
+      <Ionicons name={getWeatherIcon(weather.condition)} size={64} color={Colors.text} style={[styles.icon, { opacity: 0.9 }]} />
 
       {/* Large Temperature */}
       <Text style={styles.temp}>{weather.temp}°</Text>

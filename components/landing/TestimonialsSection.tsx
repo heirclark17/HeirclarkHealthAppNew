@@ -250,7 +250,7 @@ function TestimonialCard({ testimonial, isActive, cardWidth }: TestimonialCardPr
         {/* Rating */}
         <View style={styles.rating}>
           {Array.from({ length: testimonial.rating }).map((_, i) => (
-            <Star key={i} size={16} color=Colors.warning fill=Colors.warning />
+            <Star key={i} size={16} color={Colors.warning} fill={Colors.warning} />
           ))}
         </View>
 

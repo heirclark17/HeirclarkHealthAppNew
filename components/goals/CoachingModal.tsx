@@ -556,7 +556,7 @@ export function CoachingModal({
     if (state === 'error') {
       return (
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color=Colors.error />
+          <Ionicons name="alert-circle-outline" size={48} color={Colors.error} />
           <Text style={[styles.errorText, { color: glassColors.textSecondary }]}>{error}</Text>
           <Pressable style={[styles.retryButton, { backgroundColor: glassColors.accent }]} onPress={initializeCoaching}>
             <Text style={styles.retryButtonText}>Try Again</Text>
@@ -681,7 +681,7 @@ export function CoachingModal({
               <Ionicons
                 name={isSpeaking ? 'pause' : 'play'}
                 size={32}
-                color=Colors.background
+                color={Colors.background}
               />
             </Pressable>
           </Animated.View>

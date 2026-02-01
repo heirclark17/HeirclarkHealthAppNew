@@ -288,7 +288,7 @@ export function FormCoachModal({
           style={[styles.header, { paddingTop: insets.top }]}
         >
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="chevron-down" size={24} color=Colors.text />
+            <Ionicons name="chevron-down" size={24} color={Colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {displayName}

@@ -174,7 +174,7 @@ export default function SmartMealLoggerCard({
                 style={[styles.quickAddButton, { backgroundColor: mealColor }]}
                 onPress={() => handleQuickLog(meal)}
               >
-                <Ionicons name="add" size={18} color=Colors.text />
+                <Ionicons name="add" size={18} color={Colors.text} />
               </TouchableOpacity>
             )}
           </View>
@@ -195,7 +195,7 @@ export default function SmartMealLoggerCard({
         disabled={isLogging === meal.id}
       >
         <View style={[styles.favoriteBadge, { backgroundColor: mealColor }]}>
-          <Ionicons name="star" size={10} color=Colors.text />
+          <Ionicons name="star" size={10} color={Colors.text} />
         </View>
         <Text style={[styles.favoriteName, { color: textColor }]} numberOfLines={1}>
           {meal.name}
@@ -226,7 +226,7 @@ export default function SmartMealLoggerCard({
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(74,222,128,0.15)' }]}>
-                  <Ionicons name="flash" size={20} color=Colors.successStrong />
+                  <Ionicons name="flash" size={20} color={Colors.successStrong} />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Quick Log</Text>
@@ -239,7 +239,7 @@ export default function SmartMealLoggerCard({
                 style={[styles.fullLoggerButton, { backgroundColor: 'rgba(74,222,128,0.1)' }]}
                 onPress={onOpenFullLogger}
               >
-                <Ionicons name="camera" size={16} color=Colors.successStrong />
+                <Ionicons name="camera" size={16} color={Colors.successStrong} />
                 <Text style={[styles.fullLoggerText, { color: Colors.successStrong }]}>AI Log</Text>
               </TouchableOpacity>
             </View>
@@ -248,7 +248,7 @@ export default function SmartMealLoggerCard({
             {state.suggestions.length > 0 ? (
               <View style={styles.suggestionsContainer}>
                 <View style={styles.sectionHeader}>
-                  <Ionicons name="bulb" size={14} color=Colors.accentGold />
+                  <Ionicons name="bulb" size={14} color={Colors.accentGold} />
                   <Text style={[styles.sectionTitle, { color: textColor }]}>Suggested for You</Text>
                 </View>
                 {displaySuggestions.map((suggestion, index) => renderSuggestionItem(suggestion, index))}
@@ -264,14 +264,14 @@ export default function SmartMealLoggerCard({
                     <Ionicons
                       name={showAllSuggestions ? 'chevron-up' : 'chevron-down'}
                       size={16}
-                      color=Colors.successStrong
+                      color={Colors.successStrong}
                     />
                   </TouchableOpacity>
                 )}
               </View>
             ) : state.isLoading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color=Colors.successStrong />
+                <ActivityIndicator size="small" color={Colors.successStrong} />
                 <Text style={[styles.loadingText, { color: subtextColor }]}>Learning your patterns...</Text>
               </View>
             ) : (
@@ -287,7 +287,7 @@ export default function SmartMealLoggerCard({
             {favorites.length > 0 && (
               <View style={styles.favoritesContainer}>
                 <View style={styles.sectionHeader}>
-                  <Ionicons name="star" size={14} color=Colors.accentGold />
+                  <Ionicons name="star" size={14} color={Colors.accentGold} />
                   <Text style={[styles.sectionTitle, { color: textColor }]}>Favorites</Text>
                 </View>
                 <ScrollView
