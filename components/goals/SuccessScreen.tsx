@@ -40,16 +40,16 @@ function Confetti({ index, color }: ConfettiProps) {
 
     translateY.value = withDelay(
       delay,
-      withSpring(height + 100, {
-        duration: 2500 + Math.random(, GLASS_SPRING) * 1000,
+      withTiming(height + 100, {
+        duration: 2500 + Math.random() * 1000,
         easing: Easing.out(Easing.quad),
       })
     );
 
     translateX.value = withDelay(
       delay,
-      withSpring(endX - startX, {
-        duration: 2500 + Math.random(, GLASS_SPRING) * 1000,
+      withTiming(endX - startX, {
+        duration: 2500 + Math.random() * 1000,
         easing: Easing.inOut(Easing.sin),
       })
     );
@@ -57,7 +57,7 @@ function Confetti({ index, color }: ConfettiProps) {
     rotate.value = withDelay(
       delay,
       withRepeat(
-        withSpring(360, { duration: 1000 + Math.random(, GLASS_SPRING) * 500 }),
+        withTiming(360, { duration: 1000 + Math.random() * 500 }),
         -1,
         false
       )
@@ -149,7 +149,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
     // Ring burst animation
     ringScale.value = withSequence(
-      withSpring(1.5, { duration: 400, easing: Easing.out(Easing.ease, GLASS_SPRING) }),
+      withTiming(1.5, { duration: 400, easing: Easing.out(Easing.ease) }),
       withSpring(2, GLASS_SPRING)
     );
     ringOpacity.value = withSequence(

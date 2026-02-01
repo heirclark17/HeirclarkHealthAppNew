@@ -116,8 +116,8 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
     if (state.isActive && !state.isPaused) {
       pulseAnim.value = withRepeat(
         withSequence(
-          withSpring(1.08, { duration: 1000, easing: Easing.inOut(Easing.ease, GLASS_SPRING) }),
-          withSpring(1, { duration: 1000, easing: Easing.inOut(Easing.ease, GLASS_SPRING) })
+          withTiming(1.08, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) })
         ),
         -1,
         true

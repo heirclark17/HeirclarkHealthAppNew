@@ -95,7 +95,7 @@ export function LiquidGlassProfileImage({
         scale.value = withSpring(1.05, {}, () => {
           scale.value = withSpring(1);
         });
-        glowOpacity.value = withSpring(0.6, { duration: 300 }, (, GLASS_SPRING) => {
+        glowOpacity.value = withTiming(0.6, { duration: 300 }, () => {
           glowOpacity.value = withSpring(0.3, GLASS_SPRING);
         });
 

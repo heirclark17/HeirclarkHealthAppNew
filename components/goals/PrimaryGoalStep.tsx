@@ -111,7 +111,7 @@ function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWid
   // Staggered entrance animation
   const entranceStyle = useAnimatedStyle(() => {
     return {
-      opacity: withSpring(1, { duration: 300, easing: Easing.out(Easing.ease, GLASS_SPRING) }),
+      opacity: withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) }),
     };
   });
 
