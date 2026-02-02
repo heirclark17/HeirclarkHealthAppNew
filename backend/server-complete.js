@@ -615,7 +615,7 @@ app.post('/api/v1/nutrition/ai/meal-from-text', authenticateToken, async (req, r
     console.log(`[Text Analysis] Request from ${req.userId}: "${text}"`);
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -669,7 +669,7 @@ app.post('/api/v1/nutrition/ai/meal-from-photo', upload.single('photo'), authent
     const mimeType = req.file.mimetype || 'image/jpeg';
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -824,7 +824,7 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
     Use preferred cuisines and foods when possible, avoid hated foods completely.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -928,7 +928,7 @@ app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res)
     Include appropriate cardio based on preference: ${preferences?.cardioPreference || 'moderate'}.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -993,7 +993,7 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
     ${context ? `Additional context: ${JSON.stringify(context)}` : ''}`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         ...messages.slice(-10), // Last 10 messages for context
@@ -1058,7 +1058,7 @@ app.post('/api/v1/ai/cheat-day-guidance', authenticateToken, async (req, res) =>
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1121,7 +1121,7 @@ app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
     const { mealName, basicInfo } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1314,7 +1314,7 @@ app.post('/api/v1/agents/smart-meal-logger/suggestions', authenticateToken, asyn
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1360,7 +1360,7 @@ app.post('/api/v1/agents/accountability/check-in', authenticateToken, async (req
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1406,7 +1406,7 @@ app.post('/api/v1/agents/prediction/forecast', authenticateToken, async (req, re
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1455,7 +1455,7 @@ app.post('/api/v1/agents/habits/analyze', authenticateToken, async (req, res) =>
     const { habits, completions } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1495,7 +1495,7 @@ app.post('/api/v1/agents/restaurant/analyze', authenticateToken, async (req, res
     const { restaurantName, menuItems, goals } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1551,7 +1551,7 @@ app.post('/api/v1/agents/sleep/analyze', authenticateToken, async (req, res) => 
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1602,7 +1602,7 @@ app.post('/api/v1/agents/hydration/status', authenticateToken, async (req, res) 
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1674,7 +1674,7 @@ app.post('/api/v1/agents/banking/calculate', authenticateToken, async (req, res)
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1716,7 +1716,7 @@ app.post('/api/v1/agents/form-coach/analyze', authenticateToken, async (req, res
     const { exercise, videoData, userDescription } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -1759,7 +1759,7 @@ app.post('/api/v1/agents/nutrition-accuracy/verify', authenticateToken, async (r
     const { meal, estimatedNutrition, source } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -2132,7 +2132,7 @@ app.post('/api/v1/avatar/coach/goals', authenticateToken, async (req, res) => {
     const { goals, progress } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -2183,7 +2183,7 @@ app.post('/api/v1/avatar/coach/meal-plan', authenticateToken, async (req, res) =
     }).join('\n');
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
@@ -2264,7 +2264,7 @@ app.post('/api/v1/agents/tdee/insights', authenticateToken, async (req, res) => 
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
