@@ -8,13 +8,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSettings } from '../contexts/SettingsContext';
 
 // Conditionally import Reanimated only on native platforms to avoid web infinite loops
+// Provide no-op implementations for web to avoid conditional hook calls
 let Animated: any = View;
-let useSharedValue: any = null;
-let useAnimatedStyle: any = null;
-let withRepeat: any = null;
-let withTiming: any = null;
-let withSequence: any = null;
-let Easing: any = null;
+let useSharedValue: any;
+let useAnimatedStyle: any;
+let withRepeat: any;
+let withTiming: any;
+let withSequence: any;
+let Easing: any;
 
 if (Platform.OS !== 'web') {
   try {
@@ -29,6 +30,19 @@ if (Platform.OS !== 'web') {
   } catch (e) {
     // Reanimated not available, will use fallback
   }
+}
+
+// Fallback implementations for web - no-op hooks that don't animate
+if (!useSharedValue) {
+  useSharedValue = (initialValue: any) => ({ value: initialValue });
+  useAnimatedStyle = (callback: () => any) => callback();
+  withTiming = (toValue: any) => toValue;
+  withRepeat = (animation: any) => animation;
+  withSequence = (...animations: any[]) => animations[0];
+  Easing = {
+    inOut: (easing: any) => easing,
+    ease: 1,
+  };
 }
 import {
   BackgroundId,
@@ -49,27 +63,23 @@ function AnimatedGradientBackground({ isDark }: { isDark: boolean }) {
   const background = getBackgroundById('dynamic');
   const colors = getGradientColors(background, isDark);
 
-  // Subtle animation for dynamic background - fallback for web
-  const animatedOpacity = useSharedValue ? useSharedValue(1) : { value: 1 };
+  // Always call hooks unconditionally (no-op on web)
+  const animatedOpacity = useSharedValue(1);
 
   React.useEffect(() => {
-    if (withRepeat && withSequence && withTiming && Easing) {
-      animatedOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.95, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) })
-        ),
-        -1,
-        true
-      );
-    }
-  }, []);
+    animatedOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.95, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      true
+    );
+  }, [animatedOpacity]);
 
-  const animatedStyle = useAnimatedStyle
-    ? useAnimatedStyle(() => ({
-        opacity: animatedOpacity.value,
-      }))
-    : { opacity: 1 };
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: animatedOpacity.value,
+  }));
 
   // Use Animated.View on native, regular View on web
   const AnimatedViewComponent = Animated !== View ? Animated.View : View;

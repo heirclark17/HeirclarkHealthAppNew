@@ -5,11 +5,12 @@ import { Spacing } from '../constants/Theme';
 import { useSettings } from '../contexts/SettingsContext';
 
 // Conditionally import Reanimated only on native platforms to avoid web infinite loops
+// Provide no-op implementations for web to avoid conditional hook calls
 let Animated: any = View;
-let useSharedValue: any = null;
-let useAnimatedStyle: any = null;
-let withTiming: any = null;
-let withSpring: any = null;
+let useSharedValue: any;
+let useAnimatedStyle: any;
+let withTiming: any;
+let withSpring: any;
 
 if (Platform.OS !== 'web') {
   try {
@@ -22,6 +23,14 @@ if (Platform.OS !== 'web') {
   } catch (e) {
     // Reanimated not available, will use fallback
   }
+}
+
+// Fallback implementations for web - no-op hooks that don't animate
+if (!useSharedValue) {
+  useSharedValue = (initialValue: any) => ({ value: initialValue });
+  useAnimatedStyle = (callback: () => any) => callback();
+  withSpring = (toValue: any) => toValue;
+  withTiming = (toValue: any) => toValue;
 }
 
 // iOS 26 Liquid Glass spring configuration
@@ -83,7 +92,7 @@ const IOSGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLayoutSt
 
   // Track when content is ready before rendering BlurView
   const [isContentReady, setIsContentReady] = useState(false);
-  const blurOpacity = useSharedValue ? useSharedValue(0) : { value: 0 };
+  const blurOpacity = useSharedValue(0);
   const hasInitializedRef = useRef(false);
 
   useEffect(() => {

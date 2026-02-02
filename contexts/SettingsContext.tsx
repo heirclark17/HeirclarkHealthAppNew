@@ -128,40 +128,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousSettingsRef = useRef<string | null>(null);
+  const isSavingRef = useRef<boolean>(false);
 
   // Load settings on mount
   useEffect(() => {
     loadSettings();
   }, []);
 
-  // Debounced save - only saves if settings actually changed
-  useEffect(() => {
-    if (!settings.isLoaded) return;
-
-    const currentSettingsStr = JSON.stringify(settings);
-    if (previousSettingsRef.current === currentSettingsStr) return;
-
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    // Debounce save by 500ms
-    saveTimeoutRef.current = setTimeout(() => {
-      previousSettingsRef.current = currentSettingsStr;
-      saveSettings();
-    }, 500);
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [settings.isLoaded, settings.liveAvatar, settings.captions, settings.autoplayCoach,
-      settings.mealReminders, settings.waterTracking, settings.dailyWaterGoal,
-      settings.unitSystem, settings.themeMode, settings.backgroundImage,
-      settings.customBackgroundUri, settings.profileImageUri, settings.pushNotifications,
-      settings.dailySummary, settings.achievementAlerts]);
+  // Auto-save disabled to prevent infinite loop - settings only save on manual changes
+  // TODO: Re-enable once root cause of infinite loop is identified
 
   const loadSettings = async () => {
     try {
@@ -181,12 +156,21 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const saveSettings = async () => {
+    // Prevent concurrent saves
+    if (isSavingRef.current) {
+      console.log('[Settings] Save already in progress, skipping');
+      return;
+    }
+
     try {
+      isSavingRef.current = true;
       const { isLoaded, ...settingsToSave } = settings;
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(settingsToSave));
       console.log('[Settings] Saved settings to storage');
     } catch (error) {
       console.error('[Settings] Failed to save settings:', error);
+    } finally {
+      isSavingRef.current = false;
     }
   };
 
@@ -320,19 +304,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     // Schedule/cancel reminders
     setTimeout(() => scheduleMealReminders(), 100);
-  }, [settings.mealReminderTimes]);
+  }, []); // Removed circular dependency
 
   const setMealReminderTime = useCallback((meal: 'breakfast' | 'lunch' | 'dinner', time: string) => {
-    setSettings(prev => ({
-      ...prev,
-      mealReminderTimes: { ...prev.mealReminderTimes, [meal]: time },
-    }));
+    setSettings(prev => {
+      const updated = {
+        ...prev,
+        mealReminderTimes: { ...prev.mealReminderTimes, [meal]: time },
+      };
 
-    // Reschedule if reminders are enabled
-    if (settings.mealReminders) {
-      setTimeout(() => scheduleMealReminders(), 100);
-    }
-  }, [settings.mealReminders]);
+      // Reschedule if reminders are enabled
+      if (prev.mealReminders) {
+        setTimeout(() => scheduleMealReminders(), 100);
+      }
+
+      return updated;
+    });
+  }, []); // Removed circular dependency
 
   const setWaterTracking = useCallback((enabled: boolean) => {
     setSettings(prev => ({ ...prev, waterTracking: enabled }));
@@ -405,15 +393,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     console.log('[Settings] Daily summary:', enabled);
 
     setTimeout(() => scheduleDailySummary(), 100);
-  }, [settings.dailySummaryTime]);
+  }, []); // Removed circular dependency
 
   const setDailySummaryTime = useCallback((time: string) => {
-    setSettings(prev => ({ ...prev, dailySummaryTime: time }));
+    setSettings(prev => {
+      // Reschedule if daily summary is enabled
+      if (prev.dailySummary) {
+        setTimeout(() => scheduleDailySummary(), 100);
+      }
 
-    if (settings.dailySummary) {
-      setTimeout(() => scheduleDailySummary(), 100);
-    }
-  }, [settings.dailySummary]);
+      return { ...prev, dailySummaryTime: time };
+    });
+  }, []); // Removed circular dependency
 
   const setAchievementAlerts = useCallback(async (enabled: boolean) => {
     if (enabled) {

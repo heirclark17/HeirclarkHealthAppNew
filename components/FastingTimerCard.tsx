@@ -14,6 +14,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withSpring,
   withRepeat,
   withSequence,
   Easing,
@@ -25,6 +26,13 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../constants/Th
 import { useSettings } from '../contexts/SettingsContext';
 import { useFastingTimer, FASTING_PRESETS, FastingPresetId } from '../contexts/FastingTimerContext';
 import { lightImpact, selectionFeedback } from '../utils/haptics';
+
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
 
 interface FastingTimerCardProps {
   onPress?: () => void;

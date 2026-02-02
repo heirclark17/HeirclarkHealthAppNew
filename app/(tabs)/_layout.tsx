@@ -26,11 +26,12 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { useAuth } from '../../contexts/AuthContext';
 
 // Conditionally import Reanimated only on native platforms to avoid web infinite loops
+// Provide no-op implementations for web to avoid conditional hook calls
 let Animated: any = View;
-let useSharedValue: any = null;
-let useAnimatedStyle: any = null;
-let withSpring: any = null;
-let withTiming: any = null;
+let useSharedValue: any;
+let useAnimatedStyle: any;
+let withSpring: any;
+let withTiming: any;
 
 if (Platform.OS !== 'web') {
   try {
@@ -43,6 +44,14 @@ if (Platform.OS !== 'web') {
   } catch (e) {
     // Reanimated not available, will use fallback
   }
+}
+
+// Fallback implementations for web - no-op hooks that don't animate
+if (!useSharedValue) {
+  useSharedValue = (initialValue: any) => ({ value: initialValue });
+  useAnimatedStyle = (callback: () => any) => callback();
+  withSpring = (toValue: any) => toValue;
+  withTiming = (toValue: any) => toValue;
 }
 
 // Try to import Liquid Glass (only works after rebuild with Xcode 26+)
@@ -221,9 +230,9 @@ const GlassTabButton = forwardRef<View, GlassTabButtonProps>(
   ({ isFocused, icon, iconFilled, isDark, ...props }, ref) => {
     const colors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
 
-    // Animation values - fallback for web
-    const scale = useSharedValue ? useSharedValue(1) : { value: 1 };
-    const opacity = useSharedValue ? useSharedValue(1) : { value: 1 };
+    // Animation values - works on both native and web
+    const scale = useSharedValue(1);
+    const opacity = useSharedValue(1);
 
     const handlePressIn = useCallback(() => {
       // iOS 26 glass press: subtle scale with rigid haptic
@@ -248,12 +257,10 @@ const GlassTabButton = forwardRef<View, GlassTabButtonProps>(
       props.onPress?.();
     }, [isFocused, props.onPress]);
 
-    const animatedContainerStyle = useAnimatedStyle
-      ? useAnimatedStyle(() => ({
-          transform: [{ scale: scale.value }],
-          opacity: opacity.value,
-        }))
-      : {};
+    const animatedContainerStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    }));
 
     const currentIcon = isFocused ? iconFilled : icon;
     const iconColor = isFocused ? colors.iconActive : colors.iconInactive;
@@ -301,9 +308,9 @@ function FloatingActionButton({
   const router = useRouter();
   const colors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
 
-  // Animation values - fallback for web
-  const scale = useSharedValue ? useSharedValue(1) : { value: 1 };
-  const rotation = useSharedValue ? useSharedValue(0) : { value: 0 };
+  // Animation values - works on both native and web
+  const scale = useSharedValue(1);
+  const rotation = useSharedValue(0);
 
   const handlePressIn = useCallback(() => {
     if (withSpring) {
@@ -324,14 +331,12 @@ function FloatingActionButton({
     router.push('/(tabs)/?openMealModal=true');
   }, [router]);
 
-  const animatedStyle = useAnimatedStyle
-    ? useAnimatedStyle(() => ({
-        transform: [
-          { scale: scale.value },
-          { rotate: `${rotation.value}deg` },
-        ],
-      }))
-    : {};
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: scale.value },
+      { rotate: `${rotation.value}deg` },
+    ],
+  }));
 
   const glassStyle = {
     borderRadius: FAB_SIZE / 2,
@@ -427,9 +432,9 @@ function LiquidGlassIndicator({
 
   // Animated position - center indicator over tab
   const getTargetX = (index: number) => INDICATOR_PADDING + (index * tabWidth) + (TAB_ITEM_SPACING / 2);
-  const translateX = useSharedValue ? useSharedValue(getTargetX(activeIndex)) : { value: getTargetX(activeIndex) };
-  const scaleX = useSharedValue ? useSharedValue(1) : { value: 1 };
-  const scaleY = useSharedValue ? useSharedValue(1) : { value: 1 };
+  const translateX = useSharedValue(getTargetX(activeIndex));
+  const scaleX = useSharedValue(1);
+  const scaleY = useSharedValue(1);
 
   // Animate when active index changes - smooth transition
   useEffect(() => {
@@ -452,19 +457,13 @@ function LiquidGlassIndicator({
     }
   }, [activeIndex]);
 
-  const animatedStyle = useAnimatedStyle
-    ? useAnimatedStyle(() => ({
-        transform: [
-          { translateX: translateX.value },
-          { scaleX: scaleX.value },
-          { scaleY: scaleY.value },
-        ],
-      }))
-    : {
-        transform: [
-          { translateX: getTargetX(activeIndex) },
-        ],
-      };
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { scaleX: scaleX.value },
+      { scaleY: scaleY.value },
+    ],
+  }));
 
   // Shadow for depth
   const shadowStyle = Platform.select({
@@ -751,24 +750,9 @@ function LiquidGlassTabBar({
 // ============================================================================
 
 export default function TabLayout() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // Show loading while checking auth
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#22c55e" />
-      </View>
-    );
-  }
-
-  // Redirect to login if not authenticated - use Redirect component to avoid navigation conflicts
-  if (!isAuthenticated) {
-    return <Redirect href="/" />;
-  }
+  // Removed auth check - let index.tsx handle routing
 
   return (
     <Tabs>

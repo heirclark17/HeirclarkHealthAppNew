@@ -13,7 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
-import { Fonts, DarkColors, LightColors } from '../constants/Theme';
+import { Fonts, Colors, DarkColors, LightColors } from '../constants/Theme';
 import { useSettings } from '../contexts/SettingsContext';
 import { useGoalWizard } from '../contexts/GoalWizardContext';
 import { lightImpact } from '../utils/haptics';

@@ -22,6 +22,13 @@ const TAB_BAR_HEIGHT = 64;
 const TAB_BAR_MARGIN_BOTTOM = 12;
 const FOOTER_EXTRA_PADDING = 24;
 
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
 interface GoalOption {
   id: PrimaryGoal;
   title: string;

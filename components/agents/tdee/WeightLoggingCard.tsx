@@ -32,6 +32,13 @@ import { useSettings } from '../../../contexts/SettingsContext';
 import { Fonts } from '../../../constants/Theme';
 import { BodyWeightLog } from '../../../types/adaptiveTDEE';
 
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
 interface WeightLoggingCardProps {
   onWeightLogged?: (weight: number) => void;
 }

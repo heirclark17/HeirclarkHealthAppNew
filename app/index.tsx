@@ -38,31 +38,27 @@ export default function LoginScreen() {
     loadCachedName();
   }, []);
 
-  // Redirect to onboarding or dashboard based on status
-  useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      if (!isLoading && isAuthenticated) {
-        try {
-          const hasCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
-          if (hasCompleted === 'true') {
-            router.replace('/(tabs)');
-          } else {
-            router.replace('/onboarding');
-          }
-        } catch (error) {
-          console.error('Error checking onboarding status:', error);
-          // Default to showing onboarding on error
-          router.replace('/onboarding');
-        }
-      }
-    };
-    checkOnboardingStatus();
-  }, [isLoading, isAuthenticated]);
+  // Redirect disabled in development - use Skip Sign In button instead
+  // (Prevents infinite navigation loops during dev)
 
   const handleSignIn = async () => {
     const success = await signInWithApple();
     if (success) {
       router.replace('/(tabs)');
+    }
+  };
+
+  // Development bypass - skip authentication
+  const handleSkipSignIn = async () => {
+    try {
+      // Mark onboarding as complete and navigate to tabs
+      await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+      // Use setTimeout to defer navigation and avoid render conflicts
+      setTimeout(() => {
+        router.replace('/(tabs)');
+      }, 100);
+    } catch (error) {
+      console.error('Error skipping sign in:', error);
     }
   };
 
@@ -168,6 +164,16 @@ export default function LoginScreen() {
         <Text style={styles.disclaimer}>
           By signing in, you agree to our Terms of Service and Privacy Policy.
         </Text>
+
+        {/* Development Bypass Button */}
+        {__DEV__ && (
+          <TouchableOpacity
+            style={styles.devBypassButton}
+            onPress={handleSkipSignIn}
+          >
+            <Text style={styles.devBypassText}>Skip Sign In (Dev Mode)</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -285,5 +291,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
     paddingHorizontal: 32,
+  },
+  devBypassButton: {
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: Spacing.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  devBypassText: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    color: Colors.textSecondary,
+    textAlign: 'center',
   },
 });

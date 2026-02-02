@@ -21,8 +21,16 @@ import { ProviderComposer } from '../utils/ProviderComposer';
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
 
+// Define providers array OUTSIDE component to ensure stable reference
+// BISECTING: Minimal providers to isolate hooks issue
+const PROVIDERS_ARRAY = [
+  SafeAreaProvider,
+  AuthProvider,
+  SettingsProvider,
+];
+
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
+  const [fontsLoaded] = useFonts({
     Urbanist_100Thin,
     Urbanist_200ExtraLight,
     Urbanist_300Light,
@@ -33,58 +41,59 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded]);
 
-  if (!fontsLoaded && !fontError) {
+  if (!fontsLoaded) {
     return null;
   }
 
-  // Define providers array (order matters - outer to inner)
-  const providers = [
-    SafeAreaProvider,
-    AuthProvider,
-    NotificationProvider, // Must come after AuthProvider (depends on auth state)
-    SettingsProvider,
-    BackgroundLayer,
-    GoalWizardProvider,
-    FoodPreferencesProvider,
-    AdaptiveTDEEProvider,
-    SmartMealLoggerProvider,
-    CalorieBankingProvider,
-    MealPlanProvider,
-    TrainingProvider,
-    FastingTimerProvider,
-    WorkoutTrackingProvider,
-    AccountabilityPartnerProvider,
-    ProgressPredictionProvider,
-    WorkoutFormCoachProvider,
-    HabitFormationProvider,
-    RestaurantMenuProvider,
-    SleepRecoveryProvider,
-    HydrationProvider,
-  ];
-
-  // Web: Force mobile view with iPhone dimensions
-  if (Platform.OS === 'web') {
-    return (
-      <ProviderComposer providers={providers}>
-        <View style={styles.webContainer}>
-          <View style={styles.mobileFrame}>
-            <Slot />
-          </View>
-        </View>
-      </ProviderComposer>
-    );
-  }
-
-  // Mobile: Normal layout
   return (
-    <ProviderComposer providers={providers}>
-      <Slot />
-    </ProviderComposer>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <SettingsProvider>
+            <GoalWizardProvider>
+              <MealPlanProvider>
+                <TrainingProvider>
+                  <FastingTimerProvider>
+                    <WorkoutTrackingProvider>
+                      <CalorieBankingProvider>
+                        <RestaurantMenuProvider>
+                          <FoodPreferencesProvider>
+                            <AccountabilityPartnerProvider>
+                              <ProgressPredictionProvider>
+                                <WorkoutFormCoachProvider>
+                                  <SleepRecoveryProvider>
+                                    <HydrationProvider>
+                                      <HabitFormationProvider>
+                                        <AdaptiveTDEEProvider>
+                                          <SmartMealLoggerProvider>
+                                            <BackgroundLayer>
+                                              <Slot />
+                                            </BackgroundLayer>
+                                          </SmartMealLoggerProvider>
+                                        </AdaptiveTDEEProvider>
+                                      </HabitFormationProvider>
+                                    </HydrationProvider>
+                                  </SleepRecoveryProvider>
+                                </WorkoutFormCoachProvider>
+                              </ProgressPredictionProvider>
+                            </AccountabilityPartnerProvider>
+                          </FoodPreferencesProvider>
+                        </RestaurantMenuProvider>
+                      </CalorieBankingProvider>
+                    </WorkoutTrackingProvider>
+                  </FastingTimerProvider>
+                </TrainingProvider>
+              </MealPlanProvider>
+            </GoalWizardProvider>
+          </SettingsProvider>
+        </NotificationProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 

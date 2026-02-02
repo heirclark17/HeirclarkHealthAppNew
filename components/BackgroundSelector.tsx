@@ -29,7 +29,7 @@ import {
   getGradientColors,
   getBackgroundById,
 } from '../constants/backgrounds';
-import { DarkColors, LightColors, Fonts, Spacing } from '../constants/Theme';
+import { Colors, DarkColors, LightColors, Fonts, Spacing } from '../constants/Theme';
 import { lightImpact, mediumImpact } from '../utils/haptics';
 import { PatternBackground } from './patterns/PatternBackground';
 

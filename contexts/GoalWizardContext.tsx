@@ -482,7 +482,8 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     console.log('[GoalWizard] Provider mounted, loading saved goals...');
     loadSavedProgress();
-  }, [loadSavedProgress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Auto-save progress on state change
   useEffect(() => {

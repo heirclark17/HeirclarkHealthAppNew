@@ -19,6 +19,13 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, successNotification } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
 interface AnimatedNumberProps {
   value: number;
   duration?: number;

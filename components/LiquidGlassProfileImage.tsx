@@ -24,7 +24,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSettings } from '../contexts/SettingsContext';
-import { DarkColors, LightColors, Fonts } from '../constants/Theme';
+import { Colors, DarkColors, LightColors, Fonts } from '../constants/Theme';
 import { lightImpact } from '../utils/haptics';
 
 interface LiquidGlassProfileImageProps {

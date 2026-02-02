@@ -53,7 +53,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
         if (token) {
           // Token exists - verify it with backend
-          await refreshAuth();
+          // Note: calling refreshAuth directly instead of from dependency
+          const backendUser = await api.getCurrentUser();
+          if (!backendUser) {
+            console.warn('[Auth] Token invalid or expired, clearing session');
+            await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+            await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+            setUser(null);
+          } else {
+            // Load local user data to merge with backend user
+            const savedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+            if (savedUser) {
+              const parsed = JSON.parse(savedUser);
+              const mergedUser = {
+                id: backendUser.id,
+                email: backendUser.email || parsed.email,
+                fullName: backendUser.fullName || parsed.fullName,
+                firstName: parsed.firstName,
+                lastName: parsed.lastName,
+              };
+              setUser(mergedUser);
+              console.log('[Auth] Token verified successfully');
+            }
+          }
         } else {
           // No token - load cached user info if available (for display purposes)
           const savedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
@@ -70,7 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     loadUser();
-  }, [refreshAuth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Sign in with Apple
   const signInWithApple = useCallback(async (): Promise<boolean> => {

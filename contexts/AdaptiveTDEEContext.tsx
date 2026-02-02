@@ -134,7 +134,8 @@ export function AdaptiveTDEEProvider({ children }: { children: React.ReactNode }
       initRef.current = true;
       loadInitialData();
     }
-  }, [loadInitialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Log weight
   const logWeight = useCallback(

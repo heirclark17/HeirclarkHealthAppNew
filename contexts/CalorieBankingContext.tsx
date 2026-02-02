@@ -134,7 +134,8 @@ export function CalorieBankingProvider({ children }: { children: React.ReactNode
       initRef.current = true;
       loadInitialData();
     }
-  }, [loadInitialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Initialize week
   const initializeWeek = useCallback(async () => {
@@ -235,7 +236,8 @@ export function CalorieBankingProvider({ children }: { children: React.ReactNode
   // Refresh data
   const refreshData = useCallback(async () => {
     await loadInitialData();
-  }, [loadInitialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Stable reference - calls loadInitialData directly
 
   const value = useMemo<CalorieBankingContextType>(() => ({
     state,

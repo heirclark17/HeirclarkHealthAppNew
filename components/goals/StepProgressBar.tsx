@@ -10,6 +10,13 @@ import Animated, {
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
 interface StepProgressBarProps {
   currentStep: number;
   totalSteps: number;

@@ -129,7 +129,8 @@ export function SmartMealLoggerProvider({ children }: { children: React.ReactNod
       initRef.current = true;
       loadInitialData();
     }
-  }, [loadInitialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Refresh suggestions
   const refreshSuggestions = useCallback(

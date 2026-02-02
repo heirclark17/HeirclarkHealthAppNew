@@ -966,7 +966,7 @@ export default function DashboardScreen() {
   };
 
   // Render individual card based on ID
-  const renderCard = (cardId: string) => {
+  const renderCard = useCallback((cardId: string) => {
     switch (cardId) {
       case 'calendar':
         return <CalendarCard key={cardId} selectedDate={selectedDate} onDateChange={setSelectedDate} />;
@@ -1160,7 +1160,7 @@ export default function DashboardScreen() {
       default:
         return null;
     }
-  };
+  }, [selectedDate, colors, caloriesIn, caloriesOut, calorieGoal, protein, proteinGoal, fat, fatGoal, carbs, carbsGoal, heartRate, bloodPressureSystolic, bloodPressureDiastolic, lastSynced, goalWizardState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <View style={[styles.container, { backgroundColor: 'transparent' }]}>

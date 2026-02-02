@@ -5,11 +5,19 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
+  withSpring,
   useSharedValue,
   withDelay,
 } from 'react-native-reanimated';
 import { Colors, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
+
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
 
 interface LoadingStateProps {
   count?: number;

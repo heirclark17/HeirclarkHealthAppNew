@@ -186,6 +186,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   // Setup: Register for push notifications on mount
   useEffect(() => {
+    // Skip push notification registration in development mode
+    if (__DEV__) {
+      console.log('[Notifications] Skipping push notification registration in dev mode');
+      return;
+    }
+
     registerForPushNotifications().then(token => {
       if (token) {
         setExpoPushToken(token);
@@ -213,20 +219,30 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
     return () => {
       if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
+        notificationListener.current.remove();
       }
       if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
+        responseListener.current.remove();
       }
     };
-  }, [registerForPushNotifications, savePushToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Re-save push token when user signs in
   useEffect(() => {
     if (isAuthenticated && expoPushToken) {
-      savePushToken(expoPushToken);
+      // Inline the token save logic to avoid circular dependency
+      api.savePushToken(expoPushToken, Platform.OS).then(success => {
+        if (success) {
+          console.log('[Notifications] Push token saved to backend');
+        } else {
+          console.warn('[Notifications] Failed to save push token to backend');
+        }
+      }).catch(error => {
+        console.error('[Notifications] Error saving push token:', error);
+      });
     }
-  }, [isAuthenticated, expoPushToken, savePushToken]);
+  }, [isAuthenticated, expoPushToken]);
 
   const value = useMemo<NotificationContextType>(() => ({
     expoPushToken,

@@ -18,6 +18,13 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { successNotification, lightImpact } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 
+// iOS 26 Liquid Glass spring configuration
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 300,
+  mass: 0.8,
+};
+
 const { width, height } = Dimensions.get('window');
 
 // Confetti particle component

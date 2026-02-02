@@ -615,7 +615,7 @@ app.post('/api/v1/nutrition/ai/meal-from-text', authenticateToken, async (req, r
     console.log(`[Text Analysis] Request from ${req.userId}: "${text}"`);
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -669,7 +669,7 @@ app.post('/api/v1/nutrition/ai/meal-from-photo', upload.single('photo'), authent
     const mimeType = req.file.mimetype || 'image/jpeg';
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -762,9 +762,11 @@ app.post('/api/v1/nutrition/ai/generate-food-image', authenticateToken, async (r
 
 app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) => {
   try {
-    const { goals, preferences, restrictions, days } = req.body;
+    // FIXED: Accept preferences object directly (matches frontend MealPlanContext.tsx line 239-259)
+    const { preferences, days } = req.body;
 
     console.log(`[Meal Plan] Generating ${days || 7}-day plan for ${req.userId}`);
+    console.log('[Meal Plan] Received preferences:', JSON.stringify(preferences, null, 2));
 
     const systemPrompt = `You are an expert nutritionist creating personalized meal plans.
     Generate detailed meal plans with specific recipes, portions, and nutritional information.
@@ -795,20 +797,34 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
       "groceryList": [{"item": "Chicken breast", "amount": "2 lbs", "category": "protein"}]
     }`;
 
+    // FIXED: Use actual frontend field names from preferences object
     const userPrompt = `Create a ${days || 7}-day meal plan with these requirements:
-    - Daily calories: ${goals?.dailyCalories || 2000}
-    - Daily protein: ${goals?.dailyProtein || 150}g
-    - Diet style: ${preferences?.dietStyle || 'balanced'}
-    - Cuisine preferences: ${preferences?.cuisines?.join(', ') || 'varied'}
-    - Allergies/restrictions: ${restrictions?.join(', ') || 'none'}
+    - Daily calories: ${preferences?.calorieTarget || 2000}
+    - Daily protein: ${preferences?.proteinTarget || 150}g
+    - Daily carbs: ${preferences?.carbsTarget || 200}g
+    - Daily fat: ${preferences?.fatTarget || 65}g
+    - Diet type: ${preferences?.dietType || 'balanced'}
+    - Meals per day: ${preferences?.mealsPerDay || 3}
+    - Cuisine preferences: ${preferences?.favoriteCuisines?.join(', ') || 'varied'}
+    - Favorite proteins: ${preferences?.favoriteProteins?.join(', ') || 'varied'}
+    - Favorite vegetables: ${preferences?.favoriteVegetables?.join(', ') || 'varied'}
+    - Favorite fruits: ${preferences?.favoriteFruits?.join(', ') || 'varied'}
+    - Favorite starches: ${preferences?.favoriteStarches?.join(', ') || 'varied'}
+    - Allergies/restrictions: ${preferences?.allergies?.join(', ') || 'none'}
+    - Hated foods: ${preferences?.hatedFoods || 'none'}
+    - Meal style: ${preferences?.mealStyle || 'balanced'}
+    - Meal diversity: ${preferences?.mealDiversity || 'moderate'}
     - Cooking skill: ${preferences?.cookingSkill || 'intermediate'}
+    - Cheat days: ${preferences?.cheatDays?.join(', ') || 'none'}
 
-    Include breakfast, lunch, dinner, and 1-2 snacks per day.
+    Include ${preferences?.mealsPerDay || 3} meals per day plus snacks as needed.
     Make meals practical with common ingredients.
-    Vary the proteins and vegetables throughout the week.`;
+    Vary the proteins and vegetables throughout the week.
+    Respect all dietary restrictions and allergies.
+    Use preferred cuisines and foods when possible, avoid hated foods completely.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -862,9 +878,11 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
 
 app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res) => {
   try {
-    const { goals, fitnessLevel, equipment, daysPerWeek, preferences } = req.body;
+    // FIXED: Accept preferences object directly (matches frontend TrainingContext.tsx line 222-230)
+    const { preferences, weeks } = req.body;
 
-    console.log(`[Workout Plan] Generating ${daysPerWeek || 4}-day plan for ${req.userId}`);
+    console.log(`[Workout Plan] Generating ${preferences?.daysPerWeek || 4}-day plan for ${req.userId}`);
+    console.log('[Workout Plan] Received preferences:', JSON.stringify(preferences, null, 2));
 
     const systemPrompt = `You are an expert fitness coach creating personalized workout plans.
     Return a JSON object with:
@@ -894,16 +912,23 @@ app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res)
       "tips": ["Tip 1", "Tip 2"]
     }`;
 
-    const userPrompt = `Create a ${daysPerWeek || 4}-day workout plan:
-    - Goal: ${goals?.type || 'build muscle'}
-    - Fitness level: ${fitnessLevel || 'intermediate'}
-    - Available equipment: ${equipment?.join(', ') || 'full gym'}
-    - Days per week: ${daysPerWeek || 4}
-    - Session length: ${preferences?.sessionLength || 45}-${preferences?.sessionLength + 15 || 60} minutes
-    - Focus areas: ${preferences?.focusAreas?.join(', ') || 'full body'}`;
+    // FIXED: Use actual frontend field names from preferences object
+    const userPrompt = `Create a ${preferences?.daysPerWeek || 4}-day workout plan:
+    - Goal: ${preferences?.fitnessGoal || 'general_fitness'}
+    - Fitness level: ${preferences?.experienceLevel || 'intermediate'}
+    - Available equipment: ${preferences?.availableEquipment?.join(', ') || 'full gym'}
+    - Days per week: ${preferences?.daysPerWeek || 4}
+    - Session length: ${preferences?.sessionDuration || 45} minutes
+    - Cardio preference: ${preferences?.cardioPreference || 'moderate'}
+    - Injuries to avoid: ${preferences?.injuries?.length > 0 ? preferences.injuries.join(', ') : 'none'}
+
+    Create workouts that match the user's fitness goal (${preferences?.fitnessGoal || 'general_fitness'}).
+    Use only the available equipment: ${preferences?.availableEquipment?.join(', ') || 'full gym'}.
+    If injuries are listed, avoid exercises that could aggravate them.
+    Include appropriate cardio based on preference: ${preferences?.cardioPreference || 'moderate'}.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -968,7 +993,7 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
     ${context ? `Additional context: ${JSON.stringify(context)}` : ''}`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         ...messages.slice(-10), // Last 10 messages for context
@@ -1033,7 +1058,7 @@ app.post('/api/v1/ai/cheat-day-guidance', authenticateToken, async (req, res) =>
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1096,7 +1121,7 @@ app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
     const { mealName, basicInfo } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1289,7 +1314,7 @@ app.post('/api/v1/agents/smart-meal-logger/suggestions', authenticateToken, asyn
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1335,7 +1360,7 @@ app.post('/api/v1/agents/accountability/check-in', authenticateToken, async (req
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1381,7 +1406,7 @@ app.post('/api/v1/agents/prediction/forecast', authenticateToken, async (req, re
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1430,7 +1455,7 @@ app.post('/api/v1/agents/habits/analyze', authenticateToken, async (req, res) =>
     const { habits, completions } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1470,7 +1495,7 @@ app.post('/api/v1/agents/restaurant/analyze', authenticateToken, async (req, res
     const { restaurantName, menuItems, goals } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1526,7 +1551,7 @@ app.post('/api/v1/agents/sleep/analyze', authenticateToken, async (req, res) => 
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1577,7 +1602,7 @@ app.post('/api/v1/agents/hydration/status', authenticateToken, async (req, res) 
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1649,7 +1674,7 @@ app.post('/api/v1/agents/banking/calculate', authenticateToken, async (req, res)
     );
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1691,7 +1716,7 @@ app.post('/api/v1/agents/form-coach/analyze', authenticateToken, async (req, res
     const { exercise, videoData, userDescription } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -1734,7 +1759,7 @@ app.post('/api/v1/agents/nutrition-accuracy/verify', authenticateToken, async (r
     const { meal, estimatedNutrition, source } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -2107,7 +2132,7 @@ app.post('/api/v1/avatar/coach/goals', authenticateToken, async (req, res) => {
     const { goals, progress } = req.body;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -2158,7 +2183,7 @@ app.post('/api/v1/avatar/coach/meal-plan', authenticateToken, async (req, res) =
     }).join('\n');
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -2239,7 +2264,7 @@ app.post('/api/v1/agents/tdee/insights', authenticateToken, async (req, res) => 
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4.1-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
