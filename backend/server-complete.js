@@ -947,7 +947,7 @@ app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res)
       `INSERT INTO workout_plans (user_id, plan_name, description, weekly_schedule, goal_type, difficulty_level)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
-      [req.userId, workoutPlan.planName, workoutPlan.description, JSON.stringify(workoutPlan.weeklySchedule), goals?.type, fitnessLevel]
+      [req.userId, workoutPlan.planName, workoutPlan.description, JSON.stringify(workoutPlan.weeklySchedule), preferences?.fitnessGoal, preferences?.experienceLevel]
     );
 
     res.json({ success: true, workoutPlan });

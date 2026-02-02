@@ -1,0 +1,18 @@
+Files to process:
+- PrimaryGoalStep.tsx
+- PlanPreviewStep.tsx  
+- SuccessScreen.tsx
+- CoachingModal.tsx
+- PlanSummaryCard.tsx
+- NutritionPreferencesStep.tsx
+- ActivityLifestyleStep.tsx
+
+Pattern replacements needed:
+1. Remove: import { ...useSharedValue, useAnimatedStyle, withSpring, withTiming... } from 'react-native-reanimated';
+2. Remove: const GLASS_SPRING = {...};
+3. Replace: Animated.View → View
+4. Replace: Animated.Text → Text  
+5. Remove: useSharedValue() declarations
+6. Remove: useAnimatedStyle() functions
+7. Remove: useEffect(() => { ...animation... }, [deps]);
+8. Replace animated styles with static conditional styles

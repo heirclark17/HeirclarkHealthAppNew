@@ -1,0 +1,589 @@
+env: load .env
+env: export EXPO_PUBLIC_API_URL
+The /android project does not contain any URI schemes. Expo CLI will not be able to use links to launch the project. You can configure a custom URI scheme using the --scheme option.
+Starting project at C:\Users\derri\HeirclarkHealthAppNew
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS .\index.js ▓▓▓░░░░░░░░░░░░░ 20.7% ( 7/17)
+iOS .\index.js ▓▓▓░░░░░░░░░░░░░ 20.7% (16/59)
+iOS .\index.js ▓▓▓░░░░░░░░░░░░░ 20.7% ( 88/258)
+iOS .\index.js ▓▓▓░░░░░░░░░░░░░ 20.7% (142/337)
+iOS .\index.js ▓▓▓▓▓░░░░░░░░░░░ 36.3% (327/552)
+iOS .\index.js ▓▓▓▓▓▓▓▓░░░░░░░░ 51.1% (496/694)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% (615/788)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% (735/933)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% (747/983)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% ( 757/2659)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% ( 921/2869)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% ( 978/2999)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% (1359/3002)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% (1733/3002)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 65.7% (2154/3002)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 78.1% (2661/3011)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 81.9% (2765/3055)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 87.0% (2969/3230)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 87.0% (3062/3287)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 90.3% (3205/3378)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 92.7% (3276/3403)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 92.7% (3484/3737)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 92.7% (3696/3887)
+iOS .\index.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 96.3% (3928/4003)
+iOS Bundled 87824ms index.js (4094 modules)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Wednesday", "Tuesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef"], "favoriteSnacks": ["Fruit", "Protein Bars"], "favoriteStarches": ["Rice", "Potatoes", "Pasta", "Sweet Potatoes"], "favoriteVegetables": ["Asparagus", "Zucchini"], "hatedFoods": "Olives, Onions", "mealDiversity": "", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 1}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 1, "transactions": 0}
+ LOG  [Auth] Token verified successfully
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 411ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Wednesday", "Tuesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef"], "favoriteSnacks": ["Fruit", "Protein Bars"], "favoriteStarches": ["Rice", "Potatoes", "Pasta", "Sweet Potatoes"], "favoriteVegetables": ["Asparagus", "Zucchini"], "hatedFoods": "Olives, Onions", "mealDiversity": "", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 1}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 2, "transactions": 0}
+ LOG  [Auth] Token verified successfully
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 585ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 0, "transactions": 0}
+ WARN  Ignoring DevTools app debug target for 'com.heirclark.health' with title 'com.heirclark.health (iPhone)' and 'nativePageReloads' capability set to 'false'. 
+ INFO  Launching DevTools...
+ LOG  [Auth] Authenticating with backend...
+ LOG  [Auth] Signed in successfully: dev@heirclark.com
+ LOG  [Auth] JWT token received and stored
+ LOG  [AIMealLogger] Voice module disabled - using AI transcription after recording
+ LOG  [Dashboard] Fetching fresh Apple Health data for today...
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Initializing HealthKit...
+ LOG  [AppleHealth] Requesting permissions: {
+  "permissions": {
+    "read": [
+      "Steps",
+      "ActiveEnergyBurned",
+      "BasalEnergyBurned",
+      "DistanceWalkingRunning",
+      "HeartRate",
+      "Weight"
+    ],
+    "write": []
+  }
+}
+ LOG  [Dashboard] Fetching fresh Apple Health data for today...
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Initializing HealthKit...
+ LOG  [AppleHealth] Requesting permissions: {
+  "permissions": {
+    "read": [
+      "Steps",
+      "ActiveEnergyBurned",
+      "BasalEnergyBurned",
+      "DistanceWalkingRunning",
+      "HeartRate",
+      "Weight"
+    ],
+    "write": []
+  }
+}
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 0
+ LOG  [Dashboard]   Net Calories (In - Out): 0
+ LOG  [Dashboard]   Calorie Goal: 2200
+ LOG  [Dashboard]   Gauge will display: 0 / 2200
+ LOG  [Weekly Update] Effect triggered: {"caloriesIn": 0, "carbs": 0, "fat": 0, "isToday": true, "mealsCount": 0, "protein": 0, "selectedDate": "2026-02-02", "todayStr": "2026-02-02"}
+ LOG  [Weekly Update] History fetched: {"daysToFetch": 2, "historyLength": 0}
+ LOG  [Weekly Update] 🎯 FINAL WEEKLY TOTALS: {"finalTotals": {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": NaN, "protein": 0}, "historyTotals": {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}, "todayLive": {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}}
+ LOG  [Dashboard] Meals fetched: 0 items
+ LOG  [Dashboard] No meals, resetting to 0
+ LOG  [Dashboard] Meals fetched: 0 items
+ LOG  [Dashboard] No meals, resetting to 0
+ ERROR  [API] Get meals error: [Error: Failed to fetch meals] 
+
+Call Stack
+  HeirclarkAPI#getMeals (services\api.ts)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [API] Get meals error: [Error: Failed to fetch meals] 
+
+Call Stack
+  HeirclarkAPI#getMeals (services\api.ts)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 0
+ LOG  [Dashboard]   Net Calories (In - Out): 0
+ LOG  [Dashboard]   Calorie Goal: 2000
+ LOG  [Dashboard]   Gauge will display: 0 / 2000
+ LOG  [AppleHealth] ✅ Initialized successfully
+ LOG  [AppleHealth] ✅ Initialized successfully
+ LOG  [Dashboard] Apple Health data received: {"bloodPressureDiastolic": 0, "bloodPressureSystolic": 0, "caloriesOut": 0, "distance": 0.9270855320018808, "heartRate": 0, "restingEnergy": 0, "steps": 2129}
+ LOG  [Dashboard] Apple Health data received: {"bloodPressureDiastolic": 0, "bloodPressureSystolic": 0, "caloriesOut": 0, "distance": 0.9270855320018808, "heartRate": 0, "restingEnergy": 0, "steps": 2129}
+ LOG  [Dashboard] Synced Apple Health data to backend
+ LOG  [Dashboard] Synced Apple Health data to backend
+ LOG  [Dashboard] Updated weekly steps: {"historySteps": 0, "todaySteps": 2129, "totalWeeklySteps": 2129}
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Settings] Background image: pattern-bokeh
+ WARN  Failed to open debugger. Please check that the dev server is running and reload the app.
+ LOG  [FoodPreferences] Saved preferences
+ LOG  [NutritionPreferences] Food preferences saved
+ LOG  [PlanPreviewStep] Recalculating results due to state change: {"activityLevel": "moderate", "currentWeight": 237, "primaryGoal": "lose_weight", "targetWeight": 200}
+ LOG  [GoalWizard] Saving goals to AsyncStorage with cardioPreference: walking
+ LOG  [GoalWizard] Profile synced to backend (including targetWeight & targetDate)
+ LOG  [GoalWizard] Saving goals to API: {
+  "dailyCalories": 1200,
+  "dailyProtein": 190,
+  "dailyCarbs": 36,
+  "dailyFat": 33,
+  "dailySteps": 10000,
+  "dailyWaterOz": 64,
+  "sleepHours": 8,
+  "workoutDaysPerWeek": 3
+}
+ LOG  [API] Sending goals: {"goals":{"calories":1200,"protein":190,"carbs":36,"fat":33,"hydration":1893,"goalWeight":null,"timezone":"America/Chicago"}}
+ LOG  [GoalWizard] Goals synced to backend successfully
+ LOG  [MealPlanContext] Generating AI meal plan with:
+ LOG  Goals: {"dailyCalories": 2000, "dailyCarbs": 200, "dailyFat": 65, "dailyProtein": 150}
+ LOG  Preferences: {"allergies": [], "cuisinePreferences": [], "dietStyle": "standard", "dietaryRestrictions": [], "fastingEnd": "20:00", "fastingStart": "12:00", "intermittentFasting": false, "mealsPerDay": 3}
+ LOG  Food Preferences: {"allergens": [], "cheatDays": ["Wednesday", "Tuesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars"], "favoriteStarches": ["Rice", "Potatoes", "Pasta", "Sweet Potatoes"], "favoriteVegetables": ["Zucchini", "Asparagus", "Green Beans"], "hatedFoods": "Olives, Onions, Tomatoes", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [AIService] Generating AI meal plan with preferences: {
+  "calorieTarget": 2000,
+  "proteinTarget": 150,
+  "carbsTarget": 200,
+  "fatTarget": 65,
+  "dietType": "standard",
+  "mealsPerDay": 3,
+  "allergies": [],
+  "favoriteProteins": [
+    "Chicken",
+    "Beef",
+    "Pork"
+  ],
+  "favoriteFruits": [],
+  "favoriteVegetables": [
+    "Zucchini",
+    "Asparagus",
+    "Green Beans"
+  ],
+  "favoriteStarches": [
+    "Rice",
+    "Potatoes",
+    "Pasta",
+    "Sweet Potatoes"
+  ],
+  "favoriteSnacks": [
+    "Fruit",
+    "Protein Bars"
+  ],
+  "favoriteCuisines": [
+    "American",
+    "Italian",
+    "Mexican",
+    "Chinese"
+  ],
+  "hatedFoods": "Olives, Onions, Tomatoes",
+  "mealStyle": "threePlusSnacks",
+  "mealDiversity": "sameDaily",
+  "cheatDays": [
+    "Wednesday",
+    "Tuesday"
+  ],
+  "cookingSkill": ""
+}
+ LOG  [AIService] Backend URL: https://heirclarkinstacartbackend-production.up.railway.app
+ ERROR  [AIService] Meal plan generation error: 500 {"error":"Failed to generate meal plan","message":"relation \"meal_plans\" does not exist"} 
+
+Call Stack
+  construct (<native>)
+  apply (<native>)
+  _construct (node_modules\@babel\runtime\helpers\construct.js)
+  Wrapper (node_modules\@babel\runtime\helpers\wrapNativeSuper.js)
+  construct (<native>)
+  _callSuper (node_modules\@babel\runtime\helpers\callSuper.js)
+  NamelessError (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  captureCurrentStack (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  HMRClient.log (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  console.level (node_modules\react-native\Libraries\Core\setUpDeveloperTools.js)
+  AIService#generateAIMealPlan (services\aiService.ts)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [AIService] Request URL: https://heirclarkinstacartbackend-production.up.railway.app/api/v1/ai/generate-meal-plan 
+
+Call Stack
+  construct (<native>)
+  apply (<native>)
+  _construct (node_modules\@babel\runtime\helpers\construct.js)
+  Wrapper (node_modules\@babel\runtime\helpers\wrapNativeSuper.js)
+  construct (<native>)
+  _callSuper (node_modules\@babel\runtime\helpers\callSuper.js)
+  NamelessError (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  captureCurrentStack (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  HMRClient.log (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  console.level (node_modules\react-native\Libraries\Core\setUpDeveloperTools.js)
+  AIService#generateAIMealPlan (services\aiService.ts)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ LOG  [Auth] Periodic token refresh
+ LOG  [Auth] Token refreshed successfully
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 1980ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Wednesday", "Tuesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars"], "favoriteStarches": ["Rice", "Potatoes", "Pasta", "Sweet Potatoes"], "favoriteVegetables": ["Zucchini", "Asparagus", "Green Beans"], "hatedFoods": "Olives, Onions, Tomatoes", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 0, "transactions": 0}
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Wednesday", "Tuesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars"], "favoriteStarches": ["Rice", "Potatoes", "Pasta", "Sweet Potatoes"], "favoriteVegetables": ["Zucchini", "Asparagus", "Green Beans"], "hatedFoods": "Olives, Onions, Tomatoes", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 1200
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 1, "transactions": 0}
+ LOG  [Auth] Token verified successfully
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Wednesday", "Tuesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars"], "favoriteStarches": ["Rice", "Potatoes", "Pasta", "Sweet Potatoes"], "favoriteVegetables": ["Zucchini", "Asparagus", "Green Beans"], "hatedFoods": "Olives, Onions, Tomatoes", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 1200
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 2, "transactions": 0}
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 890ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Wednesday", "Tuesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars"], "favoriteStarches": ["Rice", "Potatoes", "Pasta", "Sweet Potatoes"], "favoriteVegetables": ["Zucchini", "Asparagus", "Green Beans"], "hatedFoods": "Olives, Onions, Tomatoes", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 3, "transactions": 0}
+ LOG  [Auth] Token verified successfully
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 205ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 0, "transactions": 0}
+ WARN  Ignoring DevTools app debug target for 'com.heirclark.health' with title 'com.heirclark.health (iPhone)' and 'nativePageReloads' capability set to 'false'. 
+ INFO  Launching DevTools...
+ LOG  [AIMealLogger] Voice module disabled - using AI transcription after recording
+ LOG  [Dashboard] Fetching fresh Apple Health data for today...
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Initializing HealthKit...
+ LOG  [AppleHealth] Requesting permissions: {
+  "permissions": {
+    "read": [
+      "Steps",
+      "ActiveEnergyBurned",
+      "BasalEnergyBurned",
+      "DistanceWalkingRunning",
+      "HeartRate",
+      "Weight"
+    ],
+    "write": []
+  }
+}
+ LOG  [Dashboard] Fetching fresh Apple Health data for today...
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Initializing HealthKit...
+ LOG  [AppleHealth] Requesting permissions: {
+  "permissions": {
+    "read": [
+      "Steps",
+      "ActiveEnergyBurned",
+      "BasalEnergyBurned",
+      "DistanceWalkingRunning",
+      "HeartRate",
+      "Weight"
+    ],
+    "write": []
+  }
+}
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 0
+ LOG  [Dashboard]   Net Calories (In - Out): 0
+ LOG  [Dashboard]   Calorie Goal: 2200
+ LOG  [Dashboard]   Gauge will display: 0 / 2200
+ LOG  [Weekly Update] Effect triggered: {"caloriesIn": 0, "carbs": 0, "fat": 0, "isToday": true, "mealsCount": 0, "protein": 0, "selectedDate": "2026-02-02", "todayStr": "2026-02-02"}
+ LOG  [Weekly Update] History fetched: {"daysToFetch": 2, "historyLength": 1}
+ LOG  [Weekly Update] Week history filtered: {"sundayStr": "2026-02-01", "todayStr": "2026-02-02", "weekHistoryLength": 1}
+ LOG  [Weekly Update] Adding day: {"calories": 0, "carbs": undefined, "date": "2026-02-02T00:00:00.000Z", "fat": undefined, "protein": undefined}
+ LOG  [Weekly Update] 🎯 FINAL WEEKLY TOTALS: {"finalTotals": {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": 0, "protein": 0}, "historyTotals": {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": 0, "protein": 0}, "todayLive": {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}}
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 15
+ LOG  [Dashboard]   Net Calories (In - Out): -15
+ LOG  [Dashboard]   Calorie Goal: 2200
+ LOG  [Dashboard]   Gauge will display: -15 / 2200
+ LOG  [Dashboard] Meals fetched: 0 items
+ LOG  [Dashboard] No meals, resetting to 0
+ LOG  [Dashboard] Meals fetched: 0 items
+ LOG  [Dashboard] No meals, resetting to 0
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 15
+ LOG  [Dashboard]   Net Calories (In - Out): -15
+ LOG  [Dashboard]   Calorie Goal: 2000
+ LOG  [Dashboard]   Gauge will display: -15 / 2000
+ LOG  [Dashboard] Weekly totals calculated: {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": 0, "protein": 0, "steps": 376}
+ LOG  [Dashboard] Today's contribution: {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}
+ LOG  [Dashboard] Weekly totals calculated: {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": 0, "protein": 0, "steps": 376}
+ LOG  [Dashboard] Today's contribution: {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}
+ LOG  [AppleHealth] ✅ Initialized successfully
+ LOG  [AppleHealth] ✅ Initialized successfully
+ LOG  [Dashboard] Apple Health data received: {"bloodPressureDiastolic": 0, "bloodPressureSystolic": 0, "caloriesOut": 0, "distance": 0.9452295652017072, "heartRate": 0, "restingEnergy": 0, "steps": 2168}
+ LOG  [Dashboard] Apple Health data received: {"bloodPressureDiastolic": 0, "bloodPressureSystolic": 0, "caloriesOut": 0, "distance": 0.9452295652017072, "heartRate": 0, "restingEnergy": 0, "steps": 2168}
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 0
+ LOG  [Dashboard]   Net Calories (In - Out): 0
+ LOG  [Dashboard]   Calorie Goal: 2000
+ LOG  [Dashboard]   Gauge will display: 0 / 2000
+ LOG  [Dashboard] Synced Apple Health data to backend
+ LOG  [Dashboard] Synced Apple Health data to backend
+ LOG  [Dashboard] Updated weekly steps: {"historySteps": 2168, "todaySteps": 2168, "totalWeeklySteps": 4336}
+ LOG  [Auth] Authenticating with backend...
+ LOG  [Auth] Signed in successfully: dev@heirclark.com
+ LOG  [Auth] JWT token received and stored
+ LOG  [Settings] Theme mode: light
+ LOG  [Settings] Background image: pattern-blobs
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [FoodPreferences] Saved preferences
+ LOG  [NutritionPreferences] Food preferences saved
+ LOG  [PlanPreviewStep] Recalculating results due to state change: {"activityLevel": "moderate", "currentWeight": 237, "primaryGoal": "lose_weight", "targetWeight": 200}
+ LOG  [GoalWizard] Saving goals to AsyncStorage with cardioPreference: walking
+ LOG  [GoalWizard] Profile synced to backend (including targetWeight & targetDate)
+ LOG  [GoalWizard] Saving goals to API: {
+  "dailyCalories": 1200,
+  "dailyProtein": 75,
+  "dailyCarbs": 15,
+  "dailyFat": 93,
+  "dailySteps": 10000,
+  "dailyWaterOz": 64,
+  "sleepHours": 8,
+  "workoutDaysPerWeek": 3
+}
+ LOG  [API] Sending goals: {"goals":{"calories":1200,"protein":75,"carbs":15,"fat":93,"hydration":1893,"goalWeight":null,"timezone":"America/Chicago"}}
+ LOG  [GoalWizard] Goals synced to backend successfully
+ LOG  [MealPlanContext] Generating AI meal plan with:
+ LOG  Goals: {"dailyCalories": 2000, "dailyCarbs": 200, "dailyFat": 65, "dailyProtein": 150}
+ LOG  Preferences: {"allergies": [], "cuisinePreferences": [], "dietStyle": "standard", "dietaryRestrictions": [], "fastingEnd": "20:00", "fastingStart": "12:00", "intermittentFasting": false, "mealsPerDay": 3}
+ LOG  Food Preferences: {"allergens": [], "cheatDays": ["Tuesday", "Wednesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars", "Smoothies"], "favoriteStarches": ["Sweet Potatoes", "Rice", "Potatoes", "Pasta"], "favoriteVegetables": ["Asparagus", "Green Beans", "Zucchini"], "hatedFoods": "Olives, Tomatoes, Onions", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [AIService] Generating AI meal plan with preferences: {
+  "calorieTarget": 2000,
+  "proteinTarget": 150,
+  "carbsTarget": 200,
+  "fatTarget": 65,
+  "dietType": "standard",
+  "mealsPerDay": 3,
+  "allergies": [],
+  "favoriteProteins": [
+    "Chicken",
+    "Beef",
+    "Pork"
+  ],
+  "favoriteFruits": [],
+  "favoriteVegetables": [
+    "Asparagus",
+    "Green Beans",
+    "Zucchini"
+  ],
+  "favoriteStarches": [
+    "Sweet Potatoes",
+    "Rice",
+    "Potatoes",
+    "Pasta"
+  ],
+  "favoriteSnacks": [
+    "Fruit",
+    "Protein Bars",
+    "Smoothies"
+  ],
+  "favoriteCuisines": [
+    "American",
+    "Italian",
+    "Mexican",
+    "Chinese"
+  ],
+  "hatedFoods": "Olives, Tomatoes, Onions",
+  "mealStyle": "threePlusSnacks",
+  "mealDiversity": "sameDaily",
+  "cheatDays": [
+    "Tuesday",
+    "Wednesday"
+  ],
+  "cookingSkill": ""
+}
+ LOG  [AIService] Backend URL: https://heirclarkinstacartbackend-production.up.railway.app
+ ERROR  [AIService] Meal plan generation timed out after 200000 ms 
+
+Call Stack
+  construct (<native>)
+  apply (<native>)
+  _construct (node_modules\@babel\runtime\helpers\construct.js)
+  Wrapper (node_modules\@babel\runtime\helpers\wrapNativeSuper.js)
+  construct (<native>)
+  _callSuper (node_modules\@babel\runtime\helpers\callSuper.js)
+  NamelessError (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  captureCurrentStack (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  HMRClient.log (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  console.level (node_modules\react-native\Libraries\Core\setUpDeveloperTools.js)
+  AIService#generateAIMealPlan (services\aiService.ts)
+  throw (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _throw (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ LOG  [AIService] Generating AI meal plan with preferences: {
+  "calorieTarget": 2000,
+  "proteinTarget": 150,
+  "carbsTarget": 200,
+  "fatTarget": 65,
+  "dietType": "balanced",
+  "mealsPerDay": 3,
+  "allergies": [],
+  "favoriteProteins": [
+    "chicken",
+    "salmon"
+  ],
+  "hatedFoods": "mushrooms"
+}
+ LOG  [AIService] Backend URL: https://heirclarkinstacartbackend-production.up.railway.app
+ LOG  [AIService] Meal plan response (first 300 chars): {"success":true,"mealPlan":[{"dayName":"Monday","dayIndex":0,"meals":[{"mealType":"breakfast","name":"Spinach and Feta Omelette with Whole Wheat Toast","calories":450,"protein":35,"carbs":30,"fat":20,"ingredients":[{"name":"Eggs","amount":"3 large","calories":210},{"name":"Fresh spinach","amount":"1
+ ERROR  [AIService] Unexpected response structure: ["success", "mealPlan", "weeklyTotals", "groceryList"] 
+
+Call Stack
+  construct (<native>)
+  apply (<native>)
+  _construct (node_modules\@babel\runtime\helpers\construct.js)
+  Wrapper (node_modules\@babel\runtime\helpers\wrapNativeSuper.js)
+  construct (<native>)
+  _callSuper (node_modules\@babel\runtime\helpers\callSuper.js)
+  NamelessError (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  captureCurrentStack (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  HMRClient.log (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  console.level (node_modules\react-native\Libraries\Core\setUpDeveloperTools.js)
+  AIService#generateAIMealPlan (services\aiService.ts)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ LOG  [AIService] Generating AI workout plan with preferences: {"availableEquipment": ["dumbbells", "barbell", "gym"], "daysPerWeek": 3, "experienceLevel": "intermediate", "fitnessGoal": "strength", "injuries": [], "sessionDuration": 60}
+ ERROR  [AIService] Workout plan generation error: 500 {"error":"Failed to generate workout plan","message":"goals is not defined"} 
+
+Call Stack
+  construct (<native>)
+  apply (<native>)
+  _construct (node_modules\@babel\runtime\helpers\construct.js)
+  Wrapper (node_modules\@babel\runtime\helpers\wrapNativeSuper.js)
+  construct (<native>)
+  _callSuper (node_modules\@babel\runtime\helpers\callSuper.js)
+  NamelessError (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  captureCurrentStack (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  HMRClient.log (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  console.level (node_modules\react-native\Libraries\Core\setUpDeveloperTools.js)
+  AIService#generateAIWorkoutPlan (services\aiService.ts)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
