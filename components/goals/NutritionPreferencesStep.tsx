@@ -152,6 +152,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
   const [disliked, setDisliked] = useState<string[]>([]);
   const [hatedFoodsText, setHatedFoodsText] = useState('');
   const [mealDiversity, setMealDiversity] = useState<'diverse' | 'sameDaily' | ''>('');
+  const [cookingSkill, setCookingSkill] = useState<'beginner' | 'intermediate' | 'advanced' | ''>('');
   const [mealStyle, setMealStyle] = useState<'threePlusSnacks' | 'fewerLarger' | ''>('');
   const [cheatDays, setCheatDays] = useState<string[]>([]);
 
@@ -170,6 +171,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
       setMealDiversity(prefs.mealDiversity || '');
       setMealStyle(prefs.mealStyle || '');
       setCheatDays(prefs.cheatDays || []);
+      setCookingSkill(prefs.cookingSkill || '');
     }
   }, [foodPrefsContext?.preferences]);
 
@@ -212,6 +214,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           mealDiversity: mealDiversity,
           mealStyle: mealStyle,
           cheatDays: cheatDays,
+          cookingSkill: cookingSkill,
         });
         console.log('[NutritionPreferences] Food preferences saved');
       } catch (error) {
@@ -668,6 +671,62 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         </GlassCard>
       </GlassSection>
 
+      {/* Cooking Skill */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>COOKING SKILL LEVEL</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Help us tailor recipe complexity to your experience
+        </Text>
+        <View style={styles.skillButtonsContainer}>
+          {[
+            { value: 'beginner', label: 'Beginner', icon: 'egg-outline', description: 'Simple recipes' },
+            { value: 'intermediate', label: 'Intermediate', icon: 'restaurant-outline', description: 'Moderate recipes' },
+            { value: 'advanced', label: 'Advanced', icon: 'flame-outline', description: 'Complex recipes' },
+          ].map((option) => {
+            const isSelected = cookingSkill === option.value;
+            return (
+              <TouchableOpacity
+                key={option.value}
+                onPress={async () => {
+                  await selectionFeedback();
+                  setCookingSkill(option.value as any);
+                }}
+                activeOpacity={0.7}
+                style={{ flex: 1 }}
+              >
+                <GlassCard
+                  style={[
+                    styles.skillButton,
+                    isSelected && {
+                      backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)',
+                    },
+                  ]}
+                  interactive
+                >
+                  <Ionicons
+                    name={option.icon as any}
+                    size={24}
+                    color={isSelected ? Colors.successMuted : colors.textMuted}
+                  />
+                  <Text
+                    style={[
+                      styles.skillButtonLabel,
+                      { color: colors.text },
+                      isSelected && { color: Colors.successMuted },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  <Text style={[styles.skillButtonDescription, { color: colors.textMuted }]}>
+                    {option.description}
+                  </Text>
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </GlassSection>
+
       {/* Buttons */}
       <View style={styles.buttonRow}>
         <TouchableOpacity onPress={onBack} activeOpacity={0.7} style={{ flex: 1 }}>
@@ -972,6 +1031,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     minHeight: 60,
     textAlignVertical: 'top',
+  },
+  skillButtonsContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+  },
+  skillButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 8,
+    minHeight: 100,
+  },
+  skillButtonLabel: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  skillButtonDescription: {
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+    marginTop: 4,
+    textAlign: 'center',
   },
   buttonRow: {
     flexDirection: 'row',
