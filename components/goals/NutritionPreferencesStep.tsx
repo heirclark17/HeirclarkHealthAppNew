@@ -1,10 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput } from 'react-native';
 import Animated, {
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  FadeInDown,
   Layout,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -318,8 +314,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         </View>
 
         {showFastingOptions && (
-          <Animated.View
-            entering={FadeInDown.duration(200)}
+          <View
+           
             layout={Layout.springify()}
             style={styles.fastingOptions}
           >
@@ -365,7 +361,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 </Text>
               </View>
             </GlassCard>
-          </Animated.View>
+          </View>
         )}
       </GlassSection>
 

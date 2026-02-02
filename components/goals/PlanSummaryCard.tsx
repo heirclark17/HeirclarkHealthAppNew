@@ -7,14 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+// Animations removed
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -59,8 +52,8 @@ function SectionHeader({ title, icon, colors }: { title: string; icon: string; c
 function OutcomeCard({ outcome, index, colors, isDark }: { outcome: ExpectedOutcome; index: number; colors: any; isDark: boolean }) {
   const cardBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
   return (
-    <Animated.View
-      entering={FadeInUp.delay(index * 50).springify().damping(15)}
+    <View
+     
       style={[styles.outcomeCard, { backgroundColor: cardBg }]}
     >
       <View style={styles.outcomeHeader}>
@@ -89,22 +82,22 @@ function OutcomeCard({ outcome, index, colors, isDark }: { outcome: ExpectedOutc
       </View>
       <Text style={[styles.outcomeValue, { color: colors.text }]}>{outcome.targetValue}</Text>
       <Text style={[styles.outcomeTimeframe, { color: colors.textMuted }]}>{outcome.timeframe}</Text>
-    </Animated.View>
+    </View>
   );
 }
 
 // Progression Step Component
 function ProgressionStep({ step, index, colors }: { step: string; index: number; colors: any }) {
   return (
-    <Animated.View
-      entering={FadeInDown.delay(index * 80)}
+    <View
+     
       style={styles.progressionStep}
     >
       <View style={[styles.stepNumber, { backgroundColor: colors.protein }]}>
         <Text style={[styles.stepNumberText, { color: colors.background }]}>{index + 1}</Text>
       </View>
       <Text style={[styles.stepText, { color: colors.textSecondary }]}>{step}</Text>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -118,8 +111,6 @@ export function PlanSummaryCard({
 }: PlanSummaryCardProps) {
   const { settings } = useSettings();
   const [expanded, setExpanded] = useState(isExpanded);
-  const scale = useSharedValue(1);
-
   // Dynamic theme colors
   const colors = useMemo(() => {
     return settings.themeMode === 'light' ? LightColors : DarkColors;
@@ -128,10 +119,6 @@ export function PlanSummaryCard({
 
   // Theme-aware backgrounds for inner elements
   const secondaryBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
-
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
 
   const handleToggleExpand = () => {
     lightImpact();
@@ -144,8 +131,8 @@ export function PlanSummaryCard({
   };
 
   return (
-    <Animated.View entering={FadeIn.duration(400)}>
-      <Animated.View style={cardStyle}>
+    <View>
+      <View>
         <GlassCard style={styles.container} interactive>
         {/* Header Section - Always Visible */}
         <TouchableOpacity
@@ -178,7 +165,7 @@ export function PlanSummaryCard({
 
       {/* Expanded Content */}
       {expanded && (
-        <Animated.View entering={FadeInDown.duration(300)}>
+        <View>
           {/* Weekly Structure */}
           <View style={styles.section}>
             <SectionHeader title="Weekly Structure" icon="calendar-outline" colors={colors} />
@@ -264,7 +251,7 @@ export function PlanSummaryCard({
               ))}
             </View>
           </View>
-        </Animated.View>
+        </View>
       )}
 
       {/* Action Buttons */}
@@ -291,8 +278,8 @@ export function PlanSummaryCard({
         </View>
       )}
       </GlassCard>
-      </Animated.View>
-    </Animated.View>
+      </View>
+    </View>
   );
 }
 

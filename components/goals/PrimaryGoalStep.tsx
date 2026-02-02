@@ -1,15 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withSequence,
-  withTiming,
-  interpolateColor,
-  Easing,
-} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
@@ -21,13 +12,6 @@ import { GlassCard } from '../GlassCard';
 const TAB_BAR_HEIGHT = 64;
 const TAB_BAR_MARGIN_BOTTOM = 12;
 const FOOTER_EXTRA_PADDING = 24;
-
-// iOS 26 Liquid Glass spring configuration
-const GLASS_SPRING = {
-  damping: 15,
-  stiffness: 300,
-  mass: 0.8,
-};
 
 interface GoalOption {
   id: PrimaryGoal;
@@ -86,46 +70,21 @@ interface GoalCardProps {
 }
 
 function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWidth }: GoalCardProps) {
-  const scale = useSharedValue(1);
-  const colorProgress = useSharedValue(isSelected ? 1 : 0);
-
   // iOS 26 Liquid Glass - subtle, translucent backgrounds
   const unselectedBg = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
   const selectedBg = isDark ? option.color + '15' : option.color + '12';
   const unselectedBorder = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)';
   const selectedBorder = option.color + '40';
 
-  React.useEffect(() => {
-    colorProgress.value = withSpring(isSelected ? 1 : 0, GLASS_SPRING);
-  }, [isSelected, colorProgress]);
-
   const handlePress = async () => {
     await selectionFeedback();
-    scale.value = withSequence(
-      withSpring(0.95, GLASS_SPRING),
-      withSpring(1.02, { damping: 10, stiffness: 400 }),
-      withSpring(1, { damping: 15, stiffness: 300 })
-    );
     onSelect();
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
-
-  // Staggered entrance animation
-  const entranceStyle = useAnimatedStyle(() => {
-    return {
-      opacity: withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) }),
-    };
-  });
-
   return (
-    <Animated.View style={[styles.cardWrapper, entranceStyle, { opacity: 0, width: cardWidth }]}>
+    <View style={[styles.cardWrapper, { width: cardWidth }]}>
       <TouchableOpacity activeOpacity={0.8} onPress={handlePress}>
-        <Animated.View style={animatedStyle}>
+        <View>
           <GlassCard
             style={[
               styles.card,
@@ -158,9 +117,9 @@ function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWid
               )}
             </View>
           </GlassCard>
-        </Animated.View>
+        </View>
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -189,19 +148,8 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
     setPrimaryGoal(goalId);
   };
 
-  // Animation for continue button
-  const buttonScale = useSharedValue(1);
-  const buttonOpacity = useSharedValue(1);
-
   const handlePressIn = useCallback(() => {
-    buttonScale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
-    buttonOpacity.value = withSpring(0.8, GLASS_SPRING);
     rigidImpact();
-  }, []);
-
-  const handlePressOut = useCallback(() => {
-    buttonScale.value = withSpring(1, { damping: 15, stiffness: 300 });
-    buttonOpacity.value = withSpring(1, GLASS_SPRING);
   }, []);
 
   const handleContinue = async () => {
@@ -209,11 +157,6 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
     await lightImpact();
     onNext();
   };
-
-  const animatedButtonStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: buttonScale.value }],
-    opacity: buttonOpacity.value,
-  }));
 
   // iOS 26 Liquid Glass colors for button
   const glassButtonColors = {
@@ -274,11 +217,10 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
       {/* Frosted Liquid Glass Continue Button - Fixed at bottom above tab bar */}
       <View style={[styles.footer, { bottom: footerBottom }]}>
-        <Animated.View style={animatedButtonStyle}>
+        <View>
           <Pressable
             onPress={handleContinue}
             onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
             disabled={!state.primaryGoal}
             style={[
               styles.continueButton,
@@ -317,7 +259,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
               color={state.primaryGoal ? glassButtonColors.text : glassButtonColors.textDisabled}
             />
           </Pressable>
-        </Animated.View>
+        </View>
       </View>
     </View>
   );

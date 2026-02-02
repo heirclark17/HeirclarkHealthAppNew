@@ -20,11 +20,6 @@ import { lightImpact, successNotification } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 
 // iOS 26 Liquid Glass spring configuration
-const GLASS_SPRING = {
-  damping: 15,
-  stiffness: 300,
-  mass: 0.8,
-};
 
 interface AnimatedNumberProps {
   value: number;
@@ -36,11 +31,9 @@ interface AnimatedNumberProps {
 
 function AnimatedNumber({ value, duration = 1200, delay = 0, suffix = '', style }: AnimatedNumberProps) {
   const [displayValue, setDisplayValue] = useState(0);
-  const animatedValue = useSharedValue(0);
 
   useEffect(() => {
     animatedValue.value = 0;
-    animatedValue.value = withDelay(
       delay,
       withTiming(value, {
         duration,
@@ -81,66 +74,13 @@ interface MacroBarProps {
 }
 
 function MacroBar({ label, value, percentage, color, delay, colors }: MacroBarProps) {
-  const width = useSharedValue(0);
 
   useEffect(() => {
-    width.value = withDelay(
       delay,
       withSpring(percentage, { damping: 15, stiffness: 90 })
     );
   }, [percentage, delay, width]);
 
-  const barStyle = useAnimatedStyle(() => ({
-    width: `${width.value}%`,
-    backgroundColor: color,
-  }));
-
-  return (
-    <Animated.View entering={FadeInDown.delay(delay).duration(400)} style={styles.macroItem}>
-      <View style={styles.macroHeader}>
-        <Text style={[styles.macroLabel, { color: colors.text }]}>{label}</Text>
-        <Text style={[styles.macroValue, { color: colors.text }]}>{value}g</Text>
-      </View>
-      <View style={[styles.macroBarBg, { backgroundColor: colors.background }]}>
-        <Animated.View style={[styles.macroBarFill, barStyle]} />
-      </View>
-      <Text style={[styles.macroPercent, { color: colors.textMuted }]}>{Math.round(percentage)}%</Text>
-    </Animated.View>
-  );
-}
-
-interface PlanPreviewStepProps {
-  onBack: () => void;
-  onConfirm: () => void;
-}
-
-export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
-  const { state, calculateResults, saveGoals } = useGoalWizard();
-  const { settings } = useSettings();
-  const [isConfirming, setIsConfirming] = useState(false);
-
-  // Dynamic theme colors
-  const colors = useMemo(() => {
-    return settings.themeMode === 'light' ? LightColors : DarkColors;
-  }, [settings.themeMode]);
-  const isDark = settings.themeMode === 'dark';
-
-  const cardScale = useSharedValue(0.9);
-  const cardOpacity = useSharedValue(0);
-  const buttonScale = useSharedValue(1);
-  const buttonProgress = useSharedValue(0);
-
-  // Create a dependency key from state values that affect calculation
-  // This ensures we recalculate when user edits goals and returns
-  const calculationKey = `${state.primaryGoal}-${state.currentWeight}-${state.targetWeight}-${state.activityLevel}-${state.dietStyle}-${state.workoutsPerWeek}-${state.age}-${state.sex}-${state.heightFt}-${state.heightIn}-${state.heightCm}`;
-
-  useEffect(() => {
-    console.log('[PlanPreviewStep] Recalculating results due to state change:', {
-      primaryGoal: state.primaryGoal,
-      currentWeight: state.currentWeight,
-      targetWeight: state.targetWeight,
-      activityLevel: state.activityLevel,
-    });
 
     // Calculate results when entering this step or when inputs change
     calculateResults();
@@ -148,55 +88,6 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
     // Reset and replay card entrance animation
     cardOpacity.value = 0;
     cardScale.value = 0.9;
-    cardOpacity.value = withSpring(1, GLASS_SPRING);
-    cardScale.value = withSpring(1, { damping: 12, stiffness: 100 });
-  }, [calculationKey, calculateResults, cardOpacity, cardScale]);
-
-  const cardAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: cardOpacity.value,
-    transform: [{ scale: cardScale.value }],
-  }));
-
-  const buttonAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: buttonScale.value }],
-  }));
-
-  const buttonFillStyle = useAnimatedStyle(() => ({
-    width: `${buttonProgress.value * 100}%`,
-  }));
-
-  if (!state.results) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Calculating your plan...</Text>
-      </View>
-    );
-  }
-
-  const { results } = state;
-
-  // Theme-aware card backgrounds
-  const mainCardBg = isDark ? colors.backgroundSecondary : 'rgba(255,255,255,0.95)';
-  const statCardBg = isDark ? colors.backgroundSecondary : 'rgba(255,255,255,0.9)';
-  const workoutCardBg = isDark ? colors.backgroundSecondary : 'rgba(255,255,255,0.95)';
-  const primaryGlassBg = isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)';
-
-  // Calculate macro percentages
-  const totalMacroCals = (results.protein * 4) + (results.carbs * 4) + (results.fat * 9);
-  const proteinPercent = ((results.protein * 4) / totalMacroCals) * 100;
-  const carbsPercent = ((results.carbs * 4) / totalMacroCals) * 100;
-  const fatPercent = ((results.fat * 9) / totalMacroCals) * 100;
-
-  // Calculate timeline
-  const getTimelineText = () => {
-    if (state.primaryGoal === 'maintain' || state.primaryGoal === 'improve_health') {
-      return 'Ongoing healthy lifestyle';
-    }
-    if (results.totalWeeks > 0) {
-      return `~${Math.round(results.totalWeeks)} weeks to reach goal`;
-    }
-    return '12 weeks initial plan';
-  };
 
   // Get goal-specific message
   const getGoalMessage = () => {
@@ -217,16 +108,6 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
     await lightImpact();
 
     // Animate button press
-    buttonScale.value = withSequence(
-      withSpring(0.95, GLASS_SPRING),
-      withSpring(1, { damping: 10 })
-    );
-
-    // Progress fill animation
-    buttonProgress.value = withSpring(1, GLASS_SPRING, () => {
-      runOnJS(handleSaveComplete)();
-    });
-  };
 
   const handleSaveComplete = async () => {
     const success = await saveGoals();
@@ -264,7 +145,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       </View>
 
       {/* Main Calorie Card */}
-      <Animated.View style={cardAnimatedStyle}>
+      <View style={cardAnimatedStyle}>
         <GlassCard isDark={isDark} borderColor="rgba(78, 205, 196, 0.25)" style={styles.mainCard}>
         <View style={styles.calorieSection}>
           <Text style={[styles.calorieLabel, { color: colors.textMuted }]}>DAILY CALORIES</Text>
@@ -317,10 +198,10 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
           />
         </View>
         </GlassCard>
-      </Animated.View>
+      </View>
 
       {/* Stats Cards */}
-      <Animated.View entering={FadeInDown.delay(600).duration(400)} style={styles.statsRow}>
+      <View style={styles.statsRow}>
         <GlassCard style={styles.statCard} interactive>
           <Ionicons name="flame-outline" size={20} color={Colors.error} />
           <Text style={[styles.statValue, { color: colors.text }]}>{results.bmr.toLocaleString()}</Text>
@@ -336,11 +217,11 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
           <Text style={[styles.statValue, { color: colors.text }]}>{results.bmi.toFixed(1)}</Text>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
         </GlassCard>
-      </Animated.View>
+      </View>
 
       {/* Weekly Rate Card - Key metric for users */}
       {(state.primaryGoal === 'lose_weight' || state.primaryGoal === 'build_muscle') && results.weeklyChange !== 0 && (
-        <Animated.View entering={FadeInDown.delay(700).duration(400)}>
+        <View>
         <GlassCard style={styles.weeklyRateCard} interactive>
           <View style={styles.weeklyRateIcon}>
             <Ionicons
@@ -377,11 +258,11 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             </Text>
           </View>
         </GlassCard>
-        </Animated.View>
+        </View>
       )}
 
       {/* Timeline Card */}
-      <Animated.View entering={FadeInDown.delay(800).duration(400)}>
+      <View>
         <GlassCard style={styles.timelineCard} interactive>
           <View style={styles.timelineIcon}>
             <Ionicons name="calendar-outline" size={24} color={Colors.successMuted} />
@@ -391,11 +272,11 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             <Text style={styles.timelineValue}>{getTimelineText()}</Text>
           </View>
         </GlassCard>
-      </Animated.View>
+      </View>
 
       {/* Diet Summary */}
       {state.dietStyle !== 'standard' && (
-        <Animated.View entering={FadeInDown.delay(900).duration(400)}>
+        <View>
           <GlassCard style={styles.dietCard} interactive>
             <Ionicons name="nutrition-outline" size={18} color={colors.textMuted} />
             <Text style={[styles.dietText, { color: colors.textSecondary }]}>
@@ -406,11 +287,11 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               {state.dietStyle === 'custom' && 'Custom macro distribution'}
             </Text>
           </GlassCard>
-        </Animated.View>
+        </View>
       )}
 
       {/* Workout Plan Preview Card */}
-      <Animated.View entering={FadeInDown.delay(1000).duration(400)}>
+      <View>
         <GlassCard style={styles.workoutPlanCard} interactive>
         <View style={styles.workoutPlanHeader}>
           <View style={styles.workoutPlanIconContainer}>
@@ -525,7 +406,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
           </Text>
         </View>
         </GlassCard>
-      </Animated.View>
+      </View>
 
       {/* Buttons */}
       <View style={styles.buttonRow}>

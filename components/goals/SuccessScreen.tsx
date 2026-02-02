@@ -19,11 +19,6 @@ import { successNotification, lightImpact } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 
 // iOS 26 Liquid Glass spring configuration
-const GLASS_SPRING = {
-  damping: 15,
-  stiffness: 300,
-  mass: 0.8,
-};
 
 const { width, height } = Dimensions.get('window');
 
@@ -34,10 +29,6 @@ interface ConfettiProps {
 }
 
 function Confetti({ index, color }: ConfettiProps) {
-  const translateY = useSharedValue(-50);
-  const translateX = useSharedValue(0);
-  const rotate = useSharedValue(0);
-  const opacity = useSharedValue(1);
 
   const startX = Math.random() * width;
   const endX = startX + (Math.random() - 0.5) * 200;
@@ -72,27 +63,13 @@ function Confetti({ index, color }: ConfettiProps) {
 
     opacity.value = withDelay(
       delay + 1500,
-      withSpring(0, GLASS_SPRING)
-    );
-  }, [translateY, translateX, rotate, opacity, endX, startX]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateY: translateY.value },
-        { translateX: translateX.value },
-        { rotate: `${rotate.value}deg` },
-      ] as const,
-      opacity: opacity.value,
-      left: startX,
-    };
   });
 
   const size = 8 + Math.random() * 8;
   const isCircle = Math.random() > 0.5;
 
   return (
-    <Animated.View
+    <View
       style={[
         styles.confetti,
         animatedStyle,
@@ -133,16 +110,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   const primaryGlassBg = isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)';
 
   // Animation values
-  const checkScale = useSharedValue(0);
-  const checkOpacity = useSharedValue(0);
-  const ringScale = useSharedValue(0);
-  const ringOpacity = useSharedValue(0);
-  const textOpacity = useSharedValue(0);
-  const textTranslateY = useSharedValue(30);
-  const cardScale = useSharedValue(0.8);
-  const cardOpacity = useSharedValue(0);
-  const buttonOpacity = useSharedValue(0);
-  const buttonTranslateY = useSharedValue(20);
 
   // Confetti colors
   const confettiColors = [Colors.success, Colors.error, Colors.warning, Colors.successMuted, '#DDA0DD', '#45B7D1'];
@@ -157,66 +124,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
     // Ring burst animation
     ringScale.value = withSequence(
       withTiming(1.5, { duration: 400, easing: Easing.out(Easing.ease) }),
-      withSpring(2, GLASS_SPRING)
-    );
-    ringOpacity.value = withSequence(
-      withSpring(0.5, GLASS_SPRING),
-      withDelay(200, withSpring(0, GLASS_SPRING))
-    );
-
-    // Checkmark animation
-    checkScale.value = withDelay(
-      200,
-      withSpring(1, { damping: 8, stiffness: 150 })
-    );
-    checkOpacity.value = withDelay(200, withSpring(1, GLASS_SPRING));
-
-    // Text animation
-    textOpacity.value = withDelay(500, withSpring(1, GLASS_SPRING));
-    textTranslateY.value = withDelay(500, withSpring(0, { damping: 12 }));
-
-    // Card animation
-    cardOpacity.value = withDelay(700, withSpring(1, GLASS_SPRING));
-    cardScale.value = withDelay(700, withSpring(1, { damping: 12 }));
-
-    // Button animation
-    buttonOpacity.value = withDelay(1000, withSpring(1, GLASS_SPRING));
-    buttonTranslateY.value = withDelay(1000, withSpring(0, { damping: 12 }));
-  }, [
-    ringScale, ringOpacity, checkScale, checkOpacity,
-    textOpacity, textTranslateY, cardOpacity, cardScale,
-    buttonOpacity, buttonTranslateY
-  ]);
-
-  const ringStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: ringScale.value }],
-    opacity: ringOpacity.value,
-  }));
-
-  const checkStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: checkScale.value }],
-    opacity: checkOpacity.value,
-  }));
-
-  const textStyle = useAnimatedStyle(() => ({
-    opacity: textOpacity.value,
-    transform: [{ translateY: textTranslateY.value }],
-  }));
-
-  const cardStyle = useAnimatedStyle(() => ({
-    opacity: cardOpacity.value,
-    transform: [{ scale: cardScale.value }],
-  }));
-
-  const buttonStyle = useAnimatedStyle(() => ({
-    opacity: buttonOpacity.value,
-    transform: [{ translateY: buttonTranslateY.value }],
-  }));
-
-  const handleLogMeal = () => {
-    lightImpact();
-    onLogMeal();
-  };
 
   const handleViewDashboard = () => {
     lightImpact();
@@ -318,25 +225,25 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
       {/* Success Icon */}
       <View style={styles.iconContainer}>
-        <Animated.View style={[styles.ring, ringStyle]} />
-        <Animated.View style={[styles.checkContainer, checkStyle]}>
+        <View style={[styles.ring, ringStyle]} />
+        <View style={[styles.checkContainer, checkStyle]}>
           <View style={styles.checkCircle}>
             <Ionicons name="checkmark" size={48} color={Colors.background} />
           </View>
-        </Animated.View>
+        </View>
       </View>
 
       {/* Success Text */}
-      <Animated.View style={[styles.textContainer, textStyle]}>
+      <View style={[styles.textContainer, textStyle]}>
         <Text style={[styles.title, { color: colors.text }]}>You're All Set!</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Your personalized nutrition plan is ready. Use this as your daily guide to reach your goals.
         </Text>
-      </Animated.View>
+      </View>
 
       {/* Daily Targets - Separate Cards */}
       {state.results && (
-        <Animated.View style={[styles.targetsSection, cardStyle]}>
+        <View style={[styles.targetsSection, cardStyle]}>
           <Text style={[styles.targetsSectionHeader, { color: colors.textMuted }]}>YOUR DAILY TARGETS</Text>
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
@@ -360,11 +267,11 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Fat</Text>
             </GlassCard>
           </View>
-        </Animated.View>
+        </View>
       )}
 
       {/* Workout Plan Commentary */}
-      <Animated.View entering={FadeInDown.delay(750).duration(400)}>
+      <View>
         <GlassCard style={styles.workoutPlanCard} interactive>
           <View style={styles.workoutPlanHeader}>
             <Ionicons name="barbell" size={20} color={Colors.error} />
@@ -438,10 +345,10 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             </View>
           </GlassCard>
         </GlassCard>
-      </Animated.View>
+      </View>
 
       {/* Detailed Profile Summary */}
-      <Animated.View entering={FadeInDown.delay(850).duration(400)}>
+      <View>
         <GlassCard style={styles.profileCard} interactive>
           <View style={styles.profileHeader}>
             <Ionicons name="person-outline" size={20} color={Colors.success} />
@@ -504,10 +411,10 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             </View>
           )}
         </GlassCard>
-      </Animated.View>
+      </View>
 
       {/* Guidance Card */}
-      <Animated.View entering={FadeInDown.delay(900).duration(400)}>
+      <View>
         <GlassCard style={styles.guidanceCard} interactive>
           <View style={styles.guidanceHeader}>
             <Ionicons name="bulb-outline" size={20} color={Colors.warning} />
@@ -522,13 +429,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             }
           </Text>
         </GlassCard>
-      </Animated.View>
+      </View>
 
       {/* Action Cards Container */}
       <View style={styles.actionCardsContainer}>
         {/* Coaching Video Button */}
         {onViewAvatar && (
-          <Animated.View entering={FadeInDown.delay(1000).duration(400)}>
+          <View>
             <Pressable
               onPress={handleViewAvatar}
               testID="watch-coaching-button"
@@ -550,12 +457,12 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                 </View>
               </GlassCard>
           </Pressable>
-        </Animated.View>
+        </View>
       )}
 
       {/* Start 7-Day Meal Plan Button */}
       {onStartMealPlan && (
-        <Animated.View entering={FadeInDown.delay(1100).duration(400)}>
+        <View>
           <Pressable
             onPress={handleStartMealPlan}
             testID="start-meal-plan-button"
@@ -586,12 +493,12 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               </View>
             </GlassCard>
           </Pressable>
-        </Animated.View>
+        </View>
       )}
 
       {/* Start Training Plan Button */}
       {onStartTrainingPlan && (
-        <Animated.View entering={FadeInDown.delay(1200).duration(400)}>
+        <View>
           <Pressable
             onPress={handleStartTrainingPlan}
             testID="start-training-plan-button"
@@ -625,12 +532,12 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               </View>
             </GlassCard>
           </Pressable>
-        </Animated.View>
+        </View>
       )}
       </View>
 
       {/* Action Buttons */}
-      <Animated.View style={[styles.buttonContainer, buttonStyle]}>
+      <View style={[styles.buttonContainer, buttonStyle]}>
         <Pressable
           onPress={handleLogMeal}
           testID="log-meal-button"
@@ -678,7 +585,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             </Pressable>
           )}
         </View>
-      </Animated.View>
+      </View>
     </ScrollView>
   );
 }

@@ -1,21 +1,7 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-  interpolateColor,
-} from 'react-native-reanimated';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
-
-// iOS 26 Liquid Glass spring configuration
-const GLASS_SPRING = {
-  damping: 15,
-  stiffness: 300,
-  mass: 0.8,
-};
 
 interface StepProgressBarProps {
   currentStep: number;
@@ -33,60 +19,28 @@ interface StepDotProps {
 
 function StepDot({ stepNumber, currentStep, label, colors, isDark }: StepDotProps) {
   const isActive = stepNumber <= currentStep;
-  const isCurrent = stepNumber === currentStep;
-
-  const scale = useSharedValue(1);
-  const progress = useSharedValue(isActive ? 1 : 0);
 
   // Theme-aware unselected colors
   const unselectedBg = isDark ? colors.backgroundSecondary : 'rgba(0,0,0,0.05)';
   const unselectedBorder = colors.border;
   const unselectedText = colors.textMuted;
 
-  useEffect(() => {
-    progress.value = withSpring(isActive ? 1 : 0, GLASS_SPRING);
-    if (isCurrent) {
-      scale.value = withSpring(1.1, { damping: 10, stiffness: 200 });
-    } else {
-      scale.value = withSpring(1, { damping: 15 });
-    }
-  }, [isActive, isCurrent, scale, progress]);
-
-  const dotStyle = useAnimatedStyle(() => {
-    const backgroundColor = interpolateColor(
-      progress.value,
-      [0, 1],
-      [unselectedBg, Colors.success]
-    );
-    const borderColor = interpolateColor(
-      progress.value,
-      [0, 1],
-      [unselectedBorder, Colors.success]
-    );
-
-    return {
-      transform: [{ scale: scale.value }],
-      backgroundColor,
-      borderColor,
-    };
-  });
-
-  const textStyle = useAnimatedStyle(() => {
-    const color = interpolateColor(
-      progress.value,
-      [0, 1],
-      [unselectedText, Colors.background]
-    );
-    return { color };
-  });
-
   return (
     <View style={styles.stepContainer}>
-      <Animated.View style={[styles.dot, dotStyle]}>
-        <Animated.Text style={[styles.dotText, textStyle]}>
+      <View style={[
+        styles.dot,
+        {
+          backgroundColor: isActive ? Colors.success : unselectedBg,
+          borderColor: isActive ? Colors.success : unselectedBorder,
+        }
+      ]}>
+        <Text style={[
+          styles.dotText,
+          { color: isActive ? Colors.background : unselectedText }
+        ]}>
           {stepNumber}
-        </Animated.Text>
-      </Animated.View>
+        </Text>
+      </View>
       {label && (
         <Text style={[styles.label, { color: colors.textMuted }, isActive && styles.labelActive]}>
           {label}
@@ -102,20 +56,10 @@ interface ConnectorProps {
 }
 
 function Connector({ isActive, colors }: ConnectorProps) {
-  const progress = useSharedValue(isActive ? 1 : 0);
-
-  useEffect(() => {
-    progress.value = withSpring(isActive ? 1 : 0, GLASS_SPRING);
-  }, [isActive, progress]);
-
-  const fillStyle = useAnimatedStyle(() => ({
-    width: `${progress.value * 100}%`,
-  }));
-
   return (
     <View style={styles.connectorContainer}>
       <View style={[styles.connectorBackground, { backgroundColor: colors.border }]} />
-      <Animated.View style={[styles.connectorFill, fillStyle]} />
+      <View style={[styles.connectorFill, { width: isActive ? '100%' : '0%' }]} />
     </View>
   );
 }
