@@ -17,17 +17,10 @@ import { AuthProvider } from '../contexts/AuthContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { BackgroundLayer } from '../components/BackgroundLayer';
 import { ProviderComposer } from '../utils/ProviderComposer';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
-
-// Define providers array OUTSIDE component to ensure stable reference
-// BISECTING: Minimal providers to isolate hooks issue
-const PROVIDERS_ARRAY = [
-  SafeAreaProvider,
-  AuthProvider,
-  SettingsProvider,
-];
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -51,7 +44,8 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
       <AuthProvider>
         <NotificationProvider>
           <SettingsProvider>
@@ -94,6 +88,7 @@ export default function RootLayout() {
         </NotificationProvider>
       </AuthProvider>
     </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 

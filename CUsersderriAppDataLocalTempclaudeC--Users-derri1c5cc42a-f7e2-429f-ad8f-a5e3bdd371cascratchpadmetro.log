@@ -590,3 +590,24 @@ Call Stack
  LOG  [AIService] Sending coach message: How much protein do I need for muscle gain? mode: meal
  LOG  [AIService] Sending coach message: How do I improve my squat form? mode: training
  LOG  [AIService] Sending coach message: How do I stay motivated? mode: general
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 1201ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Tuesday", "Wednesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars", "Smoothies"], "favoriteStarches": ["Sweet Potatoes", "Rice", "Potatoes", "Pasta"], "favoriteVegetables": ["Asparagus", "Green Beans", "Zucchini"], "hatedFoods": "Olives, Tomatoes, Onions", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 0, "transactions": 0}
+ LOG  [Auth] Token verified successfully
