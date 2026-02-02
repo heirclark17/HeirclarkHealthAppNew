@@ -9,10 +9,6 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import { BlurView } from 'expo-blur';

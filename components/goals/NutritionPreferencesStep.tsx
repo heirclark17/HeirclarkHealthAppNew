@@ -1,8 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput } from 'react-native';
-import Animated, {
-  Layout,
-} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
@@ -315,8 +312,6 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
         {showFastingOptions && (
           <View
-           
-            layout={Layout.springify()}
             style={styles.fastingOptions}
           >
             <Text style={[styles.presetsLabel, { color: colors.textMuted }]}>Quick Presets</Text>
