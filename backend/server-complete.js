@@ -95,9 +95,11 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
 
-// Initialize OpenAI client
+// Initialize OpenAI client with timeout
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 180000, // 3 minute timeout for AI generation (handles cold starts and complex requests)
+  maxRetries: 2, // Retry failed requests up to 2 times
 });
 
 // JWT Secret - MUST be set in production

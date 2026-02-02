@@ -459,7 +459,7 @@ class AIService {
    * Includes timeout handling for better network reliability
    */
   async generateAIMealPlan(preferences: MealPlanPreferences, days: number = 7): Promise<AIWeeklyMealPlan | null> {
-    const TIMEOUT_MS = 120000; // 2 minute timeout for AI generation (can be slow on cold starts)
+    const TIMEOUT_MS = 200000; // 3.5 minute timeout for AI generation (handles OpenAI API delays, cold starts, and complex meal plans)
 
     try {
       console.log('[AIService] Generating AI meal plan with preferences:', JSON.stringify(preferences, null, 2));
@@ -602,6 +602,10 @@ class AIService {
    * Generate AI-powered workout plan based on user preferences
    */
   async generateAIWorkoutPlan(preferences: WorkoutPlanPreferences, weeks: number = 4): Promise<AIWorkoutPlan | null> {
+    const TIMEOUT_MS = 200000; // 3.5 minute timeout for AI generation
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
     try {
       console.log('[AIService] Generating AI workout plan with preferences:', preferences);
 
@@ -616,7 +620,10 @@ class AIService {
           weeks,
           shopifyCustomerId: 'guest_ios_app',
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -633,7 +640,14 @@ class AIService {
       }
 
       return null;
-    } catch (error) {
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+
+      if (error.name === 'AbortError') {
+        console.error('[AIService] Workout plan generation timed out after', TIMEOUT_MS, 'ms');
+        return null;
+      }
+
       console.error('[AIService] generateAIWorkoutPlan error:', error);
       return null;
     }
