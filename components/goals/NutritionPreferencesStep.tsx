@@ -714,10 +714,16 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                       { color: colors.text },
                       isSelected && { color: Colors.successMuted },
                     ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
                   >
                     {option.label}
                   </Text>
-                  <Text style={[styles.skillButtonDescription, { color: colors.textMuted }]}>
+                  <Text
+                    style={[styles.skillButtonDescription, { color: colors.textMuted }]}
+                    numberOfLines={1}
+                  >
                     {option.description}
                   </Text>
                 </GlassCard>
@@ -1042,19 +1048,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 20,
     paddingHorizontal: 8,
-    minHeight: 100,
+    height: 110, // Fixed height for consistency
   },
   skillButtonLabel: {
     fontSize: 14,
     fontFamily: Fonts.medium,
     marginTop: 8,
     textAlign: 'center',
+    width: '100%', // Ensure label takes full width
   },
   skillButtonDescription: {
     fontSize: 11,
     fontFamily: Fonts.regular,
     marginTop: 4,
     textAlign: 'center',
+    width: '100%', // Ensure description takes full width
   },
   buttonRow: {
     flexDirection: 'row',
