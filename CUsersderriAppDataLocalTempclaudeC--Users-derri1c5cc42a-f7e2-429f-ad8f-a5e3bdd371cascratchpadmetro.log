@@ -735,3 +735,342 @@ iOS Bundled 785ms index.js (1 module)
  LOG  [Auth] Token verified successfully
 iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
 iOS Bundled 375ms index.js (1 module)
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 1063ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Tuesday", "Wednesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars", "Smoothies"], "favoriteStarches": ["Sweet Potatoes", "Rice", "Potatoes", "Pasta"], "favoriteVegetables": ["Asparagus", "Green Beans", "Zucchini"], "hatedFoods": "Olives, Tomatoes, Onions", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 4, "transactions": 0}
+ LOG  [Auth] Token verified successfully
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 2258ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Tuesday", "Wednesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars", "Smoothies"], "favoriteStarches": ["Sweet Potatoes", "Rice", "Potatoes", "Pasta"], "favoriteVegetables": ["Asparagus", "Green Beans", "Zucchini"], "hatedFoods": "Olives, Tomatoes, Onions", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 5, "transactions": 0}
+ LOG  [Auth] Token verified successfully
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 760ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 0, "transactions": 0}
+ LOG  [Auth] Authenticating with backend...
+ LOG  [Auth] Signed in successfully: dev@heirclark.com
+ LOG  [Auth] JWT token received and stored
+ LOG  [AIMealLogger] Voice module disabled - using AI transcription after recording
+ LOG  [Dashboard] Fetching fresh Apple Health data for today...
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Initializing HealthKit...
+ LOG  [AppleHealth] Requesting permissions: {
+  "permissions": {
+    "read": [
+      "Steps",
+      "ActiveEnergyBurned",
+      "BasalEnergyBurned",
+      "DistanceWalkingRunning",
+      "HeartRate",
+      "Weight"
+    ],
+    "write": []
+  }
+}
+ LOG  [Dashboard] Fetching fresh Apple Health data for today...
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Module is available and ready
+ LOG  [AppleHealth] Initializing HealthKit...
+ LOG  [AppleHealth] Requesting permissions: {
+  "permissions": {
+    "read": [
+      "Steps",
+      "ActiveEnergyBurned",
+      "BasalEnergyBurned",
+      "DistanceWalkingRunning",
+      "HeartRate",
+      "Weight"
+    ],
+    "write": []
+  }
+}
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 0
+ LOG  [Dashboard]   Net Calories (In - Out): 0
+ LOG  [Dashboard]   Calorie Goal: 2200
+ LOG  [Dashboard]   Gauge will display: 0 / 2200
+ LOG  [Weekly Update] Effect triggered: {"caloriesIn": 0, "carbs": 0, "fat": 0, "isToday": true, "mealsCount": 0, "protein": 0, "selectedDate": "2026-02-02", "todayStr": "2026-02-02"}
+ LOG  [Weekly Update] History fetched: {"daysToFetch": 2, "historyLength": 1}
+ LOG  [Weekly Update] Week history filtered: {"sundayStr": "2026-02-01", "todayStr": "2026-02-02", "weekHistoryLength": 1}
+ LOG  [Weekly Update] Adding day: {"calories": 0, "carbs": undefined, "date": "2026-02-02T00:00:00.000Z", "fat": undefined, "protein": undefined}
+ LOG  [Weekly Update] 🎯 FINAL WEEKLY TOTALS: {"finalTotals": {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": 0, "protein": 0}, "historyTotals": {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": 0, "protein": 0}, "todayLive": {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}}
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 85
+ LOG  [Dashboard]   Net Calories (In - Out): -85
+ LOG  [Dashboard]   Calorie Goal: 2200
+ LOG  [Dashboard]   Gauge will display: -85 / 2200
+ LOG  [Dashboard] Meals fetched: 0 items
+ LOG  [Dashboard] No meals, resetting to 0
+ LOG  [Dashboard] Meals fetched: 0 items
+ LOG  [Dashboard] No meals, resetting to 0
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 85
+ LOG  [Dashboard]   Net Calories (In - Out): -85
+ LOG  [Dashboard]   Calorie Goal: 2000
+ LOG  [Dashboard]   Gauge will display: -85 / 2000
+ LOG  [Dashboard] Weekly totals calculated: {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": 0, "protein": 0, "steps": 2129}
+ LOG  [Dashboard] Today's contribution: {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}
+ LOG  [Dashboard] Weekly totals calculated: {"calories": 0, "carbs": 0, "fat": 0, "fatLoss": 0, "protein": 0, "steps": 2129}
+ LOG  [Dashboard] Today's contribution: {"calories": 0, "carbs": 0, "fat": 0, "protein": 0}
+ LOG  [AppleHealth] ✅ Initialized successfully
+ LOG  [AppleHealth] ✅ Initialized successfully
+ LOG  [Dashboard] Apple Health data received: {"bloodPressureDiastolic": 0, "bloodPressureSystolic": 0, "caloriesOut": 1372, "distance": 1.409559077111667, "heartRate": 79, "restingEnergy": 1286, "steps": 3270.6192473585998}
+ LOG  [Dashboard] Apple Health data received: {"bloodPressureDiastolic": 0, "bloodPressureSystolic": 0, "caloriesOut": 1372, "distance": 1.409559077111667, "heartRate": 79, "restingEnergy": 1286, "steps": 3270.6192473585998}
+ LOG  [Dashboard] Net Calories Calculation:
+ LOG  [Dashboard]   Calories In: 0
+ LOG  [Dashboard]   Calories Out: 1372
+ LOG  [Dashboard]   Net Calories (In - Out): -1372
+ LOG  [Dashboard]   Calorie Goal: 2000
+ LOG  [Dashboard]   Gauge will display: -1372 / 2000
+ LOG  [Dashboard] Synced Apple Health data to backend
+ LOG  [Dashboard] Synced Apple Health data to backend
+ LOG  [Dashboard] Updated weekly steps: {"historySteps": 2129, "todaySteps": 3270.6192473585998, "totalWeeklySteps": 5399.6192473586}
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [FoodPreferences] Saved preferences
+ LOG  [NutritionPreferences] Food preferences saved
+ LOG  [PlanPreviewStep] Recalculating results due to state change: {"activityLevel": "moderate", "currentWeight": 237, "primaryGoal": "lose_weight", "targetWeight": 200}
+ LOG  [GoalWizard] Saving goals to AsyncStorage with cardioPreference: walking
+ LOG  [GoalWizard] Profile synced to backend (including targetWeight & targetDate)
+ LOG  [GoalWizard] Saving goals to API: {
+  "dailyCalories": 1200,
+  "dailyProtein": 75,
+  "dailyCarbs": 15,
+  "dailyFat": 93,
+  "dailySteps": 10000,
+  "dailyWaterOz": 64,
+  "sleepHours": 8,
+  "workoutDaysPerWeek": 3
+}
+ LOG  [API] Sending goals: {"goals":{"calories":1200,"protein":75,"carbs":15,"fat":93,"hydration":1893,"goalWeight":null,"timezone":"America/Chicago"}}
+ LOG  [GoalWizard] Goals synced to backend successfully
+ LOG  [CoachingModal] Fetching coaching data...
+ LOG  [AvatarService] Requesting goal coaching with streaming...
+ LOG  [AvatarService] Got coaching response: {"hasSession": false, "hasToken": false, "sessionToken": "missing", "sessionUrl": "missing", "streamingAvailable": false}
+ LOG  [CoachingModal] Streaming not available, script only mode
+ ERROR  [Error: Uncaught (in promise, id: 0) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 1) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 2) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 3) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 4) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 5) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 6) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 7) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 8) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 9) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 10) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 11) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 12) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 13) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+ ERROR  [Error: Uncaught (in promise, id: 14) ReferenceError: Property 'controlButtonScale' doesn't exist] 
+
+Call Stack
+  handleClose (components\goals\CoachingModal.tsx)
+  next (<native>)
+  asyncGeneratorStep (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
+  tryCallOne (address at (InternalBytecode.js:1:1180)
+  anonymous (address at (InternalBytecode.js:1:1874)
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 568ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Tuesday", "Wednesday"], "cookingSkill": "intermediate", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Yogurt", "Smoothies"], "favoriteStarches": ["Potatoes", "Rice", "Sweet Potatoes", "Pasta"], "favoriteVegetables": ["Zucchini", "Green Beans", "Asparagus"], "hatedFoods": "Olives, Onions, Tomatoes", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 0, "transactions": 0}
+ LOG  [Auth] Token verified successfully
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 597ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Tuesday", "Wednesday"], "cookingSkill": "intermediate", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Yogurt", "Smoothies"], "favoriteStarches": ["Potatoes", "Rice", "Sweet Potatoes", "Pasta"], "favoriteVegetables": ["Zucchini", "Green Beans", "Asparagus"], "hatedFoods": "Olives, Onions, Tomatoes", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 1, "transactions": 0}
+ LOG  [Auth] Token verified successfully
