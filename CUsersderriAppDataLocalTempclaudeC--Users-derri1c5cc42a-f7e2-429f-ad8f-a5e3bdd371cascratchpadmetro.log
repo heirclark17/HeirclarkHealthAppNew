@@ -611,3 +611,83 @@ iOS Bundled 1201ms index.js (1 module)
  LOG  [CalorieBanking] Created new week with target: 2000
  LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 0, "transactions": 0}
  LOG  [Auth] Token verified successfully
+ ERROR  SyntaxError: C:\Users\derri\HeirclarkHealthAppNew\app\_layout.tsx: Unexpected token, expected "}" (95:14)
+
+  93 |
+  94 | const styles = StyleSheet.create({
+> 95 |   webContainer: {
+     |               ^
+  96 |     flex: 1,
+  97 |     backgroundColor: '#000000', // Dark background for web demo
+  98 |     alignItems: 'center',
+    at constructor (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:365:19)
+    at TypeScriptParserMixin.raise (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:6599:19)
+    at TypeScriptParserMixin.unexpected (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:6619:16)
+    at TypeScriptParserMixin.expect (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:6899:12)
+    at TypeScriptParserMixin.jsxParseExpressionContainer (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:4637:10)
+    at TypeScriptParserMixin.jsxParseElementAt (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:4711:36)
+    at TypeScriptParserMixin.jsxParseElement (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:4749:17)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:4759:19)
+    at TypeScriptParserMixin.parseExprSubscripts (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:11071:23)
+    at TypeScriptParserMixin.parseUpdate (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:11056:21)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:11036:23)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:9827:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10889:61)
+    at TypeScriptParserMixin.parseExprOps (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10894:23)
+    at TypeScriptParserMixin.parseMaybeConditional (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10871:23)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10821:21)
+    at C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:9765:39
+    at TypeScriptParserMixin.tryParse (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:6907:20)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:9765:18)
+    at C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10790:39
+    at TypeScriptParserMixin.allowInAnd (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:12416:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10790:17)
+    at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:12483:17)
+    at TypeScriptParserMixin.parseParenAndDistinguishExpression (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:11665:28)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:11321:23)
+    at TypeScriptParserMixin.parseExprAtom (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:4764:20)
+    at TypeScriptParserMixin.parseExprSubscripts (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:11071:23)
+    at TypeScriptParserMixin.parseUpdate (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:11056:21)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:11036:23)
+    at TypeScriptParserMixin.parseMaybeUnary (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:9827:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10889:61)
+    at TypeScriptParserMixin.parseExprOps (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10894:23)
+    at TypeScriptParserMixin.parseMaybeConditional (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10871:23)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10821:21)
+    at TypeScriptParserMixin.parseMaybeAssign (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:9776:20)
+    at TypeScriptParserMixin.parseExpressionBase (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10774:23)
+    at C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10770:39
+    at TypeScriptParserMixin.allowInAnd (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:12411:16)
+    at TypeScriptParserMixin.parseExpression (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:10770:17)
+    at TypeScriptParserMixin.parseReturnStatement (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:13132:28)
+    at TypeScriptParserMixin.parseStatementContent (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:12788:21)
+    at TypeScriptParserMixin.parseStatementContent (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:9508:18)
+    at TypeScriptParserMixin.parseStatementLike (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:12757:17)
+    at TypeScriptParserMixin.parseStatementListItem (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:12737:17)
+    at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:13306:61)
+    at TypeScriptParserMixin.parseBlockBody (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:13299:10)
+    at TypeScriptParserMixin.parseBlock (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:13287:10)
+    at TypeScriptParserMixin.parseFunctionBody (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:12090:24)
+    at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:12076:10)
+    at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\derri\HeirclarkHealthAppNew\node_modules\@babel\parser\lib\index.js:9172:18)
+iOS .\index.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 534ms index.js (1 module)
+ WARN  SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+ LOG  [AppleHealth] Module loaded successfully
+ LOG  [AppleHealth] Available methods: ["Constants", "removeListeners", "addListener", "getActivitySummary", "getEnvironmentalAudioExposure", "saveBloodAlcoholContent", "saveWorkout", "saveMindfulSession", "getMindfulSession", "getSleepSamples", "saveCarbohydratesSample", "deleteInsulinDeliverySample", "getInsulinDeliverySamples", "getElectrocardiogramSamples", "getOxygenSaturationSamples", "getRestingHeartRateSamples", "getHeartbeatSeriesSamples", "getHeartRateVariabilitySamples", "getBodyTemperatureSamples", "getVo2MaxSamples", "getAppleStandTime", "getAppleExerciseTime", "getActiveEnergyBurned", "getWalkingHeartRateAverage", "getRestingHeartRate", "saveHeartRateSample", "saveWater", "getInfo", "saveInsulinDeliverySample", "saveFood", "getTotalFatSamples", "getFiberSamples", "getCarbohydratesSamples", "saveLeanBodyMass", "getEnergyConsumedSamples", "saveBloodGlucoseSample", "deleteCarbohydratesSample", "getDistanceSwimming", "getDistanceCycling", "saveWalkingRunningDistance", "getWorkoutRouteSamples", "getDistanceWalkingRunning", "getBiologicalSex", "saveWeight", "saveSteps", "deleteBloodGlucoseSample", "saveBodyTemperature", "getAnchoredWorkouts", "getSamples", "getBloodGlucoseSamples", "getDailyFlightsClimbedSamples", "getBloodAlcoholContentSamples", "getDailyDistanceSwimmingSamples", "getLeanBodyMassSamples", "getHeartRateSamples", "getLatestLeanBodyMass", "getFlightsClimbed", "getBloodType", "getDailyDistanceCyclingSamples", "saveBodyFatPercentage", "getWater", "saveBmi", "getLatestBodyFatPercentage", "getWaterSamples", "getDailyStepCountSamples", "getLatestWeight", "getHeightSamples", "getHeadphoneAudioExposure", "savePeakFlow", "getRespiratoryRateSamples", "getDailyDistanceWalkingRunningSamples", "getLatestBmi", "getLatestWaistCircumference", "getLatestHeight", "getLatestBloodAlcoholContent", "saveHeight", "getClinicalRecords", "getAuthStatus", "getBmiSamples", "initStepCountObserver", "getLatestPeakFlow", "saveWaistCircumference", "getProteinSamples", "getDateOfBirth", "getPeakFlowSamples", "setObserver", "getStepCount", "isAvailable", "getBodyFatPercentageSamples", "getBloodPressureSamples", "getBasalEnergyBurned", "getWeightSamples", "getWaistCircumferenceSamples", "initHealthKit"]
+ WARN  [expo-av]: Expo AV has been deprecated and will be removed in SDK 54. Use the `expo-audio` and `expo-video` packages to replace the required functionality.
+ LOG  [SmartMealLogger] Loading initial data...
+ LOG  [AdaptiveTDEE] Loading initial data...
+ LOG  [CalorieBanking] Loading initial data...
+ LOG  [GoalWizard] Provider mounted, loading saved goals...
+ LOG  [Notifications] Skipping push notification registration in dev mode
+ LOG  [FoodPreferences] Loaded preferences: {"allergens": [], "cheatDays": ["Tuesday", "Wednesday"], "cookingSkill": "", "dietaryPreferences": [], "favoriteCuisines": ["American", "Italian", "Mexican", "Chinese"], "favoriteFruits": [], "favoriteProteins": ["Chicken", "Beef", "Pork"], "favoriteSnacks": ["Fruit", "Protein Bars", "Smoothies"], "favoriteStarches": ["Sweet Potatoes", "Rice", "Potatoes", "Pasta"], "favoriteVegetables": ["Asparagus", "Green Beans", "Zucchini"], "hatedFoods": "Olives, Tomatoes, Onions", "mealDiversity": "sameDaily", "mealStyle": "threePlusSnacks"}
+ LOG  [WorkoutTracking] Loaded saved state: {"totalWorkoutsAllTime": 0, "workoutsThisWeek": 0}
+ LOG  [FastingTimer] Loaded saved state
+ LOG  [GoalWizard] Loaded saved progress: {"activityLevel": "moderate", "cardioPreference": "walking", "isComplete": false, "primaryGoal": "lose_weight"}
+ LOG  [Settings] Using default settings
+ LOG  [SmartMealLogger] Initial data loaded: {"frequentMeals": 0, "patterns": 0, "suggestions": 0}
+ LOG  [AdaptiveTDEE] Initial data loaded: {"calorieLogs": 0, "hasExistingResult": false, "isReady": false, "weightLogs": 0}
+ LOG  [CalorieBanking] Created new week with target: 2000
+ LOG  [CalorieBanking] Initial data loaded: {"hasWeek": true, "history": 1, "transactions": 0}
+ LOG  [Auth] Token verified successfully
