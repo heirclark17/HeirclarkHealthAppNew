@@ -1,25 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  withSequence,
-  withDelay,
-  Easing,
-  FadeIn,
-  FadeInDown,
-  runOnJS,
-} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, successNotification } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
-
-// iOS 26 Liquid Glass spring configuration
 
 interface AnimatedNumberProps {
   value: number;
@@ -30,36 +16,9 @@ interface AnimatedNumberProps {
 }
 
 function AnimatedNumber({ value, duration = 1200, delay = 0, suffix = '', style }: AnimatedNumberProps) {
-  const [displayValue, setDisplayValue] = useState(0);
-
-  useEffect(() => {
-    animatedValue.value = 0;
-      delay,
-      withTiming(value, {
-        duration,
-        easing: Easing.out(Easing.cubic),
-      })
-    );
-
-    // Update display value
-    const updateValue = (v: number) => {
-      setDisplayValue(Math.round(v));
-    };
-
-    const interval = setInterval(() => {
-      const current = animatedValue.value;
-      updateValue(current);
-      if (Math.round(current) === value) {
-        clearInterval(interval);
-      }
-    }, 16);
-
-    return () => clearInterval(interval);
-  }, [value, duration, delay, animatedValue]);
-
   return (
     <Text style={style}>
-      {displayValue.toLocaleString()}{suffix}
+      {value.toLocaleString()}{suffix}
     </Text>
   );
 }
@@ -74,20 +33,84 @@ interface MacroBarProps {
 }
 
 function MacroBar({ label, value, percentage, color, delay, colors }: MacroBarProps) {
+  return (
+    <View style={styles.macroItem}>
+      <View style={styles.macroHeader}>
+        <Text style={[styles.macroLabel, { color: colors.text }]}>{label}</Text>
+        <Text style={[styles.macroValue, { color: colors.text }]}>{value}g</Text>
+      </View>
+      <View style={[styles.macroBarBg, { backgroundColor: colors.background }]}>
+        <View style={[styles.macroBarFill, { width: `${percentage}%`, backgroundColor: color }]} />
+      </View>
+      <Text style={[styles.macroPercent, { color: colors.textMuted }]}>{Math.round(percentage)}%</Text>
+    </View>
+  );
+}
+
+interface PlanPreviewStepProps {
+  onBack: () => void;
+  onConfirm: () => void;
+}
+
+export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
+  const { state, calculateResults, saveGoals } = useGoalWizard();
+  const { settings } = useSettings();
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  // Dynamic theme colors
+  const colors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
+  const isDark = settings.themeMode === 'dark';
+
+  // Create a dependency key from state values that affect calculation
+  // This ensures we recalculate when user edits goals and returns
+  const calculationKey = `${state.primaryGoal}-${state.currentWeight}-${state.targetWeight}-${state.activityLevel}-${state.dietStyle}-${state.workoutsPerWeek}-${state.age}-${state.sex}-${state.heightFt}-${state.heightIn}-${state.heightCm}`;
 
   useEffect(() => {
-      delay,
-      withSpring(percentage, { damping: 15, stiffness: 90 })
-    );
-  }, [percentage, delay, width]);
-
+    console.log('[PlanPreviewStep] Recalculating results due to state change:', {
+      primaryGoal: state.primaryGoal,
+      currentWeight: state.currentWeight,
+      targetWeight: state.targetWeight,
+      activityLevel: state.activityLevel,
+    });
 
     // Calculate results when entering this step or when inputs change
     calculateResults();
+  }, [calculationKey, calculateResults]);
 
-    // Reset and replay card entrance animation
-    cardOpacity.value = 0;
-    cardScale.value = 0.9;
+  if (!state.results) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Calculating your plan...</Text>
+      </View>
+    );
+  }
+
+  const { results } = state;
+
+  // Theme-aware card backgrounds
+  const mainCardBg = isDark ? colors.backgroundSecondary : 'rgba(255,255,255,0.95)';
+  const statCardBg = isDark ? colors.backgroundSecondary : 'rgba(255,255,255,0.9)';
+  const workoutCardBg = isDark ? colors.backgroundSecondary : 'rgba(255,255,255,0.95)';
+  const primaryGlassBg = isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)';
+
+  // Calculate macro percentages
+  const totalMacroCals = (results.protein * 4) + (results.carbs * 4) + (results.fat * 9);
+  const proteinPercent = ((results.protein * 4) / totalMacroCals) * 100;
+  const carbsPercent = ((results.carbs * 4) / totalMacroCals) * 100;
+  const fatPercent = ((results.fat * 9) / totalMacroCals) * 100;
+
+  // Calculate timeline
+  const getTimelineText = () => {
+    if (state.primaryGoal === 'maintain' || state.primaryGoal === 'improve_health') {
+      return 'Ongoing healthy lifestyle';
+    }
+    if (results.totalWeeks > 0) {
+      return `~${Math.round(results.totalWeeks)} weeks to reach goal`;
+    }
+    return '12 weeks initial plan';
+  };
 
   // Get goal-specific message
   const getGoalMessage = () => {
@@ -107,16 +130,12 @@ function MacroBar({ label, value, percentage, color, delay, colors }: MacroBarPr
 
     await lightImpact();
 
-    // Animate button press
-
-  const handleSaveComplete = async () => {
     const success = await saveGoals();
     if (success) {
       await successNotification();
       onConfirm();
     } else {
       setIsConfirming(false);
-      buttonProgress.value = 0;
       console.log('[PlanPreview] API save failed, but local storage succeeded');
       // Show error message to user
       Alert.alert(
@@ -145,7 +164,7 @@ function MacroBar({ label, value, percentage, color, delay, colors }: MacroBarPr
       </View>
 
       {/* Main Calorie Card */}
-      <View style={cardAnimatedStyle}>
+      <View>
         <GlassCard isDark={isDark} borderColor="rgba(78, 205, 196, 0.25)" style={styles.mainCard}>
         <View style={styles.calorieSection}>
           <Text style={[styles.calorieLabel, { color: colors.textMuted }]}>DAILY CALORIES</Text>

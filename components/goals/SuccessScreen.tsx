@@ -1,88 +1,11 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  withSequence,
-  withDelay,
-  withRepeat,
-  Easing,
-  FadeInDown,
-} from 'react-native-reanimated';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { successNotification, lightImpact } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
-
-// iOS 26 Liquid Glass spring configuration
-
-const { width, height } = Dimensions.get('window');
-
-// Confetti particle component
-interface ConfettiProps {
-  index: number;
-  color: string;
-}
-
-function Confetti({ index, color }: ConfettiProps) {
-
-  const startX = Math.random() * width;
-  const endX = startX + (Math.random() - 0.5) * 200;
-
-  useEffect(() => {
-    const delay = Math.random() * 500;
-
-    translateY.value = withDelay(
-      delay,
-      withTiming(height + 100, {
-        duration: 2500 + Math.random() * 1000,
-        easing: Easing.out(Easing.quad),
-      })
-    );
-
-    translateX.value = withDelay(
-      delay,
-      withTiming(endX - startX, {
-        duration: 2500 + Math.random() * 1000,
-        easing: Easing.inOut(Easing.sin),
-      })
-    );
-
-    rotate.value = withDelay(
-      delay,
-      withRepeat(
-        withTiming(360, { duration: 1000 + Math.random() * 500 }),
-        -1,
-        false
-      )
-    );
-
-    opacity.value = withDelay(
-      delay + 1500,
-  });
-
-  const size = 8 + Math.random() * 8;
-  const isCircle = Math.random() > 0.5;
-
-  return (
-    <View
-      style={[
-        styles.confetti,
-        animatedStyle,
-        {
-          width: size,
-          height: isCircle ? size : size * 2,
-          borderRadius: isCircle ? size / 2 : 2,
-          backgroundColor: color,
-        },
-      ]}
-    />
-  );
-}
 
 interface SuccessScreenProps {
   onLogMeal: () => void;
@@ -109,21 +32,18 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   // Translucent primary color for active button
   const primaryGlassBg = isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)';
 
-  // Animation values
-
-  // Confetti colors
-  const confettiColors = [Colors.success, Colors.error, Colors.warning, Colors.successMuted, '#DDA0DD', '#45B7D1'];
-
   useEffect(() => {
     // Play haptic once
     if (!hasPlayedHaptic.current) {
       hasPlayedHaptic.current = true;
       successNotification();
     }
+  }, []);
 
-    // Ring burst animation
-    ringScale.value = withSequence(
-      withTiming(1.5, { duration: 400, easing: Easing.out(Easing.ease) }),
+  const handleLogMeal = () => {
+    lightImpact();
+    onLogMeal();
+  };
 
   const handleViewDashboard = () => {
     lightImpact();
@@ -214,19 +134,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      {/* Confetti */}
-      {Array.from({ length: 40 }).map((_, index) => (
-        <Confetti
-          key={index}
-          index={index}
-          color={confettiColors[index % confettiColors.length]}
-        />
-      ))}
-
       {/* Success Icon */}
       <View style={styles.iconContainer}>
-        <View style={[styles.ring, ringStyle]} />
-        <View style={[styles.checkContainer, checkStyle]}>
+        <View style={styles.checkContainer}>
           <View style={styles.checkCircle}>
             <Ionicons name="checkmark" size={48} color={Colors.background} />
           </View>
@@ -234,7 +144,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       </View>
 
       {/* Success Text */}
-      <View style={[styles.textContainer, textStyle]}>
+      <View style={styles.textContainer}>
         <Text style={[styles.title, { color: colors.text }]}>You're All Set!</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Your personalized nutrition plan is ready. Use this as your daily guide to reach your goals.
@@ -243,7 +153,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
       {/* Daily Targets - Separate Cards */}
       {state.results && (
-        <View style={[styles.targetsSection, cardStyle]}>
+        <View style={styles.targetsSection}>
           <Text style={[styles.targetsSectionHeader, { color: colors.textMuted }]}>YOUR DAILY TARGETS</Text>
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
@@ -537,7 +447,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       </View>
 
       {/* Action Buttons */}
-      <View style={[styles.buttonContainer, buttonStyle]}>
+      <View style={styles.buttonContainer}>
         <Pressable
           onPress={handleLogMeal}
           testID="log-meal-button"
@@ -600,25 +510,12 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
     overflow: 'hidden',
   },
-  confetti: {
-    position: 'absolute',
-    top: -50,
-    pointerEvents: 'none',
-  },
   iconContainer: {
     width: 100,
     height: 100,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
-  },
-  ring: {
-    position: 'absolute',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    borderColor: Colors.success,
   },
   checkContainer: {
     alignItems: 'center',
