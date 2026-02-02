@@ -10,6 +10,7 @@ export type DietStyle = 'standard' | 'keto' | 'high_protein' | 'vegetarian' | 'v
 export type WeightUnit = 'lb' | 'kg';
 export type HeightUnit = 'ft_in' | 'cm';
 export type CardioPreference = 'walking' | 'running' | 'hiit';
+export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced';
 
 export interface WizardState {
   // Step 1: Primary Goal
@@ -33,6 +34,7 @@ export interface WizardState {
   workoutsPerWeek: number;
   workoutDuration: 15 | 30 | 45 | 60;
   cardioPreference: CardioPreference;
+  fitnessLevel: FitnessLevel;
 
   // Step 4: Nutrition Preferences
   dietStyle: DietStyle;
@@ -81,6 +83,7 @@ interface GoalWizardContextType {
   setWorkoutsPerWeek: (count: number) => void;
   setWorkoutDuration: (duration: 15 | 30 | 45 | 60) => void;
   setCardioPreference: (preference: CardioPreference) => void;
+  setFitnessLevel: (level: FitnessLevel) => void;
 
   // Step 4
   setDietStyle: (style: DietStyle) => void;
@@ -115,6 +118,7 @@ const initialState: WizardState = {
   workoutsPerWeek: 3,
   workoutDuration: 30,
   cardioPreference: 'walking',
+  fitnessLevel: 'intermediate',
   dietStyle: 'standard',
   mealsPerDay: 3,
   intermittentFasting: false,
@@ -272,6 +276,11 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
   const setCardioPreference = useCallback((preference: CardioPreference) => {
     console.log('[GoalWizard] Setting cardio preference to:', preference);
     setState(prev => ({ ...prev, cardioPreference: preference }));
+  }, []);
+
+  const setFitnessLevel = useCallback((level: FitnessLevel) => {
+    console.log('[GoalWizard] Setting fitness level to:', level);
+    setState(prev => ({ ...prev, fitnessLevel: level }));
   }, []);
 
   // Step 4 setters
@@ -514,6 +523,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setWorkoutsPerWeek,
     setWorkoutDuration,
     setCardioPreference,
+    setFitnessLevel,
     setDietStyle,
     setMealsPerDay,
     setIntermittentFasting,
@@ -545,6 +555,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setWorkoutsPerWeek,
     setWorkoutDuration,
     setCardioPreference,
+    setFitnessLevel,
     setDietStyle,
     setMealsPerDay,
     setIntermittentFasting,

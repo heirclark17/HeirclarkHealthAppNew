@@ -256,6 +256,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
     setWorkoutsPerWeek,
     setWorkoutDuration,
     setCardioPreference,
+    setFitnessLevel,
   } = useGoalWizard();
   const { settings } = useSettings();
 
@@ -372,6 +373,29 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         </View>
       </View>
 
+      {/* Fitness Level */}
+      <GlassSection>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FITNESS EXPERIENCE LEVEL</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Help us tailor workout intensity and complexity
+        </Text>
+        <View style={styles.durationChips}>
+          {[
+            { value: 'beginner', label: 'Beginner' },
+            { value: 'intermediate', label: 'Intermediate' },
+            { value: 'advanced', label: 'Advanced' },
+          ].map((level) => (
+            <Chip
+              key={level.value}
+              label={level.label}
+              isSelected={state.fitnessLevel === level.value}
+              onSelect={() => setFitnessLevel(level.value as 'beginner' | 'intermediate' | 'advanced')}
+              colors={colors}
+            />
+          ))}
+        </View>
+      </GlassSection>
+
       {/* Summary Card */}
       <GlassCard style={styles.summaryCard} interactive>
         <View style={styles.summaryCardInner}>
@@ -484,6 +508,13 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textTransform: 'uppercase',
     marginBottom: 12,
+  },
+  sectionSubtitle: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    color: Colors.textMuted,
+    marginBottom: 16,
+    lineHeight: 18,
   },
   workoutChips: {
     flexDirection: 'row',

@@ -587,3 +587,6 @@ Call Stack
   _next (node_modules\@babel\runtime\helpers\asyncToGenerator.js)
   tryCallOne (address at (InternalBytecode.js:1:1180)
   anonymous (address at (InternalBytecode.js:1:1874)
+ LOG  [AIService] Sending coach message: How much protein do I need for muscle gain? mode: meal
+ LOG  [AIService] Sending coach message: How do I improve my squat form? mode: training
+ LOG  [AIService] Sending coach message: How do I stay motivated? mode: general
