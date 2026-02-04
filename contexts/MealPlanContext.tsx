@@ -306,17 +306,35 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
         const now = new Date().toISOString();
 
+        // Calculate ACTUAL averages from the generated meal plan (not just echo goals)
+        const daysWithMeals = weeklyPlan.filter(day => day.meals && day.meals.length > 0);
+        const numDays = daysWithMeals.length || 1; // Avoid division by zero
+
+        const actualTotals = daysWithMeals.reduce(
+          (acc, day) => ({
+            calories: acc.calories + (day.dailyTotals?.calories || 0),
+            protein: acc.protein + (day.dailyTotals?.protein || 0),
+            carbs: acc.carbs + (day.dailyTotals?.carbs || 0),
+            fat: acc.fat + (day.dailyTotals?.fat || 0),
+          }),
+          { calories: 0, protein: 0, carbs: 0, fat: 0 }
+        );
+
+        const calculatedWeekSummary = {
+          avgDailyCalories: Math.round(actualTotals.calories / numDays),
+          avgDailyProtein: Math.round(actualTotals.protein / numDays),
+          avgDailyCarbs: Math.round(actualTotals.carbs / numDays),
+          avgDailyFat: Math.round(actualTotals.fat / numDays),
+          totalMeals: weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0),
+        };
+
+        console.log('[MealPlanContext] Calculated week summary from actual meals:', calculatedWeekSummary);
+
         setState(prev => ({
           ...prev,
           weeklyPlan,
           groceryList: [], // AI plan doesn't include grocery list yet
-          weekSummary: {
-            avgDailyCalories: userGoals.dailyCalories,
-            avgDailyProtein: userGoals.dailyProtein,
-            avgDailyCarbs: userGoals.dailyCarbs,
-            avgDailyFat: userGoals.dailyFat,
-            totalMeals: weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0),
-          },
+          weekSummary: calculatedWeekSummary,
           isGenerating: false,
           error: null,
           lastGeneratedAt: now,
@@ -326,13 +344,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         const cacheData = {
           weeklyPlan,
           groceryList: [],
-          weekSummary: {
-            avgDailyCalories: userGoals.dailyCalories,
-            avgDailyProtein: userGoals.dailyProtein,
-            avgDailyCarbs: userGoals.dailyCarbs,
-            avgDailyFat: userGoals.dailyFat,
-            totalMeals: weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0),
-          },
+          weekSummary: calculatedWeekSummary,
           lastGeneratedAt: now,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));

@@ -258,7 +258,7 @@ export default function SettingsScreen() {
                         style: 'destructive',
                         onPress: async () => {
                           await signOut();
-                          router.replace('/');
+                          // Stay on settings page after sign out
                         }
                       },
                     ]

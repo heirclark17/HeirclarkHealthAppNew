@@ -42,7 +42,7 @@ export default function MealsScreen() {
     calories: 2000,
     protein: 150,
     carbs: 200,
-    fats: 65,
+    fat: 65,
   });
 
   // Meal Plan Context
@@ -104,7 +104,7 @@ export default function MealsScreen() {
           calories: goals.dailyCalories || 2000,
           protein: goals.dailyProtein || 150,
           carbs: goals.dailyCarbs || 200,
-          fats: goals.dailyFat || 65,
+          fat: goals.dailyFat || 65,
         });
       }
     } catch (error) {
@@ -128,6 +128,8 @@ export default function MealsScreen() {
 
   // Handle quick generate (template-based)
   const handleGenerate = async () => {
+    // Refresh goals before generating to ensure we use latest values
+    await fetchGoals();
     const success = await generateMealPlan();
     if (!success && error) {
       console.error('Failed to generate meal plan:', error);
@@ -136,6 +138,8 @@ export default function MealsScreen() {
 
   // Handle AI-powered generate
   const handleAIGenerate = async () => {
+    // Refresh goals before generating to ensure we use latest values
+    await fetchGoals();
     const success = await generateAIMealPlan();
     if (!success && error) {
       console.error('Failed to generate AI meal plan:', error);
@@ -255,11 +259,34 @@ export default function MealsScreen() {
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Carbs</Text>
             </View>
             <View style={styles.targetItem}>
-              <Text style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.fats}g</Text>
+              <Text style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.fat}g</Text>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Fats</Text>
             </View>
           </View>
         </GlassCard>
+
+        {/* Daily Progress - Show when plan exists */}
+        {weeklyPlan && currentDayPlan && !isCheatDay && (
+          <GlassCard
+            style={[
+              styles.progressCard,
+              { borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.5)' }
+            ]}
+          >
+            <Text style={[styles.progressTitle, { color: colors.text }]}>
+              {currentDayName}'s Progress
+            </Text>
+            <MacroProgressBar
+              dailyTotals={currentDayTotals}
+              dailyGoals={{
+                calories: dailyTargets.calories,
+                protein: dailyTargets.protein,
+                carbs: dailyTargets.carbs,
+                fat: dailyTargets.fat,
+              }}
+            />
+          </GlassCard>
+        )}
 
         {/* Generate Plan Section - show when no plan exists */}
         {!weeklyPlan && !isGenerating && (
@@ -540,7 +567,7 @@ export default function MealsScreen() {
             dailyCalories: dailyTargets.calories,
             dailyProtein: dailyTargets.protein,
             dailyCarbs: dailyTargets.carbs,
-            dailyFat: dailyTargets.fats,
+            dailyFat: dailyTargets.fat,
           }}
         />
       )}
@@ -602,6 +629,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.thin,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
+  },
+  progressCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+  },
+  progressTitle: {
+    fontSize: 14,
+    fontFamily: Fonts.thin,
+    letterSpacing: 0.3,
+    marginBottom: 12,
   },
   card: {
     marginHorizontal: 16,

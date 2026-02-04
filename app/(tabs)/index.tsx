@@ -106,9 +106,9 @@ export default function DashboardScreen() {
   const [lastSynced, setLastSynced] = useState<string | null>(null);
 
   // Goals (defaults, will be fetched from API)
-  const [calorieGoal, setCalorieGoal] = useState(2200);
+  const [calorieGoal, setCalorieGoal] = useState(2000);
   const [proteinGoal, setProteinGoal] = useState(150);
-  const [carbsGoal, setCarbsGoal] = useState(250);
+  const [carbsGoal, setCarbsGoal] = useState(200);
   const [fatGoal, setFatGoal] = useState(65);
   const [stepsGoal, setStepsGoal] = useState(10000);
   const [activeEnergyGoal, setActiveEnergyGoal] = useState(500);

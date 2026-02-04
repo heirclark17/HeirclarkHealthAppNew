@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Slot, SplashScreen } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, StyleSheet, Platform } from 'react-native';
@@ -23,7 +23,8 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontTimeout, setFontTimeout] = useState(false);
+  const [fontsLoaded, fontError] = useFonts({
     Urbanist_100Thin,
     Urbanist_200ExtraLight,
     Urbanist_300Light,
@@ -33,13 +34,25 @@ export default function RootLayout() {
     Urbanist_700Bold,
   });
 
+  // Add timeout to prevent infinite black screen if fonts fail
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
+    const timer = setTimeout(() => {
+      if (!fontsLoaded) {
+        console.warn('[RootLayout] Font loading timeout - proceeding without custom fonts');
+        setFontTimeout(true);
+      }
+    }, 5000); // 5 second timeout
+    return () => clearTimeout(timer);
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    if (fontsLoaded || fontTimeout || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontTimeout, fontError]);
+
+  // Proceed if fonts loaded, timed out, or errored
+  if (!fontsLoaded && !fontTimeout && !fontError) {
     return null;
   }
 

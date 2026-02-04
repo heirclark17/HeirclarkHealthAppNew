@@ -128,7 +128,7 @@
     "scheme": "heirclark",
     "extra": {
       "router": {},
-      "network": "tunnel",
+      "network": "lan",
       "eas": {
         "projectId": "f55aef9f-1d85-4d01-a2ae-7279eaf2c2db"
       }

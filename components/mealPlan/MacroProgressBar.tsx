@@ -2,9 +2,14 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
-  withTiming,
+  withSpring,
   useSharedValue,
 } from 'react-native-reanimated';
+
+const GLASS_SPRING = {
+  damping: 15,
+  stiffness: 90,
+};
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 
