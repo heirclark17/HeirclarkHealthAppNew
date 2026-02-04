@@ -74,7 +74,8 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
 
   // Fetch recipe details when modal opens and no ingredients exist
   useEffect(() => {
-    const needsRecipe = !meal.ingredients || meal.ingredients.length === 0;
+    const hasIngredients = Array.isArray(meal.ingredients) && meal.ingredients.length > 0;
+    const needsRecipe = !hasIngredients;
     const shouldFetch = showRecipeModal && needsRecipe && !hasFetchedRef.current && !fetchingRef.current;
 
     if (shouldFetch) {
@@ -90,10 +91,13 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             meal.calories,
             { protein: meal.protein, carbs: meal.carbs, fat: meal.fat }
           );
+          console.log('[MealCard] Recipe details response:', details);
           if (details) {
             console.log('[MealCard] Recipe details fetched:', details.ingredients?.length, 'ingredients');
             setRecipeDetails(details);
             hasFetchedRef.current = true;
+          } else {
+            console.log('[MealCard] No recipe details returned from API');
           }
         } catch (error) {
           console.error('[MealCard] Error fetching recipe details:', error);
@@ -107,12 +111,18 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   }, [showRecipeModal, meal.name, meal.mealType, meal.calories, meal.protein, meal.carbs, meal.fat, meal.ingredients]);
 
   // Use fetched recipe details if meal doesn't have them
-  const displayIngredients = meal.ingredients && meal.ingredients.length > 0
+  // Ensure we always have arrays to prevent .map() errors
+  const displayIngredients = Array.isArray(meal.ingredients) && meal.ingredients.length > 0
     ? meal.ingredients
-    : recipeDetails?.ingredients || [];
-  const displayInstructions = meal.instructions && meal.instructions.length > 0
+    : Array.isArray(recipeDetails?.ingredients) ? recipeDetails.ingredients : [];
+  const displayInstructions = Array.isArray(meal.instructions) && meal.instructions.length > 0
     ? meal.instructions
-    : recipeDetails?.instructions || [];
+    : Array.isArray(recipeDetails?.instructions) ? recipeDetails.instructions : [];
+
+  // Generate a fallback description if none exists
+  const displayDescription = meal.description && meal.description.trim().length > 0
+    ? meal.description
+    : `A delicious ${meal.mealType} with ${meal.protein}g protein, perfect for your nutrition goals.`;
 
   const handleViewRecipe = () => {
     console.log('[MealCard] View Recipe pressed for:', meal.name);
@@ -212,7 +222,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
 
             {/* Description */}
             <Text style={[styles.mealDescription, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]} numberOfLines={2}>
-              {meal.description}
+              {displayDescription}
             </Text>
 
             {/* Time info */}
@@ -313,7 +323,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             >
               {/* Meal Title */}
               <Text style={[styles.modalTitle, { color: colors.text }]}>{meal.name}</Text>
-              <Text style={[styles.modalDescription, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>{meal.description}</Text>
+              <Text style={[styles.modalDescription, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>{displayDescription}</Text>
 
               {/* Quick Info Row */}
               <View style={styles.quickInfoRow}>

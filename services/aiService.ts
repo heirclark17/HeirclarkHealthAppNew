@@ -437,12 +437,30 @@ class AIService {
       }
 
       const data = await response.json();
-      console.log('[AIService] Recipe details response:', JSON.stringify(data).substring(0, 200));
+      console.log('[AIService] Recipe details response:', JSON.stringify(data).substring(0, 500));
 
+      // Handle multiple response formats
       if (data.ok && data.recipe) {
         return data.recipe;
       }
 
+      // Handle success: true format
+      if (data.success && data.recipe) {
+        return data.recipe;
+      }
+
+      // Handle direct recipe data (no wrapper)
+      if (data.ingredients && Array.isArray(data.ingredients)) {
+        return {
+          ingredients: data.ingredients,
+          instructions: Array.isArray(data.instructions) ? data.instructions : [],
+          prepMinutes: data.prepMinutes || data.prepTime || 15,
+          cookMinutes: data.cookMinutes || data.cookTime || 20,
+          tips: data.tips,
+        };
+      }
+
+      console.log('[AIService] Recipe details - unrecognized response format:', Object.keys(data));
       return null;
     } catch (error) {
       console.error('[AIService] getRecipeDetails error:', error);
@@ -497,10 +515,11 @@ class AIService {
         console.log('[AIService] Meal plan response (first 300 chars):', JSON.stringify(data).substring(0, 300));
 
         // Handle different response formats from Railway backend
-        if (data.success && data.weeklyPlan) {
-          // Railway backend format: { success: true, weeklyPlan: [...] }
+        if (data.success && (data.weeklyPlan || data.mealPlan)) {
+          // Railway backend format: { success: true, weeklyPlan: [...] } or { success: true, mealPlan: [...] }
+          const mealPlanData = data.weeklyPlan || data.mealPlan;
           const plan: AIWeeklyMealPlan = {
-            days: data.weeklyPlan.map((day: any) => ({
+            days: mealPlanData.map((day: any) => ({
               dayName: day.dayName,
               dayIndex: day.dayIndex,
               isCheatDay: day.isCheatDay || false,
@@ -508,16 +527,24 @@ class AIService {
               // Handle cheat days that don't have meals
               meals: day.isCheatDay ? [] : (day.meals || []).map((meal: any) => ({
                 mealType: meal.mealType,
-                dishName: meal.name || meal.dishName,
+                name: meal.name || meal.dishName,
                 description: meal.description || '',
                 calories: meal.calories || 0,
-                macros: {
-                  protein: meal.protein || meal.macros?.protein || 0,
-                  carbs: meal.carbs || meal.macros?.carbs || 0,
-                  fat: meal.fat || meal.macros?.fat || 0,
-                },
+                protein: meal.protein || meal.macros?.protein || 0,
+                carbs: meal.carbs || meal.macros?.carbs || 0,
+                fat: meal.fat || meal.macros?.fat || 0,
                 servings: meal.servings || 1,
+                prepTime: meal.prepTime || meal.prepMinutes || 15,
+                cookTime: meal.cookTime || meal.cookMinutes || 20,
                 imageUrl: meal.imageUrl,
+                // Map ingredients from backend format
+                ingredients: (meal.ingredients || []).map((ing: any) => ({
+                  name: ing.name,
+                  amount: ing.amount || ing.quantity || '',
+                  unit: ing.unit || '',
+                  calories: ing.calories,
+                })),
+                instructions: Array.isArray(meal.instructions) ? meal.instructions : [],
               })),
             })),
             generatedAt: data.generatedAt || new Date().toISOString(),

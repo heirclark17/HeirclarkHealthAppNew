@@ -9,6 +9,11 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
 import { BlurView } from 'expo-blur';
@@ -301,6 +306,18 @@ export function CoachingModal({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentParagraph, setCurrentParagraph] = useState(0);
   const [showCaptions, setShowCaptions] = useState(settings.captions);
+
+  // Button animation values
+  const playButtonScale = useSharedValue(1);
+  const controlButtonScale = useSharedValue(1);
+
+  const playButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: playButtonScale.value }],
+  }));
+
+  const controlButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: controlButtonScale.value }],
+  }));
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -615,7 +632,7 @@ export function CoachingModal({
           tint={isDark ? 'dark' : 'light'}
           style={[styles.controlsSection, { borderTopColor: glassColors.border }]}
         >
-          <View>
+          <Animated.View style={controlButtonAnimatedStyle}>
             <Pressable
               style={[
                 styles.controlButton,
@@ -625,9 +642,9 @@ export function CoachingModal({
             >
               <Ionicons name="refresh" size={24} color={glassColors.text} />
             </Pressable>
-          </View>
+          </Animated.View>
 
-          <View>
+          <Animated.View style={playButtonAnimatedStyle}>
             <Pressable
               style={[styles.playButton, { backgroundColor: glassColors.accent, shadowColor: glassColors.accent }]}
               onPress={handlePlayPause}
@@ -638,9 +655,9 @@ export function CoachingModal({
                 color={Colors.background}
               />
             </Pressable>
-          </View>
+          </Animated.View>
 
-          <View>
+          <Animated.View style={controlButtonAnimatedStyle}>
             <Pressable
               style={[
                 styles.controlButton,
@@ -650,7 +667,7 @@ export function CoachingModal({
             >
               <Ionicons name="checkmark" size={24} color={glassColors.text} />
             </Pressable>
-          </View>
+          </Animated.View>
         </BlurView>
       </View>
     );
