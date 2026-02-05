@@ -282,6 +282,35 @@ app.get('/api/v1/auth/me', authenticateToken, async (req, res) => {
   }
 });
 
+// Delete current user account (self-delete)
+app.delete('/api/v1/auth/delete-account', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    console.log(`[Delete Account] Deleting user ${userId} and all related data...`);
+
+    // Delete all user data in correct order (foreign keys)
+    await pool.query('DELETE FROM user_sessions WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM user_goals WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM user_profiles WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM meals WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM health_metrics WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM habits WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM fasting_sessions WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+
+    console.log(`[Delete Account] ✅ User ${userId} deleted successfully`);
+
+    res.json({
+      success: true,
+      message: 'Account deleted successfully. You can now sign in with a fresh Apple ID.'
+    });
+  } catch (error) {
+    console.error('[Delete Account] Error:', error);
+    res.status(500).json({ error: 'Failed to delete account', message: error.message });
+  }
+});
+
 // ============================================
 // USER GOALS ENDPOINTS
 // ============================================
