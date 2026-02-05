@@ -131,6 +131,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
     setIntermittentFasting,
     setFastingWindow,
     toggleAllergy,
+    setWaterGoalOz,
+    setSleepGoalHours,
+    setStepGoal,
   } = useGoalWizard();
   const { settings } = useSettings();
   const foodPrefsContext = useFoodPreferencesSafe();
@@ -733,6 +736,110 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         </View>
       </GlassSection>
 
+      {/* Daily Goals */}
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DAILY GOALS</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Customize your daily health targets
+        </Text>
+
+        {/* Water Goal */}
+        <View style={styles.dailyGoalRow}>
+          <View style={styles.dailyGoalInfo}>
+            <Ionicons name="water-outline" size={24} color={colors.primary} />
+            <View style={styles.dailyGoalTextContainer}>
+              <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Water Intake</Text>
+              <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Daily hydration goal</Text>
+            </View>
+          </View>
+          <View style={styles.dailyGoalControls}>
+            <TouchableOpacity
+              onPress={async () => {
+                await selectionFeedback();
+                setWaterGoalOz(Math.max(32, state.waterGoalOz - 8));
+              }}
+              style={styles.dailyGoalButton}
+            >
+              <Ionicons name="remove-circle-outline" size={28} color={colors.textMuted} />
+            </TouchableOpacity>
+            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>{state.waterGoalOz} oz</Text>
+            <TouchableOpacity
+              onPress={async () => {
+                await selectionFeedback();
+                setWaterGoalOz(Math.min(160, state.waterGoalOz + 8));
+              }}
+              style={styles.dailyGoalButton}
+            >
+              <Ionicons name="add-circle-outline" size={28} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Sleep Goal */}
+        <View style={styles.dailyGoalRow}>
+          <View style={styles.dailyGoalInfo}>
+            <Ionicons name="moon-outline" size={24} color={colors.primary} />
+            <View style={styles.dailyGoalTextContainer}>
+              <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Sleep Duration</Text>
+              <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Nightly sleep target</Text>
+            </View>
+          </View>
+          <View style={styles.dailyGoalControls}>
+            <TouchableOpacity
+              onPress={async () => {
+                await selectionFeedback();
+                setSleepGoalHours(Math.max(5, state.sleepGoalHours - 0.5));
+              }}
+              style={styles.dailyGoalButton}
+            >
+              <Ionicons name="remove-circle-outline" size={28} color={colors.textMuted} />
+            </TouchableOpacity>
+            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>{state.sleepGoalHours} hrs</Text>
+            <TouchableOpacity
+              onPress={async () => {
+                await selectionFeedback();
+                setSleepGoalHours(Math.min(12, state.sleepGoalHours + 0.5));
+              }}
+              style={styles.dailyGoalButton}
+            >
+              <Ionicons name="add-circle-outline" size={28} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Step Goal */}
+        <View style={styles.dailyGoalRow}>
+          <View style={styles.dailyGoalInfo}>
+            <Ionicons name="footsteps-outline" size={24} color={colors.primary} />
+            <View style={styles.dailyGoalTextContainer}>
+              <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Daily Steps</Text>
+              <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Activity target</Text>
+            </View>
+          </View>
+          <View style={styles.dailyGoalControls}>
+            <TouchableOpacity
+              onPress={async () => {
+                await selectionFeedback();
+                setStepGoal(Math.max(2000, state.stepGoal - 1000));
+              }}
+              style={styles.dailyGoalButton}
+            >
+              <Ionicons name="remove-circle-outline" size={28} color={colors.textMuted} />
+            </TouchableOpacity>
+            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>{(state.stepGoal / 1000).toFixed(0)}k</Text>
+            <TouchableOpacity
+              onPress={async () => {
+                await selectionFeedback();
+                setStepGoal(Math.min(30000, state.stepGoal + 1000));
+              }}
+              style={styles.dailyGoalButton}
+            >
+              <Ionicons name="add-circle-outline" size={28} color={colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </GlassSection>
+
       {/* Buttons */}
       <View style={styles.buttonRow}>
         <TouchableOpacity onPress={onBack} activeOpacity={0.7} style={{ flex: 1 }}>
@@ -1097,5 +1204,47 @@ const styles = StyleSheet.create({
     fontWeight: '200',
     letterSpacing: 1,
     color: Colors.primaryText,
+  },
+  // Daily Goals styles
+  dailyGoalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  dailyGoalInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  dailyGoalTextContainer: {
+    gap: 2,
+  },
+  dailyGoalLabel: {
+    fontSize: 15,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+  },
+  dailyGoalHint: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+  },
+  dailyGoalControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dailyGoalButton: {
+    padding: 4,
+  },
+  dailyGoalValue: {
+    fontSize: 18,
+    fontFamily: Fonts.light,
+    fontWeight: '100',
+    minWidth: 60,
+    textAlign: 'center',
   },
 });

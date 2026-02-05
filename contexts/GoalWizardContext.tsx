@@ -44,6 +44,11 @@ export interface WizardState {
   fastingEnd: string;   // "20:00"
   allergies: string[];
 
+  // Daily Goals (customizable)
+  waterGoalOz: number;
+  sleepGoalHours: number;
+  stepGoal: number;
+
   // Calculated Results
   results: CalculatedResults | null;
 
@@ -92,6 +97,11 @@ interface GoalWizardContextType {
   setFastingWindow: (start: string, end: string) => void;
   toggleAllergy: (allergy: string) => void;
 
+  // Daily Goals
+  setWaterGoalOz: (oz: number) => void;
+  setSleepGoalHours: (hours: number) => void;
+  setStepGoal: (steps: number) => void;
+
   // Actions
   calculateResults: () => void;
   saveGoals: () => Promise<boolean>;
@@ -125,6 +135,9 @@ const initialState: WizardState = {
   fastingStart: '12:00',
   fastingEnd: '20:00',
   allergies: [],
+  waterGoalOz: 64,
+  sleepGoalHours: 8,
+  stepGoal: 10000,
   results: null,
   currentStep: 1,
   isComplete: false,
@@ -309,6 +322,19 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     }));
   }, []);
 
+  // Daily Goals setters
+  const setWaterGoalOz = useCallback((oz: number) => {
+    setState(prev => ({ ...prev, waterGoalOz: oz }));
+  }, []);
+
+  const setSleepGoalHours = useCallback((hours: number) => {
+    setState(prev => ({ ...prev, sleepGoalHours: hours }));
+  }, []);
+
+  const setStepGoal = useCallback((steps: number) => {
+    setState(prev => ({ ...prev, stepGoal: steps }));
+  }, []);
+
   // Calculate results - using a ref to avoid infinite loops
   const calculateResults = useCallback(() => {
     setState(prev => {
@@ -429,9 +455,9 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
         dailyProtein: state.results.protein,
         dailyCarbs: state.results.carbs,
         dailyFat: state.results.fat,
-        dailySteps: 10000, // Default step goal (can be overridden by preferences)
-        dailyWaterOz: 64,  // Default water goal (can be overridden by preferences)
-        sleepHours: 8,     // Default sleep goal (can be overridden by preferences)
+        dailySteps: state.stepGoal,
+        dailyWaterOz: state.waterGoalOz,
+        sleepHours: state.sleepGoalHours,
         workoutDaysPerWeek: state.workoutsPerWeek || 3,
       };
 
@@ -463,10 +489,10 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
         fastingStart: state.fastingStart,
         fastingEnd: state.fastingEnd,
         allergies: state.allergies,
-        // Customizable daily goals (currently hardcoded defaults, can be made editable later)
-        waterGoalOz: 64,
-        sleepGoalHours: 8,
-        stepGoal: 10000,
+        // Customizable daily goals
+        waterGoalOz: state.waterGoalOz,
+        sleepGoalHours: state.sleepGoalHours,
+        stepGoal: state.stepGoal,
       };
 
       try {
@@ -592,6 +618,9 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setIntermittentFasting,
     setFastingWindow,
     toggleAllergy,
+    setWaterGoalOz,
+    setSleepGoalHours,
+    setStepGoal,
     calculateResults,
     saveGoals,
     resetWizard,
@@ -624,6 +653,9 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setIntermittentFasting,
     setFastingWindow,
     toggleAllergy,
+    setWaterGoalOz,
+    setSleepGoalHours,
+    setStepGoal,
     calculateResults,
     saveGoals,
     resetWizard,
