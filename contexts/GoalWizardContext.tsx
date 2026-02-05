@@ -44,6 +44,10 @@ export interface WizardState {
   fastingEnd: string;   // "20:00"
   allergies: string[];
 
+  // Step 3b: Workout Equipment & Limitations
+  availableEquipment: string[];
+  injuries: string[];
+
   // Daily Goals (customizable)
   waterGoalOz: number;
   sleepGoalHours: number;
@@ -96,6 +100,8 @@ interface GoalWizardContextType {
   setIntermittentFasting: (enabled: boolean) => void;
   setFastingWindow: (start: string, end: string) => void;
   toggleAllergy: (allergy: string) => void;
+  toggleEquipment: (equipment: string) => void;
+  toggleInjury: (injury: string) => void;
 
   // Daily Goals
   setWaterGoalOz: (oz: number) => void;
@@ -135,6 +141,8 @@ const initialState: WizardState = {
   fastingStart: '12:00',
   fastingEnd: '20:00',
   allergies: [],
+  availableEquipment: ['bodyweight'], // Default to bodyweight only
+  injuries: [],
   waterGoalOz: 64,
   sleepGoalHours: 8,
   stepGoal: 10000,
@@ -322,6 +330,24 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     }));
   }, []);
 
+  const toggleEquipment = useCallback((equipment: string) => {
+    setState(prev => ({
+      ...prev,
+      availableEquipment: prev.availableEquipment.includes(equipment)
+        ? prev.availableEquipment.filter(e => e !== equipment)
+        : [...prev.availableEquipment, equipment],
+    }));
+  }, []);
+
+  const toggleInjury = useCallback((injury: string) => {
+    setState(prev => ({
+      ...prev,
+      injuries: prev.injuries.includes(injury)
+        ? prev.injuries.filter(i => i !== injury)
+        : [...prev.injuries, injury],
+    }));
+  }, []);
+
   // Daily Goals setters
   const setWaterGoalOz = useCallback((oz: number) => {
     setState(prev => ({ ...prev, waterGoalOz: oz }));
@@ -489,6 +515,9 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
         fastingStart: state.fastingStart,
         fastingEnd: state.fastingEnd,
         allergies: state.allergies,
+        // Equipment and injuries for workout generation
+        availableEquipment: state.availableEquipment,
+        injuries: state.injuries,
         // Customizable daily goals
         waterGoalOz: state.waterGoalOz,
         sleepGoalHours: state.sleepGoalHours,
@@ -566,6 +595,8 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
             fastingStart: backendPrefs.fastingStart || prev.fastingStart,
             fastingEnd: backendPrefs.fastingEnd || prev.fastingEnd,
             allergies: backendPrefs.allergies || prev.allergies,
+            availableEquipment: backendPrefs.availableEquipment || prev.availableEquipment,
+            injuries: backendPrefs.injuries || prev.injuries,
           }));
         }
       } catch (backendError) {
@@ -618,6 +649,8 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setIntermittentFasting,
     setFastingWindow,
     toggleAllergy,
+    toggleEquipment,
+    toggleInjury,
     setWaterGoalOz,
     setSleepGoalHours,
     setStepGoal,
@@ -653,6 +686,8 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setIntermittentFasting,
     setFastingWindow,
     toggleAllergy,
+    toggleEquipment,
+    toggleInjury,
     setWaterGoalOz,
     setSleepGoalHours,
     setStepGoal,

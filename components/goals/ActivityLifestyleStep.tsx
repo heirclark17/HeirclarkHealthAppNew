@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
-import { useGoalWizard, CardioPreference } from '../../contexts/GoalWizardContext';
+import { useGoalWizard, CardioPreference, FitnessLevel } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { ActivityLevel } from '../../constants/goals';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
@@ -105,6 +105,44 @@ const ACTIVITY_OPTIONS: ActivityOption[] = [
 ];
 
 const WORKOUT_DURATIONS = [15, 30, 45, 60] as const;
+
+// Equipment options for workout generation
+interface EquipmentOption {
+  id: string;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}
+
+const EQUIPMENT_OPTIONS: EquipmentOption[] = [
+  { id: 'bodyweight', label: 'Bodyweight', icon: 'body-outline' },
+  { id: 'dumbbells', label: 'Dumbbells', icon: 'barbell-outline' },
+  { id: 'barbell', label: 'Barbell', icon: 'fitness-outline' },
+  { id: 'kettlebell', label: 'Kettlebell', icon: 'disc-outline' },
+  { id: 'resistance_bands', label: 'Bands', icon: 'ellipse-outline' },
+  { id: 'pull_up_bar', label: 'Pull-up Bar', icon: 'remove-outline' },
+  { id: 'cable_machine', label: 'Cable Machine', icon: 'git-network-outline' },
+  { id: 'treadmill', label: 'Treadmill', icon: 'walk-outline' },
+  { id: 'stationary_bike', label: 'Bike', icon: 'bicycle-outline' },
+  { id: 'full_gym', label: 'Full Gym', icon: 'business-outline' },
+];
+
+// Common injury/limitation options
+interface InjuryOption {
+  id: string;
+  label: string;
+  description: string;
+}
+
+const INJURY_OPTIONS: InjuryOption[] = [
+  { id: 'lower_back', label: 'Lower Back', description: 'Avoid heavy spinal loading' },
+  { id: 'knee', label: 'Knee', description: 'Modify jumping and deep squats' },
+  { id: 'shoulder', label: 'Shoulder', description: 'Limit overhead movements' },
+  { id: 'neck', label: 'Neck', description: 'Avoid cervical strain exercises' },
+  { id: 'hip', label: 'Hip', description: 'Modify hip-hinge movements' },
+  { id: 'wrist', label: 'Wrist', description: 'Limit push-up variations' },
+  { id: 'ankle', label: 'Ankle', description: 'Modify impact exercises' },
+  { id: 'elbow', label: 'Elbow', description: 'Limit pressing movements' },
+];
 
 interface ActivityCardProps {
   option: ActivityOption;
@@ -257,6 +295,8 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
     setWorkoutDuration,
     setCardioPreference,
     setFitnessLevel,
+    toggleEquipment,
+    toggleInjury,
   } = useGoalWizard();
   const { settings } = useSettings();
 
@@ -394,6 +434,121 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
             />
           ))}
         </View>
+      </GlassSection>
+
+      {/* Available Equipment */}
+      <GlassSection>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>AVAILABLE EQUIPMENT</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Select all equipment you have access to (select multiple)
+        </Text>
+        <View style={styles.equipmentGrid}>
+          {EQUIPMENT_OPTIONS.map((equipment) => {
+            const isSelected = state.availableEquipment.includes(equipment.id);
+            const selectedBg = isSelected ? Colors.primary : undefined;
+            return (
+              <TouchableOpacity
+                key={equipment.id}
+                onPress={async () => {
+                  await selectionFeedback();
+                  toggleEquipment(equipment.id);
+                }}
+              >
+                <GlassCard
+                  style={[
+                    styles.equipmentChip,
+                    isSelected && { backgroundColor: selectedBg }
+                  ]}
+                  interactive
+                >
+                  <Ionicons
+                    name={equipment.icon}
+                    size={18}
+                    color={isSelected ? Colors.background : colors.textMuted}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={[
+                      styles.equipmentChipText,
+                      { color: colors.text },
+                      isSelected && styles.equipmentChipTextSelected,
+                    ]}
+                  >
+                    {equipment.label}
+                  </Text>
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        {state.availableEquipment.length === 0 && (
+          <Text style={[styles.warningText, { color: Colors.warning }]}>
+            Please select at least one equipment option
+          </Text>
+        )}
+      </GlassSection>
+
+      {/* Injuries / Limitations */}
+      <GlassSection>
+        <Text style={[styles.sectionTitle, { color: Colors.warning }]}>INJURIES OR LIMITATIONS</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Select any areas to avoid or modify exercises for (optional)
+        </Text>
+        <View style={styles.injuryGrid}>
+          {INJURY_OPTIONS.map((injury) => {
+            const isSelected = state.injuries.includes(injury.id);
+            const selectedBg = isSelected ? Colors.warning : undefined;
+            return (
+              <TouchableOpacity
+                key={injury.id}
+                onPress={async () => {
+                  await selectionFeedback();
+                  toggleInjury(injury.id);
+                }}
+              >
+                <GlassCard
+                  style={[
+                    styles.injuryChip,
+                    isSelected && { backgroundColor: selectedBg }
+                  ]}
+                  interactive
+                >
+                  <View>
+                    <Text
+                      style={[
+                        styles.injuryChipLabel,
+                        { color: colors.text },
+                        isSelected && styles.injuryChipLabelSelected,
+                      ]}
+                    >
+                      {injury.label}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.injuryChipDescription,
+                        { color: colors.textMuted },
+                        isSelected && styles.injuryChipDescriptionSelected,
+                      ]}
+                    >
+                      {injury.description}
+                    </Text>
+                  </View>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={20} color={Colors.background} style={{ marginLeft: 8 }} />
+                  )}
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        {state.injuries.length > 0 && (
+          <GlassCard style={styles.injuryNote} interactive>
+            <Ionicons name="information-circle-outline" size={20} color={Colors.info} />
+            <Text style={[styles.injuryNoteText, { color: colors.textSecondary }]}>
+              Workouts will be modified to avoid or reduce stress on these areas.
+            </Text>
+          </GlassCard>
+        )}
       </GlassSection>
 
       {/* Summary Card */}
@@ -679,5 +834,71 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Fonts.regular,
     color: Colors.textMuted,
+  },
+  // Equipment styles
+  equipmentGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  equipmentChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  equipmentChipText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+  },
+  equipmentChipTextSelected: {
+    color: Colors.background,
+  },
+  warningText: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    marginTop: 12,
+    fontStyle: 'italic',
+  },
+  // Injury styles
+  injuryGrid: {
+    gap: 10,
+  },
+  injuryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  injuryChipLabel: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    marginBottom: 2,
+  },
+  injuryChipLabelSelected: {
+    color: Colors.background,
+  },
+  injuryChipDescription: {
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+  },
+  injuryChipDescriptionSelected: {
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  injuryNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 12,
+    padding: 12,
+  },
+  injuryNoteText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    lineHeight: 18,
   },
 });

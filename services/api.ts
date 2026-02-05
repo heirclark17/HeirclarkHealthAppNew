@@ -97,6 +97,8 @@ export interface UserPreferences {
   fitnessLevel?: 'beginner' | 'intermediate' | 'advanced';
   workoutDuration?: number;
   workoutsPerWeek?: number;
+  availableEquipment?: string[]; // Equipment user has access to for workouts
+  injuries?: string[]; // Body areas to avoid or modify exercises for
   // Diet preferences
   dietStyle?: 'standard' | 'keto' | 'high_protein' | 'vegetarian' | 'vegan' | 'custom';
   mealsPerDay?: number;

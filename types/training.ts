@@ -170,6 +170,7 @@ export interface TrainingPreferences {
   activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
   fitnessLevel: DifficultyLevel;
   availableEquipment: Equipment[];
+  injuries?: string[]; // Body areas to avoid or modify exercises for (e.g., 'lower_back', 'knee')
   focusMuscleGroups?: MuscleGroup[];
   excludeExercises?: string[]; // Exercise IDs to exclude (injuries, etc.)
   cardioPreference?: CardioPreference; // User's preferred cardio type

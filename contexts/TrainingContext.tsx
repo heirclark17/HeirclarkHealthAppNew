@@ -97,6 +97,9 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const goalWorkoutsPerWeek = goalWizardContext?.state?.workoutsPerWeek;
   const goalWorkoutDuration = goalWizardContext?.state?.workoutDuration;
   const goalCardioPreference = goalWizardContext?.state?.cardioPreference;
+  const goalAvailableEquipment = goalWizardContext?.state?.availableEquipment;
+  const goalInjuries = goalWizardContext?.state?.injuries;
+  const goalFitnessLevel = goalWizardContext?.state?.fitnessLevel;
 
   // Build training preferences from goals
   const buildPreferencesFromGoals = useCallback((): TrainingPreferences => {
@@ -105,6 +108,9 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       cardioPreference: goalCardioPreference,
       activityLevel: goalActivityLevel,
       workoutsPerWeek: goalWorkoutsPerWeek,
+      availableEquipment: goalAvailableEquipment,
+      injuries: goalInjuries,
+      fitnessLevel: goalFitnessLevel,
     });
 
     // Map primary goal
@@ -117,18 +123,34 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     // Map activity level
     let activityLevel: TrainingPreferences['activityLevel'] = goalActivityLevel || 'moderate';
 
-    // Determine fitness level based on activity and workouts per week
-    let fitnessLevel: DifficultyLevel = 'beginner';
+    // Use user-selected fitness level from goals, or determine from activity/workouts
+    let fitnessLevel: DifficultyLevel = (goalFitnessLevel as DifficultyLevel) || 'intermediate';
     const workoutsPerWeek = goalWorkoutsPerWeek || 3;
-    if (workoutsPerWeek >= 5 && activityLevel === 'very_active') {
-      fitnessLevel = 'advanced';
-    } else if (workoutsPerWeek >= 3 || activityLevel === 'active' || activityLevel === 'moderate') {
-      fitnessLevel = 'intermediate';
+
+    // Only override if no fitness level set
+    if (!goalFitnessLevel) {
+      if (workoutsPerWeek >= 5 && activityLevel === 'very_active') {
+        fitnessLevel = 'advanced';
+      } else if (workoutsPerWeek >= 3 || activityLevel === 'active' || activityLevel === 'moderate') {
+        fitnessLevel = 'intermediate';
+      } else {
+        fitnessLevel = 'beginner';
+      }
     }
 
     // Get cardio preference - this is critical for workout generation
     const cardioPreference = goalCardioPreference || 'walking';
     console.log('[Training] Using cardio preference:', cardioPreference);
+
+    // Get available equipment from user preferences (default to bodyweight if none selected)
+    const availableEquipment = goalAvailableEquipment?.length > 0
+      ? goalAvailableEquipment
+      : ['bodyweight'];
+    console.log('[Training] Using available equipment:', availableEquipment);
+
+    // Get injuries from user preferences (for exercise modifications)
+    const injuries = goalInjuries || [];
+    console.log('[Training] User injuries/limitations:', injuries);
 
     return {
       primaryGoal,
@@ -136,10 +158,11 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       workoutDuration: goalWorkoutDuration || 30,
       activityLevel,
       fitnessLevel,
-      availableEquipment: ['dumbbells', 'barbell', 'bodyweight', 'cable_machine'], // Default equipment
+      availableEquipment, // User-selected equipment from Goals
+      injuries, // User-selected injuries/limitations from Goals
       cardioPreference, // User's preferred cardio type
     };
-  }, [goalPrimaryGoal, goalActivityLevel, goalWorkoutsPerWeek, goalWorkoutDuration, goalCardioPreference]);
+  }, [goalPrimaryGoal, goalActivityLevel, goalWorkoutsPerWeek, goalWorkoutDuration, goalCardioPreference, goalAvailableEquipment, goalInjuries, goalFitnessLevel]);
 
   // Generate weekly training plan with enhanced plan generator
   // If programId is provided, use that specific program
@@ -243,8 +266,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         experienceLevel: preferences.fitnessLevel || 'intermediate',
         daysPerWeek: preferences.workoutsPerWeek || 3,
         sessionDuration: preferences.workoutDuration || 45,
-        availableEquipment: preferences.availableEquipment || ['dumbbells', 'barbell', 'gym'],
-        injuries: [],
+        availableEquipment: preferences.availableEquipment || ['bodyweight'],
+        injuries: preferences.injuries || [], // User-selected injuries from Goals
         cardioPreference: preferences.cardioPreference || 'walking',
       };
 

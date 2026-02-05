@@ -517,6 +517,8 @@ app.get('/api/v1/user/preferences', authenticateToken, async (req, res) => {
           fastingStart: '12:00',
           fastingEnd: '20:00',
           allergies: [],
+          availableEquipment: ['bodyweight'],
+          injuries: [],
           waterGoalOz: 64,
           sleepGoalHours: 8,
           stepGoal: 10000,
@@ -538,6 +540,8 @@ app.get('/api/v1/user/preferences', authenticateToken, async (req, res) => {
         fastingStart: p.fasting_start,
         fastingEnd: p.fasting_end,
         allergies: p.allergies || [],
+        availableEquipment: p.available_equipment || ['bodyweight'],
+        injuries: p.injuries || [],
         waterGoalOz: p.water_goal_oz,
         sleepGoalHours: parseFloat(p.sleep_goal_hours),
         stepGoal: p.step_goal,
@@ -563,6 +567,8 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
       fastingStart,
       fastingEnd,
       allergies,
+      availableEquipment,
+      injuries,
       waterGoalOz,
       sleepGoalHours,
       stepGoal,
@@ -575,9 +581,9 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
       `INSERT INTO user_preferences (
         user_id, cardio_preference, fitness_level, workout_duration, workouts_per_week,
         diet_style, meals_per_day, intermittent_fasting, fasting_start, fasting_end,
-        allergies, water_goal_oz, sleep_goal_hours, step_goal
+        allergies, available_equipment, injuries, water_goal_oz, sleep_goal_hours, step_goal
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       ON CONFLICT (user_id) DO UPDATE SET
         cardio_preference = COALESCE($2, user_preferences.cardio_preference),
         fitness_level = COALESCE($3, user_preferences.fitness_level),
@@ -589,9 +595,11 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
         fasting_start = COALESCE($9, user_preferences.fasting_start),
         fasting_end = COALESCE($10, user_preferences.fasting_end),
         allergies = COALESCE($11, user_preferences.allergies),
-        water_goal_oz = COALESCE($12, user_preferences.water_goal_oz),
-        sleep_goal_hours = COALESCE($13, user_preferences.sleep_goal_hours),
-        step_goal = COALESCE($14, user_preferences.step_goal),
+        available_equipment = COALESCE($12, user_preferences.available_equipment),
+        injuries = COALESCE($13, user_preferences.injuries),
+        water_goal_oz = COALESCE($14, user_preferences.water_goal_oz),
+        sleep_goal_hours = COALESCE($15, user_preferences.sleep_goal_hours),
+        step_goal = COALESCE($16, user_preferences.step_goal),
         updated_at = NOW()
       RETURNING *`,
       [
@@ -606,6 +614,8 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
         fastingStart || '12:00',
         fastingEnd || '20:00',
         allergies || [],
+        availableEquipment || ['bodyweight'],
+        injuries || [],
         waterGoalOz || 64,
         sleepGoalHours || 8,
         stepGoal || 10000,
@@ -628,6 +638,8 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
         fastingStart: p.fasting_start,
         fastingEnd: p.fasting_end,
         allergies: p.allergies || [],
+        availableEquipment: p.available_equipment || ['bodyweight'],
+        injuries: p.injuries || [],
         waterGoalOz: p.water_goal_oz,
         sleepGoalHours: parseFloat(p.sleep_goal_hours),
         stepGoal: p.step_goal,
@@ -1601,10 +1613,17 @@ app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res)
 
     const workoutPlan = JSON.parse(completion.choices[0].message.content);
 
-    // Save to database
+    // Save to database (upsert - update if user already has a plan)
     await pool.query(
       `INSERT INTO workout_plans (user_id, plan_name, description, weekly_schedule, goal_type, difficulty_level)
        VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (user_id) DO UPDATE SET
+         plan_name = EXCLUDED.plan_name,
+         description = EXCLUDED.description,
+         weekly_schedule = EXCLUDED.weekly_schedule,
+         goal_type = EXCLUDED.goal_type,
+         difficulty_level = EXCLUDED.difficulty_level,
+         updated_at = NOW()
        RETURNING id`,
       [req.userId, workoutPlan.planName, workoutPlan.description, JSON.stringify(workoutPlan.weeklySchedule), preferences?.fitnessGoal, preferences?.experienceLevel]
     );
