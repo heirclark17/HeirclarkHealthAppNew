@@ -801,6 +801,135 @@ app.get('/api/v1/workouts/stats', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/v1/workouts/plan - Save workout plan to backend
+app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
+  try {
+    const { planData, programId, programName } = req.body;
+
+    console.log('[Workout] Saving workout plan for user:', req.userId);
+
+    // Upsert the workout plan
+    const result = await pool.query(
+      `INSERT INTO workout_plans (user_id, plan_data, program_id, program_name, updated_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (user_id)
+       DO UPDATE SET
+         plan_data = EXCLUDED.plan_data,
+         program_id = EXCLUDED.program_id,
+         program_name = EXCLUDED.program_name,
+         updated_at = NOW()
+       RETURNING id, created_at, updated_at`,
+      [req.userId, JSON.stringify(planData), programId || null, programName || null]
+    );
+
+    console.log('[Workout] ✅ Plan saved successfully');
+    res.json({
+      success: true,
+      plan: {
+        id: result.rows[0].id,
+        createdAt: result.rows[0].created_at,
+        updatedAt: result.rows[0].updated_at,
+      }
+    });
+  } catch (error) {
+    console.error('[Workout] Save plan error:', error);
+    res.status(500).json({ error: 'Failed to save workout plan' });
+  }
+});
+
+// GET /api/v1/workouts/plan - Get saved workout plan
+app.get('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, plan_data, program_id, program_name, created_at, updated_at
+       FROM workout_plans
+       WHERE user_id = $1`,
+      [req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ success: true, plan: null });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      plan: {
+        id: row.id,
+        planData: row.plan_data,
+        programId: row.program_id,
+        programName: row.program_name,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }
+    });
+  } catch (error) {
+    console.error('[Workout] Get plan error:', error);
+    res.status(500).json({ error: 'Failed to get workout plan' });
+  }
+});
+
+// POST /api/v1/workouts/pr - Save personal record
+app.post('/api/v1/workouts/pr', authenticateToken, async (req, res) => {
+  try {
+    const { exerciseName, weight, reps, notes } = req.body;
+
+    console.log('[Workout] Saving PR for user:', req.userId, exerciseName, weight, reps);
+
+    // Insert or update the PR
+    const result = await pool.query(
+      `INSERT INTO personal_records (user_id, exercise_name, weight, reps, notes, achieved_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       ON CONFLICT (user_id, exercise_name)
+       DO UPDATE SET
+         weight = CASE WHEN EXCLUDED.weight > personal_records.weight THEN EXCLUDED.weight ELSE personal_records.weight END,
+         reps = CASE WHEN EXCLUDED.weight > personal_records.weight THEN EXCLUDED.reps ELSE personal_records.reps END,
+         notes = CASE WHEN EXCLUDED.weight > personal_records.weight THEN EXCLUDED.notes ELSE personal_records.notes END,
+         achieved_at = CASE WHEN EXCLUDED.weight > personal_records.weight THEN NOW() ELSE personal_records.achieved_at END
+       RETURNING *`,
+      [req.userId, exerciseName.toLowerCase(), weight, reps || 1, notes || null]
+    );
+
+    console.log('[Workout] ✅ PR saved');
+    res.json({
+      success: true,
+      pr: result.rows[0]
+    });
+  } catch (error) {
+    console.error('[Workout] Save PR error:', error);
+    res.status(500).json({ error: 'Failed to save personal record' });
+  }
+});
+
+// GET /api/v1/workouts/prs - Get all personal records
+app.get('/api/v1/workouts/prs', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT exercise_name, weight, reps, notes, achieved_at
+       FROM personal_records
+       WHERE user_id = $1
+       ORDER BY exercise_name`,
+      [req.userId]
+    );
+
+    // Convert to object keyed by exercise name
+    const prs = {};
+    result.rows.forEach(row => {
+      prs[row.exercise_name] = {
+        weight: row.weight,
+        reps: row.reps,
+        notes: row.notes,
+        achievedAt: row.achieved_at,
+      };
+    });
+
+    res.json({ success: true, prs });
+  } catch (error) {
+    console.error('[Workout] Get PRs error:', error);
+    res.status(500).json({ error: 'Failed to get personal records' });
+  }
+});
+
 // ============================================
 // MEAL LOGGING ENDPOINTS
 // ============================================
