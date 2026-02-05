@@ -268,6 +268,59 @@ export default function SettingsScreen() {
                 <Ionicons name="log-out-outline" size={18} color={colors.error} style={{ marginRight: 8 }} />
                 <Text style={[styles.signOutButtonText, { color: colors.error }]}>Sign Out</Text>
               </TouchableOpacity>
+
+              {/* Nuclear option: Clear ALL auth data (debug) */}
+              <TouchableOpacity
+                style={[styles.signOutButton, { borderColor: '#ff9800', marginTop: 16 }]}
+                onPress={() => {
+                  Alert.alert(
+                    'Clear All Auth Data',
+                    'This will forcefully remove ALL authentication data including dev accounts. You will need to sign in again with your Apple ID.',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Clear Everything',
+                        style: 'destructive',
+                        onPress: async () => {
+                          try {
+                            console.log('[Settings] Clearing ALL auth data...');
+
+                            // Import AsyncStorage
+                            const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+
+                            // Clear all possible auth keys
+                            await AsyncStorage.removeItem('@heirclark_auth_token');
+                            await AsyncStorage.removeItem('@heirclark_auth_user');
+                            await AsyncStorage.removeItem('AUTH_TOKEN');
+                            await AsyncStorage.removeItem('USER_DATA');
+
+                            // Also call signOut to clear backend session
+                            await signOut();
+
+                            Alert.alert(
+                              'Success',
+                              'All authentication data cleared. The app will reload. Please sign in with your Apple ID.',
+                              [{
+                                text: 'OK',
+                                onPress: () => {
+                                  // Force reload by navigating to index
+                                  router.replace('/(tabs)');
+                                }
+                              }]
+                            );
+                          } catch (error) {
+                            console.error('[Settings] Clear auth error:', error);
+                            Alert.alert('Error', 'Failed to clear auth data');
+                          }
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <Ionicons name="nuclear-outline" size={18} color="#ff9800" style={{ marginRight: 8 }} />
+                <Text style={[styles.signOutButtonText, { color: '#ff9800' }]}>🔧 Clear All Auth (Debug)</Text>
+              </TouchableOpacity>
             </>
           ) : (
             Platform.OS === 'ios' && isAppleSignInAvailable ? (
