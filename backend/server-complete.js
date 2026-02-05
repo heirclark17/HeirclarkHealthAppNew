@@ -1074,6 +1074,72 @@ app.delete('/api/v1/meals/saved/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/v1/meals/plan - Save meal plan to backend
+app.post('/api/v1/meals/plan', authenticateToken, async (req, res) => {
+  try {
+    const { planData, weekStart, dietStyle } = req.body;
+    console.log(`[Meal Plan Save] Saving meal plan for user ${req.userId}`);
+
+    // Upsert the meal plan
+    const result = await pool.query(
+      `INSERT INTO meal_plans (user_id, week_start_date, daily_plans, diet_style, updated_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (user_id, week_start_date)
+       DO UPDATE SET daily_plans = $3, diet_style = $4, updated_at = NOW()
+       RETURNING *`,
+      [req.userId, weekStart || new Date().toISOString().split('T')[0], JSON.stringify(planData), dietStyle || 'standard']
+    );
+
+    console.log(`[Meal Plan Save] ✅ Plan saved successfully`);
+    res.json({ success: true, mealPlan: result.rows[0] });
+  } catch (error) {
+    console.error('[Meal Plan Save] Error:', error);
+    res.status(500).json({ error: 'Failed to save meal plan' });
+  }
+});
+
+// GET /api/v1/meals/plan - Get saved meal plan from backend
+app.get('/api/v1/meals/plan', authenticateToken, async (req, res) => {
+  try {
+    const { weekStart } = req.query;
+    console.log(`[Meal Plan Get] Fetching meal plan for user ${req.userId}`);
+
+    // Get the most recent meal plan (or specific week if provided)
+    let query = 'SELECT * FROM meal_plans WHERE user_id = $1';
+    let params = [req.userId];
+
+    if (weekStart) {
+      query += ' AND week_start_date = $2';
+      params.push(weekStart);
+    } else {
+      query += ' ORDER BY updated_at DESC LIMIT 1';
+    }
+
+    const result = await pool.query(query, params);
+
+    if (result.rows.length === 0) {
+      console.log('[Meal Plan Get] No plan found');
+      return res.json({ success: true, mealPlan: null });
+    }
+
+    const plan = result.rows[0];
+    console.log(`[Meal Plan Get] ✅ Found plan from ${plan.week_start_date}`);
+
+    res.json({
+      success: true,
+      mealPlan: {
+        planData: plan.daily_plans,
+        weekStart: plan.week_start_date,
+        dietStyle: plan.diet_style,
+        updatedAt: plan.updated_at,
+      },
+    });
+  } catch (error) {
+    console.error('[Meal Plan Get] Error:', error);
+    res.status(500).json({ error: 'Failed to get meal plan' });
+  }
+});
+
 // ============================================
 // NUTRITION AI ENDPOINTS
 // ============================================
