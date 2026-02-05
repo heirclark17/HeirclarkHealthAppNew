@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
+import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { successNotification, lightImpact } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 
@@ -21,6 +22,7 @@ interface SuccessScreenProps {
 export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvatar, onStartMealPlan, onStartTrainingPlan, isGeneratingMealPlan, isGeneratingTrainingPlan }: SuccessScreenProps) {
   const { state, resetWizard } = useGoalWizard();
   const { settings } = useSettings();
+  const foodPrefs = useFoodPreferencesSafe();
   const hasPlayedHaptic = useRef(false);
 
   // Dynamic theme colors
@@ -340,6 +342,225 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           </Text>
         </GlassCard>
       </View>
+
+      {/* Food Preferences Section */}
+      {foodPrefs && (
+        <View>
+          <GlassCard style={styles.foodPreferencesCard} interactive>
+            <View style={styles.foodPrefsHeader}>
+              <View style={styles.foodPrefsIconContainer}>
+                <Ionicons name="nutrition" size={24} color={Colors.success} />
+              </View>
+              <View style={styles.foodPrefsHeaderText}>
+                <Text style={styles.foodPrefsTitle}>YOUR NUTRITION PREFERENCES</Text>
+                <Text style={[styles.foodPrefsSubtitle, { color: colors.text }]}>
+                  Your personalized meal preferences
+                </Text>
+              </View>
+            </View>
+
+            {/* Dietary Preferences */}
+            {foodPrefs.dietaryPreferences && foodPrefs.dietaryPreferences.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Ionicons name="leaf-outline" size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Dietary Style</Text>
+                </View>
+                <View style={styles.prefTagsRow}>
+                  {foodPrefs.dietaryPreferences.map((pref, index) => (
+                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+                      <Text style={[styles.prefTagText, { color: Colors.success }]}>
+                        {pref.charAt(0).toUpperCase() + pref.slice(1).replace('_', ' ')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Allergens */}
+            {foodPrefs.allergens && foodPrefs.allergens.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Ionicons name="warning-outline" size={16} color={Colors.error} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Allergens to Avoid</Text>
+                </View>
+                <View style={styles.prefTagsRow}>
+                  {foodPrefs.allergens.map((allergen, index) => (
+                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
+                      <Text style={[styles.prefTagText, { color: Colors.error }]}>
+                        {allergen.charAt(0).toUpperCase() + allergen.slice(1)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Favorite Cuisines */}
+            {foodPrefs.favoriteCuisines && foodPrefs.favoriteCuisines.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Ionicons name="restaurant-outline" size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Cuisines</Text>
+                </View>
+                <View style={styles.prefTagsRow}>
+                  {foodPrefs.favoriteCuisines.map((cuisine, index) => (
+                    <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
+                      <Text style={[styles.prefTagText, { color: colors.text }]}>
+                        {cuisine.charAt(0).toUpperCase() + cuisine.slice(1).replace('_', ' ')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Favorite Proteins */}
+            {foodPrefs.favoriteProteins && foodPrefs.favoriteProteins.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Ionicons name="fish-outline" size={16} color={colors.protein} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Proteins</Text>
+                </View>
+                <View style={styles.prefTagsRow}>
+                  {foodPrefs.favoriteProteins.map((protein, index) => (
+                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
+                      <Text style={[styles.prefTagText, { color: colors.protein }]}>
+                        {protein.charAt(0).toUpperCase() + protein.slice(1).replace('_', ' ')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Favorite Vegetables */}
+            {foodPrefs.favoriteVegetables && foodPrefs.favoriteVegetables.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Ionicons name="leaf" size={16} color={Colors.success} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Vegetables</Text>
+                </View>
+                <View style={styles.prefTagsRow}>
+                  {foodPrefs.favoriteVegetables.map((veggie, index) => (
+                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+                      <Text style={[styles.prefTagText, { color: Colors.success }]}>
+                        {veggie.charAt(0).toUpperCase() + veggie.slice(1).replace('_', ' ')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Favorite Starches */}
+            {foodPrefs.favoriteStarches && foodPrefs.favoriteStarches.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Ionicons name="pizza-outline" size={16} color={colors.carbs} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Starches</Text>
+                </View>
+                <View style={styles.prefTagsRow}>
+                  {foodPrefs.favoriteStarches.map((starch, index) => (
+                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
+                      <Text style={[styles.prefTagText, { color: colors.carbs }]}>
+                        {starch.charAt(0).toUpperCase() + starch.slice(1).replace('_', ' ')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Favorite Snacks */}
+            {foodPrefs.favoriteSnacks && foodPrefs.favoriteSnacks.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Ionicons name="ice-cream-outline" size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Snacks</Text>
+                </View>
+                <View style={styles.prefTagsRow}>
+                  {foodPrefs.favoriteSnacks.map((snack, index) => (
+                    <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
+                      <Text style={[styles.prefTagText, { color: colors.text }]}>
+                        {snack.charAt(0).toUpperCase() + snack.slice(1).replace('_', ' ')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Hated Foods */}
+            {foodPrefs.hatedFoods && foodPrefs.hatedFoods.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Ionicons name="close-circle-outline" size={16} color={Colors.error} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Foods to Avoid</Text>
+                </View>
+                <View style={styles.prefTagsRow}>
+                  {foodPrefs.hatedFoods.map((food, index) => (
+                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
+                      <Text style={[styles.prefTagText, { color: Colors.error }]}>
+                        {food.charAt(0).toUpperCase() + food.slice(1).replace('_', ' ')}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Meal Planning Preferences */}
+            <View style={styles.mealPlanningSection}>
+              {/* Meal Diversity */}
+              {foodPrefs.mealDiversity && (
+                <View style={styles.prefRow}>
+                  <Ionicons name="options-outline" size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Variety: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text }]}>
+                    {foodPrefs.mealDiversity === 'same_meals' ? 'Same Meals Daily' : 'Diverse Meals'}
+                  </Text>
+                </View>
+              )}
+
+              {/* Meal Style */}
+              {foodPrefs.mealStyle && (
+                <View style={styles.prefRow}>
+                  <Ionicons name="time-outline" size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text }]}>
+                    {foodPrefs.mealStyle === 'quick_simple' ? 'Quick & Simple' : 'Gourmet & Complex'}
+                  </Text>
+                </View>
+              )}
+
+              {/* Cheat Days */}
+              {foodPrefs.cheatDays !== undefined && (
+                <View style={styles.prefRow}>
+                  <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text }]}>
+                    {foodPrefs.cheatDays} per week
+                  </Text>
+                </View>
+              )}
+
+              {/* Cooking Skill */}
+              {foodPrefs.cookingSkill && (
+                <View style={styles.prefRow}>
+                  <Ionicons name="flame-outline" size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cooking Skill: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text }]}>
+                    {foodPrefs.cookingSkill === 'beginner' ? 'Beginner' :
+                     foodPrefs.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </GlassCard>
+        </View>
+      )}
 
       {/* Action Cards Container */}
       <View style={styles.actionCardsContainer}>
@@ -907,5 +1128,80 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200',
     letterSpacing: 1,
+  },
+  foodPreferencesCard: {
+    width: '100%',
+    padding: 16,
+    marginBottom: 16,
+  },
+  foodPrefsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 20,
+  },
+  foodPrefsIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(78, 205, 196, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  foodPrefsHeaderText: {
+    flex: 1,
+  },
+  foodPrefsTitle: {
+    fontSize: 10,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    letterSpacing: 1.5,
+    color: Colors.success,
+  },
+  foodPrefsSubtitle: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    color: Colors.text,
+  },
+  prefSection: {
+    marginBottom: 16,
+  },
+  prefRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  prefLabel: {
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    color: Colors.textMuted,
+  },
+  prefValue: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    color: Colors.text,
+  },
+  prefTagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  prefTag: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: Colors.backgroundSecondary,
+  },
+  prefTagText: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    color: Colors.text,
+  },
+  mealPlanningSection: {
+    gap: 12,
+    marginTop: 4,
   },
 });
