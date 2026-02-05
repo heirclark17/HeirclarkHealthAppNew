@@ -11,7 +11,7 @@ import { mealPlanService } from '../../services/mealPlanService';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../../components/GlassCard';
-import { Meal } from '../../types/mealPlan';
+import { Meal, PantryItem } from '../../types/mealPlan';
 import {
   LoadingState,
   DaySelector,
@@ -20,6 +20,8 @@ import {
   MacroProgressBar,
   MealPlanCoachingModal,
   CheatDayGuidanceCard,
+  BudgetTierSelector,
+  BudgetTierType,
 } from '../../components/mealPlan';
 import { FoodPreferencesModal } from '../../components/FoodPreferences';
 
@@ -36,6 +38,11 @@ export default function MealsScreen() {
   const [showGroceryModal, setShowGroceryModal] = useState(false);
   const [showCoachingModal, setShowCoachingModal] = useState(false);
   const [showFoodPrefsModal, setShowFoodPrefsModal] = useState(false);
+
+  // Budget tier and pantry items for cost-optimized meal plans
+  const [selectedBudgetTier, setSelectedBudgetTier] = useState<BudgetTierType>('moderate');
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
+  const [estimatedSavings, setEstimatedSavings] = useState<number | null>(null);
 
   // Daily targets from API
   const [dailyTargets, setDailyTargets] = useState({
@@ -80,7 +87,7 @@ export default function MealsScreen() {
     if (!currentDayPlan || cheatDays.length === 0) return false;
 
     // Get the day name from the plan (e.g., "Monday", "Tuesday")
-    const dayName = currentDayPlan.dayName || currentDayPlan.dayOfWeek;
+    const dayName = currentDayPlan.dayName;
     if (!dayName) return false;
 
     // Normalize day name for comparison
@@ -92,7 +99,7 @@ export default function MealsScreen() {
   // Get display day name for cheat day guidance
   const currentDayName = useMemo(() => {
     if (!currentDayPlan) return 'Today';
-    return currentDayPlan.dayName || currentDayPlan.dayOfWeek || 'Today';
+    return currentDayPlan.dayName || 'Today';
   }, [currentDayPlan]);
 
   // Fetch goals from API
@@ -146,6 +153,64 @@ export default function MealsScreen() {
     }
   };
 
+  // Handle budget-optimized generate with Instacart cart
+  const handleBudgetGenerate = async () => {
+    try {
+      // Refresh goals before generating
+      await fetchGoals();
+
+      // Get food preferences
+      const prefs = foodPrefsContext?.preferences;
+
+      const budgetPreferences = {
+        daily_calories: dailyTargets.calories,
+        daily_protein_g: dailyTargets.protein,
+        daily_carbs_g: dailyTargets.carbs,
+        daily_fat_g: dailyTargets.fat,
+        dietary_restrictions: prefs?.dietaryPreferences || [],
+        allergies: prefs?.allergens || [],
+        cuisine_preferences: prefs?.favoriteCuisines || [],
+        cooking_skill: (prefs?.cookingSkill || 'intermediate') as 'beginner' | 'intermediate' | 'advanced',
+        max_prep_time_minutes: 60, // Default 60 minutes
+        meals_per_day: 3, // Default 3 meals per day
+        budget_tier: selectedBudgetTier,
+        pantry_items: pantryItems,
+      };
+
+      const response = await api.generateMealPlanWithCart(budgetPreferences);
+
+      if (response.ok && response.data) {
+        // Set estimated savings from pantry items
+        if (response.data.pantry_savings_cents) {
+          setEstimatedSavings(response.data.pantry_savings_cents);
+        }
+
+        // Open Instacart cart if available
+        if (response.data.cart?.cart_url) {
+          Alert.alert(
+            'Meal Plan Created!',
+            `Your ${selectedBudgetTier} meal plan is ready.\n\nWeekly cost: $${(response.data.plan.weekly_cost_cents / 100).toFixed(2)}${response.data.pantry_savings_cents ? `\nPantry savings: $${(response.data.pantry_savings_cents / 100).toFixed(2)}` : ''}\n\nWould you like to open Instacart to order groceries?`,
+            [
+              { text: 'Later', style: 'cancel' },
+              {
+                text: 'Open Instacart',
+                onPress: () => instacartService.openInstacart(response.data!.cart.cart_url)
+              },
+            ]
+          );
+        }
+
+        // Load the generated plan into the context
+        await loadCachedPlan();
+      } else {
+        Alert.alert('Error', response.error || 'Failed to generate budget meal plan');
+      }
+    } catch (error) {
+      console.error('Error generating budget meal plan:', error);
+      Alert.alert('Error', 'Failed to generate budget meal plan. Please try again.');
+    }
+  };
+
   // Handle meal swap
   const handleSwapMeal = async (mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => {
     await swapMeal(selectedDayIndex, mealType, 'Want variety');
@@ -162,13 +227,14 @@ export default function MealsScreen() {
     try {
       // Convert meal to the format expected by the calorie counter
       const mealData = {
+        date: new Date().toISOString().split('T')[0],
         name: meal.name,
         calories: meal.calories,
         protein: meal.protein,
         carbs: meal.carbs,
         fat: meal.fat,
         mealType: meal.mealType,
-        servings: meal.servings,
+        source: 'meal-plan',
       };
 
       // Log the meal for now - this would integrate with the calorie counter API
@@ -288,6 +354,19 @@ export default function MealsScreen() {
           </GlassCard>
         )}
 
+        {/* Pantry Savings Banner - Show when there are savings */}
+        {weeklyPlan && estimatedSavings && estimatedSavings > 0 && (
+          <View style={[
+            styles.savingsBanner,
+            { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.1)' }
+          ]}>
+            <Ionicons name="leaf-outline" size={18} color={isDark ? '#86efac' : '#22c55e'} />
+            <Text style={[styles.savingsText, { color: isDark ? '#86efac' : '#22c55e' }]}>
+              You're saving ~${(estimatedSavings / 100).toFixed(2)} this week using pantry items!
+            </Text>
+          </View>
+        )}
+
         {/* Generate Plan Section - show when no plan exists */}
         {!weeklyPlan && !isGenerating && (
           <View>
@@ -308,7 +387,16 @@ export default function MealsScreen() {
                 <Text style={[styles.linkButtonText, { color: colors.accent }]}>Edit Food Preferences</Text>
               </TouchableOpacity>
 
-              <View style={styles.generateButtonsRow}>
+              {/* Budget Tier Selection */}
+              <BudgetTierSelector
+                selectedTier={selectedBudgetTier}
+                onSelectTier={setSelectedBudgetTier}
+                pantryItems={pantryItems}
+                onPantryItemsChange={setPantryItems}
+                showPantryInput={true}
+              />
+
+              <View style={[styles.generateButtonsRow, { marginTop: 16 }]}>
                 <GlassCard
                   style={styles.halfButtonGlass}
                   intensity={isDark ? 40 : 60}
@@ -321,7 +409,7 @@ export default function MealsScreen() {
                     style={styles.halfButtonInner}
                   >
                     <Ionicons name="flash-outline" size={20} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick Generate</Text>
+                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick</Text>
                   </TouchableOpacity>
                 </GlassCard>
 
@@ -337,7 +425,23 @@ export default function MealsScreen() {
                     style={styles.halfButtonInner}
                   >
                     <Ionicons name="sparkles" size={20} color={isDark ? '#a5b4fc' : '#6366f1'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI-Powered</Text>
+                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI</Text>
+                  </TouchableOpacity>
+                </GlassCard>
+
+                <GlassCard
+                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.15)' }]}
+                  intensity={isDark ? 50 : 70}
+                  interactive
+                >
+                  <TouchableOpacity
+                    onPress={handleBudgetGenerate}
+                    disabled={isGenerating}
+                    activeOpacity={0.7}
+                    style={styles.halfButtonInner}
+                  >
+                    <Ionicons name="cart" size={20} color={isDark ? '#86efac' : '#22c55e'} />
+                    <Text style={[styles.halfButtonText, { color: isDark ? '#86efac' : '#22c55e' }]}>Budget</Text>
                   </TouchableOpacity>
                 </GlassCard>
               </View>
@@ -828,5 +932,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.medium,
     letterSpacing: 0.3,
+  },
+  savingsBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    gap: 8,
+  },
+  savingsText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: Fonts.medium,
   },
 });

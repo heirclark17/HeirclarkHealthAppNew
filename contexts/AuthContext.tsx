@@ -3,6 +3,7 @@ import { Platform, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { api } from '../services/api';
+import { secureStorage, SECURE_KEYS } from '../services/secureStorage';
 
 // User interface
 interface User {
@@ -49,8 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // First check if we have a token
-        const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+        // First check if we have a token (using secure storage)
+        const token = await secureStorage.getAuthToken();
         if (token) {
           // Token exists - verify it with backend
           // Note: calling refreshAuth directly instead of from dependency
@@ -58,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!backendUser) {
             console.warn('[Auth] Token invalid or expired, clearing session');
             await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-            await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+            await secureStorage.clearAuthToken();
             setUser(null);
           } else {
             // Load local user data to merge with backend user
@@ -73,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 lastName: parsed.lastName,
               };
               setUser(mergedUser);
-              console.log('[Auth] Token verified successfully');
+              console.log('[Auth] Token verified successfully (secure storage)');
             }
           }
         } else {
@@ -186,7 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Refresh authentication - verify token with backend
   const refreshAuth = useCallback(async () => {
     try {
-      const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+      const token = await secureStorage.getAuthToken();
       if (!token) {
         console.log('[Auth] No token found, user not authenticated');
         setUser(null);
@@ -198,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!backendUser) {
         console.warn('[Auth] Token invalid or expired, clearing session');
         await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-        await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+        await secureStorage.clearAuthToken();
         setUser(null);
         return;
       }
@@ -215,7 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           lastName: parsed.lastName,
         };
         setUser(mergedUser);
-        console.log('[Auth] Token refreshed successfully');
+        console.log('[Auth] Token refreshed successfully (secure storage)');
       }
     } catch (error) {
       console.error('[Auth] Token refresh error:', error);
@@ -229,12 +230,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Call backend logout endpoint
       await api.logout();
 
-      // Clear local storage
+      // Clear local storage (user data)
       await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-      await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+      // Clear secure storage (auth token and sensitive data)
+      await secureStorage.clearAllAuthData();
       setUser(null);
 
-      console.log('[Auth] Signed out successfully');
+      console.log('[Auth] Signed out successfully (secure storage cleared)');
     } catch (error) {
       console.error('[Auth] Sign out error:', error);
       // Even if backend call fails, clear local state

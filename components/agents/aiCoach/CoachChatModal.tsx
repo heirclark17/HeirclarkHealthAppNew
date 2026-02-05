@@ -69,7 +69,47 @@ interface CoachChatModalProps {
   onClose: () => void;
   mode: CoachMode;
   initialMessage?: string;
+  context?: {
+    userGoals?: {
+      dailyCalories?: number;
+      dailyProtein?: number;
+      fitnessGoal?: string;
+      activityLevel?: string;
+    };
+    recentMeals?: Array<{
+      name: string;
+      calories: number;
+      mealType: string;
+    }>;
+    recentWorkouts?: Array<{
+      type: string;
+      duration: number;
+      date: string;
+    }>;
+  };
 }
+
+// Suggestion chips for each mode
+const MODE_SUGGESTIONS: Record<CoachMode, string[]> = {
+  meal: [
+    'What should I eat for dinner?',
+    'High protein meal ideas',
+    'Quick healthy snacks',
+    'How to hit my protein goal?',
+  ],
+  training: [
+    'Good warm-up routine?',
+    'Improve my squat form',
+    'How to build muscle faster?',
+    'Best exercises for core',
+  ],
+  general: [
+    'How do I lose weight safely?',
+    'Tips for better sleep',
+    'How to stay motivated?',
+    'Balance cardio and weights',
+  ],
+};
 
 const MODE_CONFIG: Record<CoachMode, {
   title: string;
@@ -100,20 +140,30 @@ const MODE_CONFIG: Record<CoachMode, {
 export function CoachChatModal({
   visible,
   onClose,
-  mode,
+  mode: initialMode,
   initialMessage,
+  context,
 }: CoachChatModalProps) {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
-  const config = MODE_CONFIG[mode];
   const flatListRef = useRef<FlatList>(null);
 
+  const [currentMode, setCurrentMode] = useState<CoachMode>(initialMode);
   const [messages, setMessages] = useState<CoachMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
+  const [showModeSwitcher, setShowModeSwitcher] = useState(false);
+
+  // Update current mode when initialMode changes
+  useEffect(() => {
+    setCurrentMode(initialMode);
+  }, [initialMode]);
+
+  const config = MODE_CONFIG[currentMode];
+  const suggestions = MODE_SUGGESTIONS[currentMode];
 
   // Spring animation for send button
   const sendButtonScale = useSharedValue(1);
@@ -150,7 +200,7 @@ export function CoachChatModal({
 
   const loadHistory = async () => {
     try {
-      const history = await aiService.getCoachHistory(mode);
+      const history = await aiService.getCoachHistory(currentMode);
       setMessages(history);
       setHasLoadedHistory(true);
 
@@ -162,6 +212,36 @@ export function CoachChatModal({
       console.error('Error loading coach history:', error);
       setHasLoadedHistory(true);
     }
+  };
+
+  // Handle mode switching
+  const handleModeSwitch = async (newMode: CoachMode) => {
+    if (newMode === currentMode) {
+      setShowModeSwitcher(false);
+      return;
+    }
+
+    lightImpact();
+    setCurrentMode(newMode);
+    setShowModeSwitcher(false);
+    setHasLoadedHistory(false);
+
+    // Load history for new mode
+    try {
+      const history = await aiService.getCoachHistory(newMode);
+      setMessages(history);
+      setHasLoadedHistory(true);
+    } catch (error) {
+      console.error('Error loading coach history for mode:', newMode, error);
+      setMessages([]);
+      setHasLoadedHistory(true);
+    }
+  };
+
+  // Handle suggestion chip tap
+  const handleSuggestionTap = (suggestion: string) => {
+    lightImpact();
+    setInputText(suggestion);
   };
 
   const handleSendMessage = useCallback(async (text?: string) => {
@@ -178,11 +258,11 @@ export function CoachChatModal({
       role: 'user',
       content: messageText,
       timestamp: new Date().toISOString(),
-      mode,
+      mode: currentMode,
     };
 
     setMessages(prev => [...prev, userMessage]);
-    await aiService.saveCoachMessage(userMessage, mode);
+    await aiService.saveCoachMessage(userMessage, currentMode);
 
     // Scroll to bottom
     setTimeout(() => {
@@ -192,12 +272,15 @@ export function CoachChatModal({
     // Get AI response
     setIsLoading(true);
     try {
-      const context: CoachContext = {
-        mode,
+      const coachContext: CoachContext = {
+        mode: currentMode,
         conversationHistory: messages.slice(-10), // Last 10 messages for context
+        // Add user context for more personalized responses
+        userGoals: context?.userGoals,
+        recentActivity: currentMode === 'meal' ? context?.recentMeals : context?.recentWorkouts,
       };
 
-      const response = await aiService.sendCoachMessage(messageText, context);
+      const response = await aiService.sendCoachMessage(messageText, coachContext);
 
       if (response) {
         const assistantMessage: CoachMessage = {
@@ -205,11 +288,11 @@ export function CoachChatModal({
           role: 'assistant',
           content: response.message,
           timestamp: new Date().toISOString(),
-          mode,
+          mode: currentMode,
         };
 
         setMessages(prev => [...prev, assistantMessage]);
-        await aiService.saveCoachMessage(assistantMessage, mode);
+        await aiService.saveCoachMessage(assistantMessage, currentMode);
         mediumImpact();
       } else {
         // Fallback response if API fails
@@ -218,7 +301,7 @@ export function CoachChatModal({
           role: 'assistant',
           content: "I'm having trouble connecting right now. Please try again in a moment.",
           timestamp: new Date().toISOString(),
-          mode,
+          mode: currentMode,
         };
         setMessages(prev => [...prev, errorMessage]);
       }
@@ -232,13 +315,13 @@ export function CoachChatModal({
     } finally {
       setIsLoading(false);
     }
-  }, [inputText, isLoading, messages, mode]);
+  }, [inputText, isLoading, messages, currentMode, context]);
 
   const handleClearHistory = useCallback(async () => {
-    await aiService.clearCoachHistory(mode);
+    await aiService.clearCoachHistory(currentMode);
     setMessages([]);
     mediumImpact();
-  }, [mode]);
+  }, [currentMode]);
 
   const renderMessage = ({ item }: { item: CoachMessage }) => {
     const isUser = item.role === 'user';
@@ -274,8 +357,31 @@ export function CoachChatModal({
       </View>
       <Text style={[styles.emptyTitle, { color: glassColors.text }]}>Start a Conversation</Text>
       <Text style={[styles.emptySubtitle, { color: glassColors.textSecondary }]}>
-        Ask me anything about {mode === 'meal' ? 'nutrition and meal planning' : mode === 'training' ? 'workouts and exercise form' : 'your health and fitness goals'}
+        Ask me anything about {currentMode === 'meal' ? 'nutrition and meal planning' : currentMode === 'training' ? 'workouts and exercise form' : 'your health and fitness goals'}
       </Text>
+
+      {/* Suggestion Chips */}
+      <View style={styles.suggestionsContainer}>
+        <Text style={[styles.suggestionsLabel, { color: glassColors.textSecondary }]}>Quick suggestions:</Text>
+        <View style={styles.suggestionsGrid}>
+          {suggestions.map((suggestion, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.suggestionChip,
+                {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                  borderColor: glassColors.border,
+                }
+              ]}
+              onPress={() => handleSuggestionTap(suggestion)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.suggestionText, { color: glassColors.text }]}>{suggestion}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
     </View>
   );
 
@@ -299,14 +405,50 @@ export function CoachChatModal({
           <TouchableOpacity onPress={onClose} style={styles.headerButton}>
             <Ionicons name="chevron-down" size={24} color={glassColors.text} />
           </TouchableOpacity>
-          <View style={styles.headerCenter}>
+          {/* Mode Switcher Button */}
+          <TouchableOpacity
+            onPress={() => {
+              lightImpact();
+              setShowModeSwitcher(!showModeSwitcher);
+            }}
+            style={styles.headerCenter}
+          >
             <Ionicons name={config.icon as any} size={18} color={config.accentColor} />
             <Text style={[styles.headerTitle, { color: glassColors.text }]}>{config.title}</Text>
-          </View>
+            <Ionicons name="chevron-down" size={14} color={glassColors.textSecondary} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={handleClearHistory} style={styles.headerButton}>
             <Ionicons name="trash-outline" size={20} color={glassColors.textSecondary} />
           </TouchableOpacity>
         </BlurView>
+
+        {/* Mode Switcher Dropdown */}
+        {showModeSwitcher && (
+          <BlurView
+            intensity={isDark ? 70 : 90}
+            tint={isDark ? 'dark' : 'light'}
+            style={[styles.modeSwitcher, { borderColor: glassColors.border }]}
+          >
+            {(['meal', 'training', 'general'] as CoachMode[]).map((modeOption) => {
+              const modeConfig = MODE_CONFIG[modeOption];
+              const isSelected = modeOption === currentMode;
+              return (
+                <TouchableOpacity
+                  key={modeOption}
+                  style={[
+                    styles.modeOption,
+                    isSelected && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
+                  ]}
+                  onPress={() => handleModeSwitch(modeOption)}
+                >
+                  <Ionicons name={modeConfig.icon as any} size={20} color={modeConfig.accentColor} />
+                  <Text style={[styles.modeOptionText, { color: glassColors.text }]}>{modeConfig.title}</Text>
+                  {isSelected && <Ionicons name="checkmark" size={18} color={modeConfig.accentColor} />}
+                </TouchableOpacity>
+              );
+            })}
+          </BlurView>
+        )}
 
         {/* Messages */}
         <KeyboardAvoidingView
@@ -541,6 +683,68 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  // Mode Switcher styles
+  modeSwitcher: {
+    position: 'absolute',
+    top: 100, // Adjust based on header height
+    left: '50%',
+    marginLeft: -100,
+    width: 200,
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: 'hidden',
+    zIndex: 100,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  modeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  modeOptionText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  // Suggestion Chips styles
+  suggestionsContainer: {
+    marginTop: 24,
+    width: '100%',
+  },
+  suggestionsLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  suggestionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  suggestionChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  suggestionText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
 });
 

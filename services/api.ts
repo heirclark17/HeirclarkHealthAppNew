@@ -886,6 +886,197 @@ class HeirclarkAPI {
     }
   }
 
+  /**
+   * Get food by barcode
+   */
+  async getFoodByBarcode(barcode: string): Promise<any | null> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/food/barcode/${encodeURIComponent(barcode)}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error('Failed to lookup barcode');
+      }
+
+      const data = await response.json();
+      return data.success ? data.food : null;
+    } catch (error) {
+      console.error('[API] Barcode lookup error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get food details by ID
+   */
+  async getFoodById(foodId: string): Promise<any | null> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/food/${encodeURIComponent(foodId)}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error('Failed to get food details');
+      }
+
+      const data = await response.json();
+      return data.success ? data.food : null;
+    } catch (error) {
+      console.error('[API] Get food error:', error);
+      return null;
+    }
+  }
+
+  // ============================================
+  // WEARABLES
+  // ============================================
+
+  /**
+   * Get available wearable providers and their connection status
+   */
+  async getWearableProviders(): Promise<{
+    providers: Array<{
+      id: string;
+      name: string;
+      icon: string;
+      description: string;
+      connected: boolean;
+      lastSync?: string;
+    }>;
+  }> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/wearables/providers`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) {
+        // Return default providers if endpoint not available
+        return {
+          providers: [
+            { id: 'apple_health', name: 'Apple Health', icon: 'heart', description: 'Steps, workouts, heart rate', connected: false },
+            { id: 'fitbit', name: 'Fitbit', icon: 'watch', description: 'Activity, sleep, heart rate', connected: false },
+            { id: 'garmin', name: 'Garmin', icon: 'fitness', description: 'Training, GPS, recovery', connected: false },
+            { id: 'oura', name: 'Oura Ring', icon: 'ellipse', description: 'Sleep, readiness, activity', connected: false },
+            { id: 'strava', name: 'Strava', icon: 'bicycle', description: 'Running, cycling, swimming', connected: false },
+            { id: 'whoop', name: 'Whoop', icon: 'pulse', description: 'Recovery, strain, sleep', connected: false },
+            { id: 'withings', name: 'Withings', icon: 'scale', description: 'Weight, body composition', connected: false },
+          ],
+        };
+      }
+
+      const data = await response.json();
+      return { providers: data.providers || [] };
+    } catch (error) {
+      console.error('[API] Get wearable providers error:', error);
+      return { providers: [] };
+    }
+  }
+
+  /**
+   * Get OAuth URL to connect a wearable provider
+   */
+  async connectWearable(providerId: string): Promise<{ authUrl?: string; error?: string }> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/wearables/connect/${providerId}`,
+        {
+          method: 'POST',
+          headers: this.getHeaders(true),
+        }
+      );
+
+      if (!response.ok) {
+        return { error: 'Failed to initiate connection' };
+      }
+
+      const data = await response.json();
+      return { authUrl: data.authUrl };
+    } catch (error) {
+      console.error('[API] Connect wearable error:', error);
+      return { error: 'Connection failed' };
+    }
+  }
+
+  /**
+   * Disconnect a wearable provider
+   */
+  async disconnectWearable(providerId: string): Promise<{ success: boolean }> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/wearables/disconnect/${providerId}`,
+        {
+          method: 'POST',
+          headers: this.getHeaders(true),
+        }
+      );
+
+      return { success: response.ok };
+    } catch (error) {
+      console.error('[API] Disconnect wearable error:', error);
+      return { success: false };
+    }
+  }
+
+  /**
+   * Manually sync data from a wearable provider
+   */
+  async syncWearable(providerId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/wearables/sync/${providerId}`,
+        {
+          method: 'POST',
+          headers: this.getHeaders(true),
+        }
+      );
+
+      if (!response.ok) {
+        return { success: false, message: 'Sync failed' };
+      }
+
+      const data = await response.json();
+      return { success: true, message: data.message };
+    } catch (error) {
+      console.error('[API] Sync wearable error:', error);
+      return { success: false, message: 'Sync failed' };
+    }
+  }
+
+  // ============================================
+  // WEATHER
+  // ============================================
+
+  /**
+   * Get current weather for hydration reminders
+   */
+  async getCurrentWeather(latitude: number, longitude: number): Promise<{
+    temperature?: number;
+    humidity?: number;
+    conditions?: string;
+    hydrationRecommendation?: string;
+  } | null> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/weather/current?lat=${latitude}&lon=${longitude}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      return data.success ? data.weather : null;
+    } catch (error) {
+      console.error('[API] Get weather error:', error);
+      return null;
+    }
+  }
+
   // ============================================
   // AI AGENTS
   // ============================================
@@ -1181,6 +1372,222 @@ class HeirclarkAPI {
       return response.ok;
     } catch (error) {
       console.error('[API] Send test notification error:', error);
+      return false;
+    }
+  }
+
+  // ============================================
+  // ONBOARDING PROGRAMS
+  // ============================================
+
+  async getAvailablePrograms(): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/programs/available`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? (data.data || data.programs || []) : [];
+    } catch (error) {
+      console.error('[API] Get programs error:', error);
+      return [];
+    }
+  }
+
+  async enrollInProgram(programId: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/programs/enroll`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ programId }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.data : null;
+    } catch (error) {
+      console.error('[API] Enroll in program error:', error);
+      return null;
+    }
+  }
+
+  async getProgramTasks(programId: string): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/programs/${programId}/tasks`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? (data.data?.days || data.tasks || []) : [];
+    } catch (error) {
+      console.error('[API] Get program tasks error:', error);
+      return [];
+    }
+  }
+
+  async getDayTasks(programId: string, day: number): Promise<any[]> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/programs/${programId}/days/${day}/tasks`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? (data.data?.tasks || data.tasks || []) : [];
+    } catch (error) {
+      console.error('[API] Get day tasks error:', error);
+      return [];
+    }
+  }
+
+  async completeTask(programId: string, taskId: string, taskResponse?: any): Promise<any> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/programs/${programId}/tasks/${taskId}/complete`,
+        {
+          method: 'POST',
+          headers: this.getHeaders(true),
+          body: JSON.stringify({ response: taskResponse }),
+        }
+      );
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.data : null;
+    } catch (error) {
+      console.error('[API] Complete task error:', error);
+      return null;
+    }
+  }
+
+  async getProgramProgress(programId: string): Promise<any> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/programs/${programId}/progress`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.data : null;
+    } catch (error) {
+      console.error('[API] Get program progress error:', error);
+      return null;
+    }
+  }
+
+  async getStreakMilestones(): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/programs/streak-milestones`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.data : null;
+    } catch (error) {
+      console.error('[API] Get streak milestones error:', error);
+      return null;
+    }
+  }
+
+  // ============================================
+  // BUDGET TIERS & MEAL PLANNING WITH CART
+  // ============================================
+
+  async getBudgetTiers(): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/grocery/budget-tiers`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? (data.data || data.tiers || []) : [];
+    } catch (error) {
+      console.error('[API] Get budget tiers error:', error);
+      return [];
+    }
+  }
+
+  async generateMealPlanWithCart(preferences: {
+    daily_calories: number;
+    daily_protein_g: number;
+    daily_carbs_g?: number;
+    daily_fat_g?: number;
+    dietary_restrictions: string[];
+    allergies: string[];
+    cuisine_preferences?: string[];
+    cooking_skill: 'beginner' | 'intermediate' | 'advanced';
+    max_prep_time_minutes?: number;
+    meals_per_day: number;
+    budget_tier: 'budget' | 'moderate' | 'premium';
+    pantry_items: Array<{ name: string; quantity: number; unit: string }>;
+    landing_url?: string;
+  }): Promise<any> {
+    try {
+      console.log('[API] Generating meal plan with cart:', preferences);
+
+      const response = await fetch(`${this.baseUrl}/api/v1/grocery/plan-with-cart`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(preferences),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Generate meal plan with cart failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log('[API] Meal plan with cart generated successfully');
+      return data.success ? data.data : null;
+    } catch (error) {
+      console.error('[API] Generate meal plan with cart error:', error);
+      return null;
+    }
+  }
+
+  // ============================================
+  // ENHANCED HEALTH SYNC (for background sync)
+  // ============================================
+
+  async syncAppleHealthData(healthData: {
+    date: string;
+    steps: number;
+    activeCalories: number;
+    restingEnergy: number;
+    totalCaloriesOut: number;
+    workouts: number;
+    distance?: number;
+    heartRate?: number;
+  }): Promise<boolean> {
+    try {
+      const payload = {
+        ...healthData,
+        source: 'heirclark-ios-app',
+      };
+
+      console.log('[API] Syncing Apple Health data:', payload);
+
+      const response = await fetch(`${this.baseUrl}/api/v1/health/ingest-simple`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Apple Health sync failed:', response.status);
+        return false;
+      }
+
+      console.log('[API] Apple Health sync successful');
+      return true;
+    } catch (error) {
+      console.error('[API] Apple Health sync error:', error);
       return false;
     }
   }

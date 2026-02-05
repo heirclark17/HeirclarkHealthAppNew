@@ -1,5 +1,6 @@
 // Apple Health Integration Service
-// Syncs steps, calories, and other health data from Apple Health
+// Enhanced with workouts, historical data, and background sync support
+// Syncs steps, calories, workouts, and other health data from Apple Health
 
 import { Platform, Alert, NativeModules } from 'react-native';
 
@@ -55,15 +56,27 @@ const getPermissions = () => {
   };
 };
 
+export interface Workout {
+  activityName: string;
+  calories: number;
+  duration: number; // minutes
+  startDate: string;
+  endDate: string;
+}
+
 export interface HealthData {
   steps: number;
   caloriesOut: number;
+  activeCalories: number;
   restingEnergy: number;
+  totalCaloriesOut: number;
   distance: number;
   heartRate?: number;
   weight?: number;
   bloodPressureSystolic?: number;
   bloodPressureDiastolic?: number;
+  workouts: Workout[];
+  date: string;
 }
 
 class AppleHealthService {
@@ -173,7 +186,7 @@ class AppleHealthService {
     });
   }
 
-  // Get today's health data
+  // Get today's health data (enhanced with workouts)
   async getTodayData(): Promise<HealthData | null> {
     if (!this.isModuleAvailable()) {
       return null;
@@ -188,28 +201,216 @@ class AppleHealthService {
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
 
     try {
-      const [steps, activeEnergy, basalEnergy, distance, heartRate, bloodPressure] = await Promise.all([
+      const [steps, activeEnergy, basalEnergy, distance, heartRate, bloodPressure, workouts] = await Promise.all([
         this.getSteps(startOfDay),
         this.getActiveEnergy(startOfDay),
         this.getBasalEnergy(startOfDay),
         this.getDistance(startOfDay),
         this.getHeartRate(),
         this.getBloodPressure(),
+        this.getWorkouts(startOfDay),
       ]);
+
+      const activeCalories = Math.round(activeEnergy || 0);
+      const restingEnergy = Math.round(basalEnergy || 0);
 
       return {
         steps: steps || 0,
-        caloriesOut: Math.round((activeEnergy || 0) + (basalEnergy || 0)),
-        restingEnergy: Math.round(basalEnergy || 0),
+        caloriesOut: activeCalories + restingEnergy,
+        activeCalories,
+        restingEnergy,
+        totalCaloriesOut: activeCalories + restingEnergy,
         distance: distance || 0,
         heartRate: heartRate || 0,
         bloodPressureSystolic: bloodPressure?.systolic || 0,
         bloodPressureDiastolic: bloodPressure?.diastolic || 0,
+        workouts: workouts || [],
+        date: today.toISOString().split('T')[0],
       };
     } catch (error) {
       console.error('[AppleHealth] Error fetching health data:', error);
       return null;
     }
+  }
+
+  // Get workouts for a specific date
+  private async getWorkouts(startDate: Date): Promise<Workout[]> {
+    return new Promise((resolve) => {
+      const options = {
+        startDate: startDate.toISOString(),
+        endDate: new Date().toISOString(),
+        type: 'Workout',
+      };
+
+      AppleHealthKit.getSamples(options, (error: Object, results: any[]) => {
+        if (error) {
+          console.error('[AppleHealth] Error getting workouts:', error);
+          resolve([]);
+          return;
+        }
+
+        if (!Array.isArray(results)) {
+          resolve([]);
+          return;
+        }
+
+        const workouts: Workout[] = results.map((workout: any) => ({
+          activityName: workout.activityName || 'Unknown',
+          calories: workout.calories || 0,
+          duration: workout.duration ? Math.round(workout.duration / 60) : 0,
+          startDate: workout.startDate,
+          endDate: workout.endDate,
+        }));
+
+        resolve(workouts);
+      });
+    });
+  }
+
+  // Get historical data for a date range
+  async getHistoricalData(days: number): Promise<HealthData[]> {
+    if (!this.isModuleAvailable()) {
+      return [];
+    }
+
+    if (!this.initialized) {
+      const success = await this.initialize();
+      if (!success) return [];
+    }
+
+    const results: HealthData[] = [];
+    const today = new Date();
+
+    for (let i = 0; i < days; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      const data = await this.getDataForDate(date);
+      if (data) {
+        results.push(data);
+      }
+    }
+
+    return results;
+  }
+
+  // Get data for a specific date
+  private async getDataForDate(date: Date): Promise<HealthData | null> {
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+
+    try {
+      const [steps, activeEnergy, basalEnergy, distance, workouts] = await Promise.all([
+        this.getStepsForRange(date, endDate),
+        this.getActiveEnergyForRange(date, endDate),
+        this.getBasalEnergyForRange(date, endDate),
+        this.getDistanceForRange(date, endDate),
+        this.getWorkoutsForRange(date, endDate),
+      ]);
+
+      const activeCalories = Math.round(activeEnergy || 0);
+      const restingEnergy = Math.round(basalEnergy || 0);
+
+      return {
+        steps: steps || 0,
+        caloriesOut: activeCalories + restingEnergy,
+        activeCalories,
+        restingEnergy,
+        totalCaloriesOut: activeCalories + restingEnergy,
+        distance: distance || 0,
+        workouts: workouts || [],
+        date: date.toISOString().split('T')[0],
+      };
+    } catch (error) {
+      console.error('[AppleHealth] Error fetching data for date:', error);
+      return null;
+    }
+  }
+
+  private getStepsForRange(startDate: Date, endDate: Date): Promise<number> {
+    return new Promise((resolve) => {
+      AppleHealthKit.getStepCount(
+        { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
+        (err: Object, results: any) => {
+          resolve(err ? 0 : results?.value || 0);
+        }
+      );
+    });
+  }
+
+  private getActiveEnergyForRange(startDate: Date, endDate: Date): Promise<number> {
+    return new Promise((resolve) => {
+      AppleHealthKit.getActiveEnergyBurned(
+        { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
+        (err: Object, results: any[]) => {
+          if (err || !Array.isArray(results)) {
+            resolve(0);
+            return;
+          }
+          resolve(results.reduce((sum, e) => sum + (e?.value || 0), 0));
+        }
+      );
+    });
+  }
+
+  private getBasalEnergyForRange(startDate: Date, endDate: Date): Promise<number> {
+    return new Promise((resolve) => {
+      AppleHealthKit.getBasalEnergyBurned(
+        { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
+        (err: Object, results: any[]) => {
+          if (err || !Array.isArray(results)) {
+            resolve(0);
+            return;
+          }
+          resolve(results.reduce((sum, e) => sum + (e?.value || 0), 0));
+        }
+      );
+    });
+  }
+
+  private getDistanceForRange(startDate: Date, endDate: Date): Promise<number> {
+    return new Promise((resolve) => {
+      AppleHealthKit.getDistanceWalkingRunning(
+        { date: startDate.toISOString() },
+        (err: Object, results: any) => {
+          if (err) {
+            resolve(0);
+            return;
+          }
+          const meters = results?.value || 0;
+          const miles = meters * 0.000621371;
+          resolve(miles);
+        }
+      );
+    });
+  }
+
+  private getWorkoutsForRange(startDate: Date, endDate: Date): Promise<Workout[]> {
+    return new Promise((resolve) => {
+      AppleHealthKit.getSamples(
+        {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          type: 'Workout',
+        },
+        (err: Object, results: any[]) => {
+          if (err || !Array.isArray(results)) {
+            resolve([]);
+            return;
+          }
+          resolve(
+            results.map((w: any) => ({
+              activityName: w.activityName || 'Unknown',
+              calories: w.calories || 0,
+              duration: w.duration ? Math.round(w.duration / 60) : 0,
+              startDate: w.startDate,
+              endDate: w.endDate,
+            }))
+          );
+        }
+      );
+    });
   }
 
   // Get most recent heart rate

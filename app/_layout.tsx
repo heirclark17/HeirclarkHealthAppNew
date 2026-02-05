@@ -18,6 +18,8 @@ import { NotificationProvider } from '../contexts/NotificationContext';
 import { BackgroundLayer } from '../components/BackgroundLayer';
 import { ProviderComposer } from '../utils/ProviderComposer';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { registerBackgroundSync } from '../services/backgroundSync';
+import { secureStorage } from '../services/secureStorage';
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
@@ -50,6 +52,24 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontTimeout, fontError]);
+
+  // Initialize background sync for Apple Health data
+  useEffect(() => {
+    const initBackgroundSync = async () => {
+      try {
+        // Only register on iOS (Apple Health)
+        if (Platform.OS === 'ios') {
+          await registerBackgroundSync();
+          console.log('[RootLayout] Background sync registered');
+        }
+        // Migrate any existing auth data to secure storage
+        await secureStorage.migrateFromAsyncStorage();
+      } catch (error) {
+        console.error('[RootLayout] Background sync init error:', error);
+      }
+    };
+    initBackgroundSync();
+  }, []);
 
   // Proceed if fonts loaded, timed out, or errored
   if (!fontsLoaded && !fontTimeout && !fontError) {

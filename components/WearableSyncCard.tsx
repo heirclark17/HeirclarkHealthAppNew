@@ -6,6 +6,7 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../constants/Th
 import { fitnessMCP, FitnessProvider } from '../services/fitnessMCP';
 import { api } from '../services/api';
 import { appleHealthService } from '../services/appleHealthService';
+import { triggerManualSync, getLastSyncTime } from '../services/backgroundSync';
 import { useSettings } from '../contexts/SettingsContext';
 
 interface WearableSyncCardProps {
@@ -40,14 +41,25 @@ export const WearableSyncCard: React.FC<WearableSyncCardProps> = ({ onSync }) =>
       const providerList = await fitnessMCP.getProviders();
       setProviders(providerList);
 
-      // Find most recent sync
-      const lastSyncTime = providerList
+      // Find most recent sync from providers
+      const providerSyncTime = providerList
         .filter(p => p.lastSync)
         .map(p => new Date(p.lastSync!).getTime())
         .sort((a, b) => b - a)[0];
 
-      if (lastSyncTime) {
-        setLastSync(new Date(lastSyncTime).toLocaleTimeString());
+      // Also check background sync last sync time (iOS)
+      let bgSyncTime: number | null = null;
+      if (Platform.OS === 'ios') {
+        const bgLastSync = await getLastSyncTime();
+        if (bgLastSync) {
+          bgSyncTime = new Date(bgLastSync).getTime();
+        }
+      }
+
+      // Use the most recent sync time
+      const mostRecentSync = Math.max(providerSyncTime || 0, bgSyncTime || 0);
+      if (mostRecentSync > 0) {
+        setLastSync(new Date(mostRecentSync).toLocaleTimeString());
       }
     } catch (error) {
       // console.error('Error loading providers:', error);
@@ -252,9 +264,16 @@ export const WearableSyncCard: React.FC<WearableSyncCardProps> = ({ onSync }) =>
       let totalCalories = 0;
       const errors: string[] = [];
 
-      // Sync Apple Health if on iOS
+      // Sync Apple Health if on iOS using background sync service
       if (Platform.OS === 'ios') {
         try {
+          // Use the background sync service for comprehensive Apple Health sync
+          const syncResult = await triggerManualSync();
+          if (syncResult) {
+            console.log('[WearableSync] Background sync completed successfully');
+          }
+
+          // Also get today's data for immediate display
           const healthData = await appleHealthService.getTodayData();
           if (healthData) {
             totalSteps += healthData.steps;

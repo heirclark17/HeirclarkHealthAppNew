@@ -179,18 +179,18 @@ const TAB_CONFIG: TabConfig[] = [
     label: 'Meals'
   },
   {
+    name: 'food-search',
+    href: '/food-search',
+    icon: 'search-outline',
+    iconFilled: 'search',
+    label: 'Foods'
+  },
+  {
     name: 'saved-meals',
     href: '/saved-meals',
     icon: 'bookmark-outline',
     iconFilled: 'bookmark',
     label: 'Saved'
-  },
-  {
-    name: 'ai-test',
-    href: '/ai-test',
-    icon: 'flask-outline',
-    iconFilled: 'flask',
-    label: 'AI Test'
   },
   {
     name: 'programs',
@@ -205,6 +205,13 @@ const TAB_CONFIG: TabConfig[] = [
     icon: 'pulse-outline',
     iconFilled: 'pulse',
     label: 'Tracking'
+  },
+  {
+    name: 'wearables',
+    href: '/wearables',
+    icon: 'watch-outline',
+    iconFilled: 'watch',
+    label: 'Devices'
   },
   {
     name: 'settings',
