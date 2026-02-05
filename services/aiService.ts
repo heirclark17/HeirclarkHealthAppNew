@@ -3,6 +3,7 @@
 
 // Railway Backend for AI endpoints
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://heirclarkinstacartbackend-production.up.railway.app';
+const AUTH_TOKEN_KEY = '@heirclark_auth_token';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NutritionVerificationResult } from '../types/nutritionAccuracy';
@@ -53,9 +54,34 @@ export interface NutritionAnalysis {
 
 class AIService {
   private baseUrl: string;
+  private authToken: string | null = null;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
+    this.loadAuthToken();
+  }
+
+  // Load auth token from storage
+  private async loadAuthToken() {
+    try {
+      const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+      if (token) {
+        this.authToken = token;
+      }
+    } catch (error) {
+      console.warn('[AIService] Failed to load auth token:', error);
+    }
+  }
+
+  // Get common headers for requests
+  private getHeaders(): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    if (this.authToken) {
+      headers['Authorization'] = `Bearer ${this.authToken}`;
+    }
+    return headers;
   }
 
   /**
@@ -111,10 +137,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/nutrition/ai/meal-from-text`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           text: description,
           shopifyCustomerId: 'guest_ios_app',
@@ -203,9 +226,7 @@ class AIService {
 
       const apiResponse = await fetch(`${this.baseUrl}/api/v1/nutrition/ai/meal-from-photo`, {
         method: 'POST',
-        headers: {
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
+        headers: this.authToken ? { 'Authorization': `Bearer ${this.authToken}` } : {},
         body: formData,
       });
 
@@ -328,10 +349,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/nutrition/ai/generate-food-image`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           mealName,
           shopifyCustomerId: 'guest_ios_app',
@@ -372,9 +390,7 @@ class AIService {
       // Send to backend transcription endpoint
       const apiResponse = await fetch(`${this.baseUrl}/api/v1/nutrition/ai/transcribe-voice`, {
         method: 'POST',
-        headers: {
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
+        headers: this.authToken ? { 'Authorization': `Bearer ${this.authToken}` } : {},
         body: formData,
       });
 
@@ -417,10 +433,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/ai/recipe-details`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           dishName,
           mealType,
@@ -490,10 +503,7 @@ class AIService {
       try {
         const response = await fetch(`${this.baseUrl}/api/v1/ai/generate-meal-plan`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Shopify-Customer-Id': 'guest_ios_app',
-          },
+          headers: this.getHeaders(),
           body: JSON.stringify({
             preferences,
             days,
@@ -638,10 +648,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/ai/generate-workout-plan`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           preferences,
           weeks,
@@ -730,10 +737,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/ai/coach-message`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           message,
           context,
@@ -834,10 +838,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/ai/cheat-day-guidance`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Customer-Id': 'guest_ios_app',
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify({
           dayName,
           userGoals,
