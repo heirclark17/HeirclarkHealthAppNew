@@ -195,6 +195,13 @@ class HeirclarkAPI {
       const data = await response.json();
       if (data.success && data.token) {
         await this.saveAuthToken(data.token);
+
+        // ✅ FIX: Update shopifyCustomerId from auth response
+        if (data.customerId) {
+          this.shopifyCustomerId = data.customerId;
+          console.log('[API] ✅ Updated shopifyCustomerId:', data.customerId);
+        }
+
         return data.user;
       }
       return null;
@@ -212,6 +219,13 @@ class HeirclarkAPI {
 
       if (!response.ok) return null;
       const data = await response.json();
+
+      // ✅ FIX: Update shopifyCustomerId from auth response
+      if (data.success && data.customerId) {
+        this.shopifyCustomerId = data.customerId;
+        console.log('[API] ✅ Updated shopifyCustomerId from /me:', data.customerId);
+      }
+
       return data.success ? data.user : null;
     } catch (error) {
       return null;
