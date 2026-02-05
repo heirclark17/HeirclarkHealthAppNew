@@ -820,18 +820,19 @@ app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
 
     console.log('[Workout] Saving workout plan for user:', req.userId);
 
-    // Upsert the workout plan
+    // Upsert the workout plan - include plan_name to satisfy table constraints
     const result = await pool.query(
-      `INSERT INTO workout_plans (user_id, plan_data, program_id, program_name, updated_at)
-       VALUES ($1, $2, $3, $4, NOW())
+      `INSERT INTO workout_plans (user_id, plan_name, plan_data, program_id, program_name, updated_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
        ON CONFLICT (user_id)
        DO UPDATE SET
+         plan_name = EXCLUDED.plan_name,
          plan_data = EXCLUDED.plan_data,
          program_id = EXCLUDED.program_id,
          program_name = EXCLUDED.program_name,
          updated_at = NOW()
        RETURNING id, created_at, updated_at`,
-      [req.userId, JSON.stringify(planData), programId || null, programName || null]
+      [req.userId, programName || 'Custom Plan', JSON.stringify(planData), programId || null, programName || null]
     );
 
     console.log('[Workout] ✅ Plan saved successfully');
@@ -844,8 +845,8 @@ app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('[Workout] Save plan error:', error);
-    res.status(500).json({ error: 'Failed to save workout plan' });
+    console.error('[Workout] Save plan error:', error.message);
+    res.status(500).json({ error: 'Failed to save workout plan', message: error.message });
   }
 });
 
