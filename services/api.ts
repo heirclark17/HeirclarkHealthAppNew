@@ -111,13 +111,9 @@ export interface Habit {
 class HeirclarkAPI {
   private baseUrl: string;
   private authToken: string | null = null;
-  private odooId: string;
-  private shopifyCustomerId: string;
 
   constructor() {
     this.baseUrl = API_BASE_URL;
-    this.odooId = 'guest_user';
-    this.shopifyCustomerId = 'guest_ios_app';
     this.loadAuthToken();
   }
 
@@ -153,25 +149,19 @@ class HeirclarkAPI {
     }
   }
 
-  // Set authenticated user IDs (legacy support)
-  setUserIds(odooId: string, shopifyCustomerId?: string) {
-    this.odooId = odooId;
-    if (shopifyCustomerId) {
-      this.shopifyCustomerId = shopifyCustomerId;
-    }
-  }
-
   // Get common headers for requests
   private getHeaders(includeContentType: boolean = false): HeadersInit {
-    const headers: HeadersInit = {
-      'X-Shopify-Customer-Id': this.shopifyCustomerId,
-    };
+    const headers: HeadersInit = {};
+
+    // ✅ JWT Bearer token is the ONLY authentication method
     if (this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
+
     if (includeContentType) {
       headers['Content-Type'] = 'application/json';
     }
+
     return headers;
   }
 
@@ -181,6 +171,8 @@ class HeirclarkAPI {
 
   async authenticateWithApple(appleId: string, email?: string, fullName?: string): Promise<AuthUser | null> {
     try {
+      console.log('[API] 🍎 Authenticating with Apple ID...');
+
       const response = await fetch(`${this.baseUrl}/api/v1/auth/apple`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -188,20 +180,14 @@ class HeirclarkAPI {
       });
 
       if (!response.ok) {
-        console.error('[API] Apple auth failed:', response.status);
+        console.error('[API] ❌ Apple auth failed:', response.status);
         return null;
       }
 
       const data = await response.json();
       if (data.success && data.token) {
         await this.saveAuthToken(data.token);
-
-        // ✅ FIX: Update shopifyCustomerId from auth response
-        if (data.customerId) {
-          this.shopifyCustomerId = data.customerId;
-          console.log('[API] ✅ Updated shopifyCustomerId:', data.customerId);
-        }
-
+        console.log('[API] ✅ Apple authentication successful');
         return data.user;
       }
       return null;
@@ -219,13 +205,6 @@ class HeirclarkAPI {
 
       if (!response.ok) return null;
       const data = await response.json();
-
-      // ✅ FIX: Update shopifyCustomerId from auth response
-      if (data.success && data.customerId) {
-        this.shopifyCustomerId = data.customerId;
-        console.log('[API] ✅ Updated shopifyCustomerId from /me:', data.customerId);
-      }
-
       return data.success ? data.user : null;
     } catch (error) {
       return null;
