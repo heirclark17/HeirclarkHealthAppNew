@@ -26,6 +26,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   GoalWizardProvider,
   useGoalWizard,
@@ -73,6 +74,7 @@ function GoalWizardContent() {
   const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false);
   const [isGeneratingTrainingPlan, setIsGeneratingTrainingPlan] = useState(false);
   const { settings } = useSettings();
+  const { user, isAuthenticated } = useAuth();
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -214,6 +216,7 @@ function GoalWizardContent() {
     dietStyle: state.dietStyle || 'standard',
     workoutsPerWeek: state.workoutsPerWeek || 0,
     weightUnit: state.weightUnit || 'lbs',
+    userName: isAuthenticated && user?.firstName ? user.firstName : null,
   };
 
   // Success screen

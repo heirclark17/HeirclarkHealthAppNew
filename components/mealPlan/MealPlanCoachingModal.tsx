@@ -26,6 +26,7 @@ import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { avatarService, StreamingSession } from '../../services/avatarService';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { DayPlan } from '../../types/mealPlan';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -278,6 +279,7 @@ export function MealPlanCoachingModal({
   userId = 'guest',
 }: MealPlanCoachingModalProps) {
   const { settings } = useSettings();
+  const { user, isAuthenticated } = useAuth();
   const [state, setState] = useState<ModalState>('loading');
   const [script, setScript] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -289,6 +291,9 @@ export function MealPlanCoachingModal({
   const colors = useMemo(() => {
     return settings.themeMode === 'light' ? LightColors : DarkColors;
   }, [settings.themeMode]);
+
+  // Extract user's first name for personalized coaching
+  const userName = isAuthenticated && user?.firstName ? user.firstName : null;
   const isDark = settings.themeMode === 'dark';
   const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
 
@@ -371,6 +376,7 @@ export function MealPlanCoachingModal({
       console.log('[MealPlanCoachingModal] Fetching coaching data...');
       const response = await avatarService.getMealPlanCoaching({
         userId,
+        userName,
         weeklyPlan,
         selectedDayIndex,
         userGoals,
