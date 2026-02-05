@@ -8,6 +8,7 @@ const AUTH_TOKEN_KEY = '@heirclark_auth_token';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NutritionVerificationResult } from '../types/nutritionAccuracy';
 import { verifyNutritionData, quickValidate } from './nutritionAccuracyService';
+import { api } from './api';
 import {
   AIWeeklyMealPlan,
   AIWorkoutPlan,
@@ -894,10 +895,48 @@ class AIService {
   // ============================================================================
 
   /**
-   * Get all saved meals
+   * Get all saved meals (backend first, local fallback)
    */
   async getSavedMeals(): Promise<SavedMeal[]> {
     try {
+      // First try to get from backend
+      console.log('[AIService] 🔄 Fetching saved meals from backend...');
+      const backendMeals = await api.getSavedMeals();
+
+      if (backendMeals && backendMeals.length > 0) {
+        console.log('[AIService] ✅ Loaded', backendMeals.length, 'saved meals from backend');
+
+        // Convert backend format to local format and cache locally
+        const localFormat: SavedMeal[] = backendMeals.map((m: any) => ({
+          id: m.id,
+          meal: {
+            id: m.id,
+            name: m.mealName || m.meal_name,
+            mealType: m.mealType || m.meal_type || 'lunch',
+            description: m.recipe || '',
+            nutrients: {
+              calories: m.calories,
+              protein_g: m.protein,
+              carbs_g: m.carbs,
+              fat_g: m.fat,
+            },
+            prepTimeMinutes: m.prepTimeMinutes || m.prep_time_minutes || 15,
+            ingredients: m.ingredients || [],
+            tags: m.tags || [],
+          },
+          savedAt: m.lastUsedAt || m.last_used_at || new Date().toISOString(),
+          source: 'custom',
+          isFavorite: (m.useCount || m.use_count || 0) > 3,
+          timesUsed: m.useCount || m.use_count || 0,
+        }));
+
+        // Cache locally for offline access
+        await AsyncStorage.setItem(STORAGE_KEYS.SAVED_MEALS, JSON.stringify(localFormat));
+        return localFormat;
+      }
+
+      // Fallback to local storage
+      console.log('[AIService] ⚠️ No backend meals, checking local cache...');
       const stored = await AsyncStorage.getItem(STORAGE_KEYS.SAVED_MEALS);
       if (!stored) return [];
 
@@ -905,12 +944,19 @@ class AIService {
       return meals;
     } catch (error) {
       console.error('[AIService] Error getting saved meals:', error);
+
+      // Fallback to local on error
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEYS.SAVED_MEALS);
+        if (stored) return JSON.parse(stored);
+      } catch {}
+
       return [];
     }
   }
 
   /**
-   * Save a meal to favorites
+   * Save a meal to favorites (syncs to backend)
    */
   async saveMeal(meal: AIMeal, source: 'ai' | 'template' | 'custom' = 'ai'): Promise<SavedMeal | null> {
     try {
@@ -945,8 +991,37 @@ class AIService {
         timesUsed: 0,
       };
 
+      // Save locally first
       savedMeals.push(savedMeal);
       await AsyncStorage.setItem(STORAGE_KEYS.SAVED_MEALS, JSON.stringify(savedMeals));
+
+      // Sync to backend
+      try {
+        console.log('[AIService] 🔄 Syncing saved meal to backend...');
+        const backendResult = await api.saveMeal({
+          mealName: meal.name,
+          mealType: meal.mealType,
+          calories: meal.nutrients.calories,
+          protein: meal.nutrients.protein_g,
+          carbs: meal.nutrients.carbs_g,
+          fat: meal.nutrients.fat_g,
+          ingredients: meal.ingredients,
+          recipe: meal.description,
+          prepTimeMinutes: meal.prepTimeMinutes,
+          tags: meal.tags,
+        });
+
+        if (backendResult) {
+          console.log('[AIService] ✅ Saved meal synced to backend');
+          // Update local ID with backend ID
+          savedMeal.id = backendResult.id;
+          await AsyncStorage.setItem(STORAGE_KEYS.SAVED_MEALS, JSON.stringify(savedMeals));
+        } else {
+          console.warn('[AIService] ⚠️ Backend sync failed - meal saved locally');
+        }
+      } catch (syncError) {
+        console.error('[AIService] ❌ Backend sync error:', syncError);
+      }
 
       return savedMeal;
     } catch (error) {
@@ -956,14 +1031,29 @@ class AIService {
   }
 
   /**
-   * Remove a saved meal
+   * Remove a saved meal (syncs to backend)
    */
   async removeSavedMeal(savedMealId: string): Promise<boolean> {
     try {
       const savedMeals = await this.getSavedMeals();
       const filtered = savedMeals.filter(m => m.id !== savedMealId);
 
+      // Remove locally
       await AsyncStorage.setItem(STORAGE_KEYS.SAVED_MEALS, JSON.stringify(filtered));
+
+      // Delete from backend
+      try {
+        console.log('[AIService] 🔄 Deleting saved meal from backend...');
+        const success = await api.deleteSavedMeal(savedMealId);
+        if (success) {
+          console.log('[AIService] ✅ Deleted from backend');
+        } else {
+          console.warn('[AIService] ⚠️ Backend delete failed');
+        }
+      } catch (syncError) {
+        console.error('[AIService] ❌ Backend delete error:', syncError);
+      }
+
       return true;
     } catch (error) {
       console.error('[AIService] Error removing saved meal:', error);

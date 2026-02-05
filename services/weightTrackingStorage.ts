@@ -10,6 +10,7 @@ import {
   ProgressiveOverloadRecommendation,
   WeightTrackingSettings,
 } from '../types/training';
+import { api } from './api';
 
 const STORAGE_KEYS = {
   WEIGHT_LOGS: 'hc_weight_logs',
@@ -92,6 +93,54 @@ export const weightTrackingStorage = {
     }
   },
 
+  // Sync PRs from backend and merge with local data
+  async syncPersonalRecordsFromBackend(): Promise<void> {
+    try {
+      console.log('[WeightTracking] 🔄 Syncing PRs from backend...');
+      const backendPRs = await api.getPersonalRecords();
+
+      if (backendPRs && Object.keys(backendPRs).length > 0) {
+        const logs = await this.getAllWeightLogs();
+        const settings = await this.getSettings();
+
+        // For each backend PR, check if we have it locally
+        for (const [exerciseName, prData] of Object.entries(backendPRs)) {
+          const localLogs = logs.filter(l => l.exerciseName === exerciseName);
+          const localMax = localLogs.length > 0 ? Math.max(...localLogs.map(l => l.maxWeight)) : 0;
+
+          // If backend PR is higher than local max, create a log entry for it
+          if (prData.weight > localMax) {
+            console.log(`[WeightTracking] Found higher PR from backend: ${exerciseName} = ${prData.weight}`);
+            const newLog: WeightLog = {
+              id: generateUUID(),
+              exerciseId: `backend-pr-${exerciseName.toLowerCase().replace(/\s+/g, '-')}`,
+              exerciseName,
+              date: prData.achievedAt || new Date().toISOString(),
+              weekNumber: 0,
+              sets: [{
+                setNumber: 1,
+                weight: prData.weight,
+                unit: settings.preferredUnit,
+                reps: prData.reps || 1,
+                isWarmup: false,
+              }],
+              totalVolume: prData.weight * (prData.reps || 1),
+              maxWeight: prData.weight,
+              averageWeight: prData.weight,
+              personalRecord: true,
+            };
+            logs.push(newLog);
+          }
+        }
+
+        await AsyncStorage.setItem(STORAGE_KEYS.WEIGHT_LOGS, JSON.stringify(logs));
+        console.log('[WeightTracking] ✅ PRs synced from backend');
+      }
+    } catch (error) {
+      console.error('[WeightTracking] Error syncing PRs from backend:', error);
+    }
+  },
+
   async saveWeightLog(log: Omit<WeightLog, 'id' | 'totalVolume' | 'maxWeight' | 'averageWeight'>): Promise<WeightLog> {
     try {
       const logs = await this.getAllWeightLogs();
@@ -128,6 +177,27 @@ export const weightTrackingStorage = {
         maxWeight,
         personalRecord,
       });
+
+      // *** Sync PR to backend if this is a personal record ***
+      if (personalRecord && maxWeight > 0) {
+        try {
+          console.log('[WeightTracking] 🏆 New PR detected! Syncing to backend...');
+          const reps = workingSets.length > 0 ? workingSets[0].reps : 1;
+          const success = await api.savePersonalRecord(
+            log.exerciseName,
+            maxWeight,
+            reps,
+            log.notes
+          );
+          if (success) {
+            console.log('[WeightTracking] ✅ PR synced to backend');
+          } else {
+            console.warn('[WeightTracking] ⚠️ PR sync failed - saved locally');
+          }
+        } catch (syncError) {
+          console.error('[WeightTracking] ❌ PR sync error:', syncError);
+        }
+      }
 
       return newLog;
     } catch (error) {

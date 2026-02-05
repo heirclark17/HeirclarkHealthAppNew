@@ -228,7 +228,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           lastGeneratedAt: now,
         }));
 
-        // Cache the plan
+        // Cache the plan locally
         const cacheData = {
           weeklyPlan: response.weeklyPlan,
           groceryList: response.groceryList,
@@ -236,6 +236,23 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           lastGeneratedAt: now,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+
+        // *** Sync meal plan to backend ***
+        try {
+          console.log('[MealPlanContext] 🔄 Syncing meal plan to backend...');
+          const syncSuccess = await api.saveMealPlan(
+            { weeklyPlan: response.weeklyPlan, groceryList: response.groceryList, weekSummary: response.weekSummary },
+            startDate,
+            preferences.dietStyle
+          );
+          if (syncSuccess) {
+            console.log('[MealPlanContext] ✅ Meal plan synced to backend');
+          } else {
+            console.warn('[MealPlanContext] ⚠️ Backend sync failed - plan saved locally');
+          }
+        } catch (syncError) {
+          console.error('[MealPlanContext] ❌ Backend sync error:', syncError);
+        }
 
         return true;
       } else {
@@ -390,7 +407,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           lastGeneratedAt: now,
         }));
 
-        // Cache the plan
+        // Cache the plan locally
         const cacheData = {
           weeklyPlan,
           groceryList: [],
@@ -398,6 +415,24 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           lastGeneratedAt: now,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+
+        // *** Sync AI meal plan to backend ***
+        try {
+          console.log('[MealPlanContext] 🔄 Syncing AI meal plan to backend...');
+          const weekStart = weeklyPlan[0]?.date || new Date().toISOString().split('T')[0];
+          const syncSuccess = await api.saveMealPlan(
+            { weeklyPlan, groceryList: [], weekSummary: calculatedWeekSummary },
+            weekStart,
+            preferences.dietStyle
+          );
+          if (syncSuccess) {
+            console.log('[MealPlanContext] ✅ AI meal plan synced to backend');
+          } else {
+            console.warn('[MealPlanContext] ⚠️ Backend sync failed - plan saved locally');
+          }
+        } catch (syncError) {
+          console.error('[MealPlanContext] ❌ Backend sync error:', syncError);
+        }
 
         return true;
       } else {
@@ -477,7 +512,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
             isSwapping: false,
           }));
 
-          // Update cache
+          // Update local cache
           const cacheData = {
             weeklyPlan: updatedWeeklyPlan,
             groceryList: state.groceryList,
@@ -485,6 +520,21 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
             lastGeneratedAt: state.lastGeneratedAt,
           };
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+
+          // *** Sync updated meal plan to backend ***
+          try {
+            console.log('[MealPlanContext] 🔄 Syncing swapped meal plan to backend...');
+            const weekStart = updatedWeeklyPlan[0]?.date || new Date().toISOString().split('T')[0];
+            const syncSuccess = await api.saveMealPlan(
+              { weeklyPlan: updatedWeeklyPlan, groceryList: state.groceryList, weekSummary: state.weekSummary },
+              weekStart
+            );
+            if (syncSuccess) {
+              console.log('[MealPlanContext] ✅ Swapped meal plan synced to backend');
+            }
+          } catch (syncError) {
+            console.error('[MealPlanContext] ❌ Backend sync error after swap:', syncError);
+          }
 
           return true;
         }
@@ -565,9 +615,10 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.groceryList]);
 
-  // Load cached plan on mount
+  // Load cached plan (local first, backend fallback)
   const loadCachedPlan = useCallback(async () => {
     try {
+      // First try local cache
       const cached = await AsyncStorage.getItem(STORAGE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
@@ -579,6 +630,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           const daysDiff = Math.floor((now.getTime() - generatedDate.getTime()) / (1000 * 60 * 60 * 24));
 
           if (daysDiff < 7) {
+            console.log('[MealPlanContext] ✅ Loaded meal plan from local cache');
             setState(prev => ({
               ...prev,
               weeklyPlan: parsed.weeklyPlan,
@@ -586,11 +638,42 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
               weekSummary: parsed.weekSummary,
               lastGeneratedAt: parsed.lastGeneratedAt,
             }));
+            return;
           } else {
             // Clear old cache
             await AsyncStorage.removeItem(STORAGE_KEY);
           }
         }
+      }
+
+      // No valid local cache - try backend
+      console.log('[MealPlanContext] 🔄 No local cache, checking backend...');
+      const backendPlan = await api.getMealPlan();
+      if (backendPlan && backendPlan.planData) {
+        console.log('[MealPlanContext] ✅ Loaded meal plan from backend');
+        const { planData } = backendPlan;
+
+        setState(prev => ({
+          ...prev,
+          weeklyPlan: planData.weeklyPlan || null,
+          groceryList: planData.groceryList || [],
+          weekSummary: planData.weekSummary || null,
+          lastGeneratedAt: new Date().toISOString(),
+        }));
+
+        // Cache locally for offline access
+        if (planData.weeklyPlan) {
+          const cacheData = {
+            weeklyPlan: planData.weeklyPlan,
+            groceryList: planData.groceryList || [],
+            weekSummary: planData.weekSummary,
+            lastGeneratedAt: new Date().toISOString(),
+          };
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+          console.log('[MealPlanContext] ✅ Cached backend plan locally');
+        }
+      } else {
+        console.log('[MealPlanContext] No meal plan found (local or backend)');
       }
     } catch (error) {
       console.error('[MealPlanContext] Failed to load cache:', error);

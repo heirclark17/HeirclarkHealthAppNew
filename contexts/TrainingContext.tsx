@@ -4,6 +4,7 @@ import { useGoalWizard } from './GoalWizardContext';
 import { trainingService } from '../services/trainingService';
 import { planGenerator } from '../services/planGenerator';
 import { trainingStorage } from '../services/trainingStorage';
+import { weightTrackingStorage } from '../services/weightTrackingStorage';
 import { aiService } from '../services/aiService';
 import { api } from '../services/api';
 import {
@@ -197,6 +198,23 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       // Update goal hash to track changes
       await trainingStorage.updateGoalHash(goalWizardContext?.state);
 
+      // *** Sync workout plan to backend ***
+      try {
+        console.log('[Training] 🔄 Syncing workout plan to backend...');
+        const syncSuccess = await api.saveWorkoutPlan(
+          { weeklyPlan, preferences, summary, lastGeneratedAt },
+          program.id,
+          program.name
+        );
+        if (syncSuccess) {
+          console.log('[Training] ✅ Workout plan synced to backend');
+        } else {
+          console.warn('[Training] ⚠️ Backend sync failed - plan saved locally');
+        }
+      } catch (syncError) {
+        console.error('[Training] ❌ Backend sync error:', syncError);
+      }
+
       console.log('[Training] ✅ Training plan generated successfully!');
       return true;
     } catch (error) {
@@ -372,6 +390,23 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           preferences,
           planSummary: summary,
         });
+
+        // *** Sync AI workout plan to backend ***
+        try {
+          console.log('[Training] 🔄 Syncing AI workout plan to backend...');
+          const syncSuccess = await api.saveWorkoutPlan(
+            { weeklyPlan, preferences, summary, lastGeneratedAt },
+            program.id,
+            program.name
+          );
+          if (syncSuccess) {
+            console.log('[Training] ✅ AI workout plan synced to backend');
+          } else {
+            console.warn('[Training] ⚠️ Backend sync failed - AI plan saved locally');
+          }
+        } catch (syncError) {
+          console.error('[Training] ❌ Backend sync error:', syncError);
+        }
 
         return true;
       } else {
@@ -696,11 +731,13 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     trainingStorage.clearPlan();
   }, []);
 
-  // Load cached plan
+  // Load cached plan (local first, then backend fallback)
   const loadCachedPlan = useCallback(async () => {
     try {
+      // First try local storage
       const cached = await trainingStorage.loadPlanCache();
       if (cached) {
+        console.log('[Training] ✅ Loaded plan from local cache');
         setState(prev => ({
           ...prev,
           weeklyPlan: cached.weeklyPlan,
@@ -711,11 +748,48 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           preferences: cached.preferences,
           planSummary: cached.planSummary || null,
         }));
+        return;
+      }
+
+      // No local cache - try backend
+      console.log('[Training] 🔄 No local cache, checking backend...');
+      const backendPlan = await api.getWorkoutPlan();
+      if (backendPlan && backendPlan.planData) {
+        console.log('[Training] ✅ Loaded plan from backend');
+        const { planData, programId, programName } = backendPlan;
+
+        // Find matching program or create a placeholder
+        const programs = getEnhancedPrograms();
+        const matchedProgram = programs.find(p => p.id === programId) ||
+          (programId ? { id: programId, name: programName || 'Saved Plan' } : null);
+
+        setState(prev => ({
+          ...prev,
+          weeklyPlan: planData.weeklyPlan || null,
+          selectedProgram: matchedProgram,
+          preferences: planData.preferences || null,
+          planSummary: planData.summary || null,
+          lastGeneratedAt: planData.lastGeneratedAt,
+        }));
+
+        // Cache locally for future use
+        if (planData.weeklyPlan) {
+          await trainingStorage.savePlanCache({
+            weeklyPlan: planData.weeklyPlan,
+            selectedProgram: matchedProgram,
+            preferences: planData.preferences,
+            planSummary: planData.summary,
+            lastGeneratedAt: planData.lastGeneratedAt,
+          });
+          console.log('[Training] ✅ Cached backend plan locally');
+        }
+      } else {
+        console.log('[Training] No plan found (local or backend)');
       }
     } catch (error) {
-      console.error('Error loading cached training plan:', error);
+      console.error('[Training] Error loading cached training plan:', error);
     }
-  }, []);
+  }, [getEnhancedPrograms]);
 
   // Check if plan exists
   const hasPlan = useCallback((): boolean => {
@@ -727,9 +801,14 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     return state.planSummary;
   }, [state.planSummary]);
 
-  // Load cached data on mount
+  // Load cached data on mount and sync PRs from backend
   useEffect(() => {
     loadCachedPlan();
+
+    // Sync personal records from backend (in case user logged weights on another device)
+    weightTrackingStorage.syncPersonalRecordsFromBackend().catch(err => {
+      console.log('[Training] PR sync from backend failed (non-critical):', err);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only load once on mount
 

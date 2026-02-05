@@ -502,6 +502,101 @@ class HeirclarkAPI {
     }
   }
 
+  // Save workout plan to backend
+  async saveWorkoutPlan(planData: any, programId?: string, programName?: string): Promise<boolean> {
+    try {
+      console.log('[API] Saving workout plan to backend...');
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/plan`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ planData, programId, programName }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Save workout plan error:', response.status, errorText);
+        return false;
+      }
+
+      console.log('[API] ✅ Workout plan saved successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Save workout plan error:', error);
+      return false;
+    }
+  }
+
+  // Get saved workout plan from backend
+  async getWorkoutPlan(): Promise<{ planData: any; programId?: string; programName?: string } | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/plan`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return null;
+        throw new Error('Failed to get workout plan');
+      }
+
+      const data = await response.json();
+      if (data.success && data.plan) {
+        return {
+          planData: data.plan.planData,
+          programId: data.plan.programId,
+          programName: data.plan.programName,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('[API] Get workout plan error:', error);
+      return null;
+    }
+  }
+
+  // Save personal record
+  async savePersonalRecord(exerciseName: string, weight: number, reps?: number, notes?: string): Promise<boolean> {
+    try {
+      console.log('[API] Saving PR:', exerciseName, weight, reps);
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/pr`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ exerciseName, weight, reps, notes }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Save PR error:', response.status, errorText);
+        return false;
+      }
+
+      console.log('[API] ✅ PR saved successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Save PR error:', error);
+      return false;
+    }
+  }
+
+  // Get all personal records
+  async getPersonalRecords(): Promise<Record<string, { weight: number; reps: number; achievedAt: string }>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/prs`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return {};
+        throw new Error('Failed to get PRs');
+      }
+
+      const data = await response.json();
+      return data.success ? data.prs : {};
+    } catch (error) {
+      console.error('[API] Get PRs error:', error);
+      return {};
+    }
+  }
+
   // ============================================
   // MEALS
   // ============================================
@@ -637,6 +732,59 @@ class HeirclarkAPI {
       return response.ok;
     } catch (error) {
       return false;
+    }
+  }
+
+  // Save meal plan to backend
+  async saveMealPlan(planData: any, weekStart?: string, dietStyle?: string): Promise<boolean> {
+    try {
+      console.log('[API] Saving meal plan to backend...');
+      const response = await fetch(`${this.baseUrl}/api/v1/meals/plan`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ planData, weekStart, dietStyle }),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Save meal plan error:', response.status);
+        return false;
+      }
+
+      console.log('[API] ✅ Meal plan saved successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Save meal plan error:', error);
+      return false;
+    }
+  }
+
+  // Get meal plan from backend
+  async getMealPlan(weekStart?: string): Promise<{ planData: any; weekStart?: string; dietStyle?: string } | null> {
+    try {
+      console.log('[API] Fetching meal plan from backend...');
+      const url = weekStart
+        ? `${this.baseUrl}/api/v1/meals/plan?weekStart=${weekStart}`
+        : `${this.baseUrl}/api/v1/meals/plan`;
+
+      const response = await fetch(url, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Get meal plan error:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.success && data.mealPlan) {
+        console.log('[API] ✅ Meal plan fetched successfully');
+        return data.mealPlan;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('[API] Get meal plan error:', error);
+      return null;
     }
   }
 

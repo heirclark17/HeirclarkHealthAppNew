@@ -25,6 +25,7 @@ import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { ExerciseAlternative, WorkoutExercise, WeightLog } from '../../types/training';
 import { CoachChatModal } from '../../components/agents/aiCoach';
+import { api } from '../../services/api';
 
 export default function ProgramsScreen() {
   const router = useRouter();
@@ -129,10 +130,29 @@ export default function ProgramsScreen() {
     setShowWeightModal(true);
   };
 
-  // Handle saving weight log
-  const handleSaveWeight = (log: WeightLog) => {
+  // Handle saving weight log - sync to backend
+  const handleSaveWeight = async (log: WeightLog) => {
     console.log('[Programs] Weight log saved:', log.exerciseName, log.maxWeight, log.sets[0]?.unit);
-    // Could trigger a refresh of the weight display here if needed
+
+    // Check if this is a personal record and sync to backend
+    if (log.personalRecord && log.maxWeight > 0) {
+      try {
+        console.log('[Programs] 🏆 New PR detected! Syncing to backend...');
+        const success = await api.savePersonalRecord(
+          log.exerciseName,
+          log.maxWeight,
+          log.sets[0]?.reps || 1,
+          log.notes
+        );
+        if (success) {
+          console.log('[Programs] ✅ PR synced to backend');
+        } else {
+          console.warn('[Programs] ⚠️ PR sync failed - saved locally');
+        }
+      } catch (error) {
+        console.error('[Programs] ❌ PR sync error:', error);
+      }
+    }
   };
 
   // Navigate to training from plan summary
