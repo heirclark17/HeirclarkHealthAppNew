@@ -157,6 +157,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         lastName: newUser.lastName,
       };
 
+      // Extract firstName from fullName if not available
+      if (!newUser.firstName && newUser.fullName) {
+        const nameParts = newUser.fullName.trim().split(' ');
+        newUser.firstName = nameParts[0] || null;
+        newUser.lastName = nameParts.slice(1).join(' ') || null;
+      }
+
       // Step 5: Save user to local storage
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
       setUser(newUser);
