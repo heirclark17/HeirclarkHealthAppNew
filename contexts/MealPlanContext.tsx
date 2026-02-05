@@ -91,7 +91,11 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
   }, [foodPrefsContext]);
 
   // Get preferences from GoalWizard context, backend, or use defaults
+  // Now also includes food preferences from FoodPreferencesContext
   const getPreferences = useCallback(async (): Promise<MealPlanPreferences> => {
+    // Get detailed food preferences
+    const foodPrefs = await getFoodPreferences();
+
     // First try to get from GoalWizard context (local state)
     if (goalWizardContext?.state) {
       const { dietStyle, allergies, mealsPerDay, intermittentFasting, fastingStart, fastingEnd } = goalWizardContext.state;
@@ -102,15 +106,33 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       if (dietStyle === 'vegan') dietaryRestrictions.push('vegan');
       if (dietStyle === 'keto') dietaryRestrictions.push('low-carb');
 
+      // Combine allergies from both sources
+      const combinedAllergies = [
+        ...(allergies || []),
+        ...(foodPrefs?.allergens || []),
+      ].filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
+
       return {
         dietaryRestrictions,
-        cuisinePreferences: [],
-        allergies: allergies || [],
+        cuisinePreferences: foodPrefs?.favoriteCuisines || [],
+        allergies: combinedAllergies,
         mealsPerDay: mealsPerDay || 3,
         dietStyle: dietStyle || 'standard',
         intermittentFasting: intermittentFasting || false,
         fastingStart: fastingStart || '12:00',
         fastingEnd: fastingEnd || '20:00',
+        // Include detailed food preferences
+        favoriteProteins: foodPrefs?.favoriteProteins || [],
+        favoriteVegetables: foodPrefs?.favoriteVegetables || [],
+        favoriteFruits: foodPrefs?.favoriteFruits || [],
+        favoriteStarches: foodPrefs?.favoriteStarches || [],
+        favoriteSnacks: foodPrefs?.favoriteSnacks || [],
+        favoriteCuisines: foodPrefs?.favoriteCuisines || [],
+        hatedFoods: foodPrefs?.hatedFoods || '',
+        cookingSkill: foodPrefs?.cookingSkill || '',
+        mealStyle: foodPrefs?.mealStyle || '',
+        mealDiversity: foodPrefs?.mealDiversity || '',
+        cheatDays: foodPrefs?.cheatDays || [],
       };
     }
 
@@ -124,39 +146,70 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         if (backendPrefs.dietStyle === 'vegan') dietaryRestrictions.push('vegan');
         if (backendPrefs.dietStyle === 'keto') dietaryRestrictions.push('low-carb');
 
+        // Combine allergies from both sources
+        const combinedAllergies = [
+          ...(backendPrefs.allergies || []),
+          ...(foodPrefs?.allergens || []),
+        ].filter((v, i, a) => a.indexOf(v) === i);
+
         console.log('[MealPlanContext] ✅ Using backend preferences:', {
           dietStyle: backendPrefs.dietStyle,
-          allergies: backendPrefs.allergies,
+          allergies: combinedAllergies,
+          favoriteProteins: foodPrefs?.favoriteProteins,
         });
 
         return {
           dietaryRestrictions,
-          cuisinePreferences: [],
-          allergies: backendPrefs.allergies || [],
+          cuisinePreferences: foodPrefs?.favoriteCuisines || [],
+          allergies: combinedAllergies,
           mealsPerDay: backendPrefs.mealsPerDay || 3,
           dietStyle: backendPrefs.dietStyle || 'standard',
           intermittentFasting: backendPrefs.intermittentFasting || false,
           fastingStart: backendPrefs.fastingStart || '12:00',
           fastingEnd: backendPrefs.fastingEnd || '20:00',
+          // Include detailed food preferences
+          favoriteProteins: foodPrefs?.favoriteProteins || [],
+          favoriteVegetables: foodPrefs?.favoriteVegetables || [],
+          favoriteFruits: foodPrefs?.favoriteFruits || [],
+          favoriteStarches: foodPrefs?.favoriteStarches || [],
+          favoriteSnacks: foodPrefs?.favoriteSnacks || [],
+          favoriteCuisines: foodPrefs?.favoriteCuisines || [],
+          hatedFoods: foodPrefs?.hatedFoods || '',
+          cookingSkill: foodPrefs?.cookingSkill || '',
+          mealStyle: foodPrefs?.mealStyle || '',
+          mealDiversity: foodPrefs?.mealDiversity || '',
+          cheatDays: foodPrefs?.cheatDays || [],
         };
       }
     } catch (error) {
       console.warn('[MealPlanContext] Could not fetch backend preferences:', error);
     }
 
-    // Default preferences
-    console.log('[MealPlanContext] Using default preferences');
+    // Default preferences (still include food preferences if available)
+    console.log('[MealPlanContext] Using default preferences with food preferences');
     return {
       dietaryRestrictions: [],
-      cuisinePreferences: [],
-      allergies: [],
+      cuisinePreferences: foodPrefs?.favoriteCuisines || [],
+      allergies: foodPrefs?.allergens || [],
       mealsPerDay: 3,
       dietStyle: 'standard',
       intermittentFasting: false,
       fastingStart: '12:00',
       fastingEnd: '20:00',
+      // Include detailed food preferences
+      favoriteProteins: foodPrefs?.favoriteProteins || [],
+      favoriteVegetables: foodPrefs?.favoriteVegetables || [],
+      favoriteFruits: foodPrefs?.favoriteFruits || [],
+      favoriteStarches: foodPrefs?.favoriteStarches || [],
+      favoriteSnacks: foodPrefs?.favoriteSnacks || [],
+      favoriteCuisines: foodPrefs?.favoriteCuisines || [],
+      hatedFoods: foodPrefs?.hatedFoods || '',
+      cookingSkill: foodPrefs?.cookingSkill || '',
+      mealStyle: foodPrefs?.mealStyle || '',
+      mealDiversity: foodPrefs?.mealDiversity || '',
+      cheatDays: foodPrefs?.cheatDays || [],
     };
-  }, [goalWizardContext]);
+  }, [goalWizardContext, getFoodPreferences]);
 
   // Get user goals from API
   const getUserGoals = useCallback(async (): Promise<UserGoalsForMealPlan> => {

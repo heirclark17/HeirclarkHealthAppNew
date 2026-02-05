@@ -66,6 +66,18 @@ export interface MealPlanPreferences {
   intermittentFasting?: boolean;
   fastingStart?: string;
   fastingEnd?: string;
+  // Extended food preferences (from FoodPreferencesContext)
+  favoriteProteins?: string[];
+  favoriteVegetables?: string[];
+  favoriteFruits?: string[];
+  favoriteStarches?: string[];
+  favoriteSnacks?: string[];
+  favoriteCuisines?: string[];
+  hatedFoods?: string;
+  cookingSkill?: 'beginner' | 'intermediate' | 'advanced' | '';
+  mealStyle?: 'threePlusSnacks' | 'fewerLarger' | '';
+  mealDiversity?: 'diverse' | 'sameDaily' | '';
+  cheatDays?: string[];
 }
 
 export interface UserGoalsForMealPlan {

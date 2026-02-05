@@ -1141,6 +1141,126 @@ app.get('/api/v1/meals/plan', authenticateToken, async (req, res) => {
 });
 
 // ============================================
+// FOOD PREFERENCES ENDPOINTS
+// ============================================
+
+// POST /api/v1/food-preferences - Save food preferences to backend
+app.post('/api/v1/food-preferences', authenticateToken, async (req, res) => {
+  try {
+    const {
+      dietaryPreferences,
+      allergens,
+      favoriteCuisines,
+      favoriteProteins,
+      favoriteVegetables,
+      favoriteFruits,
+      favoriteStarches,
+      favoriteSnacks,
+      hatedFoods,
+      mealStyle,
+      mealDiversity,
+      cheatDays,
+      cookingSkill,
+    } = req.body;
+
+    console.log(`[Food Preferences Save] Saving for user ${req.userId}`);
+
+    // Upsert the food preferences
+    const result = await pool.query(
+      `INSERT INTO food_preferences (
+        user_id, dietary_preferences, allergens, favorite_cuisines, favorite_proteins,
+        favorite_vegetables, favorite_fruits, favorite_starches, favorite_snacks,
+        hated_foods, meal_style, meal_diversity, cheat_days, cooking_skill, updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
+      ON CONFLICT (user_id)
+      DO UPDATE SET
+        dietary_preferences = $2,
+        allergens = $3,
+        favorite_cuisines = $4,
+        favorite_proteins = $5,
+        favorite_vegetables = $6,
+        favorite_fruits = $7,
+        favorite_starches = $8,
+        favorite_snacks = $9,
+        hated_foods = $10,
+        meal_style = $11,
+        meal_diversity = $12,
+        cheat_days = $13,
+        cooking_skill = $14,
+        updated_at = NOW()
+      RETURNING *`,
+      [
+        req.userId,
+        dietaryPreferences || [],
+        allergens || [],
+        favoriteCuisines || [],
+        favoriteProteins || [],
+        favoriteVegetables || [],
+        favoriteFruits || [],
+        favoriteStarches || [],
+        favoriteSnacks || [],
+        hatedFoods || '',
+        mealStyle || '',
+        mealDiversity || '',
+        cheatDays || [],
+        cookingSkill || '',
+      ]
+    );
+
+    console.log(`[Food Preferences Save] ✅ Preferences saved successfully`);
+    res.json({ success: true, preferences: result.rows[0] });
+  } catch (error) {
+    console.error('[Food Preferences Save] Error:', error);
+    res.status(500).json({ error: 'Failed to save food preferences' });
+  }
+});
+
+// GET /api/v1/food-preferences - Get food preferences from backend
+app.get('/api/v1/food-preferences', authenticateToken, async (req, res) => {
+  try {
+    console.log(`[Food Preferences Get] Fetching for user ${req.userId}`);
+
+    const result = await pool.query(
+      'SELECT * FROM food_preferences WHERE user_id = $1',
+      [req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      console.log('[Food Preferences Get] No preferences found');
+      return res.json({ success: true, preferences: null });
+    }
+
+    const prefs = result.rows[0];
+    console.log(`[Food Preferences Get] ✅ Found preferences`);
+
+    // Transform snake_case to camelCase for frontend
+    res.json({
+      success: true,
+      preferences: {
+        dietaryPreferences: prefs.dietary_preferences || [],
+        allergens: prefs.allergens || [],
+        favoriteCuisines: prefs.favorite_cuisines || [],
+        favoriteProteins: prefs.favorite_proteins || [],
+        favoriteVegetables: prefs.favorite_vegetables || [],
+        favoriteFruits: prefs.favorite_fruits || [],
+        favoriteStarches: prefs.favorite_starches || [],
+        favoriteSnacks: prefs.favorite_snacks || [],
+        hatedFoods: prefs.hated_foods || '',
+        mealStyle: prefs.meal_style || '',
+        mealDiversity: prefs.meal_diversity || '',
+        cheatDays: prefs.cheat_days || [],
+        cookingSkill: prefs.cooking_skill || '',
+        updatedAt: prefs.updated_at,
+      },
+    });
+  } catch (error) {
+    console.error('[Food Preferences Get] Error:', error);
+    res.status(500).json({ error: 'Failed to get food preferences' });
+  }
+});
+
+// ============================================
 // NUTRITION AI ENDPOINTS
 // ============================================
 

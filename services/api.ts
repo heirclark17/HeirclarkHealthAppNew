@@ -1881,6 +1881,94 @@ class HeirclarkAPI {
       return false;
     }
   }
+
+  // ============================================
+  // FOOD PREFERENCES
+  // ============================================
+
+  /**
+   * Save food preferences to backend
+   */
+  async saveFoodPreferences(preferences: {
+    dietaryPreferences?: string[];
+    allergens?: string[];
+    favoriteCuisines?: string[];
+    favoriteProteins?: string[];
+    favoriteVegetables?: string[];
+    favoriteFruits?: string[];
+    favoriteStarches?: string[];
+    favoriteSnacks?: string[];
+    hatedFoods?: string;
+    mealStyle?: string;
+    mealDiversity?: string;
+    cheatDays?: string[];
+    cookingSkill?: string;
+  }): Promise<boolean> {
+    try {
+      console.log('[API] Saving food preferences to backend...');
+
+      const response = await fetch(`${this.baseUrl}/api/v1/food-preferences`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(preferences),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Save food preferences failed:', response.status);
+        return false;
+      }
+
+      console.log('[API] ✅ Food preferences saved to backend');
+      return true;
+    } catch (error) {
+      console.error('[API] Save food preferences error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get food preferences from backend
+   */
+  async getFoodPreferences(): Promise<{
+    dietaryPreferences: string[];
+    allergens: string[];
+    favoriteCuisines: string[];
+    favoriteProteins: string[];
+    favoriteVegetables: string[];
+    favoriteFruits: string[];
+    favoriteStarches: string[];
+    favoriteSnacks: string[];
+    hatedFoods: string;
+    mealStyle: string;
+    mealDiversity: string;
+    cheatDays: string[];
+    cookingSkill: string;
+    updatedAt?: string;
+  } | null> {
+    try {
+      console.log('[API] Fetching food preferences from backend...');
+
+      const response = await fetch(`${this.baseUrl}/api/v1/food-preferences`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return null;
+        console.error('[API] Get food preferences failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.success && data.preferences) {
+        console.log('[API] ✅ Food preferences loaded from backend');
+        return data.preferences;
+      }
+      return null;
+    } catch (error) {
+      console.error('[API] Get food preferences error:', error);
+      return null;
+    }
+  }
 }
 
 // Export singleton instance

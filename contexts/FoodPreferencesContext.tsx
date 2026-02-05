@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '../services/api';
 
 const STORAGE_KEY = 'hc_food_preferences';
+const SYNC_DEBOUNCE_MS = 2000; // Debounce backend sync to avoid excessive API calls
 
 export interface FoodPreferences {
   // Dietary preferences
@@ -49,6 +51,7 @@ const defaultPreferences: FoodPreferences = {
 interface FoodPreferencesContextType {
   preferences: FoodPreferences;
   isLoaded: boolean;
+  isSyncing: boolean;
 
   // Update functions
   updatePreferences: (updates: Partial<FoodPreferences>) => Promise<void>;
@@ -69,6 +72,7 @@ interface FoodPreferencesContextType {
   // Utility
   clearPreferences: () => Promise<void>;
   loadPreferences: () => Promise<void>;
+  syncToBackend: () => Promise<boolean>;
 }
 
 const FoodPreferencesContext = createContext<FoodPreferencesContextType | undefined>(undefined);
@@ -76,36 +80,128 @@ const FoodPreferencesContext = createContext<FoodPreferencesContextType | undefi
 export function FoodPreferencesProvider({ children }: { children: React.ReactNode }) {
   const [preferences, setPreferences] = useState<FoodPreferences>(defaultPreferences);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasSyncedFromBackend = useRef(false);
 
-  // Load preferences from storage on mount
+  // Sync preferences to backend (debounced)
+  const syncToBackend = useCallback(async (): Promise<boolean> => {
+    try {
+      setIsSyncing(true);
+      console.log('[FoodPreferences] 🔄 Syncing to backend...');
+      const success = await api.saveFoodPreferences(preferences);
+      if (success) {
+        console.log('[FoodPreferences] ✅ Synced to backend');
+      } else {
+        console.warn('[FoodPreferences] ⚠️ Backend sync failed, local data preserved');
+      }
+      return success;
+    } catch (error) {
+      console.error('[FoodPreferences] ❌ Backend sync error:', error);
+      return false;
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [preferences]);
+
+  // Debounced backend sync
+  const debouncedSyncToBackend = useCallback((newPrefs: FoodPreferences) => {
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+    }
+    syncTimeoutRef.current = setTimeout(async () => {
+      try {
+        setIsSyncing(true);
+        console.log('[FoodPreferences] 🔄 Debounced sync to backend...');
+        const success = await api.saveFoodPreferences(newPrefs);
+        if (success) {
+          console.log('[FoodPreferences] ✅ Synced to backend');
+        }
+      } catch (error) {
+        console.error('[FoodPreferences] Backend sync error:', error);
+      } finally {
+        setIsSyncing(false);
+      }
+    }, SYNC_DEBOUNCE_MS);
+  }, []);
+
+  // Load preferences from backend first, then fall back to local storage
   const loadPreferences = useCallback(async () => {
     try {
+      // Try to load from backend first (if not already done)
+      if (!hasSyncedFromBackend.current) {
+        console.log('[FoodPreferences] 🔄 Loading from backend...');
+        const backendPrefs = await api.getFoodPreferences();
+
+        if (backendPrefs) {
+          console.log('[FoodPreferences] ✅ Loaded from backend');
+          const mergedPrefs = { ...defaultPreferences, ...backendPrefs };
+          setPreferences(mergedPrefs);
+          // Also save to local storage for offline access
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(mergedPrefs));
+          hasSyncedFromBackend.current = true;
+          setIsLoaded(true);
+          return;
+        }
+        console.log('[FoodPreferences] No backend data, checking local storage...');
+      }
+
+      // Fall back to local storage
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         setPreferences({ ...defaultPreferences, ...parsed });
-        console.log('[FoodPreferences] Loaded preferences:', parsed);
+        console.log('[FoodPreferences] Loaded from local storage');
+
+        // If we have local data but no backend data, sync to backend
+        if (!hasSyncedFromBackend.current && parsed) {
+          console.log('[FoodPreferences] Local data exists, syncing to backend...');
+          setTimeout(async () => {
+            await api.saveFoodPreferences({ ...defaultPreferences, ...parsed });
+            hasSyncedFromBackend.current = true;
+          }, 1000);
+        }
       }
       setIsLoaded(true);
     } catch (error) {
       console.error('[FoodPreferences] Error loading:', error);
+      // Try local storage as final fallback
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          setPreferences({ ...defaultPreferences, ...JSON.parse(stored) });
+        }
+      } catch (localError) {
+        console.error('[FoodPreferences] Local storage fallback failed:', localError);
+      }
       setIsLoaded(true);
     }
   }, []);
 
   useEffect(() => {
     loadPreferences();
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+    };
   }, [loadPreferences]);
 
-  // Save preferences to storage
+  // Save preferences to storage and sync to backend
   const savePreferences = useCallback(async (newPrefs: FoodPreferences) => {
     try {
+      // Save to local storage immediately
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newPrefs));
-      console.log('[FoodPreferences] Saved preferences');
+      console.log('[FoodPreferences] Saved to local storage');
+
+      // Debounced sync to backend
+      debouncedSyncToBackend(newPrefs);
     } catch (error) {
       console.error('[FoodPreferences] Error saving:', error);
     }
-  }, []);
+  }, [debouncedSyncToBackend]);
 
   // Generic update function
   const updatePreferences = useCallback(async (updates: Partial<FoodPreferences>) => {
@@ -170,11 +266,19 @@ export function FoodPreferencesProvider({ children }: { children: React.ReactNod
   const clearPreferences = useCallback(async () => {
     setPreferences(defaultPreferences);
     await AsyncStorage.removeItem(STORAGE_KEY);
+    // Also clear on backend by saving default preferences
+    try {
+      await api.saveFoodPreferences(defaultPreferences);
+      console.log('[FoodPreferences] Cleared on backend');
+    } catch (error) {
+      console.error('[FoodPreferences] Error clearing on backend:', error);
+    }
   }, []);
 
   const value = useMemo<FoodPreferencesContextType>(() => ({
     preferences,
     isLoaded,
+    isSyncing,
     updatePreferences,
     setDietaryPreferences,
     setAllergens,
@@ -191,9 +295,11 @@ export function FoodPreferencesProvider({ children }: { children: React.ReactNod
     setCookingSkill,
     clearPreferences,
     loadPreferences,
+    syncToBackend,
   }), [
     preferences,
     isLoaded,
+    isSyncing,
     updatePreferences,
     setDietaryPreferences,
     setAllergens,
@@ -210,6 +316,7 @@ export function FoodPreferencesProvider({ children }: { children: React.ReactNod
     setCookingSkill,
     clearPreferences,
     loadPreferences,
+    syncToBackend,
   ]);
 
   return (

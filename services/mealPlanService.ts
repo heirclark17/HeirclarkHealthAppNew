@@ -556,14 +556,90 @@ function scaleMealToCalories(
   };
 }
 
-function getRandomMeal(meals: typeof BREAKFAST_MEALS, usedIndices: Set<number>): { meal: typeof BREAKFAST_MEALS[0]; index: number } {
+/**
+ * Check if a meal should be excluded based on allergies and hated foods
+ * Returns true if meal should be excluded (contains allergen or hated food)
+ */
+function shouldExcludeMeal(
+  meal: typeof BREAKFAST_MEALS[0],
+  allergies: string[],
+  hatedFoods: string
+): boolean {
+  const mealText = [
+    meal.name,
+    meal.description,
+    ...meal.ingredients.map(ing => ing.name),
+  ].join(' ').toLowerCase();
+
+  // Check for allergens
+  const allergenKeywords: { [key: string]: string[] } = {
+    'dairy': ['milk', 'cheese', 'yogurt', 'cream', 'butter', 'feta', 'parmesan', 'mozzarella', 'cheddar'],
+    'eggs': ['egg', 'eggs', 'mayo', 'mayonnaise'],
+    'gluten': ['bread', 'pasta', 'flour', 'wheat', 'tortilla', 'bagel', 'crouton', 'oats', 'granola'],
+    'nuts': ['almond', 'walnut', 'pecan', 'cashew', 'peanut', 'hazelnut', 'pistachio', 'nut'],
+    'tree_nuts': ['almond', 'walnut', 'pecan', 'cashew', 'hazelnut', 'pistachio', 'macadamia'],
+    'peanuts': ['peanut', 'peanuts'],
+    'soy': ['soy', 'tofu', 'tempeh', 'edamame', 'miso'],
+    'fish': ['salmon', 'tuna', 'cod', 'tilapia', 'halibut', 'fish', 'anchovies'],
+    'shellfish': ['shrimp', 'crab', 'lobster', 'oyster', 'mussel', 'clam', 'scallop'],
+    'sesame': ['sesame', 'tahini', 'hummus'],
+  };
+
+  for (const allergy of allergies) {
+    const allergyLower = allergy.toLowerCase().replace(' ', '_');
+    const keywords = allergenKeywords[allergyLower] || [allergyLower];
+
+    for (const keyword of keywords) {
+      if (mealText.includes(keyword)) {
+        console.log(`[MealFilter] Excluding "${meal.name}" - contains allergen: ${allergy} (${keyword})`);
+        return true;
+      }
+    }
+  }
+
+  // Check for hated foods (comma-separated or space-separated)
+  if (hatedFoods && hatedFoods.trim()) {
+    const hatedList = hatedFoods.toLowerCase().split(/[,\s]+/).filter(f => f.length > 2);
+    for (const hated of hatedList) {
+      if (mealText.includes(hated)) {
+        console.log(`[MealFilter] Excluding "${meal.name}" - contains hated food: ${hated}`);
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function getRandomMeal(
+  meals: typeof BREAKFAST_MEALS,
+  usedIndices: Set<number>,
+  allergies: string[] = [],
+  hatedFoods: string = ''
+): { meal: typeof BREAKFAST_MEALS[0]; index: number } {
+  // Filter out meals that contain allergens or hated foods
   const availableIndices = meals
-    .map((_, i) => i)
-    .filter(i => !usedIndices.has(i));
+    .map((meal, i) => ({ meal, i }))
+    .filter(({ meal, i }) => !usedIndices.has(i) && !shouldExcludeMeal(meal, allergies, hatedFoods))
+    .map(({ i }) => i);
 
   if (availableIndices.length === 0) {
-    // Reset if all used
+    // If no safe meals available, reset used indices and try again without exclusion filter
+    console.log('[MealFilter] No safe meals available, resetting...');
     usedIndices.clear();
+
+    // Try to find any meal that's not excluded
+    const anyAvailable = meals
+      .map((meal, i) => ({ meal, i }))
+      .filter(({ meal }) => !shouldExcludeMeal(meal, allergies, hatedFoods))
+      .map(({ i }) => i);
+
+    if (anyAvailable.length > 0) {
+      const randomIndex = anyAvailable[Math.floor(Math.random() * anyAvailable.length)];
+      return { meal: meals[randomIndex], index: randomIndex };
+    }
+
+    // Last resort: return first meal (shouldn't happen often)
     return { meal: meals[0], index: 0 };
   }
 
@@ -632,6 +708,16 @@ function generateMockWeeklyPlan(
   const usedDinner = new Set<number>();
   const usedSnack = new Set<number>();
 
+  // Extract food preferences for filtering
+  const allergies = preferences.allergies || [];
+  const hatedFoods = preferences.hatedFoods || '';
+
+  console.log('[MealPlanService] Filtering meals with:');
+  console.log('  - Allergies:', allergies);
+  console.log('  - Hated foods:', hatedFoods);
+  console.log('  - Cooking skill:', preferences.cookingSkill);
+  console.log('  - Favorite proteins:', preferences.favoriteProteins);
+
   // Calculate Sunday of the current week (always start from Sunday)
   const startDateObj = new Date(startDate);
   const dayOfWeek = startDateObj.getDay(); // 0 = Sunday, 1 = Monday, etc.
@@ -647,24 +733,24 @@ function generateMockWeeklyPlan(
 
     const meals: Meal[] = [];
 
-    // Breakfast
-    const { meal: breakfastTemplate, index: bIdx } = getRandomMeal(BREAKFAST_MEALS, usedBreakfast);
+    // Breakfast - now filters by allergies and hated foods
+    const { meal: breakfastTemplate, index: bIdx } = getRandomMeal(BREAKFAST_MEALS, usedBreakfast, allergies, hatedFoods);
     usedBreakfast.add(bIdx);
     meals.push(scaleMealToCalories(breakfastTemplate, breakfastCals, 'breakfast', breakfastMacros));
 
-    // Lunch
-    const { meal: lunchTemplate, index: lIdx } = getRandomMeal(LUNCH_MEALS, usedLunch);
+    // Lunch - now filters by allergies and hated foods
+    const { meal: lunchTemplate, index: lIdx } = getRandomMeal(LUNCH_MEALS, usedLunch, allergies, hatedFoods);
     usedLunch.add(lIdx);
     meals.push(scaleMealToCalories(lunchTemplate, lunchCals, 'lunch', lunchMacros));
 
-    // Dinner
-    const { meal: dinnerTemplate, index: dIdx } = getRandomMeal(DINNER_MEALS, usedDinner);
+    // Dinner - now filters by allergies and hated foods
+    const { meal: dinnerTemplate, index: dIdx } = getRandomMeal(DINNER_MEALS, usedDinner, allergies, hatedFoods);
     usedDinner.add(dIdx);
     meals.push(scaleMealToCalories(dinnerTemplate, dinnerCals, 'dinner', dinnerMacros));
 
-    // Snack (if 4 meals per day)
+    // Snack (if 4 meals per day) - now filters by allergies and hated foods
     if (includeSnack) {
-      const { meal: snackTemplate, index: sIdx } = getRandomMeal(SNACK_MEALS, usedSnack);
+      const { meal: snackTemplate, index: sIdx } = getRandomMeal(SNACK_MEALS, usedSnack, allergies, hatedFoods);
       usedSnack.add(sIdx);
       meals.push(scaleMealToCalories(snackTemplate, snackCals, 'snack', snackMacros));
     }
