@@ -358,19 +358,23 @@ app.get('/api/v1/user/goals', authenticateToken, async (req, res) => {
 
 app.post('/api/v1/user/goals', authenticateToken, async (req, res) => {
   try {
-    const { dailyCalories, dailyProtein, dailyCarbs, dailyFat, dailyWaterOz, dailySteps, sleepHours, workoutDaysPerWeek } = req.body;
+    // Frontend sends: { goals: { calories, protein, carbs, fat, ... } }
+    // Extract from req.body.goals instead of req.body directly
+    const goalsData = req.body.goals || req.body; // Support both formats for backward compatibility
+    const { calories: dailyCalories, protein: dailyProtein, carbs: dailyCarbs, fat: dailyFat, hydration, goalWeight, timezone } = goalsData;
 
     // Validate and set defaults for required fields
     const calories = parseInt(dailyCalories) || 2000;
     const protein = parseInt(dailyProtein) || 150;
     const carbs = parseInt(dailyCarbs) || 200;
     const fat = parseInt(dailyFat) || 65;
-    const waterOz = parseInt(dailyWaterOz) || 64;
-    const steps = parseInt(dailySteps) || 10000;
-    const sleep = parseFloat(sleepHours) || 8;
-    const workoutDays = parseInt(workoutDaysPerWeek) || 4;
+    const waterOz = hydration ? Math.round(hydration / 29.5735) : 64; // Convert ml to oz
+    const steps = 10000; // Default steps
+    const sleep = 8; // Default sleep
+    const workoutDays = 4; // Default workout days
 
     console.log('[Goals] Saving goals for user:', req.userId, { calories, protein, carbs, fat, waterOz, steps, sleep, workoutDays });
+    console.log('[Goals] 📥 Received payload:', JSON.stringify(req.body, null, 2));
 
     // Deactivate old goals
     await pool.query(
