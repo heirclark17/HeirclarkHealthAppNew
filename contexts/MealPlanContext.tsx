@@ -273,6 +273,9 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         cookingSkill: foodPrefs?.cookingSkill || '',
       };
 
+      console.log('[MealPlanContext] 🍽️ Meal diversity preference being sent:', foodPrefs?.mealDiversity);
+      console.log('[MealPlanContext] 📊 Full preferences:', aiPreferences);
+
       const aiPlan = await aiService.generateAIMealPlan(aiPreferences, 7);
 
       if (aiPlan) {
