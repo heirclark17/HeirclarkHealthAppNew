@@ -129,20 +129,35 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
   // Get user goals from API
   const getUserGoals = useCallback(async (): Promise<UserGoalsForMealPlan> => {
     try {
+      console.log('[MealPlanContext] 🔍 Fetching goals from backend...');
       const goals = await api.getGoals();
+      console.log('[MealPlanContext] 📥 Backend returned:', goals);
+
       if (goals) {
-        return {
+        const finalGoals = {
           dailyCalories: goals.dailyCalories || 2000,
           dailyProtein: goals.dailyProtein || 150,
           dailyCarbs: goals.dailyCarbs || 200,
           dailyFat: goals.dailyFat || 65,
         };
+        console.log('[MealPlanContext] ✅ Using goals from backend:', finalGoals);
+        return finalGoals;
+      } else {
+        console.warn('[MealPlanContext] ⚠️ Backend returned NULL - using defaults');
       }
     } catch (error) {
-      console.error('[MealPlanContext] Failed to get goals:', error);
+      console.error('[MealPlanContext] ❌ Failed to get goals:', error);
     }
 
     // Default goals
+    console.warn('[MealPlanContext] 🔧 Using HARDCODED DEFAULTS:', {
+      dailyCalories: 2000,
+      dailyProtein: 150,
+      dailyCarbs: 200,
+      dailyFat: 65,
+    });
+    console.warn('[MealPlanContext] 💡 This means your calculated goals were NOT saved to the database!');
+
     return {
       dailyCalories: 2000,
       dailyProtein: 150,

@@ -440,14 +440,25 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
       // Try to sync with backend - but don't block on failure
       let apiSuccess = false;
       try {
+        console.log('[GoalWizard] 🔄 Attempting to save goals to backend...');
+        console.log('[GoalWizard] 📊 Goals payload:', JSON.stringify(goalsToSave, null, 2));
         apiSuccess = await api.updateGoals(goalsToSave);
         if (apiSuccess) {
-          console.log('[GoalWizard] Goals synced to backend successfully');
+          console.log('[GoalWizard] ✅ Goals synced to backend successfully!');
+          console.log('[GoalWizard] 💾 Saved:', {
+            calories: goalsToSave.dailyCalories,
+            protein: goalsToSave.dailyProtein,
+            carbs: goalsToSave.dailyCarbs,
+            fat: goalsToSave.dailyFat
+          });
         } else {
-          console.warn('[GoalWizard] Backend sync failed (400 error) - goals saved locally only');
+          console.warn('[GoalWizard] ❌ Backend sync failed (400 error) - goals saved locally only');
+          console.warn('[GoalWizard] 💡 This means your calculated goals are NOT in the database');
+          console.warn('[GoalWizard] 🔍 Check if you are authenticated (have a valid JWT token)');
         }
       } catch (apiError) {
-        console.warn('[GoalWizard] Backend sync error - goals saved locally only:', apiError);
+        console.error('[GoalWizard] ❌ Backend sync error - goals saved locally only:', apiError);
+        console.error('[GoalWizard] 🔐 This is likely an authentication issue');
       }
 
       // Always mark as complete since local storage succeeded
