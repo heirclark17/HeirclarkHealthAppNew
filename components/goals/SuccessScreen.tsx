@@ -20,10 +20,11 @@ interface SuccessScreenProps {
 }
 
 export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvatar, onStartMealPlan, onStartTrainingPlan, isGeneratingMealPlan, isGeneratingTrainingPlan }: SuccessScreenProps) {
-  const { state, resetWizard } = useGoalWizard();
+  const { state, resetWizard, calculateResults } = useGoalWizard();
   const { settings } = useSettings();
   const foodPrefs = useFoodPreferencesSafe();
   const hasPlayedHaptic = useRef(false);
+  const hasCalculatedResults = useRef(false);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -33,6 +34,15 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
   // Translucent primary color for active button
   const primaryGlassBg = isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)';
+
+  // Ensure results are calculated if missing (e.g., after app reload)
+  useEffect(() => {
+    if (!state.results && !hasCalculatedResults.current) {
+      console.log('[SuccessScreen] Results missing, recalculating...');
+      hasCalculatedResults.current = true;
+      calculateResults();
+    }
+  }, [state.results, calculateResults]);
 
   useEffect(() => {
     // Play haptic once
@@ -129,6 +139,17 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
     }
     return `${state.heightFt}'${state.heightIn || 0}"`;
   };
+
+  // Show loading while calculating results
+  if (!state.results) {
+    return (
+      <View style={[styles.scrollContainer, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          Calculating your personalized plan...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
