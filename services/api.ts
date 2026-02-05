@@ -79,6 +79,7 @@ export interface UserGoals {
 }
 
 export interface UserProfile {
+  fullName?: string;
   heightCm?: number;
   weightKg?: number;
   age?: number;
@@ -88,6 +89,36 @@ export interface UserProfile {
   targetWeightKg?: number;
   targetDate?: string;
   timezone?: string;
+}
+
+export interface UserPreferences {
+  // Workout preferences
+  cardioPreference?: 'walking' | 'running' | 'hiit' | 'cycling' | 'swimming';
+  fitnessLevel?: 'beginner' | 'intermediate' | 'advanced';
+  workoutDuration?: number;
+  workoutsPerWeek?: number;
+  // Diet preferences
+  dietStyle?: 'standard' | 'keto' | 'high_protein' | 'vegetarian' | 'vegan' | 'custom';
+  mealsPerDay?: number;
+  intermittentFasting?: boolean;
+  fastingStart?: string;
+  fastingEnd?: string;
+  allergies?: string[];
+  // Customizable daily goals
+  waterGoalOz?: number;
+  sleepGoalHours?: number;
+  stepGoal?: number;
+}
+
+export interface WorkoutStats {
+  totalWorkouts: number;
+  totalMinutes: number;
+  totalCaloriesBurned: number;
+  averageRating: number;
+  workoutsThisWeek: number;
+  minutesThisWeek: number;
+  caloriesThisWeek: number;
+  currentStreak: number;
 }
 
 export interface AuthUser {
@@ -205,7 +236,16 @@ class HeirclarkAPI {
 
       if (!response.ok) return null;
       const data = await response.json();
-      return data.success ? data.user : null;
+      if (!data.success || !data.user) return null;
+
+      // Transform snake_case to camelCase
+      const user = data.user;
+      return {
+        id: user.id,
+        email: user.email,
+        fullName: user.full_name || user.fullName,
+        avatarUrl: user.avatar_url || user.avatarUrl,
+      };
     } catch (error) {
       return null;
     }
@@ -338,6 +378,7 @@ class HeirclarkAPI {
         method: 'PATCH',
         headers: this.getHeaders(true),
         body: JSON.stringify({
+          full_name: profile.fullName,
           height_cm: profile.heightCm,
           weight_kg: profile.weightKg,
           age: profile.age,
@@ -357,6 +398,107 @@ class HeirclarkAPI {
     } catch (error) {
       console.error('[API] Update profile error:', error);
       return false;
+    }
+  }
+
+  // ============================================
+  // USER PREFERENCES (Workout/Diet Preferences)
+  // ============================================
+
+  async getPreferences(): Promise<UserPreferences | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/user/preferences`, {
+        headers: this.getHeaders(),
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.preferences : null;
+    } catch (error) {
+      console.error('[API] Get preferences error:', error);
+      return null;
+    }
+  }
+
+  async updatePreferences(preferences: Partial<UserPreferences>): Promise<boolean> {
+    try {
+      console.log('[API] Saving preferences:', preferences);
+      const response = await fetch(`${this.baseUrl}/api/v1/user/preferences`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(preferences),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Update preferences failed:', response.status, errorText);
+        return false;
+      }
+      console.log('[API] ✅ Preferences saved successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Update preferences error:', error);
+      return false;
+    }
+  }
+
+  // ============================================
+  // WORKOUT TRACKING
+  // ============================================
+
+  async logWorkout(workout: {
+    sessionName: string;
+    workoutType?: string;
+    exercises?: any[];
+    durationMinutes: number;
+    caloriesBurned: number;
+    notes?: string;
+    rating?: number;
+    completedAt?: string;
+  }): Promise<boolean> {
+    try {
+      console.log('[API] Logging workout:', workout.sessionName);
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/log`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(workout),
+      });
+      if (!response.ok) {
+        console.error('[API] Log workout failed:', response.status);
+        return false;
+      }
+      console.log('[API] ✅ Workout logged successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Log workout error:', error);
+      return false;
+    }
+  }
+
+  async getWorkoutHistory(days: number = 30): Promise<any[]> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/workouts/history?days=${days}`,
+        { headers: this.getHeaders() }
+      );
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? data.workouts : [];
+    } catch (error) {
+      console.error('[API] Get workout history error:', error);
+      return [];
+    }
+  }
+
+  async getWorkoutStats(): Promise<WorkoutStats | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/stats`, {
+        headers: this.getHeaders(),
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.stats : null;
+    } catch (error) {
+      console.error('[API] Get workout stats error:', error);
+      return null;
     }
   }
 

@@ -5,6 +5,7 @@ import { trainingService } from '../services/trainingService';
 import { planGenerator } from '../services/planGenerator';
 import { trainingStorage } from '../services/trainingStorage';
 import { aiService } from '../services/aiService';
+import { api } from '../services/api';
 import {
   WeeklyTrainingPlan,
   TrainingDay,
@@ -455,7 +456,9 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Mark entire workout as complete
-  const markWorkoutComplete = useCallback((dayIndex: number) => {
+  const markWorkoutComplete = useCallback(async (dayIndex: number) => {
+    let workoutToSync: any = null;
+
     setState(prev => {
       if (!prev.weeklyPlan) return prev;
 
@@ -469,6 +472,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           completed: true,
         }));
 
+        const completedAt = new Date().toISOString();
+
         updatedDays[dayIndex] = {
           ...day,
           completed: true,
@@ -476,8 +481,23 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             ...day.workout,
             exercises: updatedExercises,
             completed: true,
-            completedAt: new Date().toISOString(),
+            completedAt,
           },
+        };
+
+        // Capture workout data for backend sync
+        workoutToSync = {
+          sessionName: day.workout.name,
+          workoutType: day.workout.type,
+          durationMinutes: day.workout.duration || 0,
+          caloriesBurned: day.workout.estimatedCaloriesBurned || 0,
+          exercises: updatedExercises.map(ex => ({
+            name: ex.exercise?.name || 'Unknown',
+            sets: ex.sets,
+            reps: ex.reps,
+            weight: ex.weight,
+          })),
+          completedAt,
         };
       } else {
         updatedDays[dayIndex] = { ...day, completed: true };
@@ -490,7 +510,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         completedWorkouts: completedCount,
       };
 
-      // Save to storage
+      // Save to local storage
       trainingStorage.savePlanCache({
         weeklyPlan: updatedPlan,
         selectedProgram: prev.selectedProgram,
@@ -503,6 +523,21 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
       return { ...prev, weeklyPlan: updatedPlan };
     });
+
+    // *** NEW: Sync completed workout to backend ***
+    if (workoutToSync) {
+      try {
+        console.log('[Training] 🔄 Syncing workout completion to backend...');
+        const syncSuccess = await api.logWorkout(workoutToSync);
+        if (syncSuccess) {
+          console.log('[Training] ✅ Workout synced to backend successfully!');
+        } else {
+          console.warn('[Training] ⚠️ Backend sync failed - workout saved locally only');
+        }
+      } catch (syncError) {
+        console.error('[Training] ❌ Backend sync error:', syncError);
+      }
+    }
   }, []);
 
   // Navigate weeks

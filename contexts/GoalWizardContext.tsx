@@ -423,42 +423,69 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
         console.warn('[GoalWizard] Profile sync error:', profileError);
       }
 
-      // Save nutritional goals to backend (targetWeight removed - stored in profile instead)
+      // Save nutritional goals to backend
       const goalsToSave: any = {
         dailyCalories: state.results.calories,
         dailyProtein: state.results.protein,
         dailyCarbs: state.results.carbs,
         dailyFat: state.results.fat,
-        dailySteps: 10000, // Default step goal
-        dailyWaterOz: 64,  // Default water goal
-        sleepHours: 8,     // Default sleep goal
+        dailySteps: 10000, // Default step goal (can be overridden by preferences)
+        dailyWaterOz: 64,  // Default water goal (can be overridden by preferences)
+        sleepHours: 8,     // Default sleep goal (can be overridden by preferences)
         workoutDaysPerWeek: state.workoutsPerWeek || 3,
       };
 
       console.log('[GoalWizard] Saving goals to API:', JSON.stringify(goalsToSave, null, 2));
 
-      // Try to sync with backend - but don't block on failure
-      let apiSuccess = false;
+      // Try to sync goals with backend
+      let goalsSuccess = false;
       try {
         console.log('[GoalWizard] 🔄 Attempting to save goals to backend...');
-        console.log('[GoalWizard] 📊 Goals payload:', JSON.stringify(goalsToSave, null, 2));
-        apiSuccess = await api.updateGoals(goalsToSave);
-        if (apiSuccess) {
+        goalsSuccess = await api.updateGoals(goalsToSave);
+        if (goalsSuccess) {
           console.log('[GoalWizard] ✅ Goals synced to backend successfully!');
-          console.log('[GoalWizard] 💾 Saved:', {
-            calories: goalsToSave.dailyCalories,
-            protein: goalsToSave.dailyProtein,
-            carbs: goalsToSave.dailyCarbs,
-            fat: goalsToSave.dailyFat
-          });
         } else {
-          console.warn('[GoalWizard] ❌ Backend sync failed (400 error) - goals saved locally only');
-          console.warn('[GoalWizard] 💡 This means your calculated goals are NOT in the database');
-          console.warn('[GoalWizard] 🔍 Check if you are authenticated (have a valid JWT token)');
+          console.warn('[GoalWizard] ❌ Goals sync failed - saved locally only');
         }
       } catch (apiError) {
-        console.error('[GoalWizard] ❌ Backend sync error - goals saved locally only:', apiError);
-        console.error('[GoalWizard] 🔐 This is likely an authentication issue');
+        console.error('[GoalWizard] ❌ Goals sync error:', apiError);
+      }
+
+      // *** NEW: Save user preferences to backend (cardio, fitness level, diet, allergies, etc.) ***
+      const preferencesToSave = {
+        cardioPreference: state.cardioPreference,
+        fitnessLevel: state.fitnessLevel,
+        workoutDuration: state.workoutDuration,
+        workoutsPerWeek: state.workoutsPerWeek,
+        dietStyle: state.dietStyle,
+        mealsPerDay: state.mealsPerDay,
+        intermittentFasting: state.intermittentFasting,
+        fastingStart: state.fastingStart,
+        fastingEnd: state.fastingEnd,
+        allergies: state.allergies,
+        // Customizable daily goals (currently hardcoded defaults, can be made editable later)
+        waterGoalOz: 64,
+        sleepGoalHours: 8,
+        stepGoal: 10000,
+      };
+
+      try {
+        console.log('[GoalWizard] 🎯 Saving user preferences to backend...');
+        console.log('[GoalWizard] 📋 Preferences payload:', JSON.stringify(preferencesToSave, null, 2));
+        const prefsSuccess = await api.updatePreferences(preferencesToSave);
+        if (prefsSuccess) {
+          console.log('[GoalWizard] ✅ Preferences synced to backend successfully!');
+          console.log('[GoalWizard] 💾 Saved preferences:', {
+            cardioPreference: preferencesToSave.cardioPreference,
+            fitnessLevel: preferencesToSave.fitnessLevel,
+            dietStyle: preferencesToSave.dietStyle,
+            allergies: preferencesToSave.allergies,
+          });
+        } else {
+          console.warn('[GoalWizard] ❌ Preferences sync failed - saved locally only');
+        }
+      } catch (prefsError) {
+        console.error('[GoalWizard] ❌ Preferences sync error:', prefsError);
       }
 
       // Always mark as complete since local storage succeeded
@@ -480,18 +507,43 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
   // Load saved progress
   const loadSavedProgress = useCallback(async () => {
     try {
+      // First, load from local storage
       const saved = await AsyncStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         // Always restore saved data (both complete and incomplete)
         // This ensures goals are available throughout the app
         setState(prev => ({ ...prev, ...parsed }));
-        console.log('[GoalWizard] Loaded saved progress:', {
+        console.log('[GoalWizard] Loaded saved progress from local storage:', {
           primaryGoal: parsed.primaryGoal,
           cardioPreference: parsed.cardioPreference,
           activityLevel: parsed.activityLevel,
           isComplete: parsed.isComplete
         });
+      }
+
+      // Then, try to load preferences from backend (will override local if available)
+      try {
+        console.log('[GoalWizard] 🔄 Fetching preferences from backend...');
+        const backendPrefs = await api.getPreferences();
+        if (backendPrefs) {
+          console.log('[GoalWizard] ✅ Loaded preferences from backend:', backendPrefs);
+          setState(prev => ({
+            ...prev,
+            cardioPreference: backendPrefs.cardioPreference || prev.cardioPreference,
+            fitnessLevel: (backendPrefs.fitnessLevel as any) || prev.fitnessLevel,
+            workoutDuration: (backendPrefs.workoutDuration as any) || prev.workoutDuration,
+            workoutsPerWeek: backendPrefs.workoutsPerWeek || prev.workoutsPerWeek,
+            dietStyle: (backendPrefs.dietStyle as any) || prev.dietStyle,
+            mealsPerDay: backendPrefs.mealsPerDay || prev.mealsPerDay,
+            intermittentFasting: backendPrefs.intermittentFasting ?? prev.intermittentFasting,
+            fastingStart: backendPrefs.fastingStart || prev.fastingStart,
+            fastingEnd: backendPrefs.fastingEnd || prev.fastingEnd,
+            allergies: backendPrefs.allergies || prev.allergies,
+          }));
+        }
+      } catch (backendError) {
+        console.warn('[GoalWizard] Could not fetch backend preferences (may not be authenticated):', backendError);
       }
     } catch (error) {
       console.error('[GoalWizard] Failed to load saved progress:', error);

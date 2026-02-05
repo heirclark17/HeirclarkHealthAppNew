@@ -90,8 +90,9 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, [foodPrefsContext]);
 
-  // Get preferences from GoalWizard context or use defaults
-  const getPreferences = useCallback((): MealPlanPreferences => {
+  // Get preferences from GoalWizard context, backend, or use defaults
+  const getPreferences = useCallback(async (): Promise<MealPlanPreferences> => {
+    // First try to get from GoalWizard context (local state)
     if (goalWizardContext?.state) {
       const { dietStyle, allergies, mealsPerDay, intermittentFasting, fastingStart, fastingEnd } = goalWizardContext.state;
 
@@ -113,7 +114,38 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
+    // Fallback: Try to get from backend preferences
+    try {
+      console.log('[MealPlanContext] 🔄 Fetching preferences from backend...');
+      const backendPrefs = await api.getPreferences();
+      if (backendPrefs) {
+        const dietaryRestrictions: string[] = [];
+        if (backendPrefs.dietStyle === 'vegetarian') dietaryRestrictions.push('vegetarian');
+        if (backendPrefs.dietStyle === 'vegan') dietaryRestrictions.push('vegan');
+        if (backendPrefs.dietStyle === 'keto') dietaryRestrictions.push('low-carb');
+
+        console.log('[MealPlanContext] ✅ Using backend preferences:', {
+          dietStyle: backendPrefs.dietStyle,
+          allergies: backendPrefs.allergies,
+        });
+
+        return {
+          dietaryRestrictions,
+          cuisinePreferences: [],
+          allergies: backendPrefs.allergies || [],
+          mealsPerDay: backendPrefs.mealsPerDay || 3,
+          dietStyle: backendPrefs.dietStyle || 'standard',
+          intermittentFasting: backendPrefs.intermittentFasting || false,
+          fastingStart: backendPrefs.fastingStart || '12:00',
+          fastingEnd: backendPrefs.fastingEnd || '20:00',
+        };
+      }
+    } catch (error) {
+      console.warn('[MealPlanContext] Could not fetch backend preferences:', error);
+    }
+
     // Default preferences
+    console.log('[MealPlanContext] Using default preferences');
     return {
       dietaryRestrictions: [],
       cuisinePreferences: [],
@@ -172,7 +204,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const userGoals = await getUserGoals();
-      const preferences = getPreferences();
+      const preferences = await getPreferences();
 
       // Get start date (today)
       const startDate = new Date().toISOString().split('T')[0];
@@ -231,7 +263,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const userGoals = await getUserGoals();
-      const preferences = getPreferences();
+      const preferences = await getPreferences();
       const foodPrefs = await getFoodPreferences();
 
       console.log('[MealPlanContext] Generating AI meal plan with:');

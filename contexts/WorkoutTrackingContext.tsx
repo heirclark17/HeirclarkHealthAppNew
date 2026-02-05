@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '../services/api';
 
 export interface WorkoutLog {
   id: string;
@@ -141,7 +142,7 @@ export function WorkoutTrackingProvider({ children }: { children: React.ReactNod
     }
   };
 
-  const logWorkout = useCallback((workout: Omit<WorkoutLog, 'id' | 'completedAt'>) => {
+  const logWorkout = useCallback(async (workout: Omit<WorkoutLog, 'id' | 'completedAt'>) => {
     const newLog: WorkoutLog = {
       ...workout,
       id: `workout_${Date.now()}`,
@@ -177,12 +178,33 @@ export function WorkoutTrackingProvider({ children }: { children: React.ReactNod
         : prev.todaysWorkout,
     }));
 
-    console.log('[WorkoutTracking] Workout logged:', {
+    console.log('[WorkoutTracking] Workout logged locally:', {
       type: workout.workoutType,
       date: workout.date,
       weeklyCount: state.workoutsThisWeek.length + 1,
       streak: newStreak,
     });
+
+    // *** NEW: Sync workout to backend ***
+    try {
+      console.log('[WorkoutTracking] 🔄 Syncing workout to backend...');
+      const syncSuccess = await api.logWorkout({
+        sessionName: workout.workoutName,
+        workoutType: workout.workoutType,
+        durationMinutes: workout.duration,
+        caloriesBurned: workout.caloriesBurned,
+        exercises: [],
+        completedAt: newLog.completedAt,
+      });
+
+      if (syncSuccess) {
+        console.log('[WorkoutTracking] ✅ Workout synced to backend successfully!');
+      } else {
+        console.warn('[WorkoutTracking] ⚠️ Backend sync failed - workout saved locally only');
+      }
+    } catch (syncError) {
+      console.error('[WorkoutTracking] ❌ Backend sync error:', syncError);
+    }
   }, [state.currentStreak, state.lastWorkoutDate, state.workoutsThisWeek.length]);
 
   const setTodaysWorkout = useCallback((workout: { type: string; name: string; isRestDay: boolean }) => {

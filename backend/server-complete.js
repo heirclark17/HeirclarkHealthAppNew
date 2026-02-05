@@ -491,6 +491,317 @@ app.patch('/api/v1/user/profile', authenticateToken, async (req, res) => {
 });
 
 // ============================================
+// USER PREFERENCES ENDPOINTS (Workout/Diet Prefs)
+// ============================================
+
+// GET /api/v1/user/preferences - Get user preferences
+app.get('/api/v1/user/preferences', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM user_preferences WHERE user_id = $1',
+      [req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      // Return defaults if no preferences exist
+      return res.json({
+        success: true,
+        preferences: {
+          cardioPreference: 'walking',
+          fitnessLevel: 'intermediate',
+          workoutDuration: 30,
+          workoutsPerWeek: 3,
+          dietStyle: 'standard',
+          mealsPerDay: 3,
+          intermittentFasting: false,
+          fastingStart: '12:00',
+          fastingEnd: '20:00',
+          allergies: [],
+          waterGoalOz: 64,
+          sleepGoalHours: 8,
+          stepGoal: 10000,
+        }
+      });
+    }
+
+    const p = result.rows[0];
+    res.json({
+      success: true,
+      preferences: {
+        cardioPreference: p.cardio_preference,
+        fitnessLevel: p.fitness_level,
+        workoutDuration: p.workout_duration,
+        workoutsPerWeek: p.workouts_per_week,
+        dietStyle: p.diet_style,
+        mealsPerDay: p.meals_per_day,
+        intermittentFasting: p.intermittent_fasting,
+        fastingStart: p.fasting_start,
+        fastingEnd: p.fasting_end,
+        allergies: p.allergies || [],
+        waterGoalOz: p.water_goal_oz,
+        sleepGoalHours: parseFloat(p.sleep_goal_hours),
+        stepGoal: p.step_goal,
+      }
+    });
+  } catch (error) {
+    console.error('[Preferences] Get error:', error);
+    res.status(500).json({ error: 'Failed to get preferences' });
+  }
+});
+
+// POST /api/v1/user/preferences - Update user preferences
+app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
+  try {
+    const {
+      cardioPreference,
+      fitnessLevel,
+      workoutDuration,
+      workoutsPerWeek,
+      dietStyle,
+      mealsPerDay,
+      intermittentFasting,
+      fastingStart,
+      fastingEnd,
+      allergies,
+      waterGoalOz,
+      sleepGoalHours,
+      stepGoal,
+    } = req.body;
+
+    console.log('[Preferences] Saving for user:', req.userId, req.body);
+
+    // Upsert preferences (insert or update)
+    const result = await pool.query(
+      `INSERT INTO user_preferences (
+        user_id, cardio_preference, fitness_level, workout_duration, workouts_per_week,
+        diet_style, meals_per_day, intermittent_fasting, fasting_start, fasting_end,
+        allergies, water_goal_oz, sleep_goal_hours, step_goal
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      ON CONFLICT (user_id) DO UPDATE SET
+        cardio_preference = COALESCE($2, user_preferences.cardio_preference),
+        fitness_level = COALESCE($3, user_preferences.fitness_level),
+        workout_duration = COALESCE($4, user_preferences.workout_duration),
+        workouts_per_week = COALESCE($5, user_preferences.workouts_per_week),
+        diet_style = COALESCE($6, user_preferences.diet_style),
+        meals_per_day = COALESCE($7, user_preferences.meals_per_day),
+        intermittent_fasting = COALESCE($8, user_preferences.intermittent_fasting),
+        fasting_start = COALESCE($9, user_preferences.fasting_start),
+        fasting_end = COALESCE($10, user_preferences.fasting_end),
+        allergies = COALESCE($11, user_preferences.allergies),
+        water_goal_oz = COALESCE($12, user_preferences.water_goal_oz),
+        sleep_goal_hours = COALESCE($13, user_preferences.sleep_goal_hours),
+        step_goal = COALESCE($14, user_preferences.step_goal),
+        updated_at = NOW()
+      RETURNING *`,
+      [
+        req.userId,
+        cardioPreference || 'walking',
+        fitnessLevel || 'intermediate',
+        workoutDuration || 30,
+        workoutsPerWeek || 3,
+        dietStyle || 'standard',
+        mealsPerDay || 3,
+        intermittentFasting || false,
+        fastingStart || '12:00',
+        fastingEnd || '20:00',
+        allergies || [],
+        waterGoalOz || 64,
+        sleepGoalHours || 8,
+        stepGoal || 10000,
+      ]
+    );
+
+    const p = result.rows[0];
+    console.log('[Preferences] ✅ Saved successfully');
+
+    res.json({
+      success: true,
+      preferences: {
+        cardioPreference: p.cardio_preference,
+        fitnessLevel: p.fitness_level,
+        workoutDuration: p.workout_duration,
+        workoutsPerWeek: p.workouts_per_week,
+        dietStyle: p.diet_style,
+        mealsPerDay: p.meals_per_day,
+        intermittentFasting: p.intermittent_fasting,
+        fastingStart: p.fasting_start,
+        fastingEnd: p.fasting_end,
+        allergies: p.allergies || [],
+        waterGoalOz: p.water_goal_oz,
+        sleepGoalHours: parseFloat(p.sleep_goal_hours),
+        stepGoal: p.step_goal,
+      }
+    });
+  } catch (error) {
+    console.error('[Preferences] Save error:', error);
+    res.status(500).json({ error: 'Failed to save preferences', message: error.message });
+  }
+});
+
+// ============================================
+// WORKOUT TRACKING ENDPOINTS
+// ============================================
+
+// POST /api/v1/workouts/log - Log a completed workout
+app.post('/api/v1/workouts/log', authenticateToken, async (req, res) => {
+  try {
+    const {
+      sessionName,
+      workoutType,
+      exercises,
+      durationMinutes,
+      caloriesBurned,
+      notes,
+      rating,
+      completedAt,
+    } = req.body;
+
+    console.log('[Workout] Logging workout for user:', req.userId, sessionName);
+
+    const result = await pool.query(
+      `INSERT INTO workout_sessions (
+        user_id, session_name, exercises, duration_minutes, calories_burned, notes, rating, completed_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *`,
+      [
+        req.userId,
+        sessionName || workoutType || 'Workout',
+        JSON.stringify(exercises || []),
+        durationMinutes || 0,
+        caloriesBurned || 0,
+        notes,
+        rating,
+        completedAt || new Date().toISOString(),
+      ]
+    );
+
+    // Update daily calorie burned log
+    const today = completedAt ? new Date(completedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    await pool.query(
+      `INSERT INTO calorie_logs (user_id, date, calories_burned)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, date)
+       DO UPDATE SET calories_burned = calorie_logs.calories_burned + $3`,
+      [req.userId, today, caloriesBurned || 0]
+    );
+
+    console.log('[Workout] ✅ Logged successfully');
+
+    res.json({ success: true, workout: result.rows[0] });
+  } catch (error) {
+    console.error('[Workout] Log error:', error);
+    res.status(500).json({ error: 'Failed to log workout', message: error.message });
+  }
+});
+
+// GET /api/v1/workouts/history - Get workout history
+app.get('/api/v1/workouts/history', authenticateToken, async (req, res) => {
+  try {
+    const { days, limit } = req.query;
+    const daysBack = parseInt(days) || 30;
+    const rowLimit = parseInt(limit) || 50;
+
+    const result = await pool.query(
+      `SELECT * FROM workout_sessions
+       WHERE user_id = $1
+         AND started_at >= NOW() - INTERVAL '${daysBack} days'
+       ORDER BY started_at DESC
+       LIMIT $2`,
+      [req.userId, rowLimit]
+    );
+
+    res.json({
+      success: true,
+      workouts: result.rows.map(w => ({
+        id: w.id,
+        sessionName: w.session_name,
+        exercises: w.exercises,
+        durationMinutes: w.duration_minutes,
+        caloriesBurned: w.calories_burned,
+        notes: w.notes,
+        rating: w.rating,
+        startedAt: w.started_at,
+        completedAt: w.completed_at,
+      }))
+    });
+  } catch (error) {
+    console.error('[Workout] History error:', error);
+    res.status(500).json({ error: 'Failed to get workout history' });
+  }
+});
+
+// GET /api/v1/workouts/stats - Get workout statistics
+app.get('/api/v1/workouts/stats', authenticateToken, async (req, res) => {
+  try {
+    // Get total workouts and stats
+    const totalStats = await pool.query(
+      `SELECT
+        COUNT(*) as total_workouts,
+        SUM(duration_minutes) as total_minutes,
+        SUM(calories_burned) as total_calories,
+        AVG(rating) as avg_rating
+       FROM workout_sessions
+       WHERE user_id = $1 AND completed_at IS NOT NULL`,
+      [req.userId]
+    );
+
+    // Get this week's workouts
+    const weekStats = await pool.query(
+      `SELECT
+        COUNT(*) as workouts_this_week,
+        SUM(duration_minutes) as minutes_this_week,
+        SUM(calories_burned) as calories_this_week
+       FROM workout_sessions
+       WHERE user_id = $1
+         AND completed_at IS NOT NULL
+         AND DATE_TRUNC('week', completed_at) = DATE_TRUNC('week', NOW())`,
+      [req.userId]
+    );
+
+    // Get streak (consecutive days with workouts)
+    const streakResult = await pool.query(
+      `WITH workout_dates AS (
+        SELECT DISTINCT DATE(completed_at) as workout_date
+        FROM workout_sessions
+        WHERE user_id = $1 AND completed_at IS NOT NULL
+        ORDER BY workout_date DESC
+      ),
+      consecutive AS (
+        SELECT workout_date,
+               workout_date - ROW_NUMBER() OVER (ORDER BY workout_date DESC)::INTEGER AS grp
+        FROM workout_dates
+      )
+      SELECT COUNT(*) as streak
+      FROM consecutive
+      WHERE grp = (SELECT grp FROM consecutive WHERE workout_date = CURRENT_DATE)`,
+      [req.userId]
+    );
+
+    const stats = totalStats.rows[0];
+    const week = weekStats.rows[0];
+
+    res.json({
+      success: true,
+      stats: {
+        totalWorkouts: parseInt(stats.total_workouts) || 0,
+        totalMinutes: parseInt(stats.total_minutes) || 0,
+        totalCaloriesBurned: parseInt(stats.total_calories) || 0,
+        averageRating: parseFloat(stats.avg_rating) || 0,
+        workoutsThisWeek: parseInt(week.workouts_this_week) || 0,
+        minutesThisWeek: parseInt(week.minutes_this_week) || 0,
+        caloriesThisWeek: parseInt(week.calories_this_week) || 0,
+        currentStreak: parseInt(streakResult.rows[0]?.streak) || 0,
+      }
+    });
+  } catch (error) {
+    console.error('[Workout] Stats error:', error);
+    res.status(500).json({ error: 'Failed to get workout stats' });
+  }
+});
+
+// ============================================
 // MEAL LOGGING ENDPOINTS
 // ============================================
 

@@ -70,6 +70,38 @@ CREATE TABLE IF NOT EXISTS user_goals (
 CREATE INDEX idx_goals_user ON user_goals(user_id);
 
 -- ============================================
+-- USER PREFERENCES (Workout/Diet Preferences)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS user_preferences (
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    -- Workout preferences
+    cardio_preference VARCHAR(20) DEFAULT 'walking', -- walking, running, hiit, cycling, swimming
+    fitness_level VARCHAR(20) DEFAULT 'intermediate', -- beginner, intermediate, advanced
+    workout_duration INTEGER DEFAULT 30, -- minutes
+    workouts_per_week INTEGER DEFAULT 3,
+    -- Diet preferences
+    diet_style VARCHAR(20) DEFAULT 'standard', -- standard, keto, high_protein, vegetarian, vegan, custom
+    meals_per_day INTEGER DEFAULT 3,
+    intermittent_fasting BOOLEAN DEFAULT false,
+    fasting_start VARCHAR(5) DEFAULT '12:00',
+    fasting_end VARCHAR(5) DEFAULT '20:00',
+    allergies TEXT[] DEFAULT '{}', -- array of allergens
+    -- Customizable daily goals
+    water_goal_oz INTEGER DEFAULT 64,
+    sleep_goal_hours DECIMAL(3,1) DEFAULT 8.0,
+    step_goal INTEGER DEFAULT 10000,
+    -- Timestamps
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TRIGGER update_user_preferences_updated_at
+    BEFORE UPDATE ON user_preferences
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================
 -- MEALS & NUTRITION
 -- ============================================
 
