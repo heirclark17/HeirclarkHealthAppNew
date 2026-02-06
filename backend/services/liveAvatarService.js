@@ -2,7 +2,7 @@
  * LiveAvatar API Service
  * Wrapper for creating, starting, and stopping LiveAvatar streaming sessions
  * Uses LiveKit-based streaming protocol
- * Docs: https://docs.liveavatar.ai
+ * Docs: https://docs.liveavatar.com
  *
  * Flow:
  *   1. Backend: POST /v1/sessions/token  (X-API-KEY) -> session_token
@@ -12,7 +12,7 @@
  *   5. Backend: POST /v1/sessions/stop   (Bearer session_token) -> cleanup
  */
 
-const LIVEAVATAR_API_BASE = 'https://api.liveavatar.ai/v1';
+const LIVEAVATAR_API_BASE = 'https://api.liveavatar.com/v1';
 
 class LiveAvatarService {
   /**
