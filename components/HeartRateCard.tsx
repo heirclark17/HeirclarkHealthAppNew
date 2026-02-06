@@ -110,26 +110,28 @@ export function HeartRateCard({
       <TouchableOpacity activeOpacity={0.7} onPress={handlePress} style={{ flex: 1 }}>
         <GlassCard style={styles.card} interactive>
           <View style={styles.innerContainer}>
+            {/* Icon */}
+            <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
+              <Ionicons name="heart" size={24} color={colors.text} />
+            </View>
+
             {/* Label */}
             <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={1}>
               HEART RATE
             </Text>
 
             {/* Heart Rate Value */}
-            <View style={styles.valueContainer}>
-              <Text style={[styles.value, { color: displayColor }]}>
-                {heartRate > 0 ? `${Math.round(heartRate)}` : '--'}
-              </Text>
-              {currentZone && heartRate > 0 ? (
-                <Text style={[styles.zoneLabel, { color: displayColor }]}>
-                  Zone {currentZone.zone} • {currentZone.name}
-                </Text>
-              ) : (
-                <Text style={[styles.unit, { color: colors.textMuted }]}>
-                  BPM
-                </Text>
-              )}
-            </View>
+            <Text style={[styles.value, { color: colors.text }]}>
+              {heartRate > 0 ? `${Math.round(heartRate)}` : '--'}
+            </Text>
+
+            {/* Subtitle */}
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+              {currentZone && heartRate > 0
+                ? `Zone ${currentZone.zone} • ${currentZone.name}`
+                : 'BPM'
+              }
+            </Text>
           </View>
         </GlassCard>
       </TouchableOpacity>
@@ -263,40 +265,34 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   label: {
     fontSize: 9,
     fontFamily: Fonts.semiBold,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
     textAlign: 'center',
-    marginBottom: 12,
-  },
-  valueContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 8,
   },
   value: {
     fontSize: 32,
+    fontFamily: Fonts.light,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 10,
     fontFamily: Fonts.regular,
     textAlign: 'center',
-  },
-  unit: {
-    fontSize: 10,
-    fontFamily: Fonts.medium,
-    textAlign: 'center',
-    marginTop: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  zoneLabel: {
-    fontSize: 10,
-    fontFamily: Fonts.semiBold,
-    textAlign: 'center',
-    marginTop: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   // Modal styles
   modalOverlay: {

@@ -75,20 +75,25 @@ export function RestingEnergyCard({
       <TouchableOpacity activeOpacity={0.7} onPress={handlePress} style={{ flex: 1 }}>
         <GlassCard style={styles.card} interactive>
           <View style={styles.innerContainer}>
+            {/* Icon */}
+            <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
+              <Ionicons name="moon" size={24} color={colors.text} />
+            </View>
+
             {/* Label */}
             <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={1}>
               RESTING
             </Text>
 
             {/* Resting Energy Value */}
-            <View style={styles.valueContainer}>
-              <Text style={[styles.value, { color: displayColor }]}>
-                {restingEnergy > 0 ? Math.round(restingEnergy).toLocaleString() : '--'}
-              </Text>
-              <Text style={[styles.unit, { color: colors.textMuted }]}>
-                kcal
-              </Text>
-            </View>
+            <Text style={[styles.value, { color: colors.text }]}>
+              {restingEnergy > 0 ? Math.round(restingEnergy).toLocaleString() : '--'}
+            </Text>
+
+            {/* Subtitle */}
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+              kcal
+            </Text>
           </View>
         </GlassCard>
       </TouchableOpacity>
@@ -262,30 +267,34 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   label: {
     fontSize: 9,
     fontFamily: Fonts.semiBold,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
     textAlign: 'center',
-    marginBottom: 12,
-  },
-  valueContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 8,
   },
   value: {
-    fontSize: 28,
-    fontFamily: Fonts.regular,
+    fontSize: 32,
+    fontFamily: Fonts.light,
     textAlign: 'center',
+    marginBottom: 4,
   },
-  unit: {
+  subtitle: {
     fontSize: 10,
     fontFamily: Fonts.regular,
     textAlign: 'center',
-    marginTop: 8,
   },
   // Modal styles
   modalOverlay: {

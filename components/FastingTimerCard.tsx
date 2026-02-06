@@ -152,23 +152,28 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
       <TouchableOpacity activeOpacity={0.7} onPress={handlePress} style={{ flex: 1 }}>
         <GlassCard style={styles.card} interactive>
           <View style={styles.innerContainer}>
+            {/* Icon */}
+            <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
+              <Ionicons name="timer" size={24} color={colors.text} />
+            </View>
+
             {/* Label */}
             <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={1}>
               FASTING
             </Text>
 
-            {/* Timer Display - stylish with animation */}
-            <View style={styles.valueContainer}>
-              <Animated.Text style={[styles.value, { color: displayColor }, animatedStyle]}>
-                {state.isActive
-                  ? formatTime(timeRemaining.hours, timeRemaining.minutes)
-                  : selectedPreset?.label || '16:8'
-                }
-              </Animated.Text>
-              <Text style={[styles.stateLabel, { color: displayColor }]}>
-                {getStateLabel()}
-              </Text>
-            </View>
+            {/* Timer Display */}
+            <Animated.Text style={[styles.value, { color: colors.text }, animatedStyle]}>
+              {state.isActive
+                ? formatTime(timeRemaining.hours, timeRemaining.minutes)
+                : selectedPreset?.label || '16:8'
+              }
+            </Animated.Text>
+
+            {/* Subtitle */}
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+              {getStateLabel()}
+            </Text>
           </View>
         </GlassCard>
       </TouchableOpacity>
@@ -295,33 +300,34 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   label: {
     fontSize: 9,
     fontFamily: Fonts.semiBold,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
     textAlign: 'center',
-    marginBottom: 12,
-  },
-  valueContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 8,
   },
   value: {
-    fontSize: 28,
+    fontSize: 32,
+    fontFamily: Fonts.light,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 10,
     fontFamily: Fonts.regular,
     textAlign: 'center',
-    letterSpacing: 2,
-  },
-  stateLabel: {
-    fontSize: 11,
-    fontFamily: Fonts.semiBold,
-    textAlign: 'center',
-    marginTop: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
   },
   // Modal styles
   modalOverlay: {

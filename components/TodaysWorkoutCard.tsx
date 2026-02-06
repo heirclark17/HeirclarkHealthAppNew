@@ -109,21 +109,31 @@ export function TodaysWorkoutCard({
       <TouchableOpacity activeOpacity={0.7} onPress={handlePress} style={{ flex: 1 }}>
         <GlassCard style={styles.card} interactive>
           <View style={styles.innerContainer}>
+            {/* Icon */}
+            <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
+              <Ionicons name={config.icon} size={24} color={colors.text} />
+            </View>
+
             {/* Label */}
             <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={1}>
               WORKOUT
             </Text>
 
-            {/* Workout Name - stylish display */}
-            <View style={styles.valueContainer}>
-              <Text
-                style={[styles.value, { color: isRestDay ? colors.textMuted : displayColor }]}
-                numberOfLines={2}
-                adjustsFontSizeToFit
-              >
-                {isRestDay ? 'Rest Day' : (propWorkoutName || workoutType)}
+            {/* Workout Name */}
+            <Text
+              style={[styles.value, { color: colors.text }]}
+              numberOfLines={2}
+              adjustsFontSizeToFit
+            >
+              {isRestDay ? 'Rest Day' : (propWorkoutName || workoutType)}
+            </Text>
+
+            {/* Subtitle */}
+            {!isRestDay && workoutType && (
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                today
               </Text>
-            </View>
+            )}
           </View>
         </GlassCard>
       </TouchableOpacity>
@@ -186,26 +196,34 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'space-between',
     width: '100%',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   label: {
     fontSize: 9,
-    fontFamily: Fonts.regular,
-    letterSpacing: 0.3,
+    fontFamily: Fonts.semiBold,
+    letterSpacing: 0.5,
     textAlign: 'center',
-    marginBottom: 12,
-  },
-  valueContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
+    marginBottom: 8,
   },
   value: {
-    fontSize: 30,
+    fontSize: 18,
     fontFamily: Fonts.light,
     textAlign: 'center',
-    lineHeight: 34,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 10,
+    fontFamily: Fonts.regular,
+    textAlign: 'center',
   },
   // Modal styles
   modalOverlay: {
