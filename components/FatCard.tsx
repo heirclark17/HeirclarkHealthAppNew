@@ -10,7 +10,7 @@ import {
   Modal,
   ScrollView,
 } from 'react-native';
-import { Avocado } from 'lucide-react-native';
+import { Nut } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
@@ -58,7 +58,7 @@ export function FatCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Avocado size={24} color={colors.text} />
+              <Nut size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -98,7 +98,7 @@ export function FatCard({
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${Colors.fat}20` }]}>
-                  <Avocado size={32} color={Colors.fat} />
+                  <Nut size={32} color={Colors.fat} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Fat</Text>
                 <Text style={[styles.modalValue, { color: Colors.fat }]}>
