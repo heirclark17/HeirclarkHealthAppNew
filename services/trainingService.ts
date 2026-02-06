@@ -15,6 +15,7 @@ import {
   CardioPreference,
   PlanSummary,
 } from '../types/training';
+import { getExerciseDbMapping } from '../data/exerciseDbMapping';
 
 // Cardio exercise IDs grouped by preference
 const CARDIO_EXERCISES_BY_PREFERENCE: Record<CardioPreference, string[]> = {
@@ -577,6 +578,23 @@ function generateUUID(): string {
   });
 }
 
+/**
+ * Enrich an exercise with GIF URL and instructions from ExerciseDB
+ * This adds animated form demonstrations to exercises for visual guidance
+ */
+function enrichExerciseWithGif(exercise: Exercise): Exercise {
+  const mapping = getExerciseDbMapping(exercise.name);
+  if (mapping) {
+    return {
+      ...exercise,
+      exerciseDbId: mapping.id,
+      gifUrl: mapping.gifUrl,
+      exerciseDbInstructions: mapping.instructions,
+    };
+  }
+  return exercise;
+}
+
 function getExercisesByMuscleGroup(muscleGroups: MuscleGroup[], difficulty: DifficultyLevel): Exercise[] {
   const difficultyOrder: DifficultyLevel[] = ['beginner', 'intermediate', 'advanced'];
   const maxDifficultyIndex = difficultyOrder.indexOf(difficulty);
@@ -672,10 +690,13 @@ function selectExercisesForWorkout(
         break;
     }
 
+    // Enrich exercise with GIF URL and instructions from ExerciseDB
+    const enrichedExercise = enrichExerciseWithGif(exercise);
+
     return {
       id: generateUUID(),
       exerciseId: exercise.id,
-      exercise,
+      exercise: enrichedExercise,
       sets,
       reps,
       restSeconds,

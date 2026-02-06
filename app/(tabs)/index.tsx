@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Alert, Modal, TextInput, Animated, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Alert, Modal, TextInput, Animated, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ReanimatedModule, { useSharedValue, useAnimatedStyle, withSpring, ReduceMotion } from 'react-native-reanimated';
 import { api } from '../../services/api';
 import { appleHealthService } from '../../services/appleHealthService';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -19,10 +20,16 @@ import { WaterTrackingCard } from '../../components/WaterTrackingCard';
 import { TodaysWorkoutCard } from '../../components/TodaysWorkoutCard';
 import { FastingTimerCard } from '../../components/FastingTimerCard';
 import { HeartRateCard } from '../../components/HeartRateCard';
+import { DashboardBottomSheet, DashboardBottomSheetRef, BottomSheetModalProvider } from '../../components/DashboardBottomSheet';
+import { WorkoutDetailContent } from '../../components/WorkoutDetailContent';
+import { WeeklyStatsContent } from '../../components/WeeklyStatsContent';
+import { WearablesSyncContent } from '../../components/WearablesSyncContent';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTraining } from '../../contexts/TrainingContext';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
+
+const AnimatedPressable = ReanimatedModule.createAnimatedComponent(Pressable);
 
 const { width } = Dimensions.get('window');
 
@@ -142,6 +149,27 @@ export default function DashboardScreen() {
     'quickActions',
   ]);
 
+  // Bottom sheet modal refs
+  const workoutSheetRef = useRef<DashboardBottomSheetRef>(null);
+  const weeklyStatsSheetRef = useRef<DashboardBottomSheetRef>(null);
+  const wearablesSyncSheetRef = useRef<DashboardBottomSheetRef>(null);
+
+  // Card press animation values
+  const workoutCardScale = useSharedValue(1);
+  const weeklyCardScale = useSharedValue(1);
+  const wearablesCardScale = useSharedValue(1);
+
+  // Animated styles for card press
+  const workoutCardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: workoutCardScale.value }],
+  }));
+  const weeklyCardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: weeklyCardScale.value }],
+  }));
+  const wearablesCardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: wearablesCardScale.value }],
+  }));
+
   const calorieBalance = caloriesIn - caloriesOut;
 
   // Check API connection
@@ -210,7 +238,11 @@ export default function DashboardScreen() {
         setProteinGoal(goals.dailyProtein || 150);
         setCarbsGoal(goals.dailyCarbs || 250);
         setFatGoal(goals.dailyFat || 65);
-        setStepsGoal(goals.dailySteps || 10000);
+        // Use API goal, then fallback to GoalWizard state, then default
+        setStepsGoal(goals.dailySteps || goalWizardState?.stepGoal || 10000);
+      } else if (goalWizardState?.stepGoal) {
+        // Fallback to GoalWizard state if API returns nothing
+        setStepsGoal(goalWizardState.stepGoal);
       }
 
       // Load weekly weight target and goal type from local wizard state
@@ -758,6 +790,7 @@ export default function DashboardScreen() {
     unit = 'g',
     displayType = 'gauge',
     themeColors = colors,
+    usePastelBar = false,
   }: {
     label: string;
     current: number;
@@ -766,6 +799,7 @@ export default function DashboardScreen() {
     unit?: string;
     displayType?: 'gauge' | 'bar';
     themeColors?: typeof colors;
+    usePastelBar?: boolean;
   }) => {
     const percentage = Math.round((current / target) * 100);
     const isOverTarget = current > target;
@@ -899,8 +933,8 @@ export default function DashboardScreen() {
           {/* Horizontal Progress Bar */}
           <View style={[styles.horizontalBarContainer, isGoalMet && { paddingVertical: 6 }]}>
             <View style={styles.horizontalBarWrapper}>
-              {/* Background track */}
-              <View style={[styles.horizontalBarBg, { backgroundColor: isDark ? Colors.gaugeBg : 'rgba(0,0,0,0.08)' }]} />
+              {/* Background track - pastel version of the color when usePastelBar is true */}
+              <View style={[styles.horizontalBarBg, { backgroundColor: usePastelBar ? `${color}20` : (isDark ? Colors.gaugeBg : 'rgba(0,0,0,0.08)') }]} />
               {/* Foreground fill with glow */}
               <Animated.View
                 style={[
@@ -972,21 +1006,43 @@ export default function DashboardScreen() {
         return <CalendarCard key={cardId} selectedDate={selectedDate} onDateChange={setSelectedDate} />;
 
       case 'dailyBalance':
+        // Calculate daily projected fat loss/gain
+        // Formula: dailyDeficit = TDEE - caloriesConsumed, projectedDailyFatLoss = dailyDeficit / 3500
+        const dailyDeficit = caloriesOut - caloriesIn;
+        const projectedDailyFatChange = dailyDeficit / 3500; // positive = loss, negative = gain
+
+        // Determine if it's a loss or gain for display
+        const isDeficit = dailyDeficit >= 0;
+        const fatChangeLabel = isDeficit ? 'FAT LOSS' : 'FAT GAIN';
+        const fatChangeValue = Math.abs(projectedDailyFatChange).toFixed(1);
+
+        // Handle edge cases: if no TDEE data yet, show placeholder
+        const hasTDEE = caloriesOut > 0;
+        const displayFatValue = hasTDEE ? `~${fatChangeValue}` : '--';
+
+        // Color coding: green for loss, red/orange for gain
+        const fatChangeColor = isDeficit ? colors.text : Colors.overTarget;
+
         return (
           <TouchableOpacity key={cardId} activeOpacity={0.7} onPress={() => setShowDailyBalanceInfoModal(true)}>
             <GlassCard style={{ marginHorizontal: 16, marginBottom: 24, marginTop: 32 }} interactive>
               <Text style={[styles.dailyBalanceTitle, { color: colors.text }, caloriesIn > calorieGoal && { color: Colors.overTarget }]}>DAILY BALANCE</Text>
               <CalorieGaugeAnimated value={caloriesIn - caloriesOut} maxValue={calorieGoal} />
-              <View style={styles.calorieCardsRow}>
+              <View style={[styles.calorieCardsRow, { gap: 8 }]}>
                 <GlassCard style={styles.calorieSubCard} interactive>
-                  <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]}>CALORIES IN</Text>
+                  <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>CAL IN</Text>
                   <Text style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesIn}</Text>
                   <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</Text>
                 </GlassCard>
                 <GlassCard style={styles.calorieSubCard} interactive>
-                  <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]}>CALORIES OUT</Text>
+                  <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>CAL OUT</Text>
                   <Text style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesOut}</Text>
                   <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</Text>
+                </GlassCard>
+                <GlassCard style={styles.calorieSubCard} interactive>
+                  <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>{fatChangeLabel}</Text>
+                  <Text style={[styles.calorieSubCardValue, { color: fatChangeColor }]}>{displayFatValue}</Text>
+                  <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>lbs/day</Text>
                 </GlassCard>
               </View>
             </GlassCard>
@@ -1028,17 +1084,17 @@ export default function DashboardScreen() {
           <View key={cardId} style={{ flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 }}>
             <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowStepsInfoModal(true)}>
               <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
-                <MacroGauge label="Steps" current={steps} target={stepsGoal} color={Colors.gaugeFill} unit="" displayType="bar" />
+                <MacroGauge label="Steps" current={steps} target={stepsGoal} color={Colors.gaugeFill} unit="" displayType="bar" usePastelBar />
               </GlassCard>
             </TouchableOpacity>
             <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowActiveEnergyInfoModal(true)}>
               <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
-                <MacroGauge label="Active Energy" current={activeEnergy} target={activeEnergyGoal} color={Colors.activeEnergy} unit="kcal" displayType="bar" />
+                <MacroGauge label="Active Energy" current={activeEnergy} target={activeEnergyGoal} color={Colors.activeEnergy} unit="kcal" displayType="bar" usePastelBar />
               </GlassCard>
             </TouchableOpacity>
             <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowRestingEnergyInfoModal(true)}>
               <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
-                <MacroGauge label="Resting Energy" current={restingEnergy} target={restingEnergyGoal} color={Colors.restingEnergy} unit="kcal" displayType="bar" />
+                <MacroGauge label="Resting Energy" current={restingEnergy} target={restingEnergyGoal} color={Colors.restingEnergy} unit="kcal" displayType="bar" usePastelBar />
               </GlassCard>
             </TouchableOpacity>
           </View>
@@ -1120,40 +1176,80 @@ export default function DashboardScreen() {
         );
 
       case 'quickActions':
-        const dailyDeficit = caloriesOut - caloriesIn;
-        const projectedWeeklyLoss = (dailyDeficit * 7) / 3500;
+        // Get workouts completed this week from training state
+        let completedWorkouts = 0;
+        if (trainingState?.weeklyPlan?.days) {
+          completedWorkouts = trainingState.weeklyPlan.days.filter(
+            (day: any) => day.workout && day.workout.completed
+          ).length;
+        }
+        // Get user's workout goal from GoalWizardContext
+        const workoutsPerWeekGoal = goalWizardState?.workoutsPerWeek || 3;
 
         return (
           <View key={cardId} style={{ flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 }}>
-            {/* Fat Loss Card - No modal */}
-            <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }}>
-              <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                <Ionicons name="trending-down" size={24} color={colors.primary} />
-              </View>
-              <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>FAT LOSS</Text>
-              <Text style={[styles.quickActionValue, { color: colors.text }]}>{projectedWeeklyLoss.toFixed(1)} lbs</Text>
-              <Text style={[styles.quickActionSubtitle, { color: colors.textMuted }]}>projected</Text>
-            </GlassCard>
+            {/* Workouts Card - opens bottom sheet */}
+            <AnimatedPressable
+              style={[{ flex: 1 }, workoutCardAnimatedStyle]}
+              onPressIn={() => {
+                workoutCardScale.value = withSpring(0.97, { damping: 15, stiffness: 300 });
+              }}
+              onPressOut={() => {
+                workoutCardScale.value = withSpring(1, { damping: 15, stiffness: 300 });
+              }}
+              onPress={() => workoutSheetRef.current?.present()}
+            >
+              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
+                <View style={{ alignItems: 'center', marginBottom: 10 }}>
+                  <Ionicons name="barbell-outline" size={24} color={colors.primary} />
+                </View>
+                <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>WORKOUTS</Text>
+                <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>{completedWorkouts}/{workoutsPerWeekGoal}</Text>
+                <Text style={[styles.quickActionSubtitle, { color: colors.textMuted }]}>this week</Text>
+              </GlassCard>
+            </AnimatedPressable>
 
-            {/* Weekly Progress Card - No modal */}
-            <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }}>
-              <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                <Ionicons name="stats-chart" size={24} color={colors.primary} />
-              </View>
-              <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>WEEKLY</Text>
-              <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>View Stats</Text>
-              <Text style={[styles.quickActionSubtitle, { color: colors.textMuted }]}>this week</Text>
-            </GlassCard>
+            {/* Weekly Progress Card - opens bottom sheet */}
+            <AnimatedPressable
+              style={[{ flex: 1 }, weeklyCardAnimatedStyle]}
+              onPressIn={() => {
+                weeklyCardScale.value = withSpring(0.97, { damping: 15, stiffness: 300 });
+              }}
+              onPressOut={() => {
+                weeklyCardScale.value = withSpring(1, { damping: 15, stiffness: 300 });
+              }}
+              onPress={() => weeklyStatsSheetRef.current?.present()}
+            >
+              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
+                <View style={{ alignItems: 'center', marginBottom: 10 }}>
+                  <Ionicons name="stats-chart" size={24} color={colors.primary} />
+                </View>
+                <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>WEEKLY</Text>
+                <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>View Stats</Text>
+                <Text style={[styles.quickActionSubtitle, { color: colors.textMuted }]}>this week</Text>
+              </GlassCard>
+            </AnimatedPressable>
 
-            {/* Wearable Sync Card - No modal */}
-            <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }}>
-              <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                <Ionicons name="watch" size={24} color={colors.primary} />
-              </View>
-              <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>SYNC</Text>
-              <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>{lastSynced ? 'Connected' : 'Not Synced'}</Text>
-              <Text style={[styles.quickActionSubtitle, { color: colors.textMuted }]}>{lastSynced ? 'apple health' : 'no device'}</Text>
-            </GlassCard>
+            {/* Wearable Sync Card - opens bottom sheet */}
+            <AnimatedPressable
+              style={[{ flex: 1 }, wearablesCardAnimatedStyle]}
+              onPressIn={() => {
+                wearablesCardScale.value = withSpring(0.97, { damping: 15, stiffness: 300 });
+              }}
+              onPressOut={() => {
+                wearablesCardScale.value = withSpring(1, { damping: 15, stiffness: 300 });
+              }}
+              onPress={() => wearablesSyncSheetRef.current?.present()}
+            >
+              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
+                <View style={{ alignItems: 'center', marginBottom: 10 }}>
+                  <Ionicons name="watch" size={24} color={colors.primary} />
+                </View>
+                <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>SYNC</Text>
+                <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>{lastSynced ? 'Connected' : 'Not Synced'}</Text>
+                <Text style={[styles.quickActionSubtitle, { color: colors.textMuted }]}>{lastSynced ? 'apple health' : 'no device'}</Text>
+              </GlassCard>
+            </AnimatedPressable>
           </View>
         );
 
@@ -1163,6 +1259,7 @@ export default function DashboardScreen() {
   }, [selectedDate, colors, caloriesIn, caloriesOut, calorieGoal, protein, proteinGoal, fat, fatGoal, carbs, carbsGoal, heartRate, bloodPressureSystolic, bloodPressureDiastolic, lastSynced, goalWizardState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
+    <BottomSheetModalProvider>
     <View style={[styles.container, { backgroundColor: 'transparent' }]}>
       <SafeAreaView style={[styles.safeArea, { backgroundColor: 'transparent' }]} edges={['top', 'left', 'right']}>
         <ScrollView
@@ -1769,7 +1866,21 @@ export default function DashboardScreen() {
           </SafeAreaView>
         </View>
       </Modal>
+
+      {/* Bottom Sheet Modals */}
+      <DashboardBottomSheet ref={workoutSheetRef} title="Today's Workout" snapPoints={['50%', '85%']}>
+        <WorkoutDetailContent />
+      </DashboardBottomSheet>
+
+      <DashboardBottomSheet ref={weeklyStatsSheetRef} title="Weekly Stats" snapPoints={['60%', '90%']}>
+        <WeeklyStatsContent />
+      </DashboardBottomSheet>
+
+      <DashboardBottomSheet ref={wearablesSyncSheetRef} title="Wearables Sync" snapPoints={['55%', '80%']}>
+        <WearablesSyncContent />
+      </DashboardBottomSheet>
     </View>
+    </BottomSheetModalProvider>
   );
 }
 

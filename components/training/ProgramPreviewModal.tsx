@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+// Animations removed
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
@@ -115,7 +115,7 @@ export function ProgramPreviewModal({
           showsVerticalScrollIndicator={false}
         >
           {/* Program Header Card */}
-          <Animated.View entering={FadeInDown.delay(100).springify()}>
+          <View>
             <GlassCard style={styles.programHeader} interactive>
               <View style={styles.programHeaderRow}>
                 <View style={[styles.iconContainer, { backgroundColor: accentBg }]}>
@@ -151,10 +151,10 @@ export function ProgramPreviewModal({
                 </View>
               </View>
             </GlassCard>
-          </Animated.View>
+          </View>
 
           {/* Description */}
-          <Animated.View entering={FadeInDown.delay(150).springify()}>
+          <View>
             <GlassCard style={styles.section} interactive>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>About This Program</Text>
               <Text style={[styles.description, { color: colors.textSecondary }]}>
@@ -169,10 +169,10 @@ export function ProgramPreviewModal({
                 </View>
               )}
             </GlassCard>
-          </Animated.View>
+          </View>
 
           {/* Program Stats */}
-          <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <View>
             <GlassCard style={styles.section} interactive>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Program Overview</Text>
               <View style={styles.statsGrid}>
@@ -193,10 +193,10 @@ export function ProgramPreviewModal({
                 </View>
               </View>
             </GlassCard>
-          </Animated.View>
+          </View>
 
           {/* Weekly Structure Preview */}
-          <Animated.View entering={FadeInDown.delay(250).springify()}>
+          <View>
             <GlassCard style={styles.section} interactive>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Weekly Structure</Text>
               <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
@@ -282,10 +282,10 @@ export function ProgramPreviewModal({
                 </View>
               )}
             </GlassCard>
-          </Animated.View>
+          </View>
 
           {/* Focus Areas */}
-          <Animated.View entering={FadeInDown.delay(300).springify()}>
+          <View>
             <GlassCard style={styles.section} interactive>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Focus Areas</Text>
               <View style={styles.tagsContainer}>
@@ -296,11 +296,11 @@ export function ProgramPreviewModal({
                 ))}
               </View>
             </GlassCard>
-          </Animated.View>
+          </View>
 
           {/* Cardio Integration */}
           {isEnhanced && enhancedProgram.cardioIntegration && (
-            <Animated.View entering={FadeInDown.delay(350).springify()}>
+            <View>
               <GlassCard style={styles.section} interactive>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>Cardio Integration</Text>
                 <View style={[styles.cardioBox, { backgroundColor: cardBg }]}>
@@ -315,7 +315,7 @@ export function ProgramPreviewModal({
                   </Text>
                 </View>
               </GlassCard>
-            </Animated.View>
+            </View>
           )}
 
           {/* Spacer for button */}

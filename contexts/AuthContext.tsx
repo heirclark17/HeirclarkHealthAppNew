@@ -22,7 +22,9 @@ interface AuthContextType {
   signInWithApple: () => Promise<boolean>;
   signOut: () => Promise<void>;
   refreshAuth: () => Promise<void>;
+  updateUserName: (fullName: string) => Promise<boolean>;
   isAppleSignInAvailable: boolean;
+  needsNamePrompt: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,18 +66,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } else {
             // Load local user data to merge with backend user
             const savedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-            if (savedUser) {
-              const parsed = JSON.parse(savedUser);
-              const mergedUser = {
-                id: backendUser.id,
-                email: backendUser.email || parsed.email,
-                fullName: backendUser.fullName || parsed.fullName,
-                firstName: parsed.firstName,
-                lastName: parsed.lastName,
-              };
-              setUser(mergedUser);
-              console.log('[Auth] Token verified successfully (secure storage)');
+            const parsed = savedUser ? JSON.parse(savedUser) : {};
+
+            // Debug logging
+            console.log('[Auth] Backend user data:', JSON.stringify(backendUser));
+            console.log('[Auth] Cached user data:', JSON.stringify(parsed));
+
+            // Get fullName from backend or local cache
+            const fullName = backendUser.fullName || parsed.fullName || null;
+
+            // Extract firstName from fullName if not available in cache
+            let firstName = parsed.firstName || null;
+            let lastName = parsed.lastName || null;
+
+            if (!firstName && fullName) {
+              const nameParts = fullName.trim().split(' ');
+              firstName = nameParts[0] || null;
+              lastName = nameParts.slice(1).join(' ') || null;
             }
+
+            const mergedUser: User = {
+              id: backendUser.id,
+              email: backendUser.email || parsed.email || null,
+              fullName,
+              firstName,
+              lastName,
+            };
+
+            // Save updated user to cache (with extracted firstName)
+            await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mergedUser));
+            setUser(mergedUser);
+            console.log('[Auth] Token verified successfully, user:', firstName || backendUser.email || backendUser.id);
           }
         } else {
           // No token - load cached user info if available (for display purposes)
@@ -206,18 +227,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Load local user data to merge with backend user
       const savedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      if (savedUser) {
-        const parsed = JSON.parse(savedUser);
-        const mergedUser: User = {
-          id: backendUser.id,
-          email: backendUser.email || parsed.email,
-          fullName: backendUser.fullName || parsed.fullName,
-          firstName: parsed.firstName,
-          lastName: parsed.lastName,
-        };
-        setUser(mergedUser);
-        console.log('[Auth] Token refreshed successfully (secure storage)');
+      const parsed = savedUser ? JSON.parse(savedUser) : {};
+
+      // Get fullName from backend or local cache
+      const fullName = backendUser.fullName || parsed.fullName || null;
+
+      // Extract firstName from fullName if not available in cache
+      let firstName = parsed.firstName || null;
+      let lastName = parsed.lastName || null;
+
+      if (!firstName && fullName) {
+        const nameParts = fullName.trim().split(' ');
+        firstName = nameParts[0] || null;
+        lastName = nameParts.slice(1).join(' ') || null;
       }
+
+      const mergedUser: User = {
+        id: backendUser.id,
+        email: backendUser.email || parsed.email || null,
+        fullName,
+        firstName,
+        lastName,
+      };
+
+      // Save updated user to cache (with extracted firstName)
+      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(mergedUser));
+      setUser(mergedUser);
+      console.log('[Auth] Token refreshed successfully, user:', firstName || backendUser.email || backendUser.id);
     } catch (error) {
       console.error('[Auth] Token refresh error:', error);
       setUser(null);
@@ -244,7 +280,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Update user's name (for when Apple didn't provide it)
+  const updateUserName = useCallback(async (fullName: string): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      // Extract firstName and lastName
+      const nameParts = fullName.trim().split(' ');
+      const firstName = nameParts[0] || null;
+      const lastName = nameParts.slice(1).join(' ') || null;
+
+      // Update backend
+      const success = await api.updateProfile({ fullName });
+      if (!success) {
+        console.error('[Auth] Failed to update name on backend');
+        return false;
+      }
+
+      // Update local state
+      const updatedUser: User = {
+        ...user,
+        fullName,
+        firstName,
+        lastName,
+      };
+
+      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      console.log('[Auth] Name updated successfully:', firstName);
+      return true;
+    } catch (error) {
+      console.error('[Auth] Error updating name:', error);
+      return false;
+    }
+  }, [user]);
+
   const isAuthenticated = !!user;
+
+  // Check if user needs to provide their name
+  const needsNamePrompt = isAuthenticated && !user?.firstName && !isLoading;
 
   // Periodic token refresh (every 15 minutes)
   useEffect(() => {
@@ -265,7 +340,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithApple,
     signOut,
     refreshAuth,
+    updateUserName,
     isAppleSignInAvailable,
+    needsNamePrompt,
   }), [
     user,
     isAuthenticated,
@@ -273,7 +350,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithApple,
     signOut,
     refreshAuth,
+    updateUserName,
     isAppleSignInAvailable,
+    needsNamePrompt,
   ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

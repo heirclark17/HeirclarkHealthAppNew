@@ -3,6 +3,7 @@ import { Slot, SplashScreen } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { View, StyleSheet, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   Urbanist_100Thin,
   Urbanist_200ExtraLight,
@@ -13,13 +14,25 @@ import {
   Urbanist_700Bold,
 } from '@expo-google-fonts/urbanist';
 import { GoalWizardProvider, MealPlanProvider, TrainingProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
-import { AuthProvider } from '../contexts/AuthContext';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { BackgroundLayer } from '../components/BackgroundLayer';
 import { ProviderComposer } from '../utils/ProviderComposer';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { registerBackgroundSync } from '../services/backgroundSync';
 import { secureStorage } from '../services/secureStorage';
+import { NamePromptModal } from '../components/NamePromptModal';
+
+// Wrapper component to show name prompt when needed
+function AuthGatedContent({ children }: { children: React.ReactNode }) {
+  const { needsNamePrompt } = useAuth();
+  return (
+    <>
+      {children}
+      <NamePromptModal visible={needsNamePrompt} />
+    </>
+  );
+}
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
@@ -77,51 +90,55 @@ export default function RootLayout() {
   }
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <ErrorBoundary>
       <SafeAreaProvider>
       <AuthProvider>
-        <NotificationProvider>
-          <SettingsProvider>
-            <GoalWizardProvider>
-              <MealPlanProvider>
-                <TrainingProvider>
-                  <FastingTimerProvider>
-                    <WorkoutTrackingProvider>
-                      <CalorieBankingProvider>
-                        <RestaurantMenuProvider>
-                          <FoodPreferencesProvider>
-                            <AccountabilityPartnerProvider>
-                              <ProgressPredictionProvider>
-                                <WorkoutFormCoachProvider>
-                                  <SleepRecoveryProvider>
-                                    <HydrationProvider>
-                                      <HabitFormationProvider>
-                                        <AdaptiveTDEEProvider>
-                                          <SmartMealLoggerProvider>
-                                            <BackgroundLayer>
-                                              <Slot />
-                                            </BackgroundLayer>
-                                          </SmartMealLoggerProvider>
-                                        </AdaptiveTDEEProvider>
-                                      </HabitFormationProvider>
-                                    </HydrationProvider>
-                                  </SleepRecoveryProvider>
-                                </WorkoutFormCoachProvider>
-                              </ProgressPredictionProvider>
-                            </AccountabilityPartnerProvider>
-                          </FoodPreferencesProvider>
-                        </RestaurantMenuProvider>
-                      </CalorieBankingProvider>
-                    </WorkoutTrackingProvider>
-                  </FastingTimerProvider>
-                </TrainingProvider>
-              </MealPlanProvider>
-            </GoalWizardProvider>
-          </SettingsProvider>
-        </NotificationProvider>
+        <AuthGatedContent>
+          <NotificationProvider>
+            <SettingsProvider>
+              <GoalWizardProvider>
+                <MealPlanProvider>
+                  <TrainingProvider>
+                    <FastingTimerProvider>
+                      <WorkoutTrackingProvider>
+                        <CalorieBankingProvider>
+                          <RestaurantMenuProvider>
+                            <FoodPreferencesProvider>
+                              <AccountabilityPartnerProvider>
+                                <ProgressPredictionProvider>
+                                  <WorkoutFormCoachProvider>
+                                    <SleepRecoveryProvider>
+                                      <HydrationProvider>
+                                        <HabitFormationProvider>
+                                          <AdaptiveTDEEProvider>
+                                            <SmartMealLoggerProvider>
+                                              <BackgroundLayer>
+                                                <Slot />
+                                              </BackgroundLayer>
+                                            </SmartMealLoggerProvider>
+                                          </AdaptiveTDEEProvider>
+                                        </HabitFormationProvider>
+                                      </HydrationProvider>
+                                    </SleepRecoveryProvider>
+                                  </WorkoutFormCoachProvider>
+                                </ProgressPredictionProvider>
+                              </AccountabilityPartnerProvider>
+                            </FoodPreferencesProvider>
+                          </RestaurantMenuProvider>
+                        </CalorieBankingProvider>
+                      </WorkoutTrackingProvider>
+                    </FastingTimerProvider>
+                  </TrainingProvider>
+                </MealPlanProvider>
+              </GoalWizardProvider>
+            </SettingsProvider>
+          </NotificationProvider>
+        </AuthGatedContent>
       </AuthProvider>
     </SafeAreaProvider>
     </ErrorBoundary>
+    </GestureHandlerRootView>
   );
 }
 

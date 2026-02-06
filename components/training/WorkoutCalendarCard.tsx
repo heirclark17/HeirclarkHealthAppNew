@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
-import { WeeklyTrainingPlan, DayPlan } from '../../types/training';
+import { WeeklyTrainingPlan, TrainingDay } from '../../types/training';
 import { lightImpact } from '../../utils/haptics';
 
 type CalendarView = 'week' | 'month';
@@ -50,8 +49,10 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
     }
   }, [selectedDayIndex, weeklyPlan, viewMode]);
 
-  // Generate month calendar data
-  const monthCalendarData = useMemo(() => {
+  // Generate month calendar structure (without selection state for better performance)
+  // Split into two memos: calendarStructure (doesn't depend on selectedDayIndex) and
+  // monthCalendarData (adds selection state). This prevents full recalculation on selection change.
+  const calendarStructure = useMemo(() => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
 
@@ -67,8 +68,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
       date: Date;
       dayNumber: number;
       isCurrentMonth: boolean;
-      dayPlan?: DayPlan;
-      isSelected: boolean;
+      dayPlan?: TrainingDay;
       weekPlanIndex?: number;
     }> = [];
 
@@ -80,7 +80,6 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
         date,
         dayNumber: prevMonthLastDay - i,
         isCurrentMonth: false,
-        isSelected: false,
       });
     }
 
@@ -102,7 +101,6 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
         dayNumber: day,
         isCurrentMonth: true,
         dayPlan,
-        isSelected: planIndex === selectedDayIndex,
         weekPlanIndex: planIndex !== undefined && planIndex >= 0 ? planIndex : undefined,
       });
     }
@@ -115,12 +113,19 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
         date,
         dayNumber: day,
         isCurrentMonth: false,
-        isSelected: false,
       });
     }
 
     return calendarDays;
-  }, [currentMonth, weeklyPlan, selectedDayIndex]);
+  }, [currentMonth, weeklyPlan]);
+
+  // Add selection state separately - only recalculates when selection changes
+  const monthCalendarData = useMemo(() => {
+    return calendarStructure.map(day => ({
+      ...day,
+      isSelected: day.weekPlanIndex === selectedDayIndex,
+    }));
+  }, [calendarStructure, selectedDayIndex]);
 
   // Navigate months
   const goToPreviousMonth = useCallback(() => {
@@ -193,7 +198,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
 
       {/* Week View */}
       {viewMode === 'week' && (
-        <Animated.View entering={FadeIn} exiting={FadeOut}>
+        <View>
           <ScrollView
             ref={scrollViewRef}
             horizontal
@@ -269,12 +274,12 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
               );
             })}
           </ScrollView>
-        </Animated.View>
+        </View>
       )}
 
       {/* Month View */}
       {viewMode === 'month' && (
-        <Animated.View entering={FadeIn} exiting={FadeOut}>
+        <View>
           {/* Month Navigation */}
           <View style={styles.monthNavigation}>
             <TouchableOpacity onPress={goToPreviousMonth} style={styles.monthNavButton}>
@@ -355,7 +360,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
               );
             })}
           </View>
-        </Animated.View>
+        </View>
       )}
 
       {/* Workout Summary */}

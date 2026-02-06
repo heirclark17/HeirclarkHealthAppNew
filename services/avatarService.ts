@@ -217,6 +217,84 @@ class AvatarService {
   }
 
   /**
+   * Create a chat session with optional HeyGen avatar streaming
+   * Used by CoachChatModal to get a LiveKit session for the avatar
+   */
+  async createChatSession(userId: string, mode?: string, userName?: string): Promise<CoachingResponse> {
+    try {
+      console.log('[AvatarService] Requesting chat session...');
+
+      const response = await fetch(`${this.baseUrl}/api/v1/avatar/coach/chat-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, mode, userName }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        console.error('[AvatarService] Chat session error:', data);
+        return {
+          ok: false,
+          streamingAvailable: false,
+          script: '',
+          error: data.error || 'Failed to create chat session',
+        };
+      }
+
+      console.log('[AvatarService] Chat session response:', {
+        streamingAvailable: data.streamingAvailable,
+        hasSession: !!data.session,
+        hasToken: !!data.token,
+      });
+
+      if (data.streamingAvailable && data.session && data.session.url && data.session.accessToken) {
+        return {
+          ok: true,
+          streamingAvailable: true,
+          token: data.token,
+          session: data.session,
+          script: data.greeting || '',
+        };
+      }
+
+      return {
+        ok: true,
+        streamingAvailable: false,
+        script: data.greeting || '',
+      };
+    } catch (error) {
+      console.error('[AvatarService] Chat session request failed:', error);
+      return {
+        ok: false,
+        streamingAvailable: false,
+        script: '',
+        error: error instanceof Error ? error.message : 'Network error',
+      };
+    }
+  }
+
+  /**
+   * Stop a HeyGen streaming session via backend
+   */
+  async stopChatSession(sessionId: string): Promise<{ ok: boolean; error?: string }> {
+    try {
+      console.log('[AvatarService] Stopping chat session:', sessionId);
+      await fetch(`${this.baseUrl}/api/v1/avatar/coach/stop-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
+      return { ok: true };
+    } catch (error) {
+      console.error('[AvatarService] Stop chat session failed:', error);
+      return { ok: true }; // Don't fail on cleanup errors
+    }
+  }
+
+  /**
    * Send text for avatar to speak via LiveKit data channel
    * Note: For LiveAvatar, speaking is done via LiveKit events, not REST API
    * This method is kept for compatibility but actual speaking happens in the WebView

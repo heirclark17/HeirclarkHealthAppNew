@@ -179,13 +179,6 @@ const TAB_CONFIG: TabConfig[] = [
     label: 'Meals'
   },
   {
-    name: 'food-search',
-    href: '/food-search',
-    icon: 'search-outline',
-    iconFilled: 'search',
-    label: 'Foods'
-  },
-  {
     name: 'saved-meals',
     href: '/saved-meals',
     icon: 'bookmark-outline',
@@ -198,6 +191,13 @@ const TAB_CONFIG: TabConfig[] = [
     icon: 'barbell-outline',
     iconFilled: 'barbell',
     label: 'Training'
+  },
+  {
+    name: 'program-library',
+    href: '/program-library',
+    icon: 'library-outline',
+    iconFilled: 'library',
+    label: 'Programs'
   },
   {
     name: 'accountability',

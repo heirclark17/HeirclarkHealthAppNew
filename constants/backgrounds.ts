@@ -38,6 +38,10 @@ export type PatternType =
 
 export type BackgroundId =
   | 'default'
+  // Sand theme backgrounds (warm beige/cream)
+  | 'sand-warm'
+  | 'sand-tan'
+  | 'sand-cream'
   // Pattern backgrounds (NEW - actual textures/pictures)
   | 'pattern-noise'
   | 'pattern-hexagons'
@@ -371,6 +375,52 @@ export const BACKGROUNDS: BackgroundOption[] = [
     type: 'pattern',
     patternType: 'cinco-de-mayo',
     category: 'holiday',
+  },
+
+  // ============================================
+  // SAND THEME (Warm Beige/Cream) - User Requested
+  // ============================================
+  {
+    id: 'sand-warm',
+    name: 'Sand',
+    description: 'Warm beige and cream tones',
+    type: 'gradient',
+    category: 'abstract',
+    colors: {
+      light: ['#FAF6F1', '#F5EDE4', '#EDE5DB', '#FAF6F1'],
+      dark: ['#2C2620', '#3D352D', '#4E443A', '#2C2620'],
+      locations: [0, 0.35, 0.65, 1],
+      start: { x: 0, y: 0 },
+      end: { x: 1, y: 1 },
+    },
+  },
+  {
+    id: 'sand-tan',
+    name: 'Sand Tan',
+    description: 'Deeper parchment and tan tones',
+    type: 'gradient',
+    category: 'abstract',
+    colors: {
+      light: ['#F5EDE4', '#EDE5DB', '#E5DDD2', '#F5EDE4'],
+      dark: ['#3D352D', '#4E443A', '#5A4F44', '#3D352D'],
+      locations: [0, 0.35, 0.65, 1],
+      start: { x: 0.2, y: 0 },
+      end: { x: 0.8, y: 1 },
+    },
+  },
+  {
+    id: 'sand-cream',
+    name: 'Sand Cream',
+    description: 'Light warm cream palette',
+    type: 'gradient',
+    category: 'abstract',
+    colors: {
+      light: ['#FFFCF8', '#FAF6F1', '#F5EDE4', '#FFFCF8'],
+      dark: ['#1E1A16', '#2C2620', '#3D352D', '#1E1A16'],
+      locations: [0, 0.35, 0.65, 1],
+      start: { x: 0.1, y: 0.1 },
+      end: { x: 0.9, y: 0.9 },
+    },
   },
 
   // ============================================

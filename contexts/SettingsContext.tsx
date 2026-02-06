@@ -353,22 +353,54 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   // Appearance
   const setThemeMode = useCallback((mode: ThemeMode) => {
-    setSettings(prev => ({ ...prev, themeMode: mode }));
+    setSettings(prev => {
+      const updated = { ...prev, themeMode: mode };
+      // Persist to storage immediately
+      const { isLoaded, ...settingsToSave } = updated;
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(settingsToSave)).catch(err =>
+        console.error('[Settings] Failed to save theme mode:', err)
+      );
+      return updated;
+    });
     console.log('[Settings] Theme mode:', mode);
   }, []);
 
-  const setBackgroundImage = useCallback((image: string) => {
-    setSettings(prev => ({ ...prev, backgroundImage: image }));
+  const setBackgroundImage = useCallback(async (image: string) => {
+    setSettings(prev => {
+      const updated = { ...prev, backgroundImage: image };
+      // Persist to storage immediately
+      const { isLoaded, ...settingsToSave } = updated;
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(settingsToSave)).catch(err =>
+        console.error('[Settings] Failed to save background image:', err)
+      );
+      return updated;
+    });
     console.log('[Settings] Background image:', image);
   }, []);
 
-  const setCustomBackgroundUri = useCallback((uri: string | null) => {
-    setSettings(prev => ({ ...prev, customBackgroundUri: uri }));
+  const setCustomBackgroundUri = useCallback(async (uri: string | null) => {
+    setSettings(prev => {
+      const updated = { ...prev, customBackgroundUri: uri };
+      // Persist to storage immediately
+      const { isLoaded, ...settingsToSave } = updated;
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(settingsToSave)).catch(err =>
+        console.error('[Settings] Failed to save custom background URI:', err)
+      );
+      return updated;
+    });
     console.log('[Settings] Custom background URI:', uri ? 'set' : 'cleared');
   }, []);
 
   const setProfileImageUri = useCallback((uri: string | null) => {
-    setSettings(prev => ({ ...prev, profileImageUri: uri }));
+    setSettings(prev => {
+      const updated = { ...prev, profileImageUri: uri };
+      // Persist to storage immediately
+      const { isLoaded, ...settingsToSave } = updated;
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(settingsToSave)).catch(err =>
+        console.error('[Settings] Failed to save profile image URI:', err)
+      );
+      return updated;
+    });
     console.log('[Settings] Profile image URI:', uri ? 'set' : 'cleared');
   }, []);
 

@@ -224,13 +224,53 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       // *** Sync workout plan to backend ***
       try {
         console.log('[Training] 🔄 Syncing workout plan to backend...');
+
+        // Transform days array into weekly_schedule format expected by backend
+        const weekly_schedule = weeklyPlan.days.map((day: any, idx: number) => ({
+          dayNumber: idx + 1,
+          dayOfWeek: day.dayOfWeek,
+          date: day.date,
+          workoutType: day.workout?.type || (day.isRestDay ? 'rest' : 'workout'),
+          workoutName: day.workout?.name || null,
+          exercises: day.workout?.exercises?.map((ex: any) => ({
+            name: ex.exercise?.name || ex.name,
+            sets: ex.sets,
+            reps: ex.reps,
+            restSeconds: ex.restSeconds,
+          })) || [],
+          duration: day.workout?.duration || 0,
+          estimatedCalories: day.workout?.estimatedCaloriesBurned || 0,
+          isRestDay: day.isRestDay || false,
+        }));
+
         const syncSuccess = await api.saveWorkoutPlan(
-          { weeklyPlan, preferences, summary, lastGeneratedAt },
+          { weeklyPlan, preferences, summary, lastGeneratedAt, weekly_schedule },
           program.id,
           program.name
         );
         if (syncSuccess) {
           console.log('[Training] ✅ Workout plan synced to backend');
+
+          // *** Also sync training state (goal alignment, plan summary, weekly stats) ***
+          const totalWorkouts = weeklyPlan.days.filter((d: any) => d.workout).length;
+          await api.saveTrainingState({
+            weeklyStats: {
+              completedWorkouts: 0,
+              totalWorkouts,
+              currentWeek: state.currentWeek,
+              caloriesBurned: 0,
+            },
+            goalAlignment: alignment ? {
+              calorieDeficitSupport: alignment.calorieDeficitSupport,
+              musclePreservation: alignment.musclePreservation,
+              muscleGrowthPotential: alignment.muscleGrowthPotential,
+              cardiovascularHealth: alignment.cardiovascularHealth,
+              overallAlignment: alignment.overallAlignment,
+            } : undefined,
+            planSummary: summary,
+            preferences,
+          });
+          console.log('[Training] ✅ Training state synced to backend');
         } else {
           console.warn('[Training] ⚠️ Backend sync failed - plan saved locally');
         }
@@ -260,15 +300,32 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       console.log('[Training] Building preferences from goals...');
       const preferences = buildPreferencesFromGoals();
 
+      // Map TrainingPreferences goal to WorkoutFocus type
+      const goalMapping: Record<string, 'strength' | 'hypertrophy' | 'endurance' | 'weight_loss' | 'general_fitness'> = {
+        lose_weight: 'weight_loss',
+        build_muscle: 'hypertrophy',
+        maintain: 'general_fitness',
+        improve_health: 'general_fitness',
+      };
+      const mappedGoal = goalMapping[preferences.primaryGoal || ''] || 'general_fitness';
+
+      // Map DifficultyLevel to AI FitnessLevel (elite → advanced)
+      const fitnessLevelMapping: Record<string, 'beginner' | 'intermediate' | 'advanced'> = {
+        beginner: 'beginner',
+        intermediate: 'intermediate',
+        advanced: 'advanced',
+        elite: 'advanced', // AI doesn't support elite, map to advanced
+      };
+      const mappedFitnessLevel = fitnessLevelMapping[preferences.fitnessLevel || 'intermediate'] || 'intermediate';
+
       // Convert to AI service format - use actual user preferences from Goal Wizard
-      const aiPreferences = {
-        fitnessGoal: preferences.primaryGoal || 'general_fitness',
-        experienceLevel: preferences.fitnessLevel || 'intermediate',
-        daysPerWeek: preferences.workoutsPerWeek || 3,
+      const aiPreferences: import('../types/ai').WorkoutPlanPreferences = {
+        primaryGoal: mappedGoal,
+        fitnessLevel: mappedFitnessLevel,
+        workoutsPerWeek: preferences.workoutsPerWeek || 3,
         sessionDuration: preferences.workoutDuration || 45,
-        availableEquipment: preferences.availableEquipment || ['bodyweight'],
-        injuries: preferences.injuries || [], // User-selected injuries from Goals
-        cardioPreference: preferences.cardioPreference || 'walking',
+        availableEquipment: (preferences.availableEquipment || ['bodyweight']) as string[],
+        injuries: preferences.injuries || [],
       };
 
       console.log('[Training] AI preferences from user settings:', JSON.stringify(aiPreferences, null, 2));
@@ -311,30 +368,29 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             name: aiWorkout.workoutType || aiWorkout.name || 'Training Session',
             type: aiWorkout.workoutType || 'strength',
             duration: aiWorkout.duration || 60,
-            difficulty: preferences.difficultyLevel || 'intermediate' as DifficultyLevel,
+            difficulty: preferences.fitnessLevel || 'intermediate' as DifficultyLevel,
             estimatedCaloriesBurned: aiWorkout.duration ? Math.round(aiWorkout.duration * 8) : 400,
+            muscleGroupsFocused: [],
             exercises: (aiWorkout.exercises || []).map((ex: any, exIndex: number) => ({
               id: `ai-ex-${Date.now()}-${index}-${exIndex}`,
               exerciseId: `ai-ex-${Date.now()}-${index}-${exIndex}`,
               exercise: {
                 id: `ai-ex-${Date.now()}-${index}-${exIndex}`,
                 name: ex.name || 'Exercise',
-                category: 'Strength',
+                category: 'compound' as const,
                 muscleGroups: [],
-                primaryMuscles: [],
-                secondaryMuscles: [],
-                equipment: [],
+                equipment: 'bodyweight' as const,
                 difficulty: 'intermediate' as DifficultyLevel,
-                instructions: [],
+                caloriesPerMinute: 8,
               },
               sets: ex.sets || 3,
               reps: ex.reps || '10',
               restSeconds: ex.restSeconds || 60,
               notes: ex.notes || '',
-              isCompleted: false,
+              completed: false,
               weight: undefined,
             })),
-            isCompleted: false,
+            completed: false,
           } : null;
 
           return {
@@ -366,18 +422,35 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           focusAreas: [],
         };
 
-        // Create a basic program reference
-        const program: ProgramTemplate = {
+        // Create a basic program reference (minimal subset for AI plans)
+        const program = {
           id: 'ai-generated',
           name: 'AI-Powered Workout Plan',
-          description: aiPlan.progressionGuidelines || 'Personalized AI workout plan',
-          difficulty: preferences.difficultyLevel || 'intermediate',
+          shortName: 'AI',
+          description: 'Personalized AI workout plan',
+          philosophy: 'AI-optimized training',
+          source: 'AI Generated',
           duration: 4,
           daysPerWeek: preferences.workoutsPerWeek || 3,
-          goal: preferences.fitnessGoal || 'general_fitness',
-          muscleGroups: [],
-          equipment: [],
-        };
+          difficulty: preferences.fitnessLevel || 'intermediate' as DifficultyLevel,
+          focus: [preferences.primaryGoal || 'general_fitness'],
+          targetGoals: [preferences.primaryGoal || 'maintain'] as any,
+          suitableFor: {
+            fitnessLevels: [preferences.fitnessLevel || 'intermediate'] as any,
+            equipmentAccess: ['full_gym'] as any,
+            timeCommitment: 'medium' as const,
+            experience: '0-6 months',
+          },
+          weeklyStructure: [],
+          progressionScheme: 'Linear progression',
+          cardioIntegration: {
+            type: 'integrated' as const,
+            frequency: '3x per week',
+            duration: '15-20 min',
+            intensity: 'moderate' as const,
+            recommendations: [],
+          },
+        } as ProgramTemplate;
 
         // Calculate goal alignment
         console.log('[Training] Calculating goal alignment...');
@@ -417,13 +490,53 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         // *** Sync AI workout plan to backend ***
         try {
           console.log('[Training] 🔄 Syncing AI workout plan to backend...');
+
+          // Transform days array into weekly_schedule format expected by backend
+          const weekly_schedule = weeklyPlan.days.map((day: any, idx: number) => ({
+            dayNumber: idx + 1,
+            dayOfWeek: day.dayOfWeek,
+            date: day.date,
+            workoutType: day.workout?.type || (day.isRestDay ? 'rest' : 'workout'),
+            workoutName: day.workout?.name || null,
+            exercises: day.workout?.exercises?.map((ex: any) => ({
+              name: ex.exercise?.name || ex.name,
+              sets: ex.sets,
+              reps: ex.reps,
+              restSeconds: ex.restSeconds,
+            })) || [],
+            duration: day.workout?.duration || 0,
+            estimatedCalories: day.workout?.estimatedCaloriesBurned || 0,
+            isRestDay: day.isRestDay || false,
+          }));
+
           const syncSuccess = await api.saveWorkoutPlan(
-            { weeklyPlan, preferences, summary, lastGeneratedAt },
+            { weeklyPlan, preferences, summary, lastGeneratedAt, weekly_schedule },
             program.id,
             program.name
           );
           if (syncSuccess) {
             console.log('[Training] ✅ AI workout plan synced to backend');
+
+            // *** Also sync training state (goal alignment, plan summary, weekly stats) ***
+            const totalWorkouts = weeklyPlan.days.filter((d: any) => d.workout).length;
+            await api.saveTrainingState({
+              weeklyStats: {
+                completedWorkouts: 0,
+                totalWorkouts,
+                currentWeek: state.currentWeek,
+                caloriesBurned: 0,
+              },
+              goalAlignment: alignment ? {
+                calorieDeficitSupport: alignment.calorieDeficitSupport,
+                musclePreservation: alignment.musclePreservation,
+                muscleGrowthPotential: alignment.muscleGrowthPotential,
+                cardiovascularHealth: alignment.cardiovascularHealth,
+                overallAlignment: alignment.overallAlignment,
+              } : undefined,
+              planSummary: summary,
+              preferences,
+            });
+            console.log('[Training] ✅ AI training state synced to backend');
           } else {
             console.warn('[Training] ⚠️ Backend sync failed - AI plan saved locally');
           }
@@ -475,7 +588,9 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Mark exercise as complete
-  const markExerciseComplete = useCallback((dayIndex: number, exerciseId: string) => {
+  const markExerciseComplete = useCallback(async (dayIndex: number, exerciseId: string) => {
+    let exerciseToSync: any = null;
+
     setState(prev => {
       if (!prev.weeklyPlan) return prev;
 
@@ -483,8 +598,11 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       const day = updatedDays[dayIndex];
 
       if (day.workout) {
+        const exercise = day.workout.exercises.find(ex => ex.id === exerciseId);
+        const newCompletedState = exercise ? !exercise.completed : true;
+
         const updatedExercises = day.workout.exercises.map(ex =>
-          ex.id === exerciseId ? { ...ex, completed: !ex.completed } : ex
+          ex.id === exerciseId ? { ...ex, completed: newCompletedState } : ex
         );
 
         updatedDays[dayIndex] = {
@@ -494,6 +612,18 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             exercises: updatedExercises,
           },
         };
+
+        // Capture exercise data for backend sync
+        if (exercise) {
+          exerciseToSync = {
+            date: day.date,
+            dayIndex,
+            exerciseId,
+            exerciseName: exercise.exercise?.name || 'Unknown',
+            completed: newCompletedState,
+            completedAt: newCompletedState ? new Date().toISOString() : undefined,
+          };
+        }
       }
 
       const updatedPlan = { ...prev.weeklyPlan, days: updatedDays };
@@ -511,6 +641,15 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
       return { ...prev, weeklyPlan: updatedPlan };
     });
+
+    // *** Sync exercise completion to backend ***
+    if (exerciseToSync) {
+      try {
+        await api.saveExerciseCompletion(exerciseToSync);
+      } catch (syncError) {
+        console.error('[Training] Exercise completion sync error:', syncError);
+      }
+    }
   }, []);
 
   // Mark entire workout as complete
@@ -582,7 +721,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       return { ...prev, weeklyPlan: updatedPlan };
     });
 
-    // *** NEW: Sync completed workout to backend ***
+    // *** Sync completed workout to backend ***
     if (workoutToSync) {
       try {
         console.log('[Training] 🔄 Syncing workout completion to backend...');
@@ -592,11 +731,34 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         } else {
           console.warn('[Training] ⚠️ Backend sync failed - workout saved locally only');
         }
+
+        // *** Also sync weekly stats after workout completion ***
+        const currentState = state;
+        if (currentState.weeklyPlan) {
+          const completedCount = currentState.weeklyPlan.days.filter((d: any) => d.completed && d.workout).length + 1;
+          const totalWorkouts = currentState.weeklyPlan.days.filter((d: any) => d.workout).length;
+          const totalCalories = currentState.weeklyPlan.days.reduce((sum: number, d: any) => {
+            if (d.completed && d.workout?.estimatedCaloriesBurned) {
+              return sum + d.workout.estimatedCaloriesBurned;
+            }
+            return sum;
+          }, 0) + (workoutToSync.caloriesBurned || 0);
+
+          await api.saveWeeklyStats({
+            weekNumber: currentState.currentWeek,
+            completedWorkouts: completedCount,
+            totalWorkouts,
+            caloriesBurned: totalCalories,
+            startDate: currentState.weeklyPlan.startDate || new Date().toISOString().split('T')[0],
+            endDate: currentState.weeklyPlan.endDate || new Date().toISOString().split('T')[0],
+          });
+          console.log('[Training] ✅ Weekly stats synced to backend');
+        }
       } catch (syncError) {
         console.error('[Training] ❌ Backend sync error:', syncError);
       }
     }
-  }, []);
+  }, [state]);
 
   // Navigate weeks
   const goToNextWeek = useCallback(() => {
@@ -784,7 +946,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         // Find matching program or create a placeholder
         const programs = getEnhancedPrograms();
         const matchedProgram = programs.find(p => p.id === programId) ||
-          (programId ? { id: programId, name: programName || 'Saved Plan' } : null);
+          (programId ? { id: programId, name: programName || 'Saved Plan' } as ProgramTemplate : null);
 
         setState(prev => ({
           ...prev,
@@ -799,10 +961,12 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         if (planData.weeklyPlan) {
           await trainingStorage.savePlanCache({
             weeklyPlan: planData.weeklyPlan,
-            selectedProgram: matchedProgram,
-            preferences: planData.preferences,
+            selectedProgram: matchedProgram as TrainingProgram | ProgramTemplate | null,
+            goalAlignment: planData.goalAlignment || null,
+            currentWeek: planData.currentWeek || 1,
+            preferences: planData.preferences || null,
             planSummary: planData.summary,
-            lastGeneratedAt: planData.lastGeneratedAt,
+            lastGeneratedAt: planData.lastGeneratedAt || new Date().toISOString(),
           });
           console.log('[Training] ✅ Cached backend plan locally');
         }

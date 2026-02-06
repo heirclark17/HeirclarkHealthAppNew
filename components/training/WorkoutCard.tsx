@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Image, ActivityIndicator } from 'react-native';
 import Animated, {
-  FadeInUp,
   useAnimatedStyle,
   withSpring,
   useSharedValue,
@@ -25,6 +24,54 @@ interface WorkoutCardProps {
   onSwapExercise: (exerciseId: string) => void;
   onShowAlternatives?: (exercise: WorkoutExercise) => void;
   onLogWeight?: (exercise: WorkoutExercise) => void;
+  onViewForm?: (exercise: WorkoutExercise) => void;
+}
+
+function ExerciseGifThumbnail({
+  gifUrl,
+  onPress,
+  isDark
+}: {
+  gifUrl: string;
+  onPress: () => void;
+  isDark: boolean;
+}) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  if (error) {
+    return (
+      <TouchableOpacity
+        style={[styles.gifThumbnail, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}
+        onPress={onPress}
+      >
+        <Ionicons name="play-circle-outline" size={24} color={isDark ? '#fff' : '#333'} />
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <TouchableOpacity style={styles.gifThumbnail} onPress={onPress}>
+      {loading && (
+        <View style={[styles.gifLoading, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
+          <ActivityIndicator size="small" color={isDark ? '#fff' : '#333'} />
+        </View>
+      )}
+      <Image
+        source={{ uri: gifUrl }}
+        style={styles.gifImage}
+        resizeMode="cover"
+        onLoad={() => setLoading(false)}
+        onError={() => {
+          setLoading(false);
+          setError(true);
+        }}
+      />
+      <View style={styles.gifPlayOverlay}>
+        <Ionicons name="play-circle" size={20} color="rgba(255, 255, 255, 0.9)" />
+      </View>
+    </TouchableOpacity>
+  );
 }
 
 function ExerciseRow({
@@ -33,6 +80,7 @@ function ExerciseRow({
   onSwap,
   onShowAlternatives,
   onLogWeight,
+  onViewForm,
   lastWeight,
   colors,
   isDark,
@@ -42,27 +90,42 @@ function ExerciseRow({
   onSwap: () => void;
   onShowAlternatives?: () => void;
   onLogWeight?: () => void;
+  onViewForm?: () => void;
   lastWeight?: { weight: number; unit: string } | null;
   colors: any;
   isDark: boolean;
 }) {
   const exerciseBg = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
   const borderColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)';
+  const hasGif = !!exercise.exercise.gifUrl;
+
   return (
     <View style={[styles.exerciseRow, { backgroundColor: exerciseBg, borderColor, borderWidth: 1 }]}>
-      <TouchableOpacity
-        style={styles.exerciseCheckbox}
-        onPress={() => {
-          lightImpact();
-          onToggle();
-        }}
-      >
-        <Ionicons
-          name={exercise.completed ? 'checkbox' : 'square-outline'}
-          size={22}
-          color={exercise.completed ? Colors.protein : colors.textMuted}
+      {/* GIF Thumbnail - shows animated form demo */}
+      {hasGif && onViewForm ? (
+        <ExerciseGifThumbnail
+          gifUrl={exercise.exercise.gifUrl!}
+          onPress={() => {
+            lightImpact();
+            onViewForm();
+          }}
+          isDark={isDark}
         />
-      </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={styles.exerciseCheckbox}
+          onPress={() => {
+            lightImpact();
+            onToggle();
+          }}
+        >
+          <Ionicons
+            name={exercise.completed ? 'checkbox' : 'square-outline'}
+            size={22}
+            color={exercise.completed ? Colors.protein : colors.textMuted}
+          />
+        </TouchableOpacity>
+      )}
       <TouchableOpacity
         style={styles.exerciseInfo}
         onPress={() => {
@@ -88,10 +151,28 @@ function ExerciseRow({
             </View>
           )}
         </View>
-        {onShowAlternatives && (
+        {hasGif ? (
+          <Text style={[styles.alternativesHint, { color: colors.primary }]}>Tap GIF for form guide</Text>
+        ) : onShowAlternatives ? (
           <Text style={[styles.alternativesHint, { color: colors.primary }]}>Tap to see alternatives</Text>
-        )}
+        ) : null}
       </TouchableOpacity>
+      {/* Checkbox when GIF is present */}
+      {hasGif && (
+        <TouchableOpacity
+          style={styles.checkboxButton}
+          onPress={() => {
+            lightImpact();
+            onToggle();
+          }}
+        >
+          <Ionicons
+            name={exercise.completed ? 'checkbox' : 'square-outline'}
+            size={20}
+            color={exercise.completed ? Colors.protein : colors.textMuted}
+          />
+        </TouchableOpacity>
+      )}
       {/* Weight Log Button */}
       {onLogWeight && (
         <TouchableOpacity
@@ -127,30 +208,37 @@ export function WorkoutCard({
   onSwapExercise,
   onShowAlternatives,
   onLogWeight,
+  onViewForm,
 }: WorkoutCardProps) {
   const { settings } = useSettings();
   const [showDetails, setShowDetails] = useState(false);
   const [lastWeights, setLastWeights] = useState<Record<string, { weight: number; unit: string } | null>>({});
   const scale = useSharedValue(1);
 
-  // Load last logged weights for all exercises
+  // Load last logged weights for all exercises - parallelized for performance
   useEffect(() => {
     const loadLastWeights = async () => {
-      const weights: Record<string, { weight: number; unit: string } | null> = {};
-      for (const exercise of workout.exercises) {
-        try {
-          const lastLog = await weightTrackingStorage.getLastLogForExercise(exercise.exerciseId);
-          if (lastLog && lastLog.maxWeight > 0) {
-            weights[exercise.exerciseId] = {
-              weight: lastLog.maxWeight,
-              unit: lastLog.sets[0]?.unit || 'lb',
+      // Use Promise.all for parallel loading instead of sequential loop
+      const results = await Promise.all(
+        workout.exercises.map(async (exercise) => {
+          try {
+            const lastLog = await weightTrackingStorage.getLastLogForExercise(exercise.exerciseId);
+            return {
+              exerciseId: exercise.exerciseId,
+              data: lastLog && lastLog.maxWeight > 0
+                ? { weight: lastLog.maxWeight, unit: lastLog.sets[0]?.unit || 'lb' }
+                : null,
             };
-          } else {
-            weights[exercise.exerciseId] = null;
+          } catch (error) {
+            return { exerciseId: exercise.exerciseId, data: null };
           }
-        } catch (error) {
-          weights[exercise.exerciseId] = null;
-        }
+        })
+      );
+
+      // Build weights object from parallel results
+      const weights: Record<string, { weight: number; unit: string } | null> = {};
+      for (const result of results) {
+        weights[result.exerciseId] = result.data;
       }
       setLastWeights(weights);
     };
@@ -222,9 +310,8 @@ export function WorkoutCard({
 
   return (
     <>
-      <Animated.View entering={FadeInUp.delay(index * 100).springify().damping(15)}>
-        <Animated.View style={animatedStyle}>
-          <TouchableOpacity
+      <Animated.View style={animatedStyle}>
+        <TouchableOpacity
             style={[styles.cardWrapper, workout.completed && styles.cardCompleted]}
             onPress={() => {
               lightImpact();
@@ -282,7 +369,6 @@ export function WorkoutCard({
             </View>
           </GlassCard>
         </TouchableOpacity>
-        </Animated.View>
       </Animated.View>
 
       {/* Workout Details Modal */}
@@ -338,6 +424,7 @@ export function WorkoutCard({
                   onSwap={() => onSwapExercise(exercise.id)}
                   onShowAlternatives={onShowAlternatives ? () => onShowAlternatives(exercise) : undefined}
                   onLogWeight={onLogWeight ? () => onLogWeight(exercise) : undefined}
+                  onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
                   lastWeight={lastWeights[exercise.exerciseId]}
                   colors={colors}
                   isDark={isDark}
@@ -539,6 +626,38 @@ const styles = StyleSheet.create({
   },
   exerciseCheckbox: {
     marginRight: 12,
+  },
+  checkboxButton: {
+    padding: 4,
+    marginRight: 4,
+  },
+  gifThumbnail: {
+    width: 52,
+    height: 52,
+    borderRadius: 10,
+    marginRight: 12,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    position: 'relative',
+  },
+  gifImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  gifLoading: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  gifPlayOverlay: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 10,
+    padding: 2,
   },
   exerciseInfo: {
     flex: 1,

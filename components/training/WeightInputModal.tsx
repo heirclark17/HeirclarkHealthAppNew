@@ -10,7 +10,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+// Animations removed
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -241,12 +241,12 @@ export function WeightInputModal({
 
             {/* Progressive Overload Suggestion */}
             {progress && progress.suggestedNextWeight > progress.currentMax && (
-              <Animated.View entering={FadeIn} style={[styles.suggestion, { backgroundColor: isDark ? 'rgba(76, 217, 100, 0.15)' : 'rgba(76, 217, 100, 0.1)' }]}>
+              <View style={[styles.suggestion, { backgroundColor: isDark ? 'rgba(76, 217, 100, 0.15)' : 'rgba(76, 217, 100, 0.1)' }]}>
                 <Ionicons name="trending-up" size={16} color="#4CD964" />
                 <Text style={[styles.suggestionText, { color: '#4CD964' }]}>
                   Ready to progress! Try {progress.suggestedNextWeight}{unit}
                 </Text>
-              </Animated.View>
+              </View>
             )}
           </GlassCard>
 
@@ -272,9 +272,8 @@ export function WeightInputModal({
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>SETS</Text>
 
             {sets.map((set, index) => (
-              <Animated.View
+              <View
                 key={set.setNumber}
-                entering={FadeInDown.delay(index * 50)}
                 style={[styles.setRow, { backgroundColor: inputBg, borderColor: inputBorder }]}
               >
                 <View style={styles.setNumber}>
@@ -308,7 +307,7 @@ export function WeightInputModal({
                   />
                   <Text style={[styles.inputLabel, { color: colors.textMuted }]}>reps</Text>
                 </View>
-              </Animated.View>
+              </View>
             ))}
 
             {/* Notes */}

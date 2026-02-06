@@ -17,6 +17,7 @@ import {
   Animated,
   Easing,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -474,6 +475,7 @@ const getDefaultMealType = (): 'breakfast' | 'lunch' | 'dinner' | 'snack' => {
 };
 
 export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMealLoggerProps) {
+  const router = useRouter();
   const { settings } = useSettings();
   const { logCalories } = useAdaptiveTDEE();
   const { logNewMeal } = useSmartMealLogger();
@@ -826,6 +828,16 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
           title="Text Description"
           description="Describe your meal in words"
           onPress={() => setMode('manual')}
+        />
+
+        <ModeCard
+          icon="search"
+          title="Food Search"
+          description="Search nutrition database"
+          onPress={() => {
+            handleClose();
+            router.push('/food-search');
+          }}
         />
 
         <ModeCard

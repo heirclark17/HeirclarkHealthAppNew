@@ -267,12 +267,22 @@ export default function SavedMealsScreen() {
 
   const renderFilterChip = useCallback(({ key, label, icon }: typeof FILTER_OPTIONS[0]) => {
     const isActive = activeFilter === key;
+    // Glass-like backgrounds for filter chips
+    const chipBg = isActive
+      ? colors.text
+      : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+    const borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.5)';
+
     return (
       <TouchableOpacity
         key={key}
         style={[
           styles.filterChip,
-          { backgroundColor: isActive ? colors.text : colors.surface },
+          {
+            backgroundColor: chipBg,
+            borderWidth: isActive ? 0 : 1,
+            borderColor: borderColor,
+          },
         ]}
         onPress={() => {
           lightImpact();
@@ -294,10 +304,10 @@ export default function SavedMealsScreen() {
         </Text>
       </TouchableOpacity>
     );
-  }, [activeFilter, colors]);
+  }, [activeFilter, colors, isDark]);
 
   const renderEmptyState = useCallback(() => (
-    <View style={styles.emptyState}>
+    <GlassCard style={styles.emptyState}>
       <Ionicons
         name={activeFilter === 'favorites' ? 'heart-outline' : 'bookmark-outline'}
         size={48}
@@ -317,12 +327,12 @@ export default function SavedMealsScreen() {
           ? 'Try a different search term'
           : 'Save meals from your meal plan to build your collection'}
       </Text>
-    </View>
+    </GlassCard>
   ), [activeFilter, searchQuery, colors]);
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top']}>
         <View style={styles.loadingContainer}>
           <Ionicons name="bookmark-outline" size={48} color={colors.textTertiary} />
           <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
@@ -340,7 +350,7 @@ export default function SavedMealsScreen() {
   const filterAnimation = FadeInDown?.delay?.(200)?.duration?.(300);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top']}>
       {/* Header */}
       <Animated.View entering={headerAnimation} style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>SAVED MEALS</Text>
@@ -365,23 +375,22 @@ export default function SavedMealsScreen() {
       </Animated.View>
 
       {/* Search Input */}
-      <Animated.View
-        entering={searchAnimation}
-        style={[styles.searchContainer, { backgroundColor: colors.surface }]}
-      >
-        <Ionicons name="search" size={18} color={colors.textTertiary} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
-          placeholder="Search meals..."
-          placeholderTextColor={colors.textTertiary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={18} color={colors.textTertiary} />
-          </TouchableOpacity>
-        )}
+      <Animated.View entering={searchAnimation} style={styles.searchWrapper}>
+        <GlassCard style={styles.searchContainer} interactive>
+          <Ionicons name="search" size={18} color={colors.textTertiary} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder="Search meals..."
+            placeholderTextColor={colors.textTertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={18} color={colors.textTertiary} />
+            </TouchableOpacity>
+          )}
+        </GlassCard>
       </Animated.View>
 
       {/* Filter Chips */}
@@ -432,6 +441,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
   },
   header: {
     alignItems: 'center',
@@ -440,11 +450,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '300',
+    fontFamily: Fonts.light,
     letterSpacing: 4,
   },
   subtitle: {
     fontSize: 13,
+    fontFamily: Fonts.regular,
     marginTop: 4,
     letterSpacing: 0.5,
   },
@@ -465,22 +476,25 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
   },
   statLabel: {
     fontSize: 11,
+    fontFamily: Fonts.regular,
     marginTop: 4,
   },
   statDivider: {
     width: 1,
     height: 40,
   },
+  searchWrapper: {
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 12,
-    marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.md,
     paddingHorizontal: Spacing.md,
     gap: 8,
   },
@@ -488,6 +502,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: Spacing.md,
     fontSize: 14,
+    fontFamily: Fonts.regular,
   },
   filterContainer: {
     marginBottom: Spacing.sm,
@@ -507,7 +522,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 11,
-    fontWeight: '500',
+    fontFamily: Fonts.medium,
   },
   listContent: {
     padding: Spacing.lg,
@@ -536,7 +551,7 @@ const styles = StyleSheet.create({
   mealTypeText: {
     fontSize: 10,
     textTransform: 'capitalize',
-    fontWeight: '500',
+    fontFamily: Fonts.medium,
   },
   mealActions: {
     flexDirection: 'row',
@@ -547,11 +562,12 @@ const styles = StyleSheet.create({
   },
   mealName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
     marginBottom: 4,
   },
   mealDescription: {
     fontSize: 13,
+    fontFamily: Fonts.regular,
     marginBottom: Spacing.md,
     lineHeight: 18,
   },
@@ -567,10 +583,11 @@ const styles = StyleSheet.create({
   },
   nutrientValue: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
   },
   nutrientLabel: {
     fontSize: 10,
+    fontFamily: Fonts.regular,
   },
   mealFooter: {
     flexDirection: 'row',
@@ -586,9 +603,11 @@ const styles = StyleSheet.create({
   },
   sourceText: {
     fontSize: 10,
+    fontFamily: Fonts.regular,
   },
   savedDate: {
     fontSize: 10,
+    fontFamily: Fonts.regular,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -603,19 +622,23 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 9,
+    fontFamily: Fonts.regular,
   },
   emptyState: {
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.xl,
+    marginHorizontal: Spacing.lg,
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
     marginTop: Spacing.lg,
     marginBottom: Spacing.sm,
   },
   emptySubtitle: {
     fontSize: 13,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 20,
   },

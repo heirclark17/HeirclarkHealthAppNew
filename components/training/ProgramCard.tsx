@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Animated, {
-  FadeInUp,
   useAnimatedStyle,
   withSpring,
   useSharedValue,
@@ -77,9 +76,8 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
   };
 
   return (
-    <Animated.View entering={FadeInUp.delay(index * 80).springify()}>
-      <Animated.View style={animatedStyle}>
-        <TouchableOpacity
+    <Animated.View style={animatedStyle}>
+      <TouchableOpacity
           style={styles.cardWrapper}
           onPress={() => {
             mediumImpact();
@@ -229,14 +227,12 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
             </View>
           </GlassCard>
         </TouchableOpacity>
-      </Animated.View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   cardWrapper: {
-    marginHorizontal: 16,
     marginBottom: 12,
   },
   card: {

@@ -1,8 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Modal, Platform } from 'react-native';
-import Animated, {
-  FadeInRight,
-} from 'react-native-reanimated';
+// Removed FadeInRight import - entrance animations removed
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -170,10 +168,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
             const accessibilityLabel = `${shortDayName} ${getDayNumber(day.date)}${isSelected ? ', Selected' : ''}${isCheat ? ', Cheat Day' : ''}`;
 
             return (
-              <Animated.View
-                key={day.dayNumber}
-                entering={FadeInRight.delay(index * 80).springify().damping(15)}
-              >
+              <View key={day.dayNumber}>
                 <TouchableOpacity
                   style={[
                     styles.dayItem,
@@ -214,7 +209,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     {getDayNumber(day.date)}
                   </Text>
                 </TouchableOpacity>
-              </Animated.View>
+              </View>
             );
           })}
         </ScrollView>

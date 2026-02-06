@@ -508,10 +508,19 @@ class HeirclarkAPI {
   async saveWorkoutPlan(planData: any, programId?: string, programName?: string): Promise<boolean> {
     try {
       console.log('[API] Saving workout plan to backend...');
+
+      // Extract weekly_schedule from planData and send at top level as backend expects
+      const { weekly_schedule, ...restPlanData } = planData;
+
       const response = await fetch(`${this.baseUrl}/api/v1/workouts/plan`, {
         method: 'POST',
         headers: this.getHeaders(true),
-        body: JSON.stringify({ planData, programId, programName }),
+        body: JSON.stringify({
+          planData: restPlanData,
+          programId,
+          programName,
+          weekly_schedule: weekly_schedule || [],
+        }),
       });
 
       if (!response.ok) {
@@ -596,6 +605,247 @@ class HeirclarkAPI {
     } catch (error) {
       console.error('[API] Get PRs error:', error);
       return {};
+    }
+  }
+
+  // ============================================
+  // FULL TRAINING STATE SYNC
+  // ============================================
+
+  // Save complete training state (weekly stats, goal alignment, plan summary)
+  async saveTrainingState(trainingState: {
+    weeklyStats?: { completedWorkouts: number; totalWorkouts: number; currentWeek: number; caloriesBurned: number };
+    goalAlignment?: { calorieDeficitSupport: number; musclePreservation: number; muscleGrowthPotential: number; cardiovascularHealth: number; overallAlignment: number };
+    planSummary?: any;
+    preferences?: any;
+  }): Promise<boolean> {
+    try {
+      console.log('[API] 🔄 Syncing full training state to backend...');
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/state`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(trainingState),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Save training state error:', response.status, errorText);
+        return false;
+      }
+
+      console.log('[API] ✅ Training state synced successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Save training state error:', error);
+      return false;
+    }
+  }
+
+  // Get complete training state
+  async getTrainingState(): Promise<{
+    weeklyStats?: { completedWorkouts: number; totalWorkouts: number; currentWeek: number; caloriesBurned: number };
+    goalAlignment?: { calorieDeficitSupport: number; musclePreservation: number; muscleGrowthPotential: number; cardiovascularHealth: number; overallAlignment: number };
+    planSummary?: any;
+    preferences?: any;
+  } | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/state`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return null;
+        throw new Error('Failed to get training state');
+      }
+
+      const data = await response.json();
+      return data.success ? data.state : null;
+    } catch (error) {
+      console.error('[API] Get training state error:', error);
+      return null;
+    }
+  }
+
+  // Save individual weight log (not just PRs)
+  async saveWeightLog(log: {
+    exerciseName: string;
+    date: string;
+    sets: Array<{ setNumber: number; weight: number; reps: number; unit: string }>;
+    notes?: string;
+    personalRecord?: boolean;
+  }): Promise<boolean> {
+    try {
+      console.log('[API] 💪 Saving weight log:', log.exerciseName);
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/weight-logs`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(log),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Save weight log error:', response.status, errorText);
+        return false;
+      }
+
+      console.log('[API] ✅ Weight log saved successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Save weight log error:', error);
+      return false;
+    }
+  }
+
+  // Get weight logs for an exercise
+  async getWeightLogs(exerciseName?: string): Promise<Array<{
+    exerciseName: string;
+    date: string;
+    sets: Array<{ setNumber: number; weight: number; reps: number; unit: string }>;
+    notes?: string;
+    personalRecord?: boolean;
+  }>> {
+    try {
+      const url = exerciseName
+        ? `${this.baseUrl}/api/v1/workouts/weight-logs?exercise=${encodeURIComponent(exerciseName)}`
+        : `${this.baseUrl}/api/v1/workouts/weight-logs`;
+
+      const response = await fetch(url, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return [];
+        throw new Error('Failed to get weight logs');
+      }
+
+      const data = await response.json();
+      return data.success ? data.logs : [];
+    } catch (error) {
+      console.error('[API] Get weight logs error:', error);
+      return [];
+    }
+  }
+
+  // Save exercise completion status
+  async saveExerciseCompletion(completion: {
+    date: string;
+    dayIndex: number;
+    exerciseId: string;
+    exerciseName: string;
+    completed: boolean;
+    completedAt?: string;
+  }): Promise<boolean> {
+    try {
+      console.log('[API] ✅ Saving exercise completion:', completion.exerciseName, completion.completed);
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/exercise-completions`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(completion),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Save exercise completion error:', response.status, errorText);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('[API] Save exercise completion error:', error);
+      return false;
+    }
+  }
+
+  // Get exercise completions for a date range
+  async getExerciseCompletions(startDate: string, endDate?: string): Promise<Array<{
+    date: string;
+    dayIndex: number;
+    exerciseId: string;
+    exerciseName: string;
+    completed: boolean;
+    completedAt?: string;
+  }>> {
+    try {
+      const url = endDate
+        ? `${this.baseUrl}/api/v1/workouts/exercise-completions?start=${startDate}&end=${endDate}`
+        : `${this.baseUrl}/api/v1/workouts/exercise-completions?start=${startDate}`;
+
+      const response = await fetch(url, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return [];
+        throw new Error('Failed to get exercise completions');
+      }
+
+      const data = await response.json();
+      return data.success ? data.completions : [];
+    } catch (error) {
+      console.error('[API] Get exercise completions error:', error);
+      return [];
+    }
+  }
+
+  // Save weekly stats
+  async saveWeeklyStats(stats: {
+    weekNumber: number;
+    completedWorkouts: number;
+    totalWorkouts: number;
+    caloriesBurned: number;
+    startDate: string;
+    endDate: string;
+  }): Promise<boolean> {
+    try {
+      console.log('[API] 📊 Saving weekly stats for week', stats.weekNumber);
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/weekly-stats`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(stats),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Save weekly stats error:', response.status, errorText);
+        return false;
+      }
+
+      console.log('[API] ✅ Weekly stats saved successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Save weekly stats error:', error);
+      return false;
+    }
+  }
+
+  // Get weekly stats history
+  async getWeeklyStats(weekNumber?: number): Promise<Array<{
+    weekNumber: number;
+    completedWorkouts: number;
+    totalWorkouts: number;
+    caloriesBurned: number;
+    startDate: string;
+    endDate: string;
+  }>> {
+    try {
+      const url = weekNumber
+        ? `${this.baseUrl}/api/v1/workouts/weekly-stats?week=${weekNumber}`
+        : `${this.baseUrl}/api/v1/workouts/weekly-stats`;
+
+      const response = await fetch(url, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return [];
+        throw new Error('Failed to get weekly stats');
+      }
+
+      const data = await response.json();
+      return data.success ? data.stats : [];
+    } catch (error) {
+      console.error('[API] Get weekly stats error:', error);
+      return [];
     }
   }
 

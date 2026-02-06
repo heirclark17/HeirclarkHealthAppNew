@@ -77,6 +77,156 @@ export const DarkColors = {
   glassTintWarning: 'rgba(255, 217, 61, 0.1)',  // Warning tint
 };
 
+// Sand Theme Colors - Light Mode (Warm Beige/Cream)
+export const SandLightColors = {
+  // Backgrounds
+  background: '#FAF6F1',          // Light warm cream
+  backgroundSecondary: '#F5EDE4', // Tan/parchment
+  card: '#F5EDE4',                // Tan/parchment for cards
+  cardHover: '#EDE5DB',           // Deeper sand tone
+
+  // Text
+  text: '#1A1A1A',                // Near-black text
+  textSecondary: '#4A4A4A',       // Dark gray secondary
+  textMuted: '#7A7067',           // Warm muted gray
+
+  // Borders
+  border: '#DDD5CA',              // Light sand border
+  cardBorder: '#E5DDD2',          // Subtle card border
+
+  // Buttons
+  primary: '#2C2620',             // Deep warm brown buttons
+  primaryText: '#FAF6F1',         // Cream text on dark buttons
+
+  // Links & Accents
+  accent: '#2C2620',              // Dark warm accent
+  link: '#8B7355',                // Warm brown links
+
+  // Input
+  inputBg: '#FFFFFF',             // White input background
+
+  // Status Colors
+  success: '#6B8E6B',             // Muted sage green
+  successStrong: '#4ADE80',       // Bright green
+  successMuted: '#96CEB4',        // Muted green
+  error: '#C45C5C',               // Muted warm red
+  errorStrong: '#FF3B30',         // Apple red
+  warning: '#D4A84B',             // Warm gold warning
+  warningOrange: '#CD8B4A',       // Warm orange
+
+  // Accent Colors
+  accentPurple: '#8B7399',        // Muted purple
+  accentCyan: '#5B9E9E',          // Muted teal
+  accentGold: '#C9A227',          // Antique gold
+
+  // Macro Colors
+  calories: '#C45C5C',            // Warm red
+  protein: '#CD8B4A',             // Warm orange
+  carbs: '#D4A4B5',               // Dusty pink
+  fat: '#C47BA0',                 // Muted pink
+  fatLoss: '#8B7399',             // Muted purple
+
+  // Health Metrics Colors
+  activeEnergy: '#B5894D',        // Warm amber
+  restingEnergy: '#5B7BAE',       // Muted blue
+  stepsColor: '#B5894D',          // Warm amber
+
+  // Over-target color
+  overTarget: '#C45C5C',          // Warm red
+  overTargetGlow: '#D4807E',      // Lighter warm red
+
+  // Goal achieved color
+  goalAchieved: '#6B8E6B',        // Sage green
+
+  // Gauge/Progress
+  gaugeFill: '#B5894D',           // Warm amber
+  gaugeBg: '#E5DDD2',             // Light sand gauge background
+
+  // iOS 26 Liquid Glass Colors - Sand tinted
+  glassCard: 'rgba(250, 246, 241, 0.6)',         // Warm cream glass
+  glassBorder: 'rgba(221, 213, 202, 0.5)',       // Sand border
+  glassSelected: 'rgba(139, 115, 85, 0.15)',     // Warm selected state
+  glassSelectedBorder: 'rgba(139, 115, 85, 0.35)', // Warm selected border
+  glassTintSuccess: 'rgba(107, 142, 107, 0.15)', // Sage success tint
+  glassTintError: 'rgba(196, 92, 92, 0.15)',     // Warm error tint
+  glassTintWarning: 'rgba(212, 168, 75, 0.15)',  // Gold warning tint
+};
+
+// Sand Theme Colors - Dark Mode (Deep Warm Brown)
+export const SandDarkColors = {
+  // Backgrounds
+  background: '#2C2620',          // Deep warm brown
+  backgroundSecondary: '#3D352D', // Muted cocoa
+  card: '#3D352D',                // Muted cocoa for cards
+  cardHover: '#4E443A',           // Warm charcoal
+
+  // Text
+  text: '#FAF6F1',                // Cream text
+  textSecondary: '#C9C0B5',       // Muted sand secondary
+  textMuted: '#9A9088',           // Warm gray muted
+
+  // Borders
+  border: '#5A4F44',              // Warm dark border
+  cardBorder: '#4E443A',          // Subtle card border
+
+  // Buttons
+  primary: '#FAF6F1',             // Cream buttons
+  primaryText: '#2C2620',         // Deep brown text on cream
+
+  // Links & Accents
+  accent: '#FAF6F1',              // Cream accent
+  link: '#C9A078',                // Warm tan links
+
+  // Input
+  inputBg: '#3D352D',             // Cocoa input background
+
+  // Status Colors
+  success: '#7CAF7C',             // Muted green
+  successStrong: '#4ADE80',       // Bright green
+  successMuted: '#96CEB4',        // Muted green
+  error: '#E07A7A',               // Warm coral red
+  errorStrong: '#FF3B30',         // Apple red
+  warning: '#E5BC5A',             // Warm gold
+  warningOrange: '#E0A05A',       // Warm orange
+
+  // Accent Colors
+  accentPurple: '#A08BB0',        // Muted purple
+  accentCyan: '#7AB5B5',          // Muted teal
+  accentGold: '#E5C55A',          // Bright gold
+
+  // Macro Colors
+  calories: '#E07A7A',            // Warm coral
+  protein: '#E0A05A',             // Warm orange
+  carbs: '#E0B5C5',               // Dusty pink
+  fat: '#D08AAF',                 // Muted pink
+  fatLoss: '#A08BB0',             // Muted purple
+
+  // Health Metrics Colors
+  activeEnergy: '#D4A05A',        // Warm amber
+  restingEnergy: '#7A9BC5',       // Muted blue
+  stepsColor: '#D4A05A',          // Warm amber
+
+  // Over-target color
+  overTarget: '#E07A7A',          // Warm coral
+  overTargetGlow: '#EFA5A0',      // Lighter coral
+
+  // Goal achieved color
+  goalAchieved: '#7CAF7C',        // Muted green
+
+  // Gauge/Progress
+  gaugeFill: '#D4A05A',           // Warm amber
+  gaugeBg: '#4E443A',             // Warm charcoal gauge background
+
+  // iOS 26 Liquid Glass Colors - Sand dark tinted
+  glassCard: 'rgba(44, 38, 32, 0.7)',            // Deep warm glass
+  glassBorder: 'rgba(90, 79, 68, 0.4)',          // Warm border
+  glassSelected: 'rgba(201, 160, 120, 0.18)',    // Warm tan selected
+  glassSelectedBorder: 'rgba(201, 160, 120, 0.35)', // Warm tan selected border
+  glassTintSuccess: 'rgba(124, 175, 124, 0.15)', // Green success tint
+  glassTintError: 'rgba(224, 122, 122, 0.15)',   // Coral error tint
+  glassTintWarning: 'rgba(229, 188, 90, 0.15)',  // Gold warning tint
+};
+
 // Midnight Gold Luxe Theme Colors - for leopard print backgrounds
 export const MidnightGoldColors = {
   // Backgrounds
@@ -219,9 +369,13 @@ export const LiquidGlass = {
   },
 
   // Helper to get liquid glass background color
-  getBg: (isDark: boolean, isSelected: boolean = false, theme: 'default' | 'midnightGold' = 'default') => {
+  getBg: (isDark: boolean, isSelected: boolean = false, theme: 'default' | 'midnightGold' | 'sand' = 'default') => {
     if (theme === 'midnightGold') {
       return isSelected ? MidnightGoldColors.glassSelected : MidnightGoldColors.glassCard;
+    }
+    if (theme === 'sand') {
+      const sandColors = isDark ? SandDarkColors : SandLightColors;
+      return isSelected ? sandColors.glassSelected : sandColors.glassCard;
     }
     if (isSelected) {
       return isDark ? DarkColors.glassSelected : LightColors.glassSelected;
@@ -230,9 +384,13 @@ export const LiquidGlass = {
   },
 
   // Helper to get liquid glass border color
-  getBorder: (isDark: boolean, isSelected: boolean = false, theme: 'default' | 'midnightGold' = 'default') => {
+  getBorder: (isDark: boolean, isSelected: boolean = false, theme: 'default' | 'midnightGold' | 'sand' = 'default') => {
     if (theme === 'midnightGold') {
       return isSelected ? MidnightGoldColors.glassSelectedBorder : MidnightGoldColors.glassBorder;
+    }
+    if (theme === 'sand') {
+      const sandColors = isDark ? SandDarkColors : SandLightColors;
+      return isSelected ? sandColors.glassSelectedBorder : sandColors.glassBorder;
     }
     if (isSelected) {
       return isDark ? DarkColors.glassSelectedBorder : LightColors.glassSelectedBorder;
@@ -241,8 +399,9 @@ export const LiquidGlass = {
   },
 
   // Helper to get blur intensity
-  getBlurIntensity: (isDark: boolean, theme: 'default' | 'midnightGold' = 'default') => {
+  getBlurIntensity: (isDark: boolean, theme: 'default' | 'midnightGold' | 'sand' = 'default') => {
     if (theme === 'midnightGold') return 60;
+    if (theme === 'sand') return isDark ? 25 : 40;
     return isDark ? 20 : 35;
   },
 };
@@ -463,4 +622,4 @@ export const Typography = {
   },
 };
 
-export default { Colors, Fonts, Typography, MidnightGoldColors, LiquidGlass };
+export default { Colors, Fonts, Typography, MidnightGoldColors, SandLightColors, SandDarkColors, LiquidGlass };

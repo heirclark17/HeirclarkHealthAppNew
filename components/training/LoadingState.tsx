@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -8,6 +8,7 @@ import Animated, {
   withSpring,
   useSharedValue,
   withDelay,
+  cancelAnimation,
 } from 'react-native-reanimated';
 import { Colors, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -29,7 +30,7 @@ function SkeletonCard({ index, colors, isDark }: { index: number; colors: any; i
   const secondaryBg = isDark ? Colors.backgroundSecondary : 'rgba(0, 0, 0, 0.05)';
   const opacity = useSharedValue(0.3);
 
-  React.useEffect(() => {
+  useEffect(() => {
     opacity.value = withDelay(
       index * 150,
       withRepeat(
@@ -41,6 +42,11 @@ function SkeletonCard({ index, colors, isDark }: { index: number; colors: any; i
         true
       )
     );
+
+    // Cleanup animation on unmount to prevent memory leaks
+    return () => {
+      cancelAnimation(opacity);
+    };
   }, [index, opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({

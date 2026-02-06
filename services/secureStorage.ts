@@ -15,13 +15,13 @@ try {
   console.warn('[SecureStorage] expo-secure-store not available, using AsyncStorage fallback');
 }
 
-// Keys for secure storage
+// Keys for secure storage (alphanumeric, ".", "-", "_" only - no "@" allowed)
 export const SECURE_KEYS = {
-  AUTH_TOKEN: '@heirclark_auth_token',
-  CUSTOMER_ID: '@heirclark_customer_id',
-  APPLE_ID: '@heirclark_apple_id',
-  LAST_SYNC: '@heirclark_last_sync',
-  REFRESH_TOKEN: '@heirclark_refresh_token',
+  AUTH_TOKEN: 'heirclark_auth_token',
+  CUSTOMER_ID: 'heirclark_customer_id',
+  APPLE_ID: 'heirclark_apple_id',
+  LAST_SYNC: 'heirclark_last_sync',
+  REFRESH_TOKEN: 'heirclark_refresh_token',
 } as const;
 
 // Maximum value length for SecureStore (2048 bytes)
@@ -32,6 +32,37 @@ class SecureStorageService {
 
   constructor() {
     this.checkAvailability();
+    this.migrateOldKeys();
+  }
+
+  /**
+   * Migrate data from old @ keys to new valid keys
+   */
+  private async migrateOldKeys(): Promise<void> {
+    const oldToNewKeys: Record<string, string> = {
+      '@heirclark_auth_token': SECURE_KEYS.AUTH_TOKEN,
+      '@heirclark_customer_id': SECURE_KEYS.CUSTOMER_ID,
+      '@heirclark_apple_id': SECURE_KEYS.APPLE_ID,
+      '@heirclark_last_sync': SECURE_KEYS.LAST_SYNC,
+      '@heirclark_refresh_token': SECURE_KEYS.REFRESH_TOKEN,
+    };
+
+    try {
+      for (const [oldKey, newKey] of Object.entries(oldToNewKeys)) {
+        const oldValue = await AsyncStorage.getItem(oldKey);
+        if (oldValue) {
+          const newValue = await AsyncStorage.getItem(newKey);
+          if (!newValue) {
+            console.log(`[SecureStorage] Migrating ${oldKey} to ${newKey}`);
+            await AsyncStorage.setItem(newKey, oldValue);
+          }
+          // Remove old key after migration
+          await AsyncStorage.removeItem(oldKey);
+        }
+      }
+    } catch (error) {
+      console.warn('[SecureStorage] Old key migration error:', error);
+    }
   }
 
   /**

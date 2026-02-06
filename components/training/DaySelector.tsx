@@ -4,7 +4,6 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
   useSharedValue,
-  FadeInRight,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -57,10 +56,7 @@ function DayPill({
   const isCompleted = day.completed;
 
   return (
-    <Animated.View
-      entering={FadeInRight.delay(index * 60).springify().damping(15)}
-      style={animatedStyle}
-    >
+    <Animated.View style={animatedStyle}>
       <TouchableOpacity
         onPress={() => {
           lightImpact();

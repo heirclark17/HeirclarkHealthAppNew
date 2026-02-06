@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 require('dotenv').config();
+const heygenService = require('./services/heygenService');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -2803,10 +2804,37 @@ app.get('/api/v1/fasting/current', authenticateToken, async (req, res) => {
 app.post('/api/v1/avatar/config', authenticateToken, async (req, res) => {
   res.json({
     ok: true,
-    streamingAvailable: !!process.env.HEYGEN_API_KEY,
+    streamingAvailable: heygenService.isConfigured(),
     avatarId: process.env.HEYGEN_AVATAR_ID || 'default',
   });
 });
+
+// Helper: create and start a HeyGen streaming session
+async function createHeyGenSession() {
+  console.log('[HeyGen] createHeyGenSession called. Configured:', heygenService.isConfigured(),
+    'API_KEY set:', !!process.env.HEYGEN_API_KEY,
+    'AVATAR_ID set:', !!process.env.HEYGEN_AVATAR_ID);
+
+  if (!heygenService.isConfigured()) {
+    console.log('[HeyGen] Not configured - missing HEYGEN_API_KEY or HEYGEN_AVATAR_ID');
+    return null;
+  }
+  try {
+    console.log('[HeyGen] Creating streaming session...');
+    const sessionData = await heygenService.createStreamingSession();
+    console.log('[HeyGen] Session created:', sessionData.session_id, 'Starting...');
+    await heygenService.startSession(sessionData.session_id);
+    console.log('[HeyGen] Session started successfully');
+    return {
+      sessionId: sessionData.session_id,
+      accessToken: sessionData.access_token,
+      url: sessionData.url,
+    };
+  } catch (err) {
+    console.error('[HeyGen] Session creation failed:', err.message);
+    return null;
+  }
+}
 
 app.post('/api/v1/avatar/coach/goals', authenticateToken, async (req, res) => {
   try {
@@ -2828,11 +2856,26 @@ app.post('/api/v1/avatar/coach/goals', authenticateToken, async (req, res) => {
       max_tokens: 300,
     });
 
-    res.json({
-      ok: true,
-      script: completion.choices[0].message.content,
-      streamingAvailable: false,
-    });
+    const script = completion.choices[0].message.content;
+    const heygenSession = await createHeyGenSession();
+
+    if (heygenSession) {
+      res.json({
+        ok: true,
+        script,
+        streamingAvailable: true,
+        token: heygenSession.sessionId,
+        session: heygenSession,
+        defaultAvatarId: process.env.HEYGEN_AVATAR_ID,
+        defaultVoiceId: process.env.HEYGEN_VOICE_ID || null,
+      });
+    } else {
+      res.json({
+        ok: true,
+        script,
+        streamingAvailable: false,
+      });
+    }
   } catch (error) {
     console.error('[Avatar Goals] Error:', error);
     res.status(500).json({ ok: false, error: error.message });
@@ -2879,19 +2922,84 @@ app.post('/api/v1/avatar/coach/meal-plan', authenticateToken, async (req, res) =
       max_tokens: 400,
     });
 
-    res.json({
-      ok: true,
-      script: completion.choices[0].message.content,
-      streamingAvailable: false,
-      metadata: {
-        dayName: selectedDay?.dayName,
-        mealCount: todaysMeals.length,
-        dailyCalories: selectedDay?.dailyTotals?.calories,
-      }
-    });
+    const script = completion.choices[0].message.content;
+    const heygenSession = await createHeyGenSession();
+
+    if (heygenSession) {
+      res.json({
+        ok: true,
+        script,
+        streamingAvailable: true,
+        token: heygenSession.sessionId,
+        session: heygenSession,
+        defaultAvatarId: process.env.HEYGEN_AVATAR_ID,
+        defaultVoiceId: process.env.HEYGEN_VOICE_ID || null,
+        metadata: {
+          dayName: selectedDay?.dayName,
+          mealCount: todaysMeals.length,
+          dailyCalories: selectedDay?.dailyTotals?.calories,
+        }
+      });
+    } else {
+      res.json({
+        ok: true,
+        script,
+        streamingAvailable: false,
+        metadata: {
+          dayName: selectedDay?.dayName,
+          mealCount: todaysMeals.length,
+          dailyCalories: selectedDay?.dailyTotals?.calories,
+        }
+      });
+    }
   } catch (error) {
     console.error('[Avatar Meal Plan] Error:', error);
     res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+// Chat session endpoint - creates a HeyGen avatar session for the AI Coach chat
+app.post('/api/v1/avatar/coach/chat-session', authenticateToken, async (req, res) => {
+  try {
+    const greeting = "Hey! I'm your AI coach. Ask me anything about nutrition, workouts, or your health goals.";
+    const heygenSession = await createHeyGenSession();
+
+    if (heygenSession) {
+      res.json({
+        ok: true,
+        streamingAvailable: true,
+        token: heygenSession.sessionId,
+        session: heygenSession,
+        greeting,
+      });
+    } else {
+      res.json({
+        ok: true,
+        streamingAvailable: false,
+        greeting,
+      });
+    }
+  } catch (error) {
+    console.error('[Avatar Chat Session] Error:', error);
+    res.json({
+      ok: true,
+      streamingAvailable: false,
+      greeting: "Hey! I'm your AI coach. Ask me anything about nutrition, workouts, or your health goals.",
+    });
+  }
+});
+
+// Stop a HeyGen streaming session
+app.post('/api/v1/avatar/coach/stop-session', authenticateToken, async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    if (sessionId && heygenService.isConfigured()) {
+      await heygenService.stopSession(sessionId);
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[Avatar Stop Session] Error:', error);
+    res.json({ ok: true }); // Don't fail client on cleanup errors
   }
 });
 

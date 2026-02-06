@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GoalWorkoutAlignment, TrainingPreferences } from '../../types/training';
@@ -77,7 +76,7 @@ export function GoalAlignmentCard({ alignment, preferences }: GoalAlignmentCardP
   };
 
   return (
-    <Animated.View entering={FadeInDown.delay(200).springify()}>
+    <View>
       <GlassCard style={styles.container} interactive>
         {/* Header */}
         <View style={styles.header}>
@@ -172,7 +171,7 @@ export function GoalAlignmentCard({ alignment, preferences }: GoalAlignmentCardP
           </View>
         )}
       </GlassCard>
-    </Animated.View>
+    </View>
   );
 }
 

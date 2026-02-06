@@ -2,14 +2,14 @@ import { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Modal, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
+// Animations removed for performance
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../../components/GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useTraining } from '../../contexts/TrainingContext';
-import { useGoalWizard } from '../../contexts/GoalWizardContext';
+import { useSafeGoalWizard } from '../../hooks/useSafeGoalWizard';
 import {
   LoadingState,
   WorkoutCard,
@@ -25,6 +25,7 @@ import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { ExerciseAlternative, WorkoutExercise, WeightLog } from '../../types/training';
 import { CoachChatModal } from '../../components/agents/aiCoach';
+import { FormCoachModal } from '../../components/agents/workoutFormCoach';
 import { api } from '../../services/api';
 
 export default function ProgramsScreen() {
@@ -35,7 +36,9 @@ export default function ProgramsScreen() {
   const [previewProgram, setPreviewProgram] = useState<any>(null);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [showCoachModal, setShowCoachModal] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
   const [selectedExerciseForWeight, setSelectedExerciseForWeight] = useState<WorkoutExercise | null>(null);
+  const [selectedExerciseForForm, setSelectedExerciseForForm] = useState<WorkoutExercise | null>(null);
   const { settings } = useSettings();
 
   // Dynamic theme colors
@@ -80,27 +83,14 @@ export default function ProgramsScreen() {
     showAlternativesModal,
   } = trainingState;
 
-  // Goal wizard context
-  let goalWizardState: any = null;
-  try {
-    const { state } = useGoalWizard();
-    goalWizardState = state;
-  } catch (e) {
-    // Context not available
-  }
+  // Goal wizard context - use safe wrapper hook
+  const { state: goalWizardState } = useSafeGoalWizard();
 
-  // Get all days from weekly plan (handles both old days[] and new weeks[].days[] formats)
+  // Get all days from weekly plan
   const allDays = useMemo(() => {
     if (!weeklyPlan) return [];
-    if (weeklyPlan.weeks && Array.isArray(weeklyPlan.weeks)) {
-      // New format: weeks[].days[]
-      const weekIndex = Math.floor(selectedDayIndex / 7);
-      const currentWeekData = weeklyPlan.weeks[currentWeek - 1] || weeklyPlan.weeks[0];
-      return currentWeekData?.days || [];
-    }
-    // Old format: days[]
     return weeklyPlan.days || [];
-  }, [weeklyPlan, currentWeek, selectedDayIndex]);
+  }, [weeklyPlan]);
 
   // Get current day's workout
   const dayIndexInWeek = selectedDayIndex % 7;
@@ -110,8 +100,8 @@ export default function ProgramsScreen() {
   // Available programs - use enhanced program templates
   const allPrograms = getEnhancedPrograms();
 
-  // Handle selecting an exercise alternative
-  const handleSelectAlternative = (alternative: ExerciseAlternative) => {
+  // Handle selecting an exercise alternative - memoized to prevent child re-renders
+  const handleSelectAlternative = useCallback((alternative: ExerciseAlternative) => {
     if (selectedExercise && currentDay?.workout) {
       // Find the exercise ID in the current workout
       const workoutExercise = currentDay.workout.exercises.find(
@@ -122,44 +112,65 @@ export default function ProgramsScreen() {
       }
     }
     hideExerciseAlternatives();
-  };
+  }, [selectedExercise, currentDay, selectedDayIndex, swapExerciseWithAlternative, hideExerciseAlternatives]);
 
-  // Handle opening weight log modal
-  const handleLogWeight = (exercise: WorkoutExercise) => {
+  // Handle opening weight log modal - memoized
+  const handleLogWeight = useCallback((exercise: WorkoutExercise) => {
     setSelectedExerciseForWeight(exercise);
     setShowWeightModal(true);
-  };
+  }, []);
 
-  // Handle saving weight log - sync to backend
-  const handleSaveWeight = async (log: WeightLog) => {
+  // Handle saving weight log - sync ALL weight logs to backend (not just PRs) - memoized
+  const handleSaveWeight = useCallback(async (log: WeightLog) => {
     console.log('[Programs] Weight log saved:', log.exerciseName, log.maxWeight, log.sets[0]?.unit);
 
-    // Check if this is a personal record and sync to backend
-    if (log.personalRecord && log.maxWeight > 0) {
-      try {
-        console.log('[Programs] 🏆 New PR detected! Syncing to backend...');
-        const success = await api.savePersonalRecord(
+    try {
+      // *** Sync ALL weight logs to backend ***
+      console.log('[Programs] 💪 Syncing weight log to backend...');
+      const weightLogSuccess = await api.saveWeightLog({
+        exerciseName: log.exerciseName,
+        date: new Date().toISOString().split('T')[0],
+        sets: log.sets.map((set, idx) => ({
+          setNumber: idx + 1,
+          weight: set.weight,
+          reps: set.reps,
+          unit: set.unit || 'lb',
+        })),
+        notes: log.notes,
+        personalRecord: log.personalRecord,
+      });
+
+      if (weightLogSuccess) {
+        console.log('[Programs] ✅ Weight log synced to backend');
+      } else {
+        console.warn('[Programs] ⚠️ Weight log sync failed - saved locally');
+      }
+
+      // Also save PR separately if it's a personal record
+      if (log.personalRecord && log.maxWeight > 0) {
+        console.log('[Programs] 🏆 New PR detected! Syncing PR to backend...');
+        const prSuccess = await api.savePersonalRecord(
           log.exerciseName,
           log.maxWeight,
           log.sets[0]?.reps || 1,
           log.notes
         );
-        if (success) {
+        if (prSuccess) {
           console.log('[Programs] ✅ PR synced to backend');
         } else {
           console.warn('[Programs] ⚠️ PR sync failed - saved locally');
         }
-      } catch (error) {
-        console.error('[Programs] ❌ PR sync error:', error);
       }
+    } catch (error) {
+      console.error('[Programs] ❌ Weight log sync error:', error);
     }
-  };
+  }, []);
 
-  // Navigate to training from plan summary
-  const handleStartTraining = () => {
+  // Navigate to training from plan summary - memoized
+  const handleStartTraining = useCallback(() => {
     // Scroll to workout section or navigate accordingly
     lightImpact();
-  };
+  }, []);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -174,8 +185,8 @@ export default function ProgramsScreen() {
     }, [loadCachedPlan])
   );
 
-  // Handle quick generate (template-based)
-  const handleGenerate = async () => {
+  // Handle quick generate (template-based) - memoized
+  const handleGenerate = useCallback(async () => {
     console.log('[Programs] Quick generate button clicked');
     console.log('[Programs] Goal wizard state:', goalWizardState?.primaryGoal);
     mediumImpact();
@@ -185,10 +196,10 @@ export default function ProgramsScreen() {
     if (!success && error) {
       console.error('[Programs] Failed to generate training plan:', error);
     }
-  };
+  }, [generateWeeklyPlan, error, goalWizardState?.primaryGoal]);
 
-  // Handle AI-powered generate
-  const handleAIGenerate = async () => {
+  // Handle AI-powered generate - memoized
+  const handleAIGenerate = useCallback(async () => {
     console.log('[Programs] AI generate button clicked');
     console.log('[Programs] Goal wizard state:', goalWizardState?.primaryGoal);
     mediumImpact();
@@ -198,18 +209,18 @@ export default function ProgramsScreen() {
     if (!success && error) {
       console.error('[Programs] Failed to generate AI training plan:', error);
     }
-  };
+  }, [generateAIWorkoutPlan, error, goalWizardState?.primaryGoal]);
 
-  // Handle program tap - shows preview modal
-  const handleProgramTap = (program: any) => {
+  // Handle program tap - shows preview modal - memoized
+  const handleProgramTap = useCallback((program: any) => {
     console.log('[Programs] User tapped program:', program.name);
     lightImpact();
     setPreviewProgram(program);
     setShowProgramPreview(true);
-  };
+  }, []);
 
-  // Handle confirming program selection - generates the plan
-  const handleConfirmProgram = async () => {
+  // Handle confirming program selection - generates the plan - memoized
+  const handleConfirmProgram = useCallback(async () => {
     if (!previewProgram) return;
 
     console.log('[Programs] User confirmed program:', previewProgram.name);
@@ -226,22 +237,22 @@ export default function ProgramsScreen() {
     }
 
     setPreviewProgram(null);
-  };
+  }, [previewProgram, selectProgramAndGenerate]);
 
-  // Handle closing preview modal
-  const handleClosePreview = () => {
+  // Handle closing preview modal - memoized
+  const handleClosePreview = useCallback(() => {
     setShowProgramPreview(false);
     // Don't clear previewProgram so selection state persists in the list
-  };
+  }, []);
 
-  // Navigate to goals page
-  const handleSetGoals = () => {
+  // Navigate to goals page - memoized
+  const handleSetGoals = useCallback(() => {
     lightImpact();
     router.push('/goals');
-  };
+  }, [router]);
 
-  // Get goal summary
-  const getGoalSummary = () => {
+  // Get goal summary - memoized
+  const getGoalSummary = useCallback(() => {
     if (!goalWizardState?.primaryGoal) return 'Set your goals to get personalized workouts';
 
     const goalLabels: Record<string, string> = {
@@ -252,7 +263,7 @@ export default function ProgramsScreen() {
     };
 
     return `Training for: ${goalLabels[goalWizardState.primaryGoal] || 'General Fitness'}`;
-  };
+  }, [goalWizardState?.primaryGoal]);
 
   // Weekly stats - handle both old and new formats
   const weeklyStats = useMemo(() => {
@@ -260,7 +271,7 @@ export default function ProgramsScreen() {
 
     // Calculate from days if direct properties don't exist
     const workoutsWithData = allDays.filter(d => d?.workout);
-    const completedCount = workoutsWithData.filter(d => d?.workout?.isCompleted).length;
+    const completedCount = workoutsWithData.filter(d => d?.workout?.completed).length;
 
     return {
       completedWorkouts: weeklyPlan.completedWorkouts ?? completedCount,
@@ -268,6 +279,70 @@ export default function ProgramsScreen() {
       caloriesBurned: weeklyPlan.totalCaloriesBurned ?? 0,
     };
   }, [weeklyPlan, allDays]);
+
+  // Memoized handlers for WorkoutCard to prevent unnecessary re-renders
+  const handleMarkComplete = useCallback(() => {
+    markWorkoutComplete(selectedDayIndex);
+  }, [markWorkoutComplete, selectedDayIndex]);
+
+  const handleExerciseToggle = useCallback((exerciseId: string) => {
+    markExerciseComplete(selectedDayIndex, exerciseId);
+  }, [markExerciseComplete, selectedDayIndex]);
+
+  const handleSwapExercise = useCallback((exerciseId: string) => {
+    swapExercise(selectedDayIndex, exerciseId);
+  }, [swapExercise, selectedDayIndex]);
+
+  const handleShowAlternatives = useCallback((workoutExercise: WorkoutExercise) => {
+    showExerciseAlternatives(workoutExercise.exercise);
+  }, [showExerciseAlternatives]);
+
+  // Handle viewing exercise form with GIF demonstration - memoized
+  const handleViewForm = useCallback((exercise: WorkoutExercise) => {
+    setSelectedExerciseForForm(exercise);
+    setShowFormModal(true);
+  }, []);
+
+  // Memoized handlers for modal controls
+  const handleOpenProgramModal = useCallback(() => {
+    lightImpact();
+    setShowProgramModal(true);
+  }, []);
+
+  const handleCloseProgramModal = useCallback(() => {
+    setShowProgramModal(false);
+  }, []);
+
+  const handleCloseWeightModal = useCallback(() => {
+    setShowWeightModal(false);
+    setSelectedExerciseForWeight(null);
+  }, []);
+
+  const handleOpenCoachModal = useCallback(() => {
+    setShowCoachModal(true);
+  }, []);
+
+  const handleCloseCoachModal = useCallback(() => {
+    setShowCoachModal(false);
+  }, []);
+
+  const handleCloseFormModal = useCallback(() => {
+    setShowFormModal(false);
+    setSelectedExerciseForForm(null);
+  }, []);
+
+  // Memoized week navigation handlers
+  const handlePreviousWeek = useCallback(() => {
+    lightImpact();
+    goToPreviousWeek();
+    generateWeeklyPlan();
+  }, [goToPreviousWeek, generateWeeklyPlan]);
+
+  const handleNextWeek = useCallback(() => {
+    lightImpact();
+    goToNextWeek();
+    generateWeeklyPlan();
+  }, [goToNextWeek, generateWeeklyPlan]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: 'transparent' }]} edges={['top', 'left', 'right']}>
@@ -281,20 +356,6 @@ export default function ProgramsScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>Training</Text>
-          {weeklyPlan && (
-            <TouchableOpacity
-              onPress={() => {
-                lightImpact();
-                setShowProgramModal(true);
-              }}
-              activeOpacity={0.7}
-            >
-              <GlassCard style={styles.programButton} interactive>
-                <Ionicons name="list-outline" size={18} color={colors.textMuted} />
-                <Text style={[styles.programButtonText, { color: colors.textMuted }]}>Programs</Text>
-              </GlassCard>
-            </TouchableOpacity>
-          )}
         </View>
 
         {/* Weekly Stats Cards - Frosted Liquid Glass */}
@@ -313,6 +374,11 @@ export default function ProgramsScreen() {
           </View>
         )}
 
+        {/* Goal Alignment Card - Above Calendar */}
+        {weeklyPlan && goalAlignment && preferences && (
+          <GoalAlignmentCard alignment={goalAlignment} preferences={preferences} />
+        )}
+
         {/* Workout Calendar Card - Frosted Liquid Glass */}
         {weeklyPlan && (
           <WorkoutCalendarCard
@@ -322,9 +388,62 @@ export default function ProgramsScreen() {
           />
         )}
 
+        {/* Today's Workout - Below Calendar */}
+        {weeklyPlan && !isGenerating && (
+          <View style={styles.workoutsContainer}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionHeaderTitle, { color: colors.text }]}>
+                {currentDay?.dayOfWeek}'s Workout
+              </Text>
+              {currentDay?.isRestDay && (
+                <View style={[styles.restBadge, { backgroundColor: colors.backgroundSecondary }]}>
+                  <Text style={[styles.restBadgeText, { color: colors.textMuted }]}>Rest Day</Text>
+                </View>
+              )}
+            </View>
+
+            {currentWorkout ? (
+              <WorkoutCard
+                workout={currentWorkout}
+                dayName={currentDay?.dayOfWeek || 'Today'}
+                index={0}
+                weekNumber={currentWeek}
+                onMarkComplete={handleMarkComplete}
+                onExerciseToggle={handleExerciseToggle}
+                onSwapExercise={handleSwapExercise}
+                onShowAlternatives={handleShowAlternatives}
+                onLogWeight={handleLogWeight}
+                onViewForm={handleViewForm}
+              />
+            ) : currentDay?.isRestDay ? (
+              <GlassCard style={styles.restDayCard} interactive>
+                <View style={styles.cardIconContainer}>
+                  <BlurView
+                    intensity={isDark ? 40 : 60}
+                    tint={isDark ? 'dark' : 'light'}
+                    style={[
+                      styles.cardIconBlur,
+                      {
+                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                        borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
+                      },
+                    ]}
+                  >
+                    <Ionicons name="bed-outline" size={32} color={colors.textMuted} />
+                  </BlurView>
+                </View>
+                <Text style={[styles.restDayTitle, { color: colors.text }]}>Rest & Recovery</Text>
+                <Text style={[styles.restDayText, { color: colors.textMuted }]}>
+                  Take today to recover. Light stretching or a walk is encouraged.
+                </Text>
+              </GlassCard>
+            ) : null}
+          </View>
+        )}
+
         {/* Generate Plan Section - show when no plan exists */}
         {!weeklyPlan && !isGenerating && (
-          <Animated.View entering={FadeIn}>
+          <View>
             <GlassCard style={styles.card} interactive>
               {/* Frosted Glass Icon Container */}
               <View style={styles.cardIconContainer}>
@@ -382,22 +501,22 @@ export default function ProgramsScreen() {
                 />
               </View>
             </GlassCard>
-          </Animated.View>
+          </View>
         )}
 
         {/* Loading State */}
         {isGenerating && (
-          <Animated.View entering={FadeIn} exiting={FadeOut}>
+          <View>
             <View style={styles.loadingHeader}>
               <Text style={[styles.loadingText, { color: colors.textMuted }]}>Creating your personalized training plan...</Text>
             </View>
             <LoadingState count={4} />
-          </Animated.View>
+          </View>
         )}
 
         {/* Error State */}
         {error && !isGenerating && (
-          <Animated.View entering={FadeIn}>
+          <View>
             <GlassCard style={styles.errorCard} interactive>
               <Text style={styles.errorIcon}>⚠</Text>
               <Text style={[styles.errorTitle, { color: colors.text }]}>Something went wrong</Text>
@@ -406,12 +525,12 @@ export default function ProgramsScreen() {
                 <Text style={[styles.retryButtonText, { color: colors.primaryText }]}>Try Again</Text>
               </TouchableOpacity>
             </GlassCard>
-          </Animated.View>
+          </View>
         )}
 
         {/* Training Plan Content - show when plan exists */}
         {weeklyPlan && !isGenerating && (
-          <Animated.View entering={FadeInDown.delay(100)}>
+          <View>
             {/* Plan Summary Card */}
             {planSummary && (
               <PlanSummaryCard
@@ -421,70 +540,11 @@ export default function ProgramsScreen() {
               />
             )}
 
-            {/* Goal Alignment Card */}
-            {goalAlignment && preferences && (
-              <GoalAlignmentCard alignment={goalAlignment} preferences={preferences} />
-            )}
-
-            {/* Today's Workout */}
-            <View style={styles.workoutsContainer}>
-              <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionHeaderTitle, { color: colors.text }]}>
-                  {currentDay?.dayOfWeek}'s Workout
-                </Text>
-                {currentDay?.isRestDay && (
-                  <View style={[styles.restBadge, { backgroundColor: colors.backgroundSecondary }]}>
-                    <Text style={[styles.restBadgeText, { color: colors.textMuted }]}>Rest Day</Text>
-                  </View>
-                )}
-              </View>
-
-              {currentWorkout ? (
-                <WorkoutCard
-                  workout={currentWorkout}
-                  dayName={currentDay?.day || currentDay?.dayOfWeek || 'Today'}
-                  index={0}
-                  weekNumber={currentWeek}
-                  onMarkComplete={() => markWorkoutComplete(selectedDayIndex)}
-                  onExerciseToggle={(exerciseId) => markExerciseComplete(selectedDayIndex, exerciseId)}
-                  onSwapExercise={(exerciseId) => swapExercise(selectedDayIndex, exerciseId)}
-                  onShowAlternatives={(workoutExercise) => showExerciseAlternatives(workoutExercise.exercise)}
-                  onLogWeight={handleLogWeight}
-                />
-              ) : currentDay?.isRestDay ? (
-                <GlassCard style={styles.restDayCard} interactive>
-                  <View style={styles.cardIconContainer}>
-                    <BlurView
-                      intensity={isDark ? 40 : 60}
-                      tint={isDark ? 'dark' : 'light'}
-                      style={[
-                        styles.cardIconBlur,
-                        {
-                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-                          borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
-                        },
-                      ]}
-                    >
-                      <Ionicons name="bed-outline" size={32} color={colors.textMuted} />
-                    </BlurView>
-                  </View>
-                  <Text style={[styles.restDayTitle, { color: colors.text }]}>Rest & Recovery</Text>
-                  <Text style={[styles.restDayText, { color: colors.textMuted }]}>
-                    Take today to recover. Light stretching or a walk is encouraged.
-                  </Text>
-                </GlassCard>
-              ) : null}
-            </View>
-
             {/* Week Navigation */}
             <View style={styles.weekNavigation}>
               <TouchableOpacity
                 style={styles.weekButton}
-                onPress={() => {
-                  lightImpact();
-                  goToPreviousWeek();
-                  generateWeeklyPlan();
-                }}
+                onPress={handlePreviousWeek}
                 disabled={currentWeek === 1}
               >
                 <Ionicons
@@ -499,11 +559,7 @@ export default function ProgramsScreen() {
 
               <TouchableOpacity
                 style={styles.weekButton}
-                onPress={() => {
-                  lightImpact();
-                  goToNextWeek();
-                  generateWeeklyPlan();
-                }}
+                onPress={handleNextWeek}
               >
                 <Text style={[styles.weekButtonText, { color: colors.text }]}>Next Week</Text>
                 <Ionicons name="chevron-forward" size={20} color={colors.text} />
@@ -545,7 +601,7 @@ export default function ProgramsScreen() {
                 </GlassCard>
               </View>
             </View>
-          </Animated.View>
+          </View>
         )}
 
         {/* Action Buttons - Frosted Liquid Glass */}
@@ -561,7 +617,7 @@ export default function ProgramsScreen() {
                 </View>
               </GlassCard>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowCoachModal(true)} activeOpacity={0.7} style={styles.actionButtonWrapper}>
+            <TouchableOpacity onPress={handleOpenCoachModal} activeOpacity={0.7} style={styles.actionButtonWrapper}>
               <GlassCard style={styles.actionButton} interactive>
                 <View style={styles.actionButtonInner}>
                   <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
@@ -582,14 +638,14 @@ export default function ProgramsScreen() {
         visible={showProgramModal}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setShowProgramModal(false)}
+        onRequestClose={handleCloseProgramModal}
       >
         <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
           <BlurView intensity={isDark ? 25 : 40} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <TouchableOpacity
-                onPress={() => setShowProgramModal(false)}
+                onPress={handleCloseProgramModal}
                 style={styles.closeButtonWrapper}
               >
                 <GlassCard style={styles.modalCloseButtonGlass} interactive>
@@ -604,7 +660,7 @@ export default function ProgramsScreen() {
               Tap a program to preview details
             </Text>
 
-            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
               {allPrograms.map((program, index) => (
                 <ProgramCard
                   key={program.id}
@@ -642,29 +698,29 @@ export default function ProgramsScreen() {
         visible={showWeightModal}
         exercise={selectedExerciseForWeight}
         weekNumber={currentWeek}
-        onClose={() => {
-          setShowWeightModal(false);
-          setSelectedExerciseForWeight(null);
-        }}
+        onClose={handleCloseWeightModal}
         onSave={handleSaveWeight}
       />
 
       {/* AI Coach Chat Modal - Training Mode */}
       <CoachChatModal
         visible={showCoachModal}
-        onClose={() => setShowCoachModal(false)}
+        onClose={handleCloseCoachModal}
         mode="training"
         context={{
           userGoals: {
-            fitnessGoal: trainingState.program?.goal || 'general_fitness',
+            fitnessGoal: selectedProgram?.focus?.[0] || 'general_fitness',
             activityLevel: 'active',
           },
-          recentWorkouts: trainingState.completedExercises?.slice(-5).map(ex => ({
-            type: ex.exerciseName || 'Unknown',
-            duration: 45,
-            date: new Date().toISOString(),
-          })),
+          recentWorkouts: [],
         }}
+      />
+
+      {/* Form Coach Modal - Exercise GIF Demonstration */}
+      <FormCoachModal
+        visible={showFormModal}
+        onClose={handleCloseFormModal}
+        exerciseName={selectedExerciseForForm?.exercise?.name || ''}
       />
     </SafeAreaView>
   );
@@ -1044,5 +1100,8 @@ const styles = StyleSheet.create({
   },
   modalScroll: {
     flex: 1,
+  },
+  modalScrollContent: {
+    paddingHorizontal: 16,
   },
 });

@@ -1,6 +1,7 @@
 /**
  * Coach Chat Modal Component
  * Full-screen chat interface for AI coach conversations
+ * With optional HeyGen LiveAvatar streaming at the top
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -17,7 +18,7 @@ import {
   Platform,
   ActivityIndicator,
   Keyboard,
-  useColorScheme,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -27,9 +28,15 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
 import { aiService } from '../../../services/aiService';
+import { avatarService, StreamingSession } from '../../../services/avatarService';
 import { CoachMode, CoachMessage, CoachContext, CoachResponse } from '../../../types/ai';
 import { mediumImpact, lightImpact } from '../../../utils/haptics';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { useAuth } from '../../../contexts/AuthContext';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // iOS 26 Liquid Glass spring configuration
 const GLASS_SPRING = {
@@ -50,6 +57,9 @@ const GLASS_COLORS = {
     textSecondary: 'rgba(60, 60, 67, 0.6)',
     border: 'rgba(0, 0, 0, 0.08)',
     inputBorder: 'rgba(0, 0, 0, 0.12)',
+    accent: 'rgba(78, 205, 196, 0.9)',
+    card: 'rgba(255, 255, 255, 0.75)',
+    cardBorder: 'rgba(255, 255, 255, 0.5)',
   },
   dark: {
     background: '#0A0A0A',
@@ -61,6 +71,9 @@ const GLASS_COLORS = {
     textSecondary: 'rgba(235, 235, 245, 0.6)',
     border: 'rgba(255, 255, 255, 0.1)',
     inputBorder: 'rgba(255, 255, 255, 0.12)',
+    accent: 'rgba(78, 205, 196, 0.9)',
+    card: 'rgba(255, 255, 255, 0.08)',
+    cardBorder: 'rgba(255, 255, 255, 0.12)',
   },
 };
 
@@ -137,6 +150,171 @@ const MODE_CONFIG: Record<CoachMode, {
   },
 };
 
+// HTML template for LiveAvatar streaming in WebView (same as CoachingModal)
+const getLiveAvatarHTML = (session: StreamingSession, token: string) => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #avatar-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    #avatar-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .loading {
+      color: #4ECDC4;
+      text-align: center;
+    }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(78, 205, 196, 0.3);
+      border-top-color: #4ECDC4;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .error {
+      color: #FF6B6B;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="avatar-container">
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      <p>Connecting to your AI coach...</p>
+    </div>
+    <video id="avatar-video" autoplay playsinline style="display:none;"></video>
+  </div>
+
+  <script type="module">
+    const roomUrl = ${JSON.stringify(session.url)};
+    const roomToken = ${JSON.stringify(session.accessToken)};
+
+    const loadingEl = document.getElementById('loading');
+    const videoEl = document.getElementById('avatar-video');
+
+    let room = null;
+
+    function sendToRN(type, data = {}) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type, ...data }));
+    }
+
+    function showError(message) {
+      loadingEl.innerHTML = '<div class="error">' + message + '</div>';
+      sendToRN('error', { message });
+    }
+
+    async function initLiveKit() {
+      try {
+        const { Room, RoomEvent, Track } = await import('https://cdn.jsdelivr.net/npm/livekit-client@2/+esm');
+
+        room = new Room({
+          adaptiveStream: true,
+          dynacast: true,
+        });
+
+        room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+          if (track.kind === Track.Kind.Video) {
+            loadingEl.style.display = 'none';
+            videoEl.style.display = 'block';
+            track.attach(videoEl);
+            sendToRN('ready');
+          }
+          if (track.kind === Track.Kind.Audio) {
+            const audioEl = track.attach();
+            document.body.appendChild(audioEl);
+          }
+        });
+
+        room.on(RoomEvent.Connected, () => {
+          sendToRN('connected');
+        });
+
+        room.on(RoomEvent.Disconnected, () => {
+          sendToRN('disconnected');
+        });
+
+        room.on(RoomEvent.DataReceived, (payload, participant, kind, topic) => {
+          try {
+            const data = JSON.parse(new TextDecoder().decode(payload));
+            if (data.event_type === 'avatar.talking_start' || data.type === 'talking_start') {
+              sendToRN('speaking', { speaking: true });
+            } else if (data.event_type === 'avatar.talking_end' || data.type === 'talking_end') {
+              sendToRN('speaking', { speaking: false });
+            }
+          } catch (e) {
+            console.log('Data parse error:', e);
+          }
+        });
+
+        await room.connect(roomUrl, roomToken);
+      } catch (error) {
+        console.error('LiveKit init error:', error);
+        showError('Failed to connect: ' + error.message);
+      }
+    }
+
+    window.speakText = async function(text) {
+      if (!room || room.state !== 'connected') {
+        console.log('Room not connected, cannot speak');
+        return;
+      }
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(JSON.stringify({
+          event_type: 'avatar.speak_text',
+          text: text
+        }));
+        await room.localParticipant.publishData(data, { topic: 'agent-control' });
+        sendToRN('speaking', { speaking: true });
+      } catch (e) {
+        console.error('Speak error:', e);
+      }
+    };
+
+    window.stopAvatar = async function() {
+      if (room) {
+        try {
+          await room.disconnect();
+        } catch (e) {
+          console.log('Disconnect error:', e);
+        }
+      }
+    };
+
+    initLiveKit();
+  </script>
+</body>
+</html>
+`;
+
 export function CoachChatModal({
   visible,
   onClose,
@@ -145,10 +323,14 @@ export function CoachChatModal({
   context,
 }: CoachChatModalProps) {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { settings } = useSettings();
+  const { user, isAuthenticated } = useAuth();
+  const isDark = settings.themeMode === 'dark';
   const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
   const flatListRef = useRef<FlatList>(null);
+  const webViewRef = useRef<WebView>(null);
+
+  const userId = isAuthenticated && user?.id ? user.id : 'guest';
 
   const [currentMode, setCurrentMode] = useState<CoachMode>(initialMode);
   const [messages, setMessages] = useState<CoachMessage[]>([]);
@@ -156,6 +338,13 @@ export function CoachChatModal({
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
   const [showModeSwitcher, setShowModeSwitcher] = useState(false);
+
+  // Avatar state
+  const [avatarSession, setAvatarSession] = useState<StreamingSession | null>(null);
+  const [avatarToken, setAvatarToken] = useState<string>('');
+  const [avatarReady, setAvatarReady] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   // Update current mode when initialMode changes
   useEffect(() => {
@@ -172,6 +361,22 @@ export function CoachChatModal({
     transform: [{ scale: sendButtonScale.value }],
   }));
 
+  // Whether to show the avatar section
+  const showAvatar = settings.liveAvatar && avatarSession && !avatarError;
+
+  // Initialize avatar session when modal opens
+  useEffect(() => {
+    if (visible && settings.liveAvatar) {
+      initAvatarSession();
+    }
+
+    return () => {
+      if (visible) {
+        cleanupAvatar();
+      }
+    };
+  }, [visible]);
+
   // Load conversation history on mount
   useEffect(() => {
     if (visible && !hasLoadedHistory) {
@@ -183,7 +388,6 @@ export function CoachChatModal({
   useEffect(() => {
     if (visible && initialMessage && hasLoadedHistory) {
       setInputText(initialMessage);
-      // Auto-send initial message after a short delay
       setTimeout(() => {
         handleSendMessage(initialMessage);
         setInputText('');
@@ -195,8 +399,77 @@ export function CoachChatModal({
   useEffect(() => {
     if (!visible) {
       setHasLoadedHistory(false);
+      cleanupAvatar();
     }
   }, [visible]);
+
+  const initAvatarSession = async () => {
+    try {
+      console.log('[CoachChatModal] Initializing avatar session...');
+      const response = await avatarService.createChatSession(userId, currentMode);
+
+      if (response.ok && response.streamingAvailable && response.session && response.token) {
+        console.log('[CoachChatModal] Avatar session created:', response.session.sessionId);
+        setAvatarSession(response.session);
+        setAvatarToken(response.token);
+        setAvatarError(false);
+      } else {
+        console.log('[CoachChatModal] Avatar not available, text-only mode');
+        setAvatarSession(null);
+        setAvatarToken('');
+      }
+    } catch (err) {
+      console.error('[CoachChatModal] Avatar session error:', err);
+      setAvatarError(true);
+    }
+  };
+
+  const cleanupAvatar = () => {
+    if (webViewRef.current && avatarSession) {
+      webViewRef.current.injectJavaScript('window.stopAvatar && window.stopAvatar(); true;');
+    }
+    if (avatarToken) {
+      avatarService.stopChatSession(avatarToken).catch(console.error);
+    }
+    setAvatarSession(null);
+    setAvatarToken('');
+    setAvatarReady(false);
+    setIsSpeaking(false);
+    setAvatarError(false);
+  };
+
+  const handleWebViewMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      console.log('[CoachChatModal] WebView message:', data.type);
+
+      switch (data.type) {
+        case 'connected':
+          break;
+        case 'ready':
+          setAvatarReady(true);
+          break;
+        case 'speaking':
+          setIsSpeaking(data.speaking);
+          break;
+        case 'disconnected':
+          setAvatarReady(false);
+          break;
+        case 'error':
+          console.error('[CoachChatModal] WebView error:', data.message);
+          setAvatarError(true);
+          break;
+      }
+    } catch (e) {
+      console.error('[CoachChatModal] WebView message parse error:', e);
+    }
+  };
+
+  const speakText = (text: string) => {
+    if (!webViewRef.current || !avatarSession || !avatarReady) return;
+    const escapedText = text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, ' ');
+    webViewRef.current.injectJavaScript(`window.speakText && window.speakText("${escapedText}"); true;`);
+  };
 
   const loadHistory = async () => {
     try {
@@ -204,7 +477,6 @@ export function CoachChatModal({
       setMessages(history);
       setHasLoadedHistory(true);
 
-      // Scroll to bottom after loading
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: false });
       }, 100);
@@ -226,7 +498,6 @@ export function CoachChatModal({
     setShowModeSwitcher(false);
     setHasLoadedHistory(false);
 
-    // Load history for new mode
     try {
       const history = await aiService.getCoachHistory(newMode);
       setMessages(history);
@@ -264,7 +535,6 @@ export function CoachChatModal({
     setMessages(prev => [...prev, userMessage]);
     await aiService.saveCoachMessage(userMessage, currentMode);
 
-    // Scroll to bottom
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
@@ -274,8 +544,7 @@ export function CoachChatModal({
     try {
       const coachContext: CoachContext = {
         mode: currentMode,
-        conversationHistory: messages.slice(-10), // Last 10 messages for context
-        // Add user context for more personalized responses
+        conversationHistory: messages.slice(-10),
         userGoals: context?.userGoals,
         recentActivity: currentMode === 'meal' ? context?.recentMeals : context?.recentWorkouts,
       };
@@ -294,8 +563,12 @@ export function CoachChatModal({
         setMessages(prev => [...prev, assistantMessage]);
         await aiService.saveCoachMessage(assistantMessage, currentMode);
         mediumImpact();
+
+        // Have avatar speak the response
+        if (showAvatar && avatarReady) {
+          speakText(response.message);
+        }
       } else {
-        // Fallback response if API fails
         const errorMessage: CoachMessage = {
           id: `msg_${Date.now()}_error`,
           role: 'assistant',
@@ -306,7 +579,6 @@ export function CoachChatModal({
         setMessages(prev => [...prev, errorMessage]);
       }
 
-      // Scroll to bottom
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
@@ -315,13 +587,18 @@ export function CoachChatModal({
     } finally {
       setIsLoading(false);
     }
-  }, [inputText, isLoading, messages, currentMode, context]);
+  }, [inputText, isLoading, messages, currentMode, context, showAvatar, avatarReady]);
 
   const handleClearHistory = useCallback(async () => {
     await aiService.clearCoachHistory(currentMode);
     setMessages([]);
     mediumImpact();
   }, [currentMode]);
+
+  const handleClose = () => {
+    cleanupAvatar();
+    onClose();
+  };
 
   const renderMessage = ({ item }: { item: CoachMessage }) => {
     const isUser = item.role === 'user';
@@ -390,7 +667,7 @@ export function CoachChatModal({
       visible={visible}
       animationType="slide"
       presentationStyle="fullScreen"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View style={styles.container}>
         {/* Background */}
@@ -402,7 +679,7 @@ export function CoachChatModal({
           tint={isDark ? 'dark' : 'light'}
           style={[styles.header, { paddingTop: insets.top, borderBottomColor: glassColors.border }]}
         >
-          <TouchableOpacity onPress={onClose} style={styles.headerButton}>
+          <TouchableOpacity onPress={handleClose} style={styles.headerButton}>
             <Ionicons name="chevron-down" size={24} color={glassColors.text} />
           </TouchableOpacity>
           {/* Mode Switcher Button */}
@@ -448,6 +725,33 @@ export function CoachChatModal({
               );
             })}
           </BlurView>
+        )}
+
+        {/* Avatar Video Section */}
+        {showAvatar && (
+          <View style={styles.avatarSection}>
+            <View style={[styles.webViewContainer, { borderColor: glassColors.cardBorder }]}>
+              <WebView
+                ref={webViewRef}
+                source={{ html: getLiveAvatarHTML(avatarSession!, avatarToken) }}
+                style={styles.webView}
+                onMessage={handleWebViewMessage}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
+                mediaPlaybackRequiresUserAction={false}
+                allowsInlineMediaPlayback={true}
+                scrollEnabled={false}
+                originWhitelist={['*']}
+                mixedContentMode="always"
+              />
+            </View>
+            <View style={[styles.statusBadge, { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder }]}>
+              <View style={[styles.statusDot, { backgroundColor: glassColors.textSecondary }, isSpeaking && { backgroundColor: glassColors.accent }, avatarReady && !isSpeaking && { backgroundColor: '#4ECDC4' }]} />
+              <Text style={[styles.statusText, { color: glassColors.text }]}>
+                {!avatarReady ? 'Connecting...' : isSpeaking ? 'Speaking...' : 'Ready'}
+              </Text>
+            </View>
+          </View>
         )}
 
         {/* Messages */}
@@ -575,6 +879,44 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  // Avatar section styles
+  avatarSection: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  webViewContainer: {
+    width: SCREEN_WIDTH - 32,
+    height: 200,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#1a1a2e',
+    borderWidth: 1,
+  },
+  webView: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  // Message styles
   messagesList: {
     padding: 16,
     flexGrow: 1,
@@ -687,7 +1029,7 @@ const styles = StyleSheet.create({
   // Mode Switcher styles
   modeSwitcher: {
     position: 'absolute',
-    top: 100, // Adjust based on header height
+    top: 100,
     left: '50%',
     marginLeft: -100,
     width: 200,

@@ -107,6 +107,10 @@ export interface Exercise {
   primaryMuscle?: MuscleGroup;
   secondaryMuscles?: MuscleGroup[];
   movementPattern?: 'push' | 'pull' | 'squat' | 'hinge' | 'carry' | 'rotation';
+  // ExerciseDB integration for animated GIFs and form guidance
+  exerciseDbId?: string; // ExerciseDB API ID for fetching additional data
+  gifUrl?: string; // Animated GIF URL showing exercise form
+  exerciseDbInstructions?: string[]; // Step-by-step instructions from ExerciseDB
 }
 
 // Exercise within a workout
