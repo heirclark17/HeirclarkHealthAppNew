@@ -341,17 +341,15 @@ function FloatingActionButton({
   const shadowStyle = Platform.select({
     ios: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: isDark ? 0.4 : 0.18,
-      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
     },
     android: {
-      elevation: 10,
+      elevation: 0,
     },
     default: {
-      boxShadow: isDark
-        ? '0px 6px 16px rgba(0, 0, 0, 0.4)'
-        : '0px 6px 16px rgba(0, 0, 0, 0.18)',
+      boxShadow: 'none',
     },
   });
 
