@@ -2833,22 +2833,124 @@ async function createLiveAvatarSession() {
 
 app.post('/api/v1/avatar/coach/goals', authenticateToken, async (req, res) => {
   try {
-    const { goals, progress } = req.body;
+    const { goalData, userInputs } = req.body;
+
+    // Build a rich context string from all available user data
+    const userName = userInputs?.userName || 'there';
+    const primaryGoal = userInputs?.primaryGoal || 'improve_health';
+    const activityLevel = userInputs?.activityLevel || 'moderate';
+    const currentWeight = userInputs?.currentWeight;
+    const targetWeight = userInputs?.targetWeight;
+    const heightFt = userInputs?.heightFt;
+    const heightIn = userInputs?.heightIn;
+    const age = userInputs?.age;
+    const sex = userInputs?.sex;
+    const dietStyle = userInputs?.dietStyle || 'standard';
+    const workoutsPerWeek = userInputs?.workoutsPerWeek || 3;
+    const weightUnit = userInputs?.weightUnit || 'lbs';
+
+    const calories = goalData?.calories;
+    const protein = goalData?.protein;
+    const carbs = goalData?.carbs;
+    const fat = goalData?.fat;
+    const bmr = goalData?.bmr;
+    const tdee = goalData?.tdee;
+    const bmi = goalData?.bmi;
+    const dailyDelta = goalData?.dailyDelta;
+    const weeklyChange = goalData?.weeklyChange;
+    const totalWeeks = goalData?.totalWeeks;
+
+    const goalLabels = {
+      lose_weight: 'lose weight',
+      build_muscle: 'build muscle',
+      maintain: 'maintain their current weight',
+      improve_health: 'improve overall health',
+    };
+    const goalLabel = goalLabels[primaryGoal] || primaryGoal;
+
+    const activityLabels = {
+      sedentary: 'sedentary (little to no exercise)',
+      lightly_active: 'lightly active (1-3 days/week)',
+      moderate: 'moderately active (3-5 days/week)',
+      very_active: 'very active (6-7 days/week)',
+      extra_active: 'extra active (athlete/physical job)',
+    };
+    const activityLabel = activityLabels[activityLevel] || activityLevel;
+
+    const dietLabels = {
+      standard: 'standard balanced',
+      keto: 'keto',
+      high_protein: 'high protein',
+      vegetarian: 'vegetarian',
+      vegan: 'vegan',
+      mediterranean: 'Mediterranean',
+    };
+    const dietLabel = dietLabels[dietStyle] || dietStyle;
+
+    const weightDiff = currentWeight && targetWeight ? Math.abs(currentWeight - targetWeight) : null;
+    const isLosing = primaryGoal === 'lose_weight';
+    const isGaining = primaryGoal === 'build_muscle';
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
-          content: `You are a friendly, encouraging fitness coach giving a brief video message about the user's goals. Keep it to 30-45 seconds of speaking time (about 80-100 words). Be specific to their goals and progress.`
+          content: `You are a knowledgeable, honest, and motivating personal health coach delivering a personalized video coaching session. You are speaking directly to the user through a live video avatar — talk naturally and conversationally as if you're face to face.
+
+Your coaching script should be 90-120 seconds of speaking time (roughly 225-300 words). Be detailed, specific, and reference their EXACT numbers. Do NOT be vague or generic. Cover all of the following in a natural, flowing conversation:
+
+1. GREETING: Address them by name. Acknowledge the goal they just set and that their plan is ready.
+
+2. BODY STATS BREAKDOWN: Explain their BMR, TDEE, and BMI in plain language — what these numbers mean for them specifically. For example: "Your body burns about X calories just existing — that's your BMR. With your activity level, your total daily burn is about Y calories."
+
+3. DAILY TARGETS: Walk through their specific calorie target and macro split (protein, carbs, fat in grams). Explain WHY these numbers matter for their specific goal. For example, if losing weight: "We've set you at X calories — that's a Y calorie deficit from your TDEE, which means you'll lose about Z pounds per week."
+
+4. THE PLAN TIMELINE: If they have a weight change goal, give them the honest timeline. "You want to go from A to B — that's C pounds. At your rate, you're looking at roughly D weeks. That's realistic and healthy."
+
+5. DIET & TRAINING: Mention their diet style and workout frequency. Give one or two practical tips specific to their approach.
+
+6. HONEST MOTIVATION: Be real with them — not fake-positive. Acknowledge the work ahead but express genuine confidence based on the fact that they've already taken the first step by setting up their plan.
+
+IMPORTANT RULES:
+- Use their actual numbers — never round excessively or say "around" when you have exact figures
+- Speak in second person ("you", "your")
+- No bullet points or lists — this is spoken coaching, make it flow naturally
+- No emojis or markdown formatting
+- Don't say "as your coach" or "as an AI" — just speak naturally
+- Keep the tone warm but direct, like a trusted coach who respects their intelligence`
         },
         {
           role: 'user',
-          content: `User goals: ${JSON.stringify(goals)}. Current progress: ${JSON.stringify(progress)}. Generate an encouraging coaching script.`
+          content: `Generate a detailed coaching script for this user:
+
+NAME: ${userName}
+AGE: ${age || 'not provided'}
+SEX: ${sex || 'not provided'}
+HEIGHT: ${heightFt ? `${heightFt}'${heightIn || 0}"` : 'not provided'}
+CURRENT WEIGHT: ${currentWeight ? `${currentWeight} ${weightUnit}` : 'not provided'}
+TARGET WEIGHT: ${targetWeight ? `${targetWeight} ${weightUnit}` : 'not provided'}
+${weightDiff ? `WEIGHT TO ${isLosing ? 'LOSE' : isGaining ? 'GAIN' : 'CHANGE'}: ${weightDiff} ${weightUnit}` : ''}
+PRIMARY GOAL: ${goalLabel}
+ACTIVITY LEVEL: ${activityLabel}
+DIET STYLE: ${dietLabel}
+WORKOUTS PER WEEK: ${workoutsPerWeek}
+
+CALCULATED METRICS:
+- BMR (Basal Metabolic Rate): ${bmr || 'N/A'} calories/day
+- TDEE (Total Daily Energy Expenditure): ${tdee || 'N/A'} calories/day
+- BMI: ${bmi ? bmi.toFixed(1) : 'N/A'}
+- Daily Calorie Target: ${calories || 'N/A'} calories
+- Daily Deficit/Surplus: ${dailyDelta ? `${dailyDelta > 0 ? '+' : ''}${dailyDelta} calories` : 'N/A'}
+- Protein Target: ${protein || 'N/A'}g
+- Carbs Target: ${carbs || 'N/A'}g
+- Fat Target: ${fat || 'N/A'}g
+${weeklyChange ? `- Expected Weekly Change: ${weeklyChange > 0 ? '+' : ''}${weeklyChange} ${weightUnit}/week` : ''}
+${totalWeeks ? `- Estimated Timeline: ${totalWeeks} weeks to reach goal` : ''}`
         }
       ],
       temperature: 0.8,
-      max_tokens: 300,
+      max_tokens: 800,
     });
 
     const script = completion.choices[0].message.content;
@@ -2879,42 +2981,121 @@ app.post('/api/v1/avatar/coach/goals', authenticateToken, async (req, res) => {
 
 app.post('/api/v1/avatar/coach/meal-plan', authenticateToken, async (req, res) => {
   try {
-    const { weeklyPlan, selectedDayIndex, userGoals, preferences } = req.body;
+    const { weeklyPlan, selectedDayIndex, userGoals, preferences, userName } = req.body;
 
     if (!weeklyPlan || !Array.isArray(weeklyPlan)) {
       return res.status(400).json({ ok: false, error: 'Weekly meal plan data required' });
     }
 
+    const name = userName || 'there';
     const selectedDay = weeklyPlan[selectedDayIndex] || weeklyPlan[0];
     const todaysMeals = selectedDay?.meals || [];
+    const dayName = selectedDay?.dayName || `Day ${selectedDayIndex + 1}`;
+    const dailyTotals = selectedDay?.dailyTotals || {};
 
-    const weekStats = weeklyPlan.reduce((acc, day) => {
-      const dayTotals = day.dailyTotals || { calories: 0, protein: 0 };
-      return {
-        totalCalories: acc.totalCalories + dayTotals.calories,
-        totalProtein: acc.totalProtein + dayTotals.protein,
-      };
-    }, { totalCalories: 0, totalProtein: 0 });
+    // Detailed meal breakdown with ingredients, macros, and prep info
+    const mealDetails = todaysMeals.map(meal => {
+      const ingredients = meal.ingredients?.map(i => {
+        let detail = i.name;
+        if (i.amount) detail += ` (${i.amount}${i.unit ? ' ' + i.unit : ''})`;
+        return detail;
+      }).join(', ') || 'various ingredients';
 
-    const mealDescriptions = todaysMeals.map(meal => {
-      const ingredients = meal.ingredients?.map(i => i.name).join(', ') || 'various ingredients';
-      return `${meal.mealType}: ${meal.name} (${meal.calories} cal, ${meal.protein}g protein)`;
+      return `  ${meal.mealType?.toUpperCase() || 'MEAL'}: ${meal.name}
+    Calories: ${meal.calories || 0} | Protein: ${meal.protein || 0}g | Carbs: ${meal.carbs || 0}g | Fat: ${meal.fat || 0}g
+    Ingredients: ${ingredients}${meal.prepTime ? `\n    Prep time: ${meal.prepTime} min` : ''}`;
     }).join('\n');
+
+    // Weekly overview stats
+    const weekStats = weeklyPlan.reduce((acc, day, idx) => {
+      const dt = day.dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+      return {
+        totalCalories: acc.totalCalories + (dt.calories || 0),
+        totalProtein: acc.totalProtein + (dt.protein || 0),
+        totalCarbs: acc.totalCarbs + (dt.carbs || 0),
+        totalFat: acc.totalFat + (dt.fat || 0),
+        daysPlanned: acc.daysPlanned + 1,
+      };
+    }, { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0, daysPlanned: 0 });
+
+    const avgCalories = weekStats.daysPlanned > 0 ? Math.round(weekStats.totalCalories / weekStats.daysPlanned) : 0;
+    const avgProtein = weekStats.daysPlanned > 0 ? Math.round(weekStats.totalProtein / weekStats.daysPlanned) : 0;
+
+    // How today compares to goals
+    const calorieDiff = dailyTotals.calories && userGoals?.dailyCalories
+      ? dailyTotals.calories - userGoals.dailyCalories : null;
+    const proteinDiff = dailyTotals.protein && userGoals?.dailyProtein
+      ? dailyTotals.protein - userGoals.dailyProtein : null;
+
+    const dietStyle = preferences?.dietStyle || 'standard';
+    const allergies = preferences?.allergies?.length > 0 ? preferences.allergies.join(', ') : null;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
-          content: `You are a friendly nutrition coach. Create a brief, conversational coaching script (45-60 seconds speaking time). Mention specific meals by name. Be warm and encouraging.`
+          content: `You are a knowledgeable, honest nutrition coach delivering a personalized video meal plan review. You are speaking directly to the user through a live video avatar — talk naturally as if you're sitting across from them reviewing their meal plan together.
+
+Your coaching script should be 90-120 seconds of speaking time (roughly 225-300 words). Be specific, reference their EXACT meals by name, and give real nutritional insight. Cover all of the following in a natural, flowing conversation:
+
+1. GREETING: Address them by name and reference what day's meal plan you're reviewing.
+
+2. MEAL-BY-MEAL WALKTHROUGH: Go through each meal of the day by name. Comment on what's good about each choice — highlight protein sources, nutrient density, or smart combinations. Don't just list them, give insight. For example: "That grilled chicken with quinoa at lunch is a solid move — you're getting about 45 grams of protein right there, plus the quinoa gives you complete amino acids and slow-burning carbs."
+
+3. DAILY MACRO ANALYSIS: Tell them exactly how today's plan stacks up against their goals. Be specific: "Today you're hitting X calories versus your Y calorie target — that's Z over/under. Your protein is at Xg out of your Yg goal." If they're over or under on something, explain what that means practically and what small adjustment they could make.
+
+4. WEEKLY CONTEXT: Put today in perspective with the rest of their week. "Across your full week, you're averaging about X calories per day, which lines up well with your target" or "you're running a bit high on average — here's where to tighten up."
+
+5. PRACTICAL TIPS: Give 1-2 specific, actionable nutrition tips based on what you see in their actual meals. Maybe a swap suggestion, a timing tip, or a way to hit a macro target they're short on.
+
+6. ENCOURAGEMENT: Close with honest motivation tied to their specific plan.
+
+IMPORTANT RULES:
+- Reference specific meal names and actual numbers — never be vague
+- Speak in second person ("you", "your")
+- No bullet points or lists — this is spoken coaching, make it flow naturally
+- No emojis or markdown formatting
+- Don't say "as your coach" or "as an AI" — just speak naturally
+- Keep the tone warm but knowledgeable, like a nutrition expert who genuinely cares`
         },
         {
           role: 'user',
-          content: `Today's meals (${selectedDay?.dayName}):\n${mealDescriptions}\n\nDaily totals: ${selectedDay?.dailyTotals?.calories || 0} cal, ${selectedDay?.dailyTotals?.protein || 0}g protein\nUser goals: ${userGoals?.dailyCalories || 2000} cal, ${userGoals?.dailyProtein || 150}g protein`
+          content: `Generate a detailed meal plan coaching script for this user:
+
+USER NAME: ${name}
+DIET STYLE: ${dietStyle}${allergies ? `\nALLERGIES/RESTRICTIONS: ${allergies}` : ''}
+
+DAY BEING REVIEWED: ${dayName}
+NUMBER OF MEALS: ${todaysMeals.length}
+
+TODAY'S MEALS:
+${mealDetails || '  No meals planned for this day'}
+
+TODAY'S TOTALS:
+- Calories: ${dailyTotals.calories || 0}
+- Protein: ${dailyTotals.protein || 0}g
+- Carbs: ${dailyTotals.carbs || 0}g
+- Fat: ${dailyTotals.fat || 0}g
+
+USER'S DAILY GOALS:
+- Calorie Target: ${userGoals?.dailyCalories || 'not set'}
+- Protein Target: ${userGoals?.dailyProtein || 'not set'}g
+- Carbs Target: ${userGoals?.dailyCarbs || 'not set'}g
+- Fat Target: ${userGoals?.dailyFat || 'not set'}g
+
+${calorieDiff !== null ? `CALORIE DIFFERENCE: ${calorieDiff > 0 ? '+' : ''}${calorieDiff} calories (${calorieDiff > 0 ? 'over' : 'under'} target)` : ''}
+${proteinDiff !== null ? `PROTEIN DIFFERENCE: ${proteinDiff > 0 ? '+' : ''}${proteinDiff}g (${proteinDiff > 0 ? 'over' : 'under'} target)` : ''}
+
+WEEKLY OVERVIEW (${weekStats.daysPlanned} days planned):
+- Average Daily Calories: ${avgCalories}
+- Average Daily Protein: ${avgProtein}g
+- Total Week Calories: ${weekStats.totalCalories}
+- Total Week Protein: ${weekStats.totalProtein}g`
         }
       ],
       temperature: 0.8,
-      max_tokens: 400,
+      max_tokens: 800,
     });
 
     const script = completion.choices[0].message.content;
