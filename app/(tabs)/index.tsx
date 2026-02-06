@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Alert, Modal, TextInput, Animated, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Dumbbell, BarChart3, Watch, X, Clock, Trash2 } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReanimatedModule, { useSharedValue, useAnimatedStyle, withSpring, ReduceMotion } from 'react-native-reanimated';
@@ -1166,8 +1167,8 @@ export default function DashboardScreen() {
                 <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
                   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                     {/* Icon */}
-                    <View style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}>
-                      <Ionicons name="alarm-outline" size={24} color={colors.text} />
+                    <View style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                      <Clock size={24} color={colors.text} />
                     </View>
 
                     {/* Label */}
@@ -1218,7 +1219,7 @@ export default function DashboardScreen() {
             >
               <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
                 <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                  <Ionicons name="barbell-outline" size={24} color={colors.primary} />
+                  <Dumbbell size={24} color={colors.primary} />
                 </View>
                 <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>WORKOUTS</Text>
                 <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>{completedWorkouts}/{workoutsPerWeekGoal}</Text>
@@ -1239,7 +1240,7 @@ export default function DashboardScreen() {
             >
               <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
                 <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                  <Ionicons name="stats-chart" size={24} color={colors.primary} />
+                  <BarChart3 size={24} color={colors.primary} />
                 </View>
                 <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>WEEKLY</Text>
                 <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>View Stats</Text>
@@ -1260,7 +1261,7 @@ export default function DashboardScreen() {
             >
               <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
                 <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                  <Ionicons name="watch" size={24} color={colors.primary} />
+                  <Watch size={24} color={colors.primary} />
                 </View>
                 <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>SYNC</Text>
                 <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>{lastSynced ? 'Connected' : 'Not Synced'}</Text>
