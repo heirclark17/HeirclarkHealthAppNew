@@ -1217,7 +1217,7 @@ export default function DashboardScreen() {
               }}
               onPress={() => workoutSheetRef.current?.present()}
             >
-              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
+              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center', minHeight: 150 }} interactive>
                 <View style={{ alignItems: 'center', marginBottom: 10 }}>
                   <Dumbbell size={24} color={colors.primary} />
                 </View>
@@ -1238,7 +1238,7 @@ export default function DashboardScreen() {
               }}
               onPress={() => weeklyStatsSheetRef.current?.present()}
             >
-              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
+              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center', minHeight: 150 }} interactive>
                 <View style={{ alignItems: 'center', marginBottom: 10 }}>
                   <BarChart3 size={24} color={colors.primary} />
                 </View>
@@ -1259,7 +1259,7 @@ export default function DashboardScreen() {
               }}
               onPress={() => wearablesSyncSheetRef.current?.present()}
             >
-              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }} interactive>
+              <GlassCard style={{ paddingVertical: 16, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center', minHeight: 150 }} interactive>
                 <View style={{ alignItems: 'center', marginBottom: 10 }}>
                   <Watch size={24} color={colors.primary} />
                 </View>
