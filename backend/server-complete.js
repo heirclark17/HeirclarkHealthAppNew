@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 require('dotenv').config();
-const heygenService = require('./services/heygenService');
+const liveAvatarService = require('./services/liveAvatarService');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -2804,37 +2804,29 @@ app.get('/api/v1/fasting/current', authenticateToken, async (req, res) => {
 app.post('/api/v1/avatar/config', authenticateToken, async (req, res) => {
   res.json({
     ok: true,
-    streamingAvailable: heygenService.isConfigured(),
-    avatarId: process.env.HEYGEN_AVATAR_ID || 'default',
+    streamingAvailable: liveAvatarService.isConfigured(),
+    avatarId: process.env.LIVEAVATAR_AVATAR_ID || 'default',
   });
 });
 
-// Helper: create and start a HeyGen streaming session
-async function createHeyGenSession() {
-  console.log('[HeyGen] createHeyGenSession called. Configured:', heygenService.isConfigured(),
-    'API_KEY set:', !!process.env.HEYGEN_API_KEY,
-    'AVATAR_ID set:', !!process.env.HEYGEN_AVATAR_ID);
+// Helper: create and start a LiveAvatar streaming session
+async function createLiveAvatarSession() {
+  console.log('[LiveAvatar] createLiveAvatarSession called. Configured:', liveAvatarService.isConfigured(),
+    'API_KEY set:', !!process.env.LIVEAVATAR_API_KEY,
+    'AVATAR_ID set:', !!process.env.LIVEAVATAR_AVATAR_ID);
 
-  if (!heygenService.isConfigured()) {
-    console.log('[HeyGen] Not configured - missing HEYGEN_API_KEY or HEYGEN_AVATAR_ID');
+  if (!liveAvatarService.isConfigured()) {
+    console.log('[LiveAvatar] Not configured - missing LIVEAVATAR_API_KEY or LIVEAVATAR_AVATAR_ID');
     return null;
   }
   try {
-    console.log('[HeyGen] Creating streaming session...');
-    const sessionData = await heygenService.createStreamingSession();
-    console.log('[HeyGen] Session created:', sessionData.session_id, 'Starting...');
-    await heygenService.startSession(sessionData.session_id);
-    console.log('[HeyGen] Session started successfully');
-    return {
-      sessionId: sessionData.session_id,
-      accessToken: sessionData.access_token,
-      url: sessionData.url,
-      sessionDurationLimit: sessionData.session_duration_limit,
-      isPaid: sessionData.is_paid,
-    };
+    console.log('[LiveAvatar] Creating and starting session...');
+    const session = await liveAvatarService.createAndStartSession();
+    console.log('[LiveAvatar] Session ready:', session.sessionId);
+    return session;
   } catch (err) {
-    console.error('[HeyGen] Session creation/start failed:', err.message);
-    console.error('[HeyGen] Full error:', err.stack || err);
+    console.error('[LiveAvatar] Session creation/start failed:', err.message);
+    console.error('[LiveAvatar] Full error:', err.stack || err);
     return null;
   }
 }
@@ -2860,17 +2852,17 @@ app.post('/api/v1/avatar/coach/goals', authenticateToken, async (req, res) => {
     });
 
     const script = completion.choices[0].message.content;
-    const heygenSession = await createHeyGenSession();
+    const avatarSession = await createLiveAvatarSession();
 
-    if (heygenSession) {
+    if (avatarSession) {
       res.json({
         ok: true,
         script,
         streamingAvailable: true,
-        token: heygenSession.sessionId,
-        session: heygenSession,
-        defaultAvatarId: process.env.HEYGEN_AVATAR_ID,
-        defaultVoiceId: process.env.HEYGEN_VOICE_ID || null,
+        token: avatarSession.sessionToken,
+        session: avatarSession,
+        defaultAvatarId: process.env.LIVEAVATAR_AVATAR_ID,
+        defaultVoiceId: process.env.LIVEAVATAR_VOICE_ID || null,
       });
     } else {
       res.json({
@@ -2926,17 +2918,17 @@ app.post('/api/v1/avatar/coach/meal-plan', authenticateToken, async (req, res) =
     });
 
     const script = completion.choices[0].message.content;
-    const heygenSession = await createHeyGenSession();
+    const avatarSession = await createLiveAvatarSession();
 
-    if (heygenSession) {
+    if (avatarSession) {
       res.json({
         ok: true,
         script,
         streamingAvailable: true,
-        token: heygenSession.sessionId,
-        session: heygenSession,
-        defaultAvatarId: process.env.HEYGEN_AVATAR_ID,
-        defaultVoiceId: process.env.HEYGEN_VOICE_ID || null,
+        token: avatarSession.sessionToken,
+        session: avatarSession,
+        defaultAvatarId: process.env.LIVEAVATAR_AVATAR_ID,
+        defaultVoiceId: process.env.LIVEAVATAR_VOICE_ID || null,
         metadata: {
           dayName: selectedDay?.dayName,
           mealCount: todaysMeals.length,
@@ -2961,18 +2953,18 @@ app.post('/api/v1/avatar/coach/meal-plan', authenticateToken, async (req, res) =
   }
 });
 
-// Chat session endpoint - creates a HeyGen avatar session for the AI Coach chat
+// Chat session endpoint - creates a LiveAvatar session for the AI Coach chat
 app.post('/api/v1/avatar/coach/chat-session', authenticateToken, async (req, res) => {
   try {
     const greeting = "Hey! I'm your AI coach. Ask me anything about nutrition, workouts, or your health goals.";
-    const heygenSession = await createHeyGenSession();
+    const avatarSession = await createLiveAvatarSession();
 
-    if (heygenSession) {
+    if (avatarSession) {
       res.json({
         ok: true,
         streamingAvailable: true,
-        token: heygenSession.sessionId,
-        session: heygenSession,
+        token: avatarSession.sessionToken,
+        session: avatarSession,
         greeting,
       });
     } else {
@@ -2992,12 +2984,12 @@ app.post('/api/v1/avatar/coach/chat-session', authenticateToken, async (req, res
   }
 });
 
-// Stop a HeyGen streaming session
+// Stop a LiveAvatar streaming session
 app.post('/api/v1/avatar/coach/stop-session', authenticateToken, async (req, res) => {
   try {
     const { sessionId } = req.body;
-    if (sessionId && heygenService.isConfigured()) {
-      await heygenService.stopSession(sessionId);
+    if (sessionId && liveAvatarService.isConfigured()) {
+      await liveAvatarService.stopSession(sessionId);
     }
     res.json({ ok: true });
   } catch (error) {

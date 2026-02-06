@@ -277,7 +277,7 @@ class AvatarService {
   }
 
   /**
-   * Stop a HeyGen streaming session via backend
+   * Stop a LiveAvatar streaming session via backend
    */
   async stopChatSession(sessionId: string): Promise<{ ok: boolean; error?: string }> {
     try {
