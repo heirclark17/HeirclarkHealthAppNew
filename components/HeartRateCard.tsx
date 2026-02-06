@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   value: {
-    fontSize: 32,
+    fontSize: 24,
     fontFamily: Fonts.light,
     textAlign: 'center',
     marginBottom: 4,
