@@ -154,7 +154,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="timer" size={24} color={colors.text} />
+              <Ionicons name="time" size={24} color={colors.text} />
             </View>
 
             {/* Label */}
