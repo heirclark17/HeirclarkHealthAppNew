@@ -185,15 +185,7 @@ export default function WearablesScreen() {
     return (
       <GlassCard
         key={provider.id}
-        style={[
-          styles.providerCard,
-          {
-            borderColor: provider.connected
-              ? brandColor
-              : (isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)'),
-            borderWidth: provider.connected ? 1.5 : 1,
-          }
-        ]}
+        style={styles.providerCard}
         interactive
       >
         <View style={styles.providerContent}>
@@ -315,12 +307,7 @@ export default function WearablesScreen() {
         </View>
 
         {/* Connection Status */}
-        <GlassCard
-          style={[
-            styles.statusCard,
-            { borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)' }
-          ]}
-        >
+        <GlassCard style={styles.statusCard}>
           <View style={styles.statusContent}>
             <View style={[
               styles.statusIcon,
@@ -359,12 +346,7 @@ export default function WearablesScreen() {
         </View>
 
         {/* Info Card */}
-        <GlassCard
-          style={[
-            styles.infoCard,
-            { borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)' }
-          ]}
-        >
+        <GlassCard style={styles.infoCard}>
           <Ionicons name="information-circle-outline" size={20} color={colors.textMuted} />
           <Text style={[styles.infoText, { color: colors.textMuted }]}>
             Connected devices sync data automatically. Manual sync is available for immediate updates.
@@ -411,7 +393,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 20,
     borderRadius: 16,
-    borderWidth: 1,
     padding: 16,
   },
   statusContent: {
@@ -528,7 +509,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 20,
     borderRadius: 12,
-    borderWidth: 1,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'flex-start',
