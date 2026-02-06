@@ -193,7 +193,7 @@ export function WaterTrackingCard({ date }: WaterTrackingCardProps) {
 
       <View style={styles.content}>
         <View style={styles.header}>
-          <View style={[styles.iconContainer, { backgroundColor: glassColors.waterBackground }]}>
+          <View style={styles.iconContainer}>
             <Ionicons name="water" size={20} color={glassColors.water} />
           </View>
           <Text style={[styles.title, { color: glassColors.text }]}>Water</Text>

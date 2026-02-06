@@ -153,7 +153,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
         <GlassCard style={styles.card} interactive>
           <View style={styles.innerContainer}>
             {/* Icon */}
-            <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
+            <View style={styles.iconContainer}>
               <Clock size={24} color={colors.text} />
             </View>
 
