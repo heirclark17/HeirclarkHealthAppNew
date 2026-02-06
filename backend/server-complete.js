@@ -817,23 +817,31 @@ app.get('/api/v1/workouts/stats', authenticateToken, async (req, res) => {
 // POST /api/v1/workouts/plan - Save workout plan to backend
 app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
   try {
-    const { planData, programId, programName } = req.body;
+    const { planData, programId, programName, weekly_schedule } = req.body;
 
     console.log('[Workout] Saving workout plan for user:', req.userId);
 
-    // Upsert the workout plan - include plan_name to satisfy table constraints
+    // Upsert the workout plan - include all required columns including weekly_schedule
     const result = await pool.query(
-      `INSERT INTO workout_plans (user_id, plan_name, plan_data, program_id, program_name, updated_at)
-       VALUES ($1, $2, $3, $4, $5, NOW())
+      `INSERT INTO workout_plans (user_id, plan_name, plan_data, program_id, program_name, weekly_schedule, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())
        ON CONFLICT (user_id)
        DO UPDATE SET
          plan_name = EXCLUDED.plan_name,
          plan_data = EXCLUDED.plan_data,
          program_id = EXCLUDED.program_id,
          program_name = EXCLUDED.program_name,
+         weekly_schedule = EXCLUDED.weekly_schedule,
          updated_at = NOW()
        RETURNING id, created_at, updated_at`,
-      [req.userId, programName || 'Custom Plan', JSON.stringify(planData), programId || null, programName || null]
+      [
+        req.userId,
+        programName || 'Custom Plan',
+        JSON.stringify(planData),
+        programId || null,
+        programName || null,
+        JSON.stringify(weekly_schedule || [])
+      ]
     );
 
     console.log('[Workout] ✅ Plan saved successfully');
@@ -855,7 +863,7 @@ app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
 app.get('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, plan_data, program_id, program_name, created_at, updated_at
+      `SELECT id, plan_data, program_id, program_name, weekly_schedule, created_at, updated_at
        FROM workout_plans
        WHERE user_id = $1`,
       [req.userId]
@@ -873,6 +881,7 @@ app.get('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
         planData: row.plan_data,
         programId: row.program_id,
         programName: row.program_name,
+        weeklySchedule: row.weekly_schedule,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
       }
