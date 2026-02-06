@@ -2136,7 +2136,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   calorieSubCardValue: {
-    fontSize: 20,
+    fontSize: 24,
     color: Colors.text,
     fontWeight: '100',
     fontFamily: Fonts.regular,

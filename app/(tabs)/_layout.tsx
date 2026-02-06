@@ -597,31 +597,29 @@ function LiquidGlassTabBar({
     borderColor: colors.border,
   };
 
-  // iOS 26 layered shadow system
+  // iOS 26 layered shadow system - disabled
   const shadowStyle = Platform.select({
     ios: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: isDark ? 0.55 : 0.12,
-      shadowRadius: 32,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
     },
     android: {
-      elevation: 14,
+      elevation: 0,
     },
     default: {
-      boxShadow: isDark
-        ? '0px 12px 32px rgba(0, 0, 0, 0.55), 0px 4px 8px rgba(0, 0, 0, 0.25)'
-        : '0px 12px 32px rgba(0, 0, 0, 0.12), 0px 4px 8px rgba(0, 0, 0, 0.06)',
+      boxShadow: 'none',
     },
   });
 
-  // Outer glow for depth (iOS 26 characteristic)
+  // Outer glow for depth (iOS 26 characteristic) - disabled
   const outerGlowStyle = Platform.select({
     ios: {
-      shadowColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+      shadowColor: 'transparent',
       shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 1,
-      shadowRadius: 2,
+      shadowOpacity: 0,
+      shadowRadius: 0,
     },
     default: {},
   });
