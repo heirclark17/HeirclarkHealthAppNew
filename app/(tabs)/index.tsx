@@ -20,6 +20,9 @@ import { WaterTrackingCard } from '../../components/WaterTrackingCard';
 import { TodaysWorkoutCard } from '../../components/TodaysWorkoutCard';
 import { FastingTimerCard } from '../../components/FastingTimerCard';
 import { HeartRateCard } from '../../components/HeartRateCard';
+import { StepsCard } from '../../components/StepsCard';
+import { ActiveEnergyCard } from '../../components/ActiveEnergyCard';
+import { RestingEnergyCard } from '../../components/RestingEnergyCard';
 import { DashboardBottomSheet, DashboardBottomSheetRef, BottomSheetModalProvider } from '../../components/DashboardBottomSheet';
 import { WorkoutDetailContent } from '../../components/WorkoutDetailContent';
 import { WeeklyStatsContent } from '../../components/WeeklyStatsContent';
@@ -1082,21 +1085,23 @@ export default function DashboardScreen() {
       case 'healthMetrics':
         return (
           <View key={cardId} style={{ flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 }}>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowStepsInfoModal(true)}>
-              <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
-                <MacroGauge label="Steps" current={steps} target={stepsGoal} color={Colors.gaugeFill} unit="" displayType="bar" usePastelBar />
-              </GlassCard>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowActiveEnergyInfoModal(true)}>
-              <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
-                <MacroGauge label="Active Energy" current={activeEnergy} target={activeEnergyGoal} color={Colors.activeEnergy} unit="kcal" displayType="bar" usePastelBar />
-              </GlassCard>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowRestingEnergyInfoModal(true)}>
-              <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
-                <MacroGauge label="Resting Energy" current={restingEnergy} target={restingEnergyGoal} color={Colors.restingEnergy} unit="kcal" displayType="bar" usePastelBar />
-              </GlassCard>
-            </TouchableOpacity>
+            <StepsCard
+              steps={steps}
+              goal={stepsGoal}
+              weeklySteps={weeklySteps}
+              weeklyGoal={stepsGoal * 7}
+            />
+            <ActiveEnergyCard
+              activeEnergy={activeEnergy}
+              goal={activeEnergyGoal}
+              weeklyActiveEnergy={weeklyCalories} // Using weeklyCalories as proxy for now
+              weeklyGoal={activeEnergyGoal * 7}
+            />
+            <RestingEnergyCard
+              restingEnergy={restingEnergy}
+              goal={restingEnergyGoal}
+              weeklyRestingEnergy={restingEnergyGoal * 7} // Calculated estimate
+            />
           </View>
         );
 
