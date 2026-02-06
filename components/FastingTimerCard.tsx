@@ -310,6 +310,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   label: {
     fontSize: 9,
