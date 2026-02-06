@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Alert, Modal, TextInput, Animated, Platform, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { UtensilsCrossed, Flame, Scale } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReanimatedModule, { useSharedValue, useAnimatedStyle, withSpring, ReduceMotion } from 'react-native-reanimated';
@@ -1037,25 +1036,16 @@ export default function DashboardScreen() {
               <CalorieGaugeAnimated value={caloriesIn - caloriesOut} maxValue={calorieGoal} />
               <View style={[styles.calorieCardsRow, { gap: 8 }]}>
                 <GlassCard style={styles.calorieSubCard} interactive>
-                  <View style={[styles.calorieSubCardIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-                    <UtensilsCrossed size={16} color={colors.text} />
-                  </View>
                   <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>CAL IN</Text>
                   <Text style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesIn}</Text>
                   <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</Text>
                 </GlassCard>
                 <GlassCard style={styles.calorieSubCard} interactive>
-                  <View style={[styles.calorieSubCardIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-                    <Flame size={16} color={colors.text} />
-                  </View>
                   <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>CAL OUT</Text>
                   <Text style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesOut}</Text>
                   <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</Text>
                 </GlassCard>
                 <GlassCard style={styles.calorieSubCard} interactive>
-                  <View style={[styles.calorieSubCardIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-                    <Scale size={16} color={colors.text} />
-                  </View>
                   <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>{fatChangeLabel}</Text>
                   <Text style={[styles.calorieSubCardValue, { color: fatChangeColor }]}>{displayFatValue}</Text>
                   <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>lbs/day</Text>
@@ -2137,14 +2127,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     minHeight: 120,
   },
-  calorieSubCardIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
   calorieSubCardTitle: {
     fontSize: 9,
     color: Colors.textMuted,
@@ -2154,13 +2136,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   calorieSubCardValue: {
-    fontSize: 28,
+    fontSize: 20,
     color: Colors.text,
     fontWeight: '100',
     fontFamily: Fonts.regular,
     marginBottom: 6,
     textAlign: 'center',
-    letterSpacing: 2,
   },
   calorieSubCardUnit: {
     fontSize: 12,
