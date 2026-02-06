@@ -57,7 +57,7 @@ export function FatCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="water" size={24} color={colors.text} />
+              <Ionicons name="leaf" size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -97,7 +97,7 @@ export function FatCard({
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${Colors.fat}20` }]}>
-                  <Ionicons name="water" size={32} color={Colors.fat} />
+                  <Ionicons name="leaf" size={32} color={Colors.fat} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Fat</Text>
                 <Text style={[styles.modalValue, { color: Colors.fat }]}>

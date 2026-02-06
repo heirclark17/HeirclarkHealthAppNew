@@ -57,7 +57,7 @@ export function ProteinCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="nutrition" size={24} color={colors.text} />
+              <Ionicons name="restaurant" size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -97,7 +97,7 @@ export function ProteinCard({
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${Colors.protein}20` }]}>
-                  <Ionicons name="nutrition" size={32} color={Colors.protein} />
+                  <Ionicons name="restaurant" size={32} color={Colors.protein} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Protein</Text>
                 <Text style={[styles.modalValue, { color: Colors.protein }]}>
