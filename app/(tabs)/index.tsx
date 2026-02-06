@@ -1024,7 +1024,7 @@ export default function DashboardScreen() {
 
         // Handle edge cases: if no TDEE data yet, show placeholder
         const hasTDEE = caloriesOut > 0;
-        const displayFatValue = hasTDEE ? `~${fatChangeValue}` : '--';
+        const displayFatValue = hasTDEE ? `${fatChangeValue}` : '--';
 
         // Color coding: green for loss, red/orange for gain
         const fatChangeColor = isDeficit ? colors.text : Colors.overTarget;
