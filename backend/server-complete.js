@@ -2829,9 +2829,12 @@ async function createHeyGenSession() {
       sessionId: sessionData.session_id,
       accessToken: sessionData.access_token,
       url: sessionData.url,
+      sessionDurationLimit: sessionData.session_duration_limit,
+      isPaid: sessionData.is_paid,
     };
   } catch (err) {
-    console.error('[HeyGen] Session creation failed:', err.message);
+    console.error('[HeyGen] Session creation/start failed:', err.message);
+    console.error('[HeyGen] Full error:', err.stack || err);
     return null;
   }
 }
