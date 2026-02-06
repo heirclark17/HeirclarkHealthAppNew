@@ -98,14 +98,14 @@ export default function AccountabilityScreen() {
           <View style={styles.sectionContainer}>
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DAILY TRACKING</Text>
 
-            {/* Adaptive TDEE Card */}
-            <View style={styles.cardWrapper}>
-              <AdaptiveTDEECard />
-            </View>
-
             {/* Weight Log Summary */}
             <View style={styles.cardWrapper}>
               <WeightLoggingCard />
+            </View>
+
+            {/* Adaptive TDEE Card */}
+            <View style={styles.cardWrapper}>
+              <AdaptiveTDEECard />
             </View>
 
             {/* Hydration Card */}
