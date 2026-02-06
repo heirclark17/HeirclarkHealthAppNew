@@ -1161,11 +1161,20 @@ export default function DashboardScreen() {
                 activeOpacity={0.7}
               >
                 <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
-                  <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', paddingVertical: 12 }}>
-                    <Text style={{ color: colors.textMuted, fontFamily: Fonts.semiBold, fontSize: 9, letterSpacing: 0.3, textAlign: 'center', marginBottom: 12 }}>FASTING</Text>
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text style={{ color: colors.textMuted, fontFamily: Fonts.semiBold, fontSize: 18, textAlign: 'center' }}>Tap to Enable</Text>
+                  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    {/* Icon */}
+                    <View style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}>
+                      <Ionicons name="alarm-outline" size={24} color={colors.text} />
                     </View>
+
+                    {/* Label */}
+                    <Text style={{ color: colors.textMuted, fontFamily: Fonts.semiBold, fontSize: 9, letterSpacing: 0.5, textAlign: 'center', marginBottom: 8 }}>FASTING</Text>
+
+                    {/* Value */}
+                    <Text style={{ color: colors.text, fontFamily: Fonts.light, fontSize: 16, textAlign: 'center', marginBottom: 4 }}>Tap to Enable</Text>
+
+                    {/* Subtitle */}
+                    <Text style={{ color: colors.textMuted, fontFamily: Fonts.regular, fontSize: 10, textAlign: 'center' }}>not active</Text>
                   </View>
                 </GlassCard>
               </TouchableOpacity>
