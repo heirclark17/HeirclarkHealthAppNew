@@ -307,27 +307,29 @@ export default function SavedMealsScreen() {
   }, [activeFilter, colors, isDark]);
 
   const renderEmptyState = useCallback(() => (
-    <GlassCard style={styles.emptyState}>
-      <Ionicons
-        name={activeFilter === 'favorites' ? 'heart-outline' : 'bookmark-outline'}
-        size={48}
-        color={colors.textTertiary}
-      />
-      <Text style={[styles.emptyTitle, { color: colors.text }]}>
-        {activeFilter === 'favorites'
-          ? 'No Favorite Meals'
-          : searchQuery
-          ? 'No Meals Found'
-          : 'No Saved Meals'}
-      </Text>
-      <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-        {activeFilter === 'favorites'
-          ? 'Tap the heart icon on meals to add them to your favorites'
-          : searchQuery
-          ? 'Try a different search term'
-          : 'Save meals from your meal plan to build your collection'}
-      </Text>
-    </GlassCard>
+    <View style={styles.emptyStateWrapper}>
+      <GlassCard style={styles.emptyState}>
+        <Ionicons
+          name={activeFilter === 'favorites' ? 'heart-outline' : 'bookmark-outline'}
+          size={48}
+          color={colors.textTertiary}
+        />
+        <Text style={[styles.emptyTitle, { color: colors.text }]}>
+          {activeFilter === 'favorites'
+            ? 'No Favorite Meals'
+            : searchQuery
+            ? 'No Meals Found'
+            : 'No Saved Meals'}
+        </Text>
+        <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+          {activeFilter === 'favorites'
+            ? 'Tap the heart icon on meals to add them to your favorites'
+            : searchQuery
+            ? 'Try a different search term'
+            : 'Save meals from your meal plan to build your collection'}
+        </Text>
+      </GlassCard>
+    </View>
   ), [activeFilter, searchQuery, colors]);
 
   if (isLoading) {
@@ -624,11 +626,13 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: Fonts.regular,
   },
+  emptyStateWrapper: {
+    marginHorizontal: Spacing.lg,
+  },
   emptyState: {
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.xl,
-    marginHorizontal: Spacing.lg,
   },
   emptyTitle: {
     fontSize: 18,
