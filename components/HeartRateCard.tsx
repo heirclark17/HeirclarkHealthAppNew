@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Heart, CheckCircle, AlertCircle } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
 import { Fonts, Colors, DarkColors, LightColors } from '../constants/Theme';
@@ -112,7 +113,7 @@ export function HeartRateCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="heart" size={24} color={colors.text} />
+              <Heart size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -156,7 +157,7 @@ export function HeartRateCard({
               {/* Heart Rate Section */}
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${displayColor}20` }]}>
-                  <Ionicons name="heart" size={32} color={displayColor} />
+                  <Heart size={32} color={displayColor} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Heart Rate</Text>
                 <Text style={[styles.modalValue, { color: displayColor }]}>
@@ -225,11 +226,11 @@ export function HeartRateCard({
                   </View>
                 </View>
                 <View style={[styles.bpStatus, { backgroundColor: `${bpClassification.color}15` }]}>
-                  <Ionicons
-                    name={bpClassification.status === 'Normal' ? 'checkmark-circle' : 'alert-circle'}
-                    size={16}
-                    color={bpClassification.color}
-                  />
+                  {bpClassification.status === 'Normal' ? (
+                    <CheckCircle size={16} color={bpClassification.color} />
+                  ) : (
+                    <AlertCircle size={16} color={bpClassification.color} />
+                  )}
                   <Text style={[styles.bpStatusText, { color: bpClassification.color }]}>
                     {bpClassification.status}
                   </Text>

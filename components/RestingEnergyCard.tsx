@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Moon, Activity, Gauge, Calendar, User, Dumbbell, Plus, ArrowRight, Info, CheckCircle, Clock, Users } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
 import { Fonts, Colors, DarkColors, LightColors } from '../constants/Theme';
@@ -77,7 +78,7 @@ export function RestingEnergyCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="moon" size={24} color={colors.text} />
+              <Moon size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -118,14 +119,14 @@ export function RestingEnergyCard({
               {/* Icon and Title */}
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${displayColor}20` }]}>
-                  <Ionicons name="moon" size={32} color={displayColor} />
+                  <Moon size={32} color={displayColor} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Resting Energy</Text>
                 <Text style={[styles.modalValue, { color: displayColor }]}>
                   {Math.round(restingEnergy).toLocaleString()} kcal
                 </Text>
                 <View style={[styles.bmrBadge, { backgroundColor: `${displayColor}20` }]}>
-                  <Ionicons name="pulse" size={16} color={displayColor} />
+                  <Activity size={16} color={displayColor} />
                   <Text style={[styles.bmrBadgeText, { color: displayColor }]}>
                     Basal Metabolic Rate
                   </Text>
@@ -134,7 +135,7 @@ export function RestingEnergyCard({
 
               {/* What is Resting Energy */}
               <View style={[styles.infoCard, { backgroundColor: `${Colors.restingEnergy}10` }]}>
-                <Ionicons name="information-circle" size={20} color={Colors.restingEnergy} />
+                <Info size={20} color={Colors.restingEnergy} />
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.infoTitle, { color: colors.text }]}>What is Resting Energy?</Text>
                   <Text style={[styles.infoText, { color: colors.text }]}>
@@ -149,12 +150,12 @@ export function RestingEnergyCard({
               <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>ENERGY BREAKDOWN</Text>
               <View style={styles.statsGrid}>
                 <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                  <Ionicons name="time" size={20} color={Colors.restingEnergy} />
+                  <Clock size={20} color={Colors.restingEnergy} />
                   <Text style={[styles.statValue, { color: colors.text }]}>{caloriesPerHour}</Text>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>kcal/hour</Text>
                 </View>
                 <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                  <Ionicons name="speedometer" size={20} color={Colors.restingEnergy} />
+                  <Gauge size={20} color={Colors.restingEnergy} />
                   <Text style={[styles.statValue, { color: colors.text }]}>{caloriesPerMinute}</Text>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>kcal/min</Text>
                 </View>
@@ -179,7 +180,7 @@ export function RestingEnergyCard({
                   </View>
                 </View>
                 <View style={[styles.consistencyRow, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }]}>
-                  <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
+                  <CheckCircle size={16} color={Colors.success} />
                   <Text style={[styles.consistencyText, { color: colors.text }]}>
                     Your BMR is consistent, which is healthy and expected
                   </Text>
@@ -190,25 +191,25 @@ export function RestingEnergyCard({
               <Text style={[styles.sectionTitle, { color: colors.textMuted, marginTop: 20 }]}>FACTORS AFFECTING BMR</Text>
               <View style={[styles.factorsContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
                 <View style={styles.factorRow}>
-                  <Ionicons name="body" size={16} color={Colors.restingEnergy} />
+                  <User size={16} color={Colors.restingEnergy} />
                   <Text style={[styles.factorText, { color: colors.text }]}>
                     <Text style={{ fontFamily: Fonts.semiBold }}>Body Composition:</Text> More muscle mass = higher BMR
                   </Text>
                 </View>
                 <View style={styles.factorRow}>
-                  <Ionicons name="calendar" size={16} color={Colors.restingEnergy} />
+                  <Calendar size={16} color={Colors.restingEnergy} />
                   <Text style={[styles.factorText, { color: colors.text }]}>
                     <Text style={{ fontFamily: Fonts.semiBold }}>Age:</Text> BMR decreases ~2% per decade after 20
                   </Text>
                 </View>
                 <View style={styles.factorRow}>
-                  <Ionicons name="male-female" size={16} color={Colors.restingEnergy} />
+                  <Users size={16} color={Colors.restingEnergy} />
                   <Text style={[styles.factorText, { color: colors.text }]}>
                     <Text style={{ fontFamily: Fonts.semiBold }}>Sex:</Text> Males typically have 5-10% higher BMR
                   </Text>
                 </View>
                 <View style={styles.factorRow}>
-                  <Ionicons name="fitness" size={16} color={Colors.restingEnergy} />
+                  <Dumbbell size={16} color={Colors.restingEnergy} />
                   <Text style={[styles.factorText, { color: colors.text }]}>
                     <Text style={{ fontFamily: Fonts.semiBold }}>Activity Level:</Text> Regular exercise can boost BMR
                   </Text>
@@ -224,14 +225,14 @@ export function RestingEnergyCard({
                       {Math.round(restingEnergy)}
                     </Text>
                   </View>
-                  <Ionicons name="add" size={20} color={colors.textMuted} />
+                  <Plus size={20} color={colors.textMuted} />
                   <View style={styles.comparisonItem}>
                     <Text style={[styles.comparisonLabel, { color: colors.textMuted }]}>Activity</Text>
                     <Text style={[styles.comparisonValue, { color: Colors.activeEnergy }]}>
                       Variable
                     </Text>
                   </View>
-                  <Ionicons name="arrow-forward" size={20} color={colors.textMuted} />
+                  <ArrowRight size={20} color={colors.textMuted} />
                   <View style={styles.comparisonItem}>
                     <Text style={[styles.comparisonLabel, { color: colors.textMuted }]}>TDEE</Text>
                     <Text style={[styles.comparisonValue, { color: Colors.success }]}>

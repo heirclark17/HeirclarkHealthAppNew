@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Footprints, Navigation, Flame, Lightbulb, CheckCircle, Clock } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
 import { Fonts, Colors, DarkColors, LightColors } from '../constants/Theme';
@@ -86,7 +87,7 @@ export function StepsCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="footsteps" size={24} color={colors.text} />
+              <Footprints size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -127,18 +128,18 @@ export function StepsCard({
               {/* Icon and Title */}
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${displayColor}20` }]}>
-                  <Ionicons name="footsteps" size={32} color={displayColor} />
+                  <Footprints size={32} color={displayColor} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Daily Steps</Text>
                 <Text style={[styles.modalValue, { color: displayColor }]}>
                   {steps.toLocaleString()}
                 </Text>
                 <View style={[styles.progressBadge, { backgroundColor: `${displayColor}20` }]}>
-                  <Ionicons
-                    name={percentage >= 100 ? 'checkmark-circle' : 'time'}
-                    size={16}
-                    color={displayColor}
-                  />
+                  {percentage >= 100 ? (
+                    <CheckCircle size={16} color={displayColor} />
+                  ) : (
+                    <Clock size={16} color={displayColor} />
+                  )}
                   <Text style={[styles.progressBadgeText, { color: displayColor }]}>
                     {percentage.toFixed(0)}% of Goal
                   </Text>
@@ -170,12 +171,12 @@ export function StepsCard({
               <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>ACTIVITY BREAKDOWN</Text>
               <View style={styles.statsGrid}>
                 <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                  <Ionicons name="navigate" size={20} color={Colors.success} />
+                  <Navigation size={20} color={Colors.success} />
                   <Text style={[styles.statValue, { color: colors.text }]}>{distanceMiles}</Text>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Miles</Text>
                 </View>
                 <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                  <Ionicons name="flame" size={20} color={Colors.error} />
+                  <Flame size={20} color={Colors.error} />
                   <Text style={[styles.statValue, { color: colors.text }]}>{caloriesBurned}</Text>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Calories</Text>
                 </View>
@@ -217,7 +218,7 @@ export function StepsCard({
 
               {/* Tips */}
               <View style={[styles.tipsContainer, { backgroundColor: `${Colors.success}10` }]}>
-                <Ionicons name="bulb" size={18} color={Colors.success} />
+                <Lightbulb size={18} color={Colors.success} />
                 <Text style={[styles.tipsText, { color: colors.text }]}>
                   {percentage >= 100
                     ? 'Amazing! You\'ve hit your daily goal. Keep up the great work!'

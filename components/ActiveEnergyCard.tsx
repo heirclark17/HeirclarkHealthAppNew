@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Zap, Clock, Dumbbell, Lightbulb, Bike, Footprints, Activity } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
 import { Fonts, Colors, DarkColors, LightColors } from '../constants/Theme';
@@ -62,10 +63,10 @@ export function ActiveEnergyCard({
 
   // Activity level classification
   const getActivityLevel = () => {
-    if (activeEnergy >= goal) return { label: 'Highly Active', color: Colors.success, icon: 'flash' as const };
-    if (activeEnergy >= goal * 0.75) return { label: 'Active', color: '#F39C12', icon: 'bicycle' as const };
-    if (activeEnergy >= goal * 0.5) return { label: 'Moderately Active', color: Colors.activeEnergy, icon: 'walk' as const };
-    return { label: 'Light Activity', color: colors.textMuted, icon: 'footsteps' as const };
+    if (activeEnergy >= goal) return { label: 'Highly Active', color: Colors.success, Icon: Zap };
+    if (activeEnergy >= goal * 0.75) return { label: 'Active', color: '#F39C12', Icon: Bike };
+    if (activeEnergy >= goal * 0.5) return { label: 'Moderately Active', color: Colors.activeEnergy, Icon: Activity };
+    return { label: 'Light Activity', color: colors.textMuted, Icon: Footprints };
   };
 
   const activityLevel = getActivityLevel();
@@ -91,7 +92,7 @@ export function ActiveEnergyCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="flash" size={24} color={colors.text} />
+              <Zap size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -132,18 +133,14 @@ export function ActiveEnergyCard({
               {/* Icon and Title */}
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${displayColor}20` }]}>
-                  <Ionicons name="flash" size={32} color={displayColor} />
+                  <Zap size={32} color={displayColor} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Active Energy</Text>
                 <Text style={[styles.modalValue, { color: displayColor }]}>
                   {Math.round(activeEnergy).toLocaleString()} kcal
                 </Text>
                 <View style={[styles.activityBadge, { backgroundColor: `${activityLevel.color}20` }]}>
-                  <Ionicons
-                    name={activityLevel.icon}
-                    size={16}
-                    color={activityLevel.color}
-                  />
+                  <activityLevel.Icon size={16} color={activityLevel.color} />
                   <Text style={[styles.activityBadgeText, { color: activityLevel.color }]}>
                     {activityLevel.label}
                   </Text>
@@ -178,12 +175,12 @@ export function ActiveEnergyCard({
               <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>ACTIVITY BREAKDOWN</Text>
               <View style={styles.statsGrid}>
                 <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                  <Ionicons name="time" size={20} color={Colors.activeEnergy} />
+                  <Clock size={20} color={Colors.activeEnergy} />
                   <Text style={[styles.statValue, { color: colors.text }]}>~{estimatedMinutes}</Text>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Active Minutes</Text>
                 </View>
                 <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-                  <Ionicons name="fitness" size={20} color={Colors.error} />
+                  <Dumbbell size={20} color={Colors.error} />
                   <Text style={[styles.statValue, { color: colors.text }]}>{percentage >= 100 ? '✓' : Math.round(percentage)}</Text>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>
                     {percentage >= 100 ? 'Complete' : '% of Goal'}
@@ -229,26 +226,26 @@ export function ActiveEnergyCard({
               <Text style={[styles.sectionTitle, { color: colors.textMuted, marginTop: 20 }]}>ACTIVITY INTENSITY</Text>
               <View style={[styles.guideContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
                 <View style={styles.guideRow}>
-                  <Ionicons name="flash" size={16} color={Colors.success} />
+                  <Zap size={16} color={Colors.success} />
                   <Text style={[styles.guideText, { color: colors.text }]}>High: 100%+ of goal</Text>
                 </View>
                 <View style={styles.guideRow}>
-                  <Ionicons name="bicycle" size={16} color={'#F39C12'} />
+                  <Bike size={16} color={'#F39C12'} />
                   <Text style={[styles.guideText, { color: colors.text }]}>Moderate: 75-99% of goal</Text>
                 </View>
                 <View style={styles.guideRow}>
-                  <Ionicons name="walk" size={16} color={Colors.activeEnergy} />
+                  <Activity size={16} color={Colors.activeEnergy} />
                   <Text style={[styles.guideText, { color: colors.text }]}>Light: 50-74% of goal</Text>
                 </View>
                 <View style={styles.guideRow}>
-                  <Ionicons name="footsteps" size={16} color={colors.textMuted} />
+                  <Footprints size={16} color={colors.textMuted} />
                   <Text style={[styles.guideText, { color: colors.text }]}>Minimal: Below 50%</Text>
                 </View>
               </View>
 
               {/* Tips */}
               <View style={[styles.tipsContainer, { backgroundColor: `${Colors.activeEnergy}10` }]}>
-                <Ionicons name="bulb" size={18} color={Colors.activeEnergy} />
+                <Lightbulb size={18} color={Colors.activeEnergy} />
                 <Text style={[styles.tipsText, { color: colors.text }]}>
                   Active energy is calories burned through intentional movement like workouts, walking, and physical activity.
                   This excludes calories burned at rest (resting energy). Aim for consistent daily activity to meet your goals!
