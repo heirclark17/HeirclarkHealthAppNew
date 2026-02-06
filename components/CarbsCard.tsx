@@ -10,6 +10,7 @@ import {
   Modal,
   ScrollView,
 } from 'react-native';
+import { Wheat } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
@@ -57,7 +58,7 @@ export function CarbsCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="pizza" size={24} color={colors.text} />
+              <Wheat size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -97,7 +98,7 @@ export function CarbsCard({
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${Colors.carbs}20` }]}>
-                  <Ionicons name="pizza" size={32} color={Colors.carbs} />
+                  <Wheat size={32} color={Colors.carbs} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Carbs</Text>
                 <Text style={[styles.modalValue, { color: Colors.carbs }]}>

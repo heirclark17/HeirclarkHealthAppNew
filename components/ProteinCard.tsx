@@ -10,6 +10,7 @@ import {
   Modal,
   ScrollView,
 } from 'react-native';
+import { Beef } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
@@ -57,7 +58,7 @@ export function ProteinCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="restaurant" size={24} color={colors.text} />
+              <Beef size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -97,7 +98,7 @@ export function ProteinCard({
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalSection}>
                 <View style={[styles.modalIconContainer, { backgroundColor: `${Colors.protein}20` }]}>
-                  <Ionicons name="restaurant" size={32} color={Colors.protein} />
+                  <Beef size={32} color={Colors.protein} />
                 </View>
                 <Text style={[styles.modalTitle, { color: colors.text }]}>Protein</Text>
                 <Text style={[styles.modalValue, { color: Colors.protein }]}>
