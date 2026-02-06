@@ -1,27 +1,52 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert, Linking, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert, Linking, ScrollView } from 'react-native';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../contexts/SettingsContext';
-import { fitnessMCP, FitnessProvider } from '../services/fitnessMCP';
-import { appleHealthService } from '../services/appleHealthService';
 import { api } from '../services/api';
-import { triggerManualSync, getLastSyncTime } from '../services/backgroundSync';
 import { Colors, Fonts, DarkColors, LightColors } from '../constants/Theme';
 import { GlassCard } from './GlassCard';
+
+interface WearableProvider {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  connected: boolean;
+  lastSync?: string;
+}
+
+// Map provider IDs to Ionicons (matching wearables page)
+const PROVIDER_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  apple_health: 'heart',
+  fitbit: 'watch-outline',
+  garmin: 'fitness-outline',
+  oura: 'ellipse-outline',
+  strava: 'bicycle-outline',
+  whoop: 'pulse-outline',
+  withings: 'scale-outline',
+};
+
+// Provider brand colors (matching wearables page)
+const PROVIDER_COLORS: Record<string, string> = {
+  apple_health: '#FF3B30',
+  fitbit: '#00B0B9',
+  garmin: '#007CC3',
+  oura: '#8B5CF6',
+  strava: '#FC4C02',
+  whoop: '#000000',
+  withings: '#00A9CE',
+};
 
 export function WearablesSyncContent() {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const colors = isDark ? DarkColors : LightColors;
 
-  const [providers, setProviders] = useState<FitnessProvider[]>([]);
-  const [lastSync, setLastSync] = useState<string | null>(null);
-  const [syncing, setSyncing] = useState(false);
+  const [providers, setProviders] = useState<WearableProvider[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Always allow Apple Health connection attempt on iOS
-  const isAppleHealthAvailable = Platform.OS === 'ios';
+  const [connectingId, setConnectingId] = useState<string | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadProviders();
@@ -30,29 +55,8 @@ export function WearablesSyncContent() {
   const loadProviders = async () => {
     setLoading(true);
     try {
-      const providerList = await fitnessMCP.getProviders();
-      setProviders(providerList);
-
-      // Find most recent sync from providers
-      const providerSyncTime = providerList
-        .filter(p => p.lastSync)
-        .map(p => new Date(p.lastSync!).getTime())
-        .sort((a, b) => b - a)[0];
-
-      // Also check background sync last sync time (iOS)
-      let bgSyncTime: number | null = null;
-      if (Platform.OS === 'ios') {
-        const bgLastSync = await getLastSyncTime();
-        if (bgLastSync) {
-          bgSyncTime = new Date(bgLastSync).getTime();
-        }
-      }
-
-      // Use the most recent sync time
-      const mostRecentSync = Math.max(providerSyncTime || 0, bgSyncTime || 0);
-      if (mostRecentSync > 0) {
-        setLastSync(new Date(mostRecentSync).toLocaleTimeString());
-      }
+      const result = await api.getWearableProviders();
+      setProviders(result.providers);
     } catch (error) {
       console.error('[WearablesSyncContent] Error loading providers:', error);
     } finally {
@@ -60,170 +64,61 @@ export function WearablesSyncContent() {
     }
   };
 
-  const handleSync = async (provider: FitnessProvider) => {
-    if (provider.connected) {
-      await syncProvider(provider);
-    } else {
-      await connectProvider(provider);
+  const handleConnect = async (provider: WearableProvider) => {
+    // Special handling for Apple Health - use native integration
+    if (provider.id === 'apple_health') {
+      Alert.alert(
+        'Apple Health',
+        'Apple Health integration is managed through your device settings. Make sure you\'ve granted health data permissions to this app.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Open Settings',
+            onPress: () => Linking.openURL('app-settings:'),
+          },
+        ]
+      );
+      return;
     }
-  };
 
-  const connectProvider = async (provider: FitnessProvider) => {
+    setConnectingId(provider.id);
     try {
-      let result;
-
-      switch (provider.id) {
-        case 'fitbit':
-          result = await fitnessMCP.connectFitbit();
-          if (result.success && result.authUrl) {
-            Alert.alert(
-              'Connect Fitbit',
-              'You will be redirected to Fitbit to authorize the connection.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Continue',
-                  onPress: () => {
-                    Linking.openURL(result.authUrl!);
-                  },
-                },
-              ]
-            );
-          }
-          break;
-
-        case 'google-fit':
-          result = await fitnessMCP.connectGoogleFit();
-          if (result.success && result.authUrl) {
-            Alert.alert(
-              'Connect Google Fit',
-              'You will be redirected to Google to authorize the connection.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Continue',
-                  onPress: () => {
-                    Linking.openURL(result.authUrl!);
-                  },
-                },
-              ]
-            );
-          }
-          break;
-
-        case 'apple-health':
-          if (Platform.OS !== 'ios') {
-            Alert.alert('Error', 'Apple Health is only available on iOS');
-            break;
-          }
-
-          console.log('[WearablesSyncContent] Connecting to Apple Health...');
-
-          if (!appleHealthService.isModuleAvailable()) {
-            console.error('[WearablesSyncContent] Apple Health module not available');
-            Alert.alert(
-              'Apple Health Unavailable',
-              'The Apple Health module could not be loaded. Please ensure the app was built with HealthKit entitlements enabled.',
-              [{ text: 'OK' }]
-            );
-            break;
-          }
-
-          const available = await appleHealthService.isAvailable();
-          console.log('[WearablesSyncContent] Apple Health available:', available);
-
-          if (!available) {
-            Alert.alert(
-              'Apple Health Not Available',
-              'Apple Health is not available on this device. Please check that Health app is installed.',
-              [{ text: 'OK' }]
-            );
-            break;
-          }
-
-          const initialized = await appleHealthService.initialize();
-          console.log('[WearablesSyncContent] Apple Health initialized:', initialized);
-
-          if (initialized) {
-            const appleProvider = providers.find(p => p.id === 'apple-health');
-            if (appleProvider) {
-              appleProvider.connected = true;
-              appleProvider.lastSync = new Date().toISOString();
-              setProviders([...providers]);
-            }
-            Alert.alert('Success', 'Apple Health connected! You can now sync your health data.');
-          }
-          break;
-      }
-    } catch (error) {
-      console.error('[WearablesSyncContent] Connection error:', error);
-      Alert.alert('Error', `Failed to connect ${provider.name}`);
-    }
-  };
-
-  const syncProvider = async (provider: FitnessProvider) => {
-    setSyncing(true);
-    try {
-      let data;
-      const today = new Date().toISOString().split('T')[0];
-
-      switch (provider.id) {
-        case 'fitbit':
-          data = await fitnessMCP.getFitbitData(today);
-          break;
-        case 'google-fit':
-          data = await fitnessMCP.getGoogleFitData(today);
-          break;
-        case 'apple-health':
-          const healthData = await appleHealthService.getTodayData();
-          if (healthData) {
-            data = {
-              date: today,
-              steps: healthData.steps,
-              caloriesOut: healthData.caloriesOut,
-            };
-          }
-          break;
-      }
-
-      if (data) {
-        const success = await api.ingestHealthData({
-          date: data.date,
-          steps: data.steps,
-          caloriesOut: data.caloriesOut,
-        });
-
-        if (success) {
-          setLastSync(new Date().toLocaleTimeString());
-          Alert.alert('Success', `Synced ${data.steps} steps from ${provider.name}`);
+      const result = await api.connectWearable(provider.id);
+      if (result.authUrl) {
+        // Open OAuth URL in browser
+        const supported = await Linking.canOpenURL(result.authUrl);
+        if (supported) {
+          await Linking.openURL(result.authUrl);
         } else {
-          Alert.alert('Warning', 'Data retrieved but failed to save to backend');
+          Alert.alert('Error', 'Unable to open authentication page');
         }
-      } else {
-        Alert.alert('No Data', `No data available from ${provider.name}`);
+      } else if (result.error) {
+        Alert.alert('Connection Failed', result.error);
       }
     } catch (error) {
-      console.error('[WearablesSyncContent] Sync error:', error);
-      Alert.alert('Error', `Failed to sync ${provider.name}`);
+      Alert.alert('Error', 'Failed to connect. Please try again.');
     } finally {
-      setSyncing(false);
+      setConnectingId(null);
+      // Refresh providers after connection attempt
+      setTimeout(loadProviders, 2000);
     }
   };
 
-  const handleDisconnect = async (provider: FitnessProvider) => {
+  const handleDisconnect = async (provider: WearableProvider) => {
     Alert.alert(
-      'Disconnect',
-      `Disconnect from ${provider.name}?`,
+      `Disconnect ${provider.name}`,
+      'Are you sure you want to disconnect this device? Your historical data will be preserved.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Disconnect',
           style: 'destructive',
           onPress: async () => {
-            const success = await fitnessMCP.disconnectProvider(provider.id);
-            if (success) {
-              await loadProviders();
-              Alert.alert('Success', `Disconnected from ${provider.name}`);
+            const result = await api.disconnectWearable(provider.id);
+            if (result.success) {
+              loadProviders();
+            } else {
+              Alert.alert('Error', 'Failed to disconnect. Please try again.');
             }
           },
         },
@@ -231,101 +126,24 @@ export function WearablesSyncContent() {
     );
   };
 
-  const handleSyncAll = async () => {
-    setSyncing(true);
+  const handleSync = async (provider: WearableProvider) => {
+    setSyncingId(provider.id);
     try {
-      const today = new Date().toISOString().split('T')[0];
-      let totalSteps = 0;
-      let totalCalories = 0;
-      const errors: string[] = [];
-
-      // Sync Apple Health if on iOS using background sync service
-      if (Platform.OS === 'ios') {
-        try {
-          const syncResult = await triggerManualSync();
-          if (syncResult) {
-            console.log('[WearablesSyncContent] Background sync completed successfully');
-          }
-
-          const healthData = await appleHealthService.getTodayData();
-          if (healthData) {
-            totalSteps += healthData.steps;
-            totalCalories += healthData.caloriesOut;
-          }
-        } catch (error) {
-          console.error('[WearablesSyncContent] Apple Health sync error:', error);
-          errors.push('Apple Health sync failed');
-        }
-      }
-
-      // Sync other providers via MCP
-      const results = await fitnessMCP.syncAllProviders(today);
-
-      if (results.fitbit) {
-        totalSteps += results.fitbit.steps;
-        totalCalories += results.fitbit.caloriesOut;
-      }
-      if (results.googleFit) {
-        totalSteps += results.googleFit.steps;
-        totalCalories += results.googleFit.caloriesOut;
-      }
-
-      // Send combined data to backend
-      if (totalSteps > 0 || totalCalories > 0) {
-        await api.ingestHealthData({
-          date: today,
-          steps: totalSteps,
-          caloriesOut: totalCalories,
-        });
-
-        setLastSync(new Date().toLocaleTimeString());
-
-        if (results.errors.length > 0) {
-          Alert.alert(
-            'Partial Success',
-            `Synced data but encountered errors:\n${results.errors.join('\n')}`
-          );
-        } else {
-          Alert.alert('Success', `Synced ${totalSteps} steps from all providers`);
-        }
+      const result = await api.syncWearable(provider.id);
+      if (result.success) {
+        Alert.alert('Sync Complete', result.message || `${provider.name} data synced successfully.`);
+        loadProviders();
       } else {
-        Alert.alert('No Data', 'No data available from any provider');
+        Alert.alert('Sync Failed', result.message || 'Unable to sync. Please try again.');
       }
     } catch (error) {
-      console.error('[WearablesSyncContent] Sync all error:', error);
-      Alert.alert('Error', 'Failed to sync providers');
+      Alert.alert('Error', 'Sync failed. Please try again.');
     } finally {
-      setSyncing(false);
+      setSyncingId(null);
     }
   };
 
   const connectedCount = providers.filter(p => p.connected).length;
-
-  const getProviderIcon = (providerId: string) => {
-    switch (providerId) {
-      case 'apple-health':
-        return 'heart';
-      case 'fitbit':
-        return 'fitness';
-      case 'google-fit':
-        return 'analytics';
-      default:
-        return 'watch';
-    }
-  };
-
-  const getProviderColor = (providerId: string) => {
-    switch (providerId) {
-      case 'apple-health':
-        return '#FF2D55';
-      case 'fitbit':
-        return '#00B0B9';
-      case 'google-fit':
-        return '#4285F4';
-      default:
-        return colors.primary;
-    }
-  };
 
   if (loading) {
     return (
@@ -337,20 +155,34 @@ export function WearablesSyncContent() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Status Summary */}
       <Animated.View entering={FadeIn.delay(0).duration(300)}>
         <GlassCard style={styles.statusCard}>
-          <View style={styles.statusRow}>
-            <View style={styles.statusItem}>
-              <Text style={[styles.statusLabel, { color: colors.textMuted }]}>Last Sync</Text>
-              <Text style={[styles.statusValue, { color: colors.text }]}>{lastSync || 'Never'}</Text>
+          <View style={styles.statusContent}>
+            <View style={[
+              styles.statusIcon,
+              {
+                backgroundColor: connectedCount > 0
+                  ? 'rgba(34, 197, 94, 0.15)'
+                  : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'),
+              }
+            ]}>
+              <Ionicons
+                name={connectedCount > 0 ? 'checkmark-circle' : 'watch-outline'}
+                size={28}
+                color={connectedCount > 0 ? '#22c55e' : colors.textMuted}
+              />
             </View>
-            <View style={styles.statusDivider} />
-            <View style={styles.statusItem}>
-              <Text style={[styles.statusLabel, { color: colors.textMuted }]}>Connected</Text>
-              <Text style={[styles.statusValue, { color: connectedCount > 0 ? Colors.success : colors.text }]}>
-                {connectedCount} source{connectedCount !== 1 ? 's' : ''}
+            <View style={styles.statusInfo}>
+              <Text style={[styles.statusTitle, { color: colors.text }]}>
+                {connectedCount === 0 ? 'No Devices Connected' : `${connectedCount} Device${connectedCount > 1 ? 's' : ''} Connected`}
+              </Text>
+              <Text style={[styles.statusSubtitle, { color: colors.textMuted }]}>
+                {connectedCount === 0
+                  ? 'Connect a device to sync your health data automatically'
+                  : 'Your health data syncs automatically in the background'
+                }
               </Text>
             </View>
           </View>
@@ -359,75 +191,91 @@ export function WearablesSyncContent() {
 
       {/* Provider List */}
       <Animated.View entering={FadeIn.delay(100).duration(300)} style={styles.providerSection}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Data Sources</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Available Integrations</Text>
 
         {providers.map((provider, index) => {
-          const needsRebuild = provider.id === 'apple-health' && Platform.OS === 'ios' && !isAppleHealthAvailable;
-          const providerColor = getProviderColor(provider.id);
+          const iconName = PROVIDER_ICONS[provider.id] || 'hardware-chip-outline';
+          const brandColor = PROVIDER_COLORS[provider.id] || colors.primary;
+          const isConnecting = connectingId === provider.id;
+          const isSyncing = syncingId === provider.id;
 
           return (
             <Animated.View
               key={provider.id}
-              entering={SlideInDown.delay(150 + index * 80).duration(300).springify()}
+              entering={SlideInDown.delay(150 + index * 50).duration(300).springify()}
             >
               <GlassCard style={styles.providerCard}>
                 <View style={styles.providerRow}>
-                  <View style={[styles.providerIconContainer, { backgroundColor: `${providerColor}20` }]}>
-                    <Ionicons name={getProviderIcon(provider.id) as any} size={24} color={providerColor} />
+                  <View style={[
+                    styles.providerIconContainer,
+                    {
+                      backgroundColor: provider.connected
+                        ? `${brandColor}20`
+                        : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'),
+                    }
+                  ]}>
+                    <Ionicons
+                      name={iconName as any}
+                      size={24}
+                      color={provider.connected ? brandColor : colors.textMuted}
+                    />
                   </View>
                   <View style={styles.providerInfo}>
-                    <Text style={[styles.providerName, { color: colors.text }]}>{provider.name}</Text>
-                    <Text
-                      style={[
-                        styles.providerStatus,
-                        { color: colors.textMuted },
-                        provider.connected && styles.providerConnected,
-                        needsRebuild && styles.providerNeedsRebuild,
-                      ]}
-                    >
-                      {needsRebuild ? 'Requires App Rebuild' : provider.connected ? 'Connected' : 'Not Connected'}
+                    <View style={styles.providerHeader}>
+                      <Text style={[styles.providerName, { color: colors.text }]}>
+                        {provider.name}
+                      </Text>
+                      {provider.connected && (
+                        <View style={[styles.connectedBadge, { backgroundColor: `${brandColor}20` }]}>
+                          <Ionicons name="checkmark-circle" size={12} color={brandColor} />
+                          <Text style={[styles.connectedText, { color: brandColor }]}>Connected</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[styles.providerDescription, { color: colors.textMuted }]}>
+                      {provider.description}
                     </Text>
-                    {provider.lastSync && (
+                    {provider.lastSync && provider.connected && (
                       <Text style={[styles.lastSyncText, { color: colors.textMuted }]}>
-                        Last sync: {new Date(provider.lastSync).toLocaleTimeString()}
+                        Last synced: {new Date(provider.lastSync).toLocaleDateString()}
                       </Text>
                     )}
                   </View>
                   <View style={styles.providerActions}>
-                    {needsRebuild ? (
-                      <View style={styles.unavailableButton}>
-                        <Text style={styles.unavailableButtonText}>Unavailable</Text>
-                      </View>
+                    {provider.connected ? (
+                      <>
+                        <TouchableOpacity
+                          style={[styles.actionButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
+                          onPress={() => handleSync(provider)}
+                          disabled={isSyncing}
+                        >
+                          {isSyncing ? (
+                            <ActivityIndicator size="small" color={colors.primary} />
+                          ) : (
+                            <Ionicons name="sync-outline" size={18} color={colors.text} />
+                          )}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.actionButton, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}
+                          onPress={() => handleDisconnect(provider)}
+                        >
+                          <Ionicons name="unlink-outline" size={18} color="#ef4444" />
+                        </TouchableOpacity>
+                      </>
                     ) : (
                       <TouchableOpacity
-                        style={[
-                          styles.actionButton,
-                          provider.connected
-                            ? { backgroundColor: `${Colors.success}20` }
-                            : { backgroundColor: colors.primary },
-                        ]}
-                        onPress={() => handleSync(provider)}
-                        disabled={syncing}
-                        activeOpacity={0.7}
+                        style={[styles.connectButton, { backgroundColor: `${brandColor}15` }]}
+                        onPress={() => handleConnect(provider)}
+                        disabled={isConnecting}
                       >
-                        <Text
-                          style={[
-                            styles.actionButtonText,
-                            provider.connected ? { color: Colors.success } : { color: '#fff' },
-                          ]}
-                        >
-                          {provider.connected ? 'Sync' : 'Connect'}
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                    {provider.connected && !needsRebuild && (
-                      <TouchableOpacity
-                        style={styles.disconnectButton}
-                        onPress={() => handleDisconnect(provider)}
-                        disabled={syncing}
-                        activeOpacity={0.7}
-                      >
-                        <Ionicons name="close" size={16} color="#fff" />
+                        {isConnecting ? (
+                          <ActivityIndicator size="small" color={brandColor} />
+                        ) : (
+                          <>
+                            <Ionicons name="link-outline" size={16} color={brandColor} />
+                            <Text style={[styles.connectButtonText, { color: brandColor }]}>Connect</Text>
+                          </>
+                        )}
                       </TouchableOpacity>
                     )}
                   </View>
@@ -438,40 +286,17 @@ export function WearablesSyncContent() {
         })}
       </Animated.View>
 
-      {/* Sync All Button */}
-      {connectedCount > 0 && (
-        <Animated.View entering={FadeIn.delay(400).duration(300)}>
-          <TouchableOpacity
-            style={[styles.syncAllButton, { backgroundColor: colors.primary }]}
-            onPress={handleSyncAll}
-            disabled={syncing}
-            activeOpacity={0.8}
-          >
-            {syncing ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="sync" size={20} color="#fff" />
-                <Text style={styles.syncAllText}>Sync All Providers</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-
-      {/* No Providers Connected Message */}
-      {connectedCount === 0 && (
-        <Animated.View entering={FadeIn.delay(400).duration(300)} style={styles.emptyStateContainer}>
-          <View style={[styles.emptyStateIcon, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-            <Ionicons name="watch-outline" size={40} color={colors.textMuted} />
-          </View>
-          <Text style={[styles.emptyStateTitle, { color: colors.text }]}>No Devices Connected</Text>
-          <Text style={[styles.emptyStateSubtitle, { color: colors.textMuted }]}>
-            Connect a wearable device above to start syncing your fitness data automatically
+      {/* Info Message */}
+      <Animated.View entering={FadeIn.delay(400).duration(300)}>
+        <GlassCard style={styles.infoCard}>
+          <Ionicons name="information-circle-outline" size={20} color={colors.textMuted} />
+          <Text style={[styles.infoText, { color: colors.textMuted }]}>
+            Connected devices sync data automatically. Manual sync is available for immediate updates.
+            Your health data is encrypted and stored securely.
           </Text>
-        </Animated.View>
-      )}
-    </View>
+        </GlassCard>
+      </Animated.View>
+    </ScrollView>
   );
 }
 
