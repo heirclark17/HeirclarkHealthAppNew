@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronUp, ChevronDown } from 'lucide-react-native';
 import { GlassCard } from './GlassCard';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../constants/Theme';
 import { RoundedNumeral } from './RoundedNumeral';
@@ -144,11 +144,11 @@ export const WeeklyProgressCard: React.FC<WeeklyProgressCardProps> = ({
             Click to expand • {viewMode === 'weekly' ? `Week of ${getWeekRange()}` : getMonthRange()}
           </Text>
         </View>
-        <Ionicons
-          name={isExpanded ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color={colors.textMuted}
-        />
+        {isExpanded ? (
+          <ChevronUp size={20} color={colors.textMuted} />
+        ) : (
+          <ChevronDown size={20} color={colors.textMuted} />
+        )}
       </TouchableOpacity>
 
       {/* Weekly/Monthly Toggle - Only show when expanded */}

@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   Modal,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Clock, RotateCw, Play, Pause, Square } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -154,7 +154,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name="alarm-outline" size={24} color={colors.text} />
+              <Clock size={24} color={colors.text} />
             </View>
 
             {/* Label */}
@@ -214,17 +214,17 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                 onPress={handleReset}
                 disabled={!state.isActive}
               >
-                <Ionicons name="refresh" size={22} color={state.isActive ? colors.textMuted : 'rgba(128,128,128,0.3)'} />
+                <RotateCw size={22} color={state.isActive ? colors.textMuted : 'rgba(128,128,128,0.3)'} />
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.playButton, { backgroundColor: state.isActive && !state.isPaused ? Colors.error : Colors.success }]}
                 onPress={handleStartPause}
               >
-                <Ionicons
-                  name={!state.isActive ? 'play' : (state.isPaused ? 'play' : 'pause')}
-                  size={28}
-                  color={Colors.text}
-                />
+                {!state.isActive || state.isPaused ? (
+                  <Play size={28} color={Colors.text} />
+                ) : (
+                  <Pause size={28} color={Colors.text} />
+                )}
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.controlButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
@@ -234,7 +234,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                 }}
                 disabled={!state.isActive}
               >
-                <Ionicons name="stop" size={22} color={state.isActive ? colors.textMuted : 'rgba(128,128,128,0.3)'} />
+                <Square size={22} color={state.isActive ? colors.textMuted : 'rgba(128,128,128,0.3)'} />
               </TouchableOpacity>
             </View>
 

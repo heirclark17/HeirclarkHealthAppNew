@@ -18,7 +18,7 @@ import { Tabs, TabList, TabTrigger, TabSlot } from 'expo-router/ui';
 import { Platform, StyleSheet, View, Pressable, useWindowDimensions, ActivityIndicator, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Home, Flag, UtensilsCrossed, Bookmark, Dumbbell, Library, Activity, Watch, Settings, Plus } from 'lucide-react-native';
 import { lightImpact, mediumImpact, rigidImpact, selectionFeedback } from '../../utils/haptics';
 import { useState, useEffect, forwardRef, useRef, useCallback, useMemo } from 'react';
 import type { TabTriggerSlotProps } from 'expo-router/ui';
@@ -146,13 +146,12 @@ const LIQUID_SPRING = {
 // Icons chosen to clearly represent each page's function
 // ============================================================================
 
-type IoniconsName = keyof typeof Ionicons.glyphMap;
+type LucideIcon = React.ComponentType<{ size: number; color: string }>;
 
 interface TabConfig {
   name: string;
   href: string;
-  icon: IoniconsName;
-  iconFilled: IoniconsName;
+  Icon: LucideIcon;
   label: string;
 }
 
@@ -160,64 +159,55 @@ const TAB_CONFIG: TabConfig[] = [
   {
     name: 'index',
     href: '/',
-    icon: 'home-outline',
-    iconFilled: 'home',
+    Icon: Home,
     label: 'Home'
   },
   {
     name: 'goals',
     href: '/goals',
-    icon: 'flag-outline',
-    iconFilled: 'flag',
+    Icon: Flag,
     label: 'Goals'
   },
   {
     name: 'meals',
     href: '/meals',
-    icon: 'restaurant-outline',
-    iconFilled: 'restaurant',
+    Icon: UtensilsCrossed,
     label: 'Meals'
   },
   {
     name: 'saved-meals',
     href: '/saved-meals',
-    icon: 'bookmark-outline',
-    iconFilled: 'bookmark',
+    Icon: Bookmark,
     label: 'Saved'
   },
   {
     name: 'programs',
     href: '/programs',
-    icon: 'barbell-outline',
-    iconFilled: 'barbell',
+    Icon: Dumbbell,
     label: 'Training'
   },
   {
     name: 'program-library',
     href: '/program-library',
-    icon: 'library-outline',
-    iconFilled: 'library',
+    Icon: Library,
     label: 'Programs'
   },
   {
     name: 'accountability',
     href: '/accountability',
-    icon: 'pulse-outline',
-    iconFilled: 'pulse',
+    Icon: Activity,
     label: 'Tracking'
   },
   {
     name: 'wearables',
     href: '/wearables',
-    icon: 'watch-outline',
-    iconFilled: 'watch',
+    Icon: Watch,
     label: 'Devices'
   },
   {
     name: 'settings',
     href: '/settings',
-    icon: 'cog-outline',
-    iconFilled: 'cog',
+    Icon: Settings,
     label: 'Settings'
   },
 ];
@@ -228,13 +218,12 @@ const TAB_CONFIG: TabConfig[] = [
 // ============================================================================
 
 interface GlassTabButtonProps extends TabTriggerSlotProps {
-  icon: IoniconsName;
-  iconFilled: IoniconsName;
+  Icon: LucideIcon;
   isDark: boolean;
 }
 
 const GlassTabButton = forwardRef<View, GlassTabButtonProps>(
-  ({ isFocused, icon, iconFilled, isDark, ...props }, ref) => {
+  ({ isFocused, Icon, isDark, ...props }, ref) => {
     const colors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
 
     // Animation values - works on both native and web
@@ -269,7 +258,6 @@ const GlassTabButton = forwardRef<View, GlassTabButtonProps>(
       opacity: opacity.value,
     }));
 
-    const currentIcon = isFocused ? iconFilled : icon;
     const iconColor = isFocused ? colors.iconActive : colors.iconInactive;
 
     // Use Animated.View on native, regular View on web
@@ -287,8 +275,7 @@ const GlassTabButton = forwardRef<View, GlassTabButtonProps>(
           accessibilityRole="tab"
           accessibilityState={{ selected: isFocused }}
         >
-          <Ionicons
-            name={currentIcon}
+          <Icon
             size={ICON_SIZE}
             color={iconColor}
           />
@@ -402,11 +389,9 @@ function FloatingActionButton({
         )}
 
         {/* Plus icon */}
-        <Ionicons
-          name="add"
+        <Plus
           size={28}
           color={colors.fabIcon}
-          style={{ fontWeight: '600' }}
         />
       </Pressable>
     </AnimatedViewComponent>
@@ -727,8 +712,7 @@ function LiquidGlassTabBar({
             <View key={tab.name} style={styles.scrollableTabItem}>
               <TabTrigger name={tab.name} asChild>
                 <GlassTabButton
-                  icon={tab.icon}
-                  iconFilled={tab.iconFilled}
+                  Icon={tab.Icon}
                   isDark={isDark}
                 />
               </TabTrigger>
