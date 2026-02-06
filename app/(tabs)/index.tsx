@@ -23,6 +23,9 @@ import { HeartRateCard } from '../../components/HeartRateCard';
 import { StepsCard } from '../../components/StepsCard';
 import { ActiveEnergyCard } from '../../components/ActiveEnergyCard';
 import { RestingEnergyCard } from '../../components/RestingEnergyCard';
+import { ProteinCard } from '../../components/ProteinCard';
+import { FatCard } from '../../components/FatCard';
+import { CarbsCard } from '../../components/CarbsCard';
 import { DashboardBottomSheet, DashboardBottomSheetRef, BottomSheetModalProvider } from '../../components/DashboardBottomSheet';
 import { WorkoutDetailContent } from '../../components/WorkoutDetailContent';
 import { WeeklyStatsContent } from '../../components/WeeklyStatsContent';
@@ -1055,21 +1058,21 @@ export default function DashboardScreen() {
       case 'macros':
         return (
           <View key={cardId} style={{ flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 }}>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowProteinInfoModal(true)}>
-              <GlassCard style={{ flex: 1, paddingVertical: 8, paddingHorizontal: 8 }} interactive>
-                <MacroGauge label="Protein" current={protein} target={proteinGoal} color={Colors.protein} />
-              </GlassCard>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowFatInfoModal(true)}>
-              <GlassCard style={{ flex: 1, paddingVertical: 8, paddingHorizontal: 8 }} interactive>
-                <MacroGauge label="Fat" current={fat} target={fatGoal} color={Colors.fat} />
-              </GlassCard>
-            </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.7} onPress={() => setShowCarbsInfoModal(true)}>
-              <GlassCard style={{ flex: 1, paddingVertical: 8, paddingHorizontal: 8 }} interactive>
-                <MacroGauge label="Carbs" current={carbs} target={carbsGoal} color={Colors.carbs} />
-              </GlassCard>
-            </TouchableOpacity>
+            <ProteinCard
+              current={protein}
+              goal={proteinGoal}
+              onPress={() => setShowProteinInfoModal(true)}
+            />
+            <FatCard
+              current={fat}
+              goal={fatGoal}
+              onPress={() => setShowFatInfoModal(true)}
+            />
+            <CarbsCard
+              current={carbs}
+              goal={carbsGoal}
+              onPress={() => setShowCarbsInfoModal(true)}
+            />
           </View>
         );
 
