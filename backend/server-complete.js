@@ -953,6 +953,65 @@ app.get('/api/v1/workouts/prs', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/v1/workouts/state - Save complete training state (weekly stats, goal alignment, etc.)
+app.post('/api/v1/workouts/state', authenticateToken, async (req, res) => {
+  try {
+    const { weeklyStats, goalAlignment, planSummary, preferences } = req.body;
+
+    console.log('[Workout] Saving training state for user:', req.userId);
+
+    // First ensure the user has a workout_plans row (create if doesn't exist)
+    await pool.query(
+      `INSERT INTO workout_plans (user_id, plan_name, weekly_schedule, plan_data, training_state)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [
+        req.userId,
+        'Default Plan',
+        JSON.stringify([]),
+        JSON.stringify({}),
+        JSON.stringify({ weeklyStats, goalAlignment, planSummary, preferences })
+      ]
+    );
+
+    // Update the training_state
+    await pool.query(
+      `UPDATE workout_plans
+       SET training_state = $1, updated_at = NOW()
+       WHERE user_id = $2`,
+      [JSON.stringify({ weeklyStats, goalAlignment, planSummary, preferences }), req.userId]
+    );
+
+    console.log('[Workout] ✅ Training state saved');
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Workout] Save training state error:', error.message);
+    res.status(500).json({ error: 'Failed to save training state', message: error.message });
+  }
+});
+
+// GET /api/v1/workouts/state - Get complete training state
+app.get('/api/v1/workouts/state', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT training_state FROM workout_plans WHERE user_id = $1`,
+      [req.userId]
+    );
+
+    if (result.rows.length === 0 || !result.rows[0].training_state) {
+      return res.json({ success: true, state: null });
+    }
+
+    res.json({
+      success: true,
+      state: result.rows[0].training_state
+    });
+  } catch (error) {
+    console.error('[Workout] Get training state error:', error);
+    res.status(500).json({ error: 'Failed to get training state' });
+  }
+});
+
 // ============================================
 // MEAL LOGGING ENDPOINTS
 // ============================================
