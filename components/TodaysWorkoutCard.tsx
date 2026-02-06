@@ -10,6 +10,7 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Dumbbell, CircleArrowUp, CircleArrowDown, User, Circle, Footprints, Zap, Heart, Leaf, Bed, Activity } from 'lucide-react-native';
 import Animated, {
   FadeInUp,
   useSharedValue,
@@ -22,22 +23,22 @@ import { useSettings } from '../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../utils/haptics';
 
 // Workout type icons and colors
-const WORKOUT_TYPE_CONFIG: Record<string, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-  'Leg Day': { icon: 'fitness', color: Colors.error },
-  'Upper Body': { icon: 'barbell', color: Colors.success },
-  'Lower Body': { icon: 'fitness', color: Colors.error },
-  'Push Day': { icon: 'arrow-up-circle', color: '#F39C12' },
-  'Pull Day': { icon: 'arrow-down-circle', color: '#9B59B6' },
-  'Full Body': { icon: 'body', color: '#3498DB' },
-  'Core': { icon: 'radio-button-on', color: '#E74C3C' },
-  'Walking Session': { icon: 'walk', color: Colors.success },
-  'Running Session': { icon: 'footsteps', color: Colors.error },
-  'HIIT': { icon: 'flash', color: '#F39C12' },
-  'Cardio': { icon: 'heart', color: '#E74C3C' },
-  'Recovery': { icon: 'leaf', color: Colors.successMuted },
-  'Yoga': { icon: 'leaf', color: '#9B59B6' },
-  'Rest Day': { icon: 'bed', color: Colors.textMuted },
-  'Workout': { icon: 'fitness', color: Colors.success },
+const WORKOUT_TYPE_CONFIG: Record<string, { Icon: React.ComponentType<{ size: number; color: string }>; color: string }> = {
+  'Leg Day': { Icon: Dumbbell, color: Colors.error },
+  'Upper Body': { Icon: Dumbbell, color: Colors.success },
+  'Lower Body': { Icon: Dumbbell, color: Colors.error },
+  'Push Day': { Icon: CircleArrowUp, color: '#F39C12' },
+  'Pull Day': { Icon: CircleArrowDown, color: '#9B59B6' },
+  'Full Body': { Icon: User, color: '#3498DB' },
+  'Core': { Icon: Circle, color: '#E74C3C' },
+  'Walking Session': { Icon: Footprints, color: Colors.success },
+  'Running Session': { Icon: Footprints, color: Colors.error },
+  'HIIT': { Icon: Zap, color: '#F39C12' },
+  'Cardio': { Icon: Heart, color: '#E74C3C' },
+  'Recovery': { Icon: Leaf, color: Colors.successMuted },
+  'Yoga': { Icon: Leaf, color: '#9B59B6' },
+  'Rest Day': { Icon: Bed, color: Colors.textMuted },
+  'Workout': { Icon: Dumbbell, color: Colors.success },
 };
 
 const getWorkoutConfig = (workoutType: string) => {
@@ -111,7 +112,7 @@ export function TodaysWorkoutCard({
           <View style={styles.innerContainer}>
             {/* Icon */}
             <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
-              <Ionicons name={config.icon} size={24} color={colors.text} />
+              <config.Icon size={24} color={colors.text} />
             </View>
 
             {/* Label */}

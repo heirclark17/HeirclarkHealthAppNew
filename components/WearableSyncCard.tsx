@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ChevronUp, ChevronDown } from 'lucide-react-native';
 import { GlassCard } from './GlassCard';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../constants/Theme';
 import { fitnessMCP, FitnessProvider } from '../services/fitnessMCP';
@@ -356,11 +357,11 @@ export const WearableSyncCard: React.FC<WearableSyncCardProps> = ({ onSync }) =>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>WEARABLE SYNC</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>Click to expand • Sync fitness data</Text>
         </View>
-        <Ionicons
-          name={isExpanded ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color={colors.textMuted}
-        />
+        {isExpanded ? (
+          <ChevronUp size={20} color={colors.textMuted} />
+        ) : (
+          <ChevronDown size={20} color={colors.textMuted} />
+        )}
       </TouchableOpacity>
 
       {/* Expandable Content */}
