@@ -192,7 +192,7 @@ export default function DashboardScreen() {
   };
 
   // Fetch data from backend
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       // Get metrics for selected date
       const metrics = await api.getMetricsByDate(selectedDate);
@@ -348,10 +348,10 @@ export default function DashboardScreen() {
       setFat(0);
       setMeals([]);
     }
-  };
+  }, [selectedDate]);
 
   // Fetch wearables data (steps, active/resting energy) for the selected date
-  const fetchWearablesData = async () => {
+  const fetchWearablesData = useCallback(async () => {
     const todayStr = new Date().toISOString().split('T')[0];
     const isToday = selectedDate === todayStr;
 
@@ -421,7 +421,7 @@ export default function DashboardScreen() {
         console.error('[Dashboard] Error fetching backend wearables data:', error);
       }
     }
-  };
+  }, [selectedDate]);
 
   // Legacy function name for compatibility
   const fetchAppleHealthCalories = fetchWearablesData;
@@ -433,7 +433,7 @@ export default function DashboardScreen() {
     await fetchData();
     await fetchAppleHealthCalories();
     setRefreshing(false);
-  }, [selectedDate]);
+  }, [fetchData, fetchAppleHealthCalories]);
 
   // Sync with fitness tracker
   const handleSync = async () => {
