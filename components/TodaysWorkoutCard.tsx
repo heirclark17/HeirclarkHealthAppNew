@@ -10,7 +10,7 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Dumbbell, CircleArrowUp, CircleArrowDown, User, Circle, Footprints, Zap, Heart, Leaf, Bed, Activity } from 'lucide-react-native';
+import { Dumbbell, CircleArrowUp, CircleArrowDown, User, Circle, Footprints, Zap, Heart, Leaf, Bed, Activity, BicepsFlexed } from 'lucide-react-native';
 import Animated, {
   FadeInUp,
   useSharedValue,
@@ -38,7 +38,7 @@ const WORKOUT_TYPE_CONFIG: Record<string, { Icon: React.ComponentType<{ size: nu
   'Recovery': { Icon: Leaf, color: Colors.successMuted },
   'Yoga': { Icon: Leaf, color: '#9B59B6' },
   'Rest Day': { Icon: Bed, color: Colors.textMuted },
-  'Workout': { Icon: Dumbbell, color: Colors.success },
+  'Workout': { Icon: BicepsFlexed, color: Colors.success },
 };
 
 const getWorkoutConfig = (workoutType: string) => {
