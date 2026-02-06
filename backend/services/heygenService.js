@@ -16,31 +16,13 @@ class HeyGenService {
   }
 
   /**
-   * Create a short-lived session token from the permanent API key.
-   * Recommended for security - avoids exposing the permanent key.
-   * @returns {string} Session token for Bearer auth
+   * Get auth headers using x-api-key directly
    */
-  async createSessionToken() {
-    const apiKey = process.env.HEYGEN_API_KEY;
-
-    const response = await fetch(`${HEYGEN_API_BASE}/streaming.create_token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[HeyGenService] Create token failed:', response.status, errorText);
-      throw new Error(`HeyGen create token failed: ${response.status} ${errorText}`);
-    }
-
-    const data = await response.json();
-    const token = data.data?.token || data.token;
-    console.log('[HeyGenService] Session token created');
-    return token;
+  _getAuthHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.HEYGEN_API_KEY,
+    };
   }
 
   /**
@@ -53,11 +35,8 @@ class HeyGenService {
     const vid = voiceId || process.env.HEYGEN_VOICE_ID;
     const kid = knowledgeBaseId || process.env.HEYGEN_CONTEXT_ID;
 
-    // Get a short-lived session token first
-    const sessionToken = await this.createSessionToken();
-
     const body = {
-      avatar_name: aid,           // SDK uses avatar_name, not avatar_id
+      avatar_name: aid,           // Official SDK uses avatar_name
       version: 'v2',              // Required for LiveKit-based streaming
       video_encoding: 'H264',     // Better device compatibility than VP8
       quality: 'medium',          // medium = 480p/1000kbps (good for mobile)
@@ -79,20 +58,25 @@ class HeyGenService {
 
     const response = await fetch(`${HEYGEN_API_BASE}/streaming.new`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sessionToken}`,
-      },
+      headers: this._getAuthHeaders(),
       body: JSON.stringify(body),
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[HeyGenService] Create session failed:', response.status, errorText);
-      throw new Error(`HeyGen create session failed: ${response.status} ${errorText}`);
+      console.error('[HeyGenService] Create session failed:', response.status, responseText);
+      throw new Error(`HeyGen streaming.new failed: ${response.status} ${responseText}`);
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('[HeyGenService] Failed to parse response:', responseText);
+      throw new Error('HeyGen streaming.new returned non-JSON response');
+    }
+
     const sessionData = data.data || data;
 
     console.log('[HeyGenService] Session created:', {
@@ -104,11 +88,9 @@ class HeyGenService {
     });
 
     if (!sessionData.session_id || !sessionData.url || !sessionData.access_token) {
+      console.error('[HeyGenService] Response missing fields. Full response:', JSON.stringify(data));
       throw new Error('HeyGen session response missing required fields (session_id, url, or access_token)');
     }
-
-    // Store the session token for subsequent calls (start, stop)
-    this._lastSessionToken = sessionToken;
 
     return {
       session_id: sessionData.session_id,
@@ -124,26 +106,18 @@ class HeyGenService {
    * Must be called after createStreamingSession and before LiveKit connect.
    */
   async startSession(sessionId) {
-    // Use the session token from createStreamingSession, or fall back to API key
-    const authHeader = this._lastSessionToken
-      ? { 'Authorization': `Bearer ${this._lastSessionToken}` }
-      : { 'x-api-key': process.env.HEYGEN_API_KEY };
-
     console.log('[HeyGenService] Starting session:', sessionId);
 
     const response = await fetch(`${HEYGEN_API_BASE}/streaming.start`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader,
-      },
+      headers: this._getAuthHeaders(),
       body: JSON.stringify({ session_id: sessionId }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('[HeyGenService] Start session failed:', response.status, errorText);
-      throw new Error(`HeyGen start session failed: ${response.status} ${errorText}`);
+      throw new Error(`HeyGen streaming.start failed: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
@@ -155,30 +129,22 @@ class HeyGenService {
    * Stop a streaming session
    */
   async stopSession(sessionId) {
-    const authHeader = this._lastSessionToken
-      ? { 'Authorization': `Bearer ${this._lastSessionToken}` }
-      : { 'x-api-key': process.env.HEYGEN_API_KEY };
-
     console.log('[HeyGenService] Stopping session:', sessionId);
 
     const response = await fetch(`${HEYGEN_API_BASE}/streaming.stop`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader,
-      },
+      headers: this._getAuthHeaders(),
       body: JSON.stringify({ session_id: sessionId }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('[HeyGenService] Stop session failed:', response.status, errorText);
-      throw new Error(`HeyGen stop session failed: ${response.status} ${errorText}`);
+      throw new Error(`HeyGen streaming.stop failed: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
     console.log('[HeyGenService] Session stopped:', sessionId);
-    this._lastSessionToken = null;
     return data;
   }
 }
