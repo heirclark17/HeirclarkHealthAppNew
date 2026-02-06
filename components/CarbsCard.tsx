@@ -14,7 +14,6 @@ import { Wheat } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
-import { SemiCircularGauge } from './SemiCircularGauge';
 import { Fonts, Colors, DarkColors, LightColors } from '../constants/Theme';
 import { useSettings } from '../contexts/SettingsContext';
 import { lightImpact } from '../utils/haptics';
@@ -67,19 +66,15 @@ export function CarbsCard({
               CARBS
             </Text>
 
-            {/* Semi-Circular Gauge */}
-            <View style={styles.gaugeContainer}>
-              <SemiCircularGauge
-                value={current}
-                maxValue={goal}
-                size={100}
-                strokeWidth={8}
-                unit="g"
-                progressColor={Colors.carbs}
-                showCenterValue={true}
-                useRoundedNumeral={false}
-              />
-            </View>
+            {/* Value */}
+            <Text style={[styles.value, { color: colors.text }]}>
+              {Math.round(current)}
+            </Text>
+
+            {/* Subtitle */}
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+              of {goal}g
+            </Text>
           </View>
         </GlassCard>
       </TouchableOpacity>
