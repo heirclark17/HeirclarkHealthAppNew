@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonContainer: {
-    marginTop: 48,
+    marginTop: 40,
     marginHorizontal: 24,
   },
   continueButton: {
