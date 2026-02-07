@@ -189,7 +189,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     marginBottom: 24,
   },

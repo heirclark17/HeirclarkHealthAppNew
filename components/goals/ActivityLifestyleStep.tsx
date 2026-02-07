@@ -596,7 +596,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 22,
   },
@@ -641,13 +640,11 @@ const styles = StyleSheet.create({
   },
   activityDescription: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 2,
   },
   activityExample: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     fontStyle: 'italic',
   },
@@ -666,7 +663,6 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     marginBottom: 16,
     lineHeight: 18,
@@ -726,7 +722,6 @@ const styles = StyleSheet.create({
   summaryText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
@@ -777,7 +772,6 @@ const styles = StyleSheet.create({
   },
   cardioSectionSubtitle: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 16,
   },
@@ -817,7 +811,6 @@ const styles = StyleSheet.create({
   },
   cardioDescription: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 6,
   },
@@ -832,7 +825,6 @@ const styles = StyleSheet.create({
   },
   cardioMetaText: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
   },
   // Equipment styles
@@ -857,7 +849,6 @@ const styles = StyleSheet.create({
   },
   warningText: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     marginTop: 12,
     fontStyle: 'italic',
   },
@@ -883,7 +874,6 @@ const styles = StyleSheet.create({
   },
   injuryChipDescription: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
   },
   injuryChipDescriptionSelected: {
     color: 'rgba(255, 255, 255, 0.8)',
@@ -898,7 +888,6 @@ const styles = StyleSheet.create({
   injuryNoteText: {
     flex: 1,
     fontSize: 12,
-    fontFamily: Fonts.regular,
     lineHeight: 18,
   },
 });

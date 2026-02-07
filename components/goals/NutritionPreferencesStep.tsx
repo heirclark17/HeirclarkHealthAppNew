@@ -879,7 +879,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 22,
   },
@@ -898,7 +897,6 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     marginBottom: 12,
     marginTop: -4,
@@ -940,7 +938,6 @@ const styles = StyleSheet.create({
   },
   dietDescription: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
   },
   mealsRow: {
@@ -971,7 +968,6 @@ const styles = StyleSheet.create({
   mealsHint: {
     marginTop: 12,
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     textAlign: 'center',
     fontStyle: 'italic',
@@ -997,7 +993,6 @@ const styles = StyleSheet.create({
   },
   fastingSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
   },
   fastingOptions: {
@@ -1033,7 +1028,6 @@ const styles = StyleSheet.create({
   },
   presetDesc: {
     fontSize: 10,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     marginTop: 2,
   },
@@ -1133,7 +1127,6 @@ const styles = StyleSheet.create({
   cheatDaysHint: {
     marginTop: 12,
     fontSize: 13,
-    fontFamily: Fonts.regular,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -1143,7 +1136,6 @@ const styles = StyleSheet.create({
   },
   textInput: {
     padding: 12,
-    fontFamily: Fonts.regular,
     fontSize: 14,
     minHeight: 60,
     textAlignVertical: 'top',
@@ -1169,7 +1161,6 @@ const styles = StyleSheet.create({
   },
   skillButtonDescription: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
     marginTop: 4,
     textAlign: 'center',
     width: '100%', // Ensure description takes full width
@@ -1233,7 +1224,6 @@ const styles = StyleSheet.create({
   },
   dailyGoalHint: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
   },
   dailyGoalControls: {
     flexDirection: 'row',

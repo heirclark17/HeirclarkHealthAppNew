@@ -285,7 +285,6 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
   },
   statValue: {
@@ -300,7 +299,6 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 20,
   },

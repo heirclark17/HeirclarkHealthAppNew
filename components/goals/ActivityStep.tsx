@@ -138,7 +138,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     marginBottom: 24,
   },
@@ -178,7 +177,6 @@ const styles = StyleSheet.create({
   },
   optionDesc: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
   },
   buttonRow: {

@@ -277,7 +277,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     marginBottom: 24,
   },
@@ -328,7 +327,6 @@ const styles = StyleSheet.create({
   },
   helperText: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     marginBottom: 8,
   },
@@ -399,7 +397,6 @@ const styles = StyleSheet.create({
   },
   computedNote: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
   },
   warningCallout: {
@@ -415,7 +412,6 @@ const styles = StyleSheet.create({
   warningText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: '#ffaa00',
     lineHeight: 20,
   },

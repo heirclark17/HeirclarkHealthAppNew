@@ -796,7 +796,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
@@ -982,7 +981,6 @@ const styles = StyleSheet.create({
   },
   guidanceText: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
@@ -1030,7 +1028,6 @@ const styles = StyleSheet.create({
   },
   mealPlanButtonSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     lineHeight: 16,
   },
@@ -1067,7 +1064,6 @@ const styles = StyleSheet.create({
   },
   trainingPlanButtonSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     lineHeight: 16,
   },
@@ -1100,7 +1096,6 @@ const styles = StyleSheet.create({
   },
   coachingButtonSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     lineHeight: 16,
   },
@@ -1207,7 +1202,6 @@ const styles = StyleSheet.create({
   },
   prefValue: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.text,
   },
   prefTagsRow: {
@@ -1223,7 +1217,6 @@ const styles = StyleSheet.create({
   },
   prefTagText: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.text,
   },
   mealPlanningSection: {

@@ -836,7 +836,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 22,
   },
@@ -862,7 +861,6 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     marginTop: 4,
     marginBottom: 12,
@@ -976,7 +974,6 @@ const styles = StyleSheet.create({
   },
   simpleWeightUnit: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
     fontWeight: '400',
   },
   simpleWeightQuickRow: {
@@ -1092,7 +1089,6 @@ const styles = StyleSheet.create({
   },
   stepperUnit: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
   },
   // Sex Toggle Styles

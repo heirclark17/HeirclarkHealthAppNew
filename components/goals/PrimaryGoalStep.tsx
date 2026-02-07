@@ -230,7 +230,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 22,
   },
@@ -270,7 +269,6 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     textAlign: 'center',
   },

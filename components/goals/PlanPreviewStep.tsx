@@ -735,7 +735,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 22,
   },
@@ -829,7 +828,6 @@ const styles = StyleSheet.create({
   },
   macroPercent: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
     color: Colors.textMuted,
     textAlign: 'right',
   },
@@ -899,7 +897,6 @@ const styles = StyleSheet.create({
   },
   weeklyRateHint: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginTop: 4,
   },
@@ -944,7 +941,6 @@ const styles = StyleSheet.create({
   dietText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 18,
   },
@@ -1017,7 +1013,6 @@ const styles = StyleSheet.create({
   workoutCommentaryText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 18,
   },
@@ -1032,7 +1027,6 @@ const styles = StyleSheet.create({
   nutritionSynergyText: {
     flex: 1,
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 16,
   },
@@ -1123,7 +1117,6 @@ const styles = StyleSheet.create({
   },
   prefValue: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.text,
   },
   prefTagsRow: {
@@ -1139,7 +1132,6 @@ const styles = StyleSheet.create({
   },
   prefTagText: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.text,
   },
   mealPlanningSection: {
@@ -1158,7 +1150,6 @@ const styles = StyleSheet.create({
   prefConnectionText: {
     flex: 1,
     fontSize: 12,
-    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 16,
   },
