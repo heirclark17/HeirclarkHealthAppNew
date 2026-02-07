@@ -187,6 +187,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
           variant="secondary"
           size="large"
           fullWidth
+          style={styles.glassButton}
         />
       </View>
     </View>
@@ -284,5 +285,13 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     backgroundColor: 'transparent',
     // bottom is set dynamically to sit above the floating tab bar
+  },
+  glassButton: {
+    // Remove shadow for true frosted liquid glass effect
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
 });
