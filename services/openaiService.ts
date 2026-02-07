@@ -2,18 +2,37 @@ import OpenAI from 'openai';
 import Constants from 'expo-constants';
 
 /**
- * OpenAI Service for direct GPT-4o-mini API calls
+ * OpenAI Service for direct GPT-4.1-mini API calls
  * Used for generating detailed customized guidance on SuccessScreen
  */
 
 // Get API key from Expo environment variables
-const apiKey = Constants.expoConfig?.extra?.openaiApiKey || process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+const getApiKey = () => {
+  return Constants.expoConfig?.extra?.openaiApiKey || process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+};
 
-const openai = new OpenAI({
-  apiKey: apiKey,
-  // Note: OpenAI SDK uses fetch which is available in React Native 0.60+
-  dangerouslyAllowBrowser: true, // Required for React Native
-});
+// Lazy-load OpenAI client to avoid crashes if API key is missing
+let openaiClient: OpenAI | null = null;
+
+const getOpenAI = (): OpenAI => {
+  if (!openaiClient) {
+    const apiKey = getApiKey();
+
+    if (!apiKey) {
+      throw new Error(
+        'OpenAI API key not configured. Please add EXPO_PUBLIC_OPENAI_API_KEY to your .env file. ' +
+        'Get your key from https://platform.openai.com/api-keys'
+      );
+    }
+
+    openaiClient = new OpenAI({
+      apiKey: apiKey,
+      dangerouslyAllowBrowser: true, // Required for React Native
+    });
+  }
+
+  return openaiClient;
+};
 
 export interface WorkoutGuidanceParams {
   primaryGoal: string;
@@ -71,7 +90,7 @@ Provide:
 
 Keep it motivating, practical, and specific to their goals and constraints. Write in second person ("you should..."). Be concise but comprehensive.`;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
@@ -90,7 +109,13 @@ Keep it motivating, practical, and specific to their goals and constraints. Writ
     return completion.choices[0]?.message?.content || 'Unable to generate workout guidance at this time.';
   } catch (error) {
     console.error('[OpenAI Service] Error generating workout guidance:', error);
-    throw error;
+
+    // Return a friendly fallback message instead of crashing
+    if (error instanceof Error && error.message.includes('API key not configured')) {
+      return 'AI-powered workout guidance is not currently available. To enable this feature, please configure your OpenAI API key in the app settings.';
+    }
+
+    return 'Unable to generate personalized workout guidance at this time. Your workout plan will be customized based on your goals and preferences.';
   }
 }
 
@@ -117,7 +142,7 @@ Provide practical daily guidance covering:
 
 Keep it actionable, positive, and realistic. Write in second person ("Focus on...", "Make sure to..."). Be encouraging but honest.`;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
@@ -136,7 +161,13 @@ Keep it actionable, positive, and realistic. Write in second person ("Focus on..
     return completion.choices[0]?.message?.content || 'Unable to generate daily guidance at this time.';
   } catch (error) {
     console.error('[OpenAI Service] Error generating daily guidance:', error);
-    throw error;
+
+    // Return a friendly fallback message instead of crashing
+    if (error instanceof Error && error.message.includes('API key not configured')) {
+      return 'AI-powered daily guidance is not currently available. To enable this feature, please configure your OpenAI API key in the app settings.';
+    }
+
+    return 'Focus on consistency and tracking your meals to stay accountable. Hit your daily calorie and protein targets, and remember that progress takes time.';
   }
 }
 
@@ -186,7 +217,7 @@ Provide:
 
 Keep it practical, varied, and enjoyable. Write in second person. Focus on abundance and what they CAN eat, not just restrictions.`;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
@@ -205,6 +236,12 @@ Keep it practical, varied, and enjoyable. Write in second person. Focus on abund
     return completion.choices[0]?.message?.content || 'Unable to generate nutrition guidance at this time.';
   } catch (error) {
     console.error('[OpenAI Service] Error generating nutrition guidance:', error);
-    throw error;
+
+    // Return a friendly fallback message instead of crashing
+    if (error instanceof Error && error.message.includes('API key not configured')) {
+      return 'AI-powered nutrition guidance is not currently available. To enable this feature, please configure your OpenAI API key in the app settings.';
+    }
+
+    return 'Build your meals around whole foods and consistent meal timing. Focus on hitting your daily macro targets while enjoying foods you love.';
   }
 }
