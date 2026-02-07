@@ -7,11 +7,6 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 
-// Tab bar constants (must match _layout.tsx)
-const TAB_BAR_HEIGHT = 64;
-const TAB_BAR_MARGIN_BOTTOM = 12;
-const FOOTER_EXTRA_PADDING = 24;
-
 interface GoalOption {
   id: PrimaryGoal;
   title: string;
@@ -127,9 +122,6 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
   // Calculate card width dynamically for 2-column grid
   const cardWidth = (screenWidth - 48 - 12) / 2; // screenWidth - horizontal padding - gap
 
-  // Calculate footer bottom position to sit above the tab bar
-  const footerBottom = TAB_BAR_HEIGHT + TAB_BAR_MARGIN_BOTTOM + FOOTER_EXTRA_PADDING;
-
   // Dynamic theme colors
   const colors = useMemo(() => {
     return settings.themeMode === 'light' ? LightColors : DarkColors;
@@ -178,27 +170,27 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
             />
           ))}
         </View>
-      </ScrollView>
 
-      {/* Frosted Liquid Glass Continue Button - Fixed at bottom above tab bar */}
-      <View style={[styles.footer, { bottom: footerBottom }]}>
-        <TouchableOpacity
-          onPress={handleContinue}
-          disabled={!state.primaryGoal}
-        >
-          <GlassCard
-            style={[
-              styles.continueButton,
-              state.primaryGoal && { backgroundColor: primaryGlassBg },
-            ]}
-            interactive
+        {/* Frosted Liquid Glass Continue Button */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={handleContinue}
+            disabled={!state.primaryGoal}
           >
-            <Text style={[styles.continueButtonText, { color: state.primaryGoal ? colors.primary : colors.textMuted }]}>
-              CONTINUE
-            </Text>
-          </GlassCard>
-        </TouchableOpacity>
-      </View>
+            <GlassCard
+              style={[
+                styles.continueButton,
+                state.primaryGoal && { backgroundColor: primaryGlassBg },
+              ]}
+              interactive
+            >
+              <Text style={[styles.continueButtonText, { color: state.primaryGoal ? colors.primary : colors.textMuted }]}>
+                CONTINUE
+              </Text>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -211,7 +203,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 120, // Space to scroll past the fixed footer button
+    paddingBottom: 100, // Space for tab bar
   },
   header: {
     marginTop: 16,
@@ -280,20 +272,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  footer: {
-    ...Platform.select({
-      web: {
-        position: 'fixed' as any,
-      },
-      default: {
-        position: 'absolute' as any,
-      },
-    }),
-    left: 16,
-    right: 16,
-    paddingVertical: 0,
-    backgroundColor: 'transparent',
-    // bottom is set dynamically to sit above the floating tab bar
+  buttonContainer: {
+    marginTop: 48,
   },
   continueButton: {
     flexDirection: 'row',
