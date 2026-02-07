@@ -290,7 +290,6 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 15,
-    fontFamily: Fonts.medium,
     color: Colors.text,
   },
   tipItem: {

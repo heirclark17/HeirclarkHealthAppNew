@@ -827,8 +827,6 @@ const styles = StyleSheet.create({
   },
   targetValue: {
     fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '100',
     color: Colors.text,
     marginTop: 8,
     marginBottom: 4,
@@ -941,8 +939,6 @@ const styles = StyleSheet.create({
   },
   profileValue: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '100',
     color: Colors.text,
   },
   statsRow: {
@@ -957,8 +953,6 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '100',
     color: Colors.text,
   },
   statLabel: {

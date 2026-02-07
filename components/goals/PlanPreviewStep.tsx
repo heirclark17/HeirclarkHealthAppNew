@@ -815,8 +815,6 @@ const styles = StyleSheet.create({
   },
   macroValue: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '100',
     color: Colors.text,
   },
   macroBarBg: {
@@ -848,8 +846,6 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontFamily: Fonts.light,
-    fontWeight: '100',
     color: Colors.text,
   },
   statLabel: {
@@ -999,8 +995,6 @@ const styles = StyleSheet.create({
   },
   workoutStatValue: {
     fontSize: 18,
-    fontFamily: Fonts.light,
-    fontWeight: '100',
     color: Colors.text,
   },
   workoutStatLabel: {
