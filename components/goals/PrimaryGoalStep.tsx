@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
-    borderRadius: 14,
+    borderRadius: 20,
   },
   continueButtonText: {
     fontSize: 14,
