@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { CalculatedResults, GoalType } from '../../constants/goals';
 import { RoundedNumeral } from '../RoundedNumeral';
+import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 
 interface ResultsStepProps {
@@ -102,7 +103,9 @@ export function ResultsStep({
         <Text style={[styles.cardTitle, { color: colors.text }]}>Starting Point</Text>
         <View style={styles.statRow}>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
-          <Text style={[styles.statValue, { color: colors.text }]}>{results.bmi.toFixed(1)}</Text>
+          <NumberText weight="medium" style={[styles.statValue, { color: colors.text }]}>
+            {results.bmi.toFixed(1)}
+          </NumberText>
         </View>
         <View style={styles.statRow}>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI Category</Text>
@@ -117,11 +120,15 @@ export function ResultsStep({
         <Text style={[styles.cardTitle, { color: colors.text }]}>Metabolism</Text>
         <View style={styles.statRow}>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMR</Text>
-          <Text style={[styles.statValue, { color: colors.text }]}>{results.bmr.toLocaleString()} cal</Text>
+          <NumberText weight="medium" style={[styles.statValue, { color: colors.text }]}>
+            {results.bmr.toLocaleString()} cal
+          </NumberText>
         </View>
         <View style={styles.statRow}>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>TDEE</Text>
-          <Text style={[styles.statValue, { color: colors.text }]}>{results.tdee.toLocaleString()} cal</Text>
+          <NumberText weight="medium" style={[styles.statValue, { color: colors.text }]}>
+            {results.tdee.toLocaleString()} cal
+          </NumberText>
         </View>
       </View>
 
@@ -131,17 +138,17 @@ export function ResultsStep({
           <Text style={[styles.cardTitle, { color: colors.text }]}>Weekly Target</Text>
           <View style={styles.statRow}>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Weekly Change</Text>
-            <Text style={[styles.statValue, { color: colors.text }]}>
+            <NumberText weight="medium" style={[styles.statValue, { color: colors.text }]}>
               {results.weeklyChange > 0 ? '+' : ''}
               {Math.abs(results.weeklyChange).toFixed(2)} lb/week
-            </Text>
+            </NumberText>
           </View>
           <View style={styles.statRow}>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Daily Adjustment</Text>
-            <Text style={[styles.statValue, { color: colors.text }]}>
+            <NumberText weight="medium" style={[styles.statValue, { color: colors.text }]}>
               {results.dailyDelta > 0 ? '+' : ''}
               {Math.round(results.dailyDelta)} cal
-            </Text>
+            </NumberText>
           </View>
         </View>
       )}
@@ -152,7 +159,7 @@ export function ResultsStep({
         <View style={styles.tipItem}>
           <Ionicons name="checkmark-circle" size={20} color={Colors.successStrong} />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>
-            Hit your protein target of {results.protein}g daily to preserve muscle.
+            Hit your protein target of <NumberText weight="medium">{results.protein}</NumberText>g daily to preserve muscle.
           </Text>
         </View>
         <View style={styles.tipItem}>

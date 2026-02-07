@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
+import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { successNotification, lightImpact } from '../../utils/haptics';
@@ -181,7 +182,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
               <Ionicons name="flame" size={20} color={Colors.error} />
-              <Text style={[styles.targetValue, { color: colors.text }]}>{state.results.calories.toLocaleString()}</Text>
+              <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
+                {state.results.calories.toLocaleString()}
+              </NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Calories</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
@@ -319,7 +322,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             </GlassCard>
             <GlassCard style={styles.profileItem} interactive>
               <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Workouts/Week</Text>
-              <Text style={[styles.profileValue, { color: colors.text }]}>{state.workoutsPerWeek || 0}</Text>
+              <NumberText weight="medium" style={[styles.profileValue, { color: colors.text }]}>
+                {state.workoutsPerWeek || 0}
+              </NumberText>
             </GlassCard>
           </View>
 
@@ -328,17 +333,23 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <Ionicons name="flame-outline" size={16} color={Colors.error} />
-                <Text style={[styles.statValue, { color: colors.text }]}>{state.results.bmr.toLocaleString()}</Text>
+                <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
+                  {state.results.bmr.toLocaleString()}
+                </NumberText>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMR</Text>
               </View>
               <View style={styles.statItem}>
                 <Ionicons name="flash-outline" size={16} color={Colors.warning} />
-                <Text style={[styles.statValue, { color: colors.text }]}>{state.results.tdee.toLocaleString()}</Text>
+                <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
+                  {state.results.tdee.toLocaleString()}
+                </NumberText>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>TDEE</Text>
               </View>
               <View style={styles.statItem}>
                 <Ionicons name="body-outline" size={16} color={Colors.success} />
-                <Text style={[styles.statValue, { color: colors.text }]}>{state.results.bmi.toFixed(1)}</Text>
+                <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
+                  {state.results.bmi.toFixed(1)}
+                </NumberText>
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
               </View>
             </View>

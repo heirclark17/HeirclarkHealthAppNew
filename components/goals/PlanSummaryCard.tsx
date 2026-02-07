@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 import { PlanSummary, ExpectedOutcome } from '../../types/training';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -94,7 +95,9 @@ function ProgressionStep({ step, index, colors }: { step: string; index: number;
       style={styles.progressionStep}
     >
       <View style={[styles.stepNumber, { backgroundColor: colors.protein }]}>
-        <Text style={[styles.stepNumberText, { color: colors.background }]}>{index + 1}</Text>
+        <NumberText weight="semiBold" style={[styles.stepNumberText, { color: colors.background }]}>
+          {index + 1}
+        </NumberText>
       </View>
       <Text style={[styles.stepText, { color: colors.textSecondary }]}>{step}</Text>
     </View>

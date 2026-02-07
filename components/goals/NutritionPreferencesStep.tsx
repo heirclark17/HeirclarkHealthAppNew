@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 import { useGoalWizard, DietStyle } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
@@ -826,7 +827,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             >
               <Ionicons name="remove-circle-outline" size={28} color={colors.textMuted} />
             </TouchableOpacity>
-            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>{(state.stepGoal / 1000).toFixed(0)}k</Text>
+            <NumberText weight="bold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+              {(state.stepGoal / 1000).toFixed(0)}k
+            </NumberText>
             <TouchableOpacity
               onPress={async () => {
                 await selectionFeedback();

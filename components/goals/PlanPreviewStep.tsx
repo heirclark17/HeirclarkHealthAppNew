@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
+import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { lightImpact, successNotification } from '../../utils/haptics';
@@ -38,12 +39,16 @@ function MacroBar({ label, value, percentage, color, delay, colors }: MacroBarPr
     <View style={styles.macroItem}>
       <View style={styles.macroHeader}>
         <Text style={[styles.macroLabel, { color: colors.text }]}>{label}</Text>
-        <Text style={[styles.macroValue, { color: colors.text }]}>{value}g</Text>
+        <NumberText weight="medium" style={[styles.macroValue, { color: colors.text }]}>
+          {value}g
+        </NumberText>
       </View>
       <View style={[styles.macroBarBg, { backgroundColor: colors.background }]}>
         <View style={[styles.macroBarFill, { width: `${percentage}%`, backgroundColor: color }]} />
       </View>
-      <Text style={[styles.macroPercent, { color: colors.textMuted }]}>{Math.round(percentage)}%</Text>
+      <NumberText weight="regular" style={[styles.macroPercent, { color: colors.textMuted }]}>
+        {Math.round(percentage)}%
+      </NumberText>
     </View>
   );
 }
@@ -225,17 +230,23 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       <View style={styles.statsRow}>
         <GlassCard style={styles.statCard} interactive>
           <Ionicons name="flame-outline" size={20} color={Colors.error} />
-          <Text style={[styles.statValue, { color: colors.text }]}>{results.bmr.toLocaleString()}</Text>
+          <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
+            {results.bmr.toLocaleString()}
+          </NumberText>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMR</Text>
         </GlassCard>
         <GlassCard style={styles.statCard} interactive>
           <Ionicons name="flash-outline" size={20} color={Colors.warning} />
-          <Text style={[styles.statValue, { color: colors.text }]}>{results.tdee.toLocaleString()}</Text>
+          <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
+            {results.tdee.toLocaleString()}
+          </NumberText>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>TDEE</Text>
         </GlassCard>
         <GlassCard style={styles.statCard} interactive>
           <Ionicons name="body-outline" size={20} color={Colors.success} />
-          <Text style={[styles.statValue, { color: colors.text }]}>{results.bmi.toFixed(1)}</Text>
+          <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
+            {results.bmi.toFixed(1)}
+          </NumberText>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
         </GlassCard>
       </View>
@@ -345,12 +356,16 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         <View style={styles.workoutStatsRow}>
           <View style={styles.workoutStatItem}>
             <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
-            <Text style={[styles.workoutStatValue, { color: colors.text }]}>{state.workoutsPerWeek || 3}</Text>
+            <NumberText weight="semiBold" style={[styles.workoutStatValue, { color: colors.text }]}>
+              {state.workoutsPerWeek || 3}
+            </NumberText>
             <Text style={[styles.workoutStatLabel, { color: colors.textMuted }]}>days/week</Text>
           </View>
           <View style={styles.workoutStatItem}>
             <Ionicons name="time-outline" size={16} color={colors.textMuted} />
-            <Text style={[styles.workoutStatValue, { color: colors.text }]}>{state.workoutDuration || 45}</Text>
+            <NumberText weight="semiBold" style={[styles.workoutStatValue, { color: colors.text }]}>
+              {state.workoutDuration || 45}
+            </NumberText>
             <Text style={[styles.workoutStatLabel, { color: colors.textMuted }]}>min/session</Text>
           </View>
           <View style={styles.workoutStatItem}>
