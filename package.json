@@ -14,6 +14,9 @@
     "test:headed": "playwright test --headed",
     "test:report": "playwright show-report",
     "test:install": "playwright install chromium",
+    "test:unit": "jest --config jest.config.js",
+    "test:unit:watch": "jest --config jest.config.js --watch",
+    "test:unit:coverage": "jest --config jest.config.js --coverage",
     "postinstall": "patch-package"
   },
   "dependencies": {
@@ -78,8 +81,15 @@
   "private": true,
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^29.5.14",
+    "@types/react-test-renderer": "^19.1.0",
+    "jest": "^29.7.0",
+    "jest-expo": "^54.0.17",
     "patch-package": "^8.0.1",
-    "playwright": "^1.57.0"
+    "playwright": "^1.57.0",
+    "react-test-renderer": "^19.1.0"
   },
   "expo": {
     "doctor": {
