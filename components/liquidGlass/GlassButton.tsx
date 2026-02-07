@@ -105,12 +105,12 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
 
   const handlePressIn = () => {
     scale.value = withSpring(0.96, { damping: 15, stiffness: 300 });
-    opacity.value = withSpring(0.8, GLASS_SPRING);
+    opacity.value = withSpring(0.8, { damping: 15, stiffness: 300 });
   };
 
   const handlePressOut = () => {
     scale.value = withSpring(1, { damping: 15, stiffness: 300 });
-    opacity.value = withSpring(1, GLASS_SPRING);
+    opacity.value = withSpring(1, { damping: 15, stiffness: 300 });
   };
 
   const handlePress = () => {
