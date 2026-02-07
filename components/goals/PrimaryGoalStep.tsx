@@ -1,12 +1,12 @@
-import React, { useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Pressable, ScrollView, useWindowDimensions } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
+import { Flame, Dumbbell, ShieldCheck, Heart, Check, ArrowRight } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
-import { lightImpact, selectionFeedback, rigidImpact } from '../../utils/haptics';
+import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
+import { GlassButton } from '../liquidGlass/GlassButton';
 
 // Tab bar constants (must match _layout.tsx)
 const TAB_BAR_HEIGHT = 64;
@@ -17,7 +17,7 @@ interface GoalOption {
   id: PrimaryGoal;
   title: string;
   subtitle: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   color: string;
 }
 
@@ -26,36 +26,29 @@ const GOAL_OPTIONS: GoalOption[] = [
     id: 'lose_weight',
     title: 'Lose Weight',
     subtitle: 'Burn fat, get lean',
-    icon: 'flame-outline',
+    icon: Flame,
     color: Colors.error,
   },
   {
     id: 'build_muscle',
     title: 'Build Muscle',
     subtitle: 'Get stronger',
-    icon: 'barbell-outline',
+    icon: Dumbbell,
     color: Colors.success,
   },
   {
     id: 'maintain',
     title: 'Maintain',
     subtitle: 'Stay where you are',
-    icon: 'shield-checkmark-outline',
+    icon: ShieldCheck,
     color: '#45B7D1',
   },
   {
     id: 'improve_health',
     title: 'Improve Health',
     subtitle: 'Feel better daily',
-    icon: 'heart-outline',
+    icon: Heart,
     color: Colors.successMuted,
-  },
-  {
-    id: 'custom',
-    title: 'Custom Goal',
-    subtitle: 'Define your own',
-    icon: 'create-outline',
-    color: '#DDA0DD',
   },
 ];
 
@@ -104,7 +97,7 @@ function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWid
               ]}
             >
               <View style={[styles.iconContainer, { backgroundColor: option.color + '15' }]}>
-                <Ionicons name={option.icon} size={32} color={isSelected ? option.color : colors.textMuted} />
+                <option.icon size={32} color={isSelected ? option.color : colors.textMuted} />
               </View>
               <Text style={[styles.cardTitle, { color: colors.text }, isSelected && { color: option.color }]}>
                 {option.title}
@@ -112,7 +105,7 @@ function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWid
               <Text style={[styles.cardSubtitle, { color: colors.textMuted }]}>{option.subtitle}</Text>
               {isSelected && (
                 <View style={[styles.checkmark, { backgroundColor: option.color }]}>
-                  <Ionicons name="checkmark" size={14} color="#fff" />
+                  <Check size={14} color="#fff" />
                 </View>
               )}
             </View>
@@ -148,41 +141,11 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
     setPrimaryGoal(goalId);
   };
 
-  const handlePressIn = useCallback(() => {
-    rigidImpact();
-  }, []);
-
   const handleContinue = async () => {
     if (!state.primaryGoal) return;
     await lightImpact();
     onNext();
   };
-
-  // iOS 26 Liquid Glass colors for button
-  const glassButtonColors = {
-    background: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
-    backgroundActive: isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(0, 0, 0, 0.10)',
-    border: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)',
-    text: isDark ? Colors.text : '#1D1D1F',
-    textDisabled: isDark ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.35)',
-  };
-
-  const shadowStyle = Platform.select({
-    ios: {
-      shadowColor: Colors.background,
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: isDark ? 0.4 : 0.12,
-      shadowRadius: 16,
-    },
-    android: {
-      elevation: 8,
-    },
-    default: {
-      boxShadow: isDark
-        ? '0px 8px 16px rgba(0, 0, 0, 0.4)'
-        : '0px 8px 16px rgba(0, 0, 0, 0.12)',
-    },
-  });
 
   return (
     <View style={styles.container}>
@@ -217,49 +180,14 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
       {/* Frosted Liquid Glass Continue Button - Fixed at bottom above tab bar */}
       <View style={[styles.footer, { bottom: footerBottom }]}>
-        <View>
-          <Pressable
-            onPress={handleContinue}
-            onPressIn={handlePressIn}
-            disabled={!state.primaryGoal}
-            style={[
-              styles.continueButton,
-              !state.primaryGoal && styles.continueButtonDisabled,
-            ]}
-          >
-            {/* Glass Background */}
-            <BlurView
-              intensity={isDark ? 40 : 60}
-              tint={isDark ? 'dark' : 'light'}
-              style={[
-                StyleSheet.absoluteFill,
-                styles.continueButtonBlur,
-                {
-                  backgroundColor: state.primaryGoal
-                    ? glassButtonColors.backgroundActive
-                    : glassButtonColors.background,
-                  borderColor: glassButtonColors.border,
-                },
-                state.primaryGoal && shadowStyle,
-              ]}
-            />
-            <Text style={[
-              styles.continueButtonText,
-              {
-                color: state.primaryGoal
-                  ? glassButtonColors.text
-                  : glassButtonColors.textDisabled,
-              },
-            ]}>
-              CONTINUE
-            </Text>
-            <Ionicons
-              name="arrow-forward"
-              size={18}
-              color={state.primaryGoal ? glassButtonColors.text : glassButtonColors.textDisabled}
-            />
-          </Pressable>
-        </View>
+        <GlassButton
+          title="CONTINUE"
+          onPress={handleContinue}
+          disabled={!state.primaryGoal}
+          icon={<ArrowRight size={18} />}
+          size="large"
+          fullWidth
+        />
       </View>
     </View>
   );
@@ -356,27 +284,5 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     backgroundColor: 'transparent',
     // bottom is set dynamically to sit above the floating tab bar
-  },
-  continueButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 8,
-    overflow: 'hidden',
-  },
-  continueButtonBlur: {
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  continueButtonDisabled: {
-    opacity: 0.7,
-  },
-  continueButtonText: {
-    fontSize: 14,
-    fontFamily: Fonts.semiBold,
-    fontWeight: '600',
-    letterSpacing: 1.5,
   },
 });
