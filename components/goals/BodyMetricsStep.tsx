@@ -15,6 +15,7 @@ import { useGoalWizard, WeightUnit, HeightUnit } from '../../contexts/GoalWizard
 import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -163,7 +164,8 @@ function SimplePicker({ data, selectedValue, onValueChange, colors, isDark }: Si
               }}
               activeOpacity={0.7}
             >
-              <Text
+              <NumberText
+                weight={isSelected ? "semiBold" : "regular"}
                 style={[
                   styles.simplePickerText,
                   { color: isSelected ? colors.primary : colors.text },
@@ -171,7 +173,7 @@ function SimplePicker({ data, selectedValue, onValueChange, colors, isDark }: Si
                 ]}
               >
                 {item.label}
-              </Text>
+              </NumberText>
             </TouchableOpacity>
           );
         })}
@@ -245,7 +247,7 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
           disabled={value - 10 < min}
           activeOpacity={0.6}
         >
-          <Text style={[styles.simpleWeightSmallButtonText, { color: colors.textMuted }]}>-10</Text>
+          <NumberText weight="medium" style={[styles.simpleWeightSmallButtonText, { color: colors.textMuted }]}>-10</NumberText>
         </TouchableOpacity>
 
         {/* -1 button */}
@@ -260,7 +262,7 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
 
         {/* Value display */}
         <View style={styles.simpleWeightValueDisplay}>
-          <Text style={[styles.simpleWeightValue, { color: colors.primary }]}>{value}</Text>
+          <NumberText weight="light" style={[styles.simpleWeightValue, { color: colors.primary }]}>{value}</NumberText>
           <Text style={[styles.simpleWeightUnit, { color: colors.textMuted }]}>{unit}</Text>
         </View>
 
@@ -281,7 +283,7 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
           disabled={value + 10 > max}
           activeOpacity={0.6}
         >
-          <Text style={[styles.simpleWeightSmallButtonText, { color: colors.textMuted }]}>+10</Text>
+          <NumberText weight="medium" style={[styles.simpleWeightSmallButtonText, { color: colors.textMuted }]}>+10</NumberText>
         </TouchableOpacity>
       </View>
 
@@ -301,13 +303,13 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
             }}
             activeOpacity={0.7}
           >
-            <Text style={[
+            <NumberText weight="medium" style={[
               styles.simpleWeightQuickText,
               { color: colors.textMuted },
               value === qv && { color: colors.primary },
             ]}>
               {qv}
-            </Text>
+            </NumberText>
           </TouchableOpacity>
         ))}
       </View>
@@ -323,8 +325,8 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
         <View style={[styles.simpleWeightThumb, { left: `${((value - min) / (max - min)) * 100}%`, backgroundColor: colors.primary }]} />
       </View>
       <View style={styles.simpleWeightRangeLabels}>
-        <Text style={[styles.simpleWeightRangeLabel, { color: colors.textMuted }]}>{min}</Text>
-        <Text style={[styles.simpleWeightRangeLabel, { color: colors.textMuted }]}>{max}</Text>
+        <NumberText weight="regular" style={[styles.simpleWeightRangeLabel, { color: colors.textMuted }]}>{min}</NumberText>
+        <NumberText weight="regular" style={[styles.simpleWeightRangeLabel, { color: colors.textMuted }]}>{max}</NumberText>
       </View>
     </View>
   );
@@ -371,7 +373,7 @@ function NumberStepper({ value, min, max, step = 1, onChange, unit, colors, isDa
         <Ionicons name="remove" size={20} color={value <= min ? colors.textMuted : colors.text} />
       </TouchableOpacity>
       <View style={styles.stepperValueContainer}>
-        <Text style={[styles.stepperValue, { color: colors.text }]}>{value}</Text>
+        <NumberText weight="light" style={[styles.stepperValue, { color: colors.text }]}>{value}</NumberText>
         {unit && <Text style={[styles.stepperUnit, { color: colors.textMuted }]}>{unit}</Text>}
       </View>
       <TouchableOpacity
@@ -925,7 +927,6 @@ const styles = StyleSheet.create({
   },
   simplePickerText: {
     fontSize: 18,
-    fontFamily: Fonts.regular,
     fontWeight: '400',
     textAlign: 'center',
   },
@@ -960,7 +961,6 @@ const styles = StyleSheet.create({
   },
   simpleWeightSmallButtonText: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
     fontWeight: '500',
   },
   simpleWeightValueDisplay: {
@@ -972,7 +972,6 @@ const styles = StyleSheet.create({
   },
   simpleWeightValue: {
     fontSize: 44,
-    fontFamily: Fonts.light,
     fontWeight: '200',
   },
   simpleWeightUnit: {
@@ -995,7 +994,6 @@ const styles = StyleSheet.create({
   },
   simpleWeightQuickText: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
     fontWeight: '500',
   },
   simpleWeightTrack: {
@@ -1023,7 +1021,6 @@ const styles = StyleSheet.create({
   },
   simpleWeightRangeLabel: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
   },
   // Date Picker Styles
   datePickerButton: {
@@ -1091,7 +1088,6 @@ const styles = StyleSheet.create({
   },
   stepperValue: {
     fontSize: 24,
-    fontFamily: Fonts.light,
     fontWeight: '100',
     color: Colors.text,
   },
