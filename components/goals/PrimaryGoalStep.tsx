@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
+import { router } from 'expo-router';
 import { Flame, Dumbbell, ShieldCheck, Heart, Check } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
@@ -135,6 +136,11 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
     setPrimaryGoal(goalId);
   };
 
+  const handleBack = async () => {
+    await lightImpact();
+    router.back();
+  };
+
   const handleContinue = async () => {
     if (!state.primaryGoal) return;
     await lightImpact();
@@ -171,11 +177,17 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
           ))}
         </View>
 
-        {/* Frosted Liquid Glass Continue Button */}
-        <View style={styles.buttonContainer}>
+        {/* Action Buttons */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity onPress={handleBack} style={{ flex: 1 }}>
+            <GlassCard style={styles.backButton} interactive>
+              <Text style={[styles.backButtonText, { color: colors.text }]}>EXIT</Text>
+            </GlassCard>
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={handleContinue}
             disabled={!state.primaryGoal}
+            style={{ flex: 2 }}
           >
             <GlassCard
               style={[
@@ -272,9 +284,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonContainer: {
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
     marginTop: 37,
     marginHorizontal: 24,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 16,
+    borderRadius: 20,
+  },
+  backButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    letterSpacing: 1,
+    color: Colors.text,
   },
   continueButton: {
     flexDirection: 'row',
