@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions, Pressable } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { Flame, Dumbbell, ShieldCheck, Heart, Check } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
-import { GlassButton } from '../liquidGlass/GlassButton';
 
 // Tab bar constants (must match _layout.tsx)
 const TAB_BAR_HEIGHT = 64;
@@ -180,15 +180,46 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
       {/* Frosted Liquid Glass Continue Button - Fixed at bottom above tab bar */}
       <View style={[styles.footer, { bottom: footerBottom }]}>
-        <GlassButton
-          title="CONTINUE"
+        <Pressable
           onPress={handleContinue}
           disabled={!state.primaryGoal}
-          variant="secondary"
-          size="large"
-          fullWidth
-          style={styles.glassButton}
-        />
+          style={styles.continueButtonWrapper}
+        >
+          <BlurView
+            intensity={isDark ? 30 : 50}
+            tint={isDark ? 'dark' : 'light'}
+            style={styles.continueButtonBlur}
+          >
+            <View
+              style={[
+                styles.continueButtonContent,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : 'rgba(0, 0, 0, 0.04)',
+                  borderColor: isDark
+                    ? 'rgba(255, 255, 255, 0.12)'
+                    : 'rgba(0, 0, 0, 0.08)',
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.continueButtonText,
+                  {
+                    color: !state.primaryGoal
+                      ? isDark
+                        ? 'rgba(255, 255, 255, 0.3)'
+                        : 'rgba(0, 0, 0, 0.3)'
+                      : colors.text,
+                  },
+                ]}
+              >
+                CONTINUE
+              </Text>
+            </View>
+          </BlurView>
+        </Pressable>
       </View>
     </View>
   );
@@ -286,12 +317,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     // bottom is set dynamically to sit above the floating tab bar
   },
-  glassButton: {
-    // Remove shadow for true frosted liquid glass effect
-    shadowColor: 'transparent',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
+  continueButtonWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  continueButtonBlur: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  continueButtonContent: {
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  continueButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.semiBold,
+    fontWeight: '600',
+    letterSpacing: 1.5,
   },
 });
