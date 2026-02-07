@@ -50,6 +50,9 @@ const getPermissions = () => {
         AppleHealthKit.Constants.Permissions.DistanceWalkingRunning,
         AppleHealthKit.Constants.Permissions.HeartRate,
         AppleHealthKit.Constants.Permissions.Weight,
+        AppleHealthKit.Constants.Permissions.Workout,
+        AppleHealthKit.Constants.Permissions.BloodPressureSystolic,
+        AppleHealthKit.Constants.Permissions.BloodPressureDiastolic,
       ],
       write: [],
     },
@@ -235,6 +238,12 @@ class AppleHealthService {
 
   // Get workouts for a specific date
   private async getWorkouts(startDate: Date): Promise<Workout[]> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get workouts - module not initialized');
+      return [];
+    }
+
     return new Promise((resolve) => {
       const options = {
         startDate: startDate.toISOString(),
@@ -329,6 +338,12 @@ class AppleHealthService {
   }
 
   private getStepsForRange(startDate: Date, endDate: Date): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get steps for range - module not initialized');
+      return Promise.resolve(0);
+    }
+
     return new Promise((resolve) => {
       AppleHealthKit.getStepCount(
         { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
@@ -340,6 +355,12 @@ class AppleHealthService {
   }
 
   private getActiveEnergyForRange(startDate: Date, endDate: Date): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get active energy for range - module not initialized');
+      return Promise.resolve(0);
+    }
+
     return new Promise((resolve) => {
       AppleHealthKit.getActiveEnergyBurned(
         { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
@@ -355,6 +376,12 @@ class AppleHealthService {
   }
 
   private getBasalEnergyForRange(startDate: Date, endDate: Date): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get basal energy for range - module not initialized');
+      return Promise.resolve(0);
+    }
+
     return new Promise((resolve) => {
       AppleHealthKit.getBasalEnergyBurned(
         { startDate: startDate.toISOString(), endDate: endDate.toISOString() },
@@ -370,6 +397,12 @@ class AppleHealthService {
   }
 
   private getDistanceForRange(startDate: Date, endDate: Date): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get distance for range - module not initialized');
+      return Promise.resolve(0);
+    }
+
     return new Promise((resolve) => {
       AppleHealthKit.getDistanceWalkingRunning(
         { date: startDate.toISOString() },
@@ -387,6 +420,12 @@ class AppleHealthService {
   }
 
   private getWorkoutsForRange(startDate: Date, endDate: Date): Promise<Workout[]> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get workouts for range - module not initialized');
+      return Promise.resolve([]);
+    }
+
     return new Promise((resolve) => {
       AppleHealthKit.getSamples(
         {
@@ -415,6 +454,12 @@ class AppleHealthService {
 
   // Get most recent heart rate
   private async getHeartRate(): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get heart rate - module not initialized');
+      return 0;
+    }
+
     return new Promise((resolve) => {
       const options = {
         unit: 'bpm',
@@ -439,6 +484,12 @@ class AppleHealthService {
 
   // Get most recent blood pressure reading
   private async getBloodPressure(): Promise<{ systolic: number; diastolic: number }> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get blood pressure - module not initialized');
+      return { systolic: 0, diastolic: 0 };
+    }
+
     return new Promise((resolve) => {
       const options = {
         startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // Last 7 days
@@ -465,6 +516,12 @@ class AppleHealthService {
 
   // Get steps for a specific date
   private async getSteps(startDate: Date): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get steps - module not initialized');
+      return 0;
+    }
+
     return new Promise((resolve) => {
       const options = {
         date: startDate.toISOString(),
@@ -484,6 +541,12 @@ class AppleHealthService {
 
   // Get active energy burned
   private async getActiveEnergy(startDate: Date): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get active energy - module not initialized');
+      return 0;
+    }
+
     return new Promise((resolve) => {
       const options = {
         startDate: startDate.toISOString(),
@@ -506,6 +569,12 @@ class AppleHealthService {
 
   // Get basal (resting) energy
   private async getBasalEnergy(startDate: Date): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get basal energy - module not initialized');
+      return 0;
+    }
+
     return new Promise((resolve) => {
       const options = {
         startDate: startDate.toISOString(),
@@ -528,6 +597,12 @@ class AppleHealthService {
 
   // Get walking/running distance
   private async getDistance(startDate: Date): Promise<number> {
+    // Safety check: ensure module is available and initialized
+    if (!this.isModuleAvailable() || !this.initialized) {
+      console.warn('[AppleHealth] Cannot get distance - module not initialized');
+      return 0;
+    }
+
     return new Promise((resolve) => {
       const options = {
         date: startDate.toISOString(),

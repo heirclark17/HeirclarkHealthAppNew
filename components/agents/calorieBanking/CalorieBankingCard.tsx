@@ -21,6 +21,7 @@ import { GlassCard } from '../../liquidGlass/GlassCard';
 import { useGlassTheme } from '../../liquidGlass/useGlassTheme';
 import { useCalorieBanking } from '../../../contexts/CalorieBankingContext';
 import { BankingRecommendation } from '../../../types/calorieBanking';
+import { NumberText } from '../../../components/NumberText';
 
 interface CalorieBankingCardProps {
   currentConsumed: number;
@@ -189,9 +190,9 @@ export default function CalorieBankingCard({
           {/* Bank Balance Display */}
           <View style={styles.balanceContainer}>
             <View style={styles.balanceMain}>
-              <Text style={[styles.balanceValue, { color: summary && summary.bankedCalories < 0 ? Colors.warningOrange : Colors.successStrong }]}>
+              <NumberText weight="bold" style={[styles.balanceValue, { color: summary && summary.bankedCalories < 0 ? Colors.warningOrange : Colors.successStrong }]}>
                 {summary ? (summary.bankedCalories >= 0 ? '+' : '') + summary.bankedCalories : '0'}
-              </Text>
+              </NumberText>
               <Text style={[styles.balanceUnit, { color: subtextColor }]}>cal banked</Text>
             </View>
 
@@ -239,9 +240,9 @@ export default function CalorieBankingCard({
                 onPress={recommendation.type === 'bank' ? handleBank : handleBorrow}
                 disabled={isActing}
               >
-                <Text style={styles.actionButtonText}>
+                <NumberText weight="bold" style={styles.actionButtonText}>
                   {isActing ? '...' : recommendation.type === 'bank' ? `+${recommendation.amount}` : `-${recommendation.amount}`}
-                </Text>
+                </NumberText>
               </TouchableOpacity>
             </View>
           )}
@@ -250,16 +251,16 @@ export default function CalorieBankingCard({
           {summary && (
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: textColor }]}>
+                <NumberText weight="semiBold" style={[styles.statValue, { color: textColor }]}>
                   {summary.weeklyRemaining.toLocaleString()}
-                </Text>
+                </NumberText>
                 <Text style={[styles.statLabel, { color: mutedColor }]}>cal remaining</Text>
               </View>
               <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
               <View style={styles.statItem}>
-                <Text style={[styles.statValue, { color: textColor }]}>
+                <NumberText weight="semiBold" style={[styles.statValue, { color: textColor }]}>
                   {recommendation?.averageNeeded.toLocaleString() || dailyTarget}
-                </Text>
+                </NumberText>
                 <Text style={[styles.statLabel, { color: mutedColor }]}>avg/day needed</Text>
               </View>
               <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
@@ -344,7 +345,6 @@ const styles = StyleSheet.create({
   },
   balanceValue: {
     fontSize: 42,
-    fontWeight: '700',
     letterSpacing: -1,
   },
   balanceUnit: {
@@ -405,7 +405,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: Colors.text,
     fontSize: 14,
-    fontWeight: '700',
   },
   statsRow: {
     flexDirection: 'row',
@@ -418,7 +417,6 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontWeight: '600',
     marginBottom: 2,
   },
   statLabel: {

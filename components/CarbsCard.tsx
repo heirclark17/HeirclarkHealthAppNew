@@ -167,14 +167,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   value: {
-    fontSize: 32,
-    fontFamily: Fonts.light,
+    fontSize: 24,
+    fontFamily: Fonts.numericRegular,
     textAlign: 'center',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 10,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     textAlign: 'center',
   },
   modalOverlay: {
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   modalValue: {
     fontSize: 36,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.numericBold,
     marginBottom: 8,
   },
   progressBadge: {

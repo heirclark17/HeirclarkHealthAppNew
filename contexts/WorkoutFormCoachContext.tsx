@@ -14,6 +14,7 @@ import {
   ExerciseCategory,
   DEFAULT_EXERCISES,
 } from '../types/workoutFormCoach';
+import { api } from '../services/api';
 import {
   getExerciseHistory,
   updateExerciseHistory,
@@ -181,6 +182,16 @@ export function WorkoutFormCoachProvider({ children }: WorkoutFormCoachProviderP
         recentFormChecks: updatedChecks,
         lastUpdated: Date.now(),
       }));
+
+      // Sync form analysis to backend (fire-and-forget)
+      try {
+        const userDescription = mistakesIdentified.length > 0
+          ? `Mistakes: ${mistakesIdentified.join(', ')}. Cues followed: ${cuesFollowed.join(', ')}`
+          : `Cues followed: ${cuesFollowed.join(', ')}`;
+        await api.analyzeExerciseForm(exercise.name, userDescription);
+      } catch (error) {
+        console.error('[WorkoutFormCoach] API sync error:', error);
+      }
 
       return result;
     },

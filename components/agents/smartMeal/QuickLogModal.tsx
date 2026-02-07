@@ -2,7 +2,7 @@
 // Shows meal details and allows quick logging with liquid glass design
 
 import React, { useState } from 'react';
-import { Colors } from '../../../constants/Theme';
+import { Colors, Fonts } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { GlassCard } from '../../liquidGlass/GlassCard';
 import { useGlassTheme } from '../../liquidGlass/useGlassTheme';
+import { NumberText } from '../../NumberText';
 import { FrequentMeal } from '../../../types/smartMealLogger';
 
 interface QuickLogModalProps {
@@ -115,23 +116,23 @@ export default function QuickLogModal({
             {/* Macro Display */}
             <View style={styles.macroContainer}>
               <View style={[styles.macroItem, styles.calorieItem]}>
-                <Text style={[styles.macroValue, { color: textColor }]}>{meal.calories}</Text>
+                <NumberText weight="bold" style={[styles.macroValue, { color: textColor }]}>{meal.calories}</NumberText>
                 <Text style={[styles.macroLabel, { color: subtextColor }]}>Calories</Text>
               </View>
               <View style={styles.macroRow}>
                 <View style={styles.macroItem}>
                   <View style={[styles.macroDot, { backgroundColor: Colors.error }]} />
-                  <Text style={[styles.macroSmallValue, { color: textColor }]}>{meal.protein}g</Text>
+                  <NumberText weight="semiBold" style={[styles.macroSmallValue, { color: textColor }]}>{meal.protein}g</NumberText>
                   <Text style={[styles.macroSmallLabel, { color: mutedColor }]}>Protein</Text>
                 </View>
                 <View style={styles.macroItem}>
                   <View style={[styles.macroDot, { backgroundColor: Colors.success }]} />
-                  <Text style={[styles.macroSmallValue, { color: textColor }]}>{meal.carbs}g</Text>
+                  <NumberText weight="semiBold" style={[styles.macroSmallValue, { color: textColor }]}>{meal.carbs}g</NumberText>
                   <Text style={[styles.macroSmallLabel, { color: mutedColor }]}>Carbs</Text>
                 </View>
                 <View style={styles.macroItem}>
                   <View style={[styles.macroDot, { backgroundColor: '#FFE66D' }]} />
-                  <Text style={[styles.macroSmallValue, { color: textColor }]}>{meal.fat}g</Text>
+                  <NumberText weight="semiBold" style={[styles.macroSmallValue, { color: textColor }]}>{meal.fat}g</NumberText>
                   <Text style={[styles.macroSmallLabel, { color: mutedColor }]}>Fat</Text>
                 </View>
               </View>
@@ -141,7 +142,7 @@ export default function QuickLogModal({
             <View style={[styles.statsContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }]}>
               <View style={styles.statItem}>
                 <Ionicons name="repeat" size={16} color={subtextColor} />
-                <Text style={[styles.statText, { color: subtextColor }]}>Logged {meal.logCount} times</Text>
+                <NumberText weight="regular" style={[styles.statText, { color: subtextColor }]}>Logged {meal.logCount} times</NumberText>
               </View>
               <View style={styles.statItem}>
                 <Ionicons name="time-outline" size={16} color={subtextColor} />
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
   },
   macroValue: {
     fontSize: 48,
-    fontWeight: '700',
+    fontFamily: Fonts.numericBold,
     letterSpacing: -1,
   },
   macroLabel: {
@@ -256,7 +257,7 @@ const styles = StyleSheet.create({
   },
   macroSmallValue: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
   },
   macroSmallLabel: {
     fontSize: 11,

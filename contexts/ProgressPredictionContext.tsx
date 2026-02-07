@@ -43,6 +43,7 @@ import {
   createDefaultMilestones,
   updateMilestones,
 } from '../services/progressPredictionService';
+import { api } from '../services/api';
 
 // Context interface
 interface ProgressPredictionContextType {
@@ -240,6 +241,20 @@ export function ProgressPredictionProvider({ children }: ProgressPredictionProvi
         snapshot,
         lastCalculated: now,
       }));
+
+      // Sync with backend AI prediction agent
+      if (goalWeight > 0 && state.weightHistory.length > 0) {
+        try {
+          const currentWeight = state.weightHistory[0]?.weight || startingWeight;
+          const averageDeficit = trendAnalysis.weeklyChange || 0;
+          const aiPrediction = await api.getProgressForecast(currentWeight, goalWeight, averageDeficit);
+          if (aiPrediction) {
+            console.log('[ProgressPrediction] AI forecast synced successfully');
+          }
+        } catch (error) {
+          console.error('[ProgressPrediction] API sync error:', error);
+        }
+      }
     } catch (error) {
       console.error('Error recalculating predictions:', error);
     }

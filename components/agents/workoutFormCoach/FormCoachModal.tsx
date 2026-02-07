@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { exerciseDbService } from '../../../services/exerciseDbService';
+import { NumberText } from '../../NumberText';
 import { ExerciseDBExercise } from '../../../types/ai';
 import { Exercise, FormCue, CommonMistake } from '../../../types/workoutFormCoach';
 import { useGlassTheme } from '../../liquidGlass';
@@ -159,9 +160,9 @@ export function FormCoachModal({
         {(cues.length > 0 ? cues : instructions.map((instr, i) => ({ id: `instr_${i}`, cue: instr, order: i + 1 }))).map((cue, index) => (
           <View key={cue.id || index} style={styles.cueItem}>
             <View style={[styles.cueNumber, { backgroundColor: colors.primary + '20' }]}>
-              <Text style={[styles.cueNumberText, { color: colors.primary }]}>
+              <NumberText weight="semiBold" style={[styles.cueNumberText, { color: colors.primary }]}>
                 {cue.order || index + 1}
-              </Text>
+              </NumberText>
             </View>
             <View style={styles.cueContent}>
               <Text style={[styles.cueText, { color: colors.text }]}>

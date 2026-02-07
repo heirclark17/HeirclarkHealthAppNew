@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
+import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
 import { mediumImpact, lightImpact, selectionFeedback } from '../../utils/haptics';
@@ -220,17 +221,17 @@ export function WeightInputModal({
             <Text style={[styles.exerciseName, { color: colors.text }]}>
               {exercise.exercise.name}
             </Text>
-            <Text style={[styles.exercisePrescription, { color: colors.textMuted }]}>
+            <NumberText weight="regular" style={[styles.exercisePrescription, { color: colors.textMuted }]}>
               {exercise.sets} sets × {exercise.reps}
-            </Text>
+            </NumberText>
 
             {/* Previous Performance */}
             {lastLog && (
               <View style={[styles.previousPerformance, { borderTopColor: inputBorder }]}>
                 <Ionicons name="time-outline" size={14} color={colors.textMuted} />
-                <Text style={[styles.previousText, { color: colors.textMuted }]}>
+                <NumberText weight="regular" style={[styles.previousText, { color: colors.textMuted }]}>
                   Last: {lastLog.maxWeight}{lastLog.sets[0]?.unit || 'lb'} × {lastLog.sets[0]?.reps || 0} reps
-                </Text>
+                </NumberText>
                 {lastLog.personalRecord && (
                   <View style={styles.prBadge}>
                     <Text style={styles.prBadgeText}>PR</Text>
@@ -243,9 +244,9 @@ export function WeightInputModal({
             {progress && progress.suggestedNextWeight > progress.currentMax && (
               <View style={[styles.suggestion, { backgroundColor: isDark ? 'rgba(76, 217, 100, 0.15)' : 'rgba(76, 217, 100, 0.1)' }]}>
                 <Ionicons name="trending-up" size={16} color="#4CD964" />
-                <Text style={[styles.suggestionText, { color: '#4CD964' }]}>
+                <NumberText weight="medium" style={[styles.suggestionText, { color: '#4CD964' }]}>
                   Ready to progress! Try {progress.suggestedNextWeight}{unit}
-                </Text>
+                </NumberText>
               </View>
             )}
           </GlassCard>
@@ -277,9 +278,9 @@ export function WeightInputModal({
                 style={[styles.setRow, { backgroundColor: inputBg, borderColor: inputBorder }]}
               >
                 <View style={styles.setNumber}>
-                  <Text style={[styles.setNumberText, { color: colors.textMuted }]}>
+                  <NumberText weight="semiBold" style={[styles.setNumberText, { color: colors.textMuted }]}>
                     {set.setNumber}
-                  </Text>
+                  </NumberText>
                 </View>
 
                 <View style={styles.inputGroup}>
@@ -294,7 +295,7 @@ export function WeightInputModal({
                   <Text style={[styles.inputLabel, { color: colors.textMuted }]}>{unit}</Text>
                 </View>
 
-                <Text style={[styles.separator, { color: colors.textMuted }]}>×</Text>
+                <NumberText weight="regular" style={[styles.separator, { color: colors.textMuted }]}>×</NumberText>
 
                 <View style={styles.inputGroup}>
                   <TextInput
@@ -335,23 +336,24 @@ export function WeightInputModal({
                 </Text>
                 <View style={styles.progressStats}>
                   <View style={styles.progressStat}>
-                    <Text style={[styles.progressStatValue, { color: Colors.protein }]}>
+                    <NumberText weight="semiBold" style={[styles.progressStatValue, { color: Colors.protein }]}>
                       {progress.allTimeMax}{progress.currentMaxUnit}
-                    </Text>
+                    </NumberText>
                     <Text style={[styles.progressStatLabel, { color: colors.textMuted }]}>
                       Personal Best
                     </Text>
                   </View>
                   <View style={styles.progressStat}>
-                    <Text style={[styles.progressStatValue, { color: colors.text }]}>
+                    <NumberText weight="semiBold" style={[styles.progressStatValue, { color: colors.text }]}>
                       {progress.totalSessions}
-                    </Text>
+                    </NumberText>
                     <Text style={[styles.progressStatLabel, { color: colors.textMuted }]}>
                       Sessions
                     </Text>
                   </View>
                   <View style={styles.progressStat}>
-                    <Text
+                    <NumberText
+                      weight="semiBold"
                       style={[
                         styles.progressStatValue,
                         {
@@ -366,7 +368,7 @@ export function WeightInputModal({
                     >
                       {progress.progressPercentage > 0 ? '+' : ''}
                       {progress.progressPercentage}%
-                    </Text>
+                    </NumberText>
                     <Text style={[styles.progressStatLabel, { color: colors.textMuted }]}>
                       Progress
                     </Text>
@@ -525,7 +527,7 @@ const styles = StyleSheet.create({
   },
   setNumberText: {
     fontSize: 13,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   inputGroup: {
     flex: 1,
@@ -540,7 +542,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     fontSize: 18,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
     textAlign: 'center',
   },
   inputLabel: {
@@ -550,7 +552,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     fontSize: 18,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericRegular,
   },
   notesSection: {
     marginTop: 16,
@@ -581,7 +583,7 @@ const styles = StyleSheet.create({
   },
   progressStatValue: {
     fontSize: 20,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   progressStatLabel: {
     fontSize: 11,

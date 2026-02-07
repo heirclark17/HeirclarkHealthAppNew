@@ -30,6 +30,7 @@ import { GlassCard } from '../../GlassCard';
 import { useAdaptiveTDEE } from '../../../contexts/AdaptiveTDEEContext';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Fonts } from '../../../constants/Theme';
+import { NumberText } from '../../../components/NumberText';
 import { BodyWeightLog } from '../../../types/adaptiveTDEE';
 
 // iOS 26 Liquid Glass spring configuration
@@ -237,15 +238,15 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                 <>
                   {/* Current Weight Display */}
                   <View style={styles.weightDisplay}>
-                    <Text style={[styles.weightValue, { color: textColor }]}>
+                    <NumberText weight="light" style={[styles.weightValue, { color: textColor }]}>
                       {formatWeight(latestWeight)}
-                    </Text>
+                    </NumberText>
                     {weightChange && (
                       <View style={[styles.changeIndicator, { backgroundColor: `${weightChange.color}15` }]}>
                         <Ionicons name={weightChange.icon} size={14} color={weightChange.color} />
-                        <Text style={[styles.changeText, { color: weightChange.color }]}>
+                        <NumberText weight="medium" style={[styles.changeText, { color: weightChange.color }]}>
                           {weightChange.text}
-                        </Text>
+                        </NumberText>
                       </View>
                     )}
                   </View>
@@ -385,9 +386,9 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                         setWeightInput((current + delta).toFixed(1));
                       }}
                     >
-                      <Text style={[styles.adjustButtonText, { color: delta > 0 ? Colors.warningOrange : Colors.successStrong }]}>
+                      <NumberText weight="medium" style={[styles.adjustButtonText, { color: delta > 0 ? Colors.warningOrange : Colors.successStrong }]}>
                         {delta > 0 ? '+' : ''}{delta}
-                      </Text>
+                      </NumberText>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -477,7 +478,6 @@ const styles = StyleSheet.create({
   },
   weightValue: {
     fontSize: 42,
-    fontFamily: Fonts.light,
     letterSpacing: -1,
   },
   changeIndicator: {
@@ -491,7 +491,6 @@ const styles = StyleSheet.create({
   },
   changeText: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
   },
   miniChart: {
     width: '100%',
@@ -661,7 +660,6 @@ const styles = StyleSheet.create({
   },
   adjustButtonText: {
     fontSize: 16,
-    fontFamily: Fonts.medium,
   },
   submitButton: {
     flexDirection: 'row',

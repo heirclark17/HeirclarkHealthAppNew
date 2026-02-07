@@ -48,6 +48,7 @@ import {
   getBestStreak,
   getStreaksAtRisk,
 } from '../services/accountabilityPartnerService';
+import { api } from '../services/api';
 
 // Context interface
 interface AccountabilityPartnerContextType {
@@ -147,6 +148,25 @@ export function AccountabilityPartnerProvider({ children }: AccountabilityPartne
         isLoading: false,
         lastUpdated: Date.now(),
       });
+
+      // Sync with backend AI accountability agent
+      try {
+        const todayProgress = {
+          streaks,
+          checkIn: todayCheckIn,
+          engagement,
+        };
+        const goals = {
+          reminderSettings: settings,
+        };
+        const streak = getBestStreak(streaks).streak.currentStreak;
+        const aiResponse = await api.getAccountabilityCheckIn(todayProgress, goals, streak);
+        if (aiResponse) {
+          console.log('[AccountabilityPartner] AI check-in synced successfully');
+        }
+      } catch (error) {
+        console.error('[AccountabilityPartner] API sync error:', error);
+      }
     } catch (error) {
       console.error('Error loading accountability data:', error);
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -191,6 +211,16 @@ export function AccountabilityPartnerProvider({ children }: AccountabilityPartne
         recentMessages: updatedMessages,
         lastUpdated: Date.now(),
       }));
+
+      // Fire-and-forget: sync activity to backend AI agent
+      try {
+        const todayProgress = { streaks: updatedStreaks, activity };
+        const goals = {};
+        const streak = getBestStreak(updatedStreaks).streak.currentStreak;
+        await api.getAccountabilityCheckIn(todayProgress, goals, streak);
+      } catch (error) {
+        console.error('[AccountabilityPartner] API sync error:', error);
+      }
     } catch (error) {
       console.error('Error logging activity:', error);
     }

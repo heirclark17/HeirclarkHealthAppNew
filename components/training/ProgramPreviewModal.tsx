@@ -13,6 +13,7 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 // Animations removed
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
+import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
 import { ProgramTemplate, TrainingProgram } from '../../types/training';
@@ -178,17 +179,17 @@ export function ProgramPreviewModal({
               <View style={styles.statsGrid}>
                 <View style={[styles.statBox, { backgroundColor: cardBg }]}>
                   <Ionicons name="calendar-outline" size={20} color={greenColor} />
-                  <Text style={[styles.statValue, { color: colors.text }]}>{program.duration}</Text>
+                  <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{program.duration}</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Weeks</Text>
                 </View>
                 <View style={[styles.statBox, { backgroundColor: cardBg }]}>
                   <Ionicons name="repeat-outline" size={20} color={greenColor} />
-                  <Text style={[styles.statValue, { color: colors.text }]}>{program.daysPerWeek}</Text>
+                  <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{program.daysPerWeek}</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Days/Week</Text>
                 </View>
                 <View style={[styles.statBox, { backgroundColor: cardBg }]}>
                   <Ionicons name="time-outline" size={20} color={greenColor} />
-                  <Text style={[styles.statValue, { color: colors.text }]}>45-60</Text>
+                  <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>45-60</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Min/Session</Text>
                 </View>
               </View>

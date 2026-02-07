@@ -19,6 +19,7 @@ import { useGlassTheme } from '../../liquidGlass';
 import { useHydration } from '../../../contexts/HydrationContext';
 import { QUICK_ADD_AMOUNTS, WATER_SOURCES } from '../../../types/hydration';
 import { Fonts } from '../../../constants/Theme';
+import { NumberText } from '../../../components/NumberText';
 
 export default function HydrationCard() {
   const { colors } = useGlassTheme();
@@ -109,7 +110,7 @@ export default function HydrationCard() {
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
             <Text style={[styles.progressLabel, { color: colors.textMuted }]}>Today's Progress</Text>
-            <Text style={[styles.progressPercent, { color: getProgressColor() }]}>{progressPercent}%</Text>
+            <NumberText weight="semiBold" style={[styles.progressPercent, { color: getProgressColor() }]}>{progressPercent}%</NumberText>
           </View>
 
           {/* Progress Bar */}
@@ -129,21 +130,21 @@ export default function HydrationCard() {
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Ionicons name="water" size={16} color={colors.primary} />
-              <Text style={[styles.statValue, { color: colors.text }]}>{formatAmount(state.todayIntake)}</Text>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{formatAmount(state.todayIntake)}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>consumed</Text>
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.glassBorder }]} />
             <View style={styles.statItem}>
               <Ionicons name="flag" size={16} color={colors.primary} />
-              <Text style={[styles.statValue, { color: colors.text }]}>{formatAmount(state.todayGoal)}</Text>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{formatAmount(state.todayGoal)}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>goal</Text>
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.glassBorder }]} />
             <View style={styles.statItem}>
               <Ionicons name="hourglass" size={16} color={remaining > 0 ? '#FFB74D' : colors.success} />
-              <Text style={[styles.statValue, { color: remaining > 0 ? colors.text : colors.success }]}>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: remaining > 0 ? colors.text : colors.success }]}>
                 {remaining > 0 ? formatAmount(remaining) : 'Done!'}
-              </Text>
+              </NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>remaining</Text>
             </View>
           </View>
@@ -260,7 +261,7 @@ export default function HydrationCard() {
                         color={WATER_SOURCES.find((s) => s.id === entry.source)?.color || '#4FC3F7'}
                       />
                       <View>
-                        <Text style={[styles.entryAmount, { color: colors.text }]}>{formatAmount(entry.amount)}</Text>
+                        <NumberText weight="semiBold" style={[styles.entryAmount, { color: colors.text }]}>{formatAmount(entry.amount)}</NumberText>
                         <Text style={[styles.entryTime, { color: colors.textMuted }]}>
                           {new Date(entry.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                         </Text>
@@ -303,12 +304,12 @@ export default function HydrationCard() {
             <View style={styles.streakRow}>
               <View style={[styles.streakBox, { backgroundColor: colors.primary + '20' }]}>
                 <Ionicons name="flame" size={24} color={colors.primary} />
-                <Text style={[styles.streakValue, { color: colors.text }]}>{state.streak.currentStreak}</Text>
+                <NumberText weight="semiBold" style={[styles.streakValue, { color: colors.text }]}>{state.streak.currentStreak}</NumberText>
                 <Text style={[styles.streakLabel, { color: colors.textMuted }]}>Current Streak</Text>
               </View>
               <View style={[styles.streakBox, { backgroundColor: colors.success + '20' }]}>
                 <Ionicons name="trophy" size={24} color={colors.success} />
-                <Text style={[styles.streakValue, { color: colors.text }]}>{state.streak.longestStreak}</Text>
+                <NumberText weight="semiBold" style={[styles.streakValue, { color: colors.text }]}>{state.streak.longestStreak}</NumberText>
                 <Text style={[styles.streakLabel, { color: colors.textMuted }]}>Best Streak</Text>
               </View>
             </View>
@@ -383,12 +384,12 @@ const styles = StyleSheet.create({
   progressSection: { marginBottom: 12 },
   progressHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   progressLabel: { fontSize: 12, fontFamily: Fonts.regular },
-  progressPercent: { fontSize: 14, fontFamily: Fonts.semiBold },
+  progressPercent: { fontSize: 14 },
   progressBarContainer: { height: 10, borderRadius: 5, overflow: 'hidden', marginBottom: 12 },
   progressBarFill: { height: '100%', borderRadius: 5 },
   statsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' },
   statItem: { alignItems: 'center', gap: 4 },
-  statValue: { fontSize: 14, fontFamily: Fonts.semiBold },
+  statValue: { fontSize: 14 },
   statLabel: { fontSize: 10, fontFamily: Fonts.regular },
   statDivider: { width: 1, height: 30 },
   quickAddScroll: { marginBottom: 12 },
@@ -411,12 +412,12 @@ const styles = StyleSheet.create({
   amountValue: { fontSize: 16, fontFamily: Fonts.semiBold },
   entryItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderRadius: 10, marginBottom: 8 },
   entryLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  entryAmount: { fontSize: 14, fontFamily: Fonts.semiBold },
+  entryAmount: { fontSize: 14 },
   entryTime: { fontSize: 11, fontFamily: Fonts.regular },
   deleteButton: { padding: 8, borderRadius: 8 },
   streakRow: { flexDirection: 'row', gap: 12 },
   streakBox: { flex: 1, alignItems: 'center', padding: 16, borderRadius: 12, gap: 4 },
-  streakValue: { fontSize: 24, fontFamily: Fonts.semiBold },
+  streakValue: { fontSize: 24 },
   streakLabel: { fontSize: 11, fontFamily: Fonts.regular },
   historyItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderRadius: 10, marginBottom: 8 },
   historyLeft: { flex: 1 },

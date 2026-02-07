@@ -114,8 +114,7 @@ const styles = StyleSheet.create({
   mainValue: {
     fontSize: 48,
     color: Colors.text,
-    fontFamily: Fonts.regular,
-    fontWeight: '200',
+    fontFamily: Fonts.numericRegular,
     letterSpacing: 2,
   },
   unit: {

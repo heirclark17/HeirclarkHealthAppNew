@@ -39,6 +39,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { aiService } from '../../services/aiService';
 import { SavedMeal, MealType } from '../../types/ai';
 import { DarkColors, LightColors, Spacing, Fonts } from '../../constants/Theme';
+import { NumberText } from '../../components/NumberText';
 import { mediumImpact, lightImpact } from '../../utils/haptics';
 
 type FilterType = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'favorites';
@@ -216,21 +217,21 @@ export default function SavedMealsScreen() {
 
           <View style={styles.mealMeta}>
             <View style={styles.nutrientBadge}>
-              <Text style={[styles.nutrientValue, { color: colors.text }]}>
+              <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
                 {meal.nutrients.calories}
-              </Text>
+              </NumberText>
               <Text style={[styles.nutrientLabel, { color: colors.textTertiary }]}>cal</Text>
             </View>
             <View style={styles.nutrientBadge}>
-              <Text style={[styles.nutrientValue, { color: colors.text }]}>
+              <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
                 {meal.nutrients.protein_g}g
-              </Text>
+              </NumberText>
               <Text style={[styles.nutrientLabel, { color: colors.textTertiary }]}>protein</Text>
             </View>
             <View style={styles.nutrientBadge}>
-              <Text style={[styles.nutrientValue, { color: colors.text }]}>
+              <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
                 {meal.prepTimeMinutes}
-              </Text>
+              </NumberText>
               <Text style={[styles.nutrientLabel, { color: colors.textTertiary }]}>min</Text>
             </View>
           </View>
@@ -364,12 +365,12 @@ export default function SavedMealsScreen() {
         <GlassCard style={styles.statsCard}>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: colors.text }]}>{stats.total}</Text>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{stats.total}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Meals</Text>
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.surface }]} />
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: '#ff6b6b' }]}>{stats.favorites}</Text>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: '#ff6b6b' }]}>{stats.favorites}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Favorites</Text>
             </View>
           </View>
@@ -478,7 +479,6 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontFamily: Fonts.semiBold,
   },
   statLabel: {
     fontSize: 11,
@@ -585,7 +585,6 @@ const styles = StyleSheet.create({
   },
   nutrientValue: {
     fontSize: 15,
-    fontFamily: Fonts.semiBold,
   },
   nutrientLabel: {
     fontSize: 10,

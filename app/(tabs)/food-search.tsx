@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { api } from '../../services/api';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
+import { NumberText } from '../../components/NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../../components/GlassCard';
 
@@ -176,19 +177,19 @@ export default function FoodSearchScreen() {
         <View style={styles.nutritionInfo}>
           <View style={styles.macroRow}>
             <View style={styles.macroItem}>
-              <Text style={[styles.macroValue, { color: colors.text }]}>{item.calories}</Text>
+              <NumberText weight="semiBold" style={[styles.macroValue, { color: colors.text }]}>{item.calories}</NumberText>
               <Text style={[styles.macroLabel, { color: colors.textMuted }]}>cal</Text>
             </View>
             <View style={styles.macroItem}>
-              <Text style={[styles.macroValue, { color: '#60a5fa' }]}>{item.protein}g</Text>
+              <NumberText weight="semiBold" style={[styles.macroValue, { color: '#60a5fa' }]}>{item.protein}g</NumberText>
               <Text style={[styles.macroLabel, { color: colors.textMuted }]}>P</Text>
             </View>
             <View style={styles.macroItem}>
-              <Text style={[styles.macroValue, { color: '#fbbf24' }]}>{item.carbs}g</Text>
+              <NumberText weight="semiBold" style={[styles.macroValue, { color: '#fbbf24' }]}>{item.carbs}g</NumberText>
               <Text style={[styles.macroLabel, { color: colors.textMuted }]}>C</Text>
             </View>
             <View style={styles.macroItem}>
-              <Text style={[styles.macroValue, { color: '#f472b6' }]}>{item.fat}g</Text>
+              <NumberText weight="semiBold" style={[styles.macroValue, { color: '#f472b6' }]}>{item.fat}g</NumberText>
               <Text style={[styles.macroLabel, { color: colors.textMuted }]}>F</Text>
             </View>
           </View>
@@ -484,7 +485,6 @@ const styles = StyleSheet.create({
   },
   macroValue: {
     fontSize: 14,
-    fontFamily: Fonts.semiBold,
   },
   macroLabel: {
     fontSize: 10,

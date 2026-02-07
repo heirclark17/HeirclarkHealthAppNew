@@ -221,8 +221,7 @@ const styles = StyleSheet.create({
   fatLossValue: {
     fontSize: 32,
     color: Colors.text,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericRegular,
     marginBottom: 4,
   },
   helperText: {
@@ -312,7 +311,7 @@ const styles = StyleSheet.create({
   },
   weeklyTargetValue: {
     fontSize: 24,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.numericBold,
     color: Colors.text,
   },
   weeklyTargetLabel: {

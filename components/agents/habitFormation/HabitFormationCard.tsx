@@ -19,6 +19,7 @@ import { useGlassTheme } from '../../liquidGlass';
 import { useHabitFormation } from '../../../contexts/HabitFormationContext';
 import { Habit, HabitCategory, SUGGESTED_HABITS, CATEGORY_ICONS } from '../../../types/habitFormation';
 import { Fonts } from '../../../constants/Theme';
+import { NumberText } from '../../../components/NumberText';
 
 export default function HabitFormationCard() {
   const { colors } = useGlassTheme();
@@ -65,9 +66,9 @@ export default function HabitFormationCard() {
         <View style={styles.habitInfo}>
           <Text style={[styles.habitName, { color: colors.text }]}>{habit.name}</Text>
           {streak && streak.currentStreak > 0 && (
-            <Text style={[styles.habitStreak, { color: colors.textMuted }]}>
+            <NumberText weight="regular" style={[styles.habitStreak, { color: colors.textMuted }]}>
               {streak.currentStreak} day streak
-            </Text>
+            </NumberText>
           )}
         </View>
         <View style={styles.habitActions}>
@@ -138,9 +139,9 @@ export default function HabitFormationCard() {
                 ]}
               />
             </View>
-            <Text style={[styles.progressText, { color: colors.textMuted }]}>
+            <NumberText weight="regular" style={[styles.progressText, { color: colors.textMuted }]}>
               {summary.completionRate}% complete
-            </Text>
+            </NumberText>
           </View>
         )}
 
@@ -284,13 +285,13 @@ const styles = StyleSheet.create({
   progressSection: { marginBottom: 12 },
   progressBar: { height: 6, borderRadius: 3, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 3 },
-  progressText: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 4 },
+  progressText: { fontSize: 11, marginTop: 4 },
   habitsPreview: {},
   habitItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1 },
   habitIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   habitInfo: { flex: 1, marginLeft: 12 },
   habitName: { fontSize: 13, fontFamily: Fonts.medium },
-  habitStreak: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 2 },
+  habitStreak: { fontSize: 11, marginTop: 2 },
   habitActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   actionButton: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   skipButton: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },

@@ -6,6 +6,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
+import { NumberText } from '../../components/NumberText';
 import { GlassCard } from '../../components/GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useTraining } from '../../contexts/TrainingContext';
@@ -362,13 +363,13 @@ export default function ProgramsScreen() {
         {weeklyStats && (
           <View style={styles.statsRow}>
             <GlassCard style={styles.statCard} interactive>
-              <Text style={[styles.statValue, { color: colors.text }]}>
+              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>
                 {weeklyStats.completedWorkouts}/{weeklyStats.totalWorkouts}
-              </Text>
+              </NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Workouts</Text>
             </GlassCard>
             <GlassCard style={styles.statCard} interactive>
-              <Text style={[styles.statValue, { color: colors.text }]}>Week {currentWeek}</Text>
+              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>Week {currentWeek}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Current</Text>
             </GlassCard>
           </View>
@@ -806,7 +807,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     color: Colors.text,
-    fontFamily: Fonts.thin,
     letterSpacing: 0.5,
   },
   statLabel: {

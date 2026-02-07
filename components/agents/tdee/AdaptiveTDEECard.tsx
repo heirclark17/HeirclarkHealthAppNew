@@ -22,6 +22,7 @@ import { TDEE_CONSTANTS } from '../../../types/adaptiveTDEE';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Fonts } from '../../../constants/Theme';
+import { NumberText } from '../../../components/NumberText';
 import TDEEInsightModal from './TDEEInsightModal';
 
 interface AdaptiveTDEECardProps {
@@ -167,9 +168,9 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
               // Not enough data state
               <View style={styles.notReadyContainer}>
                 <View style={styles.progressRing}>
-                  <Text style={[styles.progressText, { color: textColor }]}>
+                  <NumberText weight="light" style={[styles.progressText, { color: textColor }]}>
                     {TDEE_CONSTANTS.MIN_DAYS_FOR_CALCULATION - daysUntilReady}
-                  </Text>
+                  </NumberText>
                   <Text style={[styles.progressLabel, { color: subtextColor }]}>days logged</Text>
                 </View>
                 <View style={styles.notReadyInfo}>
@@ -203,7 +204,7 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
               <View style={styles.tdeeContainer}>
                 {/* Main TDEE Display */}
                 <View style={styles.mainTDEE}>
-                  <Text style={[styles.tdeeValue, { color: textColor }]}>{adaptiveTDEE.toLocaleString()}</Text>
+                  <NumberText weight="light" style={[styles.tdeeValue, { color: textColor }]}>{adaptiveTDEE.toLocaleString()}</NumberText>
                   <Text style={[styles.tdeeUnit, { color: subtextColor }]}>cal/day</Text>
                 </View>
 
@@ -211,14 +212,14 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
                 <View style={[styles.comparisonRow, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }]}>
                   <View style={styles.comparisonItem}>
                     <Text style={[styles.comparisonLabel, { color: mutedColor }]}>Formula Estimate</Text>
-                    <Text style={[styles.comparisonValue, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{formulaTDEE.toLocaleString()}</Text>
+                    <NumberText weight="medium" style={[styles.comparisonValue, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{formulaTDEE.toLocaleString()}</NumberText>
                   </View>
                   <View style={[styles.divider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
                   <View style={styles.comparisonItem}>
                     <Text style={[styles.comparisonLabel, { color: mutedColor }]}>Recommended</Text>
-                    <Text style={[styles.comparisonValue, styles.recommendedValue]}>
+                    <NumberText weight="medium" style={[styles.comparisonValue, styles.recommendedValue]}>
                       {getRecommendedCalories().toLocaleString()}
-                    </Text>
+                    </NumberText>
                   </View>
                 </View>
 
@@ -226,9 +227,9 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
                 {trendDisplay && (
                   <View style={[styles.trendContainer, { backgroundColor: `${trendDisplay.color}15` }]}>
                     <Ionicons name={trendDisplay.icon} size={16} color={trendDisplay.color} />
-                    <Text style={[styles.trendText, { color: trendDisplay.color }]}>
+                    <NumberText weight="medium" style={[styles.trendText, { color: trendDisplay.color }]}>
                       {trendDisplay.text}
-                    </Text>
+                    </NumberText>
                   </View>
                 )}
               </View>
@@ -321,7 +322,6 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 24,
-    fontFamily: Fonts.light,
   },
   progressLabel: {
     fontSize: 10,
@@ -363,7 +363,6 @@ const styles = StyleSheet.create({
   },
   tdeeValue: {
     fontSize: 48,
-    fontFamily: Fonts.light,
     letterSpacing: -1,
   },
   tdeeUnit: {
@@ -391,7 +390,6 @@ const styles = StyleSheet.create({
   },
   comparisonValue: {
     fontSize: 18,
-    fontFamily: Fonts.medium,
   },
   recommendedValue: {
     color: Colors.successStrong,
@@ -410,7 +408,6 @@ const styles = StyleSheet.create({
   },
   trendText: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
   },
   footer: {
     flexDirection: 'row',

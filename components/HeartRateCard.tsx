@@ -286,13 +286,13 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 24,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericRegular,
     textAlign: 'center',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 10,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     textAlign: 'center',
   },
   // Modal styles

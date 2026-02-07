@@ -13,6 +13,7 @@ import {
   RECOVERY_TIPS,
 } from '../types/sleepRecovery';
 import * as SleepStorage from '../services/sleepRecoveryStorage';
+import { api } from '../services/api';
 
 interface SleepRecoveryContextType {
   state: SleepRecoveryState;
@@ -51,8 +52,30 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
     try {
       setState((prev) => ({ ...prev, isLoading: true }));
 
-      const [entries, scores, goal, avgDuration, debt] = await Promise.all([
-        SleepStorage.getSleepEntries(),
+      // Try backend first for sleep history, fall back to local storage
+      let entries;
+      try {
+        const backendSleep = await api.getSleepHistory(14);
+        if (backendSleep && backendSleep.length > 0) {
+          console.log('[SleepRecovery] Loaded sleep history from backend:', backendSleep.length);
+          entries = backendSleep.map((s: any) => ({
+            id: s.id || `sleep_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            date: s.date,
+            bedTime: s.bedTime || s.bed_time,
+            wakeTime: s.wakeTime || s.wake_time,
+            duration: s.totalHours || s.total_hours || s.duration || 0,
+            quality: s.qualityScore || s.quality_score || s.quality || 3,
+            ...s,
+          }));
+        } else {
+          entries = await SleepStorage.getSleepEntries();
+        }
+      } catch (apiError) {
+        console.error('[SleepRecovery] API fetch error, falling back to local:', apiError);
+        entries = await SleepStorage.getSleepEntries();
+      }
+
+      const [scores, goal, avgDuration, debt] = await Promise.all([
         SleepStorage.getRecoveryScores(),
         SleepStorage.getSleepGoal(),
         SleepStorage.getAverageSleepDuration(),
@@ -106,6 +129,19 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
       averageSleepDuration: avgDuration,
       sleepDebt: debt,
     }));
+
+    // Fire-and-forget: sync sleep log to backend
+    try {
+      await api.logSleep({
+        date: entry.date,
+        bedTime: (entry as any).bedTime,
+        wakeTime: (entry as any).wakeTime,
+        totalHours: (entry as any).duration,
+        qualityScore: (entry as any).quality,
+      });
+    } catch (error) {
+      console.error('[SleepRecovery] API sync error:', error);
+    }
   }, []);
 
   const updateSleepEntry = useCallback(async (entry: SleepEntry) => {
@@ -178,6 +214,22 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
       ...prev,
       recoveryScores: [recoveryScore, ...prev.recoveryScores.filter((s) => s.date !== today)],
     }));
+
+    // Request AI sleep analysis from backend
+    try {
+      const recentSleep = state.sleepEntries.slice(0, 7);
+      const goals = {
+        targetDuration: state.sleepGoal.targetDuration,
+        targetBedTime: (state.sleepGoal as any).targetBedTime,
+        targetWakeTime: (state.sleepGoal as any).targetWakeTime,
+      };
+      const aiAnalysis = await api.analyzeSleep(recentSleep, goals);
+      if (aiAnalysis) {
+        console.log('[SleepRecovery] AI sleep analysis received');
+      }
+    } catch (error) {
+      console.error('[SleepRecovery] API analyze error:', error);
+    }
 
     return recoveryScore;
   }, [state.sleepEntries, state.sleepGoal]);

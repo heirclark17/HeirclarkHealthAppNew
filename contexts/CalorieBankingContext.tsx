@@ -12,6 +12,7 @@ import {
   CALORIE_BANKING_CONSTANTS,
 } from '../types/calorieBanking';
 import { calorieBankingStorage } from '../services/calorieBankingStorage';
+import { api } from '../services/api';
 import {
   getBankingRecommendation,
   bankCalories,
@@ -192,6 +193,21 @@ export function CalorieBankingProvider({ children }: { children: React.ReactNode
         currentWeek: week,
         transactionHistory: transactions,
       }));
+
+      // Sync banking calculation to backend (fire-and-forget)
+      try {
+        const weeklyBudget = week.weeklyTarget;
+        const dailyLogs = week.days.map(d => ({
+          date: d.date,
+          target: d.targetCalories,
+          consumed: d.actualCalories || 0,
+          isComplete: d.isComplete,
+        }));
+        const specialEvents = week.specialEvents || [];
+        await api.calculateCalorieBanking(weeklyBudget, dailyLogs, specialEvents);
+      } catch (error) {
+        console.error('[CalorieBanking] API sync error:', error);
+      }
     }
   }, []);
 

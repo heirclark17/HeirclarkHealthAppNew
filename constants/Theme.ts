@@ -419,14 +419,16 @@ export const Fonts = {
   semiBold: 'Urbanist_600SemiBold',
   bold: 'Urbanist_700Bold',
 
-  // Urbanist for numbers (consistent with text)
-  numericThin: 'Urbanist_100Thin',
-  numericExtraLight: 'Urbanist_200ExtraLight',
-  numericLight: 'Urbanist_300Light',
-  numericRegular: 'Urbanist_400Regular',
-  numericMedium: 'Urbanist_500Medium',
-  numericSemiBold: 'Urbanist_600SemiBold',
-  numericBold: 'Urbanist_700Bold',
+  // SF Pro Rounded for numbers (rounded appearance like v-fonts.com)
+  numericUltralight: 'SFProRounded-Ultralight',
+  numericThin: 'SFProRounded-Thin',
+  numericLight: 'SFProRounded-Light',
+  numericRegular: 'SFProRounded-Regular',
+  numericMedium: 'SFProRounded-Medium',
+  numericSemiBold: 'SFProRounded-Semibold',
+  numericBold: 'SFProRounded-Bold',
+  numericHeavy: 'SFProRounded-Heavy',
+  numericBlack: 'SFProRounded-Black',
 };
 
 export const Spacing = {

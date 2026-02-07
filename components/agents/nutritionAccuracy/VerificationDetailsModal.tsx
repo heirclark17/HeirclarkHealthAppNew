@@ -2,7 +2,8 @@
 // Shows detailed verification information with liquid glass design
 
 import React from 'react';
-import { Colors } from '../../../constants/Theme';
+import { Colors, Fonts } from '../../../constants/Theme';
+import { NumberText } from '../../NumberText';
 import {
   View,
   Text,
@@ -83,17 +84,17 @@ export default function VerificationDetailsModal({
           <Ionicons name={sourceIcons[source.type]} size={16} color={subtextColor} />
           <Text style={[styles.sourceName, { color: textColor }]}>{source.name}</Text>
           <View style={[styles.confidenceBadge, { backgroundColor: `${config.color}15` }]}>
-            <Text style={[styles.confidenceText, { color: config.color }]}>{source.confidence}%</Text>
+            <NumberText weight="semiBold" style={[styles.confidenceText, { color: config.color }]}>{source.confidence}%</NumberText>
           </View>
         </View>
         {source.matchScore !== undefined && (
-          <Text style={[styles.matchScore, { color: mutedColor }]}>Match score: {source.matchScore}%</Text>
+          <NumberText weight="regular" style={[styles.matchScore, { color: mutedColor }]}>Match score: {source.matchScore}%</NumberText>
         )}
         {source.data && (
           <View style={styles.sourceData}>
-            <Text style={[styles.sourceDataText, { color: subtextColor }]}>
+            <NumberText weight="regular" style={[styles.sourceDataText, { color: subtextColor }]}>
               {source.data.calories} cal • {source.data.protein}p • {source.data.carbs}c • {source.data.fat}f
-            </Text>
+            </NumberText>
           </View>
         )}
       </View>
@@ -122,8 +123,8 @@ export default function VerificationDetailsModal({
 
             <Text style={[styles.title, { color: textColor }]}>Nutrition Verification</Text>
             <View style={[styles.confidenceDisplay, { backgroundColor: `${config.color}10` }]}>
-              <Text style={[styles.confidenceLabel, { color: config.color }]}>{config.label}</Text>
-              <Text style={[styles.confidenceScore, { color: config.color }]}>{verification.confidenceScore}%</Text>
+              <NumberText weight="semiBold" style={[styles.confidenceLabel, { color: config.color }]}>{config.label}</NumberText>
+              <NumberText weight="bold" style={[styles.confidenceScore, { color: config.color }]}>{verification.confidenceScore}%</NumberText>
             </View>
 
             <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -137,15 +138,15 @@ export default function VerificationDetailsModal({
                         {adj.field.charAt(0).toUpperCase() + adj.field.slice(1)}
                       </Text>
                       <View style={styles.adjustmentValues}>
-                        <Text style={[styles.originalValue, { color: mutedColor }]}>{adj.originalValue}</Text>
+                        <NumberText weight="regular" style={[styles.originalValue, { color: mutedColor }]}>{adj.originalValue}</NumberText>
                         <Ionicons name="arrow-forward" size={12} color={mutedColor} />
-                        <Text style={[styles.adjustedValue, { color: Colors.successStrong }]}>{adj.adjustedValue}</Text>
-                        <Text style={[
+                        <NumberText weight="semiBold" style={[styles.adjustedValue, { color: Colors.successStrong }]}>{adj.adjustedValue}</NumberText>
+                        <NumberText weight="regular" style={[
                           styles.percentChange,
                           { color: adj.percentChange > 0 ? Colors.warningOrange : Colors.successStrong }
                         ]}>
                           ({adj.percentChange > 0 ? '+' : ''}{adj.percentChange}%)
-                        </Text>
+                        </NumberText>
                       </View>
                       <Text style={[styles.adjustmentReason, { color: subtextColor }]}>{adj.reason}</Text>
                     </View>
@@ -196,12 +197,12 @@ export default function VerificationDetailsModal({
                         <Text style={[styles.nutritionField, { color: textColor }]}>
                           {field.charAt(0).toUpperCase() + field.slice(1)}
                         </Text>
-                        <Text style={[styles.nutritionValue, { color: isDifferent ? mutedColor : textColor }]}>
+                        <NumberText weight="regular" style={[styles.nutritionValue, { color: isDifferent ? mutedColor : textColor }]}>
                           {orig}{field !== 'calories' ? 'g' : ''}
-                        </Text>
-                        <Text style={[styles.nutritionValue, { color: isDifferent ? Colors.successStrong : textColor }]}>
+                        </NumberText>
+                        <NumberText weight="regular" style={[styles.nutritionValue, { color: isDifferent ? Colors.successStrong : textColor }]}>
                           {verified}{field !== 'calories' ? 'g' : ''}
-                        </Text>
+                        </NumberText>
                       </View>
                     );
                   })}
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: Fonts.numericBold,
     marginBottom: 12,
   },
   confidenceDisplay: {
@@ -271,11 +272,11 @@ const styles = StyleSheet.create({
   },
   confidenceLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
   },
   confidenceScore: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: Fonts.numericBold,
   },
   scrollContent: {
     maxHeight: 400,
@@ -285,7 +286,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
     marginBottom: 10,
   },
   flagItem: {
@@ -320,7 +321,7 @@ const styles = StyleSheet.create({
   sourceName: {
     flex: 1,
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
   },
   confidenceBadge: {
     paddingHorizontal: 8,
@@ -329,7 +330,7 @@ const styles = StyleSheet.create({
   },
   confidenceText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
   },
   matchScore: {
     fontSize: 11,
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
   },
   adjustmentField: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
     marginBottom: 4,
   },
   adjustmentValues: {
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
   },
   adjustedValue: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
   },
   percentChange: {
     fontSize: 12,
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: Colors.text,
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
   },
   nutritionTable: {
     padding: 12,
@@ -397,7 +398,7 @@ const styles = StyleSheet.create({
   nutritionLabel: {
     flex: 1,
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   nutritionField: {
@@ -417,6 +418,6 @@ const styles = StyleSheet.create({
   },
   closeBottomText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: Fonts.numericMedium,
   },
 });

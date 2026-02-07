@@ -40,6 +40,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [fontTimeout, setFontTimeout] = useState(false);
   const [fontsLoaded, fontError] = useFonts({
+    // Urbanist fonts for text
     Urbanist_100Thin,
     Urbanist_200ExtraLight,
     Urbanist_300Light,
@@ -47,6 +48,16 @@ export default function RootLayout() {
     Urbanist_500Medium,
     Urbanist_600SemiBold,
     Urbanist_700Bold,
+    // SF Pro Rounded fonts for numbers
+    'SFProRounded-Ultralight': require('../assets/fonts/SF-Pro-Rounded-Ultralight.otf'),
+    'SFProRounded-Thin': require('../assets/fonts/SF-Pro-Rounded-Thin.otf'),
+    'SFProRounded-Light': require('../assets/fonts/SF-Pro-Rounded-Light.otf'),
+    'SFProRounded-Regular': require('../assets/fonts/SF-Pro-Rounded-Regular.otf'),
+    'SFProRounded-Medium': require('../assets/fonts/SF-Pro-Rounded-Medium.otf'),
+    'SFProRounded-Semibold': require('../assets/fonts/SF-Pro-Rounded-Semibold.otf'),
+    'SFProRounded-Bold': require('../assets/fonts/SF-Pro-Rounded-Bold.otf'),
+    'SFProRounded-Heavy': require('../assets/fonts/SF-Pro-Rounded-Heavy.otf'),
+    'SFProRounded-Black': require('../assets/fonts/SF-Pro-Rounded-Black.otf'),
   });
 
   // Add timeout to prevent infinite black screen if fonts fail

@@ -35,6 +35,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTraining } from '../../contexts/TrainingContext';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
+import { NumberText } from '../../components/NumberText';
 
 const AnimatedPressable = ReanimatedModule.createAnimatedComponent(Pressable);
 
@@ -928,13 +929,13 @@ export default function DashboardScreen() {
         >
           <Text style={[styles.healthMetricLabel, { color: themeColors.textMuted }, isGoalMet && { color: Colors.goalAchieved }]} numberOfLines={1} adjustsFontSizeToFit>{label.toUpperCase()}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', marginBottom: 16 }}>
-            <Text style={[styles.healthMetricValue, { color: themeColors.text }, isGoalMet && { color: Colors.goalAchieved }]} numberOfLines={1} adjustsFontSizeToFit>
+            <NumberText weight="light" style={[styles.healthMetricValue, { color: themeColors.text }, isGoalMet && { color: Colors.goalAchieved }]} numberOfLines={1} adjustsFontSizeToFit>
               {roundedCurrent.toLocaleString()}
-            </Text>
+            </NumberText>
             {unitLabel && (
-              <Text style={[styles.healthMetricUnit, { color: themeColors.text }, isGoalMet && { color: Colors.goalAchieved }]}>
+              <NumberText weight="light" style={[styles.healthMetricUnit, { color: themeColors.text }, isGoalMet && { color: Colors.goalAchieved }]}>
                 {` ${unitLabel}`}
-              </Text>
+              </NumberText>
             )}
           </View>
           {/* Horizontal Progress Bar */}
@@ -962,7 +963,7 @@ export default function DashboardScreen() {
               />
             </View>
           </View>
-          <Text style={[styles.healthMetricGoal, { color: isGoalMet ? Colors.goalAchieved : themeColors.textMuted }]}>Goal: {roundedTarget.toLocaleString()}{unitLabel && ` ${unitLabel}`}</Text>
+          <NumberText weight="regular" style={[styles.healthMetricGoal, { color: isGoalMet ? Colors.goalAchieved : themeColors.textMuted }]}>Goal: {roundedTarget.toLocaleString()}{unitLabel && ` ${unitLabel}`}</NumberText>
         </View>
       );
     }
@@ -1001,7 +1002,7 @@ export default function DashboardScreen() {
             progressColor={displayColor}
           />
         </Animated.View>
-        <Text style={[styles.macroTarget, { color: themeColors.textMuted }]}>Goal: {target}{unitLabel}</Text>
+        <NumberText weight="regular" style={[styles.macroTarget, { color: themeColors.textMuted }]}>Goal: {target}{unitLabel}</NumberText>
       </View>
     );
   };
@@ -1038,18 +1039,18 @@ export default function DashboardScreen() {
               <View style={[styles.calorieCardsRow, { gap: 8 }]}>
                 <GlassCard style={styles.calorieSubCard} interactive>
                   <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>CAL IN</Text>
-                  <Text style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesIn}</Text>
-                  <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</Text>
+                  <NumberText weight="regular" style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesIn}</NumberText>
+                  <NumberText weight="regular" style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</NumberText>
                 </GlassCard>
                 <GlassCard style={styles.calorieSubCard} interactive>
                   <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>CAL OUT</Text>
-                  <Text style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesOut}</Text>
-                  <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</Text>
+                  <NumberText weight="regular" style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesOut}</NumberText>
+                  <NumberText weight="regular" style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</NumberText>
                 </GlassCard>
                 <GlassCard style={styles.calorieSubCard} interactive>
                   <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>{fatChangeLabel}</Text>
-                  <Text style={[styles.calorieSubCardValue, { color: fatChangeColor }]}>{displayFatValue}</Text>
-                  <Text style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>lbs/day</Text>
+                  <NumberText weight="regular" style={[styles.calorieSubCardValue, { color: fatChangeColor }]}>{displayFatValue}</NumberText>
+                  <NumberText weight="regular" style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>lbs/day</NumberText>
                 </GlassCard>
               </View>
             </GlassCard>
@@ -1222,7 +1223,7 @@ export default function DashboardScreen() {
                   <Dumbbell size={24} color={colors.primary} />
                 </View>
                 <Text style={[styles.quickActionTitle, { color: colors.textMuted }]}>WORKOUTS</Text>
-                <Text style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>{completedWorkouts}/{workoutsPerWeekGoal}</Text>
+                <NumberText weight="light" style={[styles.quickActionValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>{completedWorkouts}/{workoutsPerWeekGoal}</NumberText>
                 <Text style={[styles.quickActionSubtitle, { color: colors.textMuted }]}>this week</Text>
               </GlassCard>
             </AnimatedPressable>
@@ -1359,7 +1360,7 @@ export default function DashboardScreen() {
                      mealType === 'dinner' ? '6:00 - 9:00 PM' : 'Any time'}
                   </Text>
                 </View>
-                <Text style={[styles.mealCalories, { color: colors.textSecondary }]}>{mealCals} kcal</Text>
+                <NumberText weight="regular" style={[styles.mealCalories, { color: colors.textSecondary }]}>{mealCals} kcal</NumberText>
               </TouchableOpacity>
 
               {/* Individual Meals */}
@@ -1367,9 +1368,9 @@ export default function DashboardScreen() {
                 <View key={meal.id || index} style={[styles.loggedMealItem, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)' }]}>
                   <View style={styles.loggedMealContent}>
                     <Text style={[styles.loggedMealName, { color: colors.text }]}>{meal.name}</Text>
-                    <Text style={[styles.loggedMealMacros, { color: colors.textMuted }]}>
+                    <NumberText weight="regular" style={[styles.loggedMealMacros, { color: colors.textMuted }]}>
                       {meal.calories} cal • P: {meal.protein}g • C: {meal.carbs}g • F: {meal.fat}g
-                    </Text>
+                    </NumberText>
                   </View>
                   <TouchableOpacity
                     style={styles.deleteMealButton}
@@ -2139,15 +2140,12 @@ const styles = StyleSheet.create({
   calorieSubCardValue: {
     fontSize: 24,
     color: Colors.text,
-    fontWeight: '100',
-    fontFamily: Fonts.regular,
     marginBottom: 6,
     textAlign: 'center',
   },
   calorieSubCardUnit: {
     fontSize: 12,
     color: Colors.textSecondary,
-    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   semiGaugeContainer: {
@@ -2254,15 +2252,11 @@ const styles = StyleSheet.create({
   healthMetricValue: {
     fontSize: 20,
     color: Colors.text,
-    fontFamily: Fonts.regular,
-    fontWeight: '200',
     textAlign: 'center',
   },
   healthMetricUnit: {
     fontSize: 12,
     color: Colors.text,
-    fontFamily: Fonts.regular,
-    fontWeight: '300',
   },
   horizontalBarContainer: {
     width: '100%',
@@ -2364,7 +2358,6 @@ const styles = StyleSheet.create({
   loggedMealMacros: {
     fontSize: 12,
     color: Colors.textMuted,
-    fontFamily: Fonts.regular,
   },
   deleteMealButton: {
     padding: 8,
@@ -2465,20 +2458,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     fontWeight: '300',
     textAlign: 'center',
-  },
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  modalContent: {
-    width: '100%',
-    maxWidth: 500,
-    maxHeight: '80%',
-    position: 'relative',
   },
   modalCloseButton: {
     position: 'absolute',

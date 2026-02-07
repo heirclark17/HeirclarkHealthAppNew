@@ -18,6 +18,7 @@ import { GlassCard } from '../../GlassCard';
 import { useGlassTheme } from '../../liquidGlass';
 import { useSleepRecovery } from '../../../contexts/SleepRecoveryContext';
 import { Fonts } from '../../../constants/Theme';
+import { NumberText } from '../../../components/NumberText';
 
 const QUALITY_OPTIONS = [
   { value: 1 as const, label: 'Poor', emoji: '😫' },
@@ -149,28 +150,29 @@ export default function SleepRecoveryCard() {
         {/* Stats Row */}
         <View style={styles.statsRow}>
           <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
-            <Text style={[styles.statValue, { color: colors.text }]}>
+            <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
               {formatDuration(state.averageSleepDuration)}
-            </Text>
+            </NumberText>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Avg Sleep</Text>
           </View>
 
           <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
-            <Text style={[styles.statValue, { color: sleepDebtStatus.color }]}>
+            <NumberText weight="semiBold" style={[styles.statValue, { color: sleepDebtStatus.color }]}>
               {sleepDebtStatus.text}
-            </Text>
+            </NumberText>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Sleep Debt</Text>
           </View>
 
           <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
-            <Text
+            <NumberText
+              weight="semiBold"
               style={[
                 styles.statValue,
                 { color: todayRecovery ? getRecoveryColor(todayRecovery) : colors.textMuted },
               ]}
             >
               {todayRecovery ? `${todayRecovery}%` : '--'}
-            </Text>
+            </NumberText>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Recovery</Text>
           </View>
         </View>
@@ -180,9 +182,9 @@ export default function SleepRecoveryCard() {
           <View style={[styles.todaySleep, { backgroundColor: colors.success + '15' }]}>
             <Ionicons name="checkmark-circle" size={18} color={colors.success} />
             <View style={styles.todaySleepInfo}>
-              <Text style={[styles.todaySleepText, { color: colors.text }]}>
+              <NumberText weight="medium" style={[styles.todaySleepText, { color: colors.text }]}>
                 Logged: {formatDuration(todaySleep.duration)}
-              </Text>
+              </NumberText>
               <Text style={[styles.todaySleepTime, { color: colors.textMuted }]}>
                 {todaySleep.bedtime} → {todaySleep.wakeTime}
               </Text>
@@ -252,9 +254,9 @@ export default function SleepRecoveryCard() {
             {/* Duration Preview */}
             <View style={[styles.durationPreview, { backgroundColor: colors.primary + '15' }]}>
               <Ionicons name="time" size={18} color={colors.primary} />
-              <Text style={[styles.durationText, { color: colors.text }]}>
+              <NumberText weight="medium" style={[styles.durationText, { color: colors.text }]}>
                 Duration: {formatDuration(calculateDuration(bedtime, wakeTime))}
-              </Text>
+              </NumberText>
             </View>
 
             {/* Quality */}
@@ -337,16 +339,16 @@ export default function SleepRecoveryCard() {
             <View style={styles.weeklyStats}>
               <View style={[styles.weeklyStat, { backgroundColor: colors.cardGlass }]}>
                 <Ionicons name="bed" size={24} color={colors.primary} />
-                <Text style={[styles.weeklyValue, { color: colors.text }]}>
+                <NumberText weight="semiBold" style={[styles.weeklyValue, { color: colors.text }]}>
                   {formatDuration(state.averageSleepDuration)}
-                </Text>
+                </NumberText>
                 <Text style={[styles.weeklyLabel, { color: colors.textMuted }]}>Avg Duration</Text>
               </View>
               <View style={[styles.weeklyStat, { backgroundColor: colors.cardGlass }]}>
                 <Ionicons name="trending-down" size={24} color={sleepDebtStatus.color} />
-                <Text style={[styles.weeklyValue, { color: sleepDebtStatus.color }]}>
+                <NumberText weight="semiBold" style={[styles.weeklyValue, { color: sleepDebtStatus.color }]}>
                   {sleepDebtStatus.text}
-                </Text>
+                </NumberText>
                 <Text style={[styles.weeklyLabel, { color: colors.textMuted }]}>Sleep Debt</Text>
               </View>
             </View>
@@ -366,9 +368,9 @@ export default function SleepRecoveryCard() {
                   </Text>
                 </View>
                 <View style={styles.entryRight}>
-                  <Text style={[styles.entryDuration, { color: colors.primary }]}>
+                  <NumberText weight="semiBold" style={[styles.entryDuration, { color: colors.primary }]}>
                     {formatDuration(entry.duration)}
-                  </Text>
+                  </NumberText>
                   <Text style={styles.entryQuality}>
                     {QUALITY_OPTIONS.find((q) => q.value === entry.quality)?.emoji}
                   </Text>
@@ -390,17 +392,17 @@ export default function SleepRecoveryCard() {
             <View style={[styles.goalBox, { backgroundColor: colors.cardGlass }]}>
               <View style={styles.goalRow}>
                 <Text style={[styles.goalLabel, { color: colors.textMuted }]}>Target Bedtime</Text>
-                <Text style={[styles.goalValue, { color: colors.text }]}>{state.sleepGoal.targetBedtime}</Text>
+                <NumberText weight="semiBold" style={[styles.goalValue, { color: colors.text }]}>{state.sleepGoal.targetBedtime}</NumberText>
               </View>
               <View style={styles.goalRow}>
                 <Text style={[styles.goalLabel, { color: colors.textMuted }]}>Target Wake Time</Text>
-                <Text style={[styles.goalValue, { color: colors.text }]}>{state.sleepGoal.targetWakeTime}</Text>
+                <NumberText weight="semiBold" style={[styles.goalValue, { color: colors.text }]}>{state.sleepGoal.targetWakeTime}</NumberText>
               </View>
               <View style={styles.goalRow}>
                 <Text style={[styles.goalLabel, { color: colors.textMuted }]}>Target Duration</Text>
-                <Text style={[styles.goalValue, { color: colors.text }]}>
+                <NumberText weight="semiBold" style={[styles.goalValue, { color: colors.text }]}>
                   {formatDuration(state.sleepGoal.targetDuration)}
-                </Text>
+                </NumberText>
               </View>
             </View>
           </ScrollView>
@@ -421,11 +423,11 @@ const styles = StyleSheet.create({
   viewButtonText: { fontSize: 13, fontFamily: Fonts.medium },
   statsRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   statBox: { flex: 1, padding: 12, borderRadius: 10, alignItems: 'center' },
-  statValue: { fontSize: 15, fontFamily: Fonts.semiBold },
+  statValue: { fontSize: 15 },
   statLabel: { fontSize: 10, fontFamily: Fonts.regular, marginTop: 2 },
   todaySleep: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 10, marginBottom: 12, gap: 10 },
   todaySleepInfo: { flex: 1 },
-  todaySleepText: { fontSize: 13, fontFamily: Fonts.medium },
+  todaySleepText: { fontSize: 13 },
   todaySleepTime: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 2 },
   qualityEmoji: { fontSize: 20 },
   logButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14, borderRadius: 10, marginBottom: 12 },
@@ -441,7 +443,7 @@ const styles = StyleSheet.create({
   input: { padding: 14, borderRadius: 10, fontSize: 16, fontFamily: Fonts.regular, borderWidth: 1 },
   notesInput: { height: 80, textAlignVertical: 'top' },
   durationPreview: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10, marginTop: 12 },
-  durationText: { fontSize: 14, fontFamily: Fonts.medium },
+  durationText: { fontSize: 14 },
   qualityGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   qualityOption: { alignItems: 'center', padding: 12, borderRadius: 10, borderWidth: 1, minWidth: 60 },
   qualityLabel: { fontSize: 11, fontFamily: Fonts.medium, marginTop: 4 },
@@ -450,19 +452,19 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 15, fontFamily: Fonts.semiBold, marginBottom: 12 },
   weeklyStats: { flexDirection: 'row', gap: 12 },
   weeklyStat: { flex: 1, alignItems: 'center', padding: 16, borderRadius: 12 },
-  weeklyValue: { fontSize: 18, fontFamily: Fonts.semiBold, marginTop: 8 },
+  weeklyValue: { fontSize: 18, marginTop: 8 },
   weeklyLabel: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 4 },
   sleepEntry: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderRadius: 10, marginBottom: 8 },
   entryLeft: { flex: 1 },
   entryDate: { fontSize: 13, fontFamily: Fonts.medium },
   entryTimes: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 2 },
   entryRight: { alignItems: 'flex-end' },
-  entryDuration: { fontSize: 14, fontFamily: Fonts.semiBold },
+  entryDuration: { fontSize: 14 },
   entryQuality: { fontSize: 16, marginTop: 2 },
   emptyState: { alignItems: 'center', padding: 24, borderRadius: 12 },
   emptyText: { fontSize: 13, fontFamily: Fonts.regular, textAlign: 'center', marginTop: 12 },
   goalBox: { padding: 16, borderRadius: 12 },
   goalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
   goalLabel: { fontSize: 13, fontFamily: Fonts.regular },
-  goalValue: { fontSize: 14, fontFamily: Fonts.semiBold },
+  goalValue: { fontSize: 14 },
 });

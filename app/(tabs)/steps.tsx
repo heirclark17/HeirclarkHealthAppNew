@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Refre
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../services/api';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
+import { NumberText } from '../../components/NumberText';
 import { CircularGauge } from '../../components/CircularGauge';
 import { GlassCard } from '../../components/GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -168,7 +169,7 @@ export default function StepsScreen() {
               onPress={() => setSelectedDate(item.dateStr)}
             >
               <Text style={[styles.dayName, { color: colors.textMuted }, selectedDate === item.dateStr && { color: colors.background }]}>{item.day}</Text>
-              <Text style={[styles.dayNumber, { color: colors.text }, selectedDate === item.dateStr && { color: colors.background }]}>{item.date}</Text>
+              <NumberText weight="semiBold" style={[styles.dayNumber, { color: colors.text }, selectedDate === item.dateStr && { color: colors.background }]}>{item.date}</NumberText>
               {item.isToday && <View style={[styles.todayDot, { backgroundColor: colors.success }]} />}
             </TouchableOpacity>
           ))}
@@ -210,7 +211,7 @@ export default function StepsScreen() {
       {/* Distance Stat */}
       <View style={styles.statRow}>
         <GlassCard style={styles.statItem} interactive>
-          <Text style={[styles.statValue, { color: colors.text }]}>{distance}</Text>
+          <NumberText weight="regular" style={[styles.statValue, { color: colors.text }]}>{distance}</NumberText>
           <Text style={[styles.statUnit, { color: colors.textSecondary }]}>MI</Text>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>Distance</Text>
         </GlassCard>
@@ -220,15 +221,15 @@ export default function StepsScreen() {
       <GlassCard style={styles.weeklyCard} interactive>
         <View style={styles.weeklyHeader}>
           <Text style={[styles.weeklyTitle, { color: colors.text }]}>Weekly Progress</Text>
-          <Text style={[styles.weeklyPercent, { color: colors.text }]}>{weeklyPercent}%</Text>
+          <NumberText weight="semiBold" style={[styles.weeklyPercent, { color: colors.text }]}>{weeklyPercent}%</NumberText>
         </View>
 
         <View style={styles.weeklyRow}>
           <View>
             <Text style={[styles.weeklySubLabel, { color: colors.textMuted }]}>Total Steps</Text>
-            <Text style={[styles.weeklyValue, { color: colors.text }]}>{weeklySteps.toLocaleString()}</Text>
+            <NumberText weight="semiBold" style={[styles.weeklyValue, { color: colors.text }]}>{weeklySteps.toLocaleString()}</NumberText>
           </View>
-          <Text style={[styles.weeklyGoal, { color: colors.textMuted }]}>of {weeklyGoal.toLocaleString()}</Text>
+          <NumberText weight="regular" style={[styles.weeklyGoal, { color: colors.textMuted }]}>of {weeklyGoal.toLocaleString()}</NumberText>
         </View>
 
         <View style={[styles.progressBar, { backgroundColor: colors.gaugeBg }]}>
@@ -238,11 +239,11 @@ export default function StepsScreen() {
         <View style={styles.weeklyStatsRow}>
           <View style={styles.weeklyStat}>
             <Text style={[styles.weeklySubLabel, { color: colors.textMuted }]}>Active Calories</Text>
-            <Text style={[styles.weeklySubValue, { color: colors.text }]}>{caloriesBurned} kcal</Text>
+            <NumberText weight="medium" style={[styles.weeklySubValue, { color: colors.text }]}>{caloriesBurned} kcal</NumberText>
           </View>
           <View style={styles.weeklyStat}>
             <Text style={[styles.weeklySubLabel, { color: colors.textMuted }]}>Avg Daily</Text>
-            <Text style={[styles.weeklySubValue, { color: colors.text }]}>{dailyAvg.toLocaleString()} steps</Text>
+            <NumberText weight="medium" style={[styles.weeklySubValue, { color: colors.text }]}>{dailyAvg.toLocaleString()} steps</NumberText>
           </View>
         </View>
       </GlassCard>
@@ -346,7 +347,6 @@ const styles = StyleSheet.create({
   dayNumber: {
     fontSize: 16,
     color: Colors.text,
-    fontFamily: Fonts.semiBold,
   },
   dayNumberActive: {
     color: Colors.background,
@@ -444,7 +444,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 32,
     color: Colors.text,
-    fontFamily: Fonts.regular,
   },
   statUnit: {
     fontSize: 14,
@@ -481,7 +480,6 @@ const styles = StyleSheet.create({
   weeklyPercent: {
     fontSize: 16,
     color: Colors.text,
-    fontFamily: Fonts.semiBold,
   },
   weeklyRow: {
     flexDirection: 'row',
@@ -497,12 +495,10 @@ const styles = StyleSheet.create({
   weeklyValue: {
     fontSize: 24,
     color: Colors.text,
-    fontFamily: Fonts.semiBold,
   },
   weeklyGoal: {
     fontSize: 14,
     color: Colors.textMuted,
-    fontFamily: Fonts.regular,
   },
   progressBar: {
     height: 8,
@@ -524,7 +520,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
     marginTop: 2,
-    fontFamily: Fonts.medium,
   },
   dataSource: {
     flexDirection: 'row',

@@ -182,8 +182,7 @@ const styles = StyleSheet.create({
   },
   valueText: {
     fontSize: 72,
-    fontFamily: Fonts.regular,
-    fontWeight: '100',
+    fontFamily: Fonts.numericRegular,
     color: Colors.text,
     letterSpacing: -1,
   },
@@ -194,7 +193,7 @@ const styles = StyleSheet.create({
   },
   goalText: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: Colors.textSecondary,
     position: 'absolute',
     bottom: 10,

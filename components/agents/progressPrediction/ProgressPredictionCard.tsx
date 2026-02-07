@@ -20,6 +20,7 @@ import { useGlassTheme } from '../../liquidGlass';
 import { useProgressPrediction } from '../../../contexts/ProgressPredictionContext';
 import { Milestone, WeightPrediction } from '../../../types/progressPrediction';
 import { Fonts } from '../../../constants/Theme';
+import { NumberText } from '../../../components/NumberText';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -119,9 +120,9 @@ export default function ProgressPredictionCard() {
         )}
       </View>
       <View style={styles.milestoneProgress}>
-        <Text style={[styles.milestonePercent, { color: colors.primary }]}>
+        <NumberText weight="bold" style={[styles.milestonePercent, { color: colors.primary }]}>
           {milestone.currentProgress}%
-        </Text>
+        </NumberText>
       </View>
     </View>
   );
@@ -133,17 +134,17 @@ export default function ProgressPredictionCard() {
         <Text style={[styles.predictionDate, { color: colors.text }]}>
           {formatGoalDate(prediction.date)}
         </Text>
-        <Text style={[styles.predictionDays, { color: colors.textMuted }]}>
+        <NumberText weight="regular" style={[styles.predictionDays, { color: colors.textMuted }]}>
           {prediction.daysFromNow} days
-        </Text>
+        </NumberText>
       </View>
       <View style={styles.predictionBody}>
-        <Text style={[styles.predictionWeight, { color: colors.primary }]}>
+        <NumberText weight="bold" style={[styles.predictionWeight, { color: colors.primary }]}>
           {prediction.predictedWeight} lbs
-        </Text>
-        <Text style={[styles.predictionRange, { color: colors.textMuted }]}>
+        </NumberText>
+        <NumberText weight="regular" style={[styles.predictionRange, { color: colors.textMuted }]}>
           Range: {prediction.confidenceMin} - {prediction.confidenceMax}
-        </Text>
+        </NumberText>
       </View>
     </GlassCard>
   );
@@ -187,9 +188,9 @@ export default function ProgressPredictionCard() {
               />
             ))}
           </View>
-          <Text style={[styles.progressText, { color: colors.textMuted }]}>
+          <NumberText weight="regular" style={[styles.progressText, { color: colors.textMuted }]}>
             {state.weightHistory.length}/7 days logged
-          </Text>
+          </NumberText>
         </View>
       </GlassCard>
     );
@@ -225,9 +226,9 @@ export default function ProgressPredictionCard() {
             <Text style={[styles.progressLabel, { color: colors.textMuted }]}>
               GOAL PROGRESS
             </Text>
-            <Text style={[styles.progressValue, { color: colors.primary }]}>
+            <NumberText weight="bold" style={[styles.progressValue, { color: colors.primary }]}>
               {percentComplete}%
-            </Text>
+            </NumberText>
           </View>
           <View style={[styles.progressBar, { backgroundColor: colors.cardGlass }]}>
             <View
@@ -241,12 +242,12 @@ export default function ProgressPredictionCard() {
             />
           </View>
           <View style={styles.progressStats}>
-            <Text style={[styles.progressStat, { color: colors.textSecondary }]}>
+            <NumberText weight="regular" style={[styles.progressStat, { color: colors.textSecondary }]}>
               {totalLost > 0 ? '+' : ''}{totalLost.toFixed(1)} lbs lost
-            </Text>
-            <Text style={[styles.progressStat, { color: colors.textSecondary }]}>
+            </NumberText>
+            <NumberText weight="regular" style={[styles.progressStat, { color: colors.textSecondary }]}>
               {state.snapshot?.totalToLose.toFixed(1) || 0} lbs to go
-            </Text>
+            </NumberText>
           </View>
         </View>
 
@@ -264,9 +265,9 @@ export default function ProgressPredictionCard() {
           </TouchableOpacity>
 
           <View style={[styles.statCard, { backgroundColor: colors.cardGlass }]}>
-            <Text style={[styles.rateValue, { color: colors.primary }]}>
+            <NumberText weight="bold" style={[styles.rateValue, { color: colors.primary }]}>
               {Math.abs(weeklyRate).toFixed(1)}
-            </Text>
+            </NumberText>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>LBS/WEEK</Text>
             <Text style={[styles.statSubvalue, { color: colors.textSecondary }]}>
               {weeklyRate < 0 ? 'losing' : weeklyRate > 0 ? 'gaining' : 'stable'}
@@ -279,9 +280,9 @@ export default function ProgressPredictionCard() {
           >
             <Ionicons name="flag" size={24} color={colors.primary} />
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>MILESTONES</Text>
-            <Text style={[styles.statValue, { color: colors.text }]}>
+            <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
               {achievedMilestones.length}/{state.milestones.length}
-            </Text>
+            </NumberText>
           </TouchableOpacity>
         </View>
 
@@ -316,9 +317,9 @@ export default function ProgressPredictionCard() {
             </View>
             {getDaysRemaining() && (
               <View style={styles.goalDateRight}>
-                <Text style={[styles.goalDateDays, { color: colors.primary }]}>
+                <NumberText weight="bold" style={[styles.goalDateDays, { color: colors.primary }]}>
                   {getDaysRemaining()}
-                </Text>
+                </NumberText>
                 <Text style={[styles.goalDateRemaining, { color: colors.textMuted }]}>
                   remaining
                 </Text>
@@ -348,9 +349,9 @@ export default function ProgressPredictionCard() {
               <Text style={[styles.nextMilestoneLabel, { color: colors.textMuted }]}>
                 Next: {nextMilestone.label}
               </Text>
-              <Text style={[styles.nextMilestonePercent, { color: colors.primary }]}>
+              <NumberText weight="semiBold" style={[styles.nextMilestonePercent, { color: colors.primary }]}>
                 {nextMilestone.currentProgress}%
-              </Text>
+              </NumberText>
             </View>
           </TouchableOpacity>
         )}
@@ -388,21 +389,21 @@ export default function ProgressPredictionCard() {
               </View>
               <View style={styles.detailRow}>
                 <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Weekly Rate:</Text>
-                <Text style={[styles.detailValue, { color: colors.text }]}>
+                <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
                   {Math.abs(weeklyRate).toFixed(2)} lbs/week
-                </Text>
+                </NumberText>
               </View>
               <View style={styles.detailRow}>
                 <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Monthly Rate:</Text>
-                <Text style={[styles.detailValue, { color: colors.text }]}>
+                <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
                   {Math.abs(state.trendAnalysis?.monthlyChange || 0).toFixed(2)} lbs/month
-                </Text>
+                </NumberText>
               </View>
               <View style={styles.detailRow}>
                 <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Consistency:</Text>
-                <Text style={[styles.detailValue, { color: colors.text }]}>
+                <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
                   {state.trendAnalysis?.consistency || 0}%
-                </Text>
+                </NumberText>
               </View>
               <View style={styles.detailRow}>
                 <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Velocity:</Text>
@@ -420,21 +421,21 @@ export default function ProgressPredictionCard() {
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>
                     Current Weight:
                   </Text>
-                  <Text style={[styles.detailValue, { color: colors.text }]}>
+                  <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
                     {state.goalProjection.currentWeight.toFixed(1)} lbs
-                  </Text>
+                  </NumberText>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Goal Weight:</Text>
-                  <Text style={[styles.detailValue, { color: colors.text }]}>
+                  <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
                     {state.goalProjection.goalWeight.toFixed(1)} lbs
-                  </Text>
+                  </NumberText>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Remaining:</Text>
-                  <Text style={[styles.detailValue, { color: colors.text }]}>
+                  <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
                     {Math.abs(state.goalProjection.weightToLose).toFixed(1)} lbs
-                  </Text>
+                  </NumberText>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>
@@ -459,9 +460,9 @@ export default function ProgressPredictionCard() {
                 <Text style={[styles.detailTitle, { color: Colors.warningOrange }]}>Plateau Analysis</Text>
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Duration:</Text>
-                  <Text style={[styles.detailValue, { color: colors.text }]}>
+                  <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
                     {state.plateauInfo.plateauDuration} days
-                  </Text>
+                  </NumberText>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>
@@ -603,7 +604,6 @@ const styles = StyleSheet.create({
   },
   progressValue: {
     fontSize: 14,
-    fontFamily: Fonts.bold,
   },
   progressBar: {
     height: 8,
@@ -621,7 +621,6 @@ const styles = StyleSheet.create({
   },
   progressStat: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
   },
   statsRow: {
     flexDirection: 'row',
@@ -652,7 +651,6 @@ const styles = StyleSheet.create({
   },
   rateValue: {
     fontSize: 20,
-    fontFamily: Fonts.bold,
   },
   plateauBanner: {
     flexDirection: 'row',
@@ -703,7 +701,6 @@ const styles = StyleSheet.create({
   },
   goalDateDays: {
     fontSize: 16,
-    fontFamily: Fonts.bold,
   },
   goalDateRemaining: {
     fontSize: 10,
@@ -731,7 +728,6 @@ const styles = StyleSheet.create({
   },
   nextMilestonePercent: {
     fontSize: 11,
-    fontFamily: Fonts.semiBold,
   },
   emptyState: {
     alignItems: 'center',
@@ -760,7 +756,6 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
     marginTop: 4,
   },
   modalContainer: {
@@ -870,7 +865,6 @@ const styles = StyleSheet.create({
   },
   milestonePercent: {
     fontSize: 16,
-    fontFamily: Fonts.bold,
   },
   emptyMilestones: {
     alignItems: 'center',
@@ -895,16 +889,13 @@ const styles = StyleSheet.create({
   },
   predictionDays: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
   },
   predictionBody: {},
   predictionWeight: {
     fontSize: 20,
-    fontFamily: Fonts.bold,
   },
   predictionRange: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
     marginTop: 2,
   },
 });

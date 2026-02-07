@@ -20,6 +20,7 @@ import { useGlassTheme } from '../../liquidGlass';
 import { useWorkoutFormCoach } from '../../../contexts/WorkoutFormCoachContext';
 import { Exercise, ExerciseCategory } from '../../../types/workoutFormCoach';
 import { Fonts } from '../../../constants/Theme';
+import { NumberText } from '../../../components/NumberText';
 
 // Category icons
 const CATEGORY_ICONS: Record<ExerciseCategory, keyof typeof Ionicons.glyphMap> = {
@@ -106,9 +107,9 @@ export default function WorkoutFormCoachCard() {
         <View style={styles.exerciseRight}>
           {avgScore !== null && (
             <View style={[styles.scoreBadge, { backgroundColor: getScoreColor(avgScore) + '20' }]}>
-              <Text style={[styles.scoreText, { color: getScoreColor(avgScore) }]}>
+              <NumberText weight="semiBold" style={[styles.scoreText, { color: getScoreColor(avgScore) }]}>
                 {avgScore}%
-              </Text>
+              </NumberText>
             </View>
           )}
           {favorite && (
@@ -124,7 +125,7 @@ export default function WorkoutFormCoachCard() {
   const renderFormCue = (cue: { id: string; order: number; cue: string; muscleActivation?: string }, index: number) => (
     <View key={cue.id} style={styles.cueItem}>
       <View style={[styles.cueNumber, { backgroundColor: colors.primary }]}>
-        <Text style={styles.cueNumberText}>{cue.order}</Text>
+        <NumberText weight="semiBold" style={styles.cueNumberText}>{cue.order}</NumberText>
       </View>
       <View style={styles.cueContent}>
         <Text style={[styles.cueText, { color: colors.text }]}>{cue.cue}</Text>
@@ -441,7 +442,7 @@ const styles = StyleSheet.create({
   exerciseMuscles: { fontSize: 12, fontFamily: Fonts.regular, marginTop: 2 },
   exerciseRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   scoreBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  scoreText: { fontSize: 11, fontFamily: Fonts.semiBold },
+  scoreText: { fontSize: 11 },
   detailContent: { flex: 1, padding: 16 },
   infoCard: { padding: 16, marginBottom: 16 },
   description: { fontSize: 13, fontFamily: Fonts.regular, lineHeight: 20, marginBottom: 12 },
@@ -453,7 +454,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 15, fontFamily: Fonts.semiBold, marginBottom: 12 },
   cueItem: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
   cueNumber: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  cueNumberText: { color: '#FFF', fontSize: 12, fontFamily: Fonts.semiBold },
+  cueNumberText: { color: '#FFF', fontSize: 12 },
   cueContent: { flex: 1, marginLeft: 12 },
   cueText: { fontSize: 13, fontFamily: Fonts.medium, lineHeight: 18 },
   cueMuscle: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 2, fontStyle: 'italic' },

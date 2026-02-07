@@ -9,6 +9,7 @@ import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { instacartService } from '../../services/instacartService';
 import { mealPlanService } from '../../services/mealPlanService';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
+import { NumberText } from '../../components/NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../../components/GlassCard';
 import { Meal, PantryItem } from '../../types/mealPlan';
@@ -313,19 +314,19 @@ export default function MealsScreen() {
         >
           <View style={styles.targetsRow}>
             <View style={styles.targetItem}>
-              <Text style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.calories}</Text>
+              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.calories}</NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Calories</Text>
             </View>
             <View style={styles.targetItem}>
-              <Text style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.protein}g</Text>
+              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.protein}g</NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Protein</Text>
             </View>
             <View style={styles.targetItem}>
-              <Text style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.carbs}g</Text>
+              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.carbs}g</NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Carbs</Text>
             </View>
             <View style={styles.targetItem}>
-              <Text style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.fat}g</Text>
+              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.fat}g</NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Fats</Text>
             </View>
           </View>
@@ -361,9 +362,9 @@ export default function MealsScreen() {
             { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.1)' }
           ]}>
             <Ionicons name="leaf-outline" size={18} color={isDark ? '#86efac' : '#22c55e'} />
-            <Text style={[styles.savingsText, { color: isDark ? '#86efac' : '#22c55e' }]}>
+            <NumberText weight="medium" style={[styles.savingsText, { color: isDark ? '#86efac' : '#22c55e' }]}>
               You're saving ~${(estimatedSavings / 100).toFixed(2)} this week using pantry items!
-            </Text>
+            </NumberText>
           </View>
         )}
 
@@ -723,7 +724,6 @@ const styles = StyleSheet.create({
   targetValue: {
     fontSize: 16,
     color: Colors.text,
-    fontFamily: Fonts.thin,
     letterSpacing: 0.3,
   },
   targetLabel: {
@@ -946,6 +946,5 @@ const styles = StyleSheet.create({
   savingsText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.medium,
   },
 });

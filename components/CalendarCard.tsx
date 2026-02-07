@@ -355,8 +355,7 @@ const styles = StyleSheet.create({
   dayNumber: {
     fontSize: 18,
     color: Colors.text,
-    fontFamily: Fonts.regular,
-    fontWeight: '100',
+    fontFamily: Fonts.numericRegular,
   },
   dayNumberActive: {
     color: Colors.background, // Black text on white selected day
@@ -449,7 +448,7 @@ const styles = StyleSheet.create({
   calendarDayText: {
     fontSize: 14,
     color: Colors.text,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
   },
   calendarDayTextSelected: {
     color: Colors.background,

@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
   currentValue: {
     fontSize: 24,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   unit: {
     fontSize: 14,

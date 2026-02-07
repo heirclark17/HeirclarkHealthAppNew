@@ -11,6 +11,7 @@ import {
   RESTAURANT_TIPS,
   HEALTHY_MODIFICATIONS,
 } from '../types/restaurantMenu';
+import { api } from '../services/api';
 
 interface RestaurantMenuContextType {
   state: RestaurantMenuState;
@@ -19,6 +20,7 @@ interface RestaurantMenuContextType {
   saveRestaurant: (name: string, cuisine: string) => Promise<void>;
   addRecentSearch: (query: string) => Promise<void>;
   getRecentSearches: () => string[];
+  analyzeMenu: (restaurantName: string, menuItems: any[], goals?: any) => Promise<any>;
 }
 
 const RestaurantMenuContext = createContext<RestaurantMenuContextType | undefined>(undefined);
@@ -101,6 +103,34 @@ export function RestaurantMenuProvider({ children }: { children: ReactNode }) {
     return state.recentSearches;
   }, [state.recentSearches]);
 
+  const analyzeMenu = useCallback(async (restaurantName: string, menuItems: any[], goals?: any): Promise<any> => {
+    try {
+      console.log('[RestaurantMenu] Requesting AI menu analysis for:', restaurantName);
+      const analysis = await api.analyzeRestaurantMenu(restaurantName, menuItems, goals);
+      if (analysis) {
+        // Cache the result locally
+        const cacheKey = `@restaurant_analysis_${restaurantName.replace(/\s+/g, '_').toLowerCase()}`;
+        await AsyncStorage.setItem(cacheKey, JSON.stringify({ ...analysis, cachedAt: Date.now() }));
+        console.log('[RestaurantMenu] AI analysis received and cached');
+      }
+      return analysis;
+    } catch (error) {
+      console.error('[RestaurantMenu] API analyze error:', error);
+      // Try to return cached result
+      try {
+        const cacheKey = `@restaurant_analysis_${restaurantName.replace(/\s+/g, '_').toLowerCase()}`;
+        const cached = await AsyncStorage.getItem(cacheKey);
+        if (cached) {
+          console.log('[RestaurantMenu] Returning cached analysis');
+          return JSON.parse(cached);
+        }
+      } catch (cacheError) {
+        // ignore cache errors
+      }
+      return null;
+    }
+  }, []);
+
   const value = useMemo<RestaurantMenuContextType>(() => ({
     state,
     getRestaurantTips,
@@ -108,6 +138,7 @@ export function RestaurantMenuProvider({ children }: { children: ReactNode }) {
     saveRestaurant,
     addRecentSearch,
     getRecentSearches,
+    analyzeMenu,
   }), [
     state,
     getRestaurantTips,
@@ -115,6 +146,7 @@ export function RestaurantMenuProvider({ children }: { children: ReactNode }) {
     saveRestaurant,
     addRecentSearch,
     getRecentSearches,
+    analyzeMenu,
   ]);
 
   return (

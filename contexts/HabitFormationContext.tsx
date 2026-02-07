@@ -25,6 +25,7 @@ import {
   getStreaks,
   updateStreak,
 } from '../services/habitFormationStorage';
+import { api } from '../services/api';
 
 interface HabitFormationContextType {
   state: HabitFormationState;
@@ -84,8 +85,33 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
     try {
       setState((prev) => ({ ...prev, isLoading: true }));
 
-      const [habits, completions, streaks] = await Promise.all([
-        getHabits(),
+      // Try backend first for habits, fall back to local storage
+      let habits;
+      try {
+        const backendHabits = await api.getHabits();
+        if (backendHabits && backendHabits.length > 0) {
+          console.log('[HabitFormation] Loaded habits from backend:', backendHabits.length);
+          habits = backendHabits.map((h: any) => ({
+            id: h.id,
+            name: h.habitName || h.name,
+            category: h.habitType || h.category || 'health',
+            frequency: h.frequency || 'daily',
+            targetValue: h.targetValue || 1,
+            unit: h.unit || 'times',
+            reminderTime: h.reminderTime,
+            isActive: true,
+            createdAt: Date.now(),
+            ...h,
+          }));
+        } else {
+          habits = await getHabits();
+        }
+      } catch (apiError) {
+        console.error('[HabitFormation] API fetch error, falling back to local:', apiError);
+        habits = await getHabits();
+      }
+
+      const [completions, streaks] = await Promise.all([
         getCompletions(30),
         getStreaks(),
       ]);
@@ -103,6 +129,16 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
         isLoading: false,
         lastUpdated: Date.now(),
       });
+
+      // Request AI habit analysis from backend
+      try {
+        const aiAnalysis = await api.analyzeHabits(habits, completions);
+        if (aiAnalysis) {
+          console.log('[HabitFormation] AI analysis synced successfully');
+        }
+      } catch (error) {
+        console.error('[HabitFormation] API analyze error:', error);
+      }
     } catch (error) {
       console.error('Error loading habit data:', error);
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -130,6 +166,20 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
       todaySummary,
       lastUpdated: Date.now(),
     }));
+
+    // Fire-and-forget: sync new habit to backend
+    try {
+      await api.createHabit({
+        habitName: newHabit.name,
+        habitType: (newHabit as any).category,
+        frequency: newHabit.frequency,
+        targetValue: (newHabit as any).targetValue || 1,
+        unit: (newHabit as any).unit,
+        reminderTime: (newHabit as any).reminderTime,
+      });
+    } catch (error) {
+      console.error('[HabitFormation] API sync error:', error);
+    }
   }, [calculateTodaySummary, state.completions]);
 
   const updateHabitHandler = useCallback(async (habitId: string, updates: Partial<Habit>) => {
@@ -182,6 +232,13 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
       insights,
       lastUpdated: Date.now(),
     }));
+
+    // Fire-and-forget: sync completion to backend
+    try {
+      await api.completeHabit(habitId, today, 1);
+    } catch (error) {
+      console.error('[HabitFormation] API sync error:', error);
+    }
   }, [calculateTodaySummary, state.habits]);
 
   const skipHabit = useCallback(async (habitId: string) => {

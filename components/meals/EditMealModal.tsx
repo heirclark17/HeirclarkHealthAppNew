@@ -15,6 +15,7 @@ import {
 import { GlassModal } from '../liquidGlass/GlassModal';
 import { Button } from '../Button';
 import { Colors, Fonts, Spacing } from '../../constants/Theme';
+import { NumberText } from '../NumberText';
 
 // iOS 26 Liquid Glass spring physics
 const GLASS_SPRING = {
@@ -243,7 +244,7 @@ export function EditMealModal({
 
         {/* Calculated Macros Info */}
         <View style={styles.infoCard}>
-          <Text style={styles.infoText}>
+          <NumberText weight="medium" style={styles.infoText}>
             Calculated from macros:{' '}
             {Math.round(
               (parseFloat(protein) || 0) * 4 +
@@ -251,10 +252,10 @@ export function EditMealModal({
               (parseFloat(fat) || 0) * 9
             )}{' '}
             calories
-          </Text>
-          <Text style={styles.infoSubtext}>
+          </NumberText>
+          <NumberText weight="regular" style={styles.infoSubtext}>
             Protein: 4 cal/g • Carbs: 4 cal/g • Fat: 9 cal/g
-          </Text>
+          </NumberText>
         </View>
 
         {/* Action Buttons */}

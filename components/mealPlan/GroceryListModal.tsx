@@ -20,6 +20,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing } from '../../constants/Theme';
+import { NumberText } from '../NumberText';
 import { GroceryCategory, GroceryItem } from '../../types/mealPlan';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 
@@ -161,9 +162,9 @@ const CategorySection = ({
           {CATEGORY_ICONS[category.category] || '📦'}
         </Text>
         <Text style={[styles.categoryTitle, { color: glassColors.text }]}>{category.category}</Text>
-        <Text style={[styles.categoryCount, { color: glassColors.textMuted }]}>
+        <NumberText weight="regular" style={[styles.categoryCount, { color: glassColors.textMuted }]}>
           {checkedCount}/{totalCount}
-        </Text>
+        </NumberText>
       </View>
       {category.items.map((item, itemIndex) => (
         <CheckboxItem
@@ -251,9 +252,9 @@ export function GroceryListModal({
             {/* Glass highlight */}
             <View style={styles.progressHighlight} />
           </View>
-          <Text style={[styles.progressText, { color: glassColors.textMuted }]}>
+          <NumberText weight="regular" style={[styles.progressText, { color: glassColors.textMuted }]}>
             {checkedItems} of {totalItems} items checked
-          </Text>
+          </NumberText>
         </Animated.View>
 
         {/* Grocery list */}

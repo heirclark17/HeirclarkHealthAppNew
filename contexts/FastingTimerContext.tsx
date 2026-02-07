@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useGoalWizard } from './GoalWizardContext';
+import { api } from '../services/api';
 
 // Fasting presets matching the goal wizard
 export const FASTING_PRESETS = [
@@ -183,6 +184,16 @@ export function FastingTimerProvider({ children }: { children: React.ReactNode }
 
   const loadSavedState = async () => {
     try {
+      // Try to check for active fast from API first
+      try {
+        const apiFast = await api.getCurrentFast();
+        if (apiFast && apiFast.startedAt) {
+          console.log('[FastingTimer] Found active fast from API:', apiFast);
+        }
+      } catch (error) {
+        console.error('[FastingTimer] API getCurrentFast error, using local:', error);
+      }
+
       const saved = await AsyncStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -215,7 +226,7 @@ export function FastingTimerProvider({ children }: { children: React.ReactNode }
     return FASTING_PRESETS.find(p => p.id === presetId) || FASTING_PRESETS[0];
   };
 
-  const startFast = useCallback(() => {
+  const startFast = useCallback(async () => {
     const now = new Date();
     const preset = getPresetConfig(state.selectedPreset);
     const endTime = new Date(now.getTime() + preset.fastingHours * 60 * 60 * 1000);
@@ -234,6 +245,13 @@ export function FastingTimerProvider({ children }: { children: React.ReactNode }
       startTime: now.toISOString(),
       endTime: endTime.toISOString(),
     });
+
+    // Sync fast start to backend (fire-and-forget)
+    try {
+      await api.startFast(state.selectedPreset, preset.fastingHours);
+    } catch (error) {
+      console.error('[FastingTimer] API startFast sync error:', error);
+    }
   }, [state.selectedPreset]);
 
   const pauseFast = useCallback(() => {
@@ -254,7 +272,7 @@ export function FastingTimerProvider({ children }: { children: React.ReactNode }
     console.log('[FastingTimer] Fast resumed');
   }, []);
 
-  const stopFast = useCallback(() => {
+  const stopFast = useCallback(async () => {
     setState(prev => ({
       ...prev,
       isActive: false,
@@ -264,9 +282,16 @@ export function FastingTimerProvider({ children }: { children: React.ReactNode }
       fastingEndTime: null,
     }));
     console.log('[FastingTimer] Fast stopped');
+
+    // Sync fast end to backend (fire-and-forget)
+    try {
+      await api.endFast();
+    } catch (error) {
+      console.error('[FastingTimer] API endFast sync error:', error);
+    }
   }, []);
 
-  const completeFast = useCallback(() => {
+  const completeFast = useCallback(async () => {
     const today = new Date().toISOString().split('T')[0];
     const preset = getPresetConfig(state.selectedPreset);
 
@@ -298,6 +323,13 @@ export function FastingTimerProvider({ children }: { children: React.ReactNode }
       completedFastsThisWeek: state.completedFastsThisWeek + 1,
       streak: newStreak,
     });
+
+    // Sync fast completion to backend (fire-and-forget)
+    try {
+      await api.endFast();
+    } catch (error) {
+      console.error('[FastingTimer] API endFast sync error:', error);
+    }
   }, [state.selectedPreset, state.currentStreak, state.lastCompletedDate]);
 
   const resetTimer = useCallback(() => {

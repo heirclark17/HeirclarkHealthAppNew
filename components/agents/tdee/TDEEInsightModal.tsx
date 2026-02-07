@@ -3,7 +3,7 @@
 // Uses Liquid Glass design for frosted glass effect
 
 import React from 'react';
-import { Colors } from '../../../constants/Theme';
+import { Colors, Fonts } from '../../../constants/Theme';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, SlideInUp } from 'react-native-reanimated';
+import { NumberText } from '../../NumberText';
 import { useAdaptiveTDEE } from '../../../contexts/AdaptiveTDEEContext';
 import { TDEE_CONSTANTS } from '../../../types/adaptiveTDEE';
 import { GlassCard } from '../../liquidGlass/GlassCard';
@@ -63,12 +64,12 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
   const renderNotReady = () => (
     <View style={styles.notReadyContainer}>
       <View style={styles.progressCircle}>
-        <Text style={[styles.progressNumber, { color: textColor }]}>
+        <NumberText weight="bold" style={[styles.progressNumber, { color: textColor }]}>
           {TDEE_CONSTANTS.MIN_DAYS_FOR_CALCULATION - daysUntilReady}
-        </Text>
-        <Text style={[styles.progressOf, { color: subtextColor }]}>
+        </NumberText>
+        <NumberText weight="regular" style={[styles.progressOf, { color: subtextColor }]}>
           / {TDEE_CONSTANTS.MIN_DAYS_FOR_CALCULATION}
-        </Text>
+        </NumberText>
         <Text style={[styles.progressLabel, { color: mutedColor }]}>days</Text>
       </View>
 
@@ -104,7 +105,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
         <GlassCard variant="elevated" material="regular" style={styles.mainStatCard}>
           <Text style={[styles.statLabel, { color: subtextColor }]}>Your Adaptive TDEE</Text>
           <View style={styles.statValueRow}>
-            <Text style={[styles.mainStatValue, { color: textColor }]}>{result.adaptiveTDEE.toLocaleString()}</Text>
+            <NumberText weight="bold" style={[styles.mainStatValue, { color: textColor }]}>{result.adaptiveTDEE.toLocaleString()}</NumberText>
             <Text style={[styles.statUnit, { color: subtextColor }]}>cal/day</Text>
           </View>
           <View style={[styles.confidenceBadge, { backgroundColor: cardBg }]}>
@@ -113,10 +114,10 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
               size={14}
               color={result.confidence === 'high' ? Colors.successStrong : Colors.restingEnergy}
             />
-            <Text style={[styles.confidenceText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>
+            <NumberText weight="regular" style={[styles.confidenceText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>
               {result.confidence.charAt(0).toUpperCase() + result.confidence.slice(1)} Confidence
               ({result.confidenceScore}%)
-            </Text>
+            </NumberText>
           </View>
         </GlassCard>
 
@@ -124,20 +125,20 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
         <View style={styles.statsRow}>
           <GlassCard variant="compact" material="thin" style={styles.statBox}>
             <Text style={[styles.statBoxLabel, { color: mutedColor }]}>Formula TDEE</Text>
-            <Text style={[styles.statBoxValue, { color: textColor }]}>{result.formulaTDEE.toLocaleString()}</Text>
+            <NumberText weight="bold" style={[styles.statBoxValue, { color: textColor }]}>{result.formulaTDEE.toLocaleString()}</NumberText>
             <Text style={[styles.statBoxSubtext, { color: mutedColor }]}>Mifflin-St Jeor</Text>
           </GlassCard>
           <GlassCard variant="compact" material="thin" style={styles.statBox}>
             <Text style={[styles.statBoxLabel, { color: mutedColor }]}>Difference</Text>
-            <Text style={[
+            <NumberText weight="bold" style={[
               styles.statBoxValue,
               { color: result.difference >= 0 ? Colors.successStrong : Colors.warningOrange }
             ]}>
               {result.difference >= 0 ? '+' : ''}{result.difference}
-            </Text>
-            <Text style={[styles.statBoxSubtext, { color: mutedColor }]}>
+            </NumberText>
+            <NumberText weight="regular" style={[styles.statBoxSubtext, { color: mutedColor }]}>
               {result.differencePercent >= 0 ? '+' : ''}{result.differencePercent}% variance
-            </Text>
+            </NumberText>
           </GlassCard>
         </View>
 
@@ -147,9 +148,9 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
             <Ionicons name="nutrition" size={20} color={Colors.successStrong} />
             <Text style={styles.recommendedTitle}>Recommended Daily Intake</Text>
           </View>
-          <Text style={[styles.recommendedValue, { color: textColor }]}>
+          <NumberText weight="bold" style={[styles.recommendedValue, { color: textColor }]}>
             {getRecommendedCalories().toLocaleString()} calories
-          </Text>
+          </NumberText>
           <Text style={[styles.recommendedSubtext, { color: subtextColor }]}>
             Based on your adaptive TDEE and goal
           </Text>
@@ -216,14 +217,14 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
             </View>
             {recentWeeks.map((week, index) => (
               <View key={week.weekEndDate} style={[styles.historyRow, { borderBottomColor: borderColor }]}>
-                <Text style={[styles.historyText, { flex: 1.5, color: isDark ? Colors.textSecondary : Colors.textMuted }]}>
+                <NumberText weight="regular" style={[styles.historyText, { flex: 1.5, color: isDark ? Colors.textSecondary : Colors.textMuted }]}>
                   {new Date(week.weekEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </Text>
-                <Text style={[styles.historyText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{week.avgWeight} lb</Text>
-                <Text style={[styles.historyText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{week.avgCalories}</Text>
-                <Text style={[styles.historyText, styles.historyTDEE]}>
+                </NumberText>
+                <NumberText weight="regular" style={[styles.historyText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{week.avgWeight} lb</NumberText>
+                <NumberText weight="regular" style={[styles.historyText, { color: isDark ? Colors.textSecondary : Colors.textMuted }]}>{week.avgCalories}</NumberText>
+                <NumberText weight="semiBold" style={[styles.historyText, styles.historyTDEE]}>
                   {week.calculatedTDEE}
-                </Text>
+                </NumberText>
               </View>
             ))}
           </View>
@@ -261,7 +262,7 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
         ].map((step, index) => (
           <View key={index} style={styles.howItWorksStep}>
             <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>{step.num}</Text>
+              <NumberText weight="bold" style={styles.stepNumberText}>{step.num}</NumberText>
             </View>
             <View style={styles.stepContent}>
               <Text style={[styles.stepTitle, { color: textColor }]}>{step.title}</Text>
@@ -418,7 +419,7 @@ const styles = StyleSheet.create({
   },
   progressNumber: {
     fontSize: 36,
-    fontWeight: '700',
+    fontFamily: Fonts.numericBold,
   },
   progressOf: {
     fontSize: 14,
@@ -476,7 +477,7 @@ const styles = StyleSheet.create({
   },
   mainStatValue: {
     fontSize: 48,
-    fontWeight: '700',
+    fontFamily: Fonts.numericBold,
   },
   statUnit: {
     fontSize: 16,
@@ -510,7 +511,7 @@ const styles = StyleSheet.create({
   },
   statBoxValue: {
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: Fonts.numericBold,
   },
   statBoxSubtext: {
     fontSize: 11,
@@ -590,11 +591,12 @@ const styles = StyleSheet.create({
   historyText: {
     flex: 1,
     fontSize: 13,
+    fontFamily: Fonts.numericRegular,
     textAlign: 'center',
   },
   historyTDEE: {
     color: Colors.restingEnergy,
-    fontWeight: '600',
+    fontFamily: Fonts.numericSemiBold,
   },
   insightsContainer: {
     marginBottom: 20,
@@ -631,7 +633,7 @@ const styles = StyleSheet.create({
   },
   stepNumberText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: Fonts.numericBold,
     color: Colors.restingEnergy,
   },
   stepContent: {

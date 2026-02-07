@@ -1,11 +1,12 @@
-import { Colors } from '../constants/Theme';
+import { Colors, Fonts } from '../constants/Theme';
 
 import React from 'react';
-import { Text, TextStyle, StyleSheet, Platform, TextProps } from 'react-native';
+import { Text, TextStyle, StyleSheet, TextProps } from 'react-native';
 
 interface RoundedNumeralProps extends Omit<TextProps, 'children'> {
   value: string | number;
   size?: 'small' | 'medium' | 'large';
+  weight?: 'light' | 'regular' | 'medium' | 'semiBold' | 'bold' | 'heavy';
   unit?: string;
   style?: TextStyle;
   showCommas?: boolean;
@@ -19,9 +20,19 @@ const SIZE_CONFIG = {
   large: { fontSize: 48, lineHeight: 53 },
 } as const;
 
+const WEIGHT_MAP = {
+  light: Fonts.numericLight,
+  regular: Fonts.numericRegular,
+  medium: Fonts.numericMedium,
+  semiBold: Fonts.numericSemiBold,
+  bold: Fonts.numericBold,
+  heavy: Fonts.numericHeavy,
+} as const;
+
 export const RoundedNumeral: React.FC<RoundedNumeralProps> = ({
   value,
   size = 'medium',
+  weight = 'regular',
   unit,
   style,
   showCommas = true,
@@ -46,10 +57,12 @@ export const RoundedNumeral: React.FC<RoundedNumeralProps> = ({
   const displayText = unit ? `${formattedValue} ${unit}` : formattedValue;
   const sizeConfig = SIZE_CONFIG[size];
 
+  const fontFamily = WEIGHT_MAP[weight];
+
   return (
     <Text
       {...textProps}
-      style={[styles.base, sizeConfig, style]}
+      style={[styles.base, sizeConfig, { fontFamily }, style]}
       allowFontScaling={allowFontScaling}
       accessible={true}
       accessibilityLabel={`${formattedValue} ${unit || ''}`}
@@ -62,12 +75,7 @@ export const RoundedNumeral: React.FC<RoundedNumeralProps> = ({
 
 const styles = StyleSheet.create({
   base: {
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'sans-serif-medium',
-      default: 'System',
-    }),
-    fontWeight: '400',
+    fontFamily: Fonts.numericRegular,
     color: Colors.text,
     letterSpacing: -0.5,
     textAlign: 'center',

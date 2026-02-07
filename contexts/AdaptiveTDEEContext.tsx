@@ -10,6 +10,7 @@ import {
   TDEE_CONSTANTS,
 } from '../types/adaptiveTDEE';
 import { adaptiveTDEEStorage } from '../services/adaptiveTDEEStorage';
+import { api } from '../services/api';
 import { calculateAdaptiveTDEE, recalculateTDEEIfNeeded } from '../services/adaptiveTDEEService';
 import { useGoalWizard } from './GoalWizardContext';
 
@@ -107,6 +108,16 @@ export function AdaptiveTDEEProvider({ children }: { children: React.ReactNode }
         adaptiveTDEEStorage.getDataQualityMetrics(),
       ]);
 
+      // Try to fetch weight history from API for TDEE calculations
+      try {
+        const apiHistory = await api.getHistory(30);
+        if (apiHistory && apiHistory.length > 0) {
+          console.log('[AdaptiveTDEE] Fetched API weight history:', apiHistory.length, 'entries');
+        }
+      } catch (error) {
+        console.error('[AdaptiveTDEE] API weight history fetch error, using local:', error);
+      }
+
       setState((prev) => ({
         ...prev,
         weightHistory,
@@ -144,6 +155,14 @@ export function AdaptiveTDEEProvider({ children }: { children: React.ReactNode }
         console.log('[AdaptiveTDEE] Logging weight:', { weight, unit, source });
 
         const newLog = await adaptiveTDEEStorage.logWeight(weight, unit, source);
+
+        // Sync weight to backend (fire-and-forget)
+        try {
+          const weightInLbs = unit === 'kg' ? weight * 2.20462 : weight;
+          await api.logWeight(weightInLbs, 'lbs');
+        } catch (error) {
+          console.error('[AdaptiveTDEE] API logWeight sync error:', error);
+        }
 
         setState((prev) => {
           const updatedHistory = [newLog, ...prev.weightHistory.filter((l) => l.id !== newLog.id)];

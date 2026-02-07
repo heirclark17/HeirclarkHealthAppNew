@@ -13,6 +13,7 @@ import {
   HYDRATION_TIPS,
 } from '../types/hydration';
 import * as HydrationStorage from '../services/hydrationStorage';
+import { api } from '../services/api';
 
 interface HydrationContextType {
   state: HydrationState;
@@ -20,6 +21,7 @@ interface HydrationContextType {
   removeEntry: (entryId: string) => Promise<void>;
   updateGoal: (goal: HydrationGoal) => Promise<void>;
   getHydrationTip: () => string;
+  getHydrationStatusFromAI: (activityLevel?: string, weather?: string) => Promise<any>;
   getProgressPercent: () => number;
   getRemainingAmount: () => number;
   getAverageIntake: () => number;
@@ -113,6 +115,13 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
           streak: updatedStreak,
         }));
       }
+
+      // Sync hydration log to backend (fire-and-forget)
+      try {
+        await api.logHydration(amount, entry.date);
+      } catch (error) {
+        console.error('[Hydration] API sync error:', error);
+      }
     },
     [state.todayEntries, state.todayGoal]
   );
@@ -148,6 +157,17 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
     return HYDRATION_TIPS[index];
   }, []);
 
+  // Get AI-powered hydration status analysis
+  const getHydrationStatusFromAI = useCallback(async (activityLevel?: string, weather?: string) => {
+    try {
+      const result = await api.getHydrationStatus(state.todayIntake, state.todayGoal, activityLevel, weather);
+      return result;
+    } catch (error) {
+      console.error('[Hydration] API getHydrationStatus error:', error);
+      return null;
+    }
+  }, [state.todayIntake, state.todayGoal]);
+
   const getProgressPercent = useCallback((): number => {
     if (state.todayGoal === 0) return 0;
     return Math.min(100, Math.round((state.todayIntake / state.todayGoal) * 100));
@@ -169,6 +189,7 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
     removeEntry,
     updateGoal,
     getHydrationTip,
+    getHydrationStatusFromAI,
     getProgressPercent,
     getRemainingAmount,
     getAverageIntake,
@@ -179,6 +200,7 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
     removeEntry,
     updateGoal,
     getHydrationTip,
+    getHydrationStatusFromAI,
     getProgressPercent,
     getRemainingAmount,
     getAverageIntake,
