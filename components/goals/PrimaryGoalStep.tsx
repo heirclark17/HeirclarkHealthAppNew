@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
-import { Flame, Dumbbell, ShieldCheck, Heart, Check, ArrowRight } from 'lucide-react-native';
+import { Flame, Dumbbell, ShieldCheck, Heart, Check } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -184,7 +184,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
           title="CONTINUE"
           onPress={handleContinue}
           disabled={!state.primaryGoal}
-          icon={<ArrowRight size={18} />}
+          variant="secondary"
           size="large"
           fullWidth
         />
