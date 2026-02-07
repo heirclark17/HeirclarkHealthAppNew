@@ -274,6 +274,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 48,
+    marginHorizontal: 24,
   },
   continueButton: {
     flexDirection: 'row',
