@@ -597,9 +597,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           activeOpacity={0.7}
         >
           <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
-          <Text style={[styles.datePickerButtonText, { color: colors.text }]}>
+          <NumberText weight="light" style={[styles.datePickerButtonText, { color: colors.text }]}>
             {formatDateForDisplay(state.startDate)}
-          </Text>
+          </NumberText>
         </TouchableOpacity>
 
         {showStartDatePicker && (
@@ -635,9 +635,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             activeOpacity={0.7}
           >
             <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
-            <Text style={[styles.datePickerButtonText, { color: colors.text }]}>
+            <NumberText weight="light" style={[styles.datePickerButtonText, { color: colors.text }]}>
               {formatDateForDisplay(state.targetDate)}
-            </Text>
+            </NumberText>
           </TouchableOpacity>
 
           {showTargetDatePicker && (
@@ -1035,7 +1035,6 @@ const styles = StyleSheet.create({
   },
   datePickerButtonText: {
     fontSize: 16,
-    fontFamily: Fonts.light,
     fontWeight: '200',
   },
   datePickerDoneButton: {
