@@ -1,6 +1,27 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  Apple,
+  Egg,
+  Dumbbell,
+  Leaf,
+  Flower2,
+  Edit,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Shuffle,
+  Repeat,
+  Coffee,
+  UtensilsCrossed,
+  Pizza,
+  Droplet,
+  MinusCircle,
+  PlusCircle,
+  Moon,
+  Footprints,
+  Flame
+} from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
@@ -22,16 +43,16 @@ interface DietOption {
   id: DietStyle;
   title: string;
   description: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ComponentType<any>;
 }
 
 const DIET_OPTIONS: DietOption[] = [
-  { id: 'standard', title: 'Standard', description: 'Balanced macros', icon: 'nutrition-outline' },
-  { id: 'keto', title: 'Keto', description: 'Low carb, high fat', icon: 'egg-outline' },
-  { id: 'high_protein', title: 'High Protein', description: 'Muscle focused', icon: 'barbell-outline' },
-  { id: 'vegetarian', title: 'Vegetarian', description: 'No meat', icon: 'leaf-outline' },
-  { id: 'vegan', title: 'Vegan', description: 'Plant-based only', icon: 'flower-outline' },
-  { id: 'custom', title: 'Custom', description: 'Set your own', icon: 'create-outline' },
+  { id: 'standard', title: 'Standard', description: 'Balanced macros', icon: Apple },
+  { id: 'keto', title: 'Keto', description: 'Low carb, high fat', icon: Egg },
+  { id: 'high_protein', title: 'High Protein', description: 'Muscle focused', icon: Dumbbell },
+  { id: 'vegetarian', title: 'Vegetarian', description: 'No meat', icon: Leaf },
+  { id: 'vegan', title: 'Vegan', description: 'Plant-based only', icon: Flower2 },
+  { id: 'custom', title: 'Custom', description: 'Set your own', icon: Edit },
 ];
 
 const ALLERGIES = [
@@ -86,6 +107,7 @@ interface DietCardProps {
 function DietCard({ option, isSelected, onSelect, colors, isDark }: DietCardProps) {
   // iOS 26 Liquid Glass styling - enhanced visibility
   const selectedBg = isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)';
+  const IconComponent = option.icon;
 
   return (
     <TouchableOpacity
@@ -98,8 +120,7 @@ function DietCard({ option, isSelected, onSelect, colors, isDark }: DietCardProp
       <GlassCard style={[styles.dietCard, isSelected && { backgroundColor: selectedBg }]} interactive>
         <View style={styles.dietCardInner}>
           <View style={[styles.dietIcon, isSelected && styles.dietIconSelected]}>
-            <Ionicons
-              name={option.icon}
+            <IconComponent
               size={22}
               color={isSelected ? Colors.successMuted : colors.textMuted}
             />
@@ -111,7 +132,7 @@ function DietCard({ option, isSelected, onSelect, colors, isDark }: DietCardProp
             <Text style={[styles.dietDescription, { color: colors.textMuted }]}>{option.description}</Text>
           </View>
           {isSelected && (
-            <Ionicons name="checkmark-circle" size={20} color={Colors.successMuted} />
+            <CheckCircle2 size={20} color={Colors.successMuted} />
           )}
         </View>
       </GlassCard>
@@ -278,7 +299,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   ]}
                   interactive
                 >
-                  <Text
+                  <NumberText
+                    weight="light"
                     style={[
                       styles.mealChipText,
                       { color: colors.text },
@@ -286,7 +308,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                     ]}
                   >
                     {num}
-                  </Text>
+                  </NumberText>
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -303,7 +325,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
       <GlassSection isDark={isDark}>
         <View style={styles.fastingHeader}>
           <View style={styles.fastingInfo}>
-            <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
+            <Clock size={20} color={colors.textSecondary} />
             <View style={styles.fastingTextContainer}>
               <Text style={[styles.fastingTitle, { color: colors.text }]}>Intermittent Fasting</Text>
               <Text style={[styles.fastingSubtitle, { color: colors.textMuted }]}>Restrict eating to a time window</Text>
@@ -344,9 +366,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                       ]}
                       interactive
                     >
-                      <Text style={[styles.presetLabel, { color: colors.text }, isSelected && styles.presetLabelSelected]}>
+                      <NumberText weight="light" style={[styles.presetLabel, { color: colors.text }, isSelected && styles.presetLabelSelected]}>
                         {preset.label}
-                      </Text>
+                      </NumberText>
                       <Text style={[styles.presetDesc, { color: colors.textMuted }]}>
                         {preset.description}
                       </Text>
@@ -358,9 +380,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             <GlassCard style={styles.windowDisplay} interactive>
               <View style={styles.windowTime}>
                 <Text style={[styles.windowLabel, { color: colors.textMuted }]}>Eating Window</Text>
-                <Text style={[styles.windowValue, { color: colors.primary }]}>
+                <NumberText weight="light" style={[styles.windowValue, { color: colors.primary }]}>
                   {state.fastingStart} - {state.fastingEnd}
-                </Text>
+                </NumberText>
               </View>
             </GlassCard>
           </View>
@@ -397,7 +419,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                     {allergy}
                   </Text>
                   {isSelected && (
-                    <Ionicons name="close-circle" size={16} color={Colors.error} />
+                    <XCircle size={16} color={Colors.error} />
                   )}
                 </GlassCard>
               </TouchableOpacity>
@@ -425,7 +447,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               ]}
               interactive
             >
-              <Ionicons name="shuffle-outline" size={20} color={mealDiversity === 'diverse' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
+              <Shuffle size={20} color={mealDiversity === 'diverse' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
               <Text style={[styles.optionButtonText, { color: colors.text }, mealDiversity === 'diverse' && { color: Colors.successMuted }]}>Diverse daily</Text>
             </GlassCard>
           </TouchableOpacity>
@@ -441,7 +463,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               ]}
               interactive
             >
-              <Ionicons name="repeat-outline" size={20} color={mealDiversity === 'sameDaily' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
+              <Repeat size={20} color={mealDiversity === 'sameDaily' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
               <Text style={[styles.optionButtonText, { color: colors.text }, mealDiversity === 'sameDaily' && { color: Colors.successMuted }]}>Same meals (prep)</Text>
             </GlassCard>
           </TouchableOpacity>
@@ -467,7 +489,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               ]}
               interactive
             >
-              <Ionicons name="cafe-outline" size={20} color={mealStyle === 'threePlusSnacks' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
+              <Coffee size={20} color={mealStyle === 'threePlusSnacks' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
               <Text style={[styles.optionButtonText, { color: colors.text }, mealStyle === 'threePlusSnacks' && { color: Colors.successMuted }]}>3 meals + snacks</Text>
             </GlassCard>
           </TouchableOpacity>
@@ -483,7 +505,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               ]}
               interactive
             >
-              <Ionicons name="restaurant-outline" size={20} color={mealStyle === 'fewerLarger' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
+              <UtensilsCrossed size={20} color={mealStyle === 'fewerLarger' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
               <Text style={[styles.optionButtonText, { color: colors.text }, mealStyle === 'fewerLarger' && { color: Colors.successMuted }]}>Fewer, larger meals</Text>
             </GlassCard>
           </TouchableOpacity>
@@ -517,7 +539,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   ]}
                   interactive
                 >
-                  {isSelected && <Ionicons name="pizza-outline" size={14} color={Colors.warning} />}
+                  {isSelected && <Pizza size={14} color={Colors.warning} />}
                   <Text style={[styles.cheatDayText, { color: colors.text }, isSelected && { color: Colors.warning }]}>
                     {shortDay}
                   </Text>
@@ -528,7 +550,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         </ScrollView>
         {cheatDays.length > 0 && (
           <Text style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
-            {cheatDays.length === 1 ? '1 cheat day' : `${cheatDays.length} cheat days`} selected - enjoy mindfully!
+            <NumberText weight="light" style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
+              {cheatDays.length}
+            </NumberText>
+            {' cheat day'}{cheatDays.length > 1 ? 's' : ''} selected - enjoy mindfully!
           </Text>
         )}
       </GlassSection>
@@ -547,7 +572,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{protein}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
+                  {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -569,7 +594,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{veg}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
+                  {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -591,7 +616,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{starch}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
+                  {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -613,7 +638,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{snack}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
+                  {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -635,7 +660,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{cuisine}</Text>
-                  {isSelected && <Ionicons name="checkmark-circle" size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
+                  {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -657,7 +682,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: '#f97316' }]}>{food}</Text>
-                  {isSelected && <Ionicons name="close-circle" size={16} color="#f97316" style={{ marginLeft: 4 }} />}
+                  {isSelected && <XCircle size={16} color="#f97316" style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -683,11 +708,12 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         </Text>
         <View style={styles.skillButtonsContainer}>
           {[
-            { value: 'beginner', label: 'Beginner', icon: 'egg-outline', description: 'Simple recipes' },
-            { value: 'intermediate', label: 'Intermediate', icon: 'restaurant-outline', description: 'Moderate recipes' },
-            { value: 'advanced', label: 'Advanced', icon: 'flame-outline', description: 'Complex recipes' },
+            { value: 'beginner', label: 'Beginner', icon: Egg, description: 'Simple recipes' },
+            { value: 'intermediate', label: 'Intermediate', icon: UtensilsCrossed, description: 'Moderate recipes' },
+            { value: 'advanced', label: 'Advanced', icon: Flame, description: 'Complex recipes' },
           ].map((option) => {
             const isSelected = cookingSkill === option.value;
+            const IconComponent = option.icon;
             return (
               <TouchableOpacity
                 key={option.value}
@@ -707,8 +733,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   ]}
                   interactive
                 >
-                  <Ionicons
-                    name={option.icon as any}
+                  <IconComponent
                     size={24}
                     color={isSelected ? Colors.successMuted : colors.textMuted}
                   />
@@ -747,7 +772,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         {/* Water Goal */}
         <View style={styles.dailyGoalRow}>
           <View style={styles.dailyGoalInfo}>
-            <Ionicons name="water-outline" size={24} color={colors.primary} />
+            <Droplet size={24} color={colors.primary} />
             <View style={styles.dailyGoalTextContainer}>
               <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Water Intake</Text>
               <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Daily hydration goal</Text>
@@ -761,9 +786,14 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               }}
               style={styles.dailyGoalButton}
             >
-              <Ionicons name="remove-circle-outline" size={28} color={colors.textMuted} />
+              <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
-            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>{state.waterGoalOz} oz</Text>
+            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>
+              <NumberText weight="light" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+                {state.waterGoalOz}
+              </NumberText>
+              {' oz'}
+            </Text>
             <TouchableOpacity
               onPress={async () => {
                 await selectionFeedback();
@@ -771,7 +801,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               }}
               style={styles.dailyGoalButton}
             >
-              <Ionicons name="add-circle-outline" size={28} color={colors.textMuted} />
+              <PlusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>
@@ -779,7 +809,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         {/* Sleep Goal */}
         <View style={styles.dailyGoalRow}>
           <View style={styles.dailyGoalInfo}>
-            <Ionicons name="moon-outline" size={24} color={colors.primary} />
+            <Moon size={24} color={colors.primary} />
             <View style={styles.dailyGoalTextContainer}>
               <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Sleep Duration</Text>
               <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Nightly sleep target</Text>
@@ -793,9 +823,14 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               }}
               style={styles.dailyGoalButton}
             >
-              <Ionicons name="remove-circle-outline" size={28} color={colors.textMuted} />
+              <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
-            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>{state.sleepGoalHours} hrs</Text>
+            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>
+              <NumberText weight="light" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+                {state.sleepGoalHours}
+              </NumberText>
+              {' hrs'}
+            </Text>
             <TouchableOpacity
               onPress={async () => {
                 await selectionFeedback();
@@ -803,7 +838,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               }}
               style={styles.dailyGoalButton}
             >
-              <Ionicons name="add-circle-outline" size={28} color={colors.textMuted} />
+              <PlusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>
@@ -811,7 +846,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         {/* Step Goal */}
         <View style={styles.dailyGoalRow}>
           <View style={styles.dailyGoalInfo}>
-            <Ionicons name="footsteps-outline" size={24} color={colors.primary} />
+            <Footprints size={24} color={colors.primary} />
             <View style={styles.dailyGoalTextContainer}>
               <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Daily Steps</Text>
               <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Activity target</Text>
@@ -825,7 +860,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               }}
               style={styles.dailyGoalButton}
             >
-              <Ionicons name="remove-circle-outline" size={28} color={colors.textMuted} />
+              <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
             <NumberText weight="bold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
               {(state.stepGoal / 1000).toFixed(0)}k
@@ -837,7 +872,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               }}
               style={styles.dailyGoalButton}
             >
-              <Ionicons name="add-circle-outline" size={28} color={colors.textMuted} />
+              <PlusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>
@@ -879,6 +914,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 22,
   },
@@ -897,6 +933,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
     marginBottom: 12,
     marginTop: -4,
@@ -938,6 +975,7 @@ const styles = StyleSheet.create({
   },
   dietDescription: {
     fontSize: 12,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
   },
   mealsRow: {
@@ -955,7 +993,6 @@ const styles = StyleSheet.create({
   },
   mealChipText: {
     fontSize: 20,
-    fontFamily: Fonts.light,
     fontWeight: '100',
     color: Colors.text,
     textAlign: 'center',
@@ -968,6 +1005,7 @@ const styles = StyleSheet.create({
   mealsHint: {
     marginTop: 12,
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
     textAlign: 'center',
     fontStyle: 'italic',
@@ -993,6 +1031,7 @@ const styles = StyleSheet.create({
   },
   fastingSubtitle: {
     fontSize: 12,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
   },
   fastingOptions: {
@@ -1019,7 +1058,6 @@ const styles = StyleSheet.create({
   },
   presetLabel: {
     fontSize: 16,
-    fontFamily: Fonts.light,
     fontWeight: '100',
     color: Colors.text,
   },
@@ -1028,6 +1066,7 @@ const styles = StyleSheet.create({
   },
   presetDesc: {
     fontSize: 10,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
     marginTop: 2,
   },
@@ -1048,7 +1087,6 @@ const styles = StyleSheet.create({
   },
   windowValue: {
     fontSize: 20,
-    fontFamily: Fonts.light,
     fontWeight: '100',
     marginTop: 4,
   },
@@ -1127,6 +1165,7 @@ const styles = StyleSheet.create({
   cheatDaysHint: {
     marginTop: 12,
     fontSize: 13,
+    fontFamily: Fonts.light,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -1137,6 +1176,7 @@ const styles = StyleSheet.create({
   textInput: {
     padding: 12,
     fontSize: 14,
+    fontFamily: Fonts.light,
     minHeight: 60,
     textAlignVertical: 'top',
   },
@@ -1161,6 +1201,7 @@ const styles = StyleSheet.create({
   },
   skillButtonDescription: {
     fontSize: 11,
+    fontFamily: Fonts.light,
     marginTop: 4,
     textAlign: 'center',
     width: '100%', // Ensure description takes full width
@@ -1224,6 +1265,7 @@ const styles = StyleSheet.create({
   },
   dailyGoalHint: {
     fontSize: 12,
+    fontFamily: Fonts.light,
   },
   dailyGoalControls: {
     flexDirection: 'row',
@@ -1235,7 +1277,6 @@ const styles = StyleSheet.create({
   },
   dailyGoalValue: {
     fontSize: 18,
-    fontFamily: Fonts.light,
     fontWeight: '100',
     minWidth: 60,
     textAlign: 'center',

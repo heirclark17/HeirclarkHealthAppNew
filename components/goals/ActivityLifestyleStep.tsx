@@ -1,13 +1,31 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  Monitor,
+  PersonStanding,
+  Bike,
+  Dumbbell,
+  Activity,
+  Zap,
+  CheckCircle2,
+  Flame,
+  Calendar,
+  Info,
+  Lightbulb,
+  User,
+  Circle,
+  Minus,
+  Network,
+  Building2
+} from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard, CardioPreference, FitnessLevel } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { ActivityLevel } from '../../constants/goals';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 
 // Section wrapper using GlassCard
 function GlassSection({ children, style }: { children: React.ReactNode; style?: any }) {
@@ -22,7 +40,7 @@ interface CardioOption {
   id: CardioPreference;
   title: string;
   description: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ComponentType<any>;
   details: string;
   calorieInfo: string;
   frequency: string;
@@ -33,7 +51,7 @@ const CARDIO_OPTIONS: CardioOption[] = [
     id: 'walking',
     title: 'Walking',
     description: 'Low intensity, sustainable cardio',
-    icon: 'walk-outline',
+    icon: PersonStanding,
     details: 'Best for beginners and active recovery',
     calorieInfo: '150-250 cal/30min',
     frequency: '5-7 days/week',
@@ -42,7 +60,7 @@ const CARDIO_OPTIONS: CardioOption[] = [
     id: 'running',
     title: 'Running',
     description: 'Moderate-high intensity cardio',
-    icon: 'fitness-outline',
+    icon: Activity,
     details: 'Great for endurance and calorie burn',
     calorieInfo: '300-400 cal/30min',
     frequency: '3-5 days/week',
@@ -51,7 +69,7 @@ const CARDIO_OPTIONS: CardioOption[] = [
     id: 'hiit',
     title: 'HIIT Training',
     description: 'High intensity interval training',
-    icon: 'flash-outline',
+    icon: Zap,
     details: 'Maximum efficiency with afterburn effect',
     calorieInfo: '250-320 cal/20min',
     frequency: '2-3 days/week max',
@@ -62,7 +80,8 @@ interface ActivityOption {
   id: ActivityLevel;
   title: string;
   description: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  descriptionParts?: { text: string; isNumber: boolean }[];
+  icon: React.ComponentType<any>;
   example: string;
 }
 
@@ -71,35 +90,50 @@ const ACTIVITY_OPTIONS: ActivityOption[] = [
     id: 'sedentary',
     title: 'Sedentary',
     description: 'Little to no exercise',
-    icon: 'desktop-outline',
+    icon: Monitor,
     example: 'Desk job, minimal walking',
   },
   {
     id: 'light',
     title: 'Lightly Active',
     description: 'Light exercise 1-3 days/week',
-    icon: 'walk-outline',
+    descriptionParts: [
+      { text: 'Light exercise ', isNumber: false },
+      { text: '1-3', isNumber: true },
+      { text: ' days/week', isNumber: false },
+    ],
+    icon: PersonStanding,
     example: 'Daily walks, light stretching',
   },
   {
     id: 'moderate',
     title: 'Moderately Active',
     description: 'Moderate exercise 3-5 days/week',
-    icon: 'bicycle-outline',
+    descriptionParts: [
+      { text: 'Moderate exercise ', isNumber: false },
+      { text: '3-5', isNumber: true },
+      { text: ' days/week', isNumber: false },
+    ],
+    icon: Bike,
     example: 'Regular gym, active hobbies',
   },
   {
     id: 'very',
     title: 'Very Active',
     description: 'Hard exercise 6-7 days/week',
-    icon: 'barbell-outline',
+    descriptionParts: [
+      { text: 'Hard exercise ', isNumber: false },
+      { text: '6-7', isNumber: true },
+      { text: ' days/week', isNumber: false },
+    ],
+    icon: Dumbbell,
     example: 'Daily training, physical job',
   },
   {
     id: 'extra',
     title: 'Extremely Active',
     description: 'Very intense daily exercise',
-    icon: 'fitness-outline',
+    icon: Activity,
     example: 'Athletes, manual labor + gym',
   },
 ];
@@ -110,20 +144,20 @@ const WORKOUT_DURATIONS = [15, 30, 45, 60] as const;
 interface EquipmentOption {
   id: string;
   label: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ComponentType<any>;
 }
 
 const EQUIPMENT_OPTIONS: EquipmentOption[] = [
-  { id: 'bodyweight', label: 'Bodyweight', icon: 'body-outline' },
-  { id: 'dumbbells', label: 'Dumbbells', icon: 'barbell-outline' },
-  { id: 'barbell', label: 'Barbell', icon: 'fitness-outline' },
-  { id: 'kettlebell', label: 'Kettlebell', icon: 'disc-outline' },
-  { id: 'resistance_bands', label: 'Bands', icon: 'ellipse-outline' },
-  { id: 'pull_up_bar', label: 'Pull-up Bar', icon: 'remove-outline' },
-  { id: 'cable_machine', label: 'Cable Machine', icon: 'git-network-outline' },
-  { id: 'treadmill', label: 'Treadmill', icon: 'walk-outline' },
-  { id: 'stationary_bike', label: 'Bike', icon: 'bicycle-outline' },
-  { id: 'full_gym', label: 'Full Gym', icon: 'business-outline' },
+  { id: 'bodyweight', label: 'Bodyweight', icon: User },
+  { id: 'dumbbells', label: 'Dumbbells', icon: Dumbbell },
+  { id: 'barbell', label: 'Barbell', icon: Activity },
+  { id: 'kettlebell', label: 'Kettlebell', icon: Circle },
+  { id: 'resistance_bands', label: 'Bands', icon: Circle },
+  { id: 'pull_up_bar', label: 'Pull-up Bar', icon: Minus },
+  { id: 'cable_machine', label: 'Cable Machine', icon: Network },
+  { id: 'treadmill', label: 'Treadmill', icon: PersonStanding },
+  { id: 'stationary_bike', label: 'Bike', icon: Bike },
+  { id: 'full_gym', label: 'Full Gym', icon: Building2 },
 ];
 
 // Common injury/limitation options
@@ -162,6 +196,8 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
     onSelect();
   };
 
+  const IconComponent = option.icon;
+
   return (
     <View>
       <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
@@ -170,8 +206,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
             <View style={styles.activityCard}>
               <View style={styles.activityLeft}>
                 <View style={[styles.activityIcon, isSelected && styles.activityIconSelected]}>
-                  <Ionicons
-                    name={option.icon}
+                  <IconComponent
                     size={22}
                     color={isSelected ? Colors.success : colors.textMuted}
                   />
@@ -181,11 +216,29 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                 <Text style={[styles.activityTitle, { color: colors.text }, isSelected && styles.activityTitleSelected]}>
                   {option.title}
                 </Text>
-                <Text style={[styles.activityDescription, { color: colors.textSecondary }]}>{option.description}</Text>
+                <Text style={[styles.activityDescription, { color: colors.textSecondary }]}>
+                  {option.descriptionParts ? (
+                    option.descriptionParts.map((part, index) =>
+                      part.isNumber ? (
+                        <NumberText
+                          key={index}
+                          weight="light"
+                          style={[styles.activityDescription, { color: colors.textSecondary }]}
+                        >
+                          {part.text}
+                        </NumberText>
+                      ) : (
+                        <Text key={index}>{part.text}</Text>
+                      )
+                    )
+                  ) : (
+                    option.description
+                  )}
+                </Text>
                 <Text style={[styles.activityExample, { color: colors.textMuted }]}>{option.example}</Text>
               </View>
               {isSelected && (
-                <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
+                <CheckCircle2 size={24} color={Colors.success} />
               )}
             </View>
           </GlassCard>
@@ -240,6 +293,8 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
     onSelect();
   };
 
+  const IconComponent = option.icon;
+
   return (
     <View>
       <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
@@ -248,8 +303,7 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
             <View style={styles.cardioCard}>
               <View style={styles.cardioLeft}>
                 <View style={[styles.cardioIcon, isSelected && styles.cardioIconSelected]}>
-                  <Ionicons
-                    name={option.icon}
+                  <IconComponent
                     size={24}
                     color={isSelected ? Colors.error : colors.textMuted}
                   />
@@ -262,17 +316,17 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
                 <Text style={[styles.cardioDescription, { color: colors.textSecondary }]}>{option.description}</Text>
                 <View style={styles.cardioMeta}>
                   <View style={styles.cardioMetaItem}>
-                    <Ionicons name="flame-outline" size={12} color={colors.textMuted} />
-                    <Text style={[styles.cardioMetaText, { color: colors.textMuted }]}>{option.calorieInfo}</Text>
+                    <Flame size={12} color={colors.textMuted} />
+                    <NumberText weight="light" style={[styles.cardioMetaText, { color: colors.textMuted }]}>{option.calorieInfo}</NumberText>
                   </View>
                   <View style={styles.cardioMetaItem}>
-                    <Ionicons name="calendar-outline" size={12} color={colors.textMuted} />
-                    <Text style={[styles.cardioMetaText, { color: colors.textMuted }]}>{option.frequency}</Text>
+                    <Calendar size={12} color={colors.textMuted} />
+                    <NumberText weight="light" style={[styles.cardioMetaText, { color: colors.textMuted }]}>{option.frequency}</NumberText>
                   </View>
                 </View>
               </View>
               {isSelected && (
-                <Ionicons name="checkmark-circle" size={24} color={Colors.error} />
+                <CheckCircle2 size={24} color={Colors.error} />
               )}
             </View>
           </GlassCard>
@@ -360,7 +414,8 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   ]}
                   interactive
                 >
-                  <Text
+                  <NumberText
+                    weight="light"
                     style={[
                       styles.workoutChipText,
                       { color: colors.text },
@@ -368,7 +423,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                     ]}
                   >
                     {num}
-                  </Text>
+                  </NumberText>
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -380,15 +435,29 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       <GlassSection>
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>TYPICAL WORKOUT DURATION</Text>
         <View style={styles.durationChips}>
-          {WORKOUT_DURATIONS.map((duration) => (
-            <Chip
-              key={duration}
-              label={`${duration} min`}
-              isSelected={state.workoutDuration === duration}
-              onSelect={() => setWorkoutDuration(duration)}
-              colors={colors}
-            />
-          ))}
+          {WORKOUT_DURATIONS.map((duration) => {
+            const isSelected = state.workoutDuration === duration;
+            const selectedBg = isSelected ? Colors.success : undefined;
+            return (
+              <TouchableOpacity
+                key={duration}
+                onPress={async () => {
+                  await selectionFeedback();
+                  setWorkoutDuration(duration);
+                }}
+                activeOpacity={0.7}
+              >
+                <GlassCard style={[styles.chip, isSelected && { backgroundColor: selectedBg }]} interactive>
+                  <Text style={[styles.chipText, { color: colors.text }, isSelected && styles.chipTextSelected]}>
+                    <NumberText weight="light" style={[{ fontSize: 14 }, { color: colors.text }, isSelected && styles.chipTextSelected]}>
+                      {duration}
+                    </NumberText>
+                    {' min'}
+                  </Text>
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </GlassSection>
 
@@ -446,6 +515,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
           {EQUIPMENT_OPTIONS.map((equipment) => {
             const isSelected = state.availableEquipment.includes(equipment.id);
             const selectedBg = isSelected ? Colors.primary : undefined;
+            const IconComponent = equipment.icon;
             return (
               <TouchableOpacity
                 key={equipment.id}
@@ -461,8 +531,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   ]}
                   interactive
                 >
-                  <Ionicons
-                    name={equipment.icon}
+                  <IconComponent
                     size={18}
                     color={isSelected ? Colors.background : colors.textMuted}
                     style={{ marginRight: 6 }}
@@ -534,7 +603,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                     </Text>
                   </View>
                   {isSelected && (
-                    <Ionicons name="checkmark-circle" size={20} color={Colors.background} style={{ marginLeft: 8 }} />
+                    <CheckCircle2 size={20} color={Colors.background} style={{ marginLeft: 8 }} />
                   )}
                 </GlassCard>
               </TouchableOpacity>
@@ -543,7 +612,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         </View>
         {state.injuries.length > 0 && (
           <GlassCard style={styles.injuryNote} interactive>
-            <Ionicons name="information-circle-outline" size={20} color={Colors.info} />
+            <Info size={20} color={Colors.info} />
             <Text style={[styles.injuryNoteText, { color: colors.textSecondary }]}>
               Workouts will be modified to avoid or reduce stress on these areas.
             </Text>
@@ -554,7 +623,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Summary Card */}
       <GlassCard style={styles.summaryCard} interactive>
         <View style={styles.summaryCardInner}>
-          <Ionicons name="bulb-outline" size={28} color={Colors.warning} />
+          <Lightbulb size={28} color={Colors.warning} />
           <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
             Based on your activity level, we'll calculate your Total Daily Energy Expenditure (TDEE)
             to determine the right calorie target for your goal.
@@ -596,6 +665,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 22,
   },
@@ -640,11 +710,13 @@ const styles = StyleSheet.create({
   },
   activityDescription: {
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginBottom: 2,
   },
   activityExample: {
     fontSize: 12,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
     fontStyle: 'italic',
   },
@@ -663,6 +735,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
     marginBottom: 16,
     lineHeight: 18,
@@ -682,7 +755,6 @@ const styles = StyleSheet.create({
   },
   workoutChipText: {
     fontSize: 18,
-    fontFamily: Fonts.light,
     fontWeight: '100',
     color: Colors.text,
     textAlign: 'center',
@@ -722,6 +794,7 @@ const styles = StyleSheet.create({
   summaryText: {
     flex: 1,
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
@@ -772,6 +845,7 @@ const styles = StyleSheet.create({
   },
   cardioSectionSubtitle: {
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginBottom: 16,
   },
@@ -811,6 +885,7 @@ const styles = StyleSheet.create({
   },
   cardioDescription: {
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginBottom: 6,
   },
@@ -849,6 +924,7 @@ const styles = StyleSheet.create({
   },
   warningText: {
     fontSize: 12,
+    fontFamily: Fonts.light,
     marginTop: 12,
     fontStyle: 'italic',
   },
@@ -874,6 +950,7 @@ const styles = StyleSheet.create({
   },
   injuryChipDescription: {
     fontSize: 11,
+    fontFamily: Fonts.light,
   },
   injuryChipDescriptionSelected: {
     color: 'rgba(255, 255, 255, 0.8)',
@@ -888,6 +965,7 @@ const styles = StyleSheet.create({
   injuryNoteText: {
     flex: 1,
     fontSize: 12,
+    fontFamily: Fonts.light,
     lineHeight: 18,
   },
 });

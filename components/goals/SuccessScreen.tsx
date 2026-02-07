@@ -1,6 +1,35 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  Flame,
+  Dumbbell,
+  TrendingUp,
+  User,
+  Activity,
+  Weight,
+  Ruler,
+  Calendar,
+  Utensils,
+  Heart,
+  Zap,
+  Target,
+  Coffee,
+  Lightbulb,
+  Sparkles,
+  Leaf,
+  AlertTriangle,
+  Restaurant,
+  Fish,
+  Pizza,
+  IceCream,
+  XCircle,
+  Settings as SettingsIcon,
+  Timer,
+  ChefHat,
+  Play,
+  BookOpen,
+  ChevronRight
+} from 'lucide-react-native';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { NumberText } from '../NumberText';
@@ -8,6 +37,11 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { successNotification, lightImpact } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
+import {
+  generateWorkoutGuidance,
+  generateDailyGuidance,
+  generateNutritionGuidance
+} from '../../services/openaiService';
 
 interface SuccessScreenProps {
   onLogMeal: () => void;
@@ -26,6 +60,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   const foodPrefs = useFoodPreferencesSafe();
   const hasPlayedHaptic = useRef(false);
   const hasCalculatedResults = useRef(false);
+
+  // AI-generated content state
+  const [workoutGuidance, setWorkoutGuidance] = useState<string>('');
+  const [dailyGuidance, setDailyGuidance] = useState<string>('');
+  const [nutritionGuidance, setNutritionGuidance] = useState<string>('');
+  const [isLoadingWorkout, setIsLoadingWorkout] = useState(false);
+  const [isLoadingDaily, setIsLoadingDaily] = useState(false);
+  const [isLoadingNutrition, setIsLoadingNutrition] = useState(false);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -52,6 +94,92 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       successNotification();
     }
   }, []);
+
+  // Generate AI workout guidance
+  useEffect(() => {
+    async function generateWorkout() {
+      if (!state.primaryGoal || workoutGuidance || isLoadingWorkout) return;
+
+      setIsLoadingWorkout(true);
+      try {
+        const guidance = await generateWorkoutGuidance({
+          primaryGoal: state.primaryGoal,
+          workoutsPerWeek: state.workoutsPerWeek || 3,
+          workoutDuration: state.workoutDuration || 30,
+          activityLevel: state.activityLevel || 'moderate',
+          equipmentAccess: state.equipmentAccess || [],
+          injuries: state.injuries,
+        });
+        setWorkoutGuidance(guidance);
+      } catch (error) {
+        console.error('[SuccessScreen] Error generating workout guidance:', error);
+        setWorkoutGuidance('Your personalized workout plan is being prepared. Please check back soon.');
+      } finally {
+        setIsLoadingWorkout(false);
+      }
+    }
+
+    generateWorkout();
+  }, [state.primaryGoal, state.workoutsPerWeek, state.workoutDuration, state.activityLevel]);
+
+  // Generate AI daily guidance
+  useEffect(() => {
+    async function generateDaily() {
+      if (!state.results || dailyGuidance || isLoadingDaily) return;
+
+      setIsLoadingDaily(true);
+      try {
+        const guidance = await generateDailyGuidance({
+          primaryGoal: state.primaryGoal,
+          currentWeight: state.currentWeight,
+          targetWeight: state.targetWeight,
+          activityLevel: state.activityLevel || 'moderate',
+          dailyCalories: state.results.calories,
+          protein: state.results.protein,
+          carbs: state.results.carbs,
+          fat: state.results.fat,
+        });
+        setDailyGuidance(guidance);
+      } catch (error) {
+        console.error('[SuccessScreen] Error generating daily guidance:', error);
+        setDailyGuidance('Your personalized daily guidance is being prepared. Focus on consistency and tracking your meals.');
+      } finally {
+        setIsLoadingDaily(false);
+      }
+    }
+
+    generateDaily();
+  }, [state.results, state.primaryGoal, state.currentWeight, state.targetWeight]);
+
+  // Generate AI nutrition guidance
+  useEffect(() => {
+    async function generateNutrition() {
+      if (nutritionGuidance || isLoadingNutrition) return;
+
+      setIsLoadingNutrition(true);
+      try {
+        const guidance = await generateNutritionGuidance({
+          dietStyle: state.dietStyle,
+          allergies: state.allergies,
+          favoriteCuisines: foodPrefs?.preferences?.favoriteCuisines,
+          cookingTime: foodPrefs?.preferences?.cookingTime,
+          budgetLevel: foodPrefs?.preferences?.budgetLevel,
+          mealsPerDay: state.mealsPerDay,
+          intermittentFasting: state.intermittentFasting,
+          fastingWindow: state.fastingWindow,
+          dislikedIngredients: foodPrefs?.preferences?.hatedFoods?.split(',').map((f: string) => f.trim()),
+        });
+        setNutritionGuidance(guidance);
+      } catch (error) {
+        console.error('[SuccessScreen] Error generating nutrition guidance:', error);
+        setNutritionGuidance('Your personalized nutrition guidance is being prepared. Focus on whole foods and consistent meal timing.');
+      } finally {
+        setIsLoadingNutrition(false);
+      }
+    }
+
+    generateNutrition();
+  }, [state.dietStyle, state.allergies, state.mealsPerDay, foodPrefs?.preferences]);
 
   const handleLogMeal = () => {
     lightImpact();
@@ -162,15 +290,15 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <View style={styles.iconContainer}>
         <View style={styles.checkContainer}>
           <View style={styles.checkCircle}>
-            <Ionicons name="checkmark" size={48} color={Colors.background} />
+            <Target size={48} color={Colors.background} />
           </View>
         </View>
       </View>
 
       {/* Success Text */}
       <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: colors.text }]}>You're All Set!</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.light }]}>You're All Set!</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
           Your personalized nutrition plan is ready. Use this as your daily guide to reach your goals.
         </Text>
       </View>
@@ -178,29 +306,44 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       {/* Daily Targets - Separate Cards */}
       {state.results && (
         <View style={styles.targetsSection}>
-          <Text style={[styles.targetsSectionHeader, { color: colors.textMuted }]}>YOUR DAILY TARGETS</Text>
+          <Text style={[styles.targetsSectionHeader, { color: colors.textMuted, fontFamily: Fonts.light }]}>YOUR DAILY TARGETS</Text>
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
-              <Ionicons name="flame" size={20} color={Colors.error} />
+              <Flame size={20} color={Colors.error} />
               <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                 {state.results.calories.toLocaleString()}
               </NumberText>
-              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Calories</Text>
+              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Calories</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Ionicons name="fish" size={20} color={colors.protein} />
-              <Text style={[styles.targetValue, { color: colors.text }]}>{state.results.protein}g</Text>
-              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Protein</Text>
+              <Fish size={20} color={colors.protein} />
+              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
+                  {state.results.protein}
+                </NumberText>
+                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.light }]}>g</Text>
+              </View>
+              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Protein</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Ionicons name="leaf" size={20} color={colors.carbs} />
-              <Text style={[styles.targetValue, { color: colors.text }]}>{state.results.carbs}g</Text>
-              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Carbs</Text>
+              <Leaf size={20} color={colors.carbs} />
+              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
+                  {state.results.carbs}
+                </NumberText>
+                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.light }]}>g</Text>
+              </View>
+              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Carbs</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Ionicons name="water" size={20} color={colors.fat} />
-              <Text style={[styles.targetValue, { color: colors.text }]}>{state.results.fat}g</Text>
-              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Fat</Text>
+              <Coffee size={20} color={colors.fat} />
+              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
+                  {state.results.fat}
+                </NumberText>
+                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.light }]}>g</Text>
+              </View>
+              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Fat</Text>
             </GlassCard>
           </View>
         </View>
@@ -210,45 +353,43 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <View>
         <GlassCard style={styles.workoutPlanCard} interactive>
           <View style={styles.workoutPlanHeader}>
-            <Ionicons name="barbell" size={20} color={Colors.error} />
-            <Text style={styles.workoutPlanTitle}>YOUR WORKOUT PLAN</Text>
+            <Dumbbell size={20} color={Colors.error} />
+            <Text style={[styles.workoutPlanTitle, { fontFamily: Fonts.light }]}>YOUR WORKOUT PLAN</Text>
           </View>
 
-          <Text style={[styles.workoutPlanDescription, { color: colors.text }]}>
-            {state.primaryGoal === 'lose_weight' && (
-              <>Based on your goal to lose weight, we recommend a <Text style={[styles.workoutPlanBold, { color: colors.protein }]}>Fat Burning HIIT program</Text> combining high-intensity cardio with strength training to maximize calorie burn while preserving muscle mass. This approach creates an optimal environment for fat loss while maintaining metabolic rate.</>
-            )}
-            {state.primaryGoal === 'build_muscle' && (
-              <>Based on your goal to build muscle, we recommend a <Text style={[styles.workoutPlanBold, { color: colors.protein }]}>Progressive Overload Strength program</Text> focusing on compound movements and progressive resistance. This program emphasizes muscle hypertrophy through strategic volume and intensity manipulation.</>
-            )}
-            {state.primaryGoal === 'maintain' && (
-              <>Based on your goal to maintain fitness, we recommend a <Text style={[styles.workoutPlanBold, { color: colors.protein }]}>Balanced Fitness program</Text> combining strength training, cardio, and mobility work to sustain your current fitness level and prevent regression.</>
-            )}
-            {state.primaryGoal === 'improve_health' && (
-              <>Based on your goal to improve overall health, we recommend a <Text style={[styles.workoutPlanBold, { color: colors.protein }]}>Health & Wellness program</Text> emphasizing cardiovascular health, functional strength, and movement quality for long-term vitality.</>
-            )}
-          </Text>
+          {isLoadingWorkout ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={colors.protein} />
+              <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+                Generating your personalized workout plan...
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.workoutPlanDescription, { color: colors.text, fontFamily: Fonts.light }]}>
+              {workoutGuidance}
+            </Text>
+          )}
 
           <View style={styles.workoutPlanFeatures}>
             <View style={styles.workoutFeatureItem}>
-              <Ionicons name="calendar" size={16} color={colors.protein} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
-                {state.workoutsPerWeek || 3} workouts per week
+              <Calendar size={16} color={colors.protein} />
+              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
+                <NumberText weight="light" style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
+                  {state.workoutsPerWeek || 3}
+                </NumberText> workouts per week
               </Text>
             </View>
             <View style={styles.workoutFeatureItem}>
-              <Ionicons name="time" size={16} color={colors.protein} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
-                {state.workoutDuration || 30} minutes per session
+              <Timer size={16} color={colors.protein} />
+              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
+                <NumberText weight="light" style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
+                  {state.workoutDuration || 30}
+                </NumberText> minutes per session
               </Text>
             </View>
             <View style={styles.workoutFeatureItem}>
-              <Ionicons
-                name={state.cardioPreference === 'walking' ? 'walk' : state.cardioPreference === 'running' ? 'fitness' : 'flash'}
-                size={16}
-                color={Colors.error}
-              />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
+              <Activity size={16} color={Colors.error} />
+              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
                 {state.cardioPreference === 'walking' && 'Walking-based cardio'}
                 {state.cardioPreference === 'running' && 'Running-based cardio'}
                 {state.cardioPreference === 'hiit' && 'HIIT training sessions'}
@@ -256,14 +397,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               </Text>
             </View>
             <View style={styles.workoutFeatureItem}>
-              <Ionicons name="trending-up" size={16} color={colors.protein} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
+              <TrendingUp size={16} color={colors.protein} />
+              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
                 Progressive difficulty levels
               </Text>
             </View>
             <View style={styles.workoutFeatureItem}>
-              <Ionicons name="checkmark-circle" size={16} color={colors.protein} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
+              <Target size={16} color={colors.protein} />
+              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
                 {state.primaryGoal === 'lose_weight' && 'Optimized for fat burning'}
                 {state.primaryGoal === 'build_muscle' && 'Maximizes muscle growth'}
                 {state.primaryGoal === 'maintain' && 'Sustains current fitness'}
@@ -274,8 +415,8 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
           <GlassCard style={styles.workoutPlanNote} interactive>
             <View style={styles.workoutPlanNoteInner}>
-              <Ionicons name="information-circle" size={16} color={colors.textMuted} />
-              <Text style={[styles.workoutPlanNoteText, { color: colors.textMuted }]}>
+              <Lightbulb size={16} color={colors.textMuted} />
+              <Text style={[styles.workoutPlanNoteText, { color: colors.textMuted, fontFamily: Fonts.light }]}>
                 Your plan adapts based on your progress and includes rest days for optimal recovery.
               </Text>
             </View>
@@ -287,41 +428,49 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <View>
         <GlassCard style={styles.profileCard} interactive>
           <View style={styles.profileHeader}>
-            <Ionicons name="person-outline" size={20} color={Colors.success} />
-            <Text style={styles.profileTitle}>YOUR PROFILE SUMMARY</Text>
+            <User size={20} color={Colors.success} />
+            <Text style={[styles.profileTitle, { fontFamily: Fonts.light }]}>YOUR PROFILE SUMMARY</Text>
           </View>
 
           <View style={styles.profileGrid}>
             <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Goal</Text>
-              <Text style={[styles.profileValue, { color: colors.text }]}>{getGoalLabel()}</Text>
+              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Goal</Text>
+              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{getGoalLabel()}</Text>
             </GlassCard>
             <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Activity</Text>
-              <Text style={[styles.profileValue, { color: colors.text }]}>{getActivityLabel()}</Text>
+              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Activity</Text>
+              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{getActivityLabel()}</Text>
             </GlassCard>
             <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Current Weight</Text>
-              <Text style={[styles.profileValue, { color: colors.text }]}>{formatWeight(state.currentWeight)}</Text>
+              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Current Weight</Text>
+              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{formatWeight(state.currentWeight)}</Text>
             </GlassCard>
             <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Target Weight</Text>
-              <Text style={[styles.profileValue, { color: colors.text }]}>{formatWeight(state.targetWeight)}</Text>
+              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Target Weight</Text>
+              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{formatWeight(state.targetWeight)}</Text>
             </GlassCard>
             <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Height</Text>
-              <Text style={[styles.profileValue, { color: colors.text }]}>{formatHeight()}</Text>
+              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Height</Text>
+              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{formatHeight()}</Text>
             </GlassCard>
             <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Age</Text>
-              <Text style={[styles.profileValue, { color: colors.text }]}>{state.age || '--'} years</Text>
+              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Age</Text>
+              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>
+                {state.age ? (
+                  <>
+                    <NumberText weight="medium" style={[styles.profileValue, { color: colors.text }]}>
+                      {state.age}
+                    </NumberText> years
+                  </>
+                ) : '--'}
+              </Text>
             </GlassCard>
             <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Diet Style</Text>
-              <Text style={[styles.profileValue, { color: colors.text }]}>{getDietLabel()}</Text>
+              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Diet Style</Text>
+              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{getDietLabel()}</Text>
             </GlassCard>
             <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted }]}>Workouts/Week</Text>
+              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Workouts/Week</Text>
               <NumberText weight="medium" style={[styles.profileValue, { color: colors.text }]}>
                 {state.workoutsPerWeek || 0}
               </NumberText>
@@ -332,25 +481,25 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           {state.results && (
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Ionicons name="flame-outline" size={16} color={Colors.error} />
+                <Flame size={16} color={Colors.error} />
                 <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
                   {state.results.bmr.toLocaleString()}
                 </NumberText>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMR</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>BMR</Text>
               </View>
               <View style={styles.statItem}>
-                <Ionicons name="flash-outline" size={16} color={Colors.warning} />
+                <Zap size={16} color={Colors.warning} />
                 <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
                   {state.results.tdee.toLocaleString()}
                 </NumberText>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>TDEE</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>TDEE</Text>
               </View>
               <View style={styles.statItem}>
-                <Ionicons name="body-outline" size={16} color={Colors.success} />
+                <Weight size={16} color={Colors.success} />
                 <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
                   {state.results.bmi.toFixed(1)}
                 </NumberText>
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
+                <Text style={[styles.statLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>BMI</Text>
               </View>
             </View>
           )}
@@ -361,17 +510,21 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       <View>
         <GlassCard style={styles.guidanceCard} interactive>
           <View style={styles.guidanceHeader}>
-            <Ionicons name="bulb-outline" size={20} color={Colors.warning} />
-            <Text style={styles.guidanceTitle}>DAILY GUIDANCE</Text>
+            <Lightbulb size={20} color={Colors.warning} />
+            <Text style={[styles.guidanceTitle, { fontFamily: Fonts.light }]}>DAILY GUIDANCE</Text>
           </View>
-          <Text style={[styles.guidanceText, { color: colors.textSecondary }]}>
-            {state.primaryGoal === 'lose_weight'
-              ? `Stay consistent with your ${state.results?.calories.toLocaleString() || '--'} calorie target. Focus on protein to preserve muscle while losing fat. Track your meals to stay accountable.`
-              : state.primaryGoal === 'build_muscle'
-              ? `Prioritize your ${state.results?.protein || '--'}g protein goal daily. Spread protein across 4-5 meals for optimal muscle synthesis. Don't skip your post-workout nutrition.`
-              : `Maintain balance with your macro targets. Focus on whole foods and consistent meal timing. Listen to your body's hunger cues.`
-            }
-          </Text>
+          {isLoadingDaily ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={Colors.warning} />
+              <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+                Generating your daily guidance...
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.guidanceText, { color: colors.textSecondary }]}>
+              {dailyGuidance}
+            </Text>
+          )}
         </GlassCard>
       </View>
 
@@ -381,11 +534,11 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           <GlassCard style={styles.foodPreferencesCard} interactive>
             <View style={styles.foodPrefsHeader}>
               <View style={styles.foodPrefsIconContainer}>
-                <Ionicons name="nutrition" size={24} color={Colors.success} />
+                <Utensils size={24} color={Colors.success} />
               </View>
               <View style={styles.foodPrefsHeaderText}>
-                <Text style={styles.foodPrefsTitle}>YOUR NUTRITION PREFERENCES</Text>
-                <Text style={[styles.foodPrefsSubtitle, { color: colors.text }]}>
+                <Text style={[styles.foodPrefsTitle, { fontFamily: Fonts.light }]}>YOUR NUTRITION PREFERENCES</Text>
+                <Text style={[styles.foodPrefsSubtitle, { color: colors.text, fontFamily: Fonts.light }]}>
                   Your personalized meal preferences
                 </Text>
               </View>
@@ -395,13 +548,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {foodPrefs.dietaryPreferences && foodPrefs.dietaryPreferences.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="leaf-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Dietary Style</Text>
+                  <Leaf size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Dietary Style</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
                   {foodPrefs.dietaryPreferences.map((pref, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.success }]}>
+                      <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
                         {pref.charAt(0).toUpperCase() + pref.slice(1).replace('_', ' ')}
                       </Text>
                     </View>
@@ -414,13 +567,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {foodPrefs.allergens && foodPrefs.allergens.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="warning-outline" size={16} color={Colors.error} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Allergens to Avoid</Text>
+                  <AlertTriangle size={16} color={Colors.error} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Allergens to Avoid</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
                   {foodPrefs.allergens.map((allergen, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.error }]}>
+                      <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
                         {allergen.charAt(0).toUpperCase() + allergen.slice(1)}
                       </Text>
                     </View>
@@ -433,13 +586,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {foodPrefs.favoriteCuisines && foodPrefs.favoriteCuisines.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="restaurant-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Cuisines</Text>
+                  <Restaurant size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Cuisines</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
                   {foodPrefs.favoriteCuisines.map((cuisine, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
-                      <Text style={[styles.prefTagText, { color: colors.text }]}>
+                      <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
                         {cuisine.charAt(0).toUpperCase() + cuisine.slice(1).replace('_', ' ')}
                       </Text>
                     </View>
@@ -452,13 +605,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {foodPrefs.favoriteProteins && foodPrefs.favoriteProteins.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="fish-outline" size={16} color={colors.protein} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Proteins</Text>
+                  <Fish size={16} color={colors.protein} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Proteins</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
                   {foodPrefs.favoriteProteins.map((protein, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: colors.protein }]}>
+                      <Text style={[styles.prefTagText, { color: colors.protein, fontFamily: Fonts.light }]}>
                         {protein.charAt(0).toUpperCase() + protein.slice(1).replace('_', ' ')}
                       </Text>
                     </View>
@@ -471,13 +624,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {foodPrefs.favoriteVegetables && foodPrefs.favoriteVegetables.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="leaf" size={16} color={Colors.success} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Vegetables</Text>
+                  <Leaf size={16} color={Colors.success} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Vegetables</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
                   {foodPrefs.favoriteVegetables.map((veggie, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.success }]}>
+                      <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
                         {veggie.charAt(0).toUpperCase() + veggie.slice(1).replace('_', ' ')}
                       </Text>
                     </View>
@@ -490,13 +643,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {foodPrefs.favoriteStarches && foodPrefs.favoriteStarches.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="pizza-outline" size={16} color={colors.carbs} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Starches</Text>
+                  <Pizza size={16} color={colors.carbs} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Starches</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
                   {foodPrefs.favoriteStarches.map((starch, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: colors.carbs }]}>
+                      <Text style={[styles.prefTagText, { color: colors.carbs, fontFamily: Fonts.light }]}>
                         {starch.charAt(0).toUpperCase() + starch.slice(1).replace('_', ' ')}
                       </Text>
                     </View>
@@ -509,13 +662,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {foodPrefs.favoriteSnacks && foodPrefs.favoriteSnacks.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="ice-cream-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Snacks</Text>
+                  <IceCream size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Snacks</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
                   {foodPrefs.favoriteSnacks.map((snack, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
-                      <Text style={[styles.prefTagText, { color: colors.text }]}>
+                      <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
                         {snack.charAt(0).toUpperCase() + snack.slice(1).replace('_', ' ')}
                       </Text>
                     </View>
@@ -528,13 +681,13 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {foodPrefs.hatedFoods && foodPrefs.hatedFoods.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="close-circle-outline" size={16} color={Colors.error} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Foods to Avoid</Text>
+                  <XCircle size={16} color={Colors.error} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Foods to Avoid</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
                   {foodPrefs.hatedFoods.map((food, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.error }]}>
+                      <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
                         {food.charAt(0).toUpperCase() + food.slice(1).replace('_', ' ')}
                       </Text>
                     </View>
@@ -548,9 +701,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               {/* Meal Diversity */}
               {foodPrefs.mealDiversity && (
                 <View style={styles.prefRow}>
-                  <Ionicons name="options-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Variety: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
+                  <SettingsIcon size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Variety: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
                     {foodPrefs.mealDiversity === 'same_meals' ? 'Same Meals Daily' : 'Diverse Meals'}
                   </Text>
                 </View>
@@ -559,9 +712,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               {/* Meal Style */}
               {foodPrefs.mealStyle && (
                 <View style={styles.prefRow}>
-                  <Ionicons name="time-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
+                  <Timer size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Style: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
                     {foodPrefs.mealStyle === 'quick_simple' ? 'Quick & Simple' : 'Gourmet & Complex'}
                   </Text>
                 </View>
@@ -570,10 +723,12 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               {/* Cheat Days */}
               {foodPrefs.cheatDays !== undefined && (
                 <View style={styles.prefRow}>
-                  <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
-                    {foodPrefs.cheatDays} per week
+                  <Calendar size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cheat Days: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
+                    <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
+                      {foodPrefs.cheatDays}
+                    </NumberText> per week
                   </Text>
                 </View>
               )}
@@ -581,13 +736,33 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               {/* Cooking Skill */}
               {foodPrefs.cookingSkill && (
                 <View style={styles.prefRow}>
-                  <Ionicons name="flame-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cooking Skill: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
+                  <ChefHat size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cooking Skill: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
                     {foodPrefs.cookingSkill === 'beginner' ? 'Beginner' :
                      foodPrefs.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
                   </Text>
                 </View>
+              )}
+            </View>
+
+            {/* AI-Generated Nutrition Guidance */}
+            <View style={[styles.nutritionGuidanceSection, { borderTopColor: colors.border }]}>
+              <View style={styles.guidanceHeader}>
+                <Sparkles size={18} color={Colors.success} />
+                <Text style={[styles.guidanceSectionTitle, { color: colors.text }]}>PERSONALIZED NUTRITION GUIDANCE</Text>
+              </View>
+              {isLoadingNutrition ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="small" color={Colors.success} />
+                  <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+                    Generating your personalized nutrition guidance...
+                  </Text>
+                </View>
+              ) : (
+                <Text style={[styles.nutritionGuidanceText, { color: colors.textSecondary }]}>
+                  {nutritionGuidance}
+                </Text>
               )}
             </View>
           </GlassCard>
@@ -609,14 +784,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                 <View style={styles.coachingButtonInner}>
                   <View style={styles.coachingIconContainer}>
                     <View style={styles.playIconCircle}>
-                      <Ionicons name="play" size={20} color="#fff" />
+                      <Play size={20} color="#fff" />
                     </View>
                   </View>
                   <View style={styles.coachingTextContainer}>
-                    <Text style={[styles.coachingButtonTitle, { color: colors.text }]}>Watch Your Customized Coaching</Text>
-                    <Text style={[styles.coachingButtonSubtitle, { color: colors.textMuted }]}>Your AI coach explains your personalized plan</Text>
+                    <Text style={[styles.coachingButtonTitle, { color: colors.text, fontFamily: Fonts.light }]}>Watch Your Customized Coaching</Text>
+                    <Text style={[styles.coachingButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>Your AI coach explains your personalized plan</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                  <ChevronRight size={20} color={colors.textMuted} />
                 </View>
               </GlassCard>
           </Pressable>
@@ -640,19 +815,23 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                     {isGeneratingMealPlan ? (
                       <ActivityIndicator size="small" color="#fff" />
                     ) : (
-                      <Ionicons name="restaurant" size={20} color="#fff" />
+                      <Utensils size={20} color="#fff" />
                     )}
                   </View>
                 </View>
                 <View style={styles.coachingTextContainer}>
-                  <Text style={[styles.mealPlanButtonTitle, { color: colors.text }]}>
-                    {isGeneratingMealPlan ? 'Generating AI Meal Plan...' : 'Start Your 7-Day Meal Plan'}
+                  <Text style={[styles.mealPlanButtonTitle, { color: colors.text, fontFamily: Fonts.light }]}>
+                    {isGeneratingMealPlan ? 'Generating AI Meal Plan...' : 'Start Your '}
+                    {!isGeneratingMealPlan && (
+                      <NumberText weight="light" style={[styles.mealPlanButtonTitle, { color: colors.text }]}>7</NumberText>
+                    )}
+                    {isGeneratingMealPlan ? '' : '-Day Meal Plan'}
                   </Text>
-                  <Text style={[styles.mealPlanButtonSubtitle, { color: colors.textMuted }]}>
+                  <Text style={[styles.mealPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>
                     {isGeneratingMealPlan ? 'Please wait while AI creates your plan' : 'AI-generated meals tailored to your goals'}
                   </Text>
                 </View>
-                {!isGeneratingMealPlan && <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
+                {!isGeneratingMealPlan && <ChevronRight size={20} color={colors.textMuted} />}
               </View>
             </GlassCard>
           </Pressable>
@@ -676,22 +855,29 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                     {isGeneratingTrainingPlan ? (
                       <ActivityIndicator size="small" color="#fff" />
                     ) : (
-                      <Ionicons name="barbell" size={20} color="#fff" />
+                      <Dumbbell size={20} color="#fff" />
                     )}
                   </View>
                 </View>
                 <View style={styles.coachingTextContainer}>
-                  <Text style={[styles.trainingPlanButtonTitle, { color: colors.text }]}>
+                  <Text style={[styles.trainingPlanButtonTitle, { color: colors.text, fontFamily: Fonts.light }]}>
                     {isGeneratingTrainingPlan ? 'Generating AI Training Plan...' : 'Start Your Training Plan'}
                   </Text>
-                  <Text style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted }]}>
+                  <Text style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>
                     {isGeneratingTrainingPlan
                       ? 'Please wait while AI creates your plan'
-                      : `${state.workoutsPerWeek || 3} days/week • ${state.primaryGoal === 'lose_weight' ? 'Fat burning' : state.primaryGoal === 'build_muscle' ? 'Muscle building' : 'Fitness'} focused`
+                      : (
+                        <>
+                          <NumberText weight="light" style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted }]}>
+                            {state.workoutsPerWeek || 3}
+                          </NumberText>
+                          {` days/week • ${state.primaryGoal === 'lose_weight' ? 'Fat burning' : state.primaryGoal === 'build_muscle' ? 'Muscle building' : 'Fitness'} focused`}
+                        </>
+                      )
                     }
                   </Text>
                 </View>
-                {!isGeneratingTrainingPlan && <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />}
+                {!isGeneratingTrainingPlan && <ChevronRight size={20} color={colors.textMuted} />}
               </View>
             </GlassCard>
           </Pressable>
@@ -709,8 +895,8 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         >
           <GlassCard style={[styles.primaryButtonCard, { backgroundColor: primaryGlassBg }]} interactive>
             <View style={styles.primaryButton}>
-              <Ionicons name="add-circle" size={22} color={colors.primary} />
-              <Text style={[styles.primaryButtonText, { color: colors.primary }]}>LOG YOUR FIRST MEAL</Text>
+              <Target size={22} color={colors.primary} />
+              <Text style={[styles.primaryButtonText, { color: colors.primary, fontFamily: Fonts.light }]}>LOG YOUR FIRST MEAL</Text>
             </View>
           </GlassCard>
         </Pressable>
@@ -725,8 +911,8 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           >
             <GlassCard style={styles.secondaryButtonCard} interactive>
               <View style={styles.secondaryButton}>
-                <Ionicons name="home-outline" size={20} color={colors.text} />
-                <Text style={[styles.secondaryButtonText, { color: colors.text }]}>DASHBOARD</Text>
+                <Heart size={20} color={colors.text} />
+                <Text style={[styles.secondaryButtonText, { color: colors.text, fontFamily: Fonts.light }]}>DASHBOARD</Text>
               </View>
             </GlassCard>
           </Pressable>
@@ -741,8 +927,8 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             >
               <GlassCard style={styles.adjustButtonCard} interactive>
                 <View style={styles.adjustButton}>
-                  <Ionicons name="settings-outline" size={20} color={colors.text} />
-                  <Text style={[styles.adjustButtonText, { color: colors.text }]}>ADJUST</Text>
+                  <SettingsIcon size={20} color={colors.text} />
+                  <Text style={[styles.adjustButtonText, { color: colors.text, fontFamily: Fonts.light }]}>ADJUST</Text>
                 </View>
               </GlassCard>
             </Pressable>
@@ -837,6 +1023,11 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  targetUnit: {
+    fontSize: 18,
+    fontFamily: Fonts.light,
+    marginLeft: 2,
   },
   workoutPlanCard: {
     width: '100%',
@@ -1222,5 +1413,36 @@ const styles = StyleSheet.create({
   mealPlanningSection: {
     gap: 12,
     marginTop: 4,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 16,
+  },
+  loadingText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    color: Colors.textMuted,
+  },
+  nutritionGuidanceSection: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  guidanceSectionTitle: {
+    fontSize: 11,
+    fontFamily: Fonts.medium,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    color: Colors.text,
+  },
+  nutritionGuidanceText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+    marginTop: 12,
   },
 });

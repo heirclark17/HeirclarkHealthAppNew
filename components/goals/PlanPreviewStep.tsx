@@ -1,6 +1,28 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  TrendingDown,
+  TrendingUp,
+  Minus,
+  Flame,
+  Zap,
+  User,
+  Calendar,
+  Apple,
+  Dumbbell,
+  Heart,
+  Clock,
+  CheckCircle2,
+  Leaf,
+  AlertTriangle,
+  UtensilsCrossed,
+  Fish,
+  Pizza,
+  IceCream,
+  XCircle,
+  Settings,
+  Link,
+} from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { NumberText } from '../NumberText';
@@ -19,9 +41,9 @@ interface AnimatedNumberProps {
 
 function AnimatedNumber({ value, duration = 1200, delay = 0, suffix = '', style }: AnimatedNumberProps) {
   return (
-    <Text style={style}>
+    <NumberText weight="light" style={style}>
       {value.toLocaleString()}{suffix}
-    </Text>
+    </NumberText>
   );
 }
 
@@ -185,13 +207,26 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             <Text style={[styles.calorieUnit, { color: colors.textMuted }]}>kcal</Text>
           </View>
           <View style={styles.goalBadge}>
-            <Ionicons
-              name={state.primaryGoal === 'lose_weight' ? 'trending-down' :
-                    state.primaryGoal === 'build_muscle' ? 'trending-up' : 'remove'}
-              size={14}
-              color={Colors.success}
-            />
-            <Text style={styles.goalBadgeText}>{getGoalMessage()}</Text>
+            {state.primaryGoal === 'lose_weight' ? (
+              <TrendingDown size={14} color={Colors.success} />
+            ) : state.primaryGoal === 'build_muscle' ? (
+              <TrendingUp size={14} color={Colors.success} />
+            ) : (
+              <Minus size={14} color={Colors.success} />
+            )}
+            <Text style={styles.goalBadgeText}>
+              {state.primaryGoal === 'lose_weight' ? (
+                <>
+                  <NumberText weight="light" style={styles.goalBadgeText}>{Math.abs(results.dailyDelta).toFixed(0)}</NumberText> cal deficit/day
+                </>
+              ) : state.primaryGoal === 'build_muscle' ? (
+                <>
+                  <NumberText weight="light" style={styles.goalBadgeText}>{Math.abs(results.dailyDelta).toFixed(0)}</NumberText> cal surplus/day
+                </>
+              ) : (
+                'Maintaining energy balance'
+              )}
+            </Text>
           </View>
         </View>
 
@@ -226,28 +261,146 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         </GlassCard>
       </View>
 
-      {/* Stats Cards */}
-      <View style={styles.statsRow}>
-        <GlassCard style={styles.statCard} interactive>
-          <Ionicons name="flame-outline" size={20} color={Colors.error} />
-          <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
-            {results.bmr.toLocaleString()}
-          </NumberText>
-          <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMR</Text>
-        </GlassCard>
-        <GlassCard style={styles.statCard} interactive>
-          <Ionicons name="flash-outline" size={20} color={Colors.warning} />
-          <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
-            {results.tdee.toLocaleString()}
-          </NumberText>
-          <Text style={[styles.statLabel, { color: colors.textMuted }]}>TDEE</Text>
-        </GlassCard>
-        <GlassCard style={styles.statCard} interactive>
-          <Ionicons name="body-outline" size={20} color={Colors.success} />
-          <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
-            {results.bmi.toFixed(1)}
-          </NumberText>
-          <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
+      {/* User Profile Section */}
+      <View>
+        <GlassCard style={styles.profileCard} interactive>
+          <View style={styles.profileHeader}>
+            <View style={styles.profileIconContainer}>
+              <User size={24} color={Colors.primary} />
+            </View>
+            <View style={styles.profileHeaderText}>
+              <Text style={styles.profileTitle}>YOUR PROFILE</Text>
+              <Text style={[styles.profileSubtitle, { color: colors.text }]}>
+                Complete biometric assessment
+              </Text>
+            </View>
+          </View>
+
+          {/* Biometric Data */}
+          <View style={styles.profileSection}>
+            <Text style={[styles.profileSectionTitle, { color: colors.textMuted }]}>BIOMETRIC DATA</Text>
+            <View style={styles.profileDataGrid}>
+              <View style={styles.profileDataItem}>
+                <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Age</Text>
+                <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
+                  {state.age}
+                </NumberText>
+                <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}>years</Text>
+              </View>
+              <View style={styles.profileDataItem}>
+                <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Sex</Text>
+                <Text style={[styles.profileDataValue, { color: colors.text }]}>
+                  {state.sex === 'male' ? 'Male' : 'Female'}
+                </Text>
+              </View>
+              <View style={styles.profileDataItem}>
+                <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Height</Text>
+                <Text style={[styles.profileDataValue, { color: colors.text }]}>
+                  {state.heightFt ? (
+                    <>
+                      <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
+                        {state.heightFt}
+                      </NumberText>
+                      <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}>'</Text>
+                      <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
+                        {state.heightIn}
+                      </NumberText>
+                      <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}>"</Text>
+                    </>
+                  ) : (
+                    <>
+                      <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
+                        {state.heightCm}
+                      </NumberText>
+                      <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}> cm</Text>
+                    </>
+                  )}
+                </Text>
+              </View>
+              <View style={styles.profileDataItem}>
+                <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Current Weight</Text>
+                <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
+                  {state.currentWeight}
+                </NumberText>
+                <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}>lbs</Text>
+              </View>
+              <View style={styles.profileDataItem}>
+                <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Target Weight</Text>
+                <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
+                  {state.targetWeight}
+                </NumberText>
+                <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}>lbs</Text>
+              </View>
+              <View style={styles.profileDataItem}>
+                <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Activity Level</Text>
+                <Text style={[styles.profileDataValue, { color: colors.text }]}>
+                  {state.activityLevel === 'sedentary' ? 'Sedentary' :
+                   state.activityLevel === 'light' ? 'Lightly Active' :
+                   state.activityLevel === 'moderate' ? 'Moderately Active' :
+                   state.activityLevel === 'active' ? 'Very Active' : 'Extremely Active'}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Metabolic Stats */}
+          <View style={styles.profileSection}>
+            <Text style={[styles.profileSectionTitle, { color: colors.textMuted }]}>METABOLIC STATS</Text>
+            <View style={styles.profileStatsRow}>
+              <View style={styles.profileStatBox}>
+                <Flame size={18} color={Colors.error} />
+                <NumberText weight="semiBold" style={[styles.profileStatValue, { color: colors.text }]}>
+                  {results.bmr.toLocaleString()}
+                </NumberText>
+                <Text style={[styles.profileStatLabel, { color: colors.textMuted }]}>BMR (cal/day)</Text>
+                <Text style={[styles.profileStatDesc, { color: colors.textSecondary }]}>
+                  Calories burned at rest
+                </Text>
+              </View>
+              <View style={styles.profileStatBox}>
+                <Zap size={18} color={Colors.warning} />
+                <NumberText weight="semiBold" style={[styles.profileStatValue, { color: colors.text }]}>
+                  {results.tdee.toLocaleString()}
+                </NumberText>
+                <Text style={[styles.profileStatLabel, { color: colors.textMuted }]}>TDEE (cal/day)</Text>
+                <Text style={[styles.profileStatDesc, { color: colors.textSecondary }]}>
+                  Total daily energy expenditure
+                </Text>
+              </View>
+            </View>
+            <View style={styles.profileStatsRow}>
+              <View style={styles.profileStatBox}>
+                <User size={18} color={results.bmiCategory.color} />
+                <NumberText weight="semiBold" style={[styles.profileStatValue, { color: colors.text }]}>
+                  {results.bmi.toFixed(1)}
+                </NumberText>
+                <Text style={[styles.profileStatLabel, { color: colors.textMuted }]}>BMI</Text>
+                <Text style={[styles.profileStatDesc, { color: results.bmiCategory.color }]}>
+                  {results.bmiCategory.name}
+                </Text>
+              </View>
+              <View style={styles.profileStatBox}>
+                {state.primaryGoal === 'lose_weight' ? (
+                  <TrendingDown size={18} color={Colors.error} />
+                ) : state.primaryGoal === 'build_muscle' ? (
+                  <TrendingUp size={18} color={Colors.success} />
+                ) : (
+                  <Minus size={18} color={Colors.primary} />
+                )}
+                <Text style={[styles.profileStatValue, { color: colors.text }]}>
+                  {state.primaryGoal === 'lose_weight' ? 'Fat Loss' :
+                   state.primaryGoal === 'build_muscle' ? 'Muscle Gain' :
+                   state.primaryGoal === 'maintain' ? 'Maintain' : 'Health'}
+                </Text>
+                <Text style={[styles.profileStatLabel, { color: colors.textMuted }]}>Primary Goal</Text>
+                <Text style={[styles.profileStatDesc, { color: colors.textSecondary }]}>
+                  {state.primaryGoal === 'lose_weight' ? `${Math.abs(state.currentWeight - state.targetWeight).toFixed(0)} lbs to lose` :
+                   state.primaryGoal === 'build_muscle' ? `${Math.abs(state.currentWeight - state.targetWeight).toFixed(0)} lbs to gain` :
+                   'Maintain current weight'}
+                </Text>
+              </View>
+            </View>
+          </View>
         </GlassCard>
       </View>
 
@@ -256,23 +409,23 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         <View>
         <GlassCard style={styles.weeklyRateCard} interactive>
           <View style={styles.weeklyRateIcon}>
-            <Ionicons
-              name={state.primaryGoal === 'lose_weight' ? 'trending-down' : 'trending-up'}
-              size={28}
-              color={state.primaryGoal === 'lose_weight' ? Colors.error : Colors.success}
-            />
+            {state.primaryGoal === 'lose_weight' ? (
+              <TrendingDown size={28} color={Colors.error} />
+            ) : (
+              <TrendingUp size={28} color={Colors.success} />
+            )}
           </View>
           <View style={styles.weeklyRateContent}>
             <Text style={[styles.weeklyRateLabel, { color: colors.textMuted }]}>
               {state.primaryGoal === 'lose_weight' ? 'WEEKLY FAT LOSS TARGET' : 'WEEKLY MUSCLE GAIN TARGET'}
             </Text>
             <View style={styles.weeklyRateRow}>
-              <Text style={[
+              <NumberText weight="light" style={[
                 styles.weeklyRateValue,
                 { color: state.primaryGoal === 'lose_weight' ? Colors.error : Colors.success }
               ]}>
                 {Math.abs(results.weeklyChange).toFixed(1)}
-              </Text>
+              </NumberText>
               <Text style={[styles.weeklyRateUnit, { color: colors.textMuted }]}>lbs/week</Text>
             </View>
             <Text style={[styles.weeklyRateHint, { color: colors.textSecondary }]}>
@@ -297,11 +450,23 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       <View>
         <GlassCard style={styles.timelineCard} interactive>
           <View style={styles.timelineIcon}>
-            <Ionicons name="calendar-outline" size={24} color={Colors.successMuted} />
+            <Calendar size={24} color={Colors.successMuted} />
           </View>
           <View style={styles.timelineContent}>
             <Text style={[styles.timelineTitle, { color: colors.textMuted }]}>Estimated Timeline</Text>
-            <Text style={styles.timelineValue}>{getTimelineText()}</Text>
+            <Text style={styles.timelineValue}>
+              {state.primaryGoal === 'maintain' || state.primaryGoal === 'improve_health' ? (
+                'Ongoing healthy lifestyle'
+              ) : results.totalWeeks > 0 ? (
+                <>
+                  <NumberText weight="light" style={styles.timelineValue}>{Math.round(results.totalWeeks)}</NumberText> weeks to reach goal
+                </>
+              ) : (
+                <>
+                  <NumberText weight="light" style={styles.timelineValue}>12</NumberText> weeks initial plan
+                </>
+              )}
+            </Text>
           </View>
         </GlassCard>
       </View>
@@ -310,7 +475,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       {state.dietStyle !== 'standard' && (
         <View>
           <GlassCard style={styles.dietCard} interactive>
-            <Ionicons name="nutrition-outline" size={18} color={colors.textMuted} />
+            <Apple size={18} color={colors.textMuted} />
             <Text style={[styles.dietText, { color: colors.textSecondary }]}>
               {state.dietStyle === 'keto' && 'Keto-optimized macros (70% fat, 25% protein, 5% carbs)'}
               {state.dietStyle === 'high_protein' && 'High protein for muscle support (40% protein)'}
@@ -322,18 +487,18 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         </View>
       )}
 
-      {/* Workout Plan Preview Card */}
+      {/* Workout Plan Preview Card - DETAILED */}
       <View>
         <GlassCard style={styles.workoutPlanCard} interactive>
         <View style={styles.workoutPlanHeader}>
           <View style={styles.workoutPlanIconContainer}>
-            <Ionicons
-              name={state.primaryGoal === 'lose_weight' ? 'flame' :
-                    state.primaryGoal === 'build_muscle' ? 'barbell' : 'heart'}
-              size={24}
-              color={state.primaryGoal === 'lose_weight' ? Colors.error :
-                     state.primaryGoal === 'build_muscle' ? colors.protein : Colors.success}
-            />
+            {state.primaryGoal === 'lose_weight' ? (
+              <Flame size={24} color={Colors.error} />
+            ) : state.primaryGoal === 'build_muscle' ? (
+              <Dumbbell size={24} color={colors.protein} />
+            ) : (
+              <Heart size={24} color={Colors.success} />
+            )}
           </View>
           <View style={styles.workoutPlanHeaderText}>
             <Text style={styles.workoutPlanTitle}>YOUR TRAINING PLAN</Text>
@@ -344,113 +509,281 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 state.cardioPreference === 'hiit' ? 'Fat Burning HIIT Program' :
                 'Fat Loss & Conditioning'
               )}
-              {state.primaryGoal === 'build_muscle' && 'Muscle Building Program'}
-              {state.primaryGoal === 'maintain' && 'Fitness Maintenance'}
-              {state.primaryGoal === 'improve_health' && 'Health & Wellness'}
-              {!state.primaryGoal && 'General Fitness'}
+              {state.primaryGoal === 'build_muscle' && 'Progressive Overload Muscle Building'}
+              {state.primaryGoal === 'maintain' && 'Fitness Maintenance Program'}
+              {state.primaryGoal === 'improve_health' && 'Health & Wellness Program'}
+              {!state.primaryGoal && 'General Fitness Program'}
             </Text>
           </View>
         </View>
 
-        {/* Workout Stats */}
-        <View style={styles.workoutStatsRow}>
-          <View style={styles.workoutStatItem}>
-            <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
-            <NumberText weight="semiBold" style={[styles.workoutStatValue, { color: colors.text }]}>
-              {state.workoutsPerWeek || 3}
-            </NumberText>
-            <Text style={[styles.workoutStatLabel, { color: colors.textMuted }]}>days/week</Text>
-          </View>
-          <View style={styles.workoutStatItem}>
-            <Ionicons name="time-outline" size={16} color={colors.textMuted} />
-            <NumberText weight="semiBold" style={[styles.workoutStatValue, { color: colors.text }]}>
-              {state.workoutDuration || 45}
-            </NumberText>
-            <Text style={[styles.workoutStatLabel, { color: colors.textMuted }]}>min/session</Text>
-          </View>
-          <View style={styles.workoutStatItem}>
-            <Ionicons name="flash-outline" size={16} color={colors.textMuted} />
-            <Text style={[styles.workoutStatValue, { color: colors.text }]}>
-              {state.activityLevel === 'sedentary' || state.activityLevel === 'light' ? 'Low' :
-               state.activityLevel === 'moderate' ? 'Med' : 'High'}
-            </Text>
-            <Text style={[styles.workoutStatLabel, { color: colors.textMuted }]}>intensity</Text>
+        {/* Training Schedule Overview */}
+        <View style={styles.trainingScheduleSection}>
+          <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>TRAINING SCHEDULE</Text>
+          <View style={styles.scheduleGrid}>
+            <View style={styles.scheduleItem}>
+              <Calendar size={16} color={colors.primary} />
+              <NumberText weight="semiBold" style={[styles.scheduleValue, { color: colors.text }]}>
+                {state.workoutsPerWeek || 3}
+              </NumberText>
+              <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Training Days/Week</Text>
+            </View>
+            <View style={styles.scheduleItem}>
+              <Clock size={16} color={colors.primary} />
+              <NumberText weight="semiBold" style={[styles.scheduleValue, { color: colors.text }]}>
+                {state.workoutDuration || 45}
+              </NumberText>
+              <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Minutes/Session</Text>
+            </View>
+            <View style={styles.scheduleItem}>
+              <Zap size={16} color={colors.primary} />
+              <Text style={[styles.scheduleValue, { color: colors.text, fontSize: 17, marginTop: 3 }]}>
+                {state.activityLevel === 'sedentary' || state.activityLevel === 'light' ? 'Beginner' :
+                 state.activityLevel === 'moderate' ? 'Intermediate' : 'Advanced'}
+              </Text>
+              <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Intensity</Text>
+            </View>
+            <View style={styles.scheduleItem}>
+              <Heart size={16} color={colors.primary} />
+              <NumberText weight="semiBold" style={[styles.scheduleValue, { color: colors.text }]}>
+                {7 - (state.workoutsPerWeek || 3)}
+              </NumberText>
+              <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Rest Days/Week</Text>
+            </View>
           </View>
         </View>
 
-        {/* Workout Commentary */}
-        <View style={styles.workoutCommentary}>
-          <View style={styles.workoutCommentaryItem}>
-            <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
-            <Text style={[styles.workoutCommentaryText, { color: colors.textSecondary }]}>
-              {state.primaryGoal === 'lose_weight' && (
-                state.cardioPreference === 'walking'
-                  ? `Walking sessions to maximize fat burn while being easy on joints (${Math.round((state.workoutDuration || 45) * 6)} cal/session est.)`
-                  : state.cardioPreference === 'running'
-                  ? `Running sessions to maximize calorie burn and cardiovascular fitness (${Math.round((state.workoutDuration || 45) * 12)} cal/session est.)`
-                  : `HIIT and circuit training to maximize calorie burn (${Math.round((state.workoutDuration || 45) * 10)} cal/session est.)`
+        {/* Workout Split */}
+        <View style={styles.workoutSplitSection}>
+          <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>WEEKLY WORKOUT SPLIT</Text>
+          {state.primaryGoal === 'build_muscle' && (
+            <View style={styles.splitDetails}>
+              {(state.workoutsPerWeek || 3) >= 5 ? (
+                <>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push (Chest, Shoulders, Triceps)</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull (Back, Biceps, Rear Delts)</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Legs (Quads, Hamstrings, Glutes, Calves)</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body Hypertrophy</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 5:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body Strength</Text>
+                  </View>
+                </>
+              ) : (state.workoutsPerWeek || 3) >= 4 ? (
+                <>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body (Chest, Back, Shoulders, Arms)</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body (Legs, Glutes, Calves)</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push Focus (Chest, Shoulders, Triceps)</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull Focus (Back, Biceps, Hamstrings)</Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Compound Focus</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Hypertrophy Focus</Text>
+                  </View>
+                  <View style={styles.splitDay}>
+                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Strength Focus</Text>
+                  </View>
+                </>
               )}
-              {state.primaryGoal === 'build_muscle' &&
-                `Progressive overload training targeting all major muscle groups`}
-              {state.primaryGoal === 'maintain' &&
-                `Balanced mix of strength and cardio to maintain fitness`}
-              {state.primaryGoal === 'improve_health' &&
-                `Low-impact exercises focused on mobility and cardiovascular health`}
-              {!state.primaryGoal &&
-                `Balanced program with strength and cardio components`}
-            </Text>
+            </View>
+          )}
+          {state.primaryGoal === 'lose_weight' && (
+            <View style={styles.splitDetails}>
+              <View style={styles.splitDay}>
+                <Text style={[styles.splitDayLabel, { color: colors.text }]}>Days 1-{state.workoutsPerWeek || 3}:</Text>
+                <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
+                  {state.cardioPreference === 'walking' ? 'Brisk Walking + Light Resistance Training' :
+                   state.cardioPreference === 'running' ? 'Running Intervals + Core Work' :
+                   state.cardioPreference === 'hiit' ? 'HIIT Circuits + Strength Training' :
+                   'Mixed Cardio + Resistance Training'}
+                </Text>
+              </View>
+              <View style={styles.splitDay}>
+                <Text style={[styles.splitDayLabel, { color: colors.text }]}>Rest Days:</Text>
+                <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
+                  Active recovery (walking, stretching, mobility work)
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        {/* Exercise Examples */}
+        <View style={styles.exerciseSection}>
+          <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>EXAMPLE EXERCISES</Text>
+          {state.primaryGoal === 'build_muscle' && (
+            <View style={styles.exerciseList}>
+              <View style={styles.exerciseItem}>
+                <Dumbbell size={14} color={colors.protein} />
+                <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
+                  Bench Press, Squats, Deadlifts, Overhead Press (Compound Movements)
+                </Text>
+              </View>
+              <View style={styles.exerciseItem}>
+                <Dumbbell size={14} color={colors.protein} />
+                <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
+                  Dumbbell Rows, Lat Pulldowns, Romanian Deadlifts (Back & Posterior Chain)
+                </Text>
+              </View>
+              <View style={styles.exerciseItem}>
+                <Dumbbell size={14} color={colors.protein} />
+                <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
+                  Leg Press, Lunges, Leg Curls, Calf Raises (Lower Body Isolation)
+                </Text>
+              </View>
+              <View style={styles.exerciseItem}>
+                <Dumbbell size={14} color={colors.protein} />
+                <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
+                  Bicep Curls, Tricep Extensions, Lateral Raises (Arm & Shoulder Isolation)
+                </Text>
+              </View>
+            </View>
+          )}
+          {state.primaryGoal === 'lose_weight' && (
+            <View style={styles.exerciseList}>
+              <View style={styles.exerciseItem}>
+                <Flame size={14} color={Colors.error} />
+                <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
+                  {state.cardioPreference === 'walking' ? '30-45 min brisk walking at moderate pace (3.5-4 mph)' :
+                   state.cardioPreference === 'running' ? '20-30 min interval running (sprint 1 min, jog 2 min)' :
+                   state.cardioPreference === 'hiit' ? '20-30 min HIIT (burpees, mountain climbers, jump squats)' :
+                   '30-40 min mixed cardio (bike, elliptical, rowing)'}
+                </Text>
+              </View>
+              <View style={styles.exerciseItem}>
+                <Dumbbell size={14} color={Colors.error} />
+                <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
+                  Circuit training: Goblet Squats, Push-ups, Dumbbell Rows (3 rounds, 12-15 reps)
+                </Text>
+              </View>
+              <View style={styles.exerciseItem}>
+                <Heart size={14} color={Colors.error} />
+                <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
+                  Core work: Planks, Russian Twists, Leg Raises (3 sets to fatigue)
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        {/* Equipment & Modifications */}
+        {state.equipmentAvailable && state.equipmentAvailable.length > 0 && (
+          <View style={styles.equipmentSection}>
+            <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>AVAILABLE EQUIPMENT</Text>
+            <View style={styles.equipmentTags}>
+              {state.equipmentAvailable.map((equipment, index) => (
+                <View key={index} style={[styles.equipmentTag, { backgroundColor: 'rgba(150, 206, 180, 0.15)' }]}>
+                  <CheckCircle2 size={12} color={Colors.success} />
+                  <Text style={[styles.equipmentTagText, { color: Colors.success }]}>
+                    {equipment.charAt(0).toUpperCase() + equipment.slice(1).replace('_', ' ')}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
-          <View style={styles.workoutCommentaryItem}>
-            <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
-            <Text style={[styles.workoutCommentaryText, { color: colors.textSecondary }]}>
-              {state.primaryGoal === 'lose_weight' &&
-                `Combined with your ${results.dailyDelta ? Math.abs(results.dailyDelta).toFixed(0) : '500'} cal deficit for optimal fat loss`}
-              {state.primaryGoal === 'build_muscle' &&
-                `Paired with ${results.protein}g protein to support muscle synthesis`}
-              {state.primaryGoal === 'maintain' &&
-                `Designed to preserve lean mass while maintaining energy balance`}
-              {state.primaryGoal === 'improve_health' &&
-                `Focus on heart health, flexibility, and functional strength`}
-              {!state.primaryGoal &&
-                `Customized based on your fitness level and schedule`}
-            </Text>
+        )}
+
+        {/* Injury Considerations */}
+        {state.injuries && state.injuries.length > 0 && (
+          <View style={styles.injurySection}>
+            <View style={styles.injuryHeader}>
+              <AlertTriangle size={16} color={Colors.warning} />
+              <Text style={[styles.trainingSectionTitle, { color: Colors.warning }]}>INJURY MODIFICATIONS</Text>
+            </View>
+            <View style={styles.injuryList}>
+              {state.injuries.map((injury, index) => (
+                <View key={index} style={styles.injuryItem}>
+                  <Text style={[styles.injuryText, { color: colors.textSecondary }]}>
+                    <Text style={{ fontFamily: Fonts.medium, color: Colors.warning }}>
+                      {injury.charAt(0).toUpperCase() + injury.slice(1).replace('_', ' ')}:
+                    </Text>
+                    {' '}Modified exercises and reduced range of motion for affected area. Focus on pain-free movements and gradual progression.
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
-          <View style={styles.workoutCommentaryItem}>
-            <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
-            <Text style={[styles.workoutCommentaryText, { color: colors.textSecondary }]}>
-              {state.primaryGoal === 'lose_weight' &&
-                `Rest days strategically placed to prevent overtraining and muscle loss`}
-              {state.primaryGoal === 'build_muscle' &&
-                `48hr recovery between muscle groups for maximum growth`}
-              {(state.primaryGoal === 'maintain' || state.primaryGoal === 'improve_health') &&
-                `Flexible schedule with active recovery options`}
-              {!state.primaryGoal &&
-                `Progressive difficulty as your fitness improves`}
-            </Text>
+        )}
+
+        {/* Progressive Overload Plan */}
+        <View style={styles.progressionSection}>
+          <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>PROGRESSION PLAN</Text>
+          <View style={styles.progressionTimeline}>
+            <View style={styles.progressionPhase}>
+              <Text style={[styles.progressionWeek, { color: colors.primary }]}>Weeks 1-2</Text>
+              <Text style={[styles.progressionDesc, { color: colors.textSecondary }]}>
+                Adaptation Phase - Focus on form, build base conditioning
+              </Text>
+            </View>
+            <View style={styles.progressionPhase}>
+              <Text style={[styles.progressionWeek, { color: colors.primary }]}>Weeks 3-6</Text>
+              <Text style={[styles.progressionDesc, { color: colors.textSecondary }]}>
+                {state.primaryGoal === 'build_muscle' ? 'Hypertrophy Phase - Increase volume, 8-12 reps per set' :
+                 'Conditioning Phase - Increase intensity, reduce rest periods'}
+              </Text>
+            </View>
+            <View style={styles.progressionPhase}>
+              <Text style={[styles.progressionWeek, { color: colors.primary }]}>Weeks 7+</Text>
+              <Text style={[styles.progressionDesc, { color: colors.textSecondary }]}>
+                {state.primaryGoal === 'build_muscle' ? 'Strength Phase - Progressive overload, track PR milestones' :
+                 'Peak Performance - Maximize calorie burn, optimize fat loss'}
+              </Text>
+            </View>
           </View>
         </View>
 
         {/* Nutrition Synergy Note */}
         <View style={styles.nutritionSynergyNote}>
-          <Ionicons name="nutrition" size={14} color={colors.protein} />
+          <Apple size={14} color={colors.protein} />
           <Text style={[styles.nutritionSynergyText, { color: colors.textSecondary }]}>
             {state.primaryGoal === 'lose_weight'
-              ? `Your ${results.protein}g protein target preserves muscle while the training burns fat`
+              ? `Your ${results.protein}g protein target preserves muscle while training in a ${Math.abs(results.dailyDelta).toFixed(0)} cal deficit maximizes fat loss without strength loss`
               : state.primaryGoal === 'build_muscle'
-              ? `${results.calories.toLocaleString()} cal surplus + training = muscle growth of ~0.5lb/week`
-              : `Balanced macros support your training and recovery needs`}
+              ? `${results.calories.toLocaleString()} cal surplus + ${results.protein}g protein + progressive training = optimal muscle growth of ~${Math.abs(results.weeklyChange).toFixed(2)}lb/week`
+              : `Balanced ${results.calories.toLocaleString()} cal intake with ${results.protein}g protein supports your training and recovery needs`}
           </Text>
         </View>
         </GlassCard>
       </View>
 
       {/* Food Preferences Section */}
-      {foodPrefs && (
+      {(state.dietStyle || state.allergies?.length > 0 || foodPrefs) && (
         <View>
           <GlassCard style={styles.foodPreferencesCard} interactive>
             <View style={styles.foodPrefsHeader}>
               <View style={styles.foodPrefsIconContainer}>
-                <Ionicons name="nutrition" size={24} color={Colors.success} />
+                <Apple size={24} color={Colors.success} />
               </View>
               <View style={styles.foodPrefsHeaderText}>
                 <Text style={styles.foodPrefsTitle}>YOUR NUTRITION PREFERENCES</Text>
@@ -460,37 +793,35 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               </View>
             </View>
 
-            {/* Dietary Preferences */}
-            {foodPrefs.dietaryPreferences && foodPrefs.dietaryPreferences.length > 0 && (
+            {/* Dietary Style */}
+            {state.dietStyle && state.dietStyle !== 'standard' && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="leaf-outline" size={16} color={colors.textMuted} />
+                  <Leaf size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Dietary Style</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.dietaryPreferences.map((pref, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.success }]}>
-                        {pref.charAt(0).toUpperCase() + pref.slice(1).replace('_', ' ')}
-                      </Text>
-                    </View>
-                  ))}
+                  <View style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+                    <Text style={[styles.prefTagText, { color: Colors.success }]}>
+                      {state.dietStyle.charAt(0).toUpperCase() + state.dietStyle.slice(1).replace('_', ' ')}
+                    </Text>
+                  </View>
                 </View>
               </View>
             )}
 
             {/* Allergens */}
-            {foodPrefs.allergens && foodPrefs.allergens.length > 0 && (
+            {state.allergies && state.allergies.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="warning-outline" size={16} color={Colors.error} />
+                  <AlertTriangle size={16} color={Colors.error} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Allergens to Avoid</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.allergens.map((allergen, index) => (
+                  {state.allergies.map((allergen, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.error }]}>
-                        {allergen.charAt(0).toUpperCase() + allergen.slice(1)}
+                        {allergen.charAt(0).toUpperCase() + allergen.slice(1).toLowerCase()}
                       </Text>
                     </View>
                   ))}
@@ -498,15 +829,41 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               </View>
             )}
 
-            {/* Favorite Cuisines */}
-            {foodPrefs.favoriteCuisines && foodPrefs.favoriteCuisines.length > 0 && (
+            {/* Meals Per Day */}
+            {state.mealsPerDay && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="restaurant-outline" size={16} color={colors.textMuted} />
+                  <UtensilsCrossed size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meals Per Day: </Text>
+                  <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
+                    {state.mealsPerDay}
+                  </NumberText>
+                </View>
+              </View>
+            )}
+
+            {/* Intermittent Fasting */}
+            {state.intermittentFasting && state.fastingWindow && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <Clock size={16} color={colors.textMuted} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Fasting Window: </Text>
+                  <Text style={[styles.prefValue, { color: colors.text }]}>
+                    {state.fastingWindow.start} - {state.fastingWindow.end}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Favorite Cuisines */}
+            {foodPrefs?.preferences?.favoriteCuisines && foodPrefs.preferences.favoriteCuisines.length > 0 && (
+              <View style={styles.prefSection}>
+                <View style={styles.prefRow}>
+                  <UtensilsCrossed size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Cuisines</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteCuisines.map((cuisine, index) => (
+                  {foodPrefs.preferences.favoriteCuisines.map((cuisine, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
                       <Text style={[styles.prefTagText, { color: colors.text }]}>
                         {cuisine.charAt(0).toUpperCase() + cuisine.slice(1).replace('_', ' ')}
@@ -518,14 +875,14 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             )}
 
             {/* Favorite Proteins */}
-            {foodPrefs.favoriteProteins && foodPrefs.favoriteProteins.length > 0 && (
+            {foodPrefs?.preferences?.favoriteProteins && foodPrefs.preferences.favoriteProteins.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="fish-outline" size={16} color={colors.protein} />
+                  <Fish size={16} color={colors.protein} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Proteins</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteProteins.map((protein, index) => (
+                  {foodPrefs.preferences.favoriteProteins.map((protein, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: colors.protein }]}>
                         {protein.charAt(0).toUpperCase() + protein.slice(1).replace('_', ' ')}
@@ -537,14 +894,14 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             )}
 
             {/* Favorite Vegetables */}
-            {foodPrefs.favoriteVegetables && foodPrefs.favoriteVegetables.length > 0 && (
+            {foodPrefs?.preferences?.favoriteVegetables && foodPrefs.preferences.favoriteVegetables.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="leaf" size={16} color={Colors.success} />
+                  <Leaf size={16} color={Colors.success} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Vegetables</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteVegetables.map((veggie, index) => (
+                  {foodPrefs.preferences.favoriteVegetables.map((veggie, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.success }]}>
                         {veggie.charAt(0).toUpperCase() + veggie.slice(1).replace('_', ' ')}
@@ -556,14 +913,14 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             )}
 
             {/* Favorite Starches */}
-            {foodPrefs.favoriteStarches && foodPrefs.favoriteStarches.length > 0 && (
+            {foodPrefs?.preferences?.favoriteStarches && foodPrefs.preferences.favoriteStarches.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="pizza-outline" size={16} color={colors.carbs} />
+                  <Pizza size={16} color={colors.carbs} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Starches</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteStarches.map((starch, index) => (
+                  {foodPrefs.preferences.favoriteStarches.map((starch, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: colors.carbs }]}>
                         {starch.charAt(0).toUpperCase() + starch.slice(1).replace('_', ' ')}
@@ -575,14 +932,14 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             )}
 
             {/* Favorite Snacks */}
-            {foodPrefs.favoriteSnacks && foodPrefs.favoriteSnacks.length > 0 && (
+            {foodPrefs?.preferences?.favoriteSnacks && foodPrefs.preferences.favoriteSnacks.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="ice-cream-outline" size={16} color={colors.textMuted} />
+                  <IceCream size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Snacks</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteSnacks.map((snack, index) => (
+                  {foodPrefs.preferences.favoriteSnacks.map((snack, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
                       <Text style={[styles.prefTagText, { color: colors.text }]}>
                         {snack.charAt(0).toUpperCase() + snack.slice(1).replace('_', ' ')}
@@ -594,17 +951,17 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             )}
 
             {/* Hated Foods */}
-            {foodPrefs.hatedFoods && foodPrefs.hatedFoods.length > 0 && (
+            {foodPrefs?.preferences?.hatedFoods && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Ionicons name="close-circle-outline" size={16} color={Colors.error} />
+                  <XCircle size={16} color={Colors.error} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Foods to Avoid</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.hatedFoods.map((food, index) => (
+                  {foodPrefs.preferences.hatedFoods.split(',').map(s => s.trim()).filter(Boolean).map((food, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.error }]}>
-                        {food.charAt(0).toUpperCase() + food.slice(1).replace('_', ' ')}
+                        {food.charAt(0).toUpperCase() + food.slice(1)}
                       </Text>
                     </View>
                   ))}
@@ -613,56 +970,59 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             )}
 
             {/* Meal Planning Preferences */}
-            <View style={styles.mealPlanningSection}>
-              {/* Meal Diversity */}
-              {foodPrefs.mealDiversity && (
-                <View style={styles.prefRow}>
-                  <Ionicons name="options-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Variety: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
-                    {foodPrefs.mealDiversity === 'same_meals' ? 'Same Meals Daily' : 'Diverse Meals'}
-                  </Text>
-                </View>
-              )}
+            {foodPrefs?.preferences && (
+              <View style={styles.mealPlanningSection}>
+                {/* Meal Diversity */}
+                {foodPrefs.preferences.mealDiversity && (
+                  <View style={styles.prefRow}>
+                    <Settings size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Variety: </Text>
+                    <Text style={[styles.prefValue, { color: colors.text }]}>
+                      {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily' : 'Diverse Meals'}
+                    </Text>
+                  </View>
+                )}
 
-              {/* Meal Style */}
-              {foodPrefs.mealStyle && (
-                <View style={styles.prefRow}>
-                  <Ionicons name="time-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
-                    {foodPrefs.mealStyle === 'quick_simple' ? 'Quick & Simple' : 'Gourmet & Complex'}
-                  </Text>
-                </View>
-              )}
+                {/* Meal Style */}
+                {foodPrefs.preferences.mealStyle && (
+                  <View style={styles.prefRow}>
+                    <Clock size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style: </Text>
+                    <Text style={[styles.prefValue, { color: colors.text }]}>
+                      {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer Larger Meals'}
+                    </Text>
+                  </View>
+                )}
 
-              {/* Cheat Days */}
-              {foodPrefs.cheatDays !== undefined && (
-                <View style={styles.prefRow}>
-                  <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
-                    {foodPrefs.cheatDays} per week
-                  </Text>
-                </View>
-              )}
+                {/* Cheat Days */}
+                {foodPrefs.preferences.cheatDays && foodPrefs.preferences.cheatDays.length > 0 && (
+                  <View style={styles.prefRow}>
+                    <Calendar size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days: </Text>
+                    <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
+                      {foodPrefs.preferences.cheatDays.length}
+                    </NumberText>
+                    <Text style={[styles.prefValue, { color: colors.text }]}> per week</Text>
+                  </View>
+                )}
 
-              {/* Cooking Skill */}
-              {foodPrefs.cookingSkill && (
-                <View style={styles.prefRow}>
-                  <Ionicons name="flame-outline" size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cooking Skill: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
-                    {foodPrefs.cookingSkill === 'beginner' ? 'Beginner' :
-                     foodPrefs.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
-                  </Text>
-                </View>
-              )}
-            </View>
+                {/* Cooking Skill */}
+                {foodPrefs.preferences.cookingSkill && (
+                  <View style={styles.prefRow}>
+                    <Flame size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cooking Skill: </Text>
+                    <Text style={[styles.prefValue, { color: colors.text }]}>
+                      {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
+                       foodPrefs.preferences.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
 
             {/* Preference Connection Note */}
             <View style={styles.prefConnectionNote}>
-              <Ionicons name="link-outline" size={14} color={Colors.success} />
+              <Link size={14} color={Colors.success} />
               <Text style={[styles.prefConnectionText, { color: colors.textSecondary }]}>
                 Your 7-day meal plan will incorporate all these preferences to create personalized, enjoyable meals
               </Text>
@@ -695,7 +1055,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 <Text style={[styles.confirmButtonText, { color: colors.primary }]}>SAVING...</Text>
               ) : (
                 <>
-                  <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                  <CheckCircle2 size={20} color={colors.primary} />
                   <Text style={[styles.confirmButtonText, { color: colors.primary }]}>CONFIRM MY PLAN</Text>
                 </>
               )}
@@ -735,6 +1095,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 22,
   },
@@ -761,7 +1122,6 @@ const styles = StyleSheet.create({
   },
   calorieValue: {
     fontSize: 56,
-    fontFamily: Fonts.light,
     fontWeight: '100',
     color: Colors.text,
   },
@@ -886,7 +1246,6 @@ const styles = StyleSheet.create({
   },
   weeklyRateValue: {
     fontSize: 32,
-    fontFamily: Fonts.light,
     fontWeight: '100',
   },
   weeklyRateUnit: {
@@ -897,6 +1256,7 @@ const styles = StyleSheet.create({
   },
   weeklyRateHint: {
     fontSize: 12,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginTop: 4,
   },
@@ -941,6 +1301,7 @@ const styles = StyleSheet.create({
   dietText: {
     flex: 1,
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 18,
   },
@@ -1013,6 +1374,7 @@ const styles = StyleSheet.create({
   workoutCommentaryText: {
     flex: 1,
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 18,
   },
@@ -1027,6 +1389,7 @@ const styles = StyleSheet.create({
   nutritionSynergyText: {
     flex: 1,
     fontSize: 12,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 16,
   },
@@ -1117,6 +1480,7 @@ const styles = StyleSheet.create({
   },
   prefValue: {
     fontSize: 12,
+    fontFamily: Fonts.light,
     color: Colors.text,
   },
   prefTagsRow: {
@@ -1132,6 +1496,7 @@ const styles = StyleSheet.create({
   },
   prefTagText: {
     fontSize: 12,
+    fontFamily: Fonts.light,
     color: Colors.text,
   },
   mealPlanningSection: {
@@ -1150,7 +1515,249 @@ const styles = StyleSheet.create({
   prefConnectionText: {
     flex: 1,
     fontSize: 12,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 16,
+  },
+  // User Profile Section Styles
+  profileCard: {
+    padding: 16,
+    marginBottom: 16,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 20,
+  },
+  profileIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(150, 206, 180, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileHeaderText: {
+    flex: 1,
+  },
+  profileTitle: {
+    fontSize: 10,
+    fontFamily: Fonts.light,
+    letterSpacing: 1.5,
+    color: Colors.success,
+    marginBottom: 2,
+  },
+  profileSubtitle: {
+    fontSize: 16,
+    fontFamily: Fonts.light,
+    color: Colors.text,
+  },
+  profileSection: {
+    marginBottom: 20,
+  },
+  profileSectionTitle: {
+    fontSize: 11,
+    fontFamily: Fonts.light,
+    letterSpacing: 2,
+    color: Colors.textMuted,
+    marginBottom: 12,
+  },
+  profileDataGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  profileDataItem: {
+    width: '30%',
+    minWidth: 90,
+  },
+  profileDataLabel: {
+    fontSize: 10,
+    fontFamily: Fonts.light,
+    color: Colors.textMuted,
+    marginBottom: 4,
+  },
+  profileDataValue: {
+    fontSize: 16,
+    fontFamily: Fonts.light,
+    color: Colors.text,
+  },
+  profileDataUnit: {
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    color: Colors.textMuted,
+  },
+  profileStatsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  profileStatBox: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: 'rgba(150, 206, 180, 0.08)',
+    borderRadius: 12,
+    gap: 6,
+  },
+  profileStatValue: {
+    fontSize: 18,
+    color: Colors.text,
+  },
+  profileStatLabel: {
+    fontSize: 9,
+    fontFamily: Fonts.light,
+    letterSpacing: 1,
+    color: Colors.textMuted,
+    textAlign: 'center',
+  },
+  profileStatDesc: {
+    fontSize: 10,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  // Training Plan Detailed Styles
+  trainingScheduleSection: {
+    marginBottom: 20,
+  },
+  trainingSectionTitle: {
+    fontSize: 11,
+    fontFamily: Fonts.light,
+    letterSpacing: 2,
+    color: Colors.textMuted,
+    marginBottom: 12,
+  },
+  scheduleGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  scheduleItem: {
+    flex: 1,
+    minWidth: 70,
+    alignItems: 'center',
+    gap: 6,
+  },
+  scheduleValue: {
+    fontSize: 20,
+    color: Colors.text,
+  },
+  scheduleLabel: {
+    fontSize: 8,
+    fontFamily: Fonts.light,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+  workoutSplitSection: {
+    marginBottom: 20,
+  },
+  splitDetails: {
+    gap: 10,
+  },
+  splitDay: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  splitDayLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.medium,
+    color: Colors.text,
+    minWidth: 50,
+  },
+  splitDayWorkout: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+  },
+  exerciseSection: {
+    marginBottom: 20,
+  },
+  exerciseList: {
+    gap: 10,
+  },
+  exerciseItem: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  exerciseText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    lineHeight: 17,
+  },
+  equipmentSection: {
+    marginBottom: 20,
+  },
+  equipmentTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  equipmentTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  equipmentTagText: {
+    fontSize: 11,
+    fontFamily: Fonts.light,
+    color: Colors.success,
+  },
+  injurySection: {
+    marginBottom: 20,
+    backgroundColor: 'rgba(255, 179, 71, 0.08)',
+    borderRadius: 12,
+    padding: 12,
+  },
+  injuryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  injuryList: {
+    gap: 8,
+  },
+  injuryItem: {
+    paddingLeft: 24,
+  },
+  injuryText: {
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    lineHeight: 17,
+  },
+  progressionSection: {
+    marginBottom: 16,
+  },
+  progressionTimeline: {
+    gap: 12,
+  },
+  progressionPhase: {
+    paddingLeft: 12,
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.primary,
+  },
+  progressionWeek: {
+    fontSize: 13,
+    fontFamily: Fonts.medium,
+    color: Colors.primary,
+    marginBottom: 4,
+  },
+  progressionDesc: {
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    color: Colors.textSecondary,
+    lineHeight: 17,
   },
 });

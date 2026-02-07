@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { CheckCircle2, Check } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { CalculatedResults, GoalType } from '../../constants/goals';
 import { RoundedNumeral } from '../RoundedNumeral';
@@ -157,19 +157,19 @@ export function ResultsStep({
       <View style={[styles.card, { backgroundColor: cardBg, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.text }]}>Key Tips</Text>
         <View style={styles.tipItem}>
-          <Ionicons name="checkmark-circle" size={20} color={Colors.successStrong} />
+          <CheckCircle2 size={20} color={Colors.successStrong} />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>
             Hit your protein target of <NumberText weight="medium">{results.protein}</NumberText>g daily to preserve muscle.
           </Text>
         </View>
         <View style={styles.tipItem}>
-          <Ionicons name="checkmark-circle" size={20} color={Colors.successStrong} />
+          <CheckCircle2 size={20} color={Colors.successStrong} />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>
             Track your food for at least 2 weeks to build awareness.
           </Text>
         </View>
         <View style={styles.tipItem}>
-          <Ionicons name="checkmark-circle" size={20} color={Colors.successStrong} />
+          <CheckCircle2 size={20} color={Colors.successStrong} />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>
             {goalType === 'lose'
               ? 'Strength train 2-3x weekly to maintain muscle while losing fat.'
@@ -195,7 +195,7 @@ export function ResultsStep({
           ) : (
             <>
               <Text style={[styles.buttonPrimaryText, { color: colors.primaryText }]}>SAVE MY PLAN</Text>
-              <Ionicons name="checkmark" size={18} color={colors.primaryText} />
+              <Check size={18} color={colors.primaryText} />
             </>
           )}
         </TouchableOpacity>
@@ -285,10 +285,12 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
   },
   statValue: {
     fontSize: 15,
+    fontFamily: Fonts.light,
     color: Colors.text,
   },
   tipItem: {
@@ -299,6 +301,7 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
