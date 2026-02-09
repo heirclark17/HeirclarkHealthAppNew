@@ -447,7 +447,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                 }}
                 activeOpacity={0.7}
               >
-                <GlassCard style={[styles.chip, isSelected && { backgroundColor: selectedBg }]} interactive>
+                <GlassCard style={[styles.chip, isSelected && { backgroundColor: selectedBg }, { borderWidth: 0 }]} borderColor="transparent" interactive>
                   <Text style={[styles.chipText, { color: colors.text }, isSelected && styles.chipTextSelected]}>
                     <NumberText weight="light" style={[{ fontSize: 14 }, { color: colors.text }, isSelected && styles.chipTextSelected]}>
                       {duration}
@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    marginTop: 16,
+    marginTop: 48,
     marginBottom: 20,
   },
   title: {

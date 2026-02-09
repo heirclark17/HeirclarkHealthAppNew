@@ -229,6 +229,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
       try {
         const allHatedFoods = [...new Set([...disliked, ...hatedFoodsText.split(',').map(s => s.trim()).filter(Boolean)])];
 
+        console.log('[NutritionPreferences] 🔍 About to save mealDiversity:', mealDiversity);
+        console.log('[NutritionPreferences] 🔍 State values - mealStyle:', mealStyle, 'cheatDays:', cheatDays, 'cookingSkill:', cookingSkill);
+
         await foodPrefsContext.updatePreferences({
           favoriteCuisines: cuisines,
           favoriteProteins: proteins,
@@ -241,7 +244,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           cheatDays: cheatDays,
           cookingSkill: cookingSkill,
         });
-        console.log('[NutritionPreferences] Food preferences saved');
+        console.log('[NutritionPreferences] ✅ Food preferences saved successfully');
       } catch (error) {
         console.error('[NutritionPreferences] Error saving food preferences:', error);
       }
@@ -902,7 +905,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    marginTop: 16,
+    marginTop: 48,
     marginBottom: 20,
   },
   title: {

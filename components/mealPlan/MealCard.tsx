@@ -35,12 +35,14 @@ interface MealCardProps {
   isSwapping?: boolean;
   onAddToTodaysMeals?: (meal: Meal) => void;
   onAddIngredientsToInstacart?: (meal: Meal) => void;
+  onSaveToSavedMeals?: (meal: Meal) => void;
 }
 
-export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, onAddIngredientsToInstacart }: MealCardProps) {
+export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, onAddIngredientsToInstacart, onSaveToSavedMeals }: MealCardProps) {
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [isAddingToMeals, setIsAddingToMeals] = useState(false);
   const [isAddingToInstacart, setIsAddingToInstacart] = useState(false);
+  const [isSavingMeal, setIsSavingMeal] = useState(false);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [recipeDetails, setRecipeDetails] = useState<{
     ingredients: Array<{ name: string; quantity: number; unit: string }>;
@@ -191,6 +193,18 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     }
   };
 
+  const handleSaveToSavedMeals = async () => {
+    if (onSaveToSavedMeals) {
+      setIsSavingMeal(true);
+      try {
+        await onSaveToSavedMeals(meal);
+        handleCloseModal();
+      } finally {
+        setIsSavingMeal(false);
+      }
+    }
+  };
+
   return (
     <>
       <View style={styles.cardContainer}>
@@ -260,7 +274,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             <View style={styles.macroRow}>
               <View style={styles.macroItem}>
                 <View style={[styles.macroDot, { backgroundColor: colors.calories }]} />
-                <Text style={[styles.macroValue, { color: colors.text }]}>{meal.calories}</Text>
+                <Text style={[styles.macroValue, { color: colors.text }]}>{Math.round(meal.calories)}</Text>
                 <Text style={[styles.macroLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>cal</Text>
               </View>
               <View style={styles.macroItem}>
@@ -348,7 +362,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   <View style={styles.nutritionGrid}>
                     <View style={styles.nutritionItem}>
                       <View style={[styles.nutritionDot, { backgroundColor: colors.calories }]} />
-                      <Text style={[styles.nutritionValue, { color: colors.text }]}>{meal.calories}</Text>
+                      <Text style={[styles.nutritionValue, { color: colors.text }]}>{Math.round(meal.calories)}</Text>
                       <Text style={[styles.nutritionLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>calories</Text>
                     </View>
                     <View style={styles.nutritionItem}>
@@ -454,6 +468,27 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
 
               {/* Secondary Actions Row */}
               <View style={styles.secondaryActionsRow}>
+                {/* Save to Saved Meals Button */}
+                {onSaveToSavedMeals && (
+                  <TouchableOpacity
+                    style={[
+                      styles.secondaryActionButton,
+                      {
+                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                        borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.12)',
+                      }
+                    ]}
+                    onPress={handleSaveToSavedMeals}
+                    disabled={isSavingMeal}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="bookmark-outline" size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
+                    <Text style={[styles.secondaryActionText, { color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)' }]}>
+                      {isSavingMeal ? 'Saving...' : 'Save to Saved Meals'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
                 {/* Add to Instacart Button */}
                 <TouchableOpacity
                   style={[

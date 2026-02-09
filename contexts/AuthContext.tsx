@@ -30,7 +30,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = '@heirclark_auth_user';
-const AUTH_TOKEN_KEY = '@heirclark_auth_token';
+const AUTH_TOKEN_KEY = 'heirclark_auth_token';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

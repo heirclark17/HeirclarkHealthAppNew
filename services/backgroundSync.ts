@@ -11,8 +11,8 @@ import { Platform } from 'react-native';
 
 const BACKGROUND_SYNC_TASK = 'HEIRCLARK_HEALTH_SYNC';
 const BACKEND_URL = 'https://heirclarkinstacartbackend-production.up.railway.app';
-const AUTH_TOKEN_KEY = '@heirclark_auth_token';
-const LAST_SYNC_KEY = '@heirclark_last_sync';
+const AUTH_TOKEN_KEY = 'heirclark_auth_token';
+const LAST_SYNC_KEY = 'heirclark_last_sync';
 
 /**
  * Sync health data to the backend

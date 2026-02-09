@@ -205,7 +205,10 @@ export function FoodPreferencesProvider({ children }: { children: React.ReactNod
 
   // Generic update function
   const updatePreferences = useCallback(async (updates: Partial<FoodPreferences>) => {
+    console.log('[FoodPreferences] 🔍 updatePreferences called with:', updates);
+    console.log('[FoodPreferences] 🔍 Current preferences before update:', preferences);
     const newPrefs = { ...preferences, ...updates };
+    console.log('[FoodPreferences] 🔍 New preferences after merge:', newPrefs);
     setPreferences(newPrefs);
     await savePreferences(newPrefs);
   }, [preferences, savePreferences]);

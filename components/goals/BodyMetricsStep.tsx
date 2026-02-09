@@ -364,7 +364,7 @@ function NumberStepper({ value, min, max, step = 1, onChange, unit, colors, isDa
   const stepperBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
 
   return (
-    <View style={[styles.stepperContainer, { backgroundColor: colors.background, borderColor: colors.border }]}>
+    <View style={[styles.stepperContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}>
       <TouchableOpacity
         style={[styles.stepperButton, { backgroundColor: stepperBg }, value <= min && styles.stepperButtonDisabled]}
         onPress={handleDecrement}
@@ -592,7 +592,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       <GlassSection isDark={isDark}>
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>WHEN DO YOU WANT TO START?</Text>
         <TouchableOpacity
-          style={[styles.datePickerButton, { backgroundColor: colors.background, borderColor: colors.border }]}
+          style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
           onPress={() => setShowStartDatePicker(true)}
           activeOpacity={0.7}
         >
@@ -630,7 +630,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
         <GlassSection isDark={isDark}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>WHEN DO YOU WANT TO REACH YOUR GOAL?</Text>
           <TouchableOpacity
-            style={[styles.datePickerButton, { backgroundColor: colors.background, borderColor: colors.border }]}
+            style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
             onPress={() => setShowTargetDatePicker(true)}
             activeOpacity={0.7}
           >
@@ -738,8 +738,8 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           <TouchableOpacity
             style={[
               styles.sexOption,
-              { backgroundColor: colors.background, borderColor: colors.border },
-              state.sex === 'male' && { backgroundColor: colors.primary, borderColor: colors.primary },
+              { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' },
+              state.sex === 'male' && { backgroundColor: colors.primary },
             ]}
             onPress={async () => {
               await selectionFeedback();
@@ -764,8 +764,8 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           <TouchableOpacity
             style={[
               styles.sexOption,
-              { backgroundColor: colors.background, borderColor: colors.border },
-              state.sex === 'female' && { backgroundColor: colors.primary, borderColor: colors.primary },
+              { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' },
+              state.sex === 'female' && { backgroundColor: colors.primary },
             ]}
             onPress={async () => {
               await selectionFeedback();
@@ -824,7 +824,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    marginTop: 16,
+    marginTop: 48,
     marginBottom: 24,
   },
   title: {
@@ -925,11 +925,13 @@ const styles = StyleSheet.create({
   },
   simplePickerText: {
     fontSize: 18,
+    fontFamily: Fonts.numericRegular,
     fontWeight: '400',
     textAlign: 'center',
   },
   simplePickerTextSelected: {
     fontSize: 24,
+    fontFamily: Fonts.numericSemiBold,
     fontWeight: '600',
   },
   // Simple Weight Input Styles
@@ -959,6 +961,7 @@ const styles = StyleSheet.create({
   },
   simpleWeightSmallButtonText: {
     fontSize: 12,
+    fontFamily: Fonts.numericMedium,
     fontWeight: '500',
   },
   simpleWeightValueDisplay: {
@@ -970,10 +973,12 @@ const styles = StyleSheet.create({
   },
   simpleWeightValue: {
     fontSize: 44,
+    fontFamily: Fonts.numericLight,
     fontWeight: '200',
   },
   simpleWeightUnit: {
     fontSize: 16,
+    fontFamily: Fonts.regular,
     fontWeight: '400',
   },
   simpleWeightQuickRow: {
@@ -991,6 +996,7 @@ const styles = StyleSheet.create({
   },
   simpleWeightQuickText: {
     fontSize: 14,
+    fontFamily: Fonts.numericMedium,
     fontWeight: '500',
   },
   simpleWeightTrack: {
@@ -1027,11 +1033,11 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 12,
-    borderWidth: 1,
     marginTop: 8,
   },
   datePickerButtonText: {
     fontSize: 16,
+    fontFamily: Fonts.light,
     fontWeight: '200',
   },
   datePickerDoneButton: {
@@ -1061,8 +1067,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.background,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
     overflow: 'hidden',
   },
   stepperButton: {
@@ -1084,6 +1088,7 @@ const styles = StyleSheet.create({
   },
   stepperValue: {
     fontSize: 24,
+    fontFamily: Fonts.numericLight,
     fontWeight: '100',
     color: Colors.text,
   },
@@ -1105,8 +1110,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
   sexText: {
     fontSize: 15,

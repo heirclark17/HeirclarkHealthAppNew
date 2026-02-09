@@ -681,12 +681,34 @@ export function CoachingModal({
       onRequestClose={handleClose}
     >
       <View style={[styles.container, { backgroundColor: glassColors.background }]}>
-        {/* Header with Glass Effect */}
+        {/* iOS 26 Liquid Glass Frosted Header */}
         <BlurView
-          intensity={isDark ? 60 : 80}
+          intensity={isDark ? 95 : 98}
           tint={isDark ? 'dark' : 'light'}
-          style={[styles.header, { borderBottomColor: glassColors.border }]}
+          style={[
+            styles.header,
+            {
+              backgroundColor: isDark ? 'rgba(28, 28, 30, 0.72)' : 'rgba(255, 255, 255, 0.70)',
+              borderBottomWidth: 0.5,
+              borderBottomColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
+              shadowColor: isDark ? '#4ECDC4' : '#96CEB4',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.08,
+              shadowRadius: 12,
+            }
+          ]}
         >
+          {/* Subtle gradient overlay */}
+          <View style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: isDark
+                ? 'linear-gradient(180deg, rgba(150, 206, 180, 0.03) 0%, rgba(150, 206, 180, 0) 100%)'
+                : 'linear-gradient(180deg, rgba(150, 206, 180, 0.04) 0%, rgba(150, 206, 180, 0) 100%)',
+              pointerEvents: 'none',
+            }
+          ]} />
+
           <Pressable
             style={[styles.closeButton, { backgroundColor: glassColors.buttonBg, borderColor: glassColors.buttonBorder }]}
             onPress={handleClose}
@@ -712,9 +734,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 18,
+    borderBottomWidth: 0.5,
   },
   closeButton: {
     width: 40,
@@ -722,7 +745,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
-    borderWidth: 1,
+    borderWidth: 0.5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
   },
   headerTitle: {
     fontSize: 12,

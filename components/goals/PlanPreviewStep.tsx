@@ -280,20 +280,20 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
           <View style={styles.profileSection}>
             <Text style={[styles.profileSectionTitle, { color: colors.textMuted }]}>BIOMETRIC DATA</Text>
             <View style={styles.profileDataGrid}>
-              <View style={styles.profileDataItem}>
+              <GlassCard style={styles.profileDataItemCard} borderColor="transparent">
                 <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Age</Text>
                 <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
                   {state.age}
                 </NumberText>
                 <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}>years</Text>
-              </View>
-              <View style={styles.profileDataItem}>
+              </GlassCard>
+              <GlassCard style={styles.profileDataItemCard} borderColor="transparent">
                 <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Sex</Text>
                 <Text style={[styles.profileDataValue, { color: colors.text }]}>
                   {state.sex === 'male' ? 'Male' : 'Female'}
                 </Text>
-              </View>
-              <View style={styles.profileDataItem}>
+              </GlassCard>
+              <GlassCard style={styles.profileDataItemCard} borderColor="transparent">
                 <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Height</Text>
                 <Text style={[styles.profileDataValue, { color: colors.text }]}>
                   {state.heightFt ? (
@@ -316,22 +316,22 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </>
                   )}
                 </Text>
-              </View>
-              <View style={styles.profileDataItem}>
+              </GlassCard>
+              <GlassCard style={styles.profileDataItemCard} borderColor="transparent">
                 <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Current Weight</Text>
                 <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
                   {state.currentWeight}
                 </NumberText>
                 <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}>lbs</Text>
-              </View>
-              <View style={styles.profileDataItem}>
+              </GlassCard>
+              <GlassCard style={styles.profileDataItemCard} borderColor="transparent">
                 <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Target Weight</Text>
                 <NumberText weight="medium" style={[styles.profileDataValue, { color: colors.text }]}>
                   {state.targetWeight}
                 </NumberText>
                 <Text style={[styles.profileDataUnit, { color: colors.textMuted }]}>lbs</Text>
-              </View>
-              <View style={styles.profileDataItem}>
+              </GlassCard>
+              <GlassCard style={styles.profileDataItemCard} borderColor="transparent">
                 <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Activity Level</Text>
                 <Text style={[styles.profileDataValue, { color: colors.text }]}>
                   {state.activityLevel === 'sedentary' ? 'Sedentary' :
@@ -339,7 +339,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                    state.activityLevel === 'moderate' ? 'Moderately Active' :
                    state.activityLevel === 'active' ? 'Very Active' : 'Extremely Active'}
                 </Text>
-              </View>
+              </GlassCard>
             </View>
           </View>
 
@@ -518,161 +518,189 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         </View>
 
         {/* Training Schedule Overview */}
-        <View style={styles.trainingScheduleSection}>
+        <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
           <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>TRAINING SCHEDULE</Text>
           <View style={styles.scheduleGrid}>
-            <View style={styles.scheduleItem}>
+            <GlassCard style={styles.scheduleItemCard} borderColor="transparent">
               <Calendar size={16} color={colors.primary} />
               <NumberText weight="semiBold" style={[styles.scheduleValue, { color: colors.text }]}>
                 {state.workoutsPerWeek || 3}
               </NumberText>
-              <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Training Days/Week</Text>
-            </View>
-            <View style={styles.scheduleItem}>
+              <Text numberOfLines={1} style={[styles.scheduleLabel, { color: colors.textMuted }]}>Training Days/Week</Text>
+            </GlassCard>
+            <GlassCard style={styles.scheduleItemCard} borderColor="transparent">
               <Clock size={16} color={colors.primary} />
               <NumberText weight="semiBold" style={[styles.scheduleValue, { color: colors.text }]}>
                 {state.workoutDuration || 45}
               </NumberText>
-              <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Minutes/Session</Text>
-            </View>
-            <View style={styles.scheduleItem}>
+              <Text numberOfLines={1} style={[styles.scheduleLabel, { color: colors.textMuted }]}>Minutes/Session</Text>
+            </GlassCard>
+            <GlassCard style={styles.scheduleItemCard} borderColor="transparent">
               <Zap size={16} color={colors.primary} />
-              <Text style={[styles.scheduleValue, { color: colors.text, fontSize: 17, marginTop: 3 }]}>
+              <Text numberOfLines={1} style={[styles.scheduleValue, { color: colors.text, fontSize: 17, marginTop: 3 }]}>
                 {state.activityLevel === 'sedentary' || state.activityLevel === 'light' ? 'Beginner' :
                  state.activityLevel === 'moderate' ? 'Intermediate' : 'Advanced'}
               </Text>
-              <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Intensity</Text>
-            </View>
-            <View style={styles.scheduleItem}>
+              <Text numberOfLines={1} style={[styles.scheduleLabel, { color: colors.textMuted }]}>Intensity</Text>
+            </GlassCard>
+            <GlassCard style={styles.scheduleItemCard} borderColor="transparent">
               <Heart size={16} color={colors.primary} />
               <NumberText weight="semiBold" style={[styles.scheduleValue, { color: colors.text }]}>
                 {7 - (state.workoutsPerWeek || 3)}
               </NumberText>
-              <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Rest Days/Week</Text>
-            </View>
+              <Text numberOfLines={1} style={[styles.scheduleLabel, { color: colors.textMuted }]}>Rest Days/Week</Text>
+            </GlassCard>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Workout Split */}
-        <View style={styles.workoutSplitSection}>
+        <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
           <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>WEEKLY WORKOUT SPLIT</Text>
           {state.primaryGoal === 'build_muscle' && (
             <View style={styles.splitDetails}>
               {(state.workoutsPerWeek || 3) >= 5 ? (
                 <>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push (Chest, Shoulders, Triceps)</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull (Back, Biceps, Rear Delts)</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Legs (Quads, Hamstrings, Glutes, Calves)</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body Hypertrophy</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 5:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body Strength</Text>
-                  </View>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push (Chest, Shoulders, Triceps)</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull (Back, Biceps, Rear Delts)</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Legs (Quads, Hamstrings, Glutes, Calves)</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body Hypertrophy</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 5:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body Strength</Text>
+                    </View>
+                  </GlassCard>
                 </>
               ) : (state.workoutsPerWeek || 3) >= 4 ? (
                 <>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body (Chest, Back, Shoulders, Arms)</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body (Legs, Glutes, Calves)</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push Focus (Chest, Shoulders, Triceps)</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull Focus (Back, Biceps, Hamstrings)</Text>
-                  </View>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body (Chest, Back, Shoulders, Arms)</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body (Legs, Glutes, Calves)</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push Focus (Chest, Shoulders, Triceps)</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull Focus (Back, Biceps, Hamstrings)</Text>
+                    </View>
+                  </GlassCard>
                 </>
               ) : (
                 <>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Compound Focus</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Hypertrophy Focus</Text>
-                  </View>
-                  <View style={styles.splitDay}>
-                    <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
-                    <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Strength Focus</Text>
-                  </View>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Compound Focus</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Hypertrophy Focus</Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Strength Focus</Text>
+                    </View>
+                  </GlassCard>
                 </>
               )}
             </View>
           )}
           {state.primaryGoal === 'lose_weight' && (
             <View style={styles.splitDetails}>
-              <View style={styles.splitDay}>
-                <Text style={[styles.splitDayLabel, { color: colors.text }]}>Days 1-{state.workoutsPerWeek || 3}:</Text>
-                <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
-                  {state.cardioPreference === 'walking' ? 'Brisk Walking + Light Resistance Training' :
-                   state.cardioPreference === 'running' ? 'Running Intervals + Core Work' :
-                   state.cardioPreference === 'hiit' ? 'HIIT Circuits + Strength Training' :
-                   'Mixed Cardio + Resistance Training'}
-                </Text>
-              </View>
-              <View style={styles.splitDay}>
-                <Text style={[styles.splitDayLabel, { color: colors.text }]}>Rest Days:</Text>
-                <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
-                  Active recovery (walking, stretching, mobility work)
-                </Text>
-              </View>
+              <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <Text style={[styles.splitDayLabel, { color: colors.text }]}>Days 1-{state.workoutsPerWeek || 3}:</Text>
+                  <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
+                    {state.cardioPreference === 'walking' ? 'Brisk Walking + Light Resistance Training' :
+                     state.cardioPreference === 'running' ? 'Running Intervals + Core Work' :
+                     state.cardioPreference === 'hiit' ? 'HIIT Circuits + Strength Training' :
+                     'Mixed Cardio + Resistance Training'}
+                  </Text>
+                </View>
+              </GlassCard>
+              <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <Text style={[styles.splitDayLabel, { color: colors.text }]}>Rest Days:</Text>
+                  <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
+                    Active recovery (walking, stretching, mobility work)
+                  </Text>
+                </View>
+              </GlassCard>
             </View>
           )}
-        </View>
+        </GlassCard>
 
         {/* Exercise Examples */}
-        <View style={styles.exerciseSection}>
+        <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
           <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>EXAMPLE EXERCISES</Text>
           {state.primaryGoal === 'build_muscle' && (
             <View style={styles.exerciseList}>
-              <View style={styles.exerciseItem}>
+              <GlassCard style={styles.exerciseItemCard} borderColor="transparent">
                 <Dumbbell size={14} color={colors.protein} />
                 <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
                   Bench Press, Squats, Deadlifts, Overhead Press (Compound Movements)
                 </Text>
-              </View>
-              <View style={styles.exerciseItem}>
+              </GlassCard>
+              <GlassCard style={styles.exerciseItemCard} borderColor="transparent">
                 <Dumbbell size={14} color={colors.protein} />
                 <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
                   Dumbbell Rows, Lat Pulldowns, Romanian Deadlifts (Back & Posterior Chain)
                 </Text>
-              </View>
-              <View style={styles.exerciseItem}>
+              </GlassCard>
+              <GlassCard style={styles.exerciseItemCard} borderColor="transparent">
                 <Dumbbell size={14} color={colors.protein} />
                 <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
                   Leg Press, Lunges, Leg Curls, Calf Raises (Lower Body Isolation)
                 </Text>
-              </View>
-              <View style={styles.exerciseItem}>
+              </GlassCard>
+              <GlassCard style={styles.exerciseItemCard} borderColor="transparent">
                 <Dumbbell size={14} color={colors.protein} />
                 <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
                   Bicep Curls, Tricep Extensions, Lateral Raises (Arm & Shoulder Isolation)
                 </Text>
-              </View>
+              </GlassCard>
             </View>
           )}
           {state.primaryGoal === 'lose_weight' && (
             <View style={styles.exerciseList}>
-              <View style={styles.exerciseItem}>
+              <GlassCard style={styles.exerciseItemCard} borderColor="transparent">
                 <Flame size={14} color={Colors.error} />
                 <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
                   {state.cardioPreference === 'walking' ? '30-45 min brisk walking at moderate pace (3.5-4 mph)' :
@@ -680,26 +708,26 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                    state.cardioPreference === 'hiit' ? '20-30 min HIIT (burpees, mountain climbers, jump squats)' :
                    '30-40 min mixed cardio (bike, elliptical, rowing)'}
                 </Text>
-              </View>
-              <View style={styles.exerciseItem}>
+              </GlassCard>
+              <GlassCard style={styles.exerciseItemCard} borderColor="transparent">
                 <Dumbbell size={14} color={Colors.error} />
                 <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
                   Circuit training: Goblet Squats, Push-ups, Dumbbell Rows (3 rounds, 12-15 reps)
                 </Text>
-              </View>
-              <View style={styles.exerciseItem}>
+              </GlassCard>
+              <GlassCard style={styles.exerciseItemCard} borderColor="transparent">
                 <Heart size={14} color={Colors.error} />
                 <Text style={[styles.exerciseText, { color: colors.textSecondary }]}>
                   Core work: Planks, Russian Twists, Leg Raises (3 sets to fatigue)
                 </Text>
-              </View>
+              </GlassCard>
             </View>
           )}
-        </View>
+        </GlassCard>
 
         {/* Equipment & Modifications */}
         {state.equipmentAvailable && state.equipmentAvailable.length > 0 && (
-          <View style={styles.equipmentSection}>
+          <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
             <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>AVAILABLE EQUIPMENT</Text>
             <View style={styles.equipmentTags}>
               {state.equipmentAvailable.map((equipment, index) => (
@@ -711,12 +739,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 </View>
               ))}
             </View>
-          </View>
+          </GlassCard>
         )}
 
         {/* Injury Considerations */}
         {state.injuries && state.injuries.length > 0 && (
-          <View style={styles.injurySection}>
+          <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
             <View style={styles.injuryHeader}>
               <AlertTriangle size={16} color={Colors.warning} />
               <Text style={[styles.trainingSectionTitle, { color: Colors.warning }]}>INJURY MODIFICATIONS</Text>
@@ -733,35 +761,35 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 </View>
               ))}
             </View>
-          </View>
+          </GlassCard>
         )}
 
         {/* Progressive Overload Plan */}
-        <View style={styles.progressionSection}>
+        <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
           <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>PROGRESSION PLAN</Text>
           <View style={styles.progressionTimeline}>
-            <View style={styles.progressionPhase}>
+            <GlassCard style={styles.progressionPhaseCard} borderColor="transparent">
               <Text style={[styles.progressionWeek, { color: colors.primary }]}>Weeks 1-2</Text>
               <Text style={[styles.progressionDesc, { color: colors.textSecondary }]}>
                 Adaptation Phase - Focus on form, build base conditioning
               </Text>
-            </View>
-            <View style={styles.progressionPhase}>
+            </GlassCard>
+            <GlassCard style={styles.progressionPhaseCard} borderColor="transparent">
               <Text style={[styles.progressionWeek, { color: colors.primary }]}>Weeks 3-6</Text>
               <Text style={[styles.progressionDesc, { color: colors.textSecondary }]}>
                 {state.primaryGoal === 'build_muscle' ? 'Hypertrophy Phase - Increase volume, 8-12 reps per set' :
                  'Conditioning Phase - Increase intensity, reduce rest periods'}
               </Text>
-            </View>
-            <View style={styles.progressionPhase}>
+            </GlassCard>
+            <GlassCard style={styles.progressionPhaseCard} borderColor="transparent">
               <Text style={[styles.progressionWeek, { color: colors.primary }]}>Weeks 7+</Text>
               <Text style={[styles.progressionDesc, { color: colors.textSecondary }]}>
                 {state.primaryGoal === 'build_muscle' ? 'Strength Phase - Progressive overload, track PR milestones' :
                  'Peak Performance - Maximize calorie burn, optimize fat loss'}
               </Text>
-            </View>
+            </GlassCard>
           </View>
-        </View>
+        </GlassCard>
 
         {/* Nutrition Synergy Note */}
         <View style={styles.nutritionSynergyNote}>
@@ -795,7 +823,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
 
             {/* Dietary Style */}
             {state.dietStyle && state.dietStyle !== 'standard' && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <Leaf size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Dietary Style</Text>
@@ -807,12 +835,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </Text>
                   </View>
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Allergens */}
             {state.allergies && state.allergies.length > 0 && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <AlertTriangle size={16} color={Colors.error} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Allergens to Avoid</Text>
@@ -826,12 +854,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </View>
                   ))}
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Meals Per Day */}
             {state.mealsPerDay && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <UtensilsCrossed size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meals Per Day: </Text>
@@ -839,12 +867,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     {state.mealsPerDay}
                   </NumberText>
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Intermittent Fasting */}
             {state.intermittentFasting && state.fastingWindow && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <Clock size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Fasting Window: </Text>
@@ -852,12 +880,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     {state.fastingWindow.start} - {state.fastingWindow.end}
                   </Text>
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Cuisines */}
             {foodPrefs?.preferences?.favoriteCuisines && foodPrefs.preferences.favoriteCuisines.length > 0 && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <UtensilsCrossed size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Cuisines</Text>
@@ -871,12 +899,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </View>
                   ))}
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Proteins */}
             {foodPrefs?.preferences?.favoriteProteins && foodPrefs.preferences.favoriteProteins.length > 0 && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <Fish size={16} color={colors.protein} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Proteins</Text>
@@ -890,12 +918,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </View>
                   ))}
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Vegetables */}
             {foodPrefs?.preferences?.favoriteVegetables && foodPrefs.preferences.favoriteVegetables.length > 0 && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <Leaf size={16} color={Colors.success} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Vegetables</Text>
@@ -909,12 +937,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </View>
                   ))}
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Starches */}
             {foodPrefs?.preferences?.favoriteStarches && foodPrefs.preferences.favoriteStarches.length > 0 && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <Pizza size={16} color={colors.carbs} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Starches</Text>
@@ -928,12 +956,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </View>
                   ))}
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Snacks */}
             {foodPrefs?.preferences?.favoriteSnacks && foodPrefs.preferences.favoriteSnacks.length > 0 && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <IceCream size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Snacks</Text>
@@ -947,12 +975,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </View>
                   ))}
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Hated Foods */}
             {foodPrefs?.preferences?.hatedFoods && (
-              <View style={styles.prefSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <XCircle size={16} color={Colors.error} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Foods to Avoid</Text>
@@ -966,12 +994,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </View>
                   ))}
                 </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Meal Planning Preferences */}
             {foodPrefs?.preferences && (
-              <View style={styles.mealPlanningSection}>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 {/* Meal Diversity */}
                 {foodPrefs.preferences.mealDiversity && (
                   <View style={styles.prefRow}>
@@ -1017,7 +1045,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                     </Text>
                   </View>
                 )}
-              </View>
+              </GlassCard>
             )}
 
             {/* Preference Connection Note */}
@@ -1083,7 +1111,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   header: {
-    marginTop: 16,
+    marginTop: 48,
     marginBottom: 20,
   },
   title: {
@@ -1466,6 +1494,10 @@ const styles = StyleSheet.create({
   prefSection: {
     marginBottom: 16,
   },
+  prefSectionCard: {
+    marginBottom: 12,
+    padding: 12,
+  },
   prefRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1572,6 +1604,12 @@ const styles = StyleSheet.create({
     width: '30%',
     minWidth: 90,
   },
+  profileDataItemCard: {
+    width: '30%',
+    minWidth: 90,
+    padding: 12,
+    gap: 8,
+  },
   profileDataLabel: {
     fontSize: 10,
     fontFamily: Fonts.light,
@@ -1619,6 +1657,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   // Training Plan Detailed Styles
+  trainingSectionCard: {
+    marginBottom: 12,
+    padding: 12,
+  },
   trainingScheduleSection: {
     marginBottom: 20,
   },
@@ -1639,6 +1681,15 @@ const styles = StyleSheet.create({
     minWidth: 70,
     alignItems: 'center',
     gap: 6,
+  },
+  scheduleItemCard: {
+    flexBasis: '45%',
+    maxWidth: '45%',
+    minWidth: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 14,
+    padding: 14,
   },
   scheduleValue: {
     fontSize: 20,
@@ -1661,18 +1712,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
+  splitDayCard: {
+    flexDirection: 'row',
+    gap: 10,
+    padding: 12,
+    marginBottom: 8,
+  },
   splitDayLabel: {
     fontSize: 13,
     fontFamily: Fonts.medium,
     color: Colors.text,
-    minWidth: 50,
+    minWidth: 60,
+    flexShrink: 0,
   },
   splitDayWorkout: {
     flex: 1,
     fontSize: 13,
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
-    lineHeight: 18,
+    lineHeight: 19,
+    flexWrap: 'wrap',
   },
   exerciseSection: {
     marginBottom: 20,
@@ -1684,6 +1743,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     alignItems: 'flex-start',
+  },
+  exerciseItemCard: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+    padding: 10,
+    marginBottom: 8,
   },
   exerciseText: {
     flex: 1,
@@ -1747,6 +1813,10 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     borderLeftWidth: 2,
     borderLeftColor: Colors.primary,
+  },
+  progressionPhaseCard: {
+    padding: 12,
+    marginBottom: 8,
   },
   progressionWeek: {
     fontSize: 13,

@@ -158,7 +158,7 @@ export const SemiCircularGauge: React.FC<SemiCircularGaugeProps> = ({
       {/* Bottom goal text */}
       {unit && (
         <Text style={[styles.goalText, { fontSize: goalFontSize, bottom: goalTextBottom, color: colors.textSecondary }]}>
-          of <Text style={[styles.goalText, { fontSize: goalFontSize, color: colors.textSecondary }]}>{maxValue.toLocaleString()}</Text> {unit} goal
+          of <Text style={[styles.goalText, { fontSize: goalFontSize, color: colors.textSecondary }]}>{Math.round(maxValue).toLocaleString()}</Text> {unit} goal
         </Text>
       )}
     </View>

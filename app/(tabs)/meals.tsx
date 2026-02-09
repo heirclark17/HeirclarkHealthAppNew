@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Leaf, Settings, Zap, Sparkles, ShoppingCart, User } from 'lucide-react-native';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { instacartService } from '../../services/instacartService';
 import { mealPlanService } from '../../services/mealPlanService';
+import { aiService } from '../../services/aiService';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../../components/NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -18,7 +19,6 @@ import {
   DaySelector,
   MealCard,
   GroceryListModal,
-  MacroProgressBar,
   MealPlanCoachingModal,
   CheatDayGuidanceCard,
   BudgetTierSelector,
@@ -247,6 +247,49 @@ export default function MealsScreen() {
     }
   };
 
+  // Handle saving meal to Saved Meals
+  const handleSaveToSavedMeals = async (meal: Meal) => {
+    try {
+      console.log('[MealsScreen] Saving meal to Saved Meals:', meal.name);
+
+      // Convert meal to AIMeal format expected by aiService
+      const aiMeal = {
+        id: `meal_${Date.now()}`,
+        name: meal.name,
+        mealType: meal.mealType,
+        description: meal.description || '',
+        nutrients: {
+          calories: meal.calories,
+          protein_g: meal.protein,
+          carbs_g: meal.carbs,
+          fat_g: meal.fat,
+        },
+        prepTimeMinutes: meal.prepTime || 15,
+        cookTimeMinutes: meal.cookTime || 20,
+        ingredients: meal.ingredients || [],
+        instructions: meal.instructions || [],
+        tags: [],
+      };
+
+      const savedMeal = await aiService.saveMeal(aiMeal, 'ai');
+
+      if (savedMeal) {
+        Alert.alert(
+          'Meal Saved',
+          `${meal.name} has been saved to your Saved Meals collection.`,
+          [{ text: 'OK' }]
+        );
+        console.log('[MealsScreen] ✅ Meal saved successfully');
+      } else {
+        Alert.alert('Save Failed', 'Could not save meal. Please try again.');
+        console.error('[MealsScreen] ❌ Failed to save meal');
+      }
+    } catch (error) {
+      console.error('[MealsScreen] Error saving meal:', error);
+      Alert.alert('Error', 'An error occurred while saving the meal.');
+    }
+  };
+
   // Handle adding meal ingredients to Instacart
   const handleAddIngredientsToInstacart = async (meal: Meal) => {
     try {
@@ -314,7 +357,7 @@ export default function MealsScreen() {
         >
           <View style={styles.targetsRow}>
             <View style={styles.targetItem}>
-              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.calories}</NumberText>
+              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{Math.round(dailyTargets.calories)}</NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Calories</Text>
             </View>
             <View style={styles.targetItem}>
@@ -332,39 +375,16 @@ export default function MealsScreen() {
           </View>
         </GlassCard>
 
-        {/* Daily Progress - Show when plan exists */}
-        {weeklyPlan && currentDayPlan && !isCheatDay && (
-          <GlassCard
-            style={[
-              styles.progressCard,
-              { borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.5)' }
-            ]}
-          >
-            <Text style={[styles.progressTitle, { color: colors.text }]}>
-              {currentDayName}'s Progress
-            </Text>
-            <MacroProgressBar
-              dailyTotals={currentDayTotals}
-              dailyGoals={{
-                calories: dailyTargets.calories,
-                protein: dailyTargets.protein,
-                carbs: dailyTargets.carbs,
-                fat: dailyTargets.fat,
-              }}
-            />
-          </GlassCard>
-        )}
-
         {/* Pantry Savings Banner - Show when there are savings */}
         {weeklyPlan && estimatedSavings && estimatedSavings > 0 && (
           <View style={[
             styles.savingsBanner,
             { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.1)' }
           ]}>
-            <Ionicons name="leaf-outline" size={18} color={isDark ? '#86efac' : '#22c55e'} />
-            <NumberText weight="medium" style={[styles.savingsText, { color: isDark ? '#86efac' : '#22c55e' }]}>
-              You're saving ~${(estimatedSavings / 100).toFixed(2)} this week using pantry items!
-            </NumberText>
+            <Leaf size={18} color={isDark ? '#86efac' : '#22c55e'} />
+            <Text style={[styles.savingsText, { color: isDark ? '#86efac' : '#22c55e', fontFamily: Fonts.light }]}>
+              You're saving ~<NumberText weight="medium" style={{ color: isDark ? '#86efac' : '#22c55e' }}>${(estimatedSavings / 100).toFixed(2)}</NumberText> this week using pantry items!
+            </Text>
           </View>
         )}
 
@@ -383,9 +403,9 @@ export default function MealsScreen() {
                 AI will generate a 7-day meal plan based on your saved food preferences and macro goals
               </Text>
 
-              <TouchableOpacity style={styles.linkButton} onPress={() => setShowFoodPrefsModal(true)}>
-                <Ionicons name="settings-outline" size={16} color={colors.accent} style={{ marginRight: 6 }} />
-                <Text style={[styles.linkButtonText, { color: colors.accent }]}>Edit Food Preferences</Text>
+              <TouchableOpacity style={[styles.linkButton, { flexDirection: 'row', alignItems: 'center' }]} onPress={() => setShowFoodPrefsModal(true)}>
+                <Settings size={16} color={colors.accent} style={{ marginRight: 6 }} />
+                <Text style={[styles.linkButtonText, { color: colors.accent, fontFamily: Fonts.light }]}>Edit Food Preferences</Text>
               </TouchableOpacity>
 
               {/* Budget Tier Selection */}
@@ -409,8 +429,8 @@ export default function MealsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <Ionicons name="flash-outline" size={20} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick</Text>
+                    <Zap size={20} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
+                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)', fontFamily: Fonts.light }]}>Quick</Text>
                   </TouchableOpacity>
                 </GlassCard>
 
@@ -425,8 +445,8 @@ export default function MealsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <Ionicons name="sparkles" size={20} color={isDark ? '#a5b4fc' : '#6366f1'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI</Text>
+                    <Sparkles size={20} color={isDark ? '#a5b4fc' : '#6366f1'} />
+                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1', fontFamily: Fonts.light }]}>AI</Text>
                   </TouchableOpacity>
                 </GlassCard>
 
@@ -441,8 +461,8 @@ export default function MealsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <Ionicons name="cart" size={20} color={isDark ? '#86efac' : '#22c55e'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? '#86efac' : '#22c55e' }]}>Budget</Text>
+                    <ShoppingCart size={20} color={isDark ? '#86efac' : '#22c55e'} />
+                    <Text style={[styles.halfButtonText, { color: isDark ? '#86efac' : '#22c55e', fontFamily: Fonts.light }]}>Budget</Text>
                   </TouchableOpacity>
                 </GlassCard>
               </View>
@@ -514,6 +534,7 @@ export default function MealsScreen() {
                           isSwapping={isSwapping}
                           onAddToTodaysMeals={handleAddToTodaysMeals}
                           onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
+                          onSaveToSavedMeals={handleSaveToSavedMeals}
                         />
                       ))}
 
@@ -527,6 +548,7 @@ export default function MealsScreen() {
                           isSwapping={isSwapping}
                           onAddToTodaysMeals={handleAddToTodaysMeals}
                           onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
+                          onSaveToSavedMeals={handleSaveToSavedMeals}
                         />
                       ))}
 
@@ -540,6 +562,7 @@ export default function MealsScreen() {
                           isSwapping={isSwapping}
                           onAddToTodaysMeals={handleAddToTodaysMeals}
                           onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
+                          onSaveToSavedMeals={handleSaveToSavedMeals}
                         />
                       ))}
 
@@ -558,6 +581,7 @@ export default function MealsScreen() {
                           isSwapping={isSwapping}
                           onAddToTodaysMeals={handleAddToTodaysMeals}
                           onAddIngredientsToInstacart={handleAddIngredientsToInstacart}
+                          onSaveToSavedMeals={handleSaveToSavedMeals}
                         />
                       ))}
                     </>
@@ -583,8 +607,8 @@ export default function MealsScreen() {
                         activeOpacity={0.7}
                         style={styles.halfButtonInner}
                       >
-                        <Ionicons name="flash-outline" size={18} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
-                        <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)' }]}>Quick</Text>
+                        <Zap size={18} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
+                        <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)', fontFamily: Fonts.light }]}>Quick</Text>
                       </TouchableOpacity>
                     </GlassCard>
 
@@ -599,8 +623,8 @@ export default function MealsScreen() {
                         activeOpacity={0.7}
                         style={styles.halfButtonInner}
                       >
-                        <Ionicons name="sparkles" size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
-                        <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>AI-Powered</Text>
+                        <Sparkles size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
+                        <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1', fontFamily: Fonts.light }]}>AI-Powered</Text>
                       </TouchableOpacity>
                     </GlassCard>
                   </View>
@@ -624,9 +648,9 @@ export default function MealsScreen() {
                 style={styles.actionButtonInner}
               >
                 <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                  <Ionicons name="cart-outline" size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
+                  <ShoppingCart size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
                 </View>
-                <Text style={[styles.actionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>Order Groceries</Text>
+                <Text style={[styles.actionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)', fontFamily: Fonts.light }]}>Order Groceries</Text>
               </TouchableOpacity>
             </GlassCard>
             <GlassCard
@@ -640,9 +664,9 @@ export default function MealsScreen() {
                 style={styles.actionButtonInner}
               >
                 <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                  <Ionicons name="person-outline" size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
+                  <User size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
                 </View>
-                <Text style={[styles.actionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>AI Coach</Text>
+                <Text style={[styles.actionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)', fontFamily: Fonts.light }]}>AI Coach</Text>
               </TouchableOpacity>
             </GlassCard>
           </View>
@@ -733,19 +757,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.thin,
     textTransform: 'uppercase',
     letterSpacing: 0.3,
-  },
-  progressCard: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 16,
-  },
-  progressTitle: {
-    fontSize: 14,
-    fontFamily: Fonts.thin,
-    letterSpacing: 0.3,
-    marginBottom: 12,
   },
   card: {
     marginHorizontal: 16,

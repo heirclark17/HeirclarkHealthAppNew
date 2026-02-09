@@ -18,7 +18,7 @@ import {
   Sparkles,
   Leaf,
   AlertTriangle,
-  Restaurant,
+  UtensilsCrossed,
   Fish,
   Pizza,
   IceCream,
@@ -311,7 +311,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             <GlassCard style={styles.targetCard} interactive>
               <Flame size={20} color={Colors.error} />
               <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
-                {state.results.calories.toLocaleString()}
+                {Math.round(state.results.calories).toLocaleString()}
               </NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Calories</Text>
             </GlassCard>
@@ -545,14 +545,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             </View>
 
             {/* Dietary Preferences */}
-            {foodPrefs.dietaryPreferences && foodPrefs.dietaryPreferences.length > 0 && (
+            {foodPrefs?.preferences?.dietaryPreferences && foodPrefs.preferences.dietaryPreferences.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
                   <Leaf size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Dietary Style</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.dietaryPreferences.map((pref, index) => (
+                  {foodPrefs.preferences.dietaryPreferences.map((pref, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
                         {pref.charAt(0).toUpperCase() + pref.slice(1).replace('_', ' ')}
@@ -564,14 +564,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             )}
 
             {/* Allergens */}
-            {foodPrefs.allergens && foodPrefs.allergens.length > 0 && (
+            {foodPrefs?.preferences?.allergens && foodPrefs.preferences.allergens.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
                   <AlertTriangle size={16} color={Colors.error} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Allergens to Avoid</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.allergens.map((allergen, index) => (
+                  {foodPrefs.preferences.allergens.map((allergen, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
                         {allergen.charAt(0).toUpperCase() + allergen.slice(1)}
@@ -583,14 +583,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             )}
 
             {/* Favorite Cuisines */}
-            {foodPrefs.favoriteCuisines && foodPrefs.favoriteCuisines.length > 0 && (
+            {foodPrefs?.preferences?.favoriteCuisines && foodPrefs.preferences.favoriteCuisines.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
-                  <Restaurant size={16} color={colors.textMuted} />
+                  <UtensilsCrossed size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Cuisines</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteCuisines.map((cuisine, index) => (
+                  {foodPrefs.preferences.favoriteCuisines.map((cuisine, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
                       <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
                         {cuisine.charAt(0).toUpperCase() + cuisine.slice(1).replace('_', ' ')}
@@ -602,14 +602,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             )}
 
             {/* Favorite Proteins */}
-            {foodPrefs.favoriteProteins && foodPrefs.favoriteProteins.length > 0 && (
+            {foodPrefs?.preferences?.favoriteProteins && foodPrefs.preferences.favoriteProteins.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
                   <Fish size={16} color={colors.protein} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Proteins</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteProteins.map((protein, index) => (
+                  {foodPrefs.preferences.favoriteProteins.map((protein, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: colors.protein, fontFamily: Fonts.light }]}>
                         {protein.charAt(0).toUpperCase() + protein.slice(1).replace('_', ' ')}
@@ -621,14 +621,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             )}
 
             {/* Favorite Vegetables */}
-            {foodPrefs.favoriteVegetables && foodPrefs.favoriteVegetables.length > 0 && (
+            {foodPrefs?.preferences?.favoriteVegetables && foodPrefs.preferences.favoriteVegetables.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
                   <Leaf size={16} color={Colors.success} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Vegetables</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteVegetables.map((veggie, index) => (
+                  {foodPrefs.preferences.favoriteVegetables.map((veggie, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
                         {veggie.charAt(0).toUpperCase() + veggie.slice(1).replace('_', ' ')}
@@ -640,14 +640,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             )}
 
             {/* Favorite Starches */}
-            {foodPrefs.favoriteStarches && foodPrefs.favoriteStarches.length > 0 && (
+            {foodPrefs?.preferences?.favoriteStarches && foodPrefs.preferences.favoriteStarches.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
                   <Pizza size={16} color={colors.carbs} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Starches</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteStarches.map((starch, index) => (
+                  {foodPrefs.preferences.favoriteStarches.map((starch, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: colors.carbs, fontFamily: Fonts.light }]}>
                         {starch.charAt(0).toUpperCase() + starch.slice(1).replace('_', ' ')}
@@ -659,14 +659,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             )}
 
             {/* Favorite Snacks */}
-            {foodPrefs.favoriteSnacks && foodPrefs.favoriteSnacks.length > 0 && (
+            {foodPrefs?.preferences?.favoriteSnacks && foodPrefs.preferences.favoriteSnacks.length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
                   <IceCream size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Snacks</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.favoriteSnacks.map((snack, index) => (
+                  {foodPrefs.preferences.favoriteSnacks.map((snack, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
                       <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
                         {snack.charAt(0).toUpperCase() + snack.slice(1).replace('_', ' ')}
@@ -678,17 +678,17 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             )}
 
             {/* Hated Foods */}
-            {foodPrefs.hatedFoods && foodPrefs.hatedFoods.length > 0 && (
+            {foodPrefs?.preferences?.hatedFoods && foodPrefs.preferences.hatedFoods.trim().length > 0 && (
               <View style={styles.prefSection}>
                 <View style={styles.prefRow}>
                   <XCircle size={16} color={Colors.error} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Foods to Avoid</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  {foodPrefs.hatedFoods.map((food, index) => (
+                  {foodPrefs.preferences.hatedFoods.split(',').map((food, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
-                        {food.charAt(0).toUpperCase() + food.slice(1).replace('_', ' ')}
+                        {food.trim().charAt(0).toUpperCase() + food.trim().slice(1).replace('_', ' ')}
                       </Text>
                     </View>
                   ))}
@@ -699,55 +699,55 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             {/* Meal Planning Preferences */}
             <View style={styles.mealPlanningSection}>
               {/* Meal Diversity */}
-              {foodPrefs.mealDiversity && (
+              {foodPrefs?.preferences?.mealDiversity && (
                 <View style={styles.prefRow}>
                   <SettingsIcon size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Variety: </Text>
                   <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                    {foodPrefs.mealDiversity === 'same_meals' ? 'Same Meals Daily' : 'Diverse Meals'}
+                    {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily (Meal Prep)' : 'Diverse Meals'}
                   </Text>
                 </View>
               )}
 
               {/* Meal Style */}
-              {foodPrefs.mealStyle && (
+              {foodPrefs?.preferences?.mealStyle && (
                 <View style={styles.prefRow}>
                   <Timer size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Style: </Text>
                   <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                    {foodPrefs.mealStyle === 'quick_simple' ? 'Quick & Simple' : 'Gourmet & Complex'}
+                    {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer, Larger Meals'}
                   </Text>
                 </View>
               )}
 
               {/* Cheat Days */}
-              {foodPrefs.cheatDays !== undefined && (
+              {foodPrefs?.preferences?.cheatDays !== undefined && (
                 <View style={styles.prefRow}>
                   <Calendar size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cheat Days: </Text>
                   <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
                     <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
-                      {foodPrefs.cheatDays}
+                      {foodPrefs.preferences.cheatDays.length}
                     </NumberText> per week
                   </Text>
                 </View>
               )}
 
               {/* Cooking Skill */}
-              {foodPrefs.cookingSkill && (
+              {foodPrefs?.preferences?.cookingSkill && (
                 <View style={styles.prefRow}>
                   <ChefHat size={16} color={colors.textMuted} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cooking Skill: </Text>
                   <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                    {foodPrefs.cookingSkill === 'beginner' ? 'Beginner' :
-                     foodPrefs.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
+                    {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
+                     foodPrefs.preferences.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
                   </Text>
                 </View>
               )}
             </View>
 
             {/* AI-Generated Nutrition Guidance */}
-            <View style={[styles.nutritionGuidanceSection, { borderTopColor: colors.border }]}>
+            <View style={styles.nutritionGuidanceSection}>
               <View style={styles.guidanceHeader}>
                 <Sparkles size={18} color={Colors.success} />
                 <Text style={[styles.guidanceSectionTitle, { color: colors.text }]}>PERSONALIZED NUTRITION GUIDANCE</Text>
@@ -946,6 +946,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     padding: 24,
+    paddingTop: 48,
     paddingBottom: 100,
     overflow: 'hidden',
   },
@@ -1172,6 +1173,7 @@ const styles = StyleSheet.create({
   },
   guidanceText: {
     fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
@@ -1377,7 +1379,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   prefSection: {
-    marginBottom: 16,
+    marginBottom: 30,
   },
   prefRow: {
     flexDirection: 'row',
@@ -1428,8 +1430,6 @@ const styles = StyleSheet.create({
   nutritionGuidanceSection: {
     marginTop: 20,
     paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
   },
   guidanceSectionTitle: {
     fontSize: 11,

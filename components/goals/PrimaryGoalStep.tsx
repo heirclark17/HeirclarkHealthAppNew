@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     paddingBottom: 100, // Space for tab bar
   },
   header: {
-    marginTop: 16,
+    marginTop: 48,
     marginBottom: 24,
   },
   title: {

@@ -1022,7 +1022,7 @@ export default function DashboardScreen() {
         // Determine if it's a loss or gain for display
         const isDeficit = dailyDeficit >= 0;
         const fatChangeLabel = isDeficit ? 'FAT LOSS' : 'FAT GAIN';
-        const fatChangeValue = Math.abs(projectedDailyFatChange).toFixed(1);
+        const fatChangeValue = Math.abs(projectedDailyFatChange).toFixed(0);
 
         // Handle edge cases: if no TDEE data yet, show placeholder
         const hasTDEE = caloriesOut > 0;
@@ -1039,12 +1039,12 @@ export default function DashboardScreen() {
               <View style={[styles.calorieCardsRow, { gap: 8 }]}>
                 <GlassCard style={styles.calorieSubCard} interactive>
                   <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>CAL IN</Text>
-                  <NumberText weight="regular" style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesIn}</NumberText>
+                  <NumberText weight="regular" style={[styles.calorieSubCardValue, { color: colors.text }]}>{Math.round(caloriesIn)}</NumberText>
                   <NumberText weight="regular" style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</NumberText>
                 </GlassCard>
                 <GlassCard style={styles.calorieSubCard} interactive>
                   <Text style={[styles.calorieSubCardTitle, { color: colors.textMuted }]} numberOfLines={1}>CAL OUT</Text>
-                  <NumberText weight="regular" style={[styles.calorieSubCardValue, { color: colors.text }]}>{caloriesOut}</NumberText>
+                  <NumberText weight="regular" style={[styles.calorieSubCardValue, { color: colors.text }]}>{Math.round(caloriesOut)}</NumberText>
                   <NumberText weight="regular" style={[styles.calorieSubCardUnit, { color: colors.textSecondary }]}>kcal</NumberText>
                 </GlassCard>
                 <GlassCard style={styles.calorieSubCard} interactive>
@@ -1369,7 +1369,7 @@ export default function DashboardScreen() {
                   <View style={styles.loggedMealContent}>
                     <Text style={[styles.loggedMealName, { color: colors.text }]}>{meal.name}</Text>
                     <NumberText weight="regular" style={[styles.loggedMealMacros, { color: colors.textMuted }]}>
-                      {meal.calories} cal • P: {meal.protein}g • C: {meal.carbs}g • F: {meal.fat}g
+                      {Math.round(meal.calories)} cal • P: {meal.protein}g • C: {meal.carbs}g • F: {meal.fat}g
                     </NumberText>
                   </View>
                   <TouchableOpacity

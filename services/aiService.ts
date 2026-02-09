@@ -3,7 +3,7 @@
 
 // Railway Backend for AI endpoints
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://heirclarkinstacartbackend-production.up.railway.app';
-const AUTH_TOKEN_KEY = '@heirclark_auth_token';
+const AUTH_TOKEN_KEY = 'heirclark_auth_token';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NutritionVerificationResult } from '../types/nutritionAccuracy';

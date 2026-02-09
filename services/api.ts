@@ -4,7 +4,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'https://heirclarkinstacartbackend-production.up.railway.app';
-const AUTH_TOKEN_KEY = '@heirclark_auth_token';
+const AUTH_TOKEN_KEY = 'heirclark_auth_token';
 
 export interface HealthMetrics {
   date: string;

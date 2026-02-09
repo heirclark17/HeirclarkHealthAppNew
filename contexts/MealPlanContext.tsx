@@ -74,19 +74,24 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
   // Load food preferences from storage (fallback if context not available)
   const getFoodPreferences = useCallback(async (): Promise<FoodPreferences | null> => {
-    // First try context
-    if (foodPrefsContext?.preferences) {
-      return foodPrefsContext.preferences;
-    }
-    // Fallback to direct storage read
+    // ✅ FIX: Read from AsyncStorage FIRST to avoid stale context closures
+    // AsyncStorage is always up-to-date, context may lag behind React re-renders
     try {
       const stored = await AsyncStorage.getItem(FOOD_PREFS_STORAGE_KEY);
       if (stored) {
+        console.log('[MealPlanContext] ✅ Loaded food prefs from AsyncStorage (source of truth)');
         return JSON.parse(stored);
       }
     } catch (error) {
-      console.error('[MealPlanContext] Error loading food preferences:', error);
+      console.error('[MealPlanContext] Error loading food preferences from AsyncStorage:', error);
     }
+
+    // Fallback to context (for offline resilience or if AsyncStorage fails)
+    if (foodPrefsContext?.preferences) {
+      console.log('[MealPlanContext] ⚠️ Fallback to context food prefs');
+      return foodPrefsContext.preferences;
+    }
+
     return null;
   }, [foodPrefsContext]);
 
@@ -251,82 +256,6 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Generate a new 7-day meal plan
-  const generateMealPlan = useCallback(async (): Promise<boolean> => {
-    setState(prev => ({ ...prev, isGenerating: true, error: null }));
-
-    try {
-      const userGoals = await getUserGoals();
-      const preferences = await getPreferences();
-
-      // Get start date (today)
-      const startDate = new Date().toISOString().split('T')[0];
-
-      console.log('[MealPlanContext] Generating meal plan with:');
-      console.log('Goals:', userGoals);
-      console.log('Preferences:', preferences);
-
-      const response = await mealPlanService.generateMealPlan(userGoals, preferences, startDate);
-
-      if (response.success) {
-        const now = new Date().toISOString();
-
-        setState(prev => ({
-          ...prev,
-          weeklyPlan: response.weeklyPlan,
-          groceryList: response.groceryList,
-          weekSummary: response.weekSummary,
-          isGenerating: false,
-          error: null,
-          lastGeneratedAt: now,
-        }));
-
-        // Cache the plan locally
-        const cacheData = {
-          weeklyPlan: response.weeklyPlan,
-          groceryList: response.groceryList,
-          weekSummary: response.weekSummary,
-          lastGeneratedAt: now,
-        };
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
-
-        // *** Sync meal plan to backend ***
-        try {
-          console.log('[MealPlanContext] 🔄 Syncing meal plan to backend...');
-          const syncSuccess = await api.saveMealPlan(
-            { weeklyPlan: response.weeklyPlan, groceryList: response.groceryList, weekSummary: response.weekSummary },
-            startDate,
-            preferences.dietStyle
-          );
-          if (syncSuccess) {
-            console.log('[MealPlanContext] ✅ Meal plan synced to backend');
-          } else {
-            console.warn('[MealPlanContext] ⚠️ Backend sync failed - plan saved locally');
-          }
-        } catch (syncError) {
-          console.error('[MealPlanContext] ❌ Backend sync error:', syncError);
-        }
-
-        return true;
-      } else {
-        setState(prev => ({
-          ...prev,
-          isGenerating: false,
-          error: response.error || 'Failed to generate meal plan',
-        }));
-        return false;
-      }
-    } catch (error) {
-      console.error('[MealPlanContext] Generate error:', error);
-      setState(prev => ({
-        ...prev,
-        isGenerating: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-      }));
-      return false;
-    }
-  }, [getUserGoals, getPreferences]);
-
   // Generate AI-powered meal plan using OpenAI
   const generateAIMealPlan = useCallback(async (): Promise<boolean> => {
     setState(prev => ({ ...prev, isGenerating: true, error: null }));
@@ -336,10 +265,11 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       const preferences = await getPreferences();
       const foodPrefs = await getFoodPreferences();
 
-      console.log('[MealPlanContext] Generating AI meal plan with:');
-      console.log('Goals:', userGoals);
-      console.log('Preferences:', preferences);
-      console.log('Food Preferences:', foodPrefs);
+      console.log('[MealPlanContext] 🍽️ Generating AI meal plan with:');
+      console.log('[MealPlanContext] 📊 Goals:', userGoals);
+      console.log('[MealPlanContext] 📊 Preferences:', preferences);
+      console.log('[MealPlanContext] 📊 Food Preferences:', foodPrefs);
+      console.log('[MealPlanContext] 🔍 Meal Diversity from foodPrefs:', foodPrefs?.mealDiversity);
 
       // Combine allergens from both sources
       const allAllergens = [
@@ -376,7 +306,8 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       };
 
       console.log('[MealPlanContext] 🍽️ Meal diversity preference being sent:', foodPrefs?.mealDiversity);
-      console.log('[MealPlanContext] 📊 Full preferences:', aiPreferences);
+      console.log('[MealPlanContext] 🍽️ aiPreferences.mealDiversity:', aiPreferences.mealDiversity);
+      console.log('[MealPlanContext] 📊 Full aiPreferences object:', JSON.stringify(aiPreferences, null, 2));
 
       const aiPlan = await aiService.generateAIMealPlan(aiPreferences, 7);
 
@@ -506,6 +437,13 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
   }, [getUserGoals, getPreferences, getFoodPreferences]);
+
+  // Generate a new 7-day meal plan (now uses AI by default)
+  // This is a wrapper that calls generateAIMealPlan for backward compatibility
+  const generateMealPlan = useCallback(async (): Promise<boolean> => {
+    console.log('[MealPlanContext] 🔄 generateMealPlan() redirecting to AI generation');
+    return await generateAIMealPlan();
+  }, [generateAIMealPlan]);
 
   // Swap a single meal
   const swapMeal = useCallback(async (

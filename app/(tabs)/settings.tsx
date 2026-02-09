@@ -289,8 +289,8 @@ export default function SettingsScreen() {
                             const AsyncStorage = require('@react-native-async-storage/async-storage').default;
 
                             // Clear all possible auth keys
-                            await AsyncStorage.removeItem('@heirclark_auth_token');
-                            await AsyncStorage.removeItem('@heirclark_auth_user');
+                            await AsyncStorage.removeItem('heirclark_auth_token');
+                            await AsyncStorage.removeItem('heirclark_auth_user');
                             await AsyncStorage.removeItem('AUTH_TOKEN');
                             await AsyncStorage.removeItem('USER_DATA');
 
