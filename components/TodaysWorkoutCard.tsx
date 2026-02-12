@@ -18,6 +18,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
+import { NumberText } from './NumberText';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../constants/Theme';
 import { useSettings } from '../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../utils/haptics';
@@ -173,7 +174,7 @@ export function TodaysWorkoutCard({
               </Text>
             </View>
             <Text style={[styles.modalStat, { color: colors.textMuted }]}>
-              {weeklyCount} workouts this week
+              <NumberText weight="regular">{weeklyCount}</NumberText> workouts this week
             </Text>
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}

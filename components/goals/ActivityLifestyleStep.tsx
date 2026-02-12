@@ -17,10 +17,12 @@ import {
   Circle,
   Minus,
   Network,
-  Building2
+  Building2,
+  Weight,
+  TrendingUp
 } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
-import { useGoalWizard, CardioPreference, FitnessLevel } from '../../contexts/GoalWizardContext';
+import { useGoalWizard, CardioPreference, FitnessLevel, StrengthLevel } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { ActivityLevel } from '../../constants/goals';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
@@ -349,6 +351,11 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
     setWorkoutDuration,
     setCardioPreference,
     setFitnessLevel,
+    setHasLiftingExperience,
+    setStrengthLevel,
+    setBenchPress1RM,
+    setSquat1RM,
+    setDeadlift1RM,
     toggleEquipment,
     toggleInjury,
   } = useGoalWizard();
@@ -503,6 +510,172 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
             />
           ))}
         </View>
+      </GlassSection>
+
+      {/* Strength Training Baseline */}
+      <GlassSection>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+          <Weight size={16} color={Colors.primary} style={{ marginRight: 8 }} />
+          <Text style={[styles.sectionTitle, { color: Colors.primary, marginBottom: 0 }]}>STRENGTH TRAINING BASELINE</Text>
+        </View>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Help us personalize weight recommendations for strength workouts
+        </Text>
+
+        {/* Has Lifting Experience */}
+        <Text style={[styles.strengthSubheading, { color: colors.textMuted }]}>
+          Do you have weight lifting experience?
+        </Text>
+        <View style={styles.durationChips}>
+          <Chip
+            label="Never Lifted"
+            isSelected={!state.hasLiftingExperience}
+            onSelect={() => setHasLiftingExperience(false)}
+            colors={colors}
+          />
+          <Chip
+            label="Yes, I Lift"
+            isSelected={state.hasLiftingExperience}
+            onSelect={() => setHasLiftingExperience(true)}
+            colors={colors}
+          />
+        </View>
+
+        {/* Strength Level (only if has experience) */}
+        {state.hasLiftingExperience && (
+          <>
+            <Text style={[styles.strengthSubheading, { color: colors.textMuted, marginTop: 16 }]}>
+              What's your strength training level?
+            </Text>
+            <View style={styles.durationChips}>
+              {[
+                { value: 'beginner', label: 'Beginner', desc: '<1 year' },
+                { value: 'intermediate', label: 'Intermediate', desc: '1-3 years' },
+                { value: 'advanced', label: 'Advanced', desc: '3+ years' },
+              ].map((level) => (
+                <TouchableOpacity
+                  key={level.value}
+                  onPress={async () => {
+                    await selectionFeedback();
+                    setStrengthLevel(level.value as StrengthLevel);
+                  }}
+                >
+                  <GlassCard
+                    style={[
+                      styles.strengthLevelChip,
+                      state.strengthLevel === level.value && { backgroundColor: primaryGlassBg }
+                    ]}
+                    interactive
+                  >
+                    <Text style={[styles.strengthLevelLabel, { color: colors.text }]}>
+                      {level.label}
+                    </Text>
+                    <Text style={[styles.strengthLevelDesc, { color: colors.textMuted }]}>
+                      {level.desc}
+                    </Text>
+                  </GlassCard>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* 1RM Input (only if intermediate or advanced) */}
+            {(state.strengthLevel === 'intermediate' || state.strengthLevel === 'advanced') && (
+              <>
+                <Text style={[styles.strengthSubheading, { color: colors.textMuted, marginTop: 16 }]}>
+                  Optional: Enter your 1-rep max (1RM) for key lifts
+                </Text>
+                <Text style={[styles.strengthNote, { color: colors.textMuted }]}>
+                  This helps us recommend appropriate starting weights. Leave blank if unsure.
+                </Text>
+                <View style={styles.oneRMContainer}>
+                  {/* Bench Press 1RM */}
+                  <View style={styles.oneRMInput}>
+                    <Text style={[styles.oneRMLabel, { color: colors.text }]}>Bench Press</Text>
+                    <View style={styles.oneRMInputRow}>
+                      <GlassCard style={styles.oneRMField} interactive>
+                        <input
+                          type="number"
+                          placeholder="185"
+                          value={state.benchPress1RM || ''}
+                          onChange={(e) => setBenchPress1RM(e.target.value ? Number(e.target.value) : null)}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: 16,
+                            fontFamily: Fonts.numericRegular,
+                            color: colors.text,
+                            width: '100%',
+                            textAlign: 'center',
+                          }}
+                        />
+                      </GlassCard>
+                      <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                    </View>
+                  </View>
+
+                  {/* Squat 1RM */}
+                  <View style={styles.oneRMInput}>
+                    <Text style={[styles.oneRMLabel, { color: colors.text }]}>Squat</Text>
+                    <View style={styles.oneRMInputRow}>
+                      <GlassCard style={styles.oneRMField} interactive>
+                        <input
+                          type="number"
+                          placeholder="225"
+                          value={state.squat1RM || ''}
+                          onChange={(e) => setSquat1RM(e.target.value ? Number(e.target.value) : null)}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: 16,
+                            fontFamily: Fonts.numericRegular,
+                            color: colors.text,
+                            width: '100%',
+                            textAlign: 'center',
+                          }}
+                        />
+                      </GlassCard>
+                      <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                    </View>
+                  </View>
+
+                  {/* Deadlift 1RM */}
+                  <View style={styles.oneRMInput}>
+                    <Text style={[styles.oneRMLabel, { color: colors.text }]}>Deadlift</Text>
+                    <View style={styles.oneRMInputRow}>
+                      <GlassCard style={styles.oneRMField} interactive>
+                        <input
+                          type="number"
+                          placeholder="275"
+                          value={state.deadlift1RM || ''}
+                          onChange={(e) => setDeadlift1RM(e.target.value ? Number(e.target.value) : null)}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: 16,
+                            fontFamily: Fonts.numericRegular,
+                            color: colors.text,
+                            width: '100%',
+                            textAlign: 'center',
+                          }}
+                        />
+                      </GlassCard>
+                      <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                    </View>
+                  </View>
+                </View>
+                <GlassCard style={styles.oneRMNote} interactive>
+                  <TrendingUp size={18} color={Colors.info} />
+                  <Text style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>
+                    We'll use these values to calculate appropriate training weights (usually 60-85% of 1RM)
+                  </Text>
+                </GlassCard>
+              </>
+            )}
+          </>
+        )}
       </GlassSection>
 
       {/* Available Equipment */}
@@ -963,6 +1136,74 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   injuryNoteText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    lineHeight: 18,
+  },
+  // Strength baseline styles
+  strengthSubheading: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    marginBottom: 12,
+    marginTop: 4,
+  },
+  strengthLevelChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  strengthLevelLabel: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    marginBottom: 2,
+  },
+  strengthLevelDesc: {
+    fontSize: 11,
+    fontFamily: Fonts.light,
+  },
+  strengthNote: {
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
+  oneRMContainer: {
+    gap: 12,
+  },
+  oneRMInput: {
+    marginBottom: 12,
+  },
+  oneRMLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    marginBottom: 8,
+  },
+  oneRMInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  oneRMField: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  oneRMUnit: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+  },
+  oneRMNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 12,
+    padding: 12,
+  },
+  oneRMNoteText: {
     flex: 1,
     fontSize: 12,
     fontFamily: Fonts.light,

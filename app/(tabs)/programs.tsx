@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, M
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 // Animations removed for performance
-import { Ionicons } from '@expo/vector-icons';
+import { Bed, Dumbbell, Flag, ArrowRight, ChevronLeft, ChevronRight, Zap, Sparkles, Settings, X } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../../components/NumberText';
@@ -430,7 +430,7 @@ export default function ProgramsScreen() {
                       },
                     ]}
                   >
-                    <Ionicons name="bed-outline" size={32} color={colors.textMuted} />
+                    <Bed size={32} color={colors.textMuted} strokeWidth={1.5} />
                   </BlurView>
                 </View>
                 <Text style={[styles.restDayTitle, { color: colors.text }]}>Rest & Recovery</Text>
@@ -459,7 +459,7 @@ export default function ProgramsScreen() {
                     },
                   ]}
                 >
-                  <Ionicons name="barbell-outline" size={32} color={colors.text} />
+                  <Dumbbell size={32} color={colors.text} strokeWidth={1.5} />
                 </BlurView>
               </View>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Personalized Training Plan</Text>
@@ -469,14 +469,14 @@ export default function ProgramsScreen() {
 
               {/* Goal Summary */}
               <View style={[styles.goalSummary, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
-                <Ionicons name="flag-outline" size={18} color={colors.protein} />
+                <Flag size={18} color={colors.protein} strokeWidth={1.5} />
                 <Text style={[styles.goalSummaryText, { color: colors.textSecondary }]}>{getGoalSummary()}</Text>
               </View>
 
               {!goalWizardState?.primaryGoal && (
                 <TouchableOpacity style={styles.linkButton} onPress={handleSetGoals}>
                   <Text style={[styles.linkButtonText, { color: colors.accent }]}>Set Your Goals First</Text>
-                  <Ionicons name="arrow-forward" size={16} color={colors.accent} />
+                  <ArrowRight size={16} color={colors.accent} strokeWidth={1.5} />
                 </TouchableOpacity>
               )}
 
@@ -548,10 +548,10 @@ export default function ProgramsScreen() {
                 onPress={handlePreviousWeek}
                 disabled={currentWeek === 1}
               >
-                <Ionicons
-                  name="chevron-back"
+                <ChevronLeft
                   size={20}
                   color={currentWeek === 1 ? colors.border : colors.text}
+                  strokeWidth={1.5}
                 />
                 <Text style={[styles.weekButtonText, { color: colors.text }, currentWeek === 1 && { color: colors.border }]}>
                   Previous Week
@@ -563,7 +563,7 @@ export default function ProgramsScreen() {
                 onPress={handleNextWeek}
               >
                 <Text style={[styles.weekButtonText, { color: colors.text }]}>Next Week</Text>
-                <Ionicons name="chevron-forward" size={20} color={colors.text} />
+                <ChevronRight size={20} color={colors.text} strokeWidth={1.5} />
               </TouchableOpacity>
             </View>
 
@@ -581,7 +581,7 @@ export default function ProgramsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <Ionicons name="flash-outline" size={18} color={colors.textSecondary} />
+                    <Zap size={18} color={colors.textSecondary} strokeWidth={1.5} />
                     <Text style={[styles.halfButtonText, { color: colors.textSecondary }]}>Quick</Text>
                   </TouchableOpacity>
                 </GlassCard>
@@ -596,7 +596,7 @@ export default function ProgramsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <Ionicons name="sparkles" size={18} color={colors.primary} />
+                    <Sparkles size={18} color={colors.primary} strokeWidth={1.5} />
                     <Text style={[styles.halfButtonText, { color: colors.primary }]}>AI-Powered</Text>
                   </TouchableOpacity>
                 </GlassCard>

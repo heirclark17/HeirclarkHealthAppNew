@@ -11,6 +11,7 @@ export type WeightUnit = 'lb' | 'kg';
 export type HeightUnit = 'ft_in' | 'cm';
 export type CardioPreference = 'walking' | 'running' | 'hiit';
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced';
+export type StrengthLevel = 'never_lifted' | 'beginner' | 'intermediate' | 'advanced';
 
 export interface WizardState {
   // Step 1: Primary Goal
@@ -35,6 +36,13 @@ export interface WizardState {
   workoutDuration: 15 | 30 | 45 | 60;
   cardioPreference: CardioPreference;
   fitnessLevel: FitnessLevel;
+
+  // Step 3c: Strength Baseline (for training personalization)
+  hasLiftingExperience: boolean;
+  strengthLevel: StrengthLevel;
+  benchPress1RM: number | null; // Optional, in pounds
+  squat1RM: number | null;
+  deadlift1RM: number | null;
 
   // Step 4: Nutrition Preferences
   dietStyle: DietStyle;
@@ -94,6 +102,13 @@ interface GoalWizardContextType {
   setCardioPreference: (preference: CardioPreference) => void;
   setFitnessLevel: (level: FitnessLevel) => void;
 
+  // Step 3c: Strength Baseline
+  setHasLiftingExperience: (hasExperience: boolean) => void;
+  setStrengthLevel: (level: StrengthLevel) => void;
+  setBenchPress1RM: (weight: number | null) => void;
+  setSquat1RM: (weight: number | null) => void;
+  setDeadlift1RM: (weight: number | null) => void;
+
   // Step 4
   setDietStyle: (style: DietStyle) => void;
   setMealsPerDay: (meals: number) => void;
@@ -135,6 +150,11 @@ const initialState: WizardState = {
   workoutDuration: 30,
   cardioPreference: 'walking',
   fitnessLevel: 'intermediate',
+  hasLiftingExperience: false,
+  strengthLevel: 'never_lifted',
+  benchPress1RM: null,
+  squat1RM: null,
+  deadlift1RM: null,
   dietStyle: 'standard',
   mealsPerDay: 3,
   intermittentFasting: false,
@@ -302,6 +322,39 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
   const setFitnessLevel = useCallback((level: FitnessLevel) => {
     console.log('[GoalWizard] Setting fitness level to:', level);
     setState(prev => ({ ...prev, fitnessLevel: level }));
+  }, []);
+
+  // Step 3c: Strength Baseline setters
+  const setHasLiftingExperience = useCallback((hasExperience: boolean) => {
+    console.log('[GoalWizard] Setting lifting experience to:', hasExperience);
+    setState(prev => ({
+      ...prev,
+      hasLiftingExperience: hasExperience,
+      // Reset strength data if user has no experience
+      ...(hasExperience ? {} : {
+        strengthLevel: 'never_lifted',
+        benchPress1RM: null,
+        squat1RM: null,
+        deadlift1RM: null,
+      }),
+    }));
+  }, []);
+
+  const setStrengthLevel = useCallback((level: StrengthLevel) => {
+    console.log('[GoalWizard] Setting strength level to:', level);
+    setState(prev => ({ ...prev, strengthLevel: level }));
+  }, []);
+
+  const setBenchPress1RM = useCallback((weight: number | null) => {
+    setState(prev => ({ ...prev, benchPress1RM: weight }));
+  }, []);
+
+  const setSquat1RM = useCallback((weight: number | null) => {
+    setState(prev => ({ ...prev, squat1RM: weight }));
+  }, []);
+
+  const setDeadlift1RM = useCallback((weight: number | null) => {
+    setState(prev => ({ ...prev, deadlift1RM: weight }));
   }, []);
 
   // Step 4 setters
@@ -644,6 +697,11 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setWorkoutDuration,
     setCardioPreference,
     setFitnessLevel,
+    setHasLiftingExperience,
+    setStrengthLevel,
+    setBenchPress1RM,
+    setSquat1RM,
+    setDeadlift1RM,
     setDietStyle,
     setMealsPerDay,
     setIntermittentFasting,
@@ -681,6 +739,11 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setWorkoutDuration,
     setCardioPreference,
     setFitnessLevel,
+    setHasLiftingExperience,
+    setStrengthLevel,
+    setBenchPress1RM,
+    setSquat1RM,
+    setDeadlift1RM,
     setDietStyle,
     setMealsPerDay,
     setIntermittentFasting,
