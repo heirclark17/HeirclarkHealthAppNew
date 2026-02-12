@@ -171,6 +171,10 @@ function SimplePicker({ data, selectedValue, onValueChange, colors, isDark }: Si
                 }
               }}
               activeOpacity={0.7}
+              accessibilityLabel={item.label}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityHint="Selects this value"
             >
               <NumberText
                 weight={isSelected ? "semiBold" : "regular"}
@@ -258,6 +262,10 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
           onPress={() => handleDecrement(10)}
           disabled={value - 10 < min}
           activeOpacity={0.6}
+          accessibilityLabel="Decrease weight by 10"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: value - 10 < min }}
+          accessibilityHint="Decreases weight value by 10 units"
         >
           <NumberText weight="medium" style={[styles.simpleWeightSmallButtonText, { color: colors.textMuted }]}>-10</NumberText>
         </TouchableOpacity>
@@ -268,6 +276,10 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
           onPress={() => handleDecrement(1)}
           disabled={value <= min}
           activeOpacity={0.6}
+          accessibilityLabel="Decrease weight by 1"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: value <= min }}
+          accessibilityHint="Decreases weight value by 1 unit"
         >
           <Ionicons name="remove" size={28} color={value <= min ? colors.border : colors.text} />
         </TouchableOpacity>
@@ -284,6 +296,10 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
           onPress={() => handleIncrement(1)}
           disabled={value >= max}
           activeOpacity={0.6}
+          accessibilityLabel="Increase weight by 1"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: value >= max }}
+          accessibilityHint="Increases weight value by 1 unit"
         >
           <Ionicons name="add" size={28} color={value >= max ? colors.border : colors.text} />
         </TouchableOpacity>
@@ -294,6 +310,10 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
           onPress={() => handleIncrement(10)}
           disabled={value + 10 > max}
           activeOpacity={0.6}
+          accessibilityLabel="Increase weight by 10"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: value + 10 > max }}
+          accessibilityHint="Increases weight value by 10 units"
         >
           <NumberText weight="medium" style={[styles.simpleWeightSmallButtonText, { color: colors.textMuted }]}>+10</NumberText>
         </TouchableOpacity>
@@ -314,6 +334,10 @@ function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDar
               onValueChange(qv);
             }}
             activeOpacity={0.7}
+            accessibilityLabel={`Set weight to ${qv} ${unit}`}
+            accessibilityRole="button"
+            accessibilityState={{ selected: value === qv }}
+            accessibilityHint="Quick select preset weight value"
           >
             <NumberText weight="medium" style={[
               styles.simpleWeightQuickText,
@@ -381,6 +405,10 @@ function NumberStepper({ value, min, max, step = 1, onChange, unit, colors, isDa
         style={[styles.stepperButton, { backgroundColor: stepperBg }, value <= min && styles.stepperButtonDisabled]}
         onPress={handleDecrement}
         disabled={value <= min}
+        accessibilityLabel={`Decrease ${unit || 'value'}`}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: value <= min }}
+        accessibilityHint={`Decreases ${unit || 'value'} by ${step}`}
       >
         <Ionicons name="remove" size={20} color={value <= min ? colors.textMuted : colors.text} />
       </TouchableOpacity>
@@ -392,6 +420,10 @@ function NumberStepper({ value, min, max, step = 1, onChange, unit, colors, isDa
         style={[styles.stepperButton, { backgroundColor: stepperBg }, value >= max && styles.stepperButtonDisabled]}
         onPress={handleIncrement}
         disabled={value >= max}
+        accessibilityLabel={`Increase ${unit || 'value'}`}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: value >= max }}
+        accessibilityHint={`Increases ${unit || 'value'} by ${step}`}
       >
         <Ionicons name="add" size={20} color={value >= max ? colors.textMuted : colors.text} />
       </TouchableOpacity>
@@ -634,6 +666,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           <TouchableOpacity
             style={[styles.datePickerDoneButton, { backgroundColor: colors.primary }]}
             onPress={handleStartDateDismiss}
+            accessibilityLabel="Done selecting start date"
+            accessibilityRole="button"
+            accessibilityHint="Confirms selected start date and closes date picker"
           >
             <Text style={[styles.datePickerDoneText, { color: colors.primaryText }]}>Done</Text>
           </TouchableOpacity>
@@ -648,6 +683,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
             onPress={() => setShowTargetDatePicker(true)}
             activeOpacity={0.7}
+            accessibilityLabel={`Target date: ${formatDateForDisplay(state.targetDate)}`}
+            accessibilityRole="button"
+            accessibilityHint="Opens date picker to select your goal completion date"
           >
             <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
             <NumberText weight="light" style={[styles.datePickerButtonText, { color: colors.text }]}>
@@ -673,6 +711,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             <TouchableOpacity
               style={[styles.datePickerDoneButton, { backgroundColor: colors.primary }]}
               onPress={handleTargetDateDismiss}
+              accessibilityLabel="Done selecting target date"
+              accessibilityRole="button"
+              accessibilityHint="Confirms selected target date and closes date picker"
             >
               <Text style={[styles.datePickerDoneText, { color: colors.primaryText }]}>Done</Text>
             </TouchableOpacity>
