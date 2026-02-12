@@ -45,6 +45,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   const [isAddingToInstacart, setIsAddingToInstacart] = useState(false);
   const [isSavingMeal, setIsSavingMeal] = useState(false);
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
+  const [isGeneratingAIRecipe, setIsGeneratingAIRecipe] = useState(false);
   const [recipeDetails, setRecipeDetails] = useState<{
     ingredients: Array<{ name: string; quantity: number; unit: string }>;
     instructions: string[];
@@ -235,6 +236,30 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
       } finally {
         setIsSavingMeal(false);
       }
+    }
+  };
+
+  const handleGenerateAIRecipe = async () => {
+    setIsGeneratingAIRecipe(true);
+    try {
+      console.log('[MealCard] Generating AI recipe for:', meal.name);
+      const details = await aiService.getRecipeDetails(
+        meal.name,
+        meal.mealType,
+        meal.calories,
+        { protein: meal.protein, carbs: meal.carbs, fat: meal.fat }
+      );
+      if (details) {
+        console.log('[MealCard] AI recipe generated:', details.ingredients?.length, 'ingredients');
+        setRecipeDetails(details);
+        hasFetchedRef.current = true;
+      } else {
+        console.log('[MealCard] No recipe details returned from AI');
+      }
+    } catch (error) {
+      console.error('[MealCard] Error generating AI recipe:', error);
+    } finally {
+      setIsGeneratingAIRecipe(false);
     }
   };
 
@@ -486,6 +511,25 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     </Text>
                   </TouchableOpacity>
                 )}
+
+                {/* AI Generate Recipe Button */}
+                <TouchableOpacity
+                  style={[
+                    styles.secondaryActionButton,
+                    {
+                      backgroundColor: isDark ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.1)',
+                      borderColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)',
+                    }
+                  ]}
+                  onPress={handleGenerateAIRecipe}
+                  disabled={isGeneratingAIRecipe || isLoadingRecipe}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="sparkles" size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
+                  <Text style={[styles.secondaryActionText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>
+                    {isGeneratingAIRecipe ? 'Generating...' : 'AI Generate Recipe'}
+                  </Text>
+                </TouchableOpacity>
 
                 {/* Add to Instacart Button */}
                 <TouchableOpacity
