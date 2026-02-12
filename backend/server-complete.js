@@ -104,8 +104,8 @@ const upload = multer({
 // Initialize OpenAI client with timeout
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: 180000, // 3 minute timeout for AI generation (handles cold starts and complex requests)
-  maxRetries: 2, // Retry failed requests up to 2 times
+  timeout: 25000, // 25 second timeout (Railway has 30s request limit)
+  maxRetries: 0, // Don't retry on timeout to avoid duplicate requests
 });
 
 // JWT Secret - MUST be set in production
@@ -1618,7 +1618,6 @@ ${mealDiversityInstruction}
       response_format: { type: 'json_object' },
       temperature: 0.7,
       max_tokens: 8000, // Reduced from 16000 to prevent timeouts (still enough for 7-day plan)
-      timeout: 25000, // 25 second timeout to prevent Railway 30s timeout
     });
 
     const rawContent = completion.choices[0].message.content;
