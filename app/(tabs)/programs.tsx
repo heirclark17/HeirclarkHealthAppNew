@@ -27,7 +27,6 @@ import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { ExerciseAlternative, WorkoutExercise, WeightLog } from '../../types/training';
 import { CoachChatModal } from '../../components/agents/aiCoach';
 import { FormCoachModal } from '../../components/agents/workoutFormCoach';
-import { FontTest } from '../../components/FontTest';
 import { api } from '../../services/api';
 
 export default function ProgramsScreen() {
@@ -359,9 +358,6 @@ export default function ProgramsScreen() {
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>Training</Text>
         </View>
-
-        {/* TEMPORARY FONT TEST */}
-        <FontTest />
 
         {/* Weekly Stats Cards - Frosted Liquid Glass */}
         {weeklyStats && (
