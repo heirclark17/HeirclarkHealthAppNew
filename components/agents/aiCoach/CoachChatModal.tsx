@@ -139,13 +139,13 @@ const MODE_CONFIG: Record<CoachMode, {
   training: {
     title: 'Training Coach',
     icon: 'barbell',
-    accentColor: colors.accentPurple,
+    accentColor: '#6366F1',
     placeholder: 'Ask about workouts, form, exercises...',
   },
   general: {
     title: 'AI Coach',
     icon: 'fitness',
-    accentColor: colors.accentPurple,
+    accentColor: '#6366F1',
     placeholder: 'Ask anything about health & fitness...',
   },
 };
