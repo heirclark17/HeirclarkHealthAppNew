@@ -13,6 +13,7 @@ import {
   HYDRATION_TIPS,
 } from '../types/hydration';
 import * as HydrationStorage from '../services/hydrationStorage';
+import { useGoalWizard } from './GoalWizardContext';
 import { api } from '../services/api';
 
 interface HydrationContextType {
@@ -45,13 +46,14 @@ const defaultState: HydrationState = {
 };
 
 export function HydrationProvider({ children }: { children: ReactNode }) {
+  const { state: goalState } = useGoalWizard();
   const [state, setState] = useState<HydrationState>(defaultState);
 
   const loadData = useCallback(async () => {
     try {
       setState((prev) => ({ ...prev, isLoading: true }));
 
-      const [todayEntries, goal, streak, weeklyHistory] = await Promise.all([
+      const [todayEntries, storedGoal, streak, weeklyHistory] = await Promise.all([
         HydrationStorage.getTodayEntries(),
         HydrationStorage.getHydrationGoal(),
         HydrationStorage.getHydrationStreak(),
@@ -60,9 +62,16 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
 
       const todayIntake = HydrationStorage.calculateTotalIntake(todayEntries);
 
+      // Use water goal from GoalWizard if available, otherwise use stored goal
+      const dailyGoal = goalState.waterGoalOz || storedGoal.dailyGoal;
+      const goal: HydrationGoal = {
+        ...storedGoal,
+        dailyGoal,
+      };
+
       setState({
         todayIntake,
-        todayGoal: goal.dailyGoal,
+        todayGoal: dailyGoal,
         todayEntries,
         hydrationGoal: goal,
         streak,
@@ -70,10 +79,10 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
         isLoading: false,
       });
     } catch (error) {
-      console.error('Error loading hydration data:', error);
+      console.error('[HydrationContext] Error loading hydration data:', error);
       setState((prev) => ({ ...prev, isLoading: false }));
     }
-  }, []);
+  }, [goalState.waterGoalOz]);
 
   useEffect(() => {
     loadData();

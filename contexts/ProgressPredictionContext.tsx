@@ -44,6 +44,7 @@ import {
   updateMilestones,
 } from '../services/progressPredictionService';
 import { api } from '../services/api';
+import { useGoalWizard } from './GoalWizardContext';
 
 // Context interface
 interface ProgressPredictionContextType {
@@ -106,9 +107,18 @@ const defaultState: ProgressPredictionState = {
 // Provider component
 export function ProgressPredictionProvider({ children }: ProgressPredictionProviderProps) {
   const [state, setState] = useState<ProgressPredictionState>(defaultState);
-  const [goalWeight, setGoalWeightState] = useState<number>(0);
-  const [startingWeight, setStartingWeightState] = useState<number>(0);
-  const [heightCm, setHeightCmState] = useState<number>(170);
+  const { state: goalState } = useGoalWizard();
+
+  // Local state for goal, starting weight, and height (can be updated independently)
+  // Initialize from goal wizard
+  const [goalWeight, setGoalWeightState] = useState<number>(goalState.targetWeight || 0);
+  const [startingWeight, setStartingWeightState] = useState<number>(goalState.currentWeight || 0);
+  const [heightCm, setHeightCmState] = useState<number>(() => {
+    if (goalState.heightUnit === 'cm') {
+      return goalState.heightCm || 170;
+    }
+    return (goalState.heightFt * 12 + goalState.heightIn) * 2.54 || 170;
+  });
 
   // Load data on mount
   const loadData = useCallback(async () => {
@@ -133,7 +143,7 @@ export function ProgressPredictionProvider({ children }: ProgressPredictionProvi
         getLastCalculated(),
       ]);
 
-      // Set state values from snapshot
+      // Set state values from snapshot (if exists), otherwise they use goal wizard values from useState initialization
       if (snapshot) {
         setGoalWeightState(snapshot.goalWeight);
         setStartingWeightState(snapshot.startingWeight);

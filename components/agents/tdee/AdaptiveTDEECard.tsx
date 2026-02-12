@@ -24,6 +24,7 @@ import { useSettings } from '../../../contexts/SettingsContext';
 import { Fonts } from '../../../constants/Theme';
 import { NumberText } from '../../../components/NumberText';
 import TDEEInsightModal from './TDEEInsightModal';
+import { useGoalWizard } from '../../../contexts/GoalWizardContext';
 
 interface AdaptiveTDEECardProps {
   onPress?: () => void;
@@ -31,12 +32,17 @@ interface AdaptiveTDEECardProps {
 
 export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
   const { state, recalculateTDEE, getRecommendedCalories } = useAdaptiveTDEE();
+  const { state: goalState } = useGoalWizard();
   const { settings } = useSettings();
   const [showModal, setShowModal] = useState(false);
   const scale = useSharedValue(1);
   const isDark = settings.themeMode === 'dark';
 
   const { result, isCalculating, isEnabled, daysUntilReady } = state;
+
+  // Get macros and calculated results from goal wizard
+  const macros = goalState.results;
+  const hasMacroData = macros && macros.calories > 0;
 
   // Animated press effect
   const handlePressIn = () => {
@@ -235,6 +241,53 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
               </View>
             )}
 
+            {/* Macro Breakdown (from Goal Wizard) */}
+            {hasMacroData && (
+              <View style={[styles.macroSection, { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)' }]}>
+                <Text style={[styles.macroTitle, { color: mutedColor }]}>DAILY TARGETS</Text>
+                <View style={styles.macroGrid}>
+                  <View style={styles.macroItem}>
+                    <Text style={[styles.macroLabel, { color: mutedColor }]}>Calories</Text>
+                    <NumberText weight="semiBold" style={[styles.macroValue, { color: textColor }]}>
+                      {macros.calories}
+                    </NumberText>
+                  </View>
+                  <View style={styles.macroItem}>
+                    <Text style={[styles.macroLabel, { color: mutedColor }]}>Protein</Text>
+                    <NumberText weight="semiBold" style={[styles.macroValue, { color: textColor }]}>
+                      {macros.protein}g
+                    </NumberText>
+                  </View>
+                  <View style={styles.macroItem}>
+                    <Text style={[styles.macroLabel, { color: mutedColor }]}>Carbs</Text>
+                    <NumberText weight="semiBold" style={[styles.macroValue, { color: textColor }]}>
+                      {macros.carbs}g
+                    </NumberText>
+                  </View>
+                  <View style={styles.macroItem}>
+                    <Text style={[styles.macroLabel, { color: mutedColor }]}>Fat</Text>
+                    <NumberText weight="semiBold" style={[styles.macroValue, { color: textColor }]}>
+                      {macros.fat}g
+                    </NumberText>
+                  </View>
+                </View>
+                <View style={[styles.bmrRow, { borderTopColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+                  <View style={styles.bmrItem}>
+                    <Text style={[styles.bmrLabel, { color: mutedColor }]}>BMR</Text>
+                    <NumberText weight="medium" style={[styles.bmrValue, { color: textColor }]}>
+                      {macros.bmr} cal
+                    </NumberText>
+                  </View>
+                  <View style={styles.bmrItem}>
+                    <Text style={[styles.bmrLabel, { color: mutedColor }]}>TDEE (formula)</Text>
+                    <NumberText weight="medium" style={[styles.bmrValue, { color: textColor }]}>
+                      {macros.tdee} cal
+                    </NumberText>
+                  </View>
+                </View>
+              </View>
+            )}
+
             {/* Footer */}
             <View style={[styles.footer, { borderTopColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
               <Text style={[styles.footerText, { color: mutedColor }]}>
@@ -421,5 +474,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.regular,
     marginRight: 4,
+  },
+  macroSection: {
+    marginTop: 16,
+    padding: 14,
+    borderRadius: 12,
+  },
+  macroTitle: {
+    fontSize: 10,
+    fontFamily: Fonts.semiBold,
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  macroGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 12,
+  },
+  macroItem: {
+    flex: 1,
+    minWidth: '45%',
+    alignItems: 'center',
+  },
+  macroLabel: {
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+    marginBottom: 4,
+  },
+  macroValue: {
+    fontSize: 16,
+  },
+  bmrRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    paddingTop: 12,
+    marginTop: 4,
+  },
+  bmrItem: {
+    alignItems: 'center',
+  },
+  bmrLabel: {
+    fontSize: 10,
+    fontFamily: Fonts.regular,
+    marginBottom: 4,
+  },
+  bmrValue: {
+    fontSize: 14,
   },
 });

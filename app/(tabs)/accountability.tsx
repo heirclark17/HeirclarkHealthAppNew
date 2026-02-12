@@ -24,6 +24,7 @@ import { useRouter } from 'expo-router';
 // Theme and styling
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
+import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { GlassCard } from '../../components/GlassCard';
 
 // Agent Cards
@@ -38,6 +39,7 @@ import WorkoutFormCoachCard from '../../components/agents/workoutFormCoach/Worko
 
 export default function AccountabilityScreen() {
   const { settings } = useSettings();
+  const { state: goalState } = useGoalWizard();
   const router = useRouter();
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -46,6 +48,20 @@ export default function AccountabilityScreen() {
     return settings.themeMode === 'light' ? LightColors : DarkColors;
   }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
+
+  // Extract goal wizard data for cards
+  const {
+    primaryGoal,
+    currentWeight,
+    targetWeight,
+    weightUnit,
+    results,
+    waterGoalOz,
+    sleepGoalHours,
+    stepGoal,
+    dietStyle,
+    allergies,
+  } = goalState;
 
   // Refresh handler
   const onRefresh = React.useCallback(async () => {

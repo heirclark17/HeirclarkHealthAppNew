@@ -14,6 +14,7 @@ import {
 } from '../types/sleepRecovery';
 import * as SleepStorage from '../services/sleepRecoveryStorage';
 import { api } from '../services/api';
+import { useGoalWizard } from './GoalWizardContext';
 
 interface SleepRecoveryContextType {
   state: SleepRecoveryState;
@@ -47,6 +48,7 @@ const defaultState: SleepRecoveryState = {
 
 export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SleepRecoveryState>(defaultState);
+  const { state: goalState } = useGoalWizard();
 
   const loadData = useCallback(async () => {
     try {
@@ -75,12 +77,19 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
         entries = await SleepStorage.getSleepEntries();
       }
 
-      const [scores, goal, avgDuration, debt] = await Promise.all([
+      const [scores, storedGoal, avgDuration, debt] = await Promise.all([
         SleepStorage.getRecoveryScores(),
         SleepStorage.getSleepGoal(),
         SleepStorage.getAverageSleepDuration(),
         SleepStorage.calculateSleepDebt(),
       ]);
+
+      // Use sleep goal from GoalWizard if available, otherwise use stored goal
+      const targetDuration = goalState.sleepGoalHours || storedGoal.targetDuration;
+      const goal: SleepGoal = {
+        ...storedGoal,
+        targetDuration,
+      };
 
       setState({
         sleepEntries: entries,
@@ -94,7 +103,7 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
       console.error('Error loading sleep data:', error);
       setState((prev) => ({ ...prev, isLoading: false }));
     }
-  }, []);
+  }, [goalState.sleepGoalHours]);
 
   useEffect(() => {
     loadData();
