@@ -131,6 +131,10 @@ export default function AccountabilityPartnerCard() {
               },
             ]}
             onPress={() => onChange(rating)}
+            accessibilityLabel={`${label} rating ${rating} out of 5${value === rating ? ', currently selected' : ''}`}
+            accessibilityRole="button"
+            accessibilityState={{ selected: value === rating }}
+            accessibilityHint={`Selects rating ${rating} for ${label.toLowerCase()}`}
           >
             <Text
               style={[
@@ -237,6 +241,9 @@ export default function AccountabilityPartnerCard() {
           <TouchableOpacity
             style={[styles.messagesButton, { backgroundColor: colors.cardGlass }]}
             onPress={() => setShowMessagesModal(true)}
+            accessibilityLabel={`View messages${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+            accessibilityRole="button"
+            accessibilityHint="Opens your motivational messages and recommendations from your accountability partner"
           >
             <Ionicons name="notifications" size={18} color={colors.text} />
             {unreadCount > 0 && (
@@ -251,6 +258,9 @@ export default function AccountabilityPartnerCard() {
         <TouchableOpacity
           style={[styles.bestStreakCard, { backgroundColor: colors.primary + '15' }]}
           onPress={() => setShowStreaksModal(true)}
+          accessibilityLabel={`Best streak: ${ACTIVITY_NAMES[bestStreak.activity]}, ${bestStreak.streak} days`}
+          accessibilityRole="button"
+          accessibilityHint="Opens detailed view showing all your activity streaks with current and longest records"
         >
           <View style={styles.bestStreakLeft}>
             <Ionicons name="flame" size={28} color={colors.primary} />
@@ -304,6 +314,10 @@ export default function AccountabilityPartnerCard() {
           ]}
           onPress={() => setShowCheckInModal(true)}
           disabled={hasCheckedIn}
+          accessibilityLabel={hasCheckedIn ? 'Check-in complete for today' : isMorning ? 'Complete morning check-in' : 'Complete evening check-in'}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: hasCheckedIn }}
+          accessibilityHint={hasCheckedIn ? 'You have already checked in today' : isMorning ? 'Opens morning check-in form to record your mood, energy, and daily goals' : 'Opens evening check-in form to reflect on accomplishments and notes'}
         >
           <Ionicons
             name={hasCheckedIn ? 'checkmark-circle' : 'checkbox'}
@@ -340,6 +354,9 @@ export default function AccountabilityPartnerCard() {
                 <TouchableOpacity
                   style={[styles.markAllReadButton, { backgroundColor: colors.cardGlass }]}
                   onPress={markAllAsRead}
+                  accessibilityLabel={`Mark all ${unreadCount} messages as read`}
+                  accessibilityRole="button"
+                  accessibilityHint="Marks all unread messages as read and removes the unread notification badge"
                 >
                   <Text style={[styles.markAllReadText, { color: colors.primary }]}>
                     Mark All Read
@@ -349,6 +366,9 @@ export default function AccountabilityPartnerCard() {
               <TouchableOpacity
                 style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
                 onPress={() => setShowMessagesModal(false)}
+                accessibilityLabel="Close messages"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the messages view and returns to the accountability partner dashboard"
               >
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
@@ -384,6 +404,9 @@ export default function AccountabilityPartnerCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowCheckInModal(false)}
+              accessibilityLabel={`Close ${isMorning ? 'morning' : 'evening'} check-in`}
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the check-in form without saving and returns to the accountability partner dashboard"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -466,6 +489,9 @@ export default function AccountabilityPartnerCard() {
             <TouchableOpacity
               style={[styles.submitButton, { backgroundColor: colors.primary }]}
               onPress={handleSubmitCheckIn}
+              accessibilityLabel="Submit check-in"
+              accessibilityRole="button"
+              accessibilityHint={isMorning ? 'Saves your morning mood, energy level, and daily goals' : 'Saves your evening accomplishments and reflections for today'}
             >
               <Text style={styles.submitButtonText}>Complete Check-in</Text>
             </TouchableOpacity>
@@ -486,6 +512,9 @@ export default function AccountabilityPartnerCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowStreaksModal(false)}
+              accessibilityLabel="Close streaks"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the streaks view and returns to the accountability partner dashboard"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
