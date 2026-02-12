@@ -201,13 +201,27 @@ export function WeightInputModal({
         <View style={styles.content}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleClose}
+              accessibilityLabel="Close weight log"
+              accessibilityRole="button"
+              accessibilityHint="Closes the weight logging modal without saving"
+            >
               <GlassCard style={styles.closeButtonGlass} interactive>
                 <Ionicons name="close" size={24} color={colors.text} />
               </GlassCard>
             </TouchableOpacity>
             <Text style={[styles.title, { color: colors.text }]}>Log Weight</Text>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSave}
+              disabled={loading}
+              accessibilityLabel="Save weight log"
+              accessibilityRole="button"
+              accessibilityState={{ disabled: loading, busy: loading }}
+              accessibilityHint="Saves the weight and rep data for this exercise to track progressive overload"
+            >
               <GlassCard style={styles.saveButtonGlass} interactive>
                 <Text style={[styles.saveButtonText, { color: Colors.protein }]}>
                   {loading ? 'Saving...' : 'Save'}
@@ -260,6 +274,9 @@ export function WeightInputModal({
                 { backgroundColor: inputBg, borderColor: inputBorder },
               ]}
               onPress={toggleUnit}
+              accessibilityLabel={`Toggle weight unit, currently ${unit === 'lb' ? 'pounds' : 'kilograms'}`}
+              accessibilityRole="button"
+              accessibilityHint={`Switches weight units between pounds and kilograms, converting all entered weights`}
             >
               <Text style={[styles.unitButtonText, { color: colors.text }]}>
                 {unit === 'lb' ? 'Pounds (lb)' : 'Kilograms (kg)'}
