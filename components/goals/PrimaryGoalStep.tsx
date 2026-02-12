@@ -186,7 +186,13 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
         {/* Action Buttons */}
         <View style={styles.buttonRow}>
-          <TouchableOpacity onPress={handleBack} style={{ flex: 1 }}>
+          <TouchableOpacity
+            onPress={handleBack}
+            style={{ flex: 1 }}
+            accessibilityLabel="Exit goal wizard"
+            accessibilityRole="button"
+            accessibilityHint="Returns to the previous screen and exits the goal setup wizard"
+          >
             <GlassCard style={styles.backButton} interactive>
               <Text style={[styles.backButtonText, { color: colors.text }]}>EXIT</Text>
             </GlassCard>
@@ -195,6 +201,10 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
             onPress={handleContinue}
             disabled={!state.primaryGoal}
             style={{ flex: 2 }}
+            accessibilityLabel={state.primaryGoal ? 'Continue to next step' : 'Continue, select a goal first'}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !state.primaryGoal }}
+            accessibilityHint={state.primaryGoal ? 'Proceeds to the next step in goal setup' : 'Select a primary fitness goal to continue'}
           >
             <GlassCard
               style={[
