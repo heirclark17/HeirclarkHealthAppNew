@@ -108,7 +108,14 @@ export function HeartRateCard({
 
   return (
     <>
-      <TouchableOpacity activeOpacity={0.7} onPress={handlePress} style={{ flex: 1 }}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={handlePress}
+        style={{ flex: 1 }}
+        accessibilityLabel={`Heart rate: ${heartRate > 0 ? `${Math.round(heartRate)} beats per minute` : 'no data'}${currentZone && heartRate > 0 ? `, ${currentZone.name} zone` : ''}`}
+        accessibilityRole="button"
+        accessibilityHint="Opens detailed view with heart rate zones, blood pressure readings, and cardiovascular metrics"
+      >
         <GlassCard style={styles.card} interactive>
           <View style={styles.innerContainer}>
             {/* Icon */}
@@ -148,6 +155,9 @@ export function HeartRateCard({
           style={[styles.modalOverlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.5)' }]}
           activeOpacity={1}
           onPress={() => setShowModal(false)}
+          accessibilityLabel="Close heart rate and blood pressure detail modal"
+          accessibilityRole="button"
+          accessibilityHint="Dismisses the cardiovascular metrics view and returns to the main screen"
         >
           <Animated.View
             entering={FadeInUp.duration(300)}
@@ -246,6 +256,9 @@ export function HeartRateCard({
               <TouchableOpacity
                 style={[styles.closeButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}
                 onPress={() => setShowModal(false)}
+                accessibilityLabel="Close heart rate and blood pressure detail modal"
+                accessibilityRole="button"
+                accessibilityHint="Returns to the main screen"
               >
                 <Text style={[styles.closeButtonText, { color: colors.text }]}>Close</Text>
               </TouchableOpacity>
