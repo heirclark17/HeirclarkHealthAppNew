@@ -90,7 +90,14 @@ export default function QuickLogModal({
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)} style={styles.overlay}>
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={onClose}
+          accessibilityLabel="Close quick log modal"
+          accessibilityRole="button"
+          accessibilityHint="Dismisses the meal logging screen without saving"
+        />
         <Animated.View
           entering={SlideInDown.duration(300).springify()}
           exiting={SlideOutDown.duration(200)}
@@ -102,7 +109,13 @@ export default function QuickLogModal({
               <View style={[styles.mealTypeIcon, { backgroundColor: `${mealColor}20` }]}>
                 <Ionicons name={MealTypeIcons[meal.mealType]} size={24} color={mealColor} />
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={styles.closeButton}
+                accessibilityLabel="Close quick log modal"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the meal logging screen without saving"
+              >
                 <Ionicons name="close" size={24} color={subtextColor} />
               </TouchableOpacity>
             </View>
@@ -159,6 +172,10 @@ export default function QuickLogModal({
               style={[styles.logButton, { backgroundColor: mealColor }]}
               onPress={handleLog}
               disabled={isLogging}
+              accessibilityLabel={`Log ${meal.name} for ${displayDate}`}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: isLogging, busy: isLogging }}
+              accessibilityHint={`Records ${meal.calories} calories and ${meal.protein}g protein, ${meal.carbs}g carbs, ${meal.fat}g fat to your meal log`}
             >
               {isLogging ? (
                 <ActivityIndicator size="small" color={Colors.text} />
@@ -171,7 +188,13 @@ export default function QuickLogModal({
             </TouchableOpacity>
 
             {/* Cancel Link */}
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={onClose}
+              accessibilityLabel="Cancel meal logging"
+              accessibilityRole="button"
+              accessibilityHint="Closes the modal without logging this meal"
+            >
               <Text style={[styles.cancelText, { color: subtextColor }]}>Cancel</Text>
             </TouchableOpacity>
           </GlassCard>
