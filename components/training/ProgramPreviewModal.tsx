@@ -101,7 +101,13 @@ export function ProgramPreviewModal({
 
         {/* Header with Close Button */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButtonWrapper}>
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.closeButtonWrapper}
+            accessibilityLabel="Close program preview"
+            accessibilityRole="button"
+            accessibilityHint="Closes the program preview modal and returns to the program list"
+          >
             <GlassCard style={styles.closeButton} interactive>
               <Ionicons name="close" size={22} color={colors.text} />
             </GlassCard>
@@ -335,6 +341,10 @@ export function ProgramPreviewModal({
             disabled={isGenerating}
             activeOpacity={0.8}
             style={styles.confirmButtonWrapper}
+            accessibilityLabel={program ? `Select ${program.name} program` : 'Select this program'}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+            accessibilityHint="Confirms your selection and generates a personalized training plan based on this program"
           >
             <GlassCard
               style={[styles.confirmButton, { backgroundColor: accentBg }]}
