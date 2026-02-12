@@ -281,7 +281,11 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 activeOpacity={0.6}
                 style={[
                   styles.recipeButtonContainer,
-                  { backgroundColor: colors.cardBackground }
+                  {
+                    backgroundColor: colors.cardBackground,
+                    borderWidth: 1,
+                    borderColor: isDark ? 'rgba(173, 216, 230, 0.4)' : 'rgba(173, 216, 230, 0.6)',
+                  }
                 ]}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
@@ -303,6 +307,8 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: colors.cardBackground,
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(195, 230, 203, 0.4)' : 'rgba(195, 230, 203, 0.6)',
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Prep: {meal.prepTime}m</Text>
@@ -311,6 +317,8 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: colors.cardBackground,
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(255, 218, 185, 0.4)' : 'rgba(255, 218, 185, 0.6)',
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Cook: {meal.cookTime}m</Text>
@@ -319,6 +327,8 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: colors.cardBackground,
+                  borderWidth: 1,
+                  borderColor: isDark ? 'rgba(221, 160, 221, 0.4)' : 'rgba(221, 160, 221, 0.6)',
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
