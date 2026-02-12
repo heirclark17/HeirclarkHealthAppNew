@@ -55,7 +55,13 @@ export default function TDEEInsightModal({ visible, onClose }: TDEEInsightModalP
           </Text>
         </View>
       </View>
-      <TouchableOpacity onPress={onClose} style={[styles.closeButton, { backgroundColor: cardBg }]}>
+      <TouchableOpacity
+        onPress={onClose}
+        style={[styles.closeButton, { backgroundColor: cardBg }]}
+        accessibilityLabel="Close TDEE insights"
+        accessibilityRole="button"
+        accessibilityHint="Dismisses the adaptive TDEE details modal"
+      >
         <Ionicons name="close" size={24} color={textColor} />
       </TouchableOpacity>
     </View>
