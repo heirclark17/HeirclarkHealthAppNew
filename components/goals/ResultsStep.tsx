@@ -182,13 +182,23 @@ export function ResultsStep({
 
       {/* Action Buttons */}
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={[styles.buttonSecondary, { borderColor: colors.border }]} onPress={onBack}>
+        <TouchableOpacity
+          style={[styles.buttonSecondary, { borderColor: colors.border }]}
+          onPress={onBack}
+          accessibilityLabel="Adjust goals"
+          accessibilityRole="button"
+          accessibilityHint="Returns to goal settings to make changes"
+        >
           <Text style={[styles.buttonSecondaryText, { color: colors.text }]}>ADJUST GOALS</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.buttonPrimary, { backgroundColor: colors.primary }, isSaving && styles.buttonDisabled]}
           onPress={onSave}
           disabled={isSaving}
+          accessibilityLabel="Save my plan"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isSaving, busy: isSaving }}
+          accessibilityHint="Saves your personalized plan and completes setup"
         >
           {isSaving ? (
             <ActivityIndicator color={colors.primaryText} />
