@@ -99,6 +99,9 @@ export default function RestaurantMenuCard() {
           <TouchableOpacity
             style={[styles.viewButton, { backgroundColor: colors.primary + '15' }]}
             onPress={() => setShowModal(true)}
+            accessibilityLabel={`Open eating out guide, ${Math.round(remainingCalories)} calories remaining today`}
+            accessibilityRole="button"
+            accessibilityHint="Opens restaurant menu assistant with AI-powered dish recommendations based on your daily calorie budget and macro targets"
           >
             <Text style={[styles.viewButtonText, { color: colors.primary }]}>Open</Text>
             <ArrowRight size={14} color={colors.primary} strokeWidth={1.5} />
@@ -130,6 +133,9 @@ export default function RestaurantMenuCard() {
                 handleCuisineSelect(cuisine);
                 setShowModal(true);
               }}
+              accessibilityLabel={`Get ${cuisine} dish recommendations`}
+              accessibilityRole="button"
+              accessibilityHint={`Opens restaurant guide modal with AI-powered ${cuisine} dish recommendations based on your remaining ${Math.round(remainingCalories)} calories`}
             >
               <Text style={[styles.cuisineText, { color: colors.text }]}>
                 {cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}
@@ -161,6 +167,9 @@ export default function RestaurantMenuCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.primary + '15' }]}
               onPress={() => setShowModal(false)}
+              accessibilityLabel="Close restaurant guide"
+              accessibilityRole="button"
+              accessibilityHint="Closes the restaurant menu assistant modal and returns to eating out guide card"
             >
               <X size={22} color={colors.text} strokeWidth={1.5} />
             </TouchableOpacity>
@@ -202,6 +211,10 @@ export default function RestaurantMenuCard() {
                   ]}
                   onPress={() => handleCuisineSelect(cuisine)}
                   disabled={isGenerating}
+                  accessibilityLabel={`${cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}${selectedCuisine === cuisine ? ', selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: selectedCuisine === cuisine, disabled: isGenerating, busy: isGenerating }}
+                  accessibilityHint={`Generates AI-powered ${cuisine} dish recommendations based on your remaining macros and dietary preferences`}
                 >
                   <Text style={{ color: selectedCuisine === cuisine ? '#FFF' : colors.text, fontSize: 13, fontFamily: Fonts.medium }}>
                     {cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}
