@@ -1032,7 +1032,14 @@ export default function DashboardScreen() {
         const fatChangeColor = isDeficit ? colors.text : Colors.overTarget;
 
         return (
-          <TouchableOpacity key={cardId} activeOpacity={0.7} onPress={() => setShowDailyBalanceInfoModal(true)}>
+          <TouchableOpacity
+            key={cardId}
+            activeOpacity={0.7}
+            onPress={() => setShowDailyBalanceInfoModal(true)}
+            accessibilityLabel={`Daily balance: ${Math.round(caloriesIn)} calories in, ${Math.round(caloriesOut)} calories out, ${isDeficit ? 'deficit' : 'surplus'} of ${Math.abs(displayFatValue)} pounds per day`}
+            accessibilityRole="button"
+            accessibilityHint="Opens detailed daily balance modal with calorie breakdown and fat change analysis"
+          >
             <GlassCard style={{ marginHorizontal: 16, marginBottom: 24, marginTop: 32 }} interactive>
               <Text style={[styles.dailyBalanceTitle, { color: colors.text }, caloriesIn > calorieGoal && { color: Colors.overTarget }]}>DAILY BALANCE</Text>
               <CalorieGaugeAnimated value={caloriesIn - caloriesOut} maxValue={calorieGoal} />
@@ -1164,6 +1171,9 @@ export default function DashboardScreen() {
                 style={{ flex: 1 }}
                 onPress={() => router.push('/goals')}
                 activeOpacity={0.7}
+                accessibilityLabel="Fasting not active, tap to enable"
+                accessibilityRole="button"
+                accessibilityHint="Opens goals settings where you can enable intermittent fasting tracking"
               >
                 <GlassCard style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12 }} interactive>
                   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -1416,6 +1426,9 @@ export default function DashboardScreen() {
             <TouchableOpacity
               style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
               onPress={() => setShowFatLossModal(false)}
+              accessibilityLabel="Close fat loss modal"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the daily fat loss breakdown and returns to home screen"
             >
               <Ionicons name="close" size={28} color={colors.text} />
             </TouchableOpacity>
@@ -1441,6 +1454,9 @@ export default function DashboardScreen() {
             <TouchableOpacity
               style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
               onPress={() => setShowWeeklyProgressModal(false)}
+              accessibilityLabel="Close weekly progress modal"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the weekly progress breakdown and returns to home screen"
             >
               <Ionicons name="close" size={28} color={colors.text} />
             </TouchableOpacity>
@@ -1474,6 +1490,9 @@ export default function DashboardScreen() {
             <TouchableOpacity
               style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
               onPress={() => setShowWearableSyncModal(false)}
+              accessibilityLabel="Close wearable sync modal"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the wearable device sync settings and returns to home screen"
             >
               <Ionicons name="close" size={28} color={colors.text} />
             </TouchableOpacity>
@@ -1498,6 +1517,9 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
                 onPress={() => setShowDailyBalanceInfoModal(false)}
+                accessibilityLabel="Close daily balance information"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the daily calorie balance educational content and returns to home screen"
               >
                 <Ionicons name="close" size={28} color={colors.text} />
               </TouchableOpacity>
@@ -1550,6 +1572,9 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
                 onPress={() => setShowProteinInfoModal(false)}
+                accessibilityLabel="Close protein information"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the protein educational content and returns to home screen"
               >
                 <Ionicons name="close" size={28} color={colors.text} />
               </TouchableOpacity>
@@ -1608,6 +1633,9 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
                 onPress={() => setShowFatInfoModal(false)}
+                accessibilityLabel="Close fat information"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the dietary fat educational content and returns to home screen"
               >
                 <Ionicons name="close" size={28} color={colors.text} />
               </TouchableOpacity>
@@ -1666,6 +1694,9 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
                 onPress={() => setShowCarbsInfoModal(false)}
+                accessibilityLabel="Close carbs info modal"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the carbohydrates information and returns to home screen"
               >
                 <Ionicons name="close" size={28} color={colors.text} />
               </TouchableOpacity>
@@ -1725,6 +1756,9 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
                 onPress={() => setShowStepsInfoModal(false)}
+                accessibilityLabel="Close steps info modal"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the daily steps information and returns to home screen"
               >
                 <Ionicons name="close" size={28} color={colors.text} />
               </TouchableOpacity>
@@ -1784,6 +1818,9 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
                 onPress={() => setShowActiveEnergyInfoModal(false)}
+                accessibilityLabel="Close active energy info modal"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the active energy information and returns to home screen"
               >
                 <Ionicons name="close" size={28} color={colors.text} />
               </TouchableOpacity>
@@ -1842,6 +1879,9 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 style={[styles.modalCloseButton, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.2)' }]}
                 onPress={() => setShowRestingEnergyInfoModal(false)}
+                accessibilityLabel="Close resting energy info modal"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the resting energy information and returns to home screen"
               >
                 <Ionicons name="close" size={28} color={colors.text} />
               </TouchableOpacity>
