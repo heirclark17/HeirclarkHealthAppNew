@@ -1558,6 +1558,33 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
     }`;
 
     // FIXED: Use actual frontend field names from preferences object
+    // Build meal diversity instruction
+    let mealDiversityInstruction = '';
+    if (preferences?.mealDiversity === 'diverse') {
+      mealDiversityInstruction = `
+    MEAL DIVERSITY REQUIREMENT: DIVERSE
+    - Create DIFFERENT meals for EACH DAY of the week
+    - Day 1 breakfast should be DIFFERENT from Day 2 breakfast, Day 3 breakfast, etc.
+    - Day 1 lunch should be DIFFERENT from Day 2 lunch, Day 3 lunch, etc.
+    - Day 1 dinner should be DIFFERENT from Day 2 dinner, Day 3 dinner, etc.
+    - Provide maximum variety across the week for an engaging eating experience
+    - Use different proteins, vegetables, cuisines, and cooking methods throughout the week`;
+    } else if (preferences?.mealDiversity === 'sameDaily') {
+      mealDiversityInstruction = `
+    MEAL DIVERSITY REQUIREMENT: MEAL PREP STYLE (SAME DAILY)
+    - Create the SAME breakfast for ALL 7 DAYS (meal prep - make once, eat all week)
+    - Create the SAME lunch for ALL 7 DAYS (meal prep - make once, eat all week)
+    - Create the SAME dinner for ALL 7 DAYS (meal prep - make once, eat all week)
+    - This makes meal preparation efficient: cook once on Sunday, portion into containers, eat all week
+    - Each meal type (breakfast/lunch/dinner) should be IDENTICAL across all 7 days
+    - Optimize for easy batch cooking and storage/reheating`;
+    } else {
+      mealDiversityInstruction = `
+    MEAL DIVERSITY REQUIREMENT: MODERATE VARIETY
+    - Provide some variety but allow for 2-3 repeating meals throughout the week
+    - Balance between diversity and meal prep efficiency`;
+    }
+
     const userPrompt = `Create a ${days || 7}-day meal plan with these requirements:
     - Daily calories: ${preferences?.calorieTarget || 2000}
     - Daily protein: ${preferences?.proteinTarget || 150}g
@@ -1573,13 +1600,12 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
     - Allergies/restrictions: ${preferences?.allergies?.join(', ') || 'none'}
     - Hated foods: ${preferences?.hatedFoods || 'none'}
     - Meal style: ${preferences?.mealStyle || 'balanced'}
-    - Meal diversity: ${preferences?.mealDiversity || 'moderate'}
     - Cooking skill: ${preferences?.cookingSkill || 'intermediate'}
     - Cheat days: ${preferences?.cheatDays?.join(', ') || 'none'}
+${mealDiversityInstruction}
 
     Include ${preferences?.mealsPerDay || 3} meals per day plus snacks as needed.
     Make meals practical with common ingredients.
-    Vary the proteins and vegetables throughout the week.
     Respect all dietary restrictions and allergies.
     Use preferred cuisines and foods when possible, avoid hated foods completely.`;
 
@@ -1885,7 +1911,22 @@ Generate personalized, encouraging guidance for their cheat day that helps them 
 
 app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
   try {
-    const { mealName, basicInfo } = req.body;
+    // Accept both old format (mealName, basicInfo) and new format (dishName, mealType, calories, macros)
+    const { mealName, dishName, basicInfo, mealType, calories, macros } = req.body;
+
+    const name = dishName || mealName;
+    if (!name) {
+      return res.status(400).json({ error: 'Missing meal name (dishName or mealName required)' });
+    }
+
+    // Build context from provided data
+    let context = '';
+    if (mealType) context += `Meal type: ${mealType}. `;
+    if (calories) context += `Target calories: ${calories}. `;
+    if (macros) context += `Macros - Protein: ${macros.protein}g, Carbs: ${macros.carbs}g, Fat: ${macros.fat}g. `;
+    if (basicInfo) context += `Additional info: ${JSON.stringify(basicInfo)}`;
+
+    console.log(`[Recipe Details] Generating recipe for: ${name}`, context ? `with context: ${context}` : '');
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4.1-mini',
@@ -1894,23 +1935,22 @@ app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
           role: 'system',
           content: `You are a professional chef providing detailed recipes. Return JSON with:
           {
-            "name": "Recipe Name",
-            "description": "Brief description",
-            "servings": 4,
-            "prepTime": 15,
-            "cookTime": 30,
-            "difficulty": "easy/medium/hard",
-            "nutrition": {"calories": 400, "protein": 30, "carbs": 40, "fat": 15},
-            "ingredients": [{"item": "ingredient", "amount": "1 cup", "notes": "optional prep notes"}],
-            "instructions": ["Step 1", "Step 2"],
-            "tips": ["Pro tip 1"],
-            "substitutions": [{"original": "item", "substitute": "alternative"}],
-            "storage": "Storage instructions"
-          }`
+            "ingredients": [{"name": "ingredient", "quantity": 1, "unit": "cup"}],
+            "instructions": ["Step 1", "Step 2", "Step 3"],
+            "prepMinutes": 15,
+            "cookMinutes": 30,
+            "tips": "Optional cooking tips"
+          }
+
+          IMPORTANT FORMAT REQUIREMENTS:
+          - ingredients array must have objects with: name (string), quantity (number), unit (string)
+          - instructions array must be array of strings (each step as a string)
+          - prepMinutes and cookMinutes must be numbers
+          - Match the provided calorie and macro targets if given`
         },
         {
           role: 'user',
-          content: `Provide detailed recipe for: ${mealName}. ${basicInfo ? `Basic info: ${JSON.stringify(basicInfo)}` : ''}`
+          content: `Provide detailed recipe for: ${name}. ${context}`
         }
       ],
       response_format: { type: 'json_object' },
@@ -1919,6 +1959,7 @@ app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
     });
 
     const recipe = JSON.parse(completion.choices[0].message.content);
+    console.log('[Recipe Details] Generated recipe with', recipe.ingredients?.length || 0, 'ingredients and', recipe.instructions?.length || 0, 'steps');
     res.json({ success: true, recipe });
   } catch (error) {
     console.error('[Recipe Details] Error:', error);
