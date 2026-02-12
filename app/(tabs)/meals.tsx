@@ -392,7 +392,13 @@ export default function MealsScreen() {
                 AI will generate a 7-day meal plan based on your saved food preferences and macro goals
               </Text>
 
-              <TouchableOpacity style={[styles.linkButton, { flexDirection: 'row', alignItems: 'center' }]} onPress={() => setShowFoodPrefsModal(true)}>
+              <TouchableOpacity
+                style={[styles.linkButton, { flexDirection: 'row', alignItems: 'center' }]}
+                onPress={() => setShowFoodPrefsModal(true)}
+                accessibilityLabel="Edit food preferences"
+                accessibilityRole="button"
+                accessibilityHint="Opens food preferences settings to customize dietary restrictions, allergies, and cuisine preferences"
+              >
                 <Settings size={16} color={colors.accent} style={{ marginRight: 6 }} />
                 <Text style={[styles.linkButtonText, { color: colors.accent, fontFamily: Fonts.light }]}>Edit Food Preferences</Text>
               </TouchableOpacity>
@@ -417,6 +423,10 @@ export default function MealsScreen() {
                     disabled={isGenerating}
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
+                    accessibilityLabel="Quick meal plan generation"
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+                    accessibilityHint="Generates a 7-day meal plan quickly using template-based approach"
                   >
                     <Zap size={20} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
                     <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)', fontFamily: Fonts.light }]}>Quick</Text>
@@ -433,6 +443,10 @@ export default function MealsScreen() {
                     disabled={isGenerating}
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
+                    accessibilityLabel="AI-powered meal plan generation"
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+                    accessibilityHint="Generates a personalized 7-day meal plan using AI based on your food preferences and macro goals"
                   >
                     <Sparkles size={20} color={colors.accentPurple} />
                     <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1', fontFamily: Fonts.light }]}>AI</Text>
@@ -449,6 +463,10 @@ export default function MealsScreen() {
                     disabled={isGenerating}
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
+                    accessibilityLabel={`Budget meal plan generation, ${selectedBudgetTier} tier selected`}
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+                    accessibilityHint="Generates a cost-optimized 7-day meal plan with Instacart shopping cart based on your budget tier and pantry items"
                   >
                     <ShoppingCart size={20} color={colors.successMuted} />
                     <Text style={[styles.halfButtonText, { color: isDark ? '#86efac' : '#22c55e', fontFamily: Fonts.light }]}>Budget</Text>
@@ -482,7 +500,13 @@ export default function MealsScreen() {
               <Text style={styles.errorIcon}>⚠</Text>
               <Text style={[styles.errorTitle, { color: colors.text }]}>Something went wrong</Text>
               <Text style={[styles.errorText, { color: colors.textMuted }]}>{error}</Text>
-              <TouchableOpacity style={[styles.retryButton, { backgroundColor: colors.primary }]} onPress={handleGenerate}>
+              <TouchableOpacity
+                style={[styles.retryButton, { backgroundColor: colors.primary }]}
+                onPress={handleGenerate}
+                accessibilityLabel="Try again"
+                accessibilityRole="button"
+                accessibilityHint="Retries meal plan generation after the previous attempt failed"
+              >
                 <Text style={[styles.retryButtonText, { color: colors.primaryText }]}>Try Again</Text>
               </TouchableOpacity>
             </GlassCard>
@@ -588,6 +612,10 @@ export default function MealsScreen() {
                         disabled={isGenerating}
                         activeOpacity={0.7}
                         style={styles.halfButtonInner}
+                        accessibilityLabel="Quick regenerate meal plan"
+                        accessibilityRole="button"
+                        accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+                        accessibilityHint="Regenerates the entire 7-day meal plan quickly using template-based approach"
                       >
                         <Zap size={18} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
                         <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)', fontFamily: Fonts.light }]}>Quick</Text>
@@ -604,6 +632,10 @@ export default function MealsScreen() {
                         disabled={isGenerating}
                         activeOpacity={0.7}
                         style={styles.halfButtonInner}
+                        accessibilityLabel="AI-powered regenerate meal plan"
+                        accessibilityRole="button"
+                        accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+                        accessibilityHint="Regenerates the entire 7-day meal plan using AI personalization based on your preferences and goals"
                       >
                         <Sparkles size={18} color={colors.accentPurple} />
                         <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1', fontFamily: Fonts.light }]}>AI-Powered</Text>
@@ -628,6 +660,9 @@ export default function MealsScreen() {
                 onPress={() => setShowGroceryModal(true)}
                 activeOpacity={0.7}
                 style={styles.actionButtonInner}
+                accessibilityLabel="Order groceries"
+                accessibilityRole="button"
+                accessibilityHint="Opens grocery list to view all ingredients and order through Instacart"
               >
                 <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' }]}>
                   <ShoppingCart size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
@@ -644,6 +679,9 @@ export default function MealsScreen() {
                 onPress={() => setShowCoachingModal(true)}
                 activeOpacity={0.7}
                 style={styles.actionButtonInner}
+                accessibilityLabel="AI coach"
+                accessibilityRole="button"
+                accessibilityHint="Opens AI coaching to get personalized guidance on your meal plan and nutrition goals"
               >
                 <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' }]}>
                   <User size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
