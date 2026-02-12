@@ -12,6 +12,7 @@ import { Workout, WorkoutExercise, WeightLog } from '../../types/training';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 import { weightTrackingStorage } from '../../services/weightTrackingStorage';
 
 interface WorkoutCardProps {
@@ -141,12 +142,12 @@ function ExerciseRow({
         </Text>
         <View style={styles.exerciseDetailsRow}>
           <Text style={[styles.exerciseDetails, { color: colors.textMuted }]}>
-            {exercise.sets} sets × {exercise.reps} • {exercise.restSeconds}s rest
+            <NumberText weight="regular">{exercise.sets}</NumberText> sets × <NumberText weight="regular">{exercise.reps}</NumberText> • <NumberText weight="regular">{exercise.restSeconds}</NumberText>s rest
           </Text>
           {lastWeight && lastWeight.weight > 0 && (
             <View style={[styles.lastWeightBadge, { backgroundColor: isDark ? 'rgba(76, 217, 100, 0.2)' : 'rgba(76, 217, 100, 0.15)' }]}>
               <Text style={styles.lastWeightText}>
-                {lastWeight.weight}{lastWeight.unit}
+                <NumberText weight="regular">{lastWeight.weight}</NumberText>{lastWeight.unit}
               </Text>
             </View>
           )}
@@ -350,7 +351,7 @@ export function WorkoutCard({
                 <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: typeColor }]} />
               </View>
               <Text style={[styles.progressText, { color: colors.textMuted }]}>
-                {completedExercises}/{totalExercises} exercises
+                <NumberText weight="regular">{completedExercises}</NumberText>/<NumberText weight="regular">{totalExercises}</NumberText> exercises
               </Text>
             </View>
 
@@ -363,7 +364,7 @@ export function WorkoutCard({
               ))}
               {workout.exercises.length > 3 && (
                 <Text style={[styles.moreExercises, { color: colors.textMuted }]}>
-                  +{workout.exercises.length - 3} more
+                  +<NumberText weight="regular">{workout.exercises.length - 3}</NumberText> more
                 </Text>
               )}
             </View>
@@ -397,17 +398,17 @@ export function WorkoutCard({
             <GlassCard style={styles.statsRow} interactive>
               <View style={styles.statsRowInner}>
                 <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: colors.text }]}>{workout.duration}</Text>
+                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.duration}</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Minutes</Text>
                 </View>
                 <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
                 <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: colors.text }]}>{workout.estimatedCaloriesBurned}</Text>
+                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.estimatedCaloriesBurned}</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Calories</Text>
                 </View>
                 <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
                 <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: colors.text }]}>{totalExercises}</Text>
+                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{totalExercises}</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exercises</Text>
                 </View>
               </View>

@@ -32,7 +32,9 @@ function AlignmentBar({
       <View style={[styles.alignmentBarContainer, { backgroundColor: secondaryBg }]}>
         <View style={[styles.alignmentBar, { width: `${value}%`, backgroundColor: color }]} />
       </View>
-      <Text style={[styles.alignmentValue, { color: colors.textMuted }]}>{value}%</Text>
+      <Text style={[styles.alignmentValue, { color: colors.textMuted }]}>
+        <NumberText weight="medium">{value}</NumberText>%
+      </Text>
     </View>
   );
 }
@@ -98,7 +100,7 @@ export function GoalAlignmentCard({ alignment, preferences }: GoalAlignmentCardP
           </View>
           <View style={styles.scoreContainer}>
             <Text style={[styles.scoreValue, { color: getAlignmentColor(alignment.overallAlignment) }]}>
-              {alignment.overallAlignment}%
+              <NumberText weight="thin">{alignment.overallAlignment}</NumberText>%
             </Text>
             <Text style={[styles.scoreLabel, { color: colors.textMuted }]}>Match</Text>
           </View>

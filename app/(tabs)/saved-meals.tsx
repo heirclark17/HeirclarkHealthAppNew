@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Grid3x3, Heart, Sun, UtensilsCrossed, Moon, Coffee, Search, XCircle, Bookmark, Sparkles, FileText, Trash2 } from 'lucide-react-native';
 
 // Conditionally import Reanimated only for native platforms to avoid web infinite loops
 let Animated: any = View;
