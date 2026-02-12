@@ -45,6 +45,9 @@ function ExerciseGifThumbnail({
       <TouchableOpacity
         style={[styles.gifThumbnail, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}
         onPress={onPress}
+        accessibilityLabel="Play exercise form demonstration"
+        accessibilityRole="button"
+        accessibilityHint="Opens a video showing proper exercise form and technique"
       >
         <Ionicons name="play-circle-outline" size={24} color={isDark ? '#fff' : '#333'} />
       </TouchableOpacity>
@@ -52,7 +55,13 @@ function ExerciseGifThumbnail({
   }
 
   return (
-    <TouchableOpacity style={styles.gifThumbnail} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.gifThumbnail}
+      onPress={onPress}
+      accessibilityLabel="Play exercise form demonstration"
+      accessibilityRole="button"
+      accessibilityHint="Opens a video showing proper exercise form and technique"
+    >
       {loading && (
         <View style={[styles.gifLoading, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
           <ActivityIndicator size="small" color={isDark ? '#fff' : '#333'} />
@@ -119,6 +128,10 @@ function ExerciseRow({
             lightImpact();
             onToggle();
           }}
+          accessibilityLabel={`${exercise.exercise.name}${exercise.completed ? ', completed' : ', not completed'}`}
+          accessibilityRole="button"
+          accessibilityState={{ checked: exercise.completed }}
+          accessibilityHint={exercise.completed ? 'Marks exercise as incomplete' : 'Marks exercise as complete'}
         >
           <Ionicons
             name={exercise.completed ? 'checkbox' : 'square-outline'}
@@ -136,6 +149,10 @@ function ExerciseRow({
           }
         }}
         disabled={!onShowAlternatives}
+        accessibilityLabel={`${exercise.exercise.name}, ${exercise.sets} sets of ${exercise.reps}, ${exercise.restSeconds} seconds rest${hasGif ? ', tap GIF for form guide' : onShowAlternatives ? ', tap to see alternatives' : ''}`}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !onShowAlternatives }}
+        accessibilityHint={onShowAlternatives ? 'Shows alternative exercises for this movement pattern' : undefined}
       >
         <Text style={[styles.exerciseName, { color: colors.text }, exercise.completed && { color: colors.textMuted, textDecorationLine: 'line-through' }]}>
           {exercise.exercise.name}
@@ -166,6 +183,10 @@ function ExerciseRow({
             lightImpact();
             onToggle();
           }}
+          accessibilityLabel={`${exercise.exercise.name}${exercise.completed ? ', completed' : ', not completed'}`}
+          accessibilityRole="button"
+          accessibilityState={{ checked: exercise.completed }}
+          accessibilityHint={exercise.completed ? 'Marks exercise as incomplete' : 'Marks exercise as complete'}
         >
           <Ionicons
             name={exercise.completed ? 'checkbox' : 'square-outline'}
@@ -182,6 +203,9 @@ function ExerciseRow({
             lightImpact();
             onLogWeight();
           }}
+          accessibilityLabel={`Log weight for ${exercise.exercise.name}`}
+          accessibilityRole="button"
+          accessibilityHint="Opens weight logging interface to track weight lifted for this exercise"
         >
           <Ionicons name="barbell-outline" size={16} color={Colors.protein} />
         </TouchableOpacity>
@@ -192,6 +216,9 @@ function ExerciseRow({
           lightImpact();
           onSwap();
         }}
+        accessibilityLabel={`Swap ${exercise.exercise.name} with alternative exercise`}
+        accessibilityRole="button"
+        accessibilityHint="Replaces this exercise with a different one targeting the same muscle groups"
       >
         <Ionicons name="swap-horizontal" size={18} color={colors.textMuted} />
       </TouchableOpacity>
@@ -391,6 +418,9 @@ export function WorkoutCard({
               <TouchableOpacity
                 style={[styles.modalCloseButton, { backgroundColor: cardBg }]}
                 onPress={() => setShowDetails(false)}
+                accessibilityLabel="Close workout details"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the workout details modal and returns to workout list"
               >
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
@@ -448,6 +478,10 @@ export function WorkoutCard({
                   setShowDetails(false);
                 }}
                 disabled={workout.completed}
+                accessibilityLabel={workout.completed ? `${workout.name} completed` : `Mark ${workout.name} as complete`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: workout.completed }}
+                accessibilityHint={workout.completed ? 'Workout has been completed' : `Marks all ${totalExercises} exercises as complete and logs ${workout.estimatedCaloriesBurned} calories burned`}
               >
                 <Ionicons
                   name={workout.completed ? 'checkmark-circle' : 'checkmark-circle-outline'}
