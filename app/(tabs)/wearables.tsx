@@ -225,6 +225,10 @@ export default function WearablesScreen() {
                   style={[styles.actionButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
                   onPress={() => handleSync(provider)}
                   disabled={isSyncing}
+                  accessibilityLabel={`Sync ${provider.name} data${isSyncing ? ', syncing' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: isSyncing, busy: isSyncing }}
+                  accessibilityHint={`Syncs your latest health and fitness data from ${provider.name}`}
                 >
                   {isSyncing ? (
                     <ActivityIndicator size="small" color={colors.primary} />
@@ -235,6 +239,9 @@ export default function WearablesScreen() {
                 <TouchableOpacity
                   style={[styles.actionButton, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}
                   onPress={() => handleDisconnect(provider)}
+                  accessibilityLabel={`Disconnect ${provider.name}`}
+                  accessibilityRole="button"
+                  accessibilityHint={`Disconnects ${provider.name} from your account and stops data syncing`}
                 >
                   <Ionicons name="unlink-outline" size={18} color="#ef4444" />
                 </TouchableOpacity>
@@ -244,6 +251,10 @@ export default function WearablesScreen() {
                 style={[styles.connectButton, { backgroundColor: `${brandColor}15` }]}
                 onPress={() => handleConnect(provider)}
                 disabled={isConnecting}
+                accessibilityLabel={`Connect ${provider.name}${isConnecting ? ', connecting' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isConnecting, busy: isConnecting }}
+                accessibilityHint={`Connects ${provider.name} to sync your health and fitness data automatically`}
               >
                 {isConnecting ? (
                   <ActivityIndicator size="small" color={brandColor} />
