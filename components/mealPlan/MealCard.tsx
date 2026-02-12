@@ -10,6 +10,7 @@ import {
   Modal,
   Dimensions,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -197,6 +198,19 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
+  // Generate food photo URL from Unsplash based on meal name
+  const getMealImageUrl = (mealName: string, size: 'card' | 'modal' = 'card') => {
+    // Clean meal name for better search results
+    const searchTerm = encodeURIComponent(mealName.replace(/[^\w\s]/g, ''));
+
+    // Different sizes for card vs modal
+    const dimensions = size === 'card' ? '600x400' : '800x600';
+
+    // Use Unsplash Source API for free food photos
+    // Adding 'food' to search term for better results
+    return `https://source.unsplash.com/${dimensions}/?${searchTerm},food,meal`;
+  };
+
   const handleSwap = () => {
     if (onSwap) {
       onSwap();
@@ -273,101 +287,111 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             tintColor={isDark ? 'rgba(18, 18, 18, 0.85)' : 'rgba(255, 255, 255, 0.9)'}
             interactive
           >
-            {/* Meal type header */}
-            <View style={styles.mealTypeRow}>
-              <Text style={[styles.mealTypeLabel, { color: colors.textMuted }]}>{getMealTypeLabel(meal.mealType)}</Text>
-              <TouchableOpacity
-                onPress={handleViewRecipe}
-                activeOpacity={0.6}
-                style={[
-                  styles.recipeButtonContainer,
+            {/* Meal Photo */}
+            <Image
+              source={{ uri: getMealImageUrl(meal.name, 'card') }}
+              style={styles.mealImage}
+              resizeMode="cover"
+            />
+
+            {/* Card Content Container */}
+            <View style={styles.cardContent}>
+              {/* Meal type header */}
+              <View style={styles.mealTypeRow}>
+                <Text style={[styles.mealTypeLabel, { color: colors.textMuted }]}>{getMealTypeLabel(meal.mealType)}</Text>
+                <TouchableOpacity
+                  onPress={handleViewRecipe}
+                  activeOpacity={0.6}
+                  style={[
+                    styles.recipeButtonContainer,
+                    {
+                      backgroundColor: colors.cardBackground,
+                      shadowColor: '#87CEEB',
+                      shadowOffset: { width: 0, height: 3 },
+                      shadowOpacity: 0.6,
+                      shadowRadius: 6,
+                      elevation: 5,
+                    }
+                  ]}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Text style={[styles.recipeButton, { color: colors.textMuted }]}>View Recipe</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Meal name */}
+              <Text style={[styles.mealName, { color: colors.text }]}>{meal.name}</Text>
+
+              {/* Description */}
+              <Text style={[styles.mealDescription, { color: colors.textMuted }]}>
+                {displayDescription}
+              </Text>
+
+              {/* Time info */}
+              <View style={styles.timeRow}>
+                <View style={[
+                  styles.timeBadge,
                   {
                     backgroundColor: colors.cardBackground,
-                    shadowColor: '#87CEEB',
+                    shadowColor: '#98D8A0',
                     shadowOffset: { width: 0, height: 3 },
                     shadowOpacity: 0.6,
                     shadowRadius: 6,
                     elevation: 5,
                   }
-                ]}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Text style={[styles.recipeButton, { color: colors.textMuted }]}>View Recipe</Text>
-              </TouchableOpacity>
-            </View>
+                ]}>
+                  <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Prep: {meal.prepTime}m</Text>
+                </View>
+                <View style={[
+                  styles.timeBadge,
+                  {
+                    backgroundColor: colors.cardBackground,
+                    shadowColor: '#FFB6A3',
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.6,
+                    shadowRadius: 6,
+                    elevation: 5,
+                  }
+                ]}>
+                  <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Cook: {meal.cookTime}m</Text>
+                </View>
+                <View style={[
+                  styles.timeBadge,
+                  {
+                    backgroundColor: colors.cardBackground,
+                    shadowColor: '#D8A8D8',
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.6,
+                    shadowRadius: 6,
+                    elevation: 5,
+                  }
+                ]}>
+                  <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
+                </View>
+              </View>
 
-            {/* Meal name */}
-            <Text style={[styles.mealName, { color: colors.text }]}>{meal.name}</Text>
-
-            {/* Description */}
-            <Text style={[styles.mealDescription, { color: colors.textMuted }]}>
-              {displayDescription}
-            </Text>
-
-            {/* Time info */}
-            <View style={styles.timeRow}>
-              <View style={[
-                styles.timeBadge,
-                {
-                  backgroundColor: colors.cardBackground,
-                  shadowColor: '#98D8A0',
-                  shadowOffset: { width: 0, height: 3 },
-                  shadowOpacity: 0.6,
-                  shadowRadius: 6,
-                  elevation: 5,
-                }
-              ]}>
-                <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Prep: {meal.prepTime}m</Text>
-              </View>
-              <View style={[
-                styles.timeBadge,
-                {
-                  backgroundColor: colors.cardBackground,
-                  shadowColor: '#FFB6A3',
-                  shadowOffset: { width: 0, height: 3 },
-                  shadowOpacity: 0.6,
-                  shadowRadius: 6,
-                  elevation: 5,
-                }
-              ]}>
-                <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Cook: {meal.cookTime}m</Text>
-              </View>
-              <View style={[
-                styles.timeBadge,
-                {
-                  backgroundColor: colors.cardBackground,
-                  shadowColor: '#D8A8D8',
-                  shadowOffset: { width: 0, height: 3 },
-                  shadowOpacity: 0.6,
-                  shadowRadius: 6,
-                  elevation: 5,
-                }
-              ]}>
-                <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
-              </View>
-            </View>
-
-            {/* Macros row */}
-            <View style={styles.macroRow}>
-              <View style={styles.macroItem}>
-                <View style={[styles.macroDot, { backgroundColor: colors.calories }]} />
-                <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{Math.round(meal.calories)}</NumberText>
-                <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>cal</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <View style={[styles.macroDot, { backgroundColor: colors.protein }]} />
-                <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.protein}g</NumberText>
-                <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>protein</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <View style={[styles.macroDot, { backgroundColor: colors.carbs }]} />
-                <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.carbs}g</NumberText>
-                <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>carbs</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <View style={[styles.macroDot, { backgroundColor: colors.fat }]} />
-                <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.fat}g</NumberText>
-                <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>fat</Text>
+              {/* Macros row */}
+              <View style={styles.macroRow}>
+                <View style={styles.macroItem}>
+                  <View style={[styles.macroDot, { backgroundColor: colors.calories }]} />
+                  <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{Math.round(meal.calories)}</NumberText>
+                  <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>cal</Text>
+                </View>
+                <View style={styles.macroItem}>
+                  <View style={[styles.macroDot, { backgroundColor: colors.protein }]} />
+                  <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.protein}g</NumberText>
+                  <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>protein</Text>
+                </View>
+                <View style={styles.macroItem}>
+                  <View style={[styles.macroDot, { backgroundColor: colors.carbs }]} />
+                  <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.carbs}g</NumberText>
+                  <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>carbs</Text>
+                </View>
+                <View style={styles.macroItem}>
+                  <View style={[styles.macroDot, { backgroundColor: colors.fat }]} />
+                  <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.fat}g</NumberText>
+                  <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>fat</Text>
+                </View>
               </View>
             </View>
         </GlassCard>
@@ -412,6 +436,13 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               contentContainerStyle={styles.modalScrollContent}
               showsVerticalScrollIndicator={false}
             >
+              {/* Meal Photo - Large */}
+              <Image
+                source={{ uri: getMealImageUrl(meal.name, 'modal') }}
+                style={styles.modalMealImage}
+                resizeMode="cover"
+              />
+
               {/* Meal Title */}
               <Text style={[styles.modalTitle, { color: colors.text }]}>{meal.name}</Text>
               <Text style={[styles.modalDescription, { color: colors.textMuted }]}>{displayDescription}</Text>
@@ -595,6 +626,16 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 20,
+    overflow: 'hidden',
+  },
+  mealImage: {
+    width: '100%',
+    height: 180,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  cardContent: {
+    padding: 16,
   },
   mealTypeRow: {
     flexDirection: 'row',
@@ -717,6 +758,12 @@ const styles = StyleSheet.create({
   modalScrollContent: {
     paddingHorizontal: 20,
     paddingTop: 24,
+  },
+  modalMealImage: {
+    width: '100%',
+    height: 250,
+    borderRadius: 16,
+    marginBottom: 20,
   },
   modalTitle: {
     fontSize: 32,
