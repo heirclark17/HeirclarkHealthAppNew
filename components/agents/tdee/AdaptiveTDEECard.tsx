@@ -143,6 +143,9 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           onPress={() => setShowModal(true)}
+          accessibilityLabel={`Adaptive TDEE: ${isEnabled ? `${adaptiveTDEE.toLocaleString()} calories per day, ${statusConfig.label}` : `Learning mode, ${daysUntilReady} days until ready`}`}
+          accessibilityRole="button"
+          accessibilityHint="Opens detailed TDEE insights modal with metabolism analysis, trend history, and personalized recommendations"
         >
           <GlassCard style={styles.cardContainer} interactive>
             {/* Header */}
