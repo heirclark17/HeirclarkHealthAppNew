@@ -175,6 +175,9 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
           style={[styles.viewToggle, { backgroundColor: dayItemBg }]}
           onPress={toggleViewMode}
           activeOpacity={0.7}
+          accessibilityLabel={`Calendar view: ${viewMode === 'week' ? 'Week view, switch to month' : 'Month view, switch to week'}`}
+          accessibilityRole="button"
+          accessibilityHint={`Toggles between week and month calendar views`}
         >
           <View style={[
             styles.toggleOption,
@@ -288,11 +291,23 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
         <View>
           {/* Month Navigation */}
           <View style={styles.monthNavigation}>
-            <TouchableOpacity onPress={goToPreviousMonth} style={styles.monthNavButton}>
+            <TouchableOpacity
+              onPress={goToPreviousMonth}
+              style={styles.monthNavButton}
+              accessibilityLabel="Previous month"
+              accessibilityRole="button"
+              accessibilityHint="Navigates to the previous month in the calendar"
+            >
               <Ionicons name="chevron-back" size={20} color={colors.text} />
             </TouchableOpacity>
             <Text style={[styles.monthTitle, { color: colors.text }]}>{monthName}</Text>
-            <TouchableOpacity onPress={goToNextMonth} style={styles.monthNavButton}>
+            <TouchableOpacity
+              onPress={goToNextMonth}
+              style={styles.monthNavButton}
+              accessibilityLabel="Next month"
+              accessibilityRole="button"
+              accessibilityHint="Navigates to the next month in the calendar"
+            >
               <Ionicons name="chevron-forward" size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
@@ -326,6 +341,10 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                   onPress={() => handleMonthDaySelect(day)}
                   disabled={!day.isCurrentMonth || day.weekPlanIndex === undefined}
                   activeOpacity={0.7}
+                  accessibilityLabel={`${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}${day.isSelected ? ', Selected' : ''}${isToday ? ', Today' : ''}${isRestDay ? ', Rest Day' : ''}${isCompleted ? ', Completed' : ''}${hasWorkout ? `, ${day.dayPlan?.workout?.name || 'Workout'}` : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: day.isSelected, disabled: !day.isCurrentMonth || day.weekPlanIndex === undefined }}
+                  accessibilityHint={day.isCurrentMonth && day.weekPlanIndex !== undefined ? 'Selects this day to view workout details' : 'Day not in current training plan'}
                 >
                   <NumberText
                     weight="regular"
