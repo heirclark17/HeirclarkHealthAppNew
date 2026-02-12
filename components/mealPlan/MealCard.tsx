@@ -18,7 +18,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
+import { X, Clock, UtensilsCrossed, PlusCircle, Bookmark, Sparkles, ShoppingCart, ArrowLeftRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -380,7 +380,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 style={[styles.closeButton, { backgroundColor: colors.cardBackground }]}
                 hitSlop={12}
               >
-                <Ionicons name="close" size={24} color={colors.text} />
+                <X size={24} color={colors.text} strokeWidth={1.5} />
               </Pressable>
             </View>
 
@@ -397,11 +397,11 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               {/* Quick Info Row */}
               <View style={styles.quickInfoRow}>
                 <View style={styles.quickInfoItem}>
-                  <Ionicons name="time-outline" size={18} color={colors.textMuted} />
+                  <Clock size={18} color={colors.textMuted} strokeWidth={1.5} />
                   <Text style={[styles.quickInfoText, { color: colors.textMuted }]}>{meal.prepTime + meal.cookTime} min total</Text>
                 </View>
                 <View style={styles.quickInfoItem}>
-                  <Ionicons name="restaurant-outline" size={18} color={colors.textMuted} />
+                  <UtensilsCrossed size={18} color={colors.textMuted} strokeWidth={1.5} />
                   <Text style={[styles.quickInfoText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
                 </View>
               </View>
@@ -472,103 +472,109 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               />
 
               {/* Add to Today's Meals Button */}
-              <TouchableOpacity
-                style={[
-                  styles.primaryActionButton,
-                  { backgroundColor: colors.primary }
-                ]}
-                onPress={handleAddToTodaysMeals}
-                disabled={isAddingToMeals}
-                activeOpacity={0.7}
+              <GlassCard
+                style={styles.primaryActionButton}
+                intensity={80}
+                tintColor={isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'}
+                interactive
               >
-                <View style={[styles.actionButtonIcon, { backgroundColor: colors.primaryAccent }]}>
-                  <Ionicons name="add-circle-outline" size={18} color={colors.primaryText} />
-                </View>
-                <Text style={[styles.primaryActionText, { color: colors.primaryText }]}>
-                  {isAddingToMeals ? 'Adding...' : "Add to Today's Meals"}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.primaryActionButtonInner}
+                  onPress={handleAddToTodaysMeals}
+                  disabled={isAddingToMeals}
+                  activeOpacity={0.7}
+                >
+                  <PlusCircle size={20} color={colors.primary} strokeWidth={1.5} />
+                  <Text style={[styles.primaryActionText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
+                    {isAddingToMeals ? 'Adding...' : "Add to Today's Meals"}
+                  </Text>
+                </TouchableOpacity>
+              </GlassCard>
 
               {/* Secondary Actions Row */}
               <View style={styles.secondaryActionsRow}>
                 {/* Save to Saved Meals Button */}
                 {onSaveToSavedMeals && (
-                  <TouchableOpacity
-                    style={[
-                      styles.secondaryActionButton,
-                      {
-                        backgroundColor: colors.cardBackground,
-                        borderColor: colors.border,
-                      }
-                    ]}
-                    onPress={handleSaveToSavedMeals}
-                    disabled={isSavingMeal}
-                    activeOpacity={0.7}
+                  <GlassCard
+                    style={styles.secondaryActionButton}
+                    intensity={60}
+                    tintColor={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'}
+                    interactive
                   >
-                    <Ionicons name="bookmark-outline" size={18} color={colors.text} />
-                    <Text style={[styles.secondaryActionText, { color: colors.text }]}>
-                      {isSavingMeal ? 'Saving...' : 'Save to Saved Meals'}
-                    </Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.secondaryActionButtonInner}
+                      onPress={handleSaveToSavedMeals}
+                      disabled={isSavingMeal}
+                      activeOpacity={0.7}
+                    >
+                      <Bookmark size={16} color={colors.text} strokeWidth={1.5} />
+                      <Text style={[styles.secondaryActionText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
+                        {isSavingMeal ? 'Saving...' : 'Save'}
+                      </Text>
+                    </TouchableOpacity>
+                  </GlassCard>
                 )}
 
                 {/* AI Generate Recipe Button */}
-                <TouchableOpacity
-                  style={[
-                    styles.secondaryActionButton,
-                    {
-                      backgroundColor: isDark ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.1)',
-                      borderColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)',
-                    }
-                  ]}
-                  onPress={handleGenerateAIRecipe}
-                  disabled={isGeneratingAIRecipe || isLoadingRecipe}
-                  activeOpacity={0.7}
+                <GlassCard
+                  style={styles.secondaryActionButton}
+                  intensity={60}
+                  tintColor={isDark ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.1)'}
+                  interactive
                 >
-                  <Ionicons name="sparkles" size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
-                  <Text style={[styles.secondaryActionText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>
-                    {isGeneratingAIRecipe ? 'Generating...' : 'AI Generate Recipe'}
-                  </Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.secondaryActionButtonInner}
+                    onPress={handleGenerateAIRecipe}
+                    disabled={isGeneratingAIRecipe || isLoadingRecipe}
+                    activeOpacity={0.7}
+                  >
+                    <Sparkles size={16} color={isDark ? '#a5b4fc' : '#6366f1'} strokeWidth={1.5} />
+                    <Text style={[styles.secondaryActionText, { color: isDark ? '#a5b4fc' : '#6366f1' }]} numberOfLines={1} ellipsizeMode="tail">
+                      {isGeneratingAIRecipe ? 'Generating...' : 'AI Recipe'}
+                    </Text>
+                  </TouchableOpacity>
+                </GlassCard>
 
                 {/* Add to Instacart Button */}
-                <TouchableOpacity
-                  style={[
-                    styles.secondaryActionButton,
-                    {
-                      backgroundColor: colors.cardBackground,
-                      borderColor: colors.border,
-                    }
-                  ]}
-                  onPress={handleAddToInstacart}
-                  disabled={isAddingToInstacart}
-                  activeOpacity={0.7}
+                <GlassCard
+                  style={styles.secondaryActionButton}
+                  intensity={60}
+                  tintColor={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'}
+                  interactive
                 >
-                  <Ionicons name="cart-outline" size={18} color={colors.text} />
-                  <Text style={[styles.secondaryActionText, { color: colors.text }]}>
-                    {isAddingToInstacart ? 'Adding...' : 'Ingredients to Instacart'}
-                  </Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.secondaryActionButtonInner}
+                    onPress={handleAddToInstacart}
+                    disabled={isAddingToInstacart}
+                    activeOpacity={0.7}
+                  >
+                    <ShoppingCart size={16} color={colors.text} strokeWidth={1.5} />
+                    <Text style={[styles.secondaryActionText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
+                      {isAddingToInstacart ? 'Adding...' : 'Instacart'}
+                    </Text>
+                  </TouchableOpacity>
+                </GlassCard>
 
                 {/* Swap Meal Button */}
                 {onSwap && (
-                  <TouchableOpacity
-                    style={[
-                      styles.secondaryActionButton,
-                      {
-                        backgroundColor: colors.cardBackground,
-                        borderColor: colors.border,
-                      }
-                    ]}
-                    onPress={handleSwap}
-                    disabled={isSwapping}
-                    activeOpacity={0.7}
+                  <GlassCard
+                    style={styles.secondaryActionButton}
+                    intensity={60}
+                    tintColor={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'}
+                    interactive
                   >
-                    <Ionicons name="swap-horizontal" size={18} color={colors.text} />
-                    <Text style={[styles.secondaryActionText, { color: colors.text }]}>
-                      {isSwapping ? 'Swapping...' : 'Swap Meal'}
-                    </Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.secondaryActionButtonInner}
+                      onPress={handleSwap}
+                      disabled={isSwapping}
+                      activeOpacity={0.7}
+                    >
+                      <ArrowLeftRight size={16} color={colors.text} strokeWidth={1.5} />
+                      <Text style={[styles.secondaryActionText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
+                        {isSwapping ? 'Swapping...' : 'Swap'}
+                      </Text>
+                    </TouchableOpacity>
+                  </GlassCard>
                 )}
               </View>
             </View>
@@ -875,26 +881,21 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   primaryActionButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  primaryActionButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     paddingVertical: 14,
-    borderRadius: 14,
-  },
-  actionButtonIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 16,
   },
   primaryActionText: {
     fontSize: 15,
-    color: 'rgba(0, 0, 0, 0.85)',
     fontFamily: Fonts.medium,
+    flexShrink: 1,
   },
   secondaryActionsRow: {
     flexDirection: 'row',
@@ -902,20 +903,23 @@ const styles = StyleSheet.create({
   },
   secondaryActionButton: {
     flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    minWidth: 0,
+  },
+  secondaryActionButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    gap: 6,
     paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 8,
+    minWidth: 0,
   },
   secondaryActionText: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 12,
     fontFamily: Fonts.thin,
+    flexShrink: 1,
   },
 });
 
