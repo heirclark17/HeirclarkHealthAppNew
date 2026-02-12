@@ -26,12 +26,22 @@ import {
 } from '../../theme/liquidGlass';
 
 export interface GlassThemeColors {
-  text: typeof LightModeColors.text;
+  // Original nested structure
+  textNested: typeof LightModeColors.text;
   icon: typeof LightModeColors.icon;
   glass: typeof LightModeColors.glass;
   semantic: typeof LightModeColors.semantic;
   background: string;
   backgroundSecondary: string;
+
+  // Backward compatibility - flattened properties for components
+  text: string;  // Maps to text.primary
+  textMuted: string;
+  textSecondary: string;
+  primary: string;
+  success: string;
+  error: string;
+  warning: string;
 }
 
 export interface GlassTheme {
@@ -70,7 +80,27 @@ export function useGlassTheme(): GlassTheme {
   const isDark = settings.themeMode === 'dark';
 
   const theme = useMemo<GlassTheme>(() => {
-    const colors = isDark ? DarkModeColors : LightModeColors;
+    const colorSystem = isDark ? DarkModeColors : LightModeColors;
+
+    // Build colors with backward compatibility
+    const colors: GlassThemeColors = {
+      // Original nested structure (renamed to avoid conflict)
+      textNested: colorSystem.text,
+      icon: colorSystem.icon,
+      glass: colorSystem.glass,
+      semantic: colorSystem.semantic,
+      background: colorSystem.background,
+      backgroundSecondary: colorSystem.backgroundSecondary,
+
+      // Flattened properties for backward compatibility
+      text: colorSystem.text.primary,  // Most common usage
+      textMuted: colorSystem.text.muted,
+      textSecondary: colorSystem.text.secondary,
+      primary: colorSystem.icon.accent,
+      success: colorSystem.semantic.success,
+      error: colorSystem.semantic.error,
+      warning: colorSystem.semantic.warning,
+    };
 
     return {
       isDark,
