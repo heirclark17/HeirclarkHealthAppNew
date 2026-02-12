@@ -153,7 +153,12 @@ export default function StepsScreen() {
             <Text style={[styles.greetingName, { color: colors.text }]}>there</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.settingsBtn}>
+        <TouchableOpacity
+          style={styles.settingsBtn}
+          accessibilityLabel="Settings"
+          accessibilityRole="button"
+          accessibilityHint="Opens settings to configure step goal and preferences"
+        >
           <Text style={[styles.settingsIcon, { color: colors.text }]}>⚙</Text>
         </TouchableOpacity>
       </View>
@@ -167,6 +172,10 @@ export default function StepsScreen() {
               key={index}
               style={[styles.dayItem, selectedDate === item.dateStr && { backgroundColor: colors.text }]}
               onPress={() => setSelectedDate(item.dateStr)}
+              accessibilityLabel={`${item.day}, ${item.date}${item.isToday ? ', today' : ''}${selectedDate === item.dateStr ? ', selected' : ''}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: selectedDate === item.dateStr }}
+              accessibilityHint={`Shows step data for ${item.day}, ${item.date}`}
             >
               <Text style={[styles.dayName, { color: colors.textMuted }, selectedDate === item.dateStr && { color: colors.background }]}>{item.day}</Text>
               <NumberText weight="semiBold" style={[styles.dayNumber, { color: colors.text }, selectedDate === item.dateStr && { color: colors.background }]}>{item.date}</NumberText>
@@ -201,7 +210,13 @@ export default function StepsScreen() {
         <Text style={[styles.motivational, { color: colors.textMuted }]}>See how far your feet have carried you today</Text>
 
         {/* Sync Button */}
-        <TouchableOpacity style={[styles.syncButton, { backgroundColor: colors.text }]} onPress={handleSync}>
+        <TouchableOpacity
+          style={[styles.syncButton, { backgroundColor: colors.text }]}
+          onPress={handleSync}
+          accessibilityLabel="Sync steps data"
+          accessibilityRole="button"
+          accessibilityHint="Syncs your latest step count from Apple Health or connected wearable device"
+        >
           <Text style={[styles.appleIcon, { color: colors.background }]}>◐</Text>
           <Text style={[styles.syncText, { color: colors.background }]}>Sync Now</Text>
         </TouchableOpacity>
