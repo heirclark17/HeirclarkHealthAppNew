@@ -248,7 +248,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                     styles.presetChip,
                     { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' },
                     state.selectedPreset === preset.id && {
-                      backgroundColor: '#96CEB420',
+                      backgroundColor: Colors.successMuted + '20',
                       borderColor: Colors.successMuted,
                       borderWidth: 1,
                     }

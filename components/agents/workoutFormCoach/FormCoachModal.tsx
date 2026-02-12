@@ -210,7 +210,7 @@ export function FormCoachModal({
               <Ionicons
                 name="warning"
                 size={16}
-                color={mistake.severity === 'serious' ? '#ef4444' : mistake.severity === 'moderate' ? Colors.warningOrange : '#6b7280'}
+                color={mistake.severity === 'serious' ? Colors.error : mistake.severity === 'moderate' ? Colors.warningOrange : Colors.textMuted}
               />
               <Text style={[styles.mistakeTitle, { color: colors.text }]}>
                 {mistake.mistake}

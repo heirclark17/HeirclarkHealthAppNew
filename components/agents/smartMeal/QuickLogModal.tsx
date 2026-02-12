@@ -35,9 +35,9 @@ const MealTypeIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 const MealTypeColors: Record<string, string> = {
   breakfast: colors.warningOrange,
-  lunch: '#4FC3F7',
-  dinner: '#9575CD',
-  snack: '#81C784',
+  lunch: colors.accentCyan,
+  dinner: colors.accentPurple,
+  snack: colors.success,
 };
 
 export default function QuickLogModal({
@@ -131,7 +131,7 @@ export default function QuickLogModal({
                   <Text style={[styles.macroSmallLabel, { color: mutedColor }]}>Carbs</Text>
                 </View>
                 <View style={styles.macroItem}>
-                  <View style={[styles.macroDot, { backgroundColor: '#FFE66D' }]} />
+                  <View style={[styles.macroDot, { backgroundColor: colors.fat }]} />
                   <NumberText weight="semiBold" style={[styles.macroSmallValue, { color: textColor }]}>{meal.fat}g</NumberText>
                   <Text style={[styles.macroSmallLabel, { color: mutedColor }]}>Fat</Text>
                 </View>

@@ -60,7 +60,7 @@ export default function ProgressPredictionCard() {
       case 'losing':
         return { icon: 'trending-down', color: Colors.successStrong };
       case 'gaining':
-        return { icon: 'trending-up', color: '#EF4444' };
+        return { icon: 'trending-up', color: Colors.error };
       default:
         return { icon: 'remove', color: colors.textMuted };
     }
@@ -92,7 +92,7 @@ export default function ProgressPredictionCard() {
         style={[
           styles.milestoneIcon,
           {
-            backgroundColor: milestone.achieved ? '#22C55E20' : colors.cardGlass,
+            backgroundColor: milestone.achieved ? Colors.successStrong + '20' : colors.cardGlass,
             borderColor: milestone.achieved ? Colors.successStrong : colors.glassBorder,
           },
         ]}
@@ -288,7 +288,7 @@ export default function ProgressPredictionCard() {
 
         {/* Plateau Warning */}
         {inPlateau && (
-          <View style={[styles.plateauBanner, { backgroundColor: '#F59E0B20' }]}>
+          <View style={[styles.plateauBanner, { backgroundColor: Colors.warningOrange + '20' }]}>
             <Ionicons name="pause-circle" size={18} color={Colors.warningOrange} />
             <View style={styles.plateauContent}>
               <Text style={[styles.plateauTitle, { color: Colors.warningOrange }]}>

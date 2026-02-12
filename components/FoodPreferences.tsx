@@ -162,8 +162,8 @@ export function FoodPreferencesModal({ visible, onClose }: { visible: boolean; o
         ? (isDark ? 'rgba(249, 115, 22, 0.18)' : 'rgba(249, 115, 22, 0.15)')
         : (isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)');
 
-    const selectedColor = variant === 'allergen' ? '#ef4444'
-      : variant === 'disliked' ? '#f97316'
+    const selectedColor = variant === 'allergen' ? Colors.error
+      : variant === 'disliked' ? Colors.warningOrange
         : Colors.successMuted;
 
     return (

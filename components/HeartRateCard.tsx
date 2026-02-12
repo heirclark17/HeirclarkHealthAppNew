@@ -21,12 +21,12 @@ import { lightImpact } from '../utils/haptics';
 
 // Heart Rate Zone Configuration
 const HEART_RATE_ZONES = [
-  { zone: 1, name: 'Rest', min: 0, max: 50, color: '#8E8E93', description: 'Resting state' },
+  { zone: 1, name: 'Rest', min: 0, max: 50, color: Colors.textMuted, description: 'Resting state' },
   { zone: 2, name: 'Fat Burn', min: 50, max: 60, color: Colors.success, description: 'Light activity, fat burning' },
   { zone: 3, name: 'Cardio', min: 60, max: 70, color: Colors.successMuted, description: 'Moderate aerobic training' },
   { zone: 4, name: 'Aerobic', min: 70, max: 80, color: colors.protein, description: 'Improved cardiovascular fitness' },
   { zone: 5, name: 'Peak', min: 80, max: 90, color: Colors.error, description: 'High intensity, anaerobic' },
-  { zone: 6, name: 'Max', min: 90, max: 100, color: '#E74C3C', description: 'Maximum effort' },
+  { zone: 6, name: 'Max', min: 90, max: 100, color: 'Colors.errorStrong', description: 'Maximum effort' },
 ];
 
 interface HeartRateCardProps {
@@ -91,7 +91,7 @@ export function HeartRateCard({
     if (systolic < 120 && diastolic < 80) return { status: 'Normal', color: Colors.successMuted };
     if (systolic < 130 && diastolic < 80) return { status: 'Elevated', color: colors.protein };
     if (systolic < 140 || diastolic < 90) return { status: 'High (Stage 1)', color: Colors.error };
-    if (systolic >= 140 || diastolic >= 90) return { status: 'High (Stage 2)', color: '#E74C3C' };
+    if (systolic >= 140 || diastolic >= 90) return { status: 'High (Stage 2)', color: 'Colors.errorStrong' };
     return { status: 'Unknown', color: colors.textMuted };
   };
 

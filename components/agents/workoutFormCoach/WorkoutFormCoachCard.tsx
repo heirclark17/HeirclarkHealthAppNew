@@ -393,14 +393,14 @@ export default function WorkoutFormCoachCard() {
 function getScoreColor(score: number): string {
   if (score >= 80) return Colors.successStrong;
   if (score >= 60) return Colors.warningOrange;
-  return '#EF4444';
+  return Colors.error;
 }
 
 function getSeverityColor(severity: string): string {
   switch (severity) {
-    case 'serious': return '#EF4444';
+    case 'serious': return Colors.error;
     case 'moderate': return Colors.warningOrange;
-    default: return '#6B7280';
+    default: return Colors.textMuted;
   }
 }
 

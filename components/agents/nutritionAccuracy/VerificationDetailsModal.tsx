@@ -48,7 +48,7 @@ export default function VerificationDetailsModal({
 
   const renderFlag = (flag: NutritionFlag, index: number) => {
     const flagColors = {
-      error: '#EF4444',
+      error: Colors.error,
       warning: Colors.warningOrange,
       info: Colors.restingEnergy,
     };

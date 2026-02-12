@@ -148,7 +148,7 @@ export function Button({
         return {
           container: {
             backgroundColor: glassColors.primary,
-            shadowColor: isDark ? '#0A84FF' : '#007AFF',
+            shadowColor: glassColors.primary,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.25,
             shadowRadius: 8,
