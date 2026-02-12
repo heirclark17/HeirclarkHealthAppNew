@@ -170,6 +170,10 @@ export default function SettingsScreen() {
     <TouchableOpacity
       style={[styles.appRow, { borderBottomColor: colors.border }]}
       onPress={() => !connected && handleConnectDevice(name)}
+      accessibilityLabel={`${name}, ${connected ? 'connected' : 'not connected'}`}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: connected }}
+      accessibilityHint={connected ? `${name} is already connected to your account` : `Connect ${name} to sync health and fitness data`}
     >
       <Text style={[styles.appName, { color: colors.text }]}>{name}</Text>
       <View style={styles.appStatusContainer}>
@@ -223,6 +227,9 @@ export default function SettingsScreen() {
           <TouchableOpacity
             style={[styles.settingRow, { borderBottomColor: colors.border }]}
             onPress={() => setShowBackgroundSelector(true)}
+            accessibilityLabel={`Background: ${currentBackgroundName}`}
+            accessibilityRole="button"
+            accessibilityHint="Opens background selector to change the app's background image"
           >
             <Text style={[styles.settingLabel, { color: colors.text }]}>Background</Text>
             <View style={styles.settingValueRow}>
@@ -264,6 +271,9 @@ export default function SettingsScreen() {
                     ]
                   );
                 }}
+                accessibilityLabel="Sign out"
+                accessibilityRole="button"
+                accessibilityHint="Signs you out of your account and returns you to the sign in screen"
               >
                 <Ionicons name="log-out-outline" size={18} color={colors.error} style={{ marginRight: 8 }} />
                 <Text style={[styles.signOutButtonText, { color: colors.error }]}>Sign Out</Text>
@@ -317,6 +327,9 @@ export default function SettingsScreen() {
                     ]
                   );
                 }}
+                accessibilityLabel="Clear all auth data (debug)"
+                accessibilityRole="button"
+                accessibilityHint="Development option that forcefully clears all authentication data and requires sign in again"
               >
                 <Ionicons name="nuclear-outline" size={18} color={colors.warningOrange} style={{ marginRight: 8 }} />
                 <Text style={[styles.signOutButtonText, { color: colors.warningOrange }]}>🔧 Clear All Auth (Debug)</Text>
@@ -337,6 +350,9 @@ export default function SettingsScreen() {
               <TouchableOpacity
                 style={[styles.signInButton, { backgroundColor: colors.text }]}
                 onPress={signInWithApple}
+                accessibilityLabel="Sign in with Apple"
+                accessibilityRole="button"
+                accessibilityHint="Signs you in using your Apple ID to sync your data across devices"
               >
                 <Text style={[styles.signInButtonText, { color: colors.background }]}>Sign in with Apple</Text>
               </TouchableOpacity>
@@ -347,11 +363,23 @@ export default function SettingsScreen() {
         {/* Goals */}
         <GlassCard style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Goals</Text>
-          <TouchableOpacity style={[styles.linkRow, { borderBottomColor: colors.border }]} onPress={handleNavigateToGoals}>
+          <TouchableOpacity
+            style={[styles.linkRow, { borderBottomColor: colors.border }]}
+            onPress={handleNavigateToGoals}
+            accessibilityLabel="View goals"
+            accessibilityRole="button"
+            accessibilityHint="Opens the goals screen to view and edit your fitness goals and daily calorie targets"
+          >
             <Text style={[styles.linkLabel, { color: colors.accent }]}>View Goals</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.linkRow, { borderBottomColor: 'transparent' }]} onPress={handleRedoGoalsSetup}>
+          <TouchableOpacity
+            style={[styles.linkRow, { borderBottomColor: 'transparent' }]}
+            onPress={handleRedoGoalsSetup}
+            accessibilityLabel="Redo goals setup"
+            accessibilityRole="button"
+            accessibilityHint="Restarts the goals wizard to reconfigure your fitness goals from the beginning"
+          >
             <Text style={[styles.linkLabel, { color: colors.accent }]}>Redo Goals Setup</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </TouchableOpacity>
@@ -364,7 +392,13 @@ export default function SettingsScreen() {
             <Text style={[styles.settingLabel, { color: colors.text }]}>Version</Text>
             <Text style={[styles.settingValue, { color: colors.textSecondary }]}>2.0.0</Text>
           </View>
-          <TouchableOpacity style={[styles.linkRow, { borderBottomColor: 'transparent' }]} onPress={handleContactSupport}>
+          <TouchableOpacity
+            style={[styles.linkRow, { borderBottomColor: 'transparent' }]}
+            onPress={handleContactSupport}
+            accessibilityLabel="Contact support"
+            accessibilityRole="button"
+            accessibilityHint="Opens your email app to send a support request to the Heirclark team"
+          >
             <Text style={[styles.linkLabel, { color: colors.accent }]}>Contact Support</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </TouchableOpacity>
@@ -372,7 +406,13 @@ export default function SettingsScreen() {
 
         {/* Danger Zone */}
         <GlassCard style={styles.section}>
-          <TouchableOpacity style={[styles.dangerButton, { borderColor: colors.error }]} onPress={handleDeleteAllData}>
+          <TouchableOpacity
+            style={[styles.dangerButton, { borderColor: colors.error }]}
+            onPress={handleDeleteAllData}
+            accessibilityLabel="Delete all data"
+            accessibilityRole="button"
+            accessibilityHint="Permanently deletes all your app data including goals, meal plans, and progress tracking. This action cannot be undone."
+          >
             <Ionicons name="trash-outline" size={18} color={colors.error} style={{ marginRight: 8 }} />
             <Text style={[styles.dangerButtonText, { color: colors.error }]}>Delete All Data</Text>
           </TouchableOpacity>
