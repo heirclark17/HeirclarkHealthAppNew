@@ -165,6 +165,9 @@ export default function CalorieBankingCard({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={onShowDetails}
+        accessibilityLabel={`Calorie bank: ${summary ? (summary.bankedCalories >= 0 ? `${summary.bankedCalories} calories banked` : `${Math.abs(summary.bankedCalories)} calories borrowed`) : '0 calories'}, ${summary ? summary.daysRemaining : '0'} days left this week`}
+        accessibilityRole="button"
+        accessibilityHint="Opens detailed weekly calorie banking view with daily breakdowns, banking history, and budget management options"
       >
         <GlassCard variant="elevated" material="thick" interactive animated>
           {/* Header */}
@@ -240,6 +243,10 @@ export default function CalorieBankingCard({
                 ]}
                 onPress={recommendation.type === 'bank' ? handleBank : handleBorrow}
                 disabled={isActing}
+                accessibilityLabel={recommendation.type === 'bank' ? `Bank ${recommendation.amount} calories for later this week` : `Borrow ${recommendation.amount} calories from your bank`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isActing, busy: isActing }}
+                accessibilityHint={recommendation.type === 'bank' ? `Saves ${recommendation.amount} calories from today for use later this week` : `Adds ${recommendation.amount} calories to today from your weekly bank`}
               >
                 <NumberText weight="bold" style={styles.actionButtonText}>
                   {isActing ? '...' : recommendation.type === 'bank' ? `+${recommendation.amount}` : `-${recommendation.amount}`}
