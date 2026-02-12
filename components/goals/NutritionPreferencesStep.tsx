@@ -116,6 +116,10 @@ function DietCard({ option, isSelected, onSelect, colors, isDark }: DietCardProp
         onSelect();
       }}
       activeOpacity={0.7}
+      accessibilityLabel={`${option.title} diet: ${option.description}`}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isSelected }}
+      accessibilityHint={`Select ${option.title} diet style`}
     >
       <GlassCard style={[styles.dietCard, isSelected && { backgroundColor: selectedBg }]} interactive>
         <View style={styles.dietCardInner}>
@@ -294,6 +298,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   await selectionFeedback();
                   setMealsPerDay(num);
                 }}
+                accessibilityLabel={`${num} meals per day`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint="Sets how many meals you'll eat daily"
               >
                 <GlassCard
                   style={[
@@ -361,6 +369,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                     style={styles.presetChipWrapper}
                     onPress={() => selectFastingPreset(preset.start, preset.end)}
                     activeOpacity={0.7}
+                    accessibilityLabel={`${preset.label} fasting: ${preset.start} to ${preset.end}, ${preset.description}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityHint="Sets your intermittent fasting window"
                   >
                     <GlassCard
                       style={[
@@ -410,6 +422,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 key={allergy}
                 onPress={() => toggleAllergy(allergy)}
                 activeOpacity={0.7}
+                accessibilityLabel={`${allergy}${isSelected ? ', selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${allergy} allergy or restriction`}
               >
                 <GlassCard
                   style={[
@@ -442,6 +458,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             style={{ flex: 1 }}
             onPress={async () => { await selectionFeedback(); setMealDiversity('diverse'); }}
             activeOpacity={0.7}
+            accessibilityLabel="Diverse daily meals"
+            accessibilityRole="button"
+            accessibilityState={{ selected: mealDiversity === 'diverse' }}
+            accessibilityHint="Different meals each day for variety"
           >
             <GlassCard
               style={[
@@ -458,6 +478,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             style={{ flex: 1 }}
             onPress={async () => { await selectionFeedback(); setMealDiversity('sameDaily'); }}
             activeOpacity={0.7}
+            accessibilityLabel="Same meals for meal prep"
+            accessibilityRole="button"
+            accessibilityState={{ selected: mealDiversity === 'sameDaily' }}
+            accessibilityHint="Repeat the same meals daily for easier meal preparation"
           >
             <GlassCard
               style={[
@@ -484,6 +508,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             style={{ flex: 1 }}
             onPress={async () => { await selectionFeedback(); setMealStyle('threePlusSnacks'); }}
             activeOpacity={0.7}
+            accessibilityLabel="3 meals plus snacks"
+            accessibilityRole="button"
+            accessibilityState={{ selected: mealStyle === 'threePlusSnacks' }}
+            accessibilityHint="Include snacks between main meals"
           >
             <GlassCard
               style={[
@@ -500,6 +528,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             style={{ flex: 1 }}
             onPress={async () => { await selectionFeedback(); setMealStyle('fewerLarger'); }}
             activeOpacity={0.7}
+            accessibilityLabel="Fewer larger meals"
+            accessibilityRole="button"
+            accessibilityState={{ selected: mealStyle === 'fewerLarger' }}
+            accessibilityHint="Eat fewer but more filling meals without snacks"
           >
             <GlassCard
               style={[
@@ -534,6 +566,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 key={day}
                 onPress={() => toggleFoodItem(cheatDays, setCheatDays, day)}
                 activeOpacity={0.7}
+                accessibilityLabel={`${day}${isSelected ? ', cheat day selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${day} as a cheat day with no meal plan`}
               >
                 <GlassCard
                   style={[
@@ -569,7 +605,15 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           {PROTEIN_OPTIONS.map((protein) => {
             const isSelected = proteins.includes(protein);
             return (
-              <TouchableOpacity key={protein} onPress={() => toggleFoodItem(proteins, setProteins, protein)} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={protein}
+                onPress={() => toggleFoodItem(proteins, setProteins, protein)}
+                activeOpacity={0.7}
+                accessibilityLabel={`${protein}${isSelected ? ', selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${protein} as a favorite protein`}
+              >
                 <GlassCard
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
@@ -591,7 +635,15 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           {VEGETABLE_OPTIONS.map((veg) => {
             const isSelected = vegetables.includes(veg);
             return (
-              <TouchableOpacity key={veg} onPress={() => toggleFoodItem(vegetables, setVegetables, veg)} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={veg}
+                onPress={() => toggleFoodItem(vegetables, setVegetables, veg)}
+                activeOpacity={0.7}
+                accessibilityLabel={`${veg}${isSelected ? ', selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${veg} as a favorite vegetable`}
+              >
                 <GlassCard
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
@@ -613,7 +665,15 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           {STARCH_OPTIONS.map((starch) => {
             const isSelected = starches.includes(starch);
             return (
-              <TouchableOpacity key={starch} onPress={() => toggleFoodItem(starches, setStarches, starch)} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={starch}
+                onPress={() => toggleFoodItem(starches, setStarches, starch)}
+                activeOpacity={0.7}
+                accessibilityLabel={`${starch}${isSelected ? ', selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${starch} as a favorite starch`}
+              >
                 <GlassCard
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
@@ -635,7 +695,15 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           {SNACK_OPTIONS.map((snack) => {
             const isSelected = snacks.includes(snack);
             return (
-              <TouchableOpacity key={snack} onPress={() => toggleFoodItem(snacks, setSnacks, snack)} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={snack}
+                onPress={() => toggleFoodItem(snacks, setSnacks, snack)}
+                activeOpacity={0.7}
+                accessibilityLabel={`${snack}${isSelected ? ', selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${snack} as a favorite snack`}
+              >
                 <GlassCard
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
@@ -657,7 +725,15 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           {CUISINE_OPTIONS.map((cuisine) => {
             const isSelected = cuisines.includes(cuisine);
             return (
-              <TouchableOpacity key={cuisine} onPress={() => toggleFoodItem(cuisines, setCuisines, cuisine)} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={cuisine}
+                onPress={() => toggleFoodItem(cuisines, setCuisines, cuisine)}
+                activeOpacity={0.7}
+                accessibilityLabel={`${cuisine}${isSelected ? ', selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${cuisine} as a favorite cuisine`}
+              >
                 <GlassCard
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
@@ -679,7 +755,15 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           {DISLIKED_OPTIONS.map((food) => {
             const isSelected = disliked.includes(food);
             return (
-              <TouchableOpacity key={food} onPress={() => toggleFoodItem(disliked, setDisliked, food)} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={food}
+                onPress={() => toggleFoodItem(disliked, setDisliked, food)}
+                activeOpacity={0.7}
+                accessibilityLabel={`${food}${isSelected ? ', disliked' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${food} as a disliked food to avoid`}
+              >
                 <GlassCard
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(249, 115, 22, 0.18)' : 'rgba(249, 115, 22, 0.15)' }]}
                   interactive
@@ -726,6 +810,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 }}
                 activeOpacity={0.7}
                 style={{ flex: 1 }}
+                accessibilityLabel={`${option.label}: ${option.description}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Select ${option.label} cooking skill level`}
               >
                 <GlassCard
                   style={[
@@ -788,6 +876,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 setWaterGoalOz(Math.max(32, state.waterGoalOz - 8));
               }}
               style={styles.dailyGoalButton}
+              accessibilityLabel="Decrease water goal"
+              accessibilityRole="button"
+              accessibilityHint="Decreases daily water intake goal by 8 ounces"
             >
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
@@ -803,6 +894,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 setWaterGoalOz(Math.min(160, state.waterGoalOz + 8));
               }}
               style={styles.dailyGoalButton}
+              accessibilityLabel="Increase water goal"
+              accessibilityRole="button"
+              accessibilityHint="Increases daily water intake goal by 8 ounces"
             >
               <PlusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
@@ -825,6 +919,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 setSleepGoalHours(Math.max(5, state.sleepGoalHours - 0.5));
               }}
               style={styles.dailyGoalButton}
+              accessibilityLabel="Decrease sleep goal"
+              accessibilityRole="button"
+              accessibilityHint="Decreases nightly sleep target by 30 minutes"
             >
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
@@ -840,6 +937,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 setSleepGoalHours(Math.min(12, state.sleepGoalHours + 0.5));
               }}
               style={styles.dailyGoalButton}
+              accessibilityLabel="Increase sleep goal"
+              accessibilityRole="button"
+              accessibilityHint="Increases nightly sleep target by 30 minutes"
             >
               <PlusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
@@ -862,6 +962,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 setStepGoal(Math.max(2000, state.stepGoal - 1000));
               }}
               style={styles.dailyGoalButton}
+              accessibilityLabel="Decrease step goal"
+              accessibilityRole="button"
+              accessibilityHint="Decreases daily step target by 1000 steps"
             >
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
@@ -874,6 +977,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                 setStepGoal(Math.min(30000, state.stepGoal + 1000));
               }}
               style={styles.dailyGoalButton}
+              accessibilityLabel="Increase step goal"
+              accessibilityRole="button"
+              accessibilityHint="Increases daily step target by 1000 steps"
             >
               <PlusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
@@ -883,13 +989,27 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Buttons */}
       <View style={styles.buttonRow}>
-        <TouchableOpacity onPress={onBack} activeOpacity={0.7} style={{ flex: 1 }}>
+        <TouchableOpacity
+          onPress={onBack}
+          activeOpacity={0.7}
+          style={{ flex: 1 }}
+          accessibilityLabel="Back"
+          accessibilityRole="button"
+          accessibilityHint="Returns to previous step"
+        >
           <GlassCard style={styles.backButton} interactive>
             <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
           </GlassCard>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleContinue} activeOpacity={0.7} style={{ flex: 2 }}>
+        <TouchableOpacity
+          onPress={handleContinue}
+          activeOpacity={0.7}
+          style={{ flex: 2 }}
+          accessibilityLabel="Continue"
+          accessibilityRole="button"
+          accessibilityHint="Saves nutrition preferences and proceeds to next step"
+        >
           <GlassCard style={[styles.continueButton, { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }]} interactive>
             <Text style={[styles.continueButtonText, { color: colors.primary }]}>CONTINUE</Text>
           </GlassCard>
