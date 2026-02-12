@@ -109,6 +109,10 @@ export function BudgetTierSelector({
               ]}
               onPress={() => onSelectTier(tier.type)}
               activeOpacity={0.7}
+              accessibilityLabel={`${tier.label} budget tier: ${tier.weeklyRange}${isSelected ? ', currently selected' : ''}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityHint={`Sets meal plan budget to ${tier.label.toLowerCase()} tier with ${tier.description.toLowerCase()}`}
             >
               <View style={[
                 styles.tierIconContainer,
@@ -150,6 +154,10 @@ export function BudgetTierSelector({
             style={styles.pantryHeader}
             onPress={() => setShowPantrySection(!showPantrySection)}
             activeOpacity={0.7}
+            accessibilityLabel={`Pantry items${pantryItems.length > 0 ? `, ${pantryItems.length} items added` : ''}${showPantrySection ? ', expanded' : ', collapsed'}`}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showPantrySection }}
+            accessibilityHint={`${showPantrySection ? 'Collapses' : 'Expands'} the pantry items section to ${showPantrySection ? 'hide' : 'show'} items you already have at home`}
           >
             <View style={styles.pantryHeaderLeft}>
               <Ionicons
@@ -217,6 +225,10 @@ export function BudgetTierSelector({
                   onPress={handleAddPantryItem}
                   disabled={!newPantryItem.trim()}
                   activeOpacity={0.7}
+                  accessibilityLabel={newPantryItem.trim() ? `Add ${newPantryItem} to pantry` : 'Add pantry item'}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: !newPantryItem.trim() }}
+                  accessibilityHint="Adds the entered item to your pantry list for meal planning cost savings"
                 >
                   <Ionicons
                     name="add"
@@ -246,6 +258,9 @@ export function BudgetTierSelector({
                       <TouchableOpacity
                         onPress={() => handleRemovePantryItem(index)}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        accessibilityLabel={`Remove ${item.name} from pantry`}
+                        accessibilityRole="button"
+                        accessibilityHint={`Removes ${item.name} from your pantry item list`}
                       >
                         <Ionicons name="close-circle" size={18} color={colors.textMuted} />
                       </TouchableOpacity>
