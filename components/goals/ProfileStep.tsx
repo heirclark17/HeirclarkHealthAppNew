@@ -99,6 +99,9 @@ export function ProfileStep({
               <TouchableOpacity
                 style={[styles.toggle, { backgroundColor: inputBg, borderColor: colors.border }, sex === 'male' && [styles.toggleActive, { backgroundColor: colors.primary, borderColor: colors.primary }]]}
                 onPress={() => setSex('male')}
+                accessibilityLabel="Male"
+                accessibilityRole="button"
+                accessibilityState={{ selected: sex === 'male' }}
               >
                 <Text style={[styles.toggleText, { color: colors.text }, sex === 'male' && { color: colors.primaryText }]}>
                   Male
@@ -107,6 +110,9 @@ export function ProfileStep({
               <TouchableOpacity
                 style={[styles.toggle, { backgroundColor: inputBg, borderColor: colors.border }, sex === 'female' && [styles.toggleActive, { backgroundColor: colors.primary, borderColor: colors.primary }]]}
                 onPress={() => setSex('female')}
+                accessibilityLabel="Female"
+                accessibilityRole="button"
+                accessibilityState={{ selected: sex === 'female' }}
               >
                 <Text style={[styles.toggleText, { color: colors.text }, sex === 'female' && { color: colors.primaryText }]}>
                   Female
@@ -159,7 +165,13 @@ export function ProfileStep({
         </View>
       </View>
 
-      <TouchableOpacity style={[styles.button, { backgroundColor: colors.primary }]} onPress={onNext}>
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: colors.primary }]}
+        onPress={onNext}
+        accessibilityLabel="Continue to next step"
+        accessibilityRole="button"
+        accessibilityHint="Proceeds to the next step of the goal wizard"
+      >
         <Text style={[styles.buttonText, { color: colors.primaryText }]}>CONTINUE</Text>
         <Ionicons name="chevron-forward" size={18} color={colors.primaryText} />
       </TouchableOpacity>
