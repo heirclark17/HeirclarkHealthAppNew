@@ -104,7 +104,14 @@ export default function VerificationDetailsModal({
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)} style={styles.overlay}>
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={onClose}
+          accessibilityLabel="Close verification details"
+          accessibilityRole="button"
+          accessibilityHint="Closes the nutrition verification details modal"
+        />
         <Animated.View
           entering={SlideInDown.duration(300).springify()}
           exiting={SlideOutDown.duration(200)}
@@ -116,7 +123,13 @@ export default function VerificationDetailsModal({
               <View style={[styles.iconContainer, { backgroundColor: `${config.color}15` }]}>
                 <Ionicons name={config.icon} size={24} color={config.color} />
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={styles.closeButton}
+                accessibilityLabel="Close verification details"
+                accessibilityRole="button"
+                accessibilityHint="Dismisses the nutrition verification information modal"
+              >
                 <Ionicons name="close" size={24} color={subtextColor} />
               </TouchableOpacity>
             </View>
@@ -156,6 +169,9 @@ export default function VerificationDetailsModal({
                     <TouchableOpacity
                       style={[styles.applyButton, { backgroundColor: Colors.successStrong }]}
                       onPress={onApplyAdjustments}
+                      accessibilityLabel={`Apply ${verification.adjustments.length} suggested nutrition adjustments`}
+                      accessibilityRole="button"
+                      accessibilityHint="Updates meal nutrition data with verified values from multiple data sources"
                     >
                       <Ionicons name="checkmark-circle" size={18} color={Colors.text} />
                       <Text style={styles.applyButtonText}>Apply Adjustments</Text>
@@ -214,6 +230,9 @@ export default function VerificationDetailsModal({
             <TouchableOpacity
               style={[styles.closeBottomButton, { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]}
               onPress={onClose}
+              accessibilityLabel="Close verification details"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the nutrition verification information modal"
             >
               <Text style={[styles.closeBottomText, { color: subtextColor }]}>Close</Text>
             </TouchableOpacity>
