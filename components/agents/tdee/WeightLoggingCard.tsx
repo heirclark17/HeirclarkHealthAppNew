@@ -204,6 +204,9 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           onPress={() => setShowModal(true)}
+          accessibilityLabel={`Weight log: ${latestWeight ? `${formatWeight(latestWeight)}, ${weightChange?.text || 'no recent change'}` : 'no weight logged yet'}, ${todayLogged ? 'logged today' : 'not logged today'}, ${Math.min(recentWeights.length, 7)}-day streak`}
+          accessibilityRole="button"
+          accessibilityHint="Opens weight logging modal to enter your daily body weight for adaptive TDEE tracking"
         >
           <GlassCard style={styles.cardContainer} interactive>
             {/* Header */}
@@ -304,6 +307,9 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
               <TouchableOpacity
                 style={styles.logButton}
                 onPress={() => setShowModal(true)}
+                accessibilityLabel="Log weight"
+                accessibilityRole="button"
+                accessibilityHint="Opens weight entry form to log your current body weight"
               >
                 <Ionicons name="add" size={18} color={textColor} />
                 <Text style={[styles.logButtonText, { color: textColor }]}>Log Weight</Text>
@@ -328,6 +334,9 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
             style={styles.modalBackdrop}
             activeOpacity={1}
             onPress={() => setShowModal(false)}
+            accessibilityLabel="Close weight logging modal"
+            accessibilityRole="button"
+            accessibilityHint="Dismisses the weight entry form and returns to weight log card"
           />
           <Animated.View
             entering={FadeIn.duration(200)}
@@ -338,7 +347,13 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
               {/* Modal Header */}
               <View style={styles.modalHeader}>
                 <Text style={[styles.modalTitle, { color: textColor }]}>Log Weight</Text>
-                <TouchableOpacity onPress={() => setShowModal(false)} style={styles.closeButton}>
+                <TouchableOpacity
+                  onPress={() => setShowModal(false)}
+                  style={styles.closeButton}
+                  accessibilityLabel="Close weight entry form"
+                  accessibilityRole="button"
+                  accessibilityHint="Cancels weight logging and returns to weight log card"
+                >
                   <Ionicons name="close" size={24} color={subtextColor} />
                 </TouchableOpacity>
               </View>
@@ -385,6 +400,9 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                           (weightUnit === 'kg' ? latestWeight.weightKg : latestWeight.weightLbs) : 150);
                         setWeightInput((current + delta).toFixed(1));
                       }}
+                      accessibilityLabel={`${delta > 0 ? 'Add' : 'Subtract'} ${Math.abs(delta)} ${weightUnit}`}
+                      accessibilityRole="button"
+                      accessibilityHint={`Adjusts weight input by ${delta > 0 ? 'adding' : 'subtracting'} ${Math.abs(delta)} ${weightUnit}`}
                     >
                       <NumberText weight="medium" style={[styles.adjustButtonText, { color: delta > 0 ? Colors.warningOrange : Colors.successStrong }]}>
                         {delta > 0 ? '+' : ''}{delta}
@@ -399,6 +417,10 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                 style={[styles.submitButton, isLogging && styles.submitButtonDisabled]}
                 onPress={handleLogWeight}
                 disabled={isLogging}
+                accessibilityLabel={isLogging ? 'Logging weight, please wait' : 'Log weight'}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: isLogging, busy: isLogging }}
+                accessibilityHint="Saves your weight entry to adaptive TDEE tracker and updates weight history"
               >
                 {isLogging ? (
                   <Text style={[styles.submitButtonText, { color: textColor }]}>Logging...</Text>
