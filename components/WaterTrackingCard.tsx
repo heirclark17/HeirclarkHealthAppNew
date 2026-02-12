@@ -239,6 +239,10 @@ export function WaterTrackingCard({ date }: WaterTrackingCardProps) {
               ]}
               onPress={handleRemoveWater}
               disabled={waterIntake <= 0}
+              accessibilityLabel={`Remove one glass of water, currently at ${waterIntake} ${unit}`}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: waterIntake <= 0 }}
+              accessibilityHint={`Removes ${incrementAmount} ${unit} from your daily water intake`}
             >
               <Ionicons
                 name="remove"
@@ -258,6 +262,9 @@ export function WaterTrackingCard({ date }: WaterTrackingCardProps) {
                 },
               ]}
               onPress={handleAddWater}
+              accessibilityLabel={`Add one glass of water, currently at ${waterIntake} ${unit} of ${goal} ${unit} goal`}
+              accessibilityRole="button"
+              accessibilityHint={`Adds ${incrementAmount} ${unit} to your daily water intake${waterIntake + incrementAmount >= goal ? ', will complete your daily goal' : ''}`}
             >
               <Ionicons name="add" size={24} color={Colors.text} />
               <Text style={styles.addButtonText}>Add Glass</Text>
