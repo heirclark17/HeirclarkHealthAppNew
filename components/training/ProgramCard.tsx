@@ -11,6 +11,7 @@ import { TrainingProgram, ProgramTemplate } from '../../types/training';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 
 interface ProgramCardProps {
   program: TrainingProgram | ProgramTemplate;
@@ -172,7 +173,7 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
                     { color: isSelected ? greenColor : colors.textMuted },
                   ]}
                 >
-                  {program.duration} weeks
+                  <NumberText weight="regular">{program.duration}</NumberText> weeks
                 </Text>
               </View>
               <View style={styles.statItem}>
@@ -187,7 +188,7 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
                     { color: isSelected ? greenColor : colors.textMuted },
                   ]}
                 >
-                  {program.daysPerWeek} days/week
+                  <NumberText weight="regular">{program.daysPerWeek}</NumberText> days/week
                 </Text>
               </View>
             </View>

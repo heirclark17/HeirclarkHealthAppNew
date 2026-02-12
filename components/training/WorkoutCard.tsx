@@ -331,7 +331,7 @@ export function WorkoutCard({
               <View style={styles.headerText}>
                 <Text style={[styles.workoutName, { color: colors.text }]}>{workout.name}</Text>
                 <Text style={[styles.workoutMeta, { color: colors.textMuted }]}>
-                  {workout.duration} min • {workout.estimatedCaloriesBurned} cal
+                  <NumberText weight="regular">{workout.duration}</NumberText> min • <NumberText weight="regular">{workout.estimatedCaloriesBurned}</NumberText> cal
                 </Text>
               </View>
               {workout.completed ? (
