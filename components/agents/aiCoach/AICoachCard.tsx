@@ -109,7 +109,9 @@ export function AICoachCard({
           <TouchableOpacity
             style={styles.chatButton}
             onPress={() => handleOpenChat()}
-            accessibilityLabel="Open AI Coach chat"
+            accessibilityLabel={`Open ${title || config.defaultTitle} chat`}
+            accessibilityRole="button"
+            accessibilityHint="Opens a conversation with your AI coach to ask questions and get personalized guidance"
           >
             <Ionicons name="chatbubble-ellipses" size={20} color={config.accentColor} />
           </TouchableOpacity>
@@ -124,6 +126,9 @@ export function AICoachCard({
                 key={index}
                 style={styles.suggestionChip}
                 onPress={() => handleOpenChat(suggestion)}
+                accessibilityLabel={`Ask: ${suggestion}`}
+                accessibilityRole="button"
+                accessibilityHint="Opens chat with this pre-filled question for quick AI guidance"
               >
                 <Text style={styles.suggestionText} numberOfLines={1}>
                   {suggestion}
@@ -142,6 +147,9 @@ export function AICoachCard({
                 key={index}
                 style={[styles.actionButton, { borderColor: `${config.accentColor}40` }]}
                 onPress={action.onPress}
+                accessibilityLabel={action.label}
+                accessibilityRole="button"
+                accessibilityHint={`Quickly access ${action.label.toLowerCase()} feature`}
               >
                 <Ionicons name={action.icon as any} size={16} color={config.accentColor} />
                 <Text style={[styles.actionText, { color: config.accentColor }]}>
