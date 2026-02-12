@@ -2,7 +2,7 @@
  * Restaurant Menu Card
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,16 @@ import {
   Modal,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { UtensilsCrossed, ArrowRight, Lightbulb, X, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useGlassTheme } from '../../liquidGlass';
 import { useRestaurantMenu } from '../../../contexts/RestaurantMenuContext';
+import { useGoalWizard } from '../../../contexts/GoalWizardContext';
+import { useMealPlan } from '../../../contexts/MealPlanContext';
 import { Fonts } from '../../../constants/Theme';
+import { generateRestaurantDishGuidance, RestaurantDishParams } from '../../../services/openaiService';
 
 const CUISINE_TYPES = ['mexican', 'italian', 'asian', 'american', 'fastfood', 'general'];
 

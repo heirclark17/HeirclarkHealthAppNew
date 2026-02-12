@@ -84,7 +84,12 @@ export default function AccountabilityScreen() {
             </View>
           </GlassCard>
 
-          {/* Section: Social - Moved to top */}
+          {/* Weight Log Summary - First card */}
+          <View style={styles.cardWrapper}>
+            <WeightLoggingCard />
+          </View>
+
+          {/* Section: Social */}
           <View style={styles.sectionContainer}>
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>SOCIAL</Text>
 
@@ -97,11 +102,6 @@ export default function AccountabilityScreen() {
           {/* Section: Daily Tracking */}
           <View style={styles.sectionContainer}>
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DAILY TRACKING</Text>
-
-            {/* Weight Log Summary */}
-            <View style={styles.cardWrapper}>
-              <WeightLoggingCard />
-            </View>
 
             {/* Adaptive TDEE Card */}
             <View style={styles.cardWrapper}>

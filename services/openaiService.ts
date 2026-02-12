@@ -245,3 +245,99 @@ Keep it practical, varied, and enjoyable. Write in second person. Focus on abund
     return 'Build your meals around whole foods and consistent meal timing. Focus on hitting your daily macro targets while enjoying foods you love.';
   }
 }
+
+export interface RestaurantDishParams {
+  cuisine: string;
+  dishType?: string; // 'appetizer', 'entree', 'dessert', 'beverage'
+  dailyCalories: number;
+  remainingCalories: number;
+  dailyProtein: number;
+  remainingProtein: number;
+  dailyCarbs: number;
+  remainingCarbs: number;
+  dailyFat: number;
+  remainingFat: number;
+  primaryGoal: string; // 'lose_weight', 'build_muscle', 'maintain'
+  allergies?: string[];
+  dietaryPreferences?: string[]; // 'vegetarian', 'vegan', 'keto', etc.
+}
+
+/**
+ * Generate detailed restaurant dish recommendations with accountability-focused AI guidance
+ */
+export async function generateRestaurantDishGuidance(
+  params: RestaurantDishParams
+): Promise<string> {
+  try {
+    const percentRemaining = (params.remainingCalories / params.dailyCalories) * 100;
+    const budgetStatus = percentRemaining >= 50 ? 'comfortable' : percentRemaining >= 25 ? 'moderate' : 'tight';
+
+    const prompt = `You are a nutrition specialist and accountability coach helping someone make smart dining-out choices. Provide DETAILED, ACTIONABLE guidance for ordering at a ${params.cuisine} restaurant.
+
+CLIENT PROFILE & DAILY TARGETS:
+- Primary Goal: ${params.primaryGoal.replace('_', ' ')}
+- Daily Calorie Target: ${params.dailyCalories} cal
+- Remaining Budget: ${params.remainingCalories} cal (${percentRemaining.toFixed(0)}% remaining - ${budgetStatus} budget)
+- Daily Protein: ${params.dailyProtein}g (${params.remainingProtein}g remaining)
+- Daily Carbs: ${params.dailyCarbs}g (${params.remainingCarbs}g remaining)
+- Daily Fat: ${params.dailyFat}g (${params.remainingFat}g remaining)
+${params.allergies && params.allergies.length > 0 ? `- Allergies: ${params.allergies.join(', ')}` : ''}
+${params.dietaryPreferences && params.dietaryPreferences.length > 0 ? `- Dietary Preferences: ${params.dietaryPreferences.join(', ')}` : ''}
+${params.dishType ? `- Looking for: ${params.dishType}` : ''}
+
+PROVIDE DETAILED GUIDANCE IN 4-5 PARAGRAPHS:
+
+1. ACCOUNTABILITY CHECK-IN (1-2 sentences): Address their current calorie budget status directly. If budget is tight (<30% remaining), acknowledge the challenge and pivot to smarter choices. If comfortable (>50%), encourage enjoying the meal while staying mindful.
+
+2. BEST DISHES TO ORDER (detailed paragraph): List 3-5 specific dishes common at ${params.cuisine} restaurants that FIT their macro budget. For EACH dish, include:
+   - Estimated calories and macros
+   - WHY it aligns with their ${params.primaryGoal.replace('_', ' ')} goal
+   - Specific protein/veggie/sauce components
+
+3. SMART MODIFICATIONS (detailed paragraph): Provide 5-7 SPECIFIC modification requests they can make to ANY dish:
+   - "Ask for sauce on the side"
+   - "Request grilled instead of fried"
+   - "Substitute rice with extra vegetables"
+   - "Ask for no cheese or light cheese"
+   - Include calorie savings for each modification (e.g., "saves ~200 calories")
+
+4. WHAT TO AVOID (direct paragraph): List 3-5 common ${params.cuisine} dishes that will BLOW their budget. Be specific about why (e.g., "General Tso's Chicken: typically 1,200+ calories with deep-fried chicken and sugary sauce").
+
+5. PRACTICAL ORDERING STRATEGY (action-focused): Give 3-4 tactical tips:
+   - When to order appetizers vs skip them
+   - Portion control strategies (ask for to-go box immediately, split entree, etc.)
+   - Beverage recommendations (save calories here!)
+   - How to handle sides/extras
+
+Be HONEST, DIRECT, and PRACTICAL. Use actual dish names from ${params.cuisine} cuisine. Focus on ACCOUNTABILITY - help them stay on track while still enjoying eating out. Make recommendations feel achievable, not restrictive.`;
+
+    console.log('[OpenAI Service] Generating restaurant dish guidance for:', params.cuisine);
+
+    const completion = await getOpenAI().chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a nutrition specialist and accountability coach. Provide detailed, practical restaurant guidance that helps people stay on track with their goals while enjoying dining out. Be specific, honest, and actionable.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 800, // More tokens for detailed guidance
+    });
+
+    return completion.choices[0]?.message?.content || 'Unable to generate restaurant guidance at this time.';
+  } catch (error) {
+    console.error('[OpenAI Service] Error generating restaurant dish guidance:', error);
+
+    // Return a friendly fallback message
+    if (error instanceof Error && error.message.includes('API key not configured')) {
+      return 'AI-powered restaurant guidance is not currently available. To enable this feature, please configure your OpenAI API key in the app settings.';
+    }
+
+    return `When dining at ${params.cuisine} restaurants, focus on grilled proteins, vegetables, and requesting sauces on the side. Ask your server about portion sizes and consider sharing dishes. You have ${params.remainingCalories} calories remaining today, so choose mindfully.`;
+  }
+}
