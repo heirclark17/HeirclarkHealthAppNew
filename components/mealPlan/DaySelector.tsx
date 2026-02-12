@@ -6,6 +6,7 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants
 import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 import { DayPlan } from '../../types/mealPlan';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -209,14 +210,17 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                   ]}>
                     {shortDayName}
                   </Text>
-                  <Text style={[
-                    styles.dayNumber,
-                    { color: colors.text },
-                    isCheat && !isSelected && { color: Colors.warning },
-                    isSelected && { color: isDark ? Colors.background : Colors.text },
-                  ]}>
+                  <NumberText
+                    weight="light"
+                    style={[
+                      styles.dayNumber,
+                      { color: colors.text },
+                      isCheat && !isSelected && { color: Colors.warning },
+                      isSelected && { color: isDark ? Colors.background : Colors.text },
+                    ]}
+                  >
                     {getDayNumber(day.date)}
-                  </Text>
+                  </NumberText>
                 </TouchableOpacity>
               </View>
             );
@@ -305,15 +309,18 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                         style={{ position: 'absolute', top: 2, right: 2 }}
                       />
                     )}
-                    <Text style={[
-                      styles.calendarDayText,
-                      { color: colors.text },
-                      item.isCheat && !item.isSelected && { color: Colors.warning },
-                      item.isSelected && { color: item.isCheat ? (isDark ? Colors.background : Colors.text) : colors.background },
-                      !item.isInPlan && !item.isCheat && { color: colors.textMuted },
-                    ]}>
+                    <NumberText
+                      weight="medium"
+                      style={[
+                        styles.calendarDayText,
+                        { color: colors.text },
+                        item.isCheat && !item.isSelected && { color: Colors.warning },
+                        item.isSelected && { color: item.isCheat ? (isDark ? Colors.background : Colors.text) : colors.background },
+                        !item.isInPlan && !item.isCheat && { color: colors.textMuted },
+                      ]}
+                    >
                       {item.day}
-                    </Text>
+                    </NumberText>
                   </TouchableOpacity>
                 )
               ))}
@@ -376,7 +383,7 @@ const styles = StyleSheet.create({
   dayNumber: {
     fontSize: 18,
     color: Colors.text,
-    fontFamily: Fonts.regular,
+    // Font family handled by NumberText component (SF Pro Rounded)
     fontWeight: '100',
   },
   cheatDayItem: {
@@ -470,7 +477,7 @@ const styles = StyleSheet.create({
   calendarDayText: {
     fontSize: 14,
     color: Colors.text,
-    fontFamily: Fonts.medium,
+    // Font family handled by NumberText component (SF Pro Rounded)
   },
   calendarDayDisabled: {
     opacity: 0.3,
