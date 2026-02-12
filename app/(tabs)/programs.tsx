@@ -612,7 +612,7 @@ export default function ProgramsScreen() {
               <GlassCard style={styles.actionButton} interactive>
                 <View style={styles.actionButtonInner}>
                   <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                    <Ionicons name="settings-outline" size={20} color={colors.textMuted} />
+                    <Settings size={20} color={colors.textMuted} strokeWidth={1.5} />
                   </View>
                   <Text style={[styles.actionText, { color: colors.textSecondary }]}>Adjust Goals</Text>
                 </View>
@@ -622,7 +622,7 @@ export default function ProgramsScreen() {
               <GlassCard style={styles.actionButton} interactive>
                 <View style={styles.actionButtonInner}>
                   <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                    <Ionicons name="sparkles-outline" size={20} color={colors.textMuted} />
+                    <Sparkles size={20} color={colors.textMuted} strokeWidth={1.5} />
                   </View>
                   <Text style={[styles.actionText, { color: colors.textSecondary }]}>AI Coach</Text>
                 </View>
@@ -650,7 +650,7 @@ export default function ProgramsScreen() {
                 style={styles.closeButtonWrapper}
               >
                 <GlassCard style={styles.modalCloseButtonGlass} interactive>
-                  <Ionicons name="close" size={22} color={colors.text} />
+                  <X size={22} color={colors.text} strokeWidth={1.5} />
                 </GlassCard>
               </TouchableOpacity>
               <Text style={[styles.modalTitle, { color: colors.text }]}>Training Programs</Text>

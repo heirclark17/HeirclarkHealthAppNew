@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { CheckCircle2, Info } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../../components/GlassCard';
@@ -95,7 +95,7 @@ export default function ProgramLibraryScreen() {
             <GlassCard style={styles.currentProgramCard} interactive>
               <View style={styles.currentProgramContent}>
                 <View style={[styles.programIconContainer, { backgroundColor: isDark ? 'rgba(76, 217, 100, 0.2)' : 'rgba(76, 217, 100, 0.15)' }]}>
-                  <Ionicons name="checkmark-circle" size={24} color={Colors.protein} />
+                  <CheckCircle2 size={24} color={Colors.protein} strokeWidth={1.5} />
                 </View>
                 <View style={styles.currentProgramInfo}>
                   <Text style={[styles.currentProgramName, { color: colors.text }]}>
@@ -137,7 +137,7 @@ export default function ProgramLibraryScreen() {
           <GlassCard style={styles.infoCard} interactive>
             <View style={styles.infoContent}>
               <View style={[styles.infoIconContainer, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.15)' }]}>
-                <Ionicons name="information-circle-outline" size={22} color={colors.primary} />
+                <Info size={22} color={colors.primary} strokeWidth={1.5} />
               </View>
               <View style={styles.infoText}>
                 <Text style={[styles.infoTitle, { color: colors.text }]}>Personalized Programs</Text>
