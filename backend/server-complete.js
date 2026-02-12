@@ -1617,7 +1617,8 @@ ${mealDiversityInstruction}
       ],
       response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 16000,
+      max_tokens: 8000, // Reduced from 16000 to prevent timeouts (still enough for 7-day plan)
+      timeout: 25000, // 25 second timeout to prevent Railway 30s timeout
     });
 
     const rawContent = completion.choices[0].message.content;
@@ -1654,7 +1655,34 @@ ${mealDiversityInstruction}
     });
   } catch (error) {
     console.error('[Meal Plan] Error:', error);
-    res.status(500).json({ error: 'Failed to generate meal plan', message: error.message });
+
+    // Specific error handling for common issues
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      return res.status(504).json({
+        error: 'Request timeout',
+        message: 'AI generation took too long. Try reducing the number of days or simplifying preferences.',
+      });
+    }
+
+    if (error.status === 401 || error.message?.includes('API key')) {
+      console.error('[Meal Plan] ⚠️ OpenAI API key missing or invalid');
+      return res.status(500).json({
+        error: 'Configuration error',
+        message: 'AI service not configured. Please contact support.',
+      });
+    }
+
+    if (error.status === 429) {
+      return res.status(429).json({
+        error: 'Rate limit exceeded',
+        message: 'Too many AI requests. Please try again in a few minutes.',
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to generate meal plan',
+      message: error.message || 'Unknown error occurred',
+    });
   }
 });
 
