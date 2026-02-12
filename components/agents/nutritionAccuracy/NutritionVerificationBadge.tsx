@@ -80,7 +80,13 @@ export default function NutritionVerificationBadge({
 
   if (onPress) {
     return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.7}
+        accessibilityLabel={`Nutrition verification status: ${config.label}${hasFlags ? ' with warnings' : ''}`}
+        accessibilityRole="button"
+        accessibilityHint="Opens detailed nutrition verification information with data sources and confidence breakdown"
+      >
         {content}
       </TouchableOpacity>
     );
