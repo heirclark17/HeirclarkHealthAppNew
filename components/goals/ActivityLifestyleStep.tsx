@@ -202,7 +202,14 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
 
   return (
     <View>
-      <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
+      <TouchableOpacity
+        onPress={handlePress}
+        activeOpacity={0.8}
+        accessibilityLabel={`${option.title}: ${option.description}, ${option.example}`}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected }}
+        accessibilityHint={`Select ${option.title} activity level`}
+      >
         <View>
           <GlassCard style={[isSelected && { backgroundColor: selectedBg }]} interactive>
             <View style={styles.activityCard}>
@@ -267,6 +274,9 @@ function Chip({ label, isSelected, onSelect, colors }: ChipProps) {
         onSelect();
       }}
       activeOpacity={0.7}
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isSelected }}
     >
       <GlassCard style={[styles.chip, isSelected && { backgroundColor: selectedBg }]} interactive>
         <Text style={[styles.chipText, { color: colors.text }, isSelected && styles.chipTextSelected]}>
@@ -299,7 +309,14 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
 
   return (
     <View>
-      <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
+      <TouchableOpacity
+        onPress={handlePress}
+        activeOpacity={0.8}
+        accessibilityLabel={`${option.title}: ${option.description}, ${option.calorieInfo}, ${option.frequency}`}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected }}
+        accessibilityHint={`Select ${option.title} as preferred cardio type`}
+      >
         <View>
           <GlassCard style={[isSelected && { backgroundColor: selectedBg }]} interactive>
             <View style={styles.cardioCard}>
@@ -413,6 +430,10 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   await selectionFeedback();
                   setWorkoutsPerWeek(num);
                 }}
+                accessibilityLabel={`${num} workouts per week`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint="Sets weekly workout frequency"
               >
                 <GlassCard
                   style={[
@@ -453,6 +474,10 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   setWorkoutDuration(duration);
                 }}
                 activeOpacity={0.7}
+                accessibilityLabel={`${duration} minutes workout duration`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint="Sets typical workout session length"
               >
                 <GlassCard style={[styles.chip, isSelected && { backgroundColor: selectedBg }, { borderWidth: 0 }]} borderColor="transparent" interactive>
                   <Text style={[styles.chipText, { color: colors.text }, isSelected && styles.chipTextSelected]}>
@@ -559,6 +584,10 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                     await selectionFeedback();
                     setStrengthLevel(level.value as StrengthLevel);
                   }}
+                  accessibilityLabel={`${level.label}: ${level.desc}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: state.strengthLevel === level.value }}
+                  accessibilityHint={`Select ${level.label} strength training level`}
                 >
                   <GlassCard
                     style={[
@@ -687,6 +716,10 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   await selectionFeedback();
                   toggleEquipment(equipment.id);
                 }}
+                accessibilityLabel={`${equipment.label}${isSelected ? ', selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${equipment.label} as available equipment`}
               >
                 <GlassCard
                   style={[
@@ -738,6 +771,10 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   await selectionFeedback();
                   toggleInjury(injury.id);
                 }}
+                accessibilityLabel={`${injury.label}: ${injury.description}${isSelected ? ', selected' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityHint={`Toggle ${injury.label} injury or limitation`}
               >
                 <GlassCard
                   style={[
@@ -797,12 +834,24 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       {/* Buttons */}
       <View style={styles.buttonRow}>
-        <TouchableOpacity onPress={onBack} style={{ flex: 1 }}>
+        <TouchableOpacity
+          onPress={onBack}
+          style={{ flex: 1 }}
+          accessibilityLabel="Back"
+          accessibilityRole="button"
+          accessibilityHint="Returns to previous step"
+        >
           <GlassCard style={styles.backButton} interactive>
             <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
           </GlassCard>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleContinue} style={{ flex: 2 }}>
+        <TouchableOpacity
+          onPress={handleContinue}
+          style={{ flex: 2 }}
+          accessibilityLabel="Continue"
+          accessibilityRole="button"
+          accessibilityHint="Saves activity preferences and proceeds to next step"
+        >
           <GlassCard style={[styles.continueButton, { backgroundColor: primaryGlassBg }]} interactive>
             <Text style={[styles.continueButtonText, { color: colors.primary }]}>CONTINUE</Text>
           </GlassCard>
