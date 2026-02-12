@@ -546,205 +546,223 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
             {/* Dietary Preferences */}
             {foodPrefs?.preferences?.dietaryPreferences && foodPrefs.preferences.dietaryPreferences.length > 0 && (
-              <View style={styles.prefSection}>
-                <View style={styles.prefRow}>
-                  <Leaf size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Dietary Style</Text>
+              <GlassCard style={styles.prefCard} interactive>
+                <View style={styles.prefSection}>
+                  <View style={styles.prefRow}>
+                    <Leaf size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Dietary Style</Text>
+                  </View>
+                  <View style={styles.prefTagsRow}>
+                    {foodPrefs.preferences.dietaryPreferences.map((pref, index) => (
+                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
+                          {pref.charAt(0).toUpperCase() + pref.slice(1).replace('_', ' ')}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.prefTagsRow}>
-                  {foodPrefs.preferences.dietaryPreferences.map((pref, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
-                        {pref.charAt(0).toUpperCase() + pref.slice(1).replace('_', ' ')}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Allergens */}
             {foodPrefs?.preferences?.allergens && foodPrefs.preferences.allergens.length > 0 && (
-              <View style={styles.prefSection}>
-                <View style={styles.prefRow}>
-                  <AlertTriangle size={16} color={Colors.error} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Allergens to Avoid</Text>
+              <GlassCard style={styles.prefCard} interactive>
+                <View style={styles.prefSection}>
+                  <View style={styles.prefRow}>
+                    <AlertTriangle size={16} color={Colors.error} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Allergens to Avoid</Text>
+                  </View>
+                  <View style={styles.prefTagsRow}>
+                    {foodPrefs.preferences.allergens.map((allergen, index) => (
+                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
+                          {allergen.charAt(0).toUpperCase() + allergen.slice(1)}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.prefTagsRow}>
-                  {foodPrefs.preferences.allergens.map((allergen, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
-                        {allergen.charAt(0).toUpperCase() + allergen.slice(1)}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Cuisines */}
             {foodPrefs?.preferences?.favoriteCuisines && foodPrefs.preferences.favoriteCuisines.length > 0 && (
-              <View style={styles.prefSection}>
-                <View style={styles.prefRow}>
-                  <UtensilsCrossed size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Cuisines</Text>
+              <GlassCard style={styles.prefCard} interactive>
+                <View style={styles.prefSection}>
+                  <View style={styles.prefRow}>
+                    <UtensilsCrossed size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Cuisines</Text>
+                  </View>
+                  <View style={styles.prefTagsRow}>
+                    {foodPrefs.preferences.favoriteCuisines.map((cuisine, index) => (
+                      <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
+                        <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
+                          {cuisine.charAt(0).toUpperCase() + cuisine.slice(1).replace('_', ' ')}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.prefTagsRow}>
-                  {foodPrefs.preferences.favoriteCuisines.map((cuisine, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
-                      <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
-                        {cuisine.charAt(0).toUpperCase() + cuisine.slice(1).replace('_', ' ')}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Proteins */}
             {foodPrefs?.preferences?.favoriteProteins && foodPrefs.preferences.favoriteProteins.length > 0 && (
-              <View style={styles.prefSection}>
-                <View style={styles.prefRow}>
-                  <Fish size={16} color={colors.protein} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Proteins</Text>
+              <GlassCard style={styles.prefCard} interactive>
+                <View style={styles.prefSection}>
+                  <View style={styles.prefRow}>
+                    <Fish size={16} color={colors.protein} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Proteins</Text>
+                  </View>
+                  <View style={styles.prefTagsRow}>
+                    {foodPrefs.preferences.favoriteProteins.map((protein, index) => (
+                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: colors.protein, fontFamily: Fonts.light }]}>
+                          {protein.charAt(0).toUpperCase() + protein.slice(1).replace('_', ' ')}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.prefTagsRow}>
-                  {foodPrefs.preferences.favoriteProteins.map((protein, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: colors.protein, fontFamily: Fonts.light }]}>
-                        {protein.charAt(0).toUpperCase() + protein.slice(1).replace('_', ' ')}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Vegetables */}
             {foodPrefs?.preferences?.favoriteVegetables && foodPrefs.preferences.favoriteVegetables.length > 0 && (
-              <View style={styles.prefSection}>
-                <View style={styles.prefRow}>
-                  <Leaf size={16} color={Colors.success} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Vegetables</Text>
+              <GlassCard style={styles.prefCard} interactive>
+                <View style={styles.prefSection}>
+                  <View style={styles.prefRow}>
+                    <Leaf size={16} color={Colors.success} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Vegetables</Text>
+                  </View>
+                  <View style={styles.prefTagsRow}>
+                    {foodPrefs.preferences.favoriteVegetables.map((veggie, index) => (
+                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
+                          {veggie.charAt(0).toUpperCase() + veggie.slice(1).replace('_', ' ')}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.prefTagsRow}>
-                  {foodPrefs.preferences.favoriteVegetables.map((veggie, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
-                        {veggie.charAt(0).toUpperCase() + veggie.slice(1).replace('_', ' ')}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Starches */}
             {foodPrefs?.preferences?.favoriteStarches && foodPrefs.preferences.favoriteStarches.length > 0 && (
-              <View style={styles.prefSection}>
-                <View style={styles.prefRow}>
-                  <Pizza size={16} color={colors.carbs} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Starches</Text>
+              <GlassCard style={styles.prefCard} interactive>
+                <View style={styles.prefSection}>
+                  <View style={styles.prefRow}>
+                    <Pizza size={16} color={colors.carbs} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Starches</Text>
+                  </View>
+                  <View style={styles.prefTagsRow}>
+                    {foodPrefs.preferences.favoriteStarches.map((starch, index) => (
+                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: colors.carbs, fontFamily: Fonts.light }]}>
+                          {starch.charAt(0).toUpperCase() + starch.slice(1).replace('_', ' ')}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.prefTagsRow}>
-                  {foodPrefs.preferences.favoriteStarches.map((starch, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: colors.carbs, fontFamily: Fonts.light }]}>
-                        {starch.charAt(0).toUpperCase() + starch.slice(1).replace('_', ' ')}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Favorite Snacks */}
             {foodPrefs?.preferences?.favoriteSnacks && foodPrefs.preferences.favoriteSnacks.length > 0 && (
-              <View style={styles.prefSection}>
-                <View style={styles.prefRow}>
-                  <IceCream size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Snacks</Text>
+              <GlassCard style={styles.prefCard} interactive>
+                <View style={styles.prefSection}>
+                  <View style={styles.prefRow}>
+                    <IceCream size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Snacks</Text>
+                  </View>
+                  <View style={styles.prefTagsRow}>
+                    {foodPrefs.preferences.favoriteSnacks.map((snack, index) => (
+                      <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
+                        <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
+                          {snack.charAt(0).toUpperCase() + snack.slice(1).replace('_', ' ')}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.prefTagsRow}>
-                  {foodPrefs.preferences.favoriteSnacks.map((snack, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
-                      <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
-                        {snack.charAt(0).toUpperCase() + snack.slice(1).replace('_', ' ')}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Hated Foods */}
             {foodPrefs?.preferences?.hatedFoods && foodPrefs.preferences.hatedFoods.trim().length > 0 && (
-              <View style={styles.prefSection}>
-                <View style={styles.prefRow}>
-                  <XCircle size={16} color={Colors.error} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Foods to Avoid</Text>
+              <GlassCard style={styles.prefCard} interactive>
+                <View style={styles.prefSection}>
+                  <View style={styles.prefRow}>
+                    <XCircle size={16} color={Colors.error} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Foods to Avoid</Text>
+                  </View>
+                  <View style={styles.prefTagsRow}>
+                    {foodPrefs.preferences.hatedFoods.split(',').map((food, index) => (
+                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
+                          {food.trim().charAt(0).toUpperCase() + food.trim().slice(1).replace('_', ' ')}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-                <View style={styles.prefTagsRow}>
-                  {foodPrefs.preferences.hatedFoods.split(',').map((food, index) => (
-                    <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
-                      <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
-                        {food.trim().charAt(0).toUpperCase() + food.trim().slice(1).replace('_', ' ')}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              </GlassCard>
             )}
 
             {/* Meal Planning Preferences */}
-            <View style={styles.mealPlanningSection}>
-              {/* Meal Diversity */}
-              {foodPrefs?.preferences?.mealDiversity && (
-                <View style={styles.prefRow}>
-                  <SettingsIcon size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Variety: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                    {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily (Meal Prep)' : 'Diverse Meals'}
-                  </Text>
-                </View>
-              )}
+            <GlassCard style={styles.prefCard} interactive>
+              <View style={styles.mealPlanningSection}>
+                {/* Meal Diversity */}
+                {foodPrefs?.preferences?.mealDiversity && (
+                  <View style={styles.prefRow}>
+                    <SettingsIcon size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Variety: </Text>
+                    <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
+                      {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily (Meal Prep)' : 'Diverse Meals'}
+                    </Text>
+                  </View>
+                )}
 
-              {/* Meal Style */}
-              {foodPrefs?.preferences?.mealStyle && (
-                <View style={styles.prefRow}>
-                  <Timer size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Style: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                    {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer, Larger Meals'}
-                  </Text>
-                </View>
-              )}
+                {/* Meal Style */}
+                {foodPrefs?.preferences?.mealStyle && (
+                  <View style={styles.prefRow}>
+                    <Timer size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Style: </Text>
+                    <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
+                      {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer, Larger Meals'}
+                    </Text>
+                  </View>
+                )}
 
-              {/* Cheat Days */}
-              {foodPrefs?.preferences?.cheatDays !== undefined && (
-                <View style={styles.prefRow}>
-                  <Calendar size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cheat Days: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                    <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
-                      {foodPrefs.preferences.cheatDays.length}
-                    </NumberText> per week
-                  </Text>
-                </View>
-              )}
+                {/* Cheat Days */}
+                {foodPrefs?.preferences?.cheatDays !== undefined && (
+                  <View style={styles.prefRow}>
+                    <Calendar size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cheat Days: </Text>
+                    <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
+                      <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
+                        {foodPrefs.preferences.cheatDays.length}
+                      </NumberText> per week
+                    </Text>
+                  </View>
+                )}
 
-              {/* Cooking Skill */}
-              {foodPrefs?.preferences?.cookingSkill && (
-                <View style={styles.prefRow}>
-                  <ChefHat size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cooking Skill: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                    {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
-                     foodPrefs.preferences.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
-                  </Text>
-                </View>
-              )}
-            </View>
+                {/* Cooking Skill */}
+                {foodPrefs?.preferences?.cookingSkill && (
+                  <View style={styles.prefRow}>
+                    <ChefHat size={16} color={colors.textMuted} />
+                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cooking Skill: </Text>
+                    <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
+                      {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
+                       foodPrefs.preferences.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </GlassCard>
 
             {/* AI-Generated Nutrition Guidance */}
             <View style={styles.nutritionGuidanceSection}>
@@ -1378,8 +1396,13 @@ const styles = StyleSheet.create({
     fontWeight: '200',
     color: Colors.text,
   },
+  prefCard: {
+    width: '100%',
+    padding: 12,
+    marginBottom: 12,
+  },
   prefSection: {
-    marginBottom: 30,
+    marginBottom: 0,
   },
   prefRow: {
     flexDirection: 'row',
