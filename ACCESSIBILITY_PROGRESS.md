@@ -1,6 +1,6 @@
 # Accessibility Labels Implementation Progress
 
-## ✅ COMPLETED (15 files)
+## ✅ COMPLETED (16 files)
 
 ### Core UI Components (2 files)
 - ✅ GlassButton - Universal button with comprehensive accessibility
@@ -10,12 +10,13 @@
 - ✅ MealCard - 5 buttons (View Recipe, Add to Meals, Save, Instacart, Swap)
 - ✅ RecipeModal - 2 buttons (Close, Shop on Instacart)
 
-### Goal Wizard (5 files)
+### Goal Wizard (6 files)
 - ✅ GoalStep - Weight goal selection + date pickers
 - ✅ PrimaryGoalStep - Primary goal cards
 - ✅ ActivityStep - Activity level options + navigation
 - ✅ PlanPreviewStep - Adjust/Confirm buttons
 - ✅ BodyMetricsStep - Complete metrics input with pickers
+- ✅ ProfileStep - Sex selection and continue button
 
 ### Training (3 files)
 - ✅ DaySelector - Day navigation with workout/rest status
@@ -24,8 +25,7 @@
 
 ## ⏳ IN PROGRESS (Remaining files needing labels)
 
-### Goal Wizard (4 files remaining)
-- ⏳ ProfileStep
+### Goal Wizard (3 files remaining)
 - ⏳ NutritionPreferencesStep
 - ⏳ ResultsStep
 - ⏳ ActivityLifestyleStep
@@ -62,10 +62,10 @@
 - ⏳ And others...
 
 ## 📊 Statistics
-- **Completed:** 15 files (~13% of 116 files with TouchableOpacity)
-- **Remaining:** ~101 files
-- **Commits:** 5 commits pushed to remote
-- **Total buttons labeled:** ~50+ interactive elements
+- **Completed:** 16 files (~14% of 116 files with TouchableOpacity)
+- **Remaining:** ~100 files
+- **Commits:** 7 commits pushed to remote
+- **Total buttons labeled:** ~55+ interactive elements
 
 ## 🎯 Next Steps Priority
 1. Complete Goal Wizard (4 remaining files)
