@@ -151,6 +151,9 @@ function AlternativeCard({
         style={[styles.alternativeCard, { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder }]}
         onPress={handlePress}
         activeOpacity={1}
+        accessibilityLabel={`${alternative.name}, ${formatEquipment(alternative.equipment)}, ${getDifficultyLabel(alternative.difficultyModifier)}`}
+        accessibilityRole="button"
+        accessibilityHint={`Swaps to ${alternative.name} exercise using ${formatEquipment(alternative.equipment)}`}
       >
         <View style={styles.cardHeader}>
           <View style={[styles.iconContainer, { backgroundColor: glassColors.secondaryBg }]}>
@@ -266,6 +269,9 @@ export function ExerciseAlternativesModal({
               <TouchableOpacity
                 style={[styles.closeButton, { backgroundColor: glassColors.buttonBg, borderColor: glassColors.cardBorder }]}
                 onPress={handleClose}
+                accessibilityLabel="Close exercise alternatives"
+                accessibilityRole="button"
+                accessibilityHint="Closes the alternatives modal and returns to the workout"
               >
                 <Ionicons name="close" size={24} color={glassColors.text} />
               </TouchableOpacity>
