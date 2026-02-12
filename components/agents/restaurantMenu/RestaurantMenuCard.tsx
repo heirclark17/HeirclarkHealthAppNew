@@ -26,19 +26,59 @@ const CUISINE_TYPES = ['mexican', 'italian', 'asian', 'american', 'fastfood', 'g
 
 export default function RestaurantMenuCard() {
   const { colors } = useGlassTheme();
-  const { state, getRestaurantTips, getHealthyModifications, addRecentSearch } = useRestaurantMenu();
+  const { state: goalState } = useGoalWizard();
+  const { state: mealState } = useMealPlan();
+  const { addRecentSearch } = useRestaurantMenu();
 
   const [showModal, setShowModal] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [aiGuidance, setAiGuidance] = useState<string>('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCuisineSelect = useCallback((cuisine: string) => {
+  // Calculate remaining macros for the day
+  const dailyTargets = goalState.dailyTargets || { calories: 2000, protein: 150, carbs: 200, fat: 60 };
+  const todayTotals = mealState.weeklyPlan?.[mealState.selectedDayIndex]?.totals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
+  const remainingCalories = Math.max(0, dailyTargets.calories - todayTotals.calories);
+  const remainingProtein = Math.max(0, dailyTargets.protein - todayTotals.protein);
+  const remainingCarbs = Math.max(0, dailyTargets.carbs - todayTotals.carbs);
+  const remainingFat = Math.max(0, dailyTargets.fat - todayTotals.fat);
+
+  const handleCuisineSelect = useCallback(async (cuisine: string) => {
     setSelectedCuisine(cuisine);
     addRecentSearch(cuisine);
-  }, [addRecentSearch]);
+    setIsGenerating(true);
+    setError(null);
 
-  const tips = selectedCuisine ? getRestaurantTips(selectedCuisine) : [];
-  const modifications = getHealthyModifications();
+    try {
+      console.log('[RestaurantMenu] Generating AI guidance for:', cuisine);
+
+      const params: RestaurantDishParams = {
+        cuisine,
+        dailyCalories: dailyTargets.calories,
+        remainingCalories,
+        dailyProtein: dailyTargets.protein,
+        remainingProtein,
+        dailyCarbs: dailyTargets.carbs,
+        remainingCarbs,
+        dailyFat: dailyTargets.fat,
+        remainingFat,
+        primaryGoal: goalState.primaryGoal || 'maintain',
+        allergies: goalState.allergies || [],
+        dietaryPreferences: goalState.dietStyle ? [goalState.dietStyle] : [],
+      };
+
+      const guidance = await generateRestaurantDishGuidance(params);
+      setAiGuidance(guidance);
+      console.log('[RestaurantMenu] ✅ AI guidance generated');
+    } catch (err) {
+      console.error('[RestaurantMenu] Error generating guidance:', err);
+      setError('Unable to generate guidance. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [addRecentSearch, dailyTargets, remainingCalories, remainingProtein, remainingCarbs, remainingFat, goalState.primaryGoal, goalState.allergies, goalState.dietStyle]);
 
   return (
     <>
@@ -47,29 +87,36 @@ export default function RestaurantMenuCard() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="restaurant" size={20} color={colors.primary} />
+              <UtensilsCrossed size={20} color={colors.primary} strokeWidth={1.5} />
             </View>
             <View>
               <Text style={[styles.title, { color: colors.text }]}>Eating Out Guide</Text>
               <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-                Make healthier choices
+                AI-powered accountability
               </Text>
             </View>
           </View>
           <TouchableOpacity
-            style={[styles.viewButton, { backgroundColor: colors.cardGlass }]}
+            style={[styles.viewButton, { backgroundColor: colors.primary + '15' }]}
             onPress={() => setShowModal(true)}
           >
-            <Text style={[styles.viewButtonText, { color: colors.primary }]}>Tips</Text>
-            <Ionicons name="arrow-forward" size={14} color={colors.primary} />
+            <Text style={[styles.viewButtonText, { color: colors.primary }]}>Open</Text>
+            <ArrowRight size={14} color={colors.primary} strokeWidth={1.5} />
           </TouchableOpacity>
         </View>
 
-        {/* Quick Tips Preview */}
-        <View style={[styles.tipsPreview, { backgroundColor: colors.primary + '10' }]}>
-          <Ionicons name="bulb" size={16} color={colors.primary} />
-          <Text style={[styles.tipText, { color: colors.textSecondary }]}>
-            Tap to get healthy dining tips for any cuisine
+        {/* Calorie Budget Display */}
+        <View style={[styles.budgetPreview, { backgroundColor: remainingCalories < dailyTargets.calories * 0.3 ? colors.error + '15' : colors.success + '15' }]}>
+          <View style={styles.budgetRow}>
+            <Text style={[styles.budgetLabel, { color: colors.textMuted }]}>Remaining Today</Text>
+            <Text style={[styles.budgetValue, { color: remainingCalories < dailyTargets.calories * 0.3 ? colors.error : colors.success }]}>
+              {Math.round(remainingCalories)} cal
+            </Text>
+          </View>
+          <Text style={[styles.budgetHint, { color: colors.textSecondary }]}>
+            {remainingCalories < dailyTargets.calories * 0.3
+              ? '⚠️ Tight budget - choose wisely'
+              : '✓ Good budget - enjoy mindfully'}
           </Text>
         </View>
 
@@ -101,22 +148,47 @@ export default function RestaurantMenuCard() {
       >
         <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>
-              {selectedCuisine
-                ? `${selectedCuisine.charAt(0).toUpperCase() + selectedCuisine.slice(1)} Tips`
-                : 'Restaurant Tips'}
-            </Text>
+            <View>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                {selectedCuisine
+                  ? `${selectedCuisine.charAt(0).toUpperCase() + selectedCuisine.slice(1)} Guide`
+                  : 'Restaurant Guide'}
+              </Text>
+              <Text style={[styles.modalSubtitle, { color: colors.textMuted }]}>
+                {Math.round(remainingCalories)} cal remaining • {goalState.primaryGoal?.replace('_', ' ') || 'Stay on track'}
+              </Text>
+            </View>
             <TouchableOpacity
-              style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
+              style={[styles.closeButton, { backgroundColor: colors.primary + '15' }]}
               onPress={() => setShowModal(false)}
             >
-              <Ionicons name="close" size={24} color={colors.text} />
+              <X size={22} color={colors.text} strokeWidth={1.5} />
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.modalContent}>
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+            {/* Calorie Budget Alert */}
+            <View style={[styles.budgetAlert, {
+              backgroundColor: remainingCalories < dailyTargets.calories * 0.3 ? colors.error + '15' : colors.success + '15',
+              borderColor: remainingCalories < dailyTargets.calories * 0.3 ? colors.error : colors.success,
+            }]}>
+              {remainingCalories < dailyTargets.calories * 0.3 ? (
+                <AlertCircle size={20} color={colors.error} strokeWidth={1.5} />
+              ) : (
+                <CheckCircle2 size={20} color={colors.success} strokeWidth={1.5} />
+              )}
+              <View style={styles.budgetAlertText}>
+                <Text style={[styles.budgetAlertTitle, { color: colors.text }]}>
+                  {remainingCalories < dailyTargets.calories * 0.3 ? 'Tight Budget' : 'Good Budget'}
+                </Text>
+                <Text style={[styles.budgetAlertSubtitle, { color: colors.textSecondary }]}>
+                  {Math.round(remainingCalories)} cal • {Math.round(remainingProtein)}g protein • {Math.round(remainingCarbs)}g carbs • {Math.round(remainingFat)}g fat
+                </Text>
+              </View>
+            </View>
+
             {/* Cuisine Selector */}
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Select Cuisine</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Select Cuisine Type</Text>
             <View style={styles.cuisineGrid}>
               {CUISINE_TYPES.map((cuisine) => (
                 <TouchableOpacity
@@ -124,11 +196,12 @@ export default function RestaurantMenuCard() {
                   style={[
                     styles.cuisineButton,
                     {
-                      backgroundColor: selectedCuisine === cuisine ? colors.primary : colors.cardGlass,
-                      borderColor: selectedCuisine === cuisine ? colors.primary : colors.glassBorder,
+                      backgroundColor: selectedCuisine === cuisine ? colors.primary : colors.backgroundSecondary,
+                      borderColor: selectedCuisine === cuisine ? colors.primary : colors.border,
                     },
                   ]}
                   onPress={() => handleCuisineSelect(cuisine)}
+                  disabled={isGenerating}
                 >
                   <Text style={{ color: selectedCuisine === cuisine ? '#FFF' : colors.text, fontSize: 13, fontFamily: Fonts.medium }}>
                     {cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}
@@ -137,32 +210,36 @@ export default function RestaurantMenuCard() {
               ))}
             </View>
 
-            {/* Tips */}
+            {/* AI-Generated Guidance */}
             {selectedCuisine && (
               <>
-                <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 20 }]}>
-                  Healthy Dining Tips
+                <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>
+                  AI-Powered Guidance
                 </Text>
-                {tips.map((tip, index) => (
-                  <View key={index} style={[styles.tipItem, { backgroundColor: colors.cardGlass }]}>
-                    <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-                    <Text style={[styles.tipItemText, { color: colors.textSecondary }]}>{tip}</Text>
+
+                {isGenerating ? (
+                  <View style={[styles.loadingContainer, { backgroundColor: colors.backgroundSecondary }]}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+                      Analyzing {selectedCuisine} dishes and your daily budget...
+                    </Text>
                   </View>
-                ))}
+                ) : error ? (
+                  <View style={[styles.errorContainer, { backgroundColor: colors.error + '15' }]}>
+                    <AlertCircle size={20} color={colors.error} strokeWidth={1.5} />
+                    <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
+                  </View>
+                ) : aiGuidance ? (
+                  <View style={[styles.guidanceContainer, { backgroundColor: colors.backgroundSecondary }]}>
+                    <Text style={[styles.guidanceText, { color: colors.text }]}>
+                      {aiGuidance}
+                    </Text>
+                  </View>
+                ) : null}
               </>
             )}
 
-            {/* Modifications */}
-            <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 20 }]}>
-              Ask for These Modifications
-            </Text>
-            <View style={styles.modificationList}>
-              {modifications.map((mod, index) => (
-                <View key={index} style={[styles.modChip, { backgroundColor: colors.primary + '20' }]}>
-                  <Text style={[styles.modText, { color: colors.primary }]}>{mod}</Text>
-                </View>
-              ))}
-            </View>
+            <View style={{ height: 40 }} />
           </ScrollView>
         </View>
       </Modal>
@@ -179,22 +256,31 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 12, fontFamily: Fonts.regular, marginTop: 2 },
   viewButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
   viewButtonText: { fontSize: 13, fontFamily: Fonts.medium },
-  tipsPreview: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10, marginBottom: 12 },
-  tipText: { flex: 1, fontSize: 12, fontFamily: Fonts.regular },
+  budgetPreview: { padding: 12, borderRadius: 12, marginBottom: 12 },
+  budgetRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  budgetLabel: { fontSize: 12, fontFamily: Fonts.regular },
+  budgetValue: { fontSize: 18, fontFamily: Fonts.semiBold },
+  budgetHint: { fontSize: 11, fontFamily: Fonts.regular },
   cuisineScroll: { marginTop: 4 },
   cuisineChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, marginRight: 8 },
   cuisineText: { fontSize: 12, fontFamily: Fonts.medium },
   modalContainer: { flex: 1 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' },
   modalTitle: { fontSize: 18, fontFamily: Fonts.semiBold },
+  modalSubtitle: { fontSize: 12, fontFamily: Fonts.regular, marginTop: 2 },
   closeButton: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   modalContent: { flex: 1, padding: 16 },
+  budgetAlert: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 20 },
+  budgetAlertText: { flex: 1 },
+  budgetAlertTitle: { fontSize: 14, fontFamily: Fonts.semiBold, marginBottom: 4 },
+  budgetAlertSubtitle: { fontSize: 11, fontFamily: Fonts.regular },
   sectionTitle: { fontSize: 15, fontFamily: Fonts.semiBold, marginBottom: 12 },
-  cuisineGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  cuisineGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   cuisineButton: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1 },
-  tipItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: 12, borderRadius: 10, marginBottom: 8 },
-  tipItemText: { flex: 1, fontSize: 13, fontFamily: Fonts.regular, lineHeight: 18 },
-  modificationList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  modChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
-  modText: { fontSize: 12, fontFamily: Fonts.medium },
+  loadingContainer: { padding: 32, borderRadius: 12, alignItems: 'center', gap: 12 },
+  loadingText: { fontSize: 13, fontFamily: Fonts.regular, textAlign: 'center' },
+  errorContainer: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderRadius: 12 },
+  errorText: { flex: 1, fontSize: 13, fontFamily: Fonts.regular },
+  guidanceContainer: { padding: 16, borderRadius: 12 },
+  guidanceText: { fontSize: 14, fontFamily: Fonts.regular, lineHeight: 22 },
 });
