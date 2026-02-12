@@ -192,6 +192,10 @@ export default function SavedMealsScreen() {
               <TouchableOpacity
                 onPress={() => handleToggleFavorite(item.id)}
                 style={styles.actionButton}
+                accessibilityLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isFavorite }}
+                accessibilityHint={isFavorite ? 'Removes this meal from your favorites list' : 'Adds this meal to your favorites for quick access'}
               >
                 <Heart
                   size={20}
@@ -203,6 +207,9 @@ export default function SavedMealsScreen() {
               <TouchableOpacity
                 onPress={() => handleDeleteMeal(item.id, meal.name)}
                 style={styles.actionButton}
+                accessibilityLabel={`Delete ${meal.name}`}
+                accessibilityRole="button"
+                accessibilityHint="Permanently deletes this saved meal from your library"
               >
                 <Trash2 size={18} color={colors.textMuted} strokeWidth={1.5} />
               </TouchableOpacity>
@@ -290,6 +297,10 @@ export default function SavedMealsScreen() {
           lightImpact();
           setActiveFilter(key);
         }}
+        accessibilityLabel={`Filter by ${label}${isActive ? ', selected' : ''}`}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isActive }}
+        accessibilityHint={`Shows only ${label.toLowerCase()} meals in your saved meals library`}
       >
         <IconComponent
           size={14}
@@ -390,7 +401,12 @@ export default function SavedMealsScreen() {
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              accessibilityLabel="Clear search"
+              accessibilityRole="button"
+              accessibilityHint="Clears the current search query and shows all saved meals"
+            >
               <XCircle size={18} color={colors.textMuted} strokeWidth={1.5} />
             </TouchableOpacity>
           )}
