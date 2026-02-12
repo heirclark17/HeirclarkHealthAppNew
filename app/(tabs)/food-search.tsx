@@ -181,15 +181,15 @@ export default function FoodSearchScreen() {
               <Text style={[styles.macroLabel, { color: colors.textMuted }]}>cal</Text>
             </View>
             <View style={styles.macroItem}>
-              <NumberText weight="semiBold" style={[styles.macroValue, { color: '#60a5fa' }]}>{item.protein}g</NumberText>
+              <NumberText weight="semiBold" style={[styles.macroValue, { color: colors.protein }]}>{item.protein}g</NumberText>
               <Text style={[styles.macroLabel, { color: colors.textMuted }]}>P</Text>
             </View>
             <View style={styles.macroItem}>
-              <NumberText weight="semiBold" style={[styles.macroValue, { color: '#fbbf24' }]}>{item.carbs}g</NumberText>
+              <NumberText weight="semiBold" style={[styles.macroValue, { color: colors.carbs }]}>{item.carbs}g</NumberText>
               <Text style={[styles.macroLabel, { color: colors.textMuted }]}>C</Text>
             </View>
             <View style={styles.macroItem}>
-              <NumberText weight="semiBold" style={[styles.macroValue, { color: '#f472b6' }]}>{item.fat}g</NumberText>
+              <NumberText weight="semiBold" style={[styles.macroValue, { color: colors.fat }]}>{item.fat}g</NumberText>
               <Text style={[styles.macroLabel, { color: colors.textMuted }]}>F</Text>
             </View>
           </View>
@@ -197,7 +197,7 @@ export default function FoodSearchScreen() {
             style={[styles.addButton, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.15)' }]}
             onPress={() => handleAddFood(item)}
           >
-            <Ionicons name="add" size={20} color="#6366f1" />
+            <Ionicons name="add" size={20} color={colors.accentPurple} />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -285,7 +285,7 @@ export default function FoodSearchScreen() {
             ]}
             onPress={openScanner}
           >
-            <Ionicons name="barcode-outline" size={24} color="#6366f1" />
+            <Ionicons name="barcode-outline" size={24} color={colors.accentPurple} />
           </TouchableOpacity>
         </View>
 
