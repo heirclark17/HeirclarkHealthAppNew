@@ -355,30 +355,133 @@ export default function MealsScreen() {
           <Text style={[styles.title, { color: colors.text }]}>7-Day Meal Plan</Text>
         </View>
 
-        {/* Daily Targets - Combined Card with iOS Liquid Glass */}
+        {/* Day Selector (Calendar) - Moved to top when plan exists */}
+        {weeklyPlan && !isGenerating && (
+          <DaySelector
+            weeklyPlan={weeklyPlan}
+            selectedDayIndex={selectedDayIndex}
+            onSelectDay={setSelectedDay}
+          />
+        )}
+
+        {/* Modern Nutrition Card - Redesigned with progress rings */}
         <GlassCard
           style={[
-            styles.targetsContainer,
+            styles.nutritionCard,
             { borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.5)' }
           ]}
           interactive
         >
-          <View style={styles.targetsRow}>
-            <View style={styles.targetItem}>
-              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{Math.round(dailyTargets.calories)}</NumberText>
-              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Calories</Text>
+          {/* Daily Calorie Goal - Large and prominent */}
+          <View style={styles.calorieHeader}>
+            <Text style={[styles.calorieLabel, { color: colors.textMuted }]}>Daily Goal</Text>
+            <View style={styles.calorieRow}>
+              <NumberText weight="semibold" style={[styles.calorieValue, { color: colors.text }]}>
+                {Math.round(currentDayTotals.calories)}
+              </NumberText>
+              <Text style={[styles.calorieTarget, { color: colors.textMuted }]}>
+                {' '}/ <NumberText weight="light">{Math.round(dailyTargets.calories)}</NumberText>
+              </Text>
             </View>
-            <View style={styles.targetItem}>
-              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.protein}g</NumberText>
-              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Protein</Text>
+            <Text style={[styles.calorieUnit, { color: colors.textMuted }]}>calories</Text>
+          </View>
+
+          {/* Macro Progress Bars */}
+          <View style={styles.macrosGrid}>
+            {/* Protein */}
+            <View style={styles.macroItem}>
+              <View style={styles.macroHeader}>
+                <View style={[styles.macroIndicator, { backgroundColor: '#6366f1' }]} />
+                <Text style={[styles.macroLabel, { color: colors.textMuted }]}>Protein</Text>
+              </View>
+              <View style={styles.macroProgress}>
+                <View
+                  style={[
+                    styles.macroProgressBar,
+                    { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.2)' : 'rgba(99, 102, 241, 0.15)' }
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.macroProgressFill,
+                      {
+                        backgroundColor: '#6366f1',
+                        width: `${Math.min((currentDayTotals.protein / dailyTargets.protein) * 100, 100)}%`
+                      }
+                    ]}
+                  />
+                </View>
+                <NumberText weight="medium" style={[styles.macroValue, { color: colors.text }]}>
+                  {Math.round(currentDayTotals.protein)}
+                </NumberText>
+                <Text style={[styles.macroTarget, { color: colors.textMuted }]}>
+                  /<NumberText weight="light">{dailyTargets.protein}</NumberText>g
+                </Text>
+              </View>
             </View>
-            <View style={styles.targetItem}>
-              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.carbs}g</NumberText>
-              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Carbs</Text>
+
+            {/* Carbs */}
+            <View style={styles.macroItem}>
+              <View style={styles.macroHeader}>
+                <View style={[styles.macroIndicator, { backgroundColor: '#f59e0b' }]} />
+                <Text style={[styles.macroLabel, { color: colors.textMuted }]}>Carbs</Text>
+              </View>
+              <View style={styles.macroProgress}>
+                <View
+                  style={[
+                    styles.macroProgressBar,
+                    { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.2)' : 'rgba(245, 158, 11, 0.15)' }
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.macroProgressFill,
+                      {
+                        backgroundColor: '#f59e0b',
+                        width: `${Math.min((currentDayTotals.carbs / dailyTargets.carbs) * 100, 100)}%`
+                      }
+                    ]}
+                  />
+                </View>
+                <NumberText weight="medium" style={[styles.macroValue, { color: colors.text }]}>
+                  {Math.round(currentDayTotals.carbs)}
+                </NumberText>
+                <Text style={[styles.macroTarget, { color: colors.textMuted }]}>
+                  /<NumberText weight="light">{dailyTargets.carbs}</NumberText>g
+                </Text>
+              </View>
             </View>
-            <View style={styles.targetItem}>
-              <NumberText weight="light" style={[styles.targetValue, { color: colors.text }]}>{dailyTargets.fat}g</NumberText>
-              <Text style={[styles.targetLabel, { color: colors.textMuted }]}>Fats</Text>
+
+            {/* Fat */}
+            <View style={styles.macroItem}>
+              <View style={styles.macroHeader}>
+                <View style={[styles.macroIndicator, { backgroundColor: '#ec4899' }]} />
+                <Text style={[styles.macroLabel, { color: colors.textMuted }]}>Fat</Text>
+              </View>
+              <View style={styles.macroProgress}>
+                <View
+                  style={[
+                    styles.macroProgressBar,
+                    { backgroundColor: isDark ? 'rgba(236, 72, 153, 0.2)' : 'rgba(236, 72, 153, 0.15)' }
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.macroProgressFill,
+                      {
+                        backgroundColor: '#ec4899',
+                        width: `${Math.min((currentDayTotals.fat / dailyTargets.fat) * 100, 100)}%`
+                      }
+                    ]}
+                  />
+                </View>
+                <NumberText weight="medium" style={[styles.macroValue, { color: colors.text }]}>
+                  {Math.round(currentDayTotals.fat)}
+                </NumberText>
+                <Text style={[styles.macroTarget, { color: colors.textMuted }]}>
+                  /<NumberText weight="light">{dailyTargets.fat}</NumberText>g
+                </Text>
+              </View>
             </View>
           </View>
         </GlassCard>
@@ -511,13 +614,6 @@ export default function MealsScreen() {
         {/* Meal Plan Content - show when plan exists */}
         {weeklyPlan && !isGenerating && (
           <View>
-            {/* Day Selector */}
-            <DaySelector
-              weeklyPlan={weeklyPlan}
-              selectedDayIndex={selectedDayIndex}
-              onSelectDay={setSelectedDay}
-            />
-
             {/* Cheat Day Guidance - Show instead of meals on cheat days */}
             {isCheatDay ? (
               <CheatDayGuidanceCard
@@ -738,35 +834,91 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.thin,
     letterSpacing: 0.5,
   },
-  targetsContainer: {
+  // Modern Nutrition Card Styles
+  nutritionCard: {
     marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    padding: 20,
   },
-  targetsRow: {
+  calorieHeader: {
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(128, 128, 128, 0.1)',
+  },
+  calorieLabel: {
+    fontSize: 11,
+    fontFamily: Fonts.medium,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 8,
+  },
+  calorieRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  calorieValue: {
+    fontSize: 48,
+    letterSpacing: -1,
+  },
+  calorieTarget: {
+    fontSize: 24,
+    fontFamily: Fonts.light,
+  },
+  calorieUnit: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    marginTop: 4,
+  },
+  macrosGrid: {
+    gap: 16,
+  },
+  macroItem: {
+    gap: 8,
+  },
+  macroHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 8,
   },
-  targetItem: {
-    flex: 1,
-    alignItems: 'center',
+  macroIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
-  targetValue: {
-    fontSize: 16,
-    color: Colors.text,
-    letterSpacing: 0.3,
-  },
-  targetLabel: {
-    fontSize: 9,
-    color: Colors.textMuted,
-    marginTop: 2,
-    fontFamily: Fonts.thin,
+  macroLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.medium,
     textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    letterSpacing: 0.8,
+  },
+  macroProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  macroProgressBar: {
+    flex: 1,
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  macroProgressFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  macroValue: {
+    fontSize: 18,
+    minWidth: 40,
+    textAlign: 'right',
+  },
+  macroTarget: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    minWidth: 50,
   },
   card: {
     marginHorizontal: 16,
