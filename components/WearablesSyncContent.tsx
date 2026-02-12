@@ -4,7 +4,7 @@ import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '../contexts/SettingsContext';
 import { api } from '../services/api';
-import { Colors, Fonts, DarkColors, LightColors } from '../constants/Theme';
+import { Colors, Fonts, DarkColors, LightColors, WearableBrands } from '../constants/Theme';
 import { GlassCard } from './GlassCard';
 
 interface WearableProvider {
@@ -27,16 +27,8 @@ const PROVIDER_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   withings: 'scale-outline',
 };
 
-// Provider brand colors (matching wearables page)
-const PROVIDER_COLORS: Record<string, string> = {
-  apple_health: '#FF3B30',
-  fitbit: '#00B0B9',
-  garmin: '#007CC3',
-  oura: '#8B5CF6',
-  strava: '#FC4C02',
-  whoop: Colors.background,
-  withings: '#00A9CE',
-};
+// Provider brand colors (from Theme.ts)
+const PROVIDER_COLORS = WearableBrands;
 
 export function WearablesSyncContent() {
   const { settings } = useSettings();
@@ -259,7 +251,7 @@ export function WearablesSyncContent() {
                           style={[styles.actionButton, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}
                           onPress={() => handleDisconnect(provider)}
                         >
-                          <Ionicons name="unlink-outline" size={18} color="#ef4444" />
+                          <Ionicons name="unlink-outline" size={18} color={Colors.error} />
                         </TouchableOpacity>
                       </>
                     ) : (
@@ -381,7 +373,7 @@ const styles = StyleSheet.create({
     color: Colors.success,
   },
   providerNeedsRebuild: {
-    color: '#FF9500',
+    color: 'Colors.warningOrange',
   },
   lastSyncText: {
     fontSize: 10,
@@ -410,7 +402,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   unavailableButtonText: {
-    color: '#FF9500',
+    color: 'Colors.warningOrange',
     fontSize: 12,
     fontFamily: Fonts.medium,
   },

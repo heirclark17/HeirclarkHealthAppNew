@@ -48,7 +48,7 @@ const GLASS_SPRING = {
 // iOS 26 Liquid Glass colors
 const GLASS_COLORS = {
   light: {
-    background: '#F8F8F8',
+    background: Colors.backgroundSecondary,
     headerBg: 'rgba(255, 255, 255, 0.85)',
     inputBg: 'rgba(255, 255, 255, 0.85)',
     userBubble: 'rgba(0, 122, 255, 0.9)',
@@ -62,7 +62,7 @@ const GLASS_COLORS = {
     cardBorder: 'rgba(255, 255, 255, 0.5)',
   },
   dark: {
-    background: '#0A0A0A',
+    background: Colors.background,
     headerBg: 'rgba(44, 44, 46, 0.85)',
     inputBg: 'rgba(44, 44, 46, 0.85)',
     userBubble: 'rgba(10, 132, 255, 0.9)',
