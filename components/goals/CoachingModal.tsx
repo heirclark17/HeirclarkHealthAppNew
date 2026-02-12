@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
   retryButton: {
     marginTop: 24,
     paddingHorizontal: 32,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 24,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -875,7 +875,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   paragraphContainer: {
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 16,
     marginBottom: 10,
     borderRadius: 16,

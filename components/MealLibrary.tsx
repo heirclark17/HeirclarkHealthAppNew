@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   searchInput: {
     backgroundColor: 'transparent',
     borderRadius: Spacing.borderRadius,
-    padding: 14,
+    padding: 16,
     fontSize: 15,
     color: Colors.text,
     borderWidth: 1,
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   tagsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 8,
     marginBottom: 12,
   },
   mealTag: {

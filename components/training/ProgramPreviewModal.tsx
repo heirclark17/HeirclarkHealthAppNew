@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     padding: 12,
     borderRadius: 12,
-    gap: 10,
+    gap: 8,
   },
   philosophyText: {
     flex: 1,
@@ -478,12 +478,12 @@ const styles = StyleSheet.create({
   },
   statsGrid: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   statBox: {
     flex: 1,
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     gap: 4,
   },
@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
   },
   dayPreview: {
     width: (SCREEN_WIDTH - 32 - 16 - 24) / 4,
-    padding: 10,
+    padding: 8,
     borderRadius: 12,
     alignItems: 'center',
     minHeight: 80,
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   focusTag: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 12,
   },
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
   cardioBox: {
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
   },
   cardioRow: {
@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
-    gap: 10,
+    gap: 8,
     borderRadius: Spacing.borderRadius,
   },
   confirmButtonText: {

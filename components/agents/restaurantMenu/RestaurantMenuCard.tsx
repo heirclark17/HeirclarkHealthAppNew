@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   budgetValue: { fontSize: 18, fontFamily: Fonts.semiBold },
   budgetHint: { fontSize: 11, fontFamily: Fonts.regular },
   cuisineScroll: { marginTop: 4 },
-  cuisineChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, marginRight: 8 },
+  cuisineChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18, borderWidth: 1, marginRight: 8 },
   cuisineText: { fontSize: 12, fontFamily: Fonts.medium },
   modalContainer: { flex: 1 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' },

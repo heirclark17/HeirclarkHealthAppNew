@@ -395,12 +395,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   checklistContainer: {
-    gap: 6,
+    gap: 8,
   },
   checklistItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   checklistText: {
     fontSize: 12,
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   trendContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
   },
   macroSection: {
     marginTop: 16,
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
   },
   macroTitle: {

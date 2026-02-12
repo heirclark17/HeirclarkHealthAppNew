@@ -968,7 +968,7 @@ const styles = StyleSheet.create({
   messageContent: {
     maxWidth: '80%',
     borderRadius: 16,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 10,
   },
   userMessageContent: {
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     borderRadius: 16,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 10,
   },
   typingText: {
@@ -1079,7 +1079,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   suggestionChip: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,

@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   pantryHeaderRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   pantryLabel: {
     fontSize: 14,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     paddingRight: 8,
     borderRadius: 16,
     borderWidth: 1,
-    gap: 6,
+    gap: 8,
   },
   pantryItemText: {
     fontSize: 13,

@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 24,
-    gap: 6,
+    gap: 8,
     // Glow shadow for button
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingVertical: 10,
     borderRadius: Spacing.radiusSM,
-    gap: 6,
+    gap: 8,
   },
   completedText: {
     fontSize: 13,

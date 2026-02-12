@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
-    gap: 6,
+    gap: 8,
   },
   activityBadgeText: {
     fontSize: 13,
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     borderRadius: 12,
     padding: 12,
-    gap: 10,
+    gap: 8,
     marginTop: 20,
     marginBottom: 16,
   },
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     width: '100%',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },

@@ -350,13 +350,13 @@ const styles = StyleSheet.create({
   },
   weekStrip: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
     paddingHorizontal: 4,
   },
   dayItem: {
     width: 48,
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 16,
     backgroundColor: 'transparent',
     minHeight: Spacing.touchTarget + 10,
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     backgroundColor: Colors.primary,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: Spacing.borderRadius,
     alignItems: 'center',
     marginTop: 24,

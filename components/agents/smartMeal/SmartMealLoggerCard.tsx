@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: 10,
   },
   sectionTitle: {
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 10,
-    gap: 6,
+    gap: 8,
     minWidth: 120,
   },
   favoriteBadge: {
@@ -507,8 +507,8 @@ const styles = StyleSheet.create({
   tipContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    padding: 10,
+    gap: 8,
+    padding: 8,
     borderRadius: 10,
     marginTop: 4,
   },

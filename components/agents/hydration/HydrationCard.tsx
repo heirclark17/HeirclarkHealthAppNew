@@ -428,6 +428,6 @@ const styles = StyleSheet.create({
   miniProgressFill: { height: '100%', borderRadius: 3 },
   emptyState: { alignItems: 'center', padding: 24, borderRadius: 12 },
   emptyText: { fontSize: 13, fontFamily: Fonts.regular, textAlign: 'center', marginTop: 12 },
-  goalInfo: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 10 },
+  goalInfo: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10 },
   goalInfoText: { flex: 1, fontSize: 12, fontFamily: Fonts.regular },
 });

@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 12,
     alignSelf: 'flex-start',
-    gap: 6,
+    gap: 8,
   },
   badgeText: {
     fontSize: 11,
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   metaText: {
     fontSize: 14,
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
     borderRadius: 12,
-    gap: 10,
+    gap: 8,
     marginTop: 8,
   },
   instacartButtonText: {

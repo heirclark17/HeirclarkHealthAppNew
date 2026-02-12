@@ -908,7 +908,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 16,
   },
   instructionNumber: {
     fontSize: 13,
@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 16,
-    gap: 10,
+    gap: 8,
   },
   primaryActionButton: {
     borderRadius: 20,
@@ -936,7 +936,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 20,
   },
@@ -947,7 +947,7 @@ const styles = StyleSheet.create({
   },
   secondaryActionsRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   secondaryActionButton: {
     flex: 1,
@@ -960,7 +960,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 11,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
   },
   secondaryActionText: {
     fontSize: 13,

@@ -264,10 +264,10 @@ const styles = StyleSheet.create({
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
-    gap: 6,
+    gap: 8,
     marginBottom: 16,
   },
   statusBadgeText: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     width: '100%',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },

@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   mealSlot: {
     backgroundColor: 'transparent',
     borderRadius: Spacing.borderRadius,
-    padding: 10,
+    padding: 8,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: Colors.border,

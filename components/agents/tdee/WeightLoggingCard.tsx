@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'center',
     height: 40,
-    gap: 6,
+    gap: 8,
   },
   chartBar: {
     width: 16,
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   streakHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: 8,
   },
   streakLabel: {
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   logButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 12,

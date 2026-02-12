@@ -942,7 +942,7 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   dietGrid: {
-    gap: 10,
+    gap: 8,
   },
   dietCard: {
     width: '100%',
@@ -983,7 +983,7 @@ const styles = StyleSheet.create({
   },
   mealsRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     justifyContent: 'center',
   },
   mealChip: {
@@ -1050,7 +1050,7 @@ const styles = StyleSheet.create({
   },
   fastingPresets: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   presetChipWrapper: {
     flex: 1,
@@ -1101,8 +1101,8 @@ const styles = StyleSheet.create({
   allergyChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
+    gap: 8,
+    paddingHorizontal: 16,
     paddingVertical: 10,
   },
   allergyText: {
@@ -1138,7 +1138,7 @@ const styles = StyleSheet.create({
   foodChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 10,
   },
   foodChipText: {
@@ -1148,7 +1148,7 @@ const styles = StyleSheet.create({
   },
   cheatDaysContainer: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     paddingRight: 8,
   },
   cheatDayChip: {
@@ -1185,7 +1185,7 @@ const styles = StyleSheet.create({
   },
   skillButtonsContainer: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     marginTop: 12,
   },
   skillButton: {

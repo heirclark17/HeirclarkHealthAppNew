@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   weeklyTargetSection: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
-    padding: 14,
+    padding: 16,
     marginBottom: 16,
   },
   weeklyTargetHeader: {

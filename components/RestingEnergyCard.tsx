@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
-    gap: 6,
+    gap: 8,
   },
   bmrBadgeText: {
     fontSize: 13,
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     borderRadius: 12,
-    padding: 14,
+    padding: 16,
     gap: 12,
     marginBottom: 20,
   },
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     width: '100%',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },

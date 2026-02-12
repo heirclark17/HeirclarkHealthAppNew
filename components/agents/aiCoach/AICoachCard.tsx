@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    gap: 6,
+    gap: 8,
     maxWidth: '48%',
   },
   suggestionText: {
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     paddingVertical: 10,
-    gap: 6,
+    gap: 8,
   },
   actionText: {
     fontSize: 13,

@@ -263,10 +263,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   statsContainer: {
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     marginBottom: 20,
-    gap: 10,
+    gap: 8,
   },
   statItem: {
     flexDirection: 'row',

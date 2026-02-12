@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   scrollContent: {
-    gap: 6,
+    gap: 8,
     paddingHorizontal: 4,
   },
   dayPill: {

@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.inputBg,
     borderRadius: 8,
-    padding: 14,
+    padding: 16,
   },
   pickerText: {
     fontSize: 14,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     maxHeight: 200,
   },
   dropdownItem: {
-    padding: 14,
+    padding: 16,
   },
   dropdownText: {
     fontSize: 14,
@@ -229,14 +229,14 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: Colors.inputBg,
     borderRadius: 8,
-    padding: 14,
+    padding: 16,
     fontSize: 14,
     color: Colors.text,
     fontFamily: Fonts.regular,
   },
   button: {
     backgroundColor: Colors.primary,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 16,

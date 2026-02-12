@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundSecondary,
   },
   skeletonExercises: {
-    gap: 10,
+    gap: 8,
     marginBottom: 16,
   },
   skeletonExerciseRow: {

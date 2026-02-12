@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 16,
     fontSize: 16,
     fontFamily: Fonts.medium,
     color: Colors.text,
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: Spacing.borderRadius,
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: 'center',
   },
   toggleActive: {

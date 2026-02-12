@@ -1863,7 +1863,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    gap: 6,
+    gap: 8,
     marginBottom: 12,
   },
   nutritionBadgeText: {
@@ -2135,7 +2135,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    gap: 6,
+    gap: 8,
   },
 
   // Capture button gradient

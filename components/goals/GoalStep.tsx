@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   goalOption: {
     flex: 1,
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     backgroundColor: Colors.backgroundSecondary,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 16,
     fontSize: 16,
     fontFamily: Fonts.medium,
     color: Colors.text,

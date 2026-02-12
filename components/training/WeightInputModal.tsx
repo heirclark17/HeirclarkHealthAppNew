@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    gap: 6,
+    gap: 8,
   },
   previousText: {
     fontSize: 13,
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 12,
-    padding: 10,
+    padding: 8,
     borderRadius: 8,
     gap: 8,
   },
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   unitButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   input: {
     flex: 1,

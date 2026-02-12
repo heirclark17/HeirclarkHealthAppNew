@@ -838,7 +838,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   activityList: {
-    gap: 10,
+    gap: 8,
     marginBottom: 24,
   },
   activityCard: {
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
     padding: 0, // GlassCard provides padding
   },
   activityLeft: {
-    marginRight: 14,
+    marginRight: 16,
   },
   activityIcon: {
     width: 44,
@@ -931,7 +931,7 @@ const styles = StyleSheet.create({
   durationChips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   chip: {
     paddingHorizontal: 16,
@@ -1022,7 +1022,7 @@ const styles = StyleSheet.create({
     padding: 0, // GlassCard provides padding
   },
   cardioLeft: {
-    marginRight: 14,
+    marginRight: 16,
   },
   cardioIcon: {
     width: 48,
@@ -1070,12 +1070,12 @@ const styles = StyleSheet.create({
   equipmentGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   equipmentChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 10,
   },
   equipmentChipText: {
@@ -1094,14 +1094,14 @@ const styles = StyleSheet.create({
   },
   // Injury styles
   injuryGrid: {
-    gap: 10,
+    gap: 8,
   },
   injuryChip: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
   },
   injuryChipLabel: {
     fontSize: 14,
@@ -1122,7 +1122,7 @@ const styles = StyleSheet.create({
   injuryNote: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     marginTop: 12,
     padding: 12,
   },
@@ -1190,7 +1190,7 @@ const styles = StyleSheet.create({
   oneRMNote: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     marginTop: 12,
     padding: 12,
   },

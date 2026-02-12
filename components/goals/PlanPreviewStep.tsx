@@ -1162,7 +1162,7 @@ const styles = StyleSheet.create({
   goalBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginTop: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -1187,7 +1187,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   macroItem: {
-    gap: 6,
+    gap: 8,
   },
   macroHeader: {
     flexDirection: 'row',
@@ -1227,8 +1227,8 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     alignItems: 'center',
-    padding: 14,
-    gap: 6,
+    padding: 16,
+    gap: 8,
   },
   statValue: {
     fontSize: 18,
@@ -1245,7 +1245,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
-    padding: 18,
+    padding: 16,
     marginBottom: 16,
   },
   weeklyRateIcon: {
@@ -1270,7 +1270,7 @@ const styles = StyleSheet.create({
   weeklyRateRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 6,
+    gap: 8,
   },
   weeklyRateValue: {
     fontSize: 32,
@@ -1291,7 +1291,7 @@ const styles = StyleSheet.create({
   timelineCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 16,
     padding: 16,
     marginBottom: 16,
   },
@@ -1322,8 +1322,8 @@ const styles = StyleSheet.create({
   dietCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    padding: 14,
+    gap: 8,
+    padding: 16,
     marginBottom: 16,
   },
   dietText: {
@@ -1391,13 +1391,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   workoutCommentary: {
-    gap: 10,
+    gap: 8,
     marginBottom: 16,
   },
   workoutCommentaryItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 10,
+    gap: 8,
   },
   workoutCommentaryText: {
     flex: 1,
@@ -1637,7 +1637,7 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: 'rgba(150, 206, 180, 0.08)',
     borderRadius: 12,
-    gap: 6,
+    gap: 8,
   },
   profileStatValue: {
     fontSize: 18,
@@ -1680,7 +1680,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 70,
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   scheduleItemCard: {
     flexBasis: '45%',
@@ -1688,8 +1688,8 @@ const styles = StyleSheet.create({
     minWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 14,
-    padding: 14,
+    gap: 16,
+    padding: 16,
   },
   scheduleValue: {
     fontSize: 20,
@@ -1706,7 +1706,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   splitDetails: {
-    gap: 10,
+    gap: 8,
   },
   splitDay: {
     flexDirection: 'row',
@@ -1714,7 +1714,7 @@ const styles = StyleSheet.create({
   },
   splitDayCard: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     padding: 12,
     marginBottom: 8,
   },
@@ -1737,18 +1737,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   exerciseList: {
-    gap: 10,
+    gap: 8,
   },
   exerciseItem: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     alignItems: 'flex-start',
   },
   exerciseItemCard: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     alignItems: 'flex-start',
-    padding: 10,
+    padding: 8,
     marginBottom: 8,
   },
   exerciseText: {
@@ -1769,7 +1769,7 @@ const styles = StyleSheet.create({
   equipmentTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 14,

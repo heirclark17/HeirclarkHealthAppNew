@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
   plateauBanner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 10,
+    gap: 8,
     padding: 12,
     borderRadius: 10,
     marginBottom: 12,
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     marginBottom: 12,
   },
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
   nextMilestone: {
-    gap: 6,
+    gap: 8,
   },
   milestoneProgressBar: {
     height: 6,
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
   },
   progressDots: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
     marginTop: 12,
   },
   progressDot: {
@@ -812,7 +812,7 @@ const styles = StyleSheet.create({
   detailValueRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   suggestionsTitle: {
     fontSize: 13,
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
   milestoneItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.1)',
   },
@@ -875,7 +875,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
   predictionItem: {
-    padding: 14,
+    padding: 16,
     marginBottom: 10,
   },
   predictionHeader: {

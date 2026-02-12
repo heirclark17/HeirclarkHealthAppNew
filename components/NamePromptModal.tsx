@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
     fontSize: 16,
     color: DarkColors.text,
     borderWidth: 1,
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: DarkColors.primary,
     borderRadius: 12,
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 32,
     width: '100%',
     alignItems: 'center',

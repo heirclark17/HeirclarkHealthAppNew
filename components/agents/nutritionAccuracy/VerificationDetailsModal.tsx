@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     marginBottom: 16,
   },
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     marginBottom: 8,
-    gap: 10,
+    gap: 8,
   },
   flagContent: {
     flex: 1,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   adjustmentValues: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: 4,
   },
   originalValue: {
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   },
   closeBottomButton: {
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 16,
     marginTop: 8,
     borderTopWidth: 1,
   },

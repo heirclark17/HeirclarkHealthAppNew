@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   stepCircle: {
     width: 32,

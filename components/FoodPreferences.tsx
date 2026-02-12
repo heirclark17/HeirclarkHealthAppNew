@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 10,
   },
   chipText: {
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
   optionButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 12,
   },
   optionButtonText: {

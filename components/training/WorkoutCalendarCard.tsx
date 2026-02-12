@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   weekTitle: {
     fontSize: 12,
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   },
   weekStrip: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
     paddingHorizontal: 4,
     marginBottom: 12,
   },

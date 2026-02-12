@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
   useCaseTags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 8,
   },
   useCaseTag: {
     paddingHorizontal: 10,

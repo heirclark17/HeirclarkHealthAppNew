@@ -1004,7 +1004,7 @@ const styles = StyleSheet.create({
   targetsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   targetCard: {
     width: '48%',
@@ -1068,7 +1068,7 @@ const styles = StyleSheet.create({
   workoutFeatureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   workoutFeatureText: {
     fontSize: 12,
@@ -1303,7 +1303,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 8,
   },
   primaryButtonText: {
     fontSize: 15,

@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   macrosRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   macroText: {
     fontSize: 13,

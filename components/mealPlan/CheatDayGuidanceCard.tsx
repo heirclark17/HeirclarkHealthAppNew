@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 10,
     marginBottom: 8,
-    gap: 10,
+    gap: 8,
   },
   tipBullet: {
     width: 6,
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   reminderCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     marginBottom: 10,
     gap: 12,
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   balanceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     gap: 12,

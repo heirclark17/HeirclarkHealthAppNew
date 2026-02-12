@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   confidenceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginTop: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
   insightHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     marginBottom: 8,
   },
   insightTitle: {
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   },
   insightItemContent: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   insightText: {
     flex: 1,
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
   },
   howItWorksStep: {
     flexDirection: 'row',
-    gap: 14,
+    gap: 16,
   },
   stepNumber: {
     width: 32,

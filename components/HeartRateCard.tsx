@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     borderRadius: 12,
-    gap: 6,
+    gap: 8,
   },
   bpStatusText: {
     fontSize: 13,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     width: '100%',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },

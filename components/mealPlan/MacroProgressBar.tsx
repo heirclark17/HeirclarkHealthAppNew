@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   macroLabelLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   macroDot: {
     width: 8,

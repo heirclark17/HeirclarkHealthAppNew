@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
   },
   previewCardInner: {
     flex: 1,
-    padding: 6,
+    padding: 8,
     justifyContent: 'center',
   },
   previewLine: {
