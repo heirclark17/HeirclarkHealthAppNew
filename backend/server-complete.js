@@ -108,7 +108,7 @@ const upload = multer({
 // Initialize OpenAI client with timeout
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: 90000, // 90 second timeout (allows complex meal plan generation)
+  timeout: 300000, // 5 minute timeout (allows complex meal plan generation)
   maxRetries: 0, // Don't retry on timeout to avoid duplicate requests
 });
 
