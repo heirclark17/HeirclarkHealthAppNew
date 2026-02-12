@@ -41,7 +41,7 @@ const GLASS_SPRING = {
 // iOS 26 Liquid Glass colors
 const GLASS_COLORS = {
   light: {
-    background: '#F8F8F8',
+    background: Colors.backgroundSecondary,
     card: 'rgba(255, 255, 255, 0.75)',
     cardBorder: 'rgba(255, 255, 255, 0.5)',
     header: 'rgba(255, 255, 255, 0.85)',
@@ -55,7 +55,7 @@ const GLASS_COLORS = {
     buttonBorder: 'rgba(255, 255, 255, 0.8)',
   },
   dark: {
-    background: '#0A0A0A',
+    background: Colors.background,
     card: 'rgba(255, 255, 255, 0.08)',
     cardBorder: 'rgba(255, 255, 255, 0.12)',
     header: 'rgba(44, 44, 46, 0.85)',
@@ -99,7 +99,7 @@ const getLiveAvatarHTML = (session: StreamingSession, script: string, token: str
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #1a1a2e;
+      background: Colors.cardBackground;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: 20,
     overflow: 'hidden',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: 'Colors.cardBackground',
     borderWidth: 1,
   },
   webView: {
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: SCREEN_WIDTH - 48,
     height: 220,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: 'Colors.cardBackground',
     borderRadius: 20,
     borderWidth: 1,
   },
