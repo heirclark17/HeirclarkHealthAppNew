@@ -87,6 +87,10 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           activeOpacity={0.9}
+          accessibilityLabel={`${program.name}, ${program.difficulty} level program`}
+          accessibilityRole="button"
+          accessibilityState={{ selected: isSelected }}
+          accessibilityHint={`Select ${program.name} training program`}
         >
           <GlassCard
             style={[

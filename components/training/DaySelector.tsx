@@ -71,6 +71,13 @@ function DayPill({
           isCompleted && styles.dayPillCompleted,
         ]}
         activeOpacity={0.8}
+        accessibilityLabel={`${day.dayOfWeek}, ${day.date}${hasWorkout ? ', workout scheduled' : ', rest day'}${isCompleted ? ', completed' : ''}`}
+        accessibilityRole="button"
+        accessibilityState={{
+          selected: isSelected,
+          disabled: false,
+        }}
+        accessibilityHint={`Select ${day.dayOfWeek} to view ${hasWorkout ? 'workout details' : 'rest day'}`}
       >
         <Text style={[
           styles.dayName,

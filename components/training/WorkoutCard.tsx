@@ -321,6 +321,10 @@ export function WorkoutCard({
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
             activeOpacity={0.8}
+            accessibilityLabel={`${workout.name}, ${workout.duration} minutes, ${workout.estimatedCaloriesBurned} calories, ${completedExercises} of ${totalExercises} exercises completed${workout.completed ? ', workout completed' : ''}`}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: false }}
+            accessibilityHint="Opens workout details to view and track exercises"
           >
           <GlassCard style={styles.card} interactive>
             {/* Header */}
