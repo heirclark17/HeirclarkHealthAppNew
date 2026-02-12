@@ -183,7 +183,7 @@ export default function SavedMealsScreen() {
       <Animated.View entering={enteringAnimation}>
         <GlassCard style={styles.mealCard}>
           <View style={styles.mealHeader}>
-            <View style={[styles.mealTypeIndicator, { backgroundColor: colors.surface }]}>
+            <View style={[styles.mealTypeIndicator, { backgroundColor: colors.backgroundSecondary }]}>
               <Text style={[styles.mealTypeText, { color: colors.textSecondary }]}>
                 {meal.mealType}
               </Text>
@@ -195,7 +195,7 @@ export default function SavedMealsScreen() {
               >
                 <Heart
                   size={20}
-                  color={isFavorite ? '#ff6b6b' : colors.textTertiary}
+                  color={isFavorite ? '#ff6b6b' : colors.textMuted}
                   fill={isFavorite ? '#ff6b6b' : 'transparent'}
                   strokeWidth={1.5}
                 />
@@ -204,7 +204,7 @@ export default function SavedMealsScreen() {
                 onPress={() => handleDeleteMeal(item.id, meal.name)}
                 style={styles.actionButton}
               >
-                <Trash2 size={18} color={colors.textTertiary} strokeWidth={1.5} />
+                <Trash2 size={18} color={colors.textMuted} strokeWidth={1.5} />
               </TouchableOpacity>
             </View>
           </View>
@@ -221,34 +221,34 @@ export default function SavedMealsScreen() {
               <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
                 {meal.nutrients.calories}
               </NumberText>
-              <Text style={[styles.nutrientLabel, { color: colors.textTertiary }]}>cal</Text>
+              <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>cal</Text>
             </View>
             <View style={styles.nutrientBadge}>
               <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
                 {meal.nutrients.protein_g}g
               </NumberText>
-              <Text style={[styles.nutrientLabel, { color: colors.textTertiary }]}>protein</Text>
+              <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>protein</Text>
             </View>
             <View style={styles.nutrientBadge}>
               <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
                 {meal.prepTimeMinutes}
               </NumberText>
-              <Text style={[styles.nutrientLabel, { color: colors.textTertiary }]}>min</Text>
+              <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>min</Text>
             </View>
           </View>
 
-          <View style={[styles.mealFooter, { borderTopColor: colors.surface }]}>
+          <View style={[styles.mealFooter, { borderTopColor: colors.border }]}>
             <View style={styles.sourceBadge}>
               {source === 'ai' ? (
-                <Sparkles size={12} color={colors.textTertiary} strokeWidth={1.5} />
+                <Sparkles size={12} color={colors.textMuted} strokeWidth={1.5} />
               ) : (
-                <FileText size={12} color={colors.textTertiary} strokeWidth={1.5} />
+                <FileText size={12} color={colors.textMuted} strokeWidth={1.5} />
               )}
-              <Text style={[styles.sourceText, { color: colors.textTertiary }]}>
+              <Text style={[styles.sourceText, { color: colors.textMuted }]}>
                 {source === 'ai' ? 'AI Generated' : source === 'template' ? 'Template' : 'Custom'}
               </Text>
             </View>
-            <Text style={[styles.savedDate, { color: colors.textTertiary }]}>
+            <Text style={[styles.savedDate, { color: colors.textMuted }]}>
               Saved {formattedDate}
             </Text>
           </View>
@@ -256,8 +256,8 @@ export default function SavedMealsScreen() {
           {meal.tags && meal.tags.length > 0 && (
             <View style={styles.tagsContainer}>
               {meal.tags.slice(0, 3).map((tag, tagIndex) => (
-                <View key={tagIndex} style={[styles.tag, { backgroundColor: colors.surface }]}>
-                  <Text style={[styles.tagText, { color: colors.textTertiary }]}>{tag}</Text>
+                <View key={tagIndex} style={[styles.tag, { backgroundColor: colors.backgroundSecondary }]}>
+                  <Text style={[styles.tagText, { color: colors.textMuted }]}>{tag}</Text>
                 </View>
               ))}
             </View>
@@ -312,9 +312,9 @@ export default function SavedMealsScreen() {
     <View style={styles.emptyStateWrapper}>
       <GlassCard style={styles.emptyState}>
         {activeFilter === 'favorites' ? (
-          <Heart size={48} color={colors.textTertiary} strokeWidth={1.5} />
+          <Heart size={48} color={colors.textMuted} strokeWidth={1.5} />
         ) : (
-          <Bookmark size={48} color={colors.textTertiary} strokeWidth={1.5} />
+          <Bookmark size={48} color={colors.textMuted} strokeWidth={1.5} />
         )}
         <Text style={[styles.emptyTitle, { color: colors.text }]}>
           {activeFilter === 'favorites'
@@ -338,7 +338,7 @@ export default function SavedMealsScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top']}>
         <View style={styles.loadingContainer}>
-          <Bookmark size={48} color={colors.textTertiary} strokeWidth={1.5} />
+          <Bookmark size={48} color={colors.textMuted} strokeWidth={1.5} />
           <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
             Loading saved meals...
           </Text>
@@ -369,7 +369,7 @@ export default function SavedMealsScreen() {
               <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{stats.total}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Meals</Text>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.surface }]} />
+            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
             <View style={styles.statItem}>
               <NumberText weight="semiBold" style={[styles.statValue, { color: '#ff6b6b' }]}>{stats.favorites}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Favorites</Text>
@@ -381,17 +381,17 @@ export default function SavedMealsScreen() {
       {/* Search Input */}
       <Animated.View entering={searchAnimation} style={styles.searchWrapper}>
         <GlassCard style={styles.searchContainer} interactive>
-          <Search size={18} color={colors.textTertiary} strokeWidth={1.5} />
+          <Search size={18} color={colors.textMuted} strokeWidth={1.5} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search meals..."
-            placeholderTextColor={colors.textTertiary}
+            placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <XCircle size={18} color={colors.textTertiary} strokeWidth={1.5} />
+              <XCircle size={18} color={colors.textMuted} strokeWidth={1.5} />
             </TouchableOpacity>
           )}
         </GlassCard>
