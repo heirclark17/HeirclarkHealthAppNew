@@ -293,7 +293,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             <Text style={[styles.mealName, { color: colors.text }]}>{meal.name}</Text>
 
             {/* Description */}
-            <Text style={[styles.mealDescription, { color: colors.textMuted }]} numberOfLines={2}>
+            <Text style={[styles.mealDescription, { color: colors.textMuted }]}>
               {displayDescription}
             </Text>
 
