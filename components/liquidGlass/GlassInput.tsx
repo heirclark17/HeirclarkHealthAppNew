@@ -52,6 +52,9 @@ export interface GlassInputProps extends Omit<TextInputProps, 'style'> {
   /** On right icon press */
   onRightIconPress?: () => void;
 
+  /** Accessibility label for right icon button */
+  rightIconAccessibilityLabel?: string;
+
   /** Error message */
   error?: string;
 
@@ -106,6 +109,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
   leftIcon,
   rightIcon,
   onRightIconPress,
+  rightIconAccessibilityLabel,
   error,
   helperText,
   disabled = false,
@@ -236,6 +240,9 @@ export const GlassInput: React.FC<GlassInputProps> = ({
               onPress={onRightIconPress}
               disabled={!onRightIconPress}
               style={styles.rightIcon}
+              accessibilityLabel={rightIconAccessibilityLabel || 'Input action button'}
+              accessibilityRole="button"
+              accessibilityHint={rightIconAccessibilityLabel ? undefined : 'Performs an action related to this input field'}
             >
               <AdaptiveIcon
                 name={rightIcon}
