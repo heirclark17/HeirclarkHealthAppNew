@@ -149,7 +149,14 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
 
   return (
     <>
-      <TouchableOpacity activeOpacity={0.7} onPress={handlePress} style={{ flex: 1 }}>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={handlePress}
+        style={{ flex: 1 }}
+        accessibilityLabel={`Fasting timer: ${state.isActive ? `${timeRemaining.hours} hours ${timeRemaining.minutes} minutes remaining` : selectedPreset?.label || '16:8 preset'}, ${getStateLabel()}`}
+        accessibilityRole="button"
+        accessibilityHint="Opens fasting timer controls with start, pause, reset, and preset selection options"
+      >
         <GlassCard style={styles.card} interactive>
           <View style={styles.innerContainer}>
             {/* Icon */}
@@ -171,7 +178,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
             </Animated.Text>
 
             {/* Subtitle */}
-            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+            <Text style={[styles.subtitle, { color: colors.textMuted}]}>
               {getStateLabel()}
             </Text>
           </View>
@@ -189,6 +196,9 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
           style={[styles.modalOverlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.5)' }]}
           activeOpacity={1}
           onPress={() => setShowControlsModal(false)}
+          accessibilityLabel="Close fasting timer controls"
+          accessibilityRole="button"
+          accessibilityHint="Dismisses the fasting timer controls and returns to the main screen"
         >
           <Animated.View
             entering={FadeInUp.duration(300)}
@@ -213,12 +223,19 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                 style={[styles.controlButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
                 onPress={handleReset}
                 disabled={!state.isActive}
+                accessibilityLabel="Reset fasting timer"
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !state.isActive }}
+                accessibilityHint="Resets the current fasting session to start from the beginning"
               >
                 <RotateCw size={22} color={state.isActive ? colors.textMuted : 'rgba(128,128,128,0.3)'} />
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.playButton, { backgroundColor: state.isActive && !state.isPaused ? Colors.error : Colors.success }]}
                 onPress={handleStartPause}
+                accessibilityLabel={!state.isActive ? 'Start fasting timer' : state.isPaused ? 'Resume fasting timer' : 'Pause fasting timer'}
+                accessibilityRole="button"
+                accessibilityHint={!state.isActive ? 'Begins a new fasting session' : state.isPaused ? 'Continues the paused fasting session' : 'Temporarily pauses the active fasting session'}
               >
                 {!state.isActive || state.isPaused ? (
                   <Play size={28} color={Colors.text} />
@@ -233,6 +250,10 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                   setShowControlsModal(false);
                 }}
                 disabled={!state.isActive}
+                accessibilityLabel="Stop fasting timer"
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !state.isActive }}
+                accessibilityHint="Ends the current fasting session and closes the timer controls"
               >
                 <Square size={22} color={state.isActive ? colors.textMuted : 'rgba(128,128,128,0.3)'} />
               </TouchableOpacity>
@@ -254,6 +275,10 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
                     }
                   ]}
                   onPress={() => handlePresetSelect(preset.id)}
+                  accessibilityLabel={`${preset.label} fasting plan${state.selectedPreset === preset.id ? ', currently selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: state.selectedPreset === preset.id }}
+                  accessibilityHint={`Selects the ${preset.label} intermittent fasting preset${state.selectedPreset === preset.id ? '' : ' and updates your fasting schedule'}`}
                 >
                   <Text style={[
                     styles.presetChipText,
@@ -281,6 +306,9 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}
               onPress={() => setShowControlsModal(false)}
+              accessibilityLabel="Close fasting timer controls"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the fasting timer controls and returns to the main screen"
             >
               <Text style={[styles.closeButtonText, { color: colors.text }]}>Close</Text>
             </TouchableOpacity>
