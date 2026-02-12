@@ -7,6 +7,7 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants
 import { GlassCard } from '../../components/GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useTraining } from '../../contexts/TrainingContext';
+import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { ProgramCard, ProgramPreviewModal } from '../../components/training';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 
@@ -32,8 +33,40 @@ export default function ProgramLibraryScreen() {
 
   const { selectedProgram, isGenerating, weeklyPlan } = trainingState;
 
-  // Get all available programs
-  const allPrograms = getEnhancedPrograms();
+  // Goal wizard context for equipment filtering
+  const { state: goalState } = useGoalWizard();
+  const userEquipment = goalState.availableEquipment || [];
+
+  // Map user equipment to equipment access level
+  const determineEquipmentAccess = useCallback(() => {
+    if (userEquipment.includes('full_gym')) return 'full_gym';
+    if (userEquipment.includes('barbell') || userEquipment.includes('dumbbells')) return 'home_gym';
+    if (userEquipment.includes('resistance_bands') || userEquipment.includes('dumbbells')) return 'minimal';
+    if (userEquipment.length === 1 && userEquipment[0] === 'bodyweight') return 'bodyweight_only';
+    return 'full_gym'; // Default to full gym if no equipment specified
+  }, [userEquipment]);
+
+  const equipmentAccess = determineEquipmentAccess();
+
+  // Get all available programs and filter by equipment
+  const allPrograms = useMemo(() => {
+    const programs = getEnhancedPrograms();
+
+    // Filter programs based on user's equipment access
+    const filtered = programs.filter(program => {
+      // If program lists suitable equipment access, check if user's access is included
+      if (program.suitableFor?.equipmentAccess) {
+        return program.suitableFor.equipmentAccess.includes(equipmentAccess as any);
+      }
+      // If no equipment access specified, include the program
+      return true;
+    });
+
+    console.log('[ProgramLibrary] Equipment access:', equipmentAccess);
+    console.log('[ProgramLibrary] Filtered programs:', filtered.length, 'of', programs.length);
+
+    return filtered;
+  }, [getEnhancedPrograms, equipmentAccess]);
 
   // Handle program tap - shows preview modal
   const handleProgramTap = useCallback((program: any) => {
