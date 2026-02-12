@@ -474,7 +474,13 @@ export default function ProgramsScreen() {
               </View>
 
               {!goalWizardState?.primaryGoal && (
-                <TouchableOpacity style={styles.linkButton} onPress={handleSetGoals}>
+                <TouchableOpacity
+                  style={styles.linkButton}
+                  onPress={handleSetGoals}
+                  accessibilityLabel="Set your goals first"
+                  accessibilityRole="button"
+                  accessibilityHint="Opens the goals wizard to set your fitness goals before generating a training plan"
+                >
                   <Text style={[styles.linkButtonText, { color: colors.accent }]}>Set Your Goals First</Text>
                   <ArrowRight size={16} color={colors.accent} strokeWidth={1.5} />
                 </TouchableOpacity>
@@ -522,7 +528,13 @@ export default function ProgramsScreen() {
               <Text style={styles.errorIcon}>⚠</Text>
               <Text style={[styles.errorTitle, { color: colors.text }]}>Something went wrong</Text>
               <Text style={[styles.errorText, { color: colors.textMuted }]}>{error}</Text>
-              <TouchableOpacity style={[styles.retryButton, { backgroundColor: colors.primary }]} onPress={handleGenerate}>
+              <TouchableOpacity
+                style={[styles.retryButton, { backgroundColor: colors.primary }]}
+                onPress={handleGenerate}
+                accessibilityLabel="Try again"
+                accessibilityRole="button"
+                accessibilityHint="Retries training plan generation after the previous attempt failed"
+              >
                 <Text style={[styles.retryButtonText, { color: colors.primaryText }]}>Try Again</Text>
               </TouchableOpacity>
             </GlassCard>
@@ -547,6 +559,10 @@ export default function ProgramsScreen() {
                 style={styles.weekButton}
                 onPress={handlePreviousWeek}
                 disabled={currentWeek === 1}
+                accessibilityLabel={`Previous week, currently on week ${currentWeek}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: currentWeek === 1 }}
+                accessibilityHint="Navigates to the previous week's training plan"
               >
                 <ChevronLeft
                   size={20}
@@ -561,6 +577,9 @@ export default function ProgramsScreen() {
               <TouchableOpacity
                 style={styles.weekButton}
                 onPress={handleNextWeek}
+                accessibilityLabel={`Next week, currently on week ${currentWeek}`}
+                accessibilityRole="button"
+                accessibilityHint="Navigates to the next week's training plan"
               >
                 <Text style={[styles.weekButtonText, { color: colors.text }]}>Next Week</Text>
                 <ChevronRight size={20} color={colors.text} strokeWidth={1.5} />
@@ -580,6 +599,10 @@ export default function ProgramsScreen() {
                     disabled={isGenerating}
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
+                    accessibilityLabel="Quick regenerate training plan"
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+                    accessibilityHint="Regenerates the entire training plan quickly using template-based approach"
                   >
                     <Zap size={18} color={colors.textSecondary} strokeWidth={1.5} />
                     <Text style={[styles.halfButtonText, { color: colors.textSecondary }]}>Quick</Text>
@@ -595,6 +618,10 @@ export default function ProgramsScreen() {
                     disabled={isGenerating}
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
+                    accessibilityLabel="AI-powered regenerate training plan"
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+                    accessibilityHint="Regenerates the entire training plan using AI personalization based on your fitness goals and preferences"
                   >
                     <Sparkles size={18} color={colors.primary} strokeWidth={1.5} />
                     <Text style={[styles.halfButtonText, { color: colors.primary }]}>AI-Powered</Text>
@@ -608,7 +635,14 @@ export default function ProgramsScreen() {
         {/* Action Buttons - Frosted Liquid Glass */}
         {weeklyPlan && (
           <View style={styles.actionRow}>
-            <TouchableOpacity onPress={handleSetGoals} activeOpacity={0.7} style={styles.actionButtonWrapper}>
+            <TouchableOpacity
+              onPress={handleSetGoals}
+              activeOpacity={0.7}
+              style={styles.actionButtonWrapper}
+              accessibilityLabel="Adjust goals"
+              accessibilityRole="button"
+              accessibilityHint="Opens the goals wizard to update your fitness goals and preferences"
+            >
               <GlassCard style={styles.actionButton} interactive>
                 <View style={styles.actionButtonInner}>
                   <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
@@ -618,7 +652,14 @@ export default function ProgramsScreen() {
                 </View>
               </GlassCard>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleOpenCoachModal} activeOpacity={0.7} style={styles.actionButtonWrapper}>
+            <TouchableOpacity
+              onPress={handleOpenCoachModal}
+              activeOpacity={0.7}
+              style={styles.actionButtonWrapper}
+              accessibilityLabel="AI coach"
+              accessibilityRole="button"
+              accessibilityHint="Opens AI coaching to get personalized training guidance and workout advice"
+            >
               <GlassCard style={styles.actionButton} interactive>
                 <View style={styles.actionButtonInner}>
                   <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
@@ -648,6 +689,9 @@ export default function ProgramsScreen() {
               <TouchableOpacity
                 onPress={handleCloseProgramModal}
                 style={styles.closeButtonWrapper}
+                accessibilityLabel="Close program library"
+                accessibilityRole="button"
+                accessibilityHint="Closes the training programs modal and returns to the training screen"
               >
                 <GlassCard style={styles.modalCloseButtonGlass} interactive>
                   <X size={22} color={colors.text} strokeWidth={1.5} />
