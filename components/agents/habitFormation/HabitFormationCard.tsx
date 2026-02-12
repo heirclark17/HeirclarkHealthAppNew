@@ -77,12 +77,18 @@ export default function HabitFormationCard() {
               <TouchableOpacity
                 style={[styles.actionButton, { backgroundColor: colors.primary }]}
                 onPress={() => completeHabit(habit.id)}
+                accessibilityLabel={`Mark ${habit.name} as complete`}
+                accessibilityRole="button"
+                accessibilityHint={`Records completion of ${habit.name} for today${streak && streak.currentStreak > 0 ? ` and extends your ${streak.currentStreak} day streak` : ''}`}
               >
                 <Ionicons name="checkmark" size={18} color="#FFF" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.skipButton, { backgroundColor: colors.cardGlass }]}
                 onPress={() => skipHabit(habit.id)}
+                accessibilityLabel={`Skip ${habit.name} today`}
+                accessibilityRole="button"
+                accessibilityHint={`Marks ${habit.name} as skipped for today${streak && streak.currentStreak > 0 ? ' and breaks your current streak' : ''}`}
               >
                 <Ionicons name="close" size={16} color={colors.textMuted} />
               </TouchableOpacity>
@@ -123,6 +129,9 @@ export default function HabitFormationCard() {
           <TouchableOpacity
             style={[styles.addButton, { backgroundColor: colors.primary }]}
             onPress={() => setShowAddModal(true)}
+            accessibilityLabel="Add new habit"
+            accessibilityRole="button"
+            accessibilityHint="Opens form to create a custom habit or choose from suggested habits"
           >
             <Ionicons name="add" size={20} color="#FFF" />
           </TouchableOpacity>
@@ -153,6 +162,9 @@ export default function HabitFormationCard() {
               <TouchableOpacity
                 style={[styles.viewAllButton, { borderColor: colors.glassBorder }]}
                 onPress={() => setShowHabitsModal(true)}
+                accessibilityLabel={`View all ${todayHabits.length} habits for today`}
+                accessibilityRole="button"
+                accessibilityHint="Opens full list of today's habits with completion status and streaks"
               >
                 <Text style={[styles.viewAllText, { color: colors.primary }]}>
                   View all {todayHabits.length} habits
@@ -183,6 +195,9 @@ export default function HabitFormationCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowHabitsModal(false)}
+              accessibilityLabel="Close habits list"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the full habits list and returns to the habits card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -206,6 +221,9 @@ export default function HabitFormationCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowAddModal(false)}
+              accessibilityLabel="Close add habit form"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the add habit form without saving and returns to the habits card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -233,6 +251,10 @@ export default function HabitFormationCard() {
                       },
                     ]}
                     onPress={() => setNewHabitCategory(cat)}
+                    accessibilityLabel={`${cat} category${newHabitCategory === cat ? ', currently selected' : ''}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: newHabitCategory === cat }}
+                    accessibilityHint={`Selects ${cat} as the category for your new habit`}
                   >
                     <Text style={{ color: newHabitCategory === cat ? '#FFF' : colors.textMuted, fontSize: 11, fontFamily: Fonts.medium }}>
                       {cat}
@@ -244,6 +266,10 @@ export default function HabitFormationCard() {
                 style={[styles.createButton, { backgroundColor: colors.primary, opacity: newHabitName.trim() ? 1 : 0.5 }]}
                 onPress={handleAddHabit}
                 disabled={!newHabitName.trim()}
+                accessibilityLabel={newHabitName.trim() ? `Create ${newHabitName} habit in ${newHabitCategory} category` : 'Create habit'}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !newHabitName.trim() }}
+                accessibilityHint={newHabitName.trim() ? `Creates a new ${newHabitCategory} habit called ${newHabitName} for daily tracking` : 'Enter a habit name first to create a new habit'}
               >
                 <Text style={styles.createButtonText}>Create Habit</Text>
               </TouchableOpacity>
@@ -256,6 +282,9 @@ export default function HabitFormationCard() {
                 key={index}
                 style={[styles.suggestedItem, { borderBottomColor: colors.glassBorder }]}
                 onPress={() => handleAddSuggested(habit)}
+                accessibilityLabel={`Add ${habit.name} habit`}
+                accessibilityRole="button"
+                accessibilityHint={`Adds ${habit.name} to your daily habits: ${habit.description}`}
               >
                 <View style={[styles.habitIcon, { backgroundColor: colors.primary + '20' }]}>
                   <Ionicons name={habit.icon as any} size={18} color={colors.primary} />
