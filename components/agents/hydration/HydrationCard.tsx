@@ -100,6 +100,9 @@ export default function HydrationCard() {
           <TouchableOpacity
             style={[styles.viewButton, { backgroundColor: colors.cardGlass }]}
             onPress={() => setShowHistoryModal(true)}
+            accessibilityLabel={`View hydration history${state.streak.currentStreak > 0 ? `, current streak ${state.streak.currentStreak} days` : ''}`}
+            accessibilityRole="button"
+            accessibilityHint="Opens detailed hydration history with weekly progress and streak information"
           >
             <Text style={[styles.viewButtonText, { color: colors.primary }]}>History</Text>
             <Ionicons name="arrow-forward" size={14} color={colors.primary} />
@@ -157,6 +160,9 @@ export default function HydrationCard() {
               key={amount.value}
               style={[styles.quickAddButton, { backgroundColor: colors.cardGlass, borderColor: colors.glassBorder }]}
               onPress={() => handleQuickAdd(amount.value)}
+              accessibilityLabel={`Add ${amount.label} of ${selectedSource.label.toLowerCase()}`}
+              accessibilityRole="button"
+              accessibilityHint={`Adds ${amount.label} to your daily hydration total, currently at ${formatAmount(state.todayIntake)}`}
             >
               <Ionicons name="add" size={14} color={colors.primary} />
               <Text style={[styles.quickAddText, { color: colors.text }]}>{amount.label}</Text>
@@ -165,6 +171,9 @@ export default function HydrationCard() {
           <TouchableOpacity
             style={[styles.quickAddButton, styles.customButton, { backgroundColor: colors.primary }]}
             onPress={() => setShowAddModal(true)}
+            accessibilityLabel="Add custom amount"
+            accessibilityRole="button"
+            accessibilityHint="Opens form to add a custom amount of water or choose different beverage types"
           >
             <Ionicons name="add-circle" size={14} color="#FFF" />
             <Text style={[styles.quickAddText, { color: '#FFF' }]}>Custom</Text>
@@ -191,6 +200,9 @@ export default function HydrationCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowAddModal(false)}
+              accessibilityLabel="Close add water form"
+              accessibilityRole="button"
+              accessibilityHint="Closes the add water modal and returns to hydration card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -211,6 +223,10 @@ export default function HydrationCard() {
                     },
                   ]}
                   onPress={() => setSelectedSource(source)}
+                  accessibilityLabel={`${source.label}${selectedSource.id === source.id ? ', currently selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: selectedSource.id === source.id }}
+                  accessibilityHint={`Selects ${source.label.toLowerCase()} as the beverage type for hydration tracking`}
                 >
                   <Ionicons
                     name={source.icon as any}
@@ -240,6 +256,9 @@ export default function HydrationCard() {
                     handleQuickAdd(amount.value);
                     setShowAddModal(false);
                   }}
+                  accessibilityLabel={`Add ${amount.label} of ${selectedSource.label.toLowerCase()}`}
+                  accessibilityRole="button"
+                  accessibilityHint={`Adds ${amount.label} of ${selectedSource.label.toLowerCase()} to your daily hydration total and closes this modal`}
                 >
                   <Text style={[styles.amountValue, { color: colors.text }]}>{amount.label}</Text>
                 </TouchableOpacity>
@@ -270,6 +289,9 @@ export default function HydrationCard() {
                     <TouchableOpacity
                       style={[styles.deleteButton, { backgroundColor: colors.danger + '20' }]}
                       onPress={() => removeEntry(entry.id)}
+                      accessibilityLabel={`Delete ${formatAmount(entry.amount)} entry from ${new Date(entry.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`}
+                      accessibilityRole="button"
+                      accessibilityHint="Removes this hydration entry from today's log"
                     >
                       <Ionicons name="trash-outline" size={16} color={colors.danger} />
                     </TouchableOpacity>
@@ -294,6 +316,9 @@ export default function HydrationCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowHistoryModal(false)}
+              accessibilityLabel="Close hydration history"
+              accessibilityRole="button"
+              accessibilityHint="Closes the hydration history modal and returns to hydration card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
