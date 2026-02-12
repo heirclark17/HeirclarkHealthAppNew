@@ -188,6 +188,10 @@ export default function AITestScreen() {
       onPress={onPress}
       disabled={loading !== null}
       style={{ marginBottom: Spacing.md }}
+      accessibilityLabel={`${title}${loading === loadingKey ? ', testing' : ''}`}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: loading !== null, busy: loading === loadingKey }}
+      accessibilityHint={description}
     >
       <GlassCard style={styles.testCard}>
         <View style={styles.testCardHeader}>
