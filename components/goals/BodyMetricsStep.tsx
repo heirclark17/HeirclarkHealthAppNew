@@ -59,6 +59,10 @@ function ToggleButton({ options, selected, onSelect, colors }: ToggleButtonProps
             onSelect(option.value);
           }}
           activeOpacity={0.7}
+          accessibilityLabel={option.label}
+          accessibilityRole="button"
+          accessibilityState={{ selected: selected === option.value }}
+          accessibilityHint={`Select ${option.label}`}
         >
           <Text
             style={[
@@ -132,6 +136,10 @@ function SimplePicker({ data, selectedValue, onValueChange, colors, isDark }: Si
         onPress={handleDecrement}
         disabled={currentIndex <= 0}
         activeOpacity={0.6}
+        accessibilityLabel="Decrease value"
+        accessibilityRole="button"
+        accessibilityState={{ disabled: currentIndex <= 0 }}
+        accessibilityHint="Decreases the selected value by one"
       >
         <Ionicons name="chevron-up" size={28} color={currentIndex <= 0 ? colors.border : colors.textMuted} />
       </TouchableOpacity>
@@ -185,6 +193,10 @@ function SimplePicker({ data, selectedValue, onValueChange, colors, isDark }: Si
         onPress={handleIncrement}
         disabled={currentIndex >= data.length - 1}
         activeOpacity={0.6}
+        accessibilityLabel="Increase value"
+        accessibilityRole="button"
+        accessibilityState={{ disabled: currentIndex >= data.length - 1 }}
+        accessibilityHint="Increases the selected value by one"
       >
         <Ionicons name="chevron-down" size={28} color={currentIndex >= data.length - 1 ? colors.border : colors.textMuted} />
       </TouchableOpacity>
@@ -595,6 +607,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
           onPress={() => setShowStartDatePicker(true)}
           activeOpacity={0.7}
+          accessibilityLabel={`Start date: ${formatDateForDisplay(state.startDate)}`}
+          accessibilityRole="button"
+          accessibilityHint="Opens date picker to select when you want to start"
         >
           <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
           <NumberText weight="light" style={[styles.datePickerButtonText, { color: colors.text }]}>
@@ -745,6 +760,10 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               await selectionFeedback();
               setSex('male');
             }}
+            accessibilityLabel="Male"
+            accessibilityRole="button"
+            accessibilityState={{ selected: state.sex === 'male' }}
+            accessibilityHint="Select male for BMR calculation"
           >
             <Ionicons
               name="male"
@@ -771,6 +790,10 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               await selectionFeedback();
               setSex('female');
             }}
+            accessibilityLabel="Female"
+            accessibilityRole="button"
+            accessibilityState={{ selected: state.sex === 'female' }}
+            accessibilityHint="Select female for BMR calculation"
           >
             <Ionicons
               name="female"
@@ -792,7 +815,13 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Buttons */}
       <View style={styles.buttonRow}>
-        <TouchableOpacity onPress={onBack} style={{ flex: 1 }}>
+        <TouchableOpacity
+          onPress={onBack}
+          style={{ flex: 1 }}
+          accessibilityLabel="Back"
+          accessibilityRole="button"
+          accessibilityHint="Returns to previous step"
+        >
           <GlassCard style={styles.backButton} interactive>
             <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
           </GlassCard>
@@ -801,6 +830,10 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           onPress={handleContinue}
           disabled={!isValid()}
           style={{ flex: 2 }}
+          accessibilityLabel="Continue to next step"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !isValid() }}
+          accessibilityHint="Proceeds to the next step if all fields are filled"
         >
           <GlassCard
             style={[
