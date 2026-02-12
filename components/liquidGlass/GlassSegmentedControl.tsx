@@ -190,6 +190,12 @@ export const GlassSegmentedControl: React.FC<GlassSegmentedControlProps> = ({
               isSegmentDisabled && styles.segmentDisabled,
             ]}
             activeOpacity={0.7}
+            accessibilityLabel={segment.label}
+            accessibilityRole="button"
+            accessibilityState={{
+              selected: isSelected,
+              disabled: isSegmentDisabled,
+            }}
           >
             <View style={styles.segmentContent}>
               {segment.icon && (

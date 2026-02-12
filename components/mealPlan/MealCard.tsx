@@ -302,6 +302,9 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 <TouchableOpacity
                   onPress={handleViewRecipe}
                   activeOpacity={0.6}
+                  accessibilityLabel={`View recipe for ${meal.name}`}
+                  accessibilityRole="button"
+                  accessibilityHint="Opens detailed recipe with ingredients and instructions"
                   style={[
                     styles.recipeButtonContainer,
                     {
@@ -536,6 +539,10 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   onPress={handleAddToTodaysMeals}
                   disabled={isAddingToMeals}
                   activeOpacity={0.7}
+                  accessibilityLabel={`Add ${meal.name} to today's meals`}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: isAddingToMeals }}
+                  accessibilityHint="Adds this meal to your daily meal log"
                 >
                   <PlusCircle size={20} color={colors.primary} strokeWidth={1.5} />
                   <Text style={[styles.primaryActionText, { color: colors.text }]}>
@@ -559,6 +566,10 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                       onPress={handleSaveToSavedMeals}
                       disabled={isSavingMeal}
                       activeOpacity={0.7}
+                      accessibilityLabel={`Save ${meal.name} to favorites`}
+                      accessibilityRole="button"
+                      accessibilityState={{ disabled: isSavingMeal }}
+                      accessibilityHint="Saves this meal to your favorites for quick access"
                     >
                       <Bookmark size={16} color={colors.text} strokeWidth={1.5} />
                       <Text style={[styles.secondaryActionText, { color: colors.text }]}>
@@ -579,6 +590,10 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     onPress={handleAddToInstacart}
                     disabled={isAddingToInstacart}
                     activeOpacity={0.7}
+                    accessibilityLabel={`Add ${meal.name} ingredients to Instacart`}
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isAddingToInstacart }}
+                    accessibilityHint="Adds all ingredients to your Instacart shopping cart"
                   >
                     <ShoppingCart size={16} color={colors.text} strokeWidth={1.5} />
                     <Text style={[styles.secondaryActionText, { color: colors.text }]}>
@@ -600,6 +615,10 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                       onPress={handleSwap}
                       disabled={isSwapping}
                       activeOpacity={0.7}
+                      accessibilityLabel={`Swap ${meal.name} for different meal`}
+                      accessibilityRole="button"
+                      accessibilityState={{ disabled: isSwapping }}
+                      accessibilityHint="Replaces this meal with an alternative meal option"
                     >
                       <ArrowLeftRight size={16} color={colors.text} strokeWidth={1.5} />
                       <Text style={[styles.secondaryActionText, { color: colors.text }]}>

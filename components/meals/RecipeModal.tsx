@@ -123,7 +123,13 @@ export function RecipeModal({ visible, meal, onClose }: RecipeModalProps) {
       <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#000' : '#fff' }]}>
         {/* Header with close button */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            accessibilityLabel="Close recipe"
+            accessibilityRole="button"
+            accessibilityHint="Closes the recipe details"
+          >
             <X size={24} color={isDark ? '#fff' : '#000'} />
           </TouchableOpacity>
         </View>
@@ -260,7 +266,13 @@ export function RecipeModal({ visible, meal, onClose }: RecipeModalProps) {
 
           {/* Shop on Instacart Button */}
           {meal.ingredients && meal.ingredients.length > 0 && (
-            <TouchableOpacity style={styles.instacartButton} onPress={handleShopInstacart}>
+            <TouchableOpacity
+              style={styles.instacartButton}
+              onPress={handleShopInstacart}
+              accessibilityLabel={`Shop ingredients for ${mealName} on Instacart`}
+              accessibilityRole="button"
+              accessibilityHint="Opens Instacart with all recipe ingredients added to cart"
+            >
               <ShoppingCart size={20} color="#fff" />
               <Text style={[styles.instacartButtonText, { fontFamily: Fonts.semiBold }]}>
                 Shop on Instacart

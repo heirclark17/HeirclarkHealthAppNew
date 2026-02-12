@@ -55,6 +55,12 @@ export interface GlassButtonProps {
 
   /** On press handler */
   onPress?: () => void;
+
+  /** Accessibility label */
+  accessibilityLabel?: string;
+
+  /** Accessibility hint */
+  accessibilityHint?: string;
 }
 
 const getSizeStyles = (size: GlassButtonSize) => {
@@ -95,6 +101,8 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   fullWidth = false,
   style,
   onPress,
+  accessibilityLabel,
+  accessibilityHint,
 }) => {
   const { isDark, colors, getGlassBackground, getGlassBorder } = useGlassTheme();
   const sizeStyles = getSizeStyles(size);
@@ -221,6 +229,13 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       onPress={handlePress}
       disabled={disabled || loading}
       activeOpacity={1}
+      accessibilityLabel={accessibilityLabel || title || 'Button'}
+      accessibilityHint={accessibilityHint}
+      accessibilityRole="button"
+      accessibilityState={{
+        disabled: disabled || loading,
+        busy: loading,
+      }}
     >
       {renderContent()}
     </AnimatedTouchable>

@@ -1065,6 +1065,10 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
           onPress={onBack}
           disabled={isConfirming}
           style={{ flex: 1 }}
+          accessibilityLabel="Adjust plan settings"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isConfirming }}
+          accessibilityHint="Returns to previous step to modify your plan"
         >
           <GlassCard style={styles.backButton} interactive>
             <Text style={[styles.backButtonText, { color: colors.text }]}>ADJUST</Text>
@@ -1076,6 +1080,10 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
           onPress={handleConfirm}
           disabled={isConfirming}
           style={{ flex: 2 }}
+          accessibilityLabel="Confirm my plan"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isConfirming, busy: isConfirming }}
+          accessibilityHint="Saves your personalized health plan and starts your journey"
         >
           <GlassCard style={[styles.confirmButton, { backgroundColor: primaryGlassBg }]} interactive>
             <View style={styles.confirmButtonContent}>
