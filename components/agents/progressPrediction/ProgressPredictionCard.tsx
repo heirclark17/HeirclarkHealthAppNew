@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 8,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
   },
   statLabel: {
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 8,
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 12,
   },
   plateauContent: {
@@ -711,12 +711,12 @@ const styles = StyleSheet.create({
   },
   milestoneProgressBar: {
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   milestoneProgressFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
   },
   nextMilestoneInfo: {
     flexDirection: 'row',
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
   closeButton: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },

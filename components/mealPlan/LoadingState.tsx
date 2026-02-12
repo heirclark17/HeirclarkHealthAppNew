@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   skeletonTitle: {
     width: '70%',
     height: 20,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.1)',
     marginBottom: 8,
   },

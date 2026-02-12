@@ -1251,7 +1251,7 @@ const styles = StyleSheet.create({
   weeklyRateIcon: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 24,
     backgroundColor: 'rgba(255, 107, 107, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1298,7 +1298,7 @@ const styles = StyleSheet.create({
   timelineIcon: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     backgroundColor: 'rgba(150, 206, 180, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1411,7 +1411,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     backgroundColor: 'rgba(255, 179, 71, 0.1)',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 12,
   },
   nutritionSynergyText: {
@@ -1541,7 +1541,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     backgroundColor: 'rgba(78, 205, 196, 0.1)',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 12,
   },
   prefConnectionText: {
@@ -1772,7 +1772,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 12,
   },
   equipmentTagText: {
     fontSize: 11,

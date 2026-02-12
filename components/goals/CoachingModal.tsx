@@ -905,7 +905,7 @@ const styles = StyleSheet.create({
   controlButton: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
   coachIconSmall: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },

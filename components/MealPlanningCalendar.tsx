@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   shoppingListCheckbox: {
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: Colors.border,
     marginRight: 12,

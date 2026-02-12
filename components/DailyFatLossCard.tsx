@@ -326,12 +326,12 @@ const styles = StyleSheet.create({
   progressBarBg: {
     height: 6,
     backgroundColor: Colors.border,
-    borderRadius: 3,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
   },
   progressBarText: {
     fontSize: 10,

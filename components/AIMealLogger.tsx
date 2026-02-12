@@ -1528,7 +1528,7 @@ const styles = StyleSheet.create({
   modeIcon: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 24,
     // backgroundColor set dynamically based on theme
     justifyContent: 'center',
     alignItems: 'center',
@@ -1678,7 +1678,7 @@ const styles = StyleSheet.create({
   cameraTopButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1704,7 +1704,7 @@ const styles = StyleSheet.create({
   cameraIconButton: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 32,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1810,16 +1810,16 @@ const styles = StyleSheet.create({
   },
   nutritionBackButton: {
     overflow: 'hidden',
-    borderRadius: 22,
+    borderRadius: 24,
   },
   nutritionRefreshButton: {
     overflow: 'hidden',
-    borderRadius: 22,
+    borderRadius: 24,
   },
   nutritionNavButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
@@ -1992,7 +1992,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    borderRadius: 30,
+    borderRadius: 32,
     paddingVertical: 16,
     gap: 8,
   },
@@ -2001,7 +2001,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 30,
+    borderRadius: 32,
     paddingVertical: 16,
     gap: 8,
     borderWidth: 1,
@@ -2011,7 +2011,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 30,
+    borderRadius: 32,
     paddingVertical: 16,
     gap: 8,
   },
@@ -2170,7 +2170,7 @@ const animStyles = StyleSheet.create({
     width: '90%',
     height: 20,
     backgroundColor: 'rgba(0, 245, 160, 0.3)',
-    borderRadius: 10,
+    borderRadius: 12,
   },
 
   // Corner animations
@@ -2307,7 +2307,7 @@ const animStyles = StyleSheet.create({
     position: 'absolute',
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: 4,
   },
   analyzingText: {
     fontSize: 14,

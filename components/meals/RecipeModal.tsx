@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   bullet: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
     marginTop: 8,
   },
   ingredientText: {

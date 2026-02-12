@@ -162,12 +162,12 @@ const styles = StyleSheet.create({
   barContainer: {
     height: 6,
     backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 3,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   barFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
   },
 });
 

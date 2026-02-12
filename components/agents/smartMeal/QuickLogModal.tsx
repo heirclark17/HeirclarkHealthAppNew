@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   mealTypeIcon: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
-    borderRadius: 14,
+    borderRadius: 12,
     marginBottom: 12,
   },
   logButtonText: {

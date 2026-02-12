@@ -188,12 +188,12 @@ const styles = StyleSheet.create({
   progressBarBg: {
     height: 6,
     backgroundColor: Colors.background,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: Colors.primary,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   noExercisesText: {
     fontSize: 14,

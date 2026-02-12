@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 8,
     gap: 8,
   },
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   },
   sourceItem: {
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 8,
   },
   sourceHeader: {
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   confidenceBadge: {
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   confidenceText: {
     fontSize: 11,
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   adjustmentItem: {
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 8,
   },
   adjustmentField: {
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     marginTop: 8,
   },
   applyButtonText: {
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   },
   nutritionTable: {
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   nutritionRow: {
     flexDirection: 'row',

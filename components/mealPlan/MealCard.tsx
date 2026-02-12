@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   timeBadgeText: {
     fontSize: 11,
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
   macroDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   macroValue: {
     fontSize: 16,
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
   closeButton: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -853,7 +853,7 @@ const styles = StyleSheet.create({
   ingredientCheck: {
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
@@ -904,7 +904,7 @@ const styles = StyleSheet.create({
   instructionNumberBadge: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -951,7 +951,7 @@ const styles = StyleSheet.create({
   },
   secondaryActionButton: {
     flex: 1,
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   secondaryActionButtonInner: {

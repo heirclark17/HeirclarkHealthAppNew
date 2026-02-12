@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 22,
+    borderRadius: 24,
   },
   headerCenter: {
     flexDirection: 'row',
@@ -960,7 +960,7 @@ const styles = StyleSheet.create({
   avatarBadge: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
@@ -1022,7 +1022,7 @@ const styles = StyleSheet.create({
   sendButton: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },

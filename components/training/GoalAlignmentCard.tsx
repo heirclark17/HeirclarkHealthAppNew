@@ -243,13 +243,13 @@ const styles = StyleSheet.create({
   alignmentBarContainer: {
     flex: 1,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
     marginHorizontal: 12,
     overflow: 'hidden',
   },
   alignmentBar: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
   },
   alignmentValue: {
     fontSize: 12,

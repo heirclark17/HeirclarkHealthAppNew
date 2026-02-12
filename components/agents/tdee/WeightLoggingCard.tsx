@@ -530,13 +530,13 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: Colors.warningOrange,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   emptyState: {
     alignItems: 'center',
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
   adjustButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
   },
   adjustButtonText: {
@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
     paddingVertical: 16,
-    borderRadius: 14,
+    borderRadius: 12,
     marginBottom: 16,
     borderWidth: 0.5,
     borderColor: 'rgba(255, 255, 255, 0.2)',

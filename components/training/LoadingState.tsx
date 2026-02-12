@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   skeletonIcon: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     backgroundColor: Colors.backgroundSecondary,
   },
   skeletonHeaderText: {

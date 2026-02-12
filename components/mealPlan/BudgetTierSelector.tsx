@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   tierIconContainer: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   pantryBadgeText: {
     fontSize: 12,
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   pantryInput: {
     flex: 1,
     height: 42,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     paddingHorizontal: 12,
     fontSize: 14,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   addButton: {
     width: 42,
     height: 42,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },

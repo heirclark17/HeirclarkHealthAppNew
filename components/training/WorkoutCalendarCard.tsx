@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   toggleOption: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   toggleOptionActive: {
     // Background set dynamically
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
   workoutIndicator: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   restIndicator: {
     // Icon handles its own styling
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
   monthIndicatorDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
   summaryDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   summaryText: {
     fontSize: 11,

@@ -319,13 +319,13 @@ const styles = StyleSheet.create({
   },
   progressBackground: {
     height: 10,
-    borderRadius: 5,
+    borderRadius: 4,
     overflow: 'hidden',
     position: 'relative',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 5,
+    borderRadius: 4,
   },
   progressHighlight: {
     position: 'absolute',
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   controlButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,

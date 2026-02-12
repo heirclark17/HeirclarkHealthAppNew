@@ -874,7 +874,7 @@ const styles = StyleSheet.create({
   toggleOption: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   toggleOptionSelected: {
     backgroundColor: Colors.primary,
@@ -1001,13 +1001,13 @@ const styles = StyleSheet.create({
   },
   simpleWeightTrack: {
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
     overflow: 'visible',
     position: 'relative',
   },
   simpleWeightFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
   },
   simpleWeightThumb: {
     position: 'absolute',
@@ -1144,7 +1144,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
-    borderRadius: 14,
+    borderRadius: 12,
   },
   continueButtonText: {
     fontSize: 14,

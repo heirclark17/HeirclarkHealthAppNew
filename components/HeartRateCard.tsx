@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   zoneDot: {
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: 4,
     marginRight: 12,
   },
   zoneName: {

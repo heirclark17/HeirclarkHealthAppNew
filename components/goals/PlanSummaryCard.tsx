@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   confidenceDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   confidenceText: {
     fontSize: 10,

@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   workoutIndicator: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
     backgroundColor: Colors.protein,
     marginTop: 6,
   },

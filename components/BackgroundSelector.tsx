@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
     right: '12%',
     top: '25%',
     height: '35%',
-    borderRadius: 6,
+    borderRadius: 8,
     overflow: 'hidden',
   },
   previewCardInner: {
@@ -727,7 +727,7 @@ const styles = StyleSheet.create({
   removePhotoButton: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },

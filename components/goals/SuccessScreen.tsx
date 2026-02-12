@@ -1207,7 +1207,7 @@ const styles = StyleSheet.create({
   mealPlanIconCircle: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: Colors.error,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1243,7 +1243,7 @@ const styles = StyleSheet.create({
   trainingPlanIconCircle: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: Colors.success,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1271,7 +1271,7 @@ const styles = StyleSheet.create({
   playIconCircle: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: Colors.success,
     alignItems: 'center',
     justifyContent: 'center',

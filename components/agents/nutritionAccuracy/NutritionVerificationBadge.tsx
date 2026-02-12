@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   flagDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 4,
     marginLeft: 2,
   },
 });

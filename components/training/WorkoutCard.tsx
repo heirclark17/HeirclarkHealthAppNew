@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   completedBadge: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 12,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
   gifThumbnail: {
     width: 52,
     height: 52,
-    borderRadius: 10,
+    borderRadius: 12,
     marginRight: 12,
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -644,20 +644,20 @@ const styles = StyleSheet.create({
   gifImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 10,
+    borderRadius: 12,
   },
   gifLoading: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: 12,
   },
   gifPlayOverlay: {
     position: 'absolute',
     bottom: 2,
     right: 2,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 2,
   },
   exerciseInfo: {
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
   lastWeightBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   lastWeightText: {
     fontSize: 11,

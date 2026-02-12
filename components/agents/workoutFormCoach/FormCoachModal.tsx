@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
   cueNumber: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },

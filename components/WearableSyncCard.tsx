@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 149, 0, 0.15)',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   unavailableButtonText: {
     color: 'Colors.warningOrange',
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   syncButtonConnected: {
     backgroundColor: 'rgba(76, 175, 80, 0.15)',
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   disconnectButton: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 12,
     backgroundColor: Colors.error,
     justifyContent: 'center',
     alignItems: 'center',

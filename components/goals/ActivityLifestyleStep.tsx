@@ -852,7 +852,7 @@ const styles = StyleSheet.create({
   activityIcon: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },

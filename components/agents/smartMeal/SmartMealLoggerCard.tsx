@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   fullLoggerText: {
     fontSize: 12,
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   mealTypeIcon: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
   confidenceBadge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   confidenceText: {
     fontSize: 10,
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 12,
     gap: 8,
     minWidth: 120,
   },
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 8,
-    borderRadius: 10,
+    borderRadius: 12,
     marginTop: 4,
   },
   tipText: {

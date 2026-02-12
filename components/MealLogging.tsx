@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
   cameraShutterInner: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 32,
     backgroundColor: Colors.text,
   },
 });
