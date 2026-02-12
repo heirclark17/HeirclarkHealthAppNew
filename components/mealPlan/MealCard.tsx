@@ -121,10 +121,42 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     ? meal.instructions
     : Array.isArray(recipeDetails?.instructions) ? recipeDetails.instructions : [];
 
-  // Generate a fallback description if none exists
-  const displayDescription = meal.description && meal.description.trim().length > 0
-    ? meal.description
-    : `A delicious ${meal.mealType} with ${meal.protein}g protein, perfect for your nutrition goals.`;
+  // Generate an appetizing fallback description if none exists
+  const displayDescription = useMemo(() => {
+    if (meal.description && meal.description.trim().length > 0) {
+      return meal.description;
+    }
+
+    // Create vivid, dynamic fallback based on meal data
+    const mealName = meal.name.toLowerCase();
+    const proteinAmount = meal.protein;
+    const calorieAmount = Math.round(meal.calories);
+
+    // Detect protein type for more specific descriptions
+    let proteinDescriptor = 'protein-rich';
+    if (mealName.includes('chicken')) proteinDescriptor = 'tender grilled chicken';
+    else if (mealName.includes('salmon') || mealName.includes('fish')) proteinDescriptor = 'flaky, omega-rich fish';
+    else if (mealName.includes('turkey')) proteinDescriptor = 'lean turkey';
+    else if (mealName.includes('beef') || mealName.includes('steak')) proteinDescriptor = 'savory beef';
+    else if (mealName.includes('egg')) proteinDescriptor = 'protein-packed eggs';
+    else if (mealName.includes('tofu') || mealName.includes('tempeh')) proteinDescriptor = 'plant-based protein';
+    else if (mealName.includes('shrimp')) proteinDescriptor = 'succulent shrimp';
+    else if (mealName.includes('yogurt')) proteinDescriptor = 'creamy Greek yogurt';
+
+    // Meal type specific descriptors
+    if (meal.mealType === 'breakfast') {
+      return `Energizing ${meal.mealType} featuring ${proteinDescriptor} with ${proteinAmount}g of protein to fuel your morning and keep you satisfied`;
+    } else if (meal.mealType === 'lunch') {
+      return `Wholesome ${meal.mealType} centered around ${proteinDescriptor}, delivering ${proteinAmount}g of protein and ${calorieAmount} perfectly balanced calories`;
+    } else if (meal.mealType === 'dinner') {
+      return `Satisfying ${meal.mealType} showcasing ${proteinDescriptor} with ${proteinAmount}g of muscle-building protein to support your fitness goals`;
+    } else if (meal.mealType === 'snack') {
+      return `Smart ${calorieAmount}-calorie snack with ${proteinAmount}g of protein to keep you fueled between meals`;
+    }
+
+    // Generic fallback
+    return `Nutritious ${meal.mealType} with ${proteinAmount}g protein and ${calorieAmount} calories, perfectly balanced for your goals`;
+  }, [meal.description, meal.name, meal.mealType, meal.protein, meal.calories]);
 
   const handleViewRecipe = () => {
     console.log('[MealCard] View Recipe pressed for:', meal.name);
@@ -245,7 +277,6 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)',
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>Prep: {meal.prepTime}m</Text>
@@ -254,7 +285,6 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)',
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>Cook: {meal.cookTime}m</Text>
@@ -263,7 +293,6 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)',
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
@@ -595,8 +624,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   timeBadgeText: {
     fontSize: 11,
