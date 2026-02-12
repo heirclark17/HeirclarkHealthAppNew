@@ -14,7 +14,7 @@ import {
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
+  withSpring,
   Easing,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 import { Meal } from '../../types/mealPlan';
 import { aiService } from '../../services/aiService';
 
@@ -161,21 +162,21 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   const handleViewRecipe = () => {
     console.log('[MealCard] View Recipe pressed for:', meal.name);
     isFlipping.value = true;
-    // Flip card to 90 degrees (edge-on), then show modal
-    flipRotateY.value = withTiming(90, { duration: 300, easing: Easing.inOut(Easing.cubic) });
+    // Flip card to 90 degrees (edge-on) with spring physics
+    flipRotateY.value = withSpring(90, { damping: 15, stiffness: 100 });
     // Show modal when flip reaches halfway
     setTimeout(() => {
       setShowRecipeModal(true);
       // Continue flip to 180 for full rotation effect
-      flipRotateY.value = withTiming(180, { duration: 300, easing: Easing.out(Easing.cubic) });
+      flipRotateY.value = withSpring(180, { damping: 15, stiffness: 100 });
     }, 300);
   };
 
   const handleCloseModal = () => {
     console.log('[MealCard] Closing modal');
     setShowRecipeModal(false);
-    // Flip back
-    flipRotateY.value = withTiming(0, { duration: 400, easing: Easing.inOut(Easing.cubic) });
+    // Flip back with spring physics
+    flipRotateY.value = withSpring(0, { damping: 15, stiffness: 100 });
     setTimeout(() => {
       isFlipping.value = false;
     }, 400);
@@ -255,11 +256,11 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 activeOpacity={0.6}
                 style={[
                   styles.recipeButtonContainer,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)' }
+                  { backgroundColor: colors.cardBackground }
                 ]}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={[styles.recipeButton, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>View Recipe</Text>
+                <Text style={[styles.recipeButton, { color: colors.textMuted }]}>View Recipe</Text>
               </TouchableOpacity>
             </View>
 
@@ -267,7 +268,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             <Text style={[styles.mealName, { color: colors.text }]}>{meal.name}</Text>
 
             {/* Description */}
-            <Text style={[styles.mealDescription, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]} numberOfLines={2}>
+            <Text style={[styles.mealDescription, { color: colors.textMuted }]} numberOfLines={2}>
               {displayDescription}
             </Text>
 
@@ -276,26 +277,26 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               <View style={[
                 styles.timeBadge,
                 {
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: colors.cardBackground,
                 }
               ]}>
-                <Text style={[styles.timeBadgeText, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>Prep: {meal.prepTime}m</Text>
+                <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Prep: {meal.prepTime}m</Text>
               </View>
               <View style={[
                 styles.timeBadge,
                 {
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: colors.cardBackground,
                 }
               ]}>
-                <Text style={[styles.timeBadgeText, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>Cook: {meal.cookTime}m</Text>
+                <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Cook: {meal.cookTime}m</Text>
               </View>
               <View style={[
                 styles.timeBadge,
                 {
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: colors.cardBackground,
                 }
               ]}>
-                <Text style={[styles.timeBadgeText, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
+                <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
               </View>
             </View>
 
@@ -303,23 +304,23 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             <View style={styles.macroRow}>
               <View style={styles.macroItem}>
                 <View style={[styles.macroDot, { backgroundColor: colors.calories }]} />
-                <Text style={[styles.macroValue, { color: colors.text }]}>{Math.round(meal.calories)}</Text>
-                <Text style={[styles.macroLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>cal</Text>
+                <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{Math.round(meal.calories)}</NumberText>
+                <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>cal</Text>
               </View>
               <View style={styles.macroItem}>
                 <View style={[styles.macroDot, { backgroundColor: colors.protein }]} />
-                <Text style={[styles.macroValue, { color: colors.text }]}>{meal.protein}g</Text>
-                <Text style={[styles.macroLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>protein</Text>
+                <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.protein}g</NumberText>
+                <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>protein</Text>
               </View>
               <View style={styles.macroItem}>
                 <View style={[styles.macroDot, { backgroundColor: colors.carbs }]} />
-                <Text style={[styles.macroValue, { color: colors.text }]}>{meal.carbs}g</Text>
-                <Text style={[styles.macroLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>carbs</Text>
+                <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.carbs}g</NumberText>
+                <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>carbs</Text>
               </View>
               <View style={styles.macroItem}>
                 <View style={[styles.macroDot, { backgroundColor: colors.fat }]} />
-                <Text style={[styles.macroValue, { color: colors.text }]}>{meal.fat}g</Text>
-                <Text style={[styles.macroLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>fat</Text>
+                <NumberText weight="light" style={[styles.macroValue, { color: colors.text }]}>{meal.fat}g</NumberText>
+                <Text style={[styles.macroLabel, { color: colors.textSecondary }]}>fat</Text>
               </View>
             </View>
         </GlassCard>
@@ -333,13 +334,13 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
         transparent={true}
         onRequestClose={handleCloseModal}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.3)' }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
           <View style={[styles.modalContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             {/* Modal Background */}
             <BlurView
               intensity={isDark ? 80 : 90}
               tint={isDark ? "dark" : "light"}
-              style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(8, 8, 8, 0.95)' : 'rgba(250, 250, 250, 0.95)' }]}
+              style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(8, 8, 8, 0.40)' : 'rgba(250, 250, 250, 0.40)' }]}
             />
 
             {/* Header */}
@@ -351,10 +352,10 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               </View>
               <Pressable
                 onPress={handleCloseModal}
-                style={[styles.closeButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)' }]}
+                style={[styles.closeButton, { backgroundColor: colors.cardBackground }]}
                 hitSlop={12}
               >
-                <Ionicons name="close" size={24} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)'} />
+                <Ionicons name="close" size={24} color={colors.text} />
               </Pressable>
             </View>
 
@@ -366,59 +367,27 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             >
               {/* Meal Title */}
               <Text style={[styles.modalTitle, { color: colors.text }]}>{meal.name}</Text>
-              <Text style={[styles.modalDescription, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>{displayDescription}</Text>
+              <Text style={[styles.modalDescription, { color: colors.textMuted }]}>{displayDescription}</Text>
 
               {/* Quick Info Row */}
               <View style={styles.quickInfoRow}>
                 <View style={styles.quickInfoItem}>
-                  <Ionicons name="time-outline" size={18} color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} />
-                  <Text style={[styles.quickInfoText, { color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }]}>{meal.prepTime + meal.cookTime} min total</Text>
+                  <Ionicons name="time-outline" size={18} color={colors.textMuted} />
+                  <Text style={[styles.quickInfoText, { color: colors.textMuted }]}>{meal.prepTime + meal.cookTime} min total</Text>
                 </View>
                 <View style={styles.quickInfoItem}>
-                  <Ionicons name="restaurant-outline" size={18} color={isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)'} />
-                  <Text style={[styles.quickInfoText, { color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
+                  <Ionicons name="restaurant-outline" size={18} color={colors.textMuted} />
+                  <Text style={[styles.quickInfoText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
                 </View>
               </View>
 
-              {/* Nutrition Card */}
-              <GlassCard
-                style={styles.nutritionCard}
-                intensity={80}
-                tintColor={isDark ? 'rgba(18, 18, 18, 0.85)' : 'rgba(255, 255, 255, 0.9)'}
-                interactive
-              >
-                <Text style={[styles.nutritionTitle, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>Nutrition per serving</Text>
-                  <View style={styles.nutritionGrid}>
-                    <View style={styles.nutritionItem}>
-                      <View style={[styles.nutritionDot, { backgroundColor: colors.calories }]} />
-                      <Text style={[styles.nutritionValue, { color: colors.text }]}>{Math.round(meal.calories)}</Text>
-                      <Text style={[styles.nutritionLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>calories</Text>
-                    </View>
-                    <View style={styles.nutritionItem}>
-                      <View style={[styles.nutritionDot, { backgroundColor: colors.protein }]} />
-                      <Text style={[styles.nutritionValue, { color: colors.text }]}>{meal.protein}g</Text>
-                      <Text style={[styles.nutritionLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>protein</Text>
-                    </View>
-                    <View style={styles.nutritionItem}>
-                      <View style={[styles.nutritionDot, { backgroundColor: colors.carbs }]} />
-                      <Text style={[styles.nutritionValue, { color: colors.text }]}>{meal.carbs}g</Text>
-                      <Text style={[styles.nutritionLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>carbs</Text>
-                    </View>
-                    <View style={styles.nutritionItem}>
-                      <View style={[styles.nutritionDot, { backgroundColor: colors.fat }]} />
-                      <Text style={[styles.nutritionValue, { color: colors.text }]}>{meal.fat}g</Text>
-                      <Text style={[styles.nutritionLabel, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>fat</Text>
-                    </View>
-                  </View>
-              </GlassCard>
-
               {/* Ingredients Section */}
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>Ingredients</Text>
+                <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Ingredients</Text>
                 {isLoadingRecipe ? (
                   <View style={styles.loadingContainer}>
                     <ActivityIndicator size="small" color={colors.primary} />
-                    <Text style={[styles.loadingText, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>
+                    <Text style={[styles.loadingText, { color: colors.textMuted }]}>
                       Loading recipe details...
                     </Text>
                   </View>
@@ -426,18 +395,18 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   <View style={styles.ingredientsList}>
                     {displayIngredients.map((ingredient: any, idx: number) => (
                       <View key={idx} style={styles.ingredientRow}>
-                        <View style={[styles.ingredientCheck, { borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)' }]}>
+                        <View style={[styles.ingredientCheck, { borderColor: colors.border }]}>
                           <View style={styles.ingredientCheckInner} />
                         </View>
-                        <Text style={[styles.ingredientText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>
-                          <Text style={[styles.ingredientAmount, { color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)' }]}>{ingredient.amount || ingredient.quantity} {ingredient.unit}</Text>
+                        <Text style={[styles.ingredientText, { color: colors.text }]}>
+                          <Text style={[styles.ingredientAmount, { color: colors.textMuted }]}>{ingredient.amount || ingredient.quantity} {ingredient.unit}</Text>
                           {'  '}{ingredient.name}
                         </Text>
                       </View>
                     ))}
                   </View>
                 ) : (
-                  <Text style={[styles.emptyRecipeText, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>
+                  <Text style={[styles.emptyRecipeText, { color: colors.textSecondary }]}>
                     Recipe details not available. Search online for "{meal.name}" recipe.
                   </Text>
                 )}
@@ -446,7 +415,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               {/* Instructions Section */}
               {(displayInstructions.length > 0 || isLoadingRecipe) && (
                 <View style={styles.section}>
-                  <Text style={[styles.sectionTitle, { color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)' }]}>Instructions</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Instructions</Text>
                   {isLoadingRecipe ? (
                     <View style={styles.loadingContainer}>
                       <ActivityIndicator size="small" color={colors.primary} />
@@ -455,10 +424,10 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     <View style={styles.instructionsList}>
                       {displayInstructions.map((instruction: string, idx: number) => (
                         <View key={idx} style={styles.instructionRow}>
-                          <View style={[styles.instructionNumberBadge, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)' }]}>
-                            <Text style={[styles.instructionNumber, { color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)' }]}>{idx + 1}</Text>
+                          <View style={[styles.instructionNumberBadge, { backgroundColor: colors.cardBackground }]}>
+                            <NumberText weight="light" style={[styles.instructionNumber, { color: colors.textMuted }]}>{idx + 1}</NumberText>
                           </View>
-                          <Text style={[styles.instructionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)' }]}>{instruction}</Text>
+                          <Text style={[styles.instructionText, { color: colors.text }]}>{instruction}</Text>
                         </View>
                       ))}
                     </View>
@@ -474,23 +443,23 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               <BlurView
                 intensity={isDark ? 60 : 80}
                 tint={isDark ? "dark" : "light"}
-                style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(8, 8, 8, 0.9)' : 'rgba(250, 250, 250, 0.9)' }]}
+                style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(8, 8, 8, 0.40)' : 'rgba(250, 250, 250, 0.40)' }]}
               />
 
               {/* Add to Today's Meals Button */}
               <TouchableOpacity
                 style={[
                   styles.primaryActionButton,
-                  { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.95)' : colors.primary }
+                  { backgroundColor: colors.primary }
                 ]}
                 onPress={handleAddToTodaysMeals}
                 disabled={isAddingToMeals}
                 activeOpacity={0.7}
               >
-                <View style={[styles.actionButtonIcon, { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.2)' }]}>
-                  <Ionicons name="add-circle-outline" size={18} color={isDark ? 'rgba(0,0,0,0.8)' : colors.primaryText} />
+                <View style={[styles.actionButtonIcon, { backgroundColor: colors.primaryAccent }]}>
+                  <Ionicons name="add-circle-outline" size={18} color={colors.primaryText} />
                 </View>
-                <Text style={[styles.primaryActionText, { color: isDark ? 'rgba(0, 0, 0, 0.85)' : colors.primaryText }]}>
+                <Text style={[styles.primaryActionText, { color: colors.primaryText }]}>
                   {isAddingToMeals ? 'Adding...' : "Add to Today's Meals"}
                 </Text>
               </TouchableOpacity>
@@ -503,16 +472,16 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     style={[
                       styles.secondaryActionButton,
                       {
-                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-                        borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.12)',
+                        backgroundColor: colors.cardBackground,
+                        borderColor: colors.border,
                       }
                     ]}
                     onPress={handleSaveToSavedMeals}
                     disabled={isSavingMeal}
                     activeOpacity={0.7}
                   >
-                    <Ionicons name="bookmark-outline" size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
-                    <Text style={[styles.secondaryActionText, { color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)' }]}>
+                    <Ionicons name="bookmark-outline" size={18} color={colors.text} />
+                    <Text style={[styles.secondaryActionText, { color: colors.text }]}>
                       {isSavingMeal ? 'Saving...' : 'Save to Saved Meals'}
                     </Text>
                   </TouchableOpacity>
@@ -523,16 +492,16 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   style={[
                     styles.secondaryActionButton,
                     {
-                      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-                      borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.12)',
+                      backgroundColor: colors.cardBackground,
+                      borderColor: colors.border,
                     }
                   ]}
                   onPress={handleAddToInstacart}
                   disabled={isAddingToInstacart}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="cart-outline" size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
-                  <Text style={[styles.secondaryActionText, { color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)' }]}>
+                  <Ionicons name="cart-outline" size={18} color={colors.text} />
+                  <Text style={[styles.secondaryActionText, { color: colors.text }]}>
                     {isAddingToInstacart ? 'Adding...' : 'Ingredients to Instacart'}
                   </Text>
                 </TouchableOpacity>
@@ -543,16 +512,16 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     style={[
                       styles.secondaryActionButton,
                       {
-                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-                        borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.12)',
+                        backgroundColor: colors.cardBackground,
+                        borderColor: colors.border,
                       }
                     ]}
                     onPress={handleSwap}
                     disabled={isSwapping}
                     activeOpacity={0.7}
                   >
-                    <Ionicons name="swap-horizontal" size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
-                    <Text style={[styles.secondaryActionText, { color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)' }]}>
+                    <Ionicons name="swap-horizontal" size={18} color={colors.text} />
+                    <Text style={[styles.secondaryActionText, { color: colors.text }]}>
                       {isSwapping ? 'Swapping...' : 'Swap Meal'}
                     </Text>
                   </TouchableOpacity>

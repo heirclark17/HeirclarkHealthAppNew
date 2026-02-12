@@ -119,6 +119,15 @@ function normalizeIngredientName(name: string): string {
  * - addAmounts("1/2", "1/4") -> "1/2, 1/4" (fallback)
  */
 function addAmounts(amount1: string, amount2: string): string {
+  // Check if amounts contain fractions or other non-numeric characters (except decimal point)
+  const isFraction1 = /[\/]/.test(amount1);
+  const isFraction2 = /[\/]/.test(amount2);
+
+  // If either is a fraction, concatenate instead of adding
+  if (isFraction1 || isFraction2) {
+    return `${amount1}, ${amount2}`;
+  }
+
   const num1 = parseFloat(amount1);
   const num2 = parseFloat(amount2);
 
@@ -129,7 +138,7 @@ function addAmounts(amount1: string, amount2: string): string {
     return sum % 1 === 0 ? sum.toString() : sum.toFixed(1);
   }
 
-  // Fallback: concatenate (e.g., fractions like "1/2")
+  // Fallback: concatenate (e.g., other non-numeric strings)
   return `${amount1}, ${amount2}`;
 }
 
