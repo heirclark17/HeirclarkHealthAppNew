@@ -123,6 +123,10 @@ export function FormCoachModal({
           mediumImpact();
           setActiveTab(tab);
         }}
+        accessibilityLabel={`${label}${isActive ? ', currently selected' : ''}`}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isActive }}
+        accessibilityHint={`Shows ${label.toLowerCase()} guidance for ${displayName}`}
       >
         <Ionicons
           name={icon as any}
@@ -288,7 +292,13 @@ export function FormCoachModal({
           tint="dark"
           style={[styles.header, { paddingTop: insets.top }]}
         >
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            accessibilityLabel="Close form coach"
+            accessibilityRole="button"
+            accessibilityHint="Dismisses the workout form guidance modal"
+          >
             <Ionicons name="chevron-down" size={24} color={Colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>
