@@ -16,6 +16,7 @@ import {
   Beef,
   Wheat,
   Nut,
+  Leaf,
   Lightbulb,
   Sparkles,
   AlertTriangle,
