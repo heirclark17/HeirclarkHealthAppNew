@@ -55,7 +55,7 @@ const features: Feature[] = [
   },
   {
     id: 'insights',
-    icon: <BarChart3 size={28} color=colors.protein />,
+    icon: <BarChart3 size={28} color={colors.protein} />,
     title: 'Smart Insights',
     description: 'Get personalized recommendations based on your patterns. Understand what works for your body.',
     color: colors.protein,
