@@ -346,6 +346,7 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginBottom: 16,
+    borderRadius: 24,
   },
   weekStrip: {
     flexDirection: 'row',
@@ -356,7 +357,7 @@ const styles = StyleSheet.create({
     width: 48,
     alignItems: 'center',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: 'transparent',
     minHeight: Spacing.touchTarget + 10,
   },
