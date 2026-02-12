@@ -34,7 +34,7 @@ const PROVIDER_COLORS: Record<string, string> = {
   garmin: '#007CC3',
   oura: '#8B5CF6',
   strava: '#FC4C02',
-  whoop: '#000000',
+  whoop: Colors.background,
   withings: '#00A9CE',
 };
 
@@ -171,7 +171,7 @@ export function WearablesSyncContent() {
               <Ionicons
                 name={connectedCount > 0 ? 'checkmark-circle' : 'watch-outline'}
                 size={28}
-                color={connectedCount > 0 ? '#22c55e' : colors.textMuted}
+                color={connectedCount > 0 ? Colors.successStrong : colors.textMuted}
               />
             </View>
             <View style={styles.statusInfo}>

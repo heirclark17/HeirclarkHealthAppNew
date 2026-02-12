@@ -37,7 +37,7 @@ const GLASS_COLORS = {
     background: '#F8F8F8',
     card: 'rgba(255, 255, 255, 0.75)',
     cardBorder: 'rgba(255, 255, 255, 0.5)',
-    text: '#1D1D1F',
+    text: Colors.text,
     textMuted: 'rgba(60, 60, 67, 0.6)',
     textSecondary: 'rgba(60, 60, 67, 0.4)',
     border: 'rgba(0, 0, 0, 0.08)',

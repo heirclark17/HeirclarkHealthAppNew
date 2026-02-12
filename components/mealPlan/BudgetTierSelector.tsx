@@ -103,7 +103,7 @@ export function BudgetTierSelector({
                     ? (isDark ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.15)')
                     : (isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)'),
                   borderColor: isSelected
-                    ? (isDark ? '#6366f1' : '#6366f1')
+                    ? (isDark ? colors.accentPurple : colors.accentPurple)
                     : (isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)'),
                 },
               ]}
@@ -121,12 +121,12 @@ export function BudgetTierSelector({
                 <Ionicons
                   name={tier.icon as any}
                   size={20}
-                  color={isSelected ? '#6366f1' : colors.textMuted}
+                  color={isSelected ? colors.accentPurple : colors.textMuted}
                 />
               </View>
               <Text style={[
                 styles.tierLabel,
-                { color: isSelected ? (isDark ? '#a5b4fc' : '#6366f1') : colors.text },
+                { color: isSelected ? (isDark ? '#a5b4fc' : colors.accentPurple) : colors.text },
               ]}>
                 {tier.label}
               </Text>
@@ -135,7 +135,7 @@ export function BudgetTierSelector({
               </Text>
               {isSelected && (
                 <View style={styles.checkmark}>
-                  <Ionicons name="checkmark-circle" size={16} color="#6366f1" />
+                  <Ionicons name="checkmark-circle" size={16} color=colors.accentPurple />
                 </View>
               )}
             </TouchableOpacity>
@@ -163,7 +163,7 @@ export function BudgetTierSelector({
               </Text>
               {pantryItems.length > 0 && (
                 <View style={[styles.pantryBadge, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)' }]}>
-                  <Text style={[styles.pantryBadgeText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>
+                  <Text style={[styles.pantryBadgeText, { color: isDark ? '#a5b4fc' : colors.accentPurple }]}>
                     {pantryItems.length}
                   </Text>
                 </View>
@@ -221,7 +221,7 @@ export function BudgetTierSelector({
                   <Ionicons
                     name="add"
                     size={20}
-                    color={newPantryItem.trim() ? '#6366f1' : colors.textMuted}
+                    color={newPantryItem.trim() ? colors.accentPurple : colors.textMuted}
                   />
                 </TouchableOpacity>
               </View>

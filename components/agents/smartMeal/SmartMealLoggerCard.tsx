@@ -40,7 +40,7 @@ const MealTypeIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 const MealTypeColors: Record<string, string> = {
-  breakfast: '#FFB74D',
+  breakfast: colors.warningOrange,
   lunch: '#4FC3F7',
   dinner: '#9575CD',
   snack: '#81C784',

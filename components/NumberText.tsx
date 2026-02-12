@@ -3,7 +3,7 @@ import { Text, TextProps, StyleSheet, Platform } from 'react-native';
 import { Fonts } from '../constants/Theme';
 
 interface NumberTextProps extends TextProps {
-  weight?: 'light' | 'regular' | 'medium' | 'semiBold' | 'bold';
+  weight?: 'ultralight' | 'thin' | 'light' | 'regular' | 'medium' | 'semiBold' | 'bold' | 'heavy' | 'black';
   children?: React.ReactNode;
 }
 
@@ -28,11 +28,15 @@ export function NumberText({
   ...props
 }: NumberTextProps) {
   const fontFamily = {
+    ultralight: Fonts.numericUltralight,
+    thin: Fonts.numericThin,
     light: Fonts.numericLight,
     regular: Fonts.numericRegular,
     medium: Fonts.numericMedium,
     semiBold: Fonts.numericSemiBold,
     bold: Fonts.numericBold,
+    heavy: Fonts.numericHeavy,
+    black: Fonts.numericBlack,
   }[weight];
 
   return (

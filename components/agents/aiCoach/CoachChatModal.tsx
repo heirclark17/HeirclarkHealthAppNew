@@ -53,7 +53,7 @@ const GLASS_COLORS = {
     inputBg: 'rgba(255, 255, 255, 0.85)',
     userBubble: 'rgba(0, 122, 255, 0.9)',
     assistantBubble: 'rgba(255, 255, 255, 0.75)',
-    text: '#1D1D1F',
+    text: Colors.text,
     textSecondary: 'rgba(60, 60, 67, 0.6)',
     border: 'rgba(0, 0, 0, 0.08)',
     inputBorder: 'rgba(0, 0, 0, 0.12)',
@@ -139,13 +139,13 @@ const MODE_CONFIG: Record<CoachMode, {
   training: {
     title: 'Training Coach',
     icon: 'barbell',
-    accentColor: '#3b82f6',
+    accentColor: colors.accentPurple,
     placeholder: 'Ask about workouts, form, exercises...',
   },
   general: {
     title: 'AI Coach',
     icon: 'fitness',
-    accentColor: '#a855f7',
+    accentColor: colors.accentPurple,
     placeholder: 'Ask anything about health & fitness...',
   },
 };
@@ -746,7 +746,7 @@ export function CoachChatModal({
               />
             </View>
             <View style={[styles.statusBadge, { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder }]}>
-              <View style={[styles.statusDot, { backgroundColor: glassColors.textSecondary }, isSpeaking && { backgroundColor: glassColors.accent }, avatarReady && !isSpeaking && { backgroundColor: '#4ECDC4' }]} />
+              <View style={[styles.statusDot, { backgroundColor: glassColors.textSecondary }, isSpeaking && { backgroundColor: glassColors.accent }, avatarReady && !isSpeaking && { backgroundColor: Colors.success }]} />
               <Text style={[styles.statusText, { color: glassColors.text }]}>
                 {!avatarReady ? 'Connecting...' : isSpeaking ? 'Speaking...' : 'Ready'}
               </Text>

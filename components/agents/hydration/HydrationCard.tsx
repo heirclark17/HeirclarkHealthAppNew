@@ -88,7 +88,7 @@ export default function HydrationCard() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={[styles.iconContainer, { backgroundColor: colors.accentCyan + '20' }]}>
-              <Ionicons name="water" size={20} color="#4FC3F7" />
+              <Ionicons name="water" size={20} color={colors.accentCyan} />
             </View>
             <View>
               <Text style={[styles.title, { color: colors.text }]}>Hydration</Text>
@@ -141,7 +141,7 @@ export default function HydrationCard() {
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.glassBorder }]} />
             <View style={styles.statItem}>
-              <Ionicons name="hourglass" size={16} color={remaining > 0 ? '#FFB74D' : colors.success} />
+              <Ionicons name="hourglass" size={16} color={remaining > 0 ? colors.warningOrange : colors.success} />
               <NumberText weight="semiBold" style={[styles.statValue, { color: remaining > 0 ? colors.text : colors.success }]}>
                 {remaining > 0 ? formatAmount(remaining) : 'Done!'}
               </NumberText>
@@ -173,7 +173,7 @@ export default function HydrationCard() {
 
         {/* Tip */}
         <View style={[styles.tipContainer, { backgroundColor: colors.accentCyan + '10' }]}>
-          <Ionicons name="bulb" size={16} color="#4FC3F7" />
+          <Ionicons name="bulb" size={16} color={colors.accentCyan} />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>{tip}</Text>
         </View>
       </GlassCard>
@@ -338,7 +338,7 @@ export default function HydrationCard() {
                           styles.miniProgressFill,
                           {
                             width: `${Math.min(100, percent)}%`,
-                            backgroundColor: day.goalMet ? colors.success : percent >= 70 ? colors.primary : '#FFB74D',
+                            backgroundColor: day.goalMet ? colors.success : percent >= 70 ? colors.primary : colors.warningOrange,
                           },
                         ]}
                       />

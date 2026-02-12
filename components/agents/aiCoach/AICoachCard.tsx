@@ -51,7 +51,7 @@ const MODE_CONFIG: Record<CoachMode, {
     icon: 'barbell',
     defaultTitle: 'Training Coach',
     defaultSubtitle: 'Powered by GPT-4.1-mini',
-    accentColor: '#3b82f6',
+    accentColor: colors.accentPurple,
     suggestions: [
       'How do I improve my squat form?',
       'Best exercises for back',
@@ -63,7 +63,7 @@ const MODE_CONFIG: Record<CoachMode, {
     icon: 'fitness',
     defaultTitle: 'AI Coach',
     defaultSubtitle: 'Powered by GPT-4.1-mini',
-    accentColor: '#a855f7',
+    accentColor: colors.accentPurple,
     suggestions: [
       'How do I lose weight safely?',
       'Tips for staying motivated',

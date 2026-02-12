@@ -57,7 +57,7 @@ export function StepsCard({
   const displayColor = useMemo(() => {
     if (percentage >= 100) return Colors.success;
     if (percentage >= 75) return Colors.successMuted;
-    if (percentage >= 50) return '#F39C12';
+    if (percentage >= 50) return colors.protein;
     return colors.textMuted;
   }, [percentage, colors.textMuted]);
 
