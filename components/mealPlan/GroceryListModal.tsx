@@ -70,7 +70,9 @@ interface GroceryListModalProps {
   onClose: () => void;
   groceryList: GroceryCategory[] | null;
   onToggleItem: (categoryIndex: number, itemIndex: number) => void;
-  onOrderInstacart: () => void;
+  onOrderInstacart: (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => void;
+  isLoading?: boolean;
+  onGenerateList?: () => void;
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -184,11 +186,19 @@ export function GroceryListModal({
   groceryList,
   onToggleItem,
   onOrderInstacart,
+  isLoading = false,
+  onGenerateList,
 }: GroceryListModalProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
   const insets = useSafeAreaInsets();
+
+  // Budget tier selection
+  const [budgetTier, setBudgetTier] = React.useState<'low' | 'medium' | 'high'>('medium');
+
+  // Dietary filters selection
+  const [dietaryFilters, setDietaryFilters] = React.useState<string[]>([]);
 
   // Button animation
   const buttonScale = useSharedValue(1);
@@ -202,17 +212,25 @@ export function GroceryListModal({
     setTimeout(() => {
       buttonScale.value = withSpring(1, GLASS_SPRING);
     }, 100);
-    onOrderInstacart();
+    onOrderInstacart({ budgetTier, dietary: dietaryFilters });
   };
 
-  if (!groceryList) return null;
+  const toggleDietaryFilter = (filter: string) => {
+    setDietaryFilters(prev =>
+      prev.includes(filter)
+        ? prev.filter(f => f !== filter)
+        : [...prev, filter]
+    );
+  };
 
-  const totalItems = groceryList.reduce((acc, cat) => acc + cat.items.length, 0);
-  const checkedItems = groceryList.reduce(
+  const totalItems = groceryList ? groceryList.reduce((acc, cat) => acc + cat.items.length, 0) : 0;
+  const checkedItems = groceryList ? groceryList.reduce(
     (acc, cat) => acc + cat.items.filter(item => item.checked).length,
     0
-  );
+  ) : 0;
   const progress = totalItems > 0 ? (checkedItems / totalItems) * 100 : 0;
+
+  const availableDietaryFilters = ['organic', 'gluten-free', 'vegan', 'vegetarian'];
 
   return (
     <Modal
@@ -237,68 +255,164 @@ export function GroceryListModal({
           </Animated.View>
         </BlurView>
 
-        {/* Progress Section */}
-        <Animated.View
-          entering={FadeIn.delay(200)}
-          style={[styles.progressSection, { borderBottomColor: glassColors.border }]}
-        >
-          <View style={[styles.progressBar, { backgroundColor: glassColors.progressBg }]}>
-            <Animated.View
-              style={[
-                styles.progressFill,
-                { width: `${progress}%`, backgroundColor: glassColors.progressFill },
-              ]}
-            />
-            {/* Glass highlight */}
-            <View style={styles.progressHighlight} />
+        {/* Empty State or Generate Button */}
+        {!groceryList && !isLoading && onGenerateList && (
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyText, { color: glassColors.textMuted }]}>
+              No grocery list yet
+            </Text>
+            <TouchableOpacity
+              style={[styles.generateButton, { backgroundColor: glassColors.buttonBg }]}
+              onPress={onGenerateList}
+            >
+              <Text style={styles.generateButtonText}>Generate Grocery List</Text>
+            </TouchableOpacity>
           </View>
-          <NumberText weight="regular" style={[styles.progressText, { color: glassColors.textMuted }]}>
-            {checkedItems} of {totalItems} items checked
-          </NumberText>
-        </Animated.View>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <View style={styles.loadingState}>
+            <Text style={[styles.loadingText, { color: glassColors.textMuted }]}>
+              Generating grocery list...
+            </Text>
+          </View>
+        )}
+
+        {/* Budget Tier Selector */}
+        {groceryList && !isLoading && (
+          <Animated.View
+            entering={FadeIn.delay(150)}
+            style={[styles.filtersSection, { borderBottomColor: glassColors.border }]}
+          >
+            <Text style={[styles.filterLabel, { color: glassColors.text }]}>Budget Tier</Text>
+            <View style={styles.budgetTierRow}>
+              {['low', 'medium', 'high'].map((tier) => (
+                <TouchableOpacity
+                  key={tier}
+                  style={[
+                    styles.budgetTierButton,
+                    { borderColor: glassColors.border },
+                    budgetTier === tier && {
+                      backgroundColor: glassColors.checkboxChecked,
+                      borderColor: glassColors.checkboxChecked,
+                    },
+                  ]}
+                  onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
+                >
+                  <Text
+                    style={[
+                      styles.budgetTierText,
+                      { color: glassColors.text },
+                      budgetTier === tier && { color: Colors.text, fontFamily: Fonts.semiBold },
+                    ]}
+                  >
+                    {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={[styles.filterLabel, { color: glassColors.text, marginTop: 12 }]}>
+              Dietary Preferences
+            </Text>
+            <View style={styles.dietaryFiltersRow}>
+              {availableDietaryFilters.map((filter) => (
+                <TouchableOpacity
+                  key={filter}
+                  style={[
+                    styles.dietaryFilterChip,
+                    { borderColor: glassColors.border },
+                    dietaryFilters.includes(filter) && {
+                      backgroundColor: glassColors.checkboxChecked,
+                      borderColor: glassColors.checkboxChecked,
+                    },
+                  ]}
+                  onPress={() => toggleDietaryFilter(filter)}
+                >
+                  <Text
+                    style={[
+                      styles.dietaryFilterText,
+                      { color: glassColors.text },
+                      dietaryFilters.includes(filter) && { color: Colors.text, fontFamily: Fonts.semiBold },
+                    ]}
+                  >
+                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Animated.View>
+        )}
+
+        {/* Progress Section */}
+        {groceryList && !isLoading && (
+          <Animated.View
+            entering={FadeIn.delay(200)}
+            style={[styles.progressSection, { borderBottomColor: glassColors.border }]}
+          >
+            <View style={[styles.progressBar, { backgroundColor: glassColors.progressBg }]}>
+              <Animated.View
+                style={[
+                  styles.progressFill,
+                  { width: `${progress}%`, backgroundColor: glassColors.progressFill },
+                ]}
+              />
+              {/* Glass highlight */}
+              <View style={styles.progressHighlight} />
+            </View>
+            <NumberText weight="regular" style={[styles.progressText, { color: glassColors.textMuted }]}>
+              {checkedItems} of {totalItems} items checked
+            </NumberText>
+          </Animated.View>
+        )}
 
         {/* Grocery list */}
-        <ScrollView
-          style={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-        >
-          {groceryList.map((category, categoryIndex) => (
-            <Animated.View
-              key={category.category}
-              entering={SlideInUp.delay(300 + categoryIndex * 50).springify()}
-            >
-              <CategorySection
-                category={category}
-                categoryIndex={categoryIndex}
-                onToggleItem={onToggleItem}
-                glassColors={glassColors}
-              />
-            </Animated.View>
-          ))}
-          <View style={{ height: 120 }} />
-        </ScrollView>
+        {groceryList && !isLoading && (
+          <ScrollView
+            style={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+          >
+            {groceryList.map((category, categoryIndex) => (
+              <Animated.View
+                key={category.category}
+                entering={SlideInUp.delay(300 + categoryIndex * 50).springify()}
+              >
+                <CategorySection
+                  category={category}
+                  categoryIndex={categoryIndex}
+                  onToggleItem={onToggleItem}
+                  glassColors={glassColors}
+                />
+              </Animated.View>
+            ))}
+            <View style={{ height: 120 }} />
+          </ScrollView>
+        )}
 
         {/* Instacart button with Glass Effect */}
-        <BlurView
-          intensity={isDark ? 60 : 80}
-          tint={isDark ? 'dark' : 'light'}
-          style={[styles.bottomSection, { paddingBottom: insets.bottom + 16, borderTopColor: glassColors.border }]}
-        >
-          <Animated.View entering={SlideInUp.delay(500).springify()} style={buttonAnimatedStyle}>
-            <TouchableOpacity
-              style={[styles.instacartButton, {
-                backgroundColor: glassColors.buttonBg,
-                shadowColor: glassColors.buttonBg,
-              }]}
-              onPress={handleInstacartPress}
-              activeOpacity={1}
-            >
-              <Text style={styles.instacartIcon}>🛒</Text>
-              <Text style={styles.instacartButtonText}>Order with Instacart</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </BlurView>
+        {groceryList && groceryList.length > 0 && !isLoading && (
+          <BlurView
+            intensity={isDark ? 60 : 80}
+            tint={isDark ? 'dark' : 'light'}
+            style={[styles.bottomSection, { paddingBottom: insets.bottom + 16, borderTopColor: glassColors.border }]}
+          >
+            <Animated.View entering={SlideInUp.delay(500).springify()} style={buttonAnimatedStyle}>
+              <TouchableOpacity
+                style={[styles.instacartButton, {
+                  backgroundColor: glassColors.buttonBg,
+                  shadowColor: glassColors.buttonBg,
+                }]}
+                onPress={handleInstacartPress}
+                activeOpacity={1}
+              >
+                <Text style={styles.instacartIcon}>🛒</Text>
+                <Text style={styles.instacartButtonText}>Order with Instacart</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </BlurView>
+        )}
       </View>
     </Modal>
   );
@@ -451,6 +565,78 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
     fontFamily: Fonts.semiBold,
+  },
+  emptyState: {
+    padding: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 15,
+    fontFamily: Fonts.medium,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  generateButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+  },
+  generateButtonText: {
+    fontSize: 14,
+    color: Colors.text,
+    fontFamily: Fonts.semiBold,
+  },
+  loadingState: {
+    padding: 32,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 15,
+    fontFamily: Fonts.medium,
+  },
+  filtersSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  filterLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.semiBold,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  budgetTierRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  budgetTierButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    alignItems: 'center',
+  },
+  budgetTierText: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+  },
+  dietaryFiltersRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  dietaryFilterChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1.5,
+  },
+  dietaryFilterText: {
+    fontSize: 12,
+    fontFamily: Fonts.medium,
   },
 });
 

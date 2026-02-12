@@ -4,6 +4,8 @@ import { api } from '../services/api';
 import { mealPlanService } from '../services/mealPlanService';
 import { instacartService } from '../services/instacartService';
 import { aiService } from '../services/aiService';
+import { generateGroceryList } from '../utils/groceryListGenerator';
+import { Linking } from 'react-native';
 import {
   DayPlan,
   GroceryCategory,
@@ -26,6 +28,7 @@ export interface MealPlanState {
   weekSummary: WeekSummary | null;
   isGenerating: boolean;
   isSwapping: boolean;
+  isGeneratingGroceryList: boolean; // NEW: Loading state for grocery list generation
   error: string | null;
   selectedDayIndex: number; // 0-6
   lastGeneratedAt: string | null;
@@ -43,6 +46,8 @@ interface MealPlanContextType {
   toggleGroceryItem: (categoryIndex: number, itemIndex: number) => void;
   openInstacart: () => Promise<boolean>;
   loadCachedPlan: () => Promise<void>;
+  generateGroceryListOnDemand: () => Promise<void>; // NEW
+  orderWithInstacart: (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => Promise<void>; // UPDATED
 }
 
 const initialState: MealPlanState = {
@@ -51,6 +56,7 @@ const initialState: MealPlanState = {
   weekSummary: null,
   isGenerating: false,
   isSwapping: false,
+  isGeneratingGroceryList: false,
   error: null,
   selectedDayIndex: 0,
   lastGeneratedAt: null,
@@ -581,30 +587,100 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
   }, [state.groceryList, state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
 
-  // Open Instacart
-  const openInstacart = useCallback(async (): Promise<boolean> => {
-    if (!state.groceryList) return false;
+  // NEW: Generate grocery list on demand from weekly meal plan
+  const generateGroceryListOnDemand = useCallback(async () => {
+    if (!state.weeklyPlan || state.weeklyPlan.length === 0) {
+      console.warn('[MealPlanContext] No meal plan available for grocery list generation');
+      return;
+    }
+
+    setState(prev => ({ ...prev, isGeneratingGroceryList: true }));
 
     try {
-      // Create list name from current date
-      const now = new Date();
-      const listName = `Week of ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      console.log('[MealPlanContext] 🛒 Generating grocery list from meal plan...');
 
-      // Try to create Instacart list through API
-      const response = await mealPlanService.createInstacartList(state.groceryList, listName);
+      // Use the grocery list generator utility
+      const groceryList = generateGroceryList(state.weeklyPlan);
 
-      if (response.success && response.instacartUrl) {
-        return await instacartService.openInstacart(response.instacartUrl);
-      }
+      setState(prev => ({
+        ...prev,
+        groceryList,
+        isGeneratingGroceryList: false,
+      }));
 
-      // Fallback: just open Instacart
-      return await instacartService.openInstacart();
+      console.log('[MealPlanContext] ✅ Generated grocery list:', {
+        categories: groceryList.length,
+        totalItems: groceryList.reduce((sum, cat) => sum + cat.items.length, 0),
+      });
+
+      // Update cache with new grocery list
+      const cacheData = {
+        weeklyPlan: state.weeklyPlan,
+        groceryList,
+        weekSummary: state.weekSummary,
+        lastGeneratedAt: state.lastGeneratedAt,
+      };
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
     } catch (error) {
-      console.error('[MealPlanContext] Instacart error:', error);
-      // Try to open Instacart anyway
-      return await instacartService.openInstacart();
+      console.error('[MealPlanContext] Grocery list generation error:', error);
+      setState(prev => ({
+        ...prev,
+        error: 'Failed to generate grocery list',
+        isGeneratingGroceryList: false,
+      }));
+    }
+  }, [state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
+
+  // UPDATED: Order with Instacart using API integration
+  const orderWithInstacart = useCallback(async (filters?: {
+    budgetTier?: 'low' | 'medium' | 'high';
+    dietary?: string[];
+  }) => {
+    if (!state.groceryList || state.groceryList.length === 0) {
+      console.warn('[MealPlanContext] No grocery list to order');
+      return;
+    }
+
+    try {
+      console.log('[MealPlanContext] 🛒 Creating Instacart cart with filters:', filters);
+
+      // Try API first
+      const result = await api.createInstacartCart(state.groceryList, filters);
+
+      if (result && result.cart_url) {
+        // Open Instacart URL in browser/app
+        console.log('[MealPlanContext] ✅ Opening Instacart cart:', result.cart_url);
+        const canOpen = await Linking.canOpenURL(result.cart_url);
+        if (canOpen) {
+          await Linking.openURL(result.cart_url);
+          console.log('[MealPlanContext] ✅ Opened Instacart cart');
+        } else {
+          console.warn('[MealPlanContext] ⚠️ Cannot open Instacart URL');
+          throw new Error('Cannot open Instacart URL');
+        }
+      } else {
+        throw new Error('No cart URL returned from API');
+      }
+    } catch (error) {
+      console.error('[MealPlanContext] Instacart API error:', error);
+
+      // Fallback: Use existing deep link method
+      try {
+        console.log('[MealPlanContext] ⚠️ Fallback to deep link');
+        await instacartService.openInstacart();
+        console.log('[MealPlanContext] ✅ Opened Instacart via deep link');
+      } catch (fallbackError) {
+        console.error('[MealPlanContext] Deep link also failed:', fallbackError);
+        throw new Error('Could not open Instacart');
+      }
     }
   }, [state.groceryList]);
+
+  // DEPRECATED: Keep for backward compatibility but use orderWithInstacart instead
+  const openInstacart = useCallback(async (): Promise<boolean> => {
+    await orderWithInstacart();
+    return true;
+  }, [orderWithInstacart]);
 
   // Load cached plan (local first, backend fallback)
   const loadCachedPlan = useCallback(async () => {
@@ -687,6 +763,8 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     openInstacart,
     loadCachedPlan,
     generateAIMealPlan,
+    generateGroceryListOnDemand,
+    orderWithInstacart,
   }), [
     state,
     generateMealPlan,
@@ -697,6 +775,8 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     toggleGroceryItem,
     openInstacart,
     loadCachedPlan,
+    generateGroceryListOnDemand,
+    orderWithInstacart,
   ]);
 
   return (

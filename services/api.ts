@@ -2094,6 +2094,136 @@ class HeirclarkAPI {
   }
 
   // ============================================
+  // INSTACART INTEGRATION
+  // ============================================
+
+  /**
+   * Create Instacart shopping cart from grocery list
+   * Calls backend /api/instacart/products-link endpoint
+   */
+  async createInstacartCart(
+    groceryList: Array<{ category: string; items: Array<{ name: string; totalAmount: string; unit: string }> }>,
+    filters?: {
+      budgetTier?: 'low' | 'medium' | 'high';
+      dietary?: string[];
+    }
+  ): Promise<{ cart_url: string } | null> {
+    try {
+      console.log('[API] Creating Instacart cart with', {
+        categories: groceryList.length,
+        filters,
+      });
+
+      // Flatten grocery categories into line items for Instacart API
+      const lineItems = groceryList.flatMap(category =>
+        category.items.map(item => ({
+          name: item.name,
+          quantity: parseFloat(item.totalAmount) || 1,
+          unit: item.unit,
+        }))
+      );
+
+      if (lineItems.length === 0) {
+        console.warn('[API] No items to send to Instacart');
+        return null;
+      }
+
+      const payload = {
+        items: lineItems,
+        filters: filters || {},
+        title: 'Heirclark 7-Day Meal Plan',
+        instructions: ['Generated from your personalized 7-day nutrition plan.'],
+        partnerLinkbackUrl: 'heirclark://meal-plan',
+      };
+
+      console.log('[API] Sending to Instacart:', payload);
+
+      const response = await fetch(`${this.baseUrl}/api/instacart/products-link`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Instacart cart creation failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log('[API] Instacart response:', data);
+
+      if (data.ok && data.products_link_url) {
+        console.log('[API] ✅ Instacart cart created:', data.products_link_url);
+        return { cart_url: data.products_link_url };
+      } else if (data.success && data.cart_url) {
+        console.log('[API] ✅ Instacart cart created:', data.cart_url);
+        return { cart_url: data.cart_url };
+      }
+
+      console.warn('[API] Instacart response missing cart URL');
+      return null;
+    } catch (error) {
+      console.error('[API] Create Instacart cart error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Search for a product on Instacart
+   * Calls backend /api/instacart/search endpoint
+   */
+  async searchInstacartProduct(query: string): Promise<{
+    products?: Array<{
+      name: string;
+      price?: string;
+      image_url?: string;
+      web_url?: string;
+    }>;
+    products_link_url?: string;
+  } | null> {
+    try {
+      console.log('[API] Searching Instacart for:', query);
+
+      const response = await fetch(`${this.baseUrl}/api/instacart/search`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Instacart search failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('[API] Instacart search error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get available Instacart retailers by postal code
+   */
+  async getInstacartRetailers(postalCode: string): Promise<any[]> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/instacart/retailers?postal_code=${encodeURIComponent(postalCode)}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) return [];
+
+      const data = await response.json();
+      return data.retailers || [];
+    } catch (error) {
+      console.error('[API] Get Instacart retailers error:', error);
+      return [];
+    }
+  }
+
+  // ============================================
   // ENHANCED HEALTH SYNC (for background sync)
   // ============================================
 

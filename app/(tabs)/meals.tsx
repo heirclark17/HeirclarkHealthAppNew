@@ -63,6 +63,8 @@ export default function MealsScreen() {
     toggleGroceryItem,
     openInstacart,
     loadCachedPlan,
+    generateGroceryListOnDemand,
+    orderWithInstacart,
   } = useMealPlan();
 
   const {
@@ -70,6 +72,7 @@ export default function MealsScreen() {
     groceryList,
     isGenerating,
     isSwapping,
+    isGeneratingGroceryList,
     error,
     selectedDayIndex,
   } = mealPlanState;
@@ -217,10 +220,15 @@ export default function MealsScreen() {
     await swapMeal(selectedDayIndex, mealType, 'Want variety');
   };
 
-  // Handle Instacart order
-  const handleOrderInstacart = async () => {
-    setShowGroceryModal(false);
-    await openInstacart();
+  // Handle Instacart order with filters
+  const handleOrderInstacart = async (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => {
+    try {
+      await orderWithInstacart(filters);
+      // Don't close modal automatically - let user confirm the order opened successfully
+    } catch (error) {
+      console.error('[MealsScreen] Instacart order error:', error);
+      Alert.alert('Error', 'Could not open Instacart. Please try again.');
+    }
   };
 
   // Handle adding meal to Today's Meals (calorie counter)
@@ -683,6 +691,8 @@ export default function MealsScreen() {
         groceryList={groceryList}
         onToggleItem={toggleGroceryItem}
         onOrderInstacart={handleOrderInstacart}
+        isLoading={isGeneratingGroceryList}
+        onGenerateList={weeklyPlan ? generateGroceryListOnDemand : undefined}
       />
 
       {/* AI Coaching Modal */}
