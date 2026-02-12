@@ -18,7 +18,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
-import { X, Clock, UtensilsCrossed, PlusCircle, Bookmark, Sparkles, ShoppingCart, ArrowLeftRight } from 'lucide-react-native';
+import { X, Clock, UtensilsCrossed, PlusCircle, Bookmark, ShoppingCart, ArrowLeftRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -491,7 +491,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 </TouchableOpacity>
               </GlassCard>
 
-              {/* Secondary Actions - First Row */}
+              {/* Secondary Actions Row */}
               <View style={styles.secondaryActionsRow}>
                 {/* Save to Saved Meals Button */}
                 {onSaveToSavedMeals && (
@@ -514,30 +514,6 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     </TouchableOpacity>
                   </GlassCard>
                 )}
-
-                {/* AI Generate Recipe Button */}
-                <GlassCard
-                  style={styles.secondaryActionButton}
-                  intensity={60}
-                  tintColor={isDark ? 'rgba(99, 102, 241, 0.15)' : 'rgba(99, 102, 241, 0.1)'}
-                  interactive
-                >
-                  <TouchableOpacity
-                    style={styles.secondaryActionButtonInner}
-                    onPress={handleGenerateAIRecipe}
-                    disabled={isGeneratingAIRecipe || isLoadingRecipe}
-                    activeOpacity={0.7}
-                  >
-                    <Sparkles size={16} color={isDark ? '#a5b4fc' : '#6366f1'} strokeWidth={1.5} />
-                    <Text style={[styles.secondaryActionText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>
-                      {isGeneratingAIRecipe ? 'Generating...' : 'AI Recipe'}
-                    </Text>
-                  </TouchableOpacity>
-                </GlassCard>
-              </View>
-
-              {/* Secondary Actions - Second Row */}
-              <View style={styles.secondaryActionsRow}>
                 {/* Add to Instacart Button */}
                 <GlassCard
                   style={styles.secondaryActionButton}
