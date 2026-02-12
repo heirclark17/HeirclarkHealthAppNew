@@ -215,6 +215,9 @@ export default function ProgressPredictionCard() {
           <TouchableOpacity
             style={[styles.detailsButton, { backgroundColor: colors.cardGlass }]}
             onPress={() => setShowDetailsModal(true)}
+            accessibilityLabel={`View detailed trend analysis, ${state.trendAnalysis?.dataPoints || 0} data points`}
+            accessibilityRole="button"
+            accessibilityHint="Opens detailed modal with trend analysis, goal projection, weekly rate, and plateau information"
           >
             <Ionicons name="stats-chart" size={18} color={colors.text} />
           </TouchableOpacity>
@@ -256,6 +259,9 @@ export default function ProgressPredictionCard() {
           <TouchableOpacity
             style={[styles.statCard, { backgroundColor: colors.cardGlass }]}
             onPress={() => setShowPredictionsModal(true)}
+            accessibilityLabel={`Current trend: ${trendDirection}`}
+            accessibilityRole="button"
+            accessibilityHint="Opens weight predictions modal with future weight projections and confidence ranges"
           >
             <Ionicons name={trendInfo.icon as any} size={24} color={trendInfo.color} />
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>TREND</Text>
@@ -277,6 +283,9 @@ export default function ProgressPredictionCard() {
           <TouchableOpacity
             style={[styles.statCard, { backgroundColor: colors.cardGlass }]}
             onPress={() => setShowMilestonesModal(true)}
+            accessibilityLabel={`Milestones: ${achievedMilestones.length} of ${state.milestones.length} achieved`}
+            accessibilityRole="button"
+            accessibilityHint="Opens milestones modal showing all weight loss milestones with progress percentages and projected dates"
           >
             <Ionicons name="flag" size={24} color={colors.primary} />
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>MILESTONES</Text>
@@ -333,6 +342,9 @@ export default function ProgressPredictionCard() {
           <TouchableOpacity
             style={styles.nextMilestone}
             onPress={() => setShowMilestonesModal(true)}
+            accessibilityLabel={`Next milestone: ${nextMilestone.label}, ${nextMilestone.currentProgress}% complete`}
+            accessibilityRole="button"
+            accessibilityHint="Opens milestones modal to view all weight loss milestones and their progress"
           >
             <View style={[styles.milestoneProgressBar, { backgroundColor: colors.cardGlass }]}>
               <View
@@ -370,6 +382,9 @@ export default function ProgressPredictionCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowDetailsModal(false)}
+              accessibilityLabel="Close trend analysis details"
+              accessibilityRole="button"
+              accessibilityHint="Closes the trend analysis modal and returns to progress prediction card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -500,6 +515,9 @@ export default function ProgressPredictionCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowMilestonesModal(false)}
+              accessibilityLabel="Close milestones"
+              accessibilityRole="button"
+              accessibilityHint="Closes the milestones modal and returns to progress prediction card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -530,6 +548,9 @@ export default function ProgressPredictionCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowPredictionsModal(false)}
+              accessibilityLabel="Close weight predictions"
+              accessibilityRole="button"
+              accessibilityHint="Closes the weight predictions modal and returns to progress prediction card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
