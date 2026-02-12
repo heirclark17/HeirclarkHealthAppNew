@@ -247,7 +247,13 @@ export function GroceryListModal({
           style={[styles.header, { borderBottomColor: glassColors.border }]}
         >
           <Animated.View entering={FadeIn.delay(100)} style={styles.headerContent}>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              accessibilityLabel="Close grocery list"
+              accessibilityRole="button"
+              accessibilityHint="Dismisses the grocery list and returns to meal plan"
+            >
               <Text style={[styles.closeButtonText, { color: glassColors.checkboxChecked }]}>Close</Text>
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: glassColors.text }]}>Grocery List</Text>
@@ -264,6 +270,9 @@ export function GroceryListModal({
             <TouchableOpacity
               style={[styles.generateButton, { backgroundColor: glassColors.buttonBg }]}
               onPress={onGenerateList}
+              accessibilityLabel="Generate grocery list from meal plan"
+              accessibilityRole="button"
+              accessibilityHint="Creates a categorized grocery list with all ingredients from your 7-day meal plan"
             >
               <Text style={styles.generateButtonText}>Generate Grocery List</Text>
             </TouchableOpacity>
@@ -299,6 +308,10 @@ export function GroceryListModal({
                     },
                   ]}
                   onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
+                  accessibilityLabel={`${tier.charAt(0).toUpperCase() + tier.slice(1)} budget tier${budgetTier === tier ? ', currently selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: budgetTier === tier }}
+                  accessibilityHint={`Selects ${tier} budget tier for grocery shopping recommendations`}
                 >
                   <Text
                     style={[
@@ -329,6 +342,10 @@ export function GroceryListModal({
                     },
                   ]}
                   onPress={() => toggleDietaryFilter(filter)}
+                  accessibilityLabel={`${filter.charAt(0).toUpperCase() + filter.slice(1)}${dietaryFilters.includes(filter) ? ', selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: dietaryFilters.includes(filter) }}
+                  accessibilityHint={`${dietaryFilters.includes(filter) ? 'Removes' : 'Adds'} ${filter} dietary preference filter for grocery shopping`}
                 >
                   <Text
                     style={[
@@ -406,6 +423,9 @@ export function GroceryListModal({
                 }]}
                 onPress={handleInstacartPress}
                 activeOpacity={1}
+                accessibilityLabel={`Order ${totalItems} grocery items with Instacart`}
+                accessibilityRole="button"
+                accessibilityHint="Opens Instacart with your grocery list pre-filled for delivery"
               >
                 <Text style={styles.instacartIcon}>🛒</Text>
                 <Text style={styles.instacartButtonText}>Order with Instacart</Text>
