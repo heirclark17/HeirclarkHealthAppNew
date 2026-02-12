@@ -75,7 +75,12 @@ class AIService {
   }
 
   // Get common headers for requests
-  private getHeaders(): HeadersInit {
+  private async getHeaders(): Promise<HeadersInit> {
+    // Ensure auth token is loaded before getting headers
+    if (!this.authToken) {
+      await this.loadAuthToken();
+    }
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
@@ -138,7 +143,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/nutrition/ai/meal-from-text`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: await this.getHeaders(),
         body: JSON.stringify({
           text: description,
           shopifyCustomerId: 'guest_ios_app',
@@ -350,7 +355,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/nutrition/ai/generate-food-image`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: await this.getHeaders(),
         body: JSON.stringify({
           mealName,
           shopifyCustomerId: 'guest_ios_app',
@@ -434,7 +439,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/ai/recipe-details`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: await this.getHeaders(),
         body: JSON.stringify({
           dishName,
           mealType,
@@ -504,7 +509,7 @@ class AIService {
       try {
         const response = await fetch(`${this.baseUrl}/api/v1/ai/generate-meal-plan`, {
           method: 'POST',
-          headers: this.getHeaders(),
+          headers: await this.getHeaders(),
           body: JSON.stringify({
             preferences,
             days,
@@ -649,7 +654,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/ai/generate-workout-plan`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: await this.getHeaders(),
         body: JSON.stringify({
           preferences,
           weeks,
@@ -738,7 +743,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/ai/coach-message`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: await this.getHeaders(),
         body: JSON.stringify({
           message,
           context,
@@ -839,7 +844,7 @@ class AIService {
 
       const response = await fetch(`${this.baseUrl}/api/v1/ai/cheat-day-guidance`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: await this.getHeaders(),
         body: JSON.stringify({
           dayName,
           userGoals,
