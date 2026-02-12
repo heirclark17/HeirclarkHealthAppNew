@@ -273,7 +273,7 @@ export default function AccountabilityPartnerCard() {
 
         {/* At Risk Streaks Warning */}
         {atRiskStreaks.length > 0 && (
-          <View style={[styles.warningBanner, { backgroundColor: '#FF6B6B20' }]}>
+          <View style={[styles.warningBanner, { backgroundColor: isDark ? 'rgba(255, 107, 107, 0.15)' : 'rgba(255, 107, 107, 0.1)' }]}>
             <Ionicons name="warning" size={16} color={Colors.error} />
             <Text style={[styles.warningText, { color: Colors.error }]}>
               {atRiskStreaks.length} streak{atRiskStreaks.length > 1 ? 's' : ''} at risk!
@@ -689,7 +689,7 @@ const styles = StyleSheet.create({
   },
   unreadMessage: {
     borderLeftWidth: 3,
-    borderLeftColor: '#6366F1',
+    borderLeftColor: Colors.accentPurple,
   },
   messageHeader: {
     flexDirection: 'row',

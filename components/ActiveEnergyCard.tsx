@@ -56,7 +56,7 @@ export function ActiveEnergyCard({
   // Determine color based on progress
   const displayColor = useMemo(() => {
     if (percentage >= 100) return Colors.success;
-    if (percentage >= 75) return '#F39C12';
+    if (percentage >= 75) return colors.protein;
     if (percentage >= 50) return Colors.activeEnergy;
     return colors.textMuted;
   }, [percentage, colors.textMuted]);
@@ -64,7 +64,7 @@ export function ActiveEnergyCard({
   // Activity level classification
   const getActivityLevel = () => {
     if (activeEnergy >= goal) return { label: 'Highly Active', color: Colors.success, Icon: Zap };
-    if (activeEnergy >= goal * 0.75) return { label: 'Active', color: '#F39C12', Icon: Bike };
+    if (activeEnergy >= goal * 0.75) return { label: 'Active', color: colors.protein, Icon: Bike };
     if (activeEnergy >= goal * 0.5) return { label: 'Moderately Active', color: Colors.activeEnergy, Icon: Activity };
     return { label: 'Light Activity', color: colors.textMuted, Icon: Footprints };
   };
@@ -230,7 +230,7 @@ export function ActiveEnergyCard({
                   <Text style={[styles.guideText, { color: colors.text }]}>High: 100%+ of goal</Text>
                 </View>
                 <View style={styles.guideRow}>
-                  <Bike size={16} color={'#F39C12'} />
+                  <Bike size={16} color={colors.protein} />
                   <Text style={[styles.guideText, { color: colors.text }]}>Moderate: 75-99% of goal</Text>
                 </View>
                 <View style={styles.guideRow}>
