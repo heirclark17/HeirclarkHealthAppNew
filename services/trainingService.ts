@@ -791,6 +791,25 @@ function selectExercisesForWorkout(
         break;
     }
 
+    // Adjust rest periods based on age for better recovery
+    if (preferences?.age && workoutType !== 'cardio') {
+      const age = preferences.age;
+      let ageMultiplier = 1.0;
+
+      if (age >= 55) {
+        ageMultiplier = 1.3; // 30% more rest for 55+
+      } else if (age >= 40) {
+        ageMultiplier = 1.2; // 20% more rest for 40-54
+      } else if (age >= 30) {
+        ageMultiplier = 1.1; // 10% more rest for 30-39
+      }
+      // Under 30: no adjustment needed
+
+      if (ageMultiplier > 1.0) {
+        restSeconds = Math.round(restSeconds * ageMultiplier);
+      }
+    }
+
     // Enrich exercise with GIF URL and instructions from ExerciseDB
     const enrichedExercise = enrichExerciseWithGif(exercise);
 

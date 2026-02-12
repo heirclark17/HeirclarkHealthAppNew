@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Dimensi
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { WeeklyTrainingPlan, TrainingDay } from '../../types/training';
 import { lightImpact } from '../../utils/haptics';
@@ -163,7 +164,9 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
         <View style={styles.headerLeft}>
           <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
           <Text style={[styles.weekTitle, { color: colors.textSecondary }]}>
-            {viewMode === 'week' ? `Week ${weeklyPlan?.weekNumber || 1}` : monthName}
+            {viewMode === 'week' ? (
+              <>Week <NumberText weight="medium">{weeklyPlan?.weekNumber || 1}</NumberText></>
+            ) : monthName}
           </Text>
         </View>
 
@@ -238,13 +241,16 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                     {dayShort}
                   </Text>
 
-                  <Text style={[
-                    styles.dayNumber,
-                    { color: colors.text },
-                    isSelected && { color: isDark ? Colors.background : Colors.text },
-                  ]}>
+                  <NumberText
+                    weight="thin"
+                    style={[
+                      styles.dayNumber,
+                      { color: colors.text },
+                      isSelected && { color: isDark ? Colors.background : Colors.text },
+                    ]}
+                  >
                     {dayNumber}
-                  </Text>
+                  </NumberText>
 
                   <View style={styles.indicatorContainer}>
                     {isRestDay && (
@@ -321,14 +327,17 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                   disabled={!day.isCurrentMonth || day.weekPlanIndex === undefined}
                   activeOpacity={0.7}
                 >
-                  <Text style={[
-                    styles.monthDayNumber,
-                    { color: day.isCurrentMonth ? colors.text : colors.textMuted },
-                    !day.isCurrentMonth && { opacity: 0.3 },
-                    day.isSelected && { color: isDark ? Colors.background : '#fff' },
-                  ]}>
+                  <NumberText
+                    weight="regular"
+                    style={[
+                      styles.monthDayNumber,
+                      { color: day.isCurrentMonth ? colors.text : colors.textMuted },
+                      !day.isCurrentMonth && { opacity: 0.3 },
+                      day.isSelected && { color: isDark ? Colors.background : '#fff' },
+                    ]}
+                  >
                     {day.dayNumber}
-                  </Text>
+                  </NumberText>
 
                   {/* Workout Indicators */}
                   {day.isCurrentMonth && day.dayPlan && (
@@ -368,19 +377,19 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
         <View style={styles.summaryItem}>
           <View style={[styles.summaryDot, { backgroundColor: colors.protein }]} />
           <Text style={[styles.summaryText, { color: colors.textMuted }]}>
-            {(weeklyPlan?.days || []).filter(d => !d.isRestDay && d.workout).length} Workouts
+            <NumberText weight="regular">{(weeklyPlan?.days || []).filter(d => !d.isRestDay && d.workout).length}</NumberText> Workouts
           </Text>
         </View>
         <View style={styles.summaryItem}>
           <Ionicons name="bed-outline" size={12} color={colors.textMuted} />
           <Text style={[styles.summaryText, { color: colors.textMuted }]}>
-            {(weeklyPlan?.days || []).filter(d => d.isRestDay).length} Rest Days
+            <NumberText weight="regular">{(weeklyPlan?.days || []).filter(d => d.isRestDay).length}</NumberText> Rest Days
           </Text>
         </View>
         <View style={styles.summaryItem}>
           <Ionicons name="checkmark-circle" size={12} color={colors.protein} />
           <Text style={[styles.summaryText, { color: colors.textMuted }]}>
-            {weeklyPlan?.completedWorkouts || 0}/{weeklyPlan?.totalWorkouts || 0} Done
+            <NumberText weight="regular">{weeklyPlan?.completedWorkouts || 0}</NumberText>/<NumberText weight="regular">{weeklyPlan?.totalWorkouts || 0}</NumberText> Done
           </Text>
         </View>
       </View>

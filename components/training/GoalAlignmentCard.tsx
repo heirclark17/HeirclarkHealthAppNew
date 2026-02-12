@@ -5,6 +5,7 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants
 import { GoalWorkoutAlignment, TrainingPreferences } from '../../types/training';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 
 interface GoalAlignmentCardProps {
   alignment: GoalWorkoutAlignment;

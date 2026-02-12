@@ -294,6 +294,53 @@ function generateWeekProgression(
   return progression.slice(0, Math.ceil(totalWeeks / 2) + 1);
 }
 
+// Generate personalized recovery recommendations based on age and sleep
+function generateRecoveryRecommendations(preferences: TrainingPreferences): string[] {
+  const recommendations: string[] = [];
+  const age = preferences.age || 30;
+  const sleepGoalHours = 8; // Default to 8 hours, could be passed from preferences
+  const sex = preferences.sex || 'male';
+
+  // Age-based recovery recommendations
+  if (age < 25) {
+    recommendations.push('Your young age supports faster recovery - maintain 7-8 hours sleep nightly');
+    recommendations.push('Consider higher training frequency if recovery feels good');
+  } else if (age < 40) {
+    recommendations.push('Sleep 7-9 hours per night for optimal recovery and hormone balance');
+    recommendations.push('Active recovery on rest days (light walking, yoga, stretching)');
+  } else if (age < 55) {
+    recommendations.push('Prioritize 8-9 hours sleep nightly - recovery becomes more critical with age');
+    recommendations.push('Schedule 2-3 full rest days per week for optimal recovery');
+    recommendations.push('Consider additional mobility work and longer warm-ups');
+  } else {
+    recommendations.push('Aim for 8+ hours sleep nightly - recovery is paramount for mature athletes');
+    recommendations.push('Schedule at least 3 full rest days per week');
+    recommendations.push('Prioritize joint health with 10-15 min mobility work daily');
+    recommendations.push('Consider lower-impact cardio options (walking, swimming, cycling)');
+  }
+
+  // Sex-specific recovery recommendations
+  if (sex === 'female') {
+    recommendations.push('Track energy levels throughout your cycle - adjust intensity as needed');
+  }
+
+  // Universal recovery recommendations
+  recommendations.push('Foam rolling 10 minutes post-workout to reduce muscle tension');
+  recommendations.push('Stay hydrated: 0.5-1 oz water per lb bodyweight daily');
+  recommendations.push('Listen to your body - extra rest day if experiencing persistent fatigue');
+
+  // Age-based deload frequency
+  if (age < 30) {
+    recommendations.push('Deload week every 6-8 weeks (reduce volume by 40%)');
+  } else if (age < 50) {
+    recommendations.push('Deload week every 4-6 weeks (reduce volume by 40-50%)');
+  } else {
+    recommendations.push('Deload week every 3-4 weeks (reduce volume by 50%)');
+  }
+
+  return recommendations;
+}
+
 // Generate complete plan summary
 export function generatePlanSummary(
   preferences: TrainingPreferences,
@@ -335,13 +382,7 @@ export function generatePlanSummary(
       ? 'Ensure adequate calorie surplus (200-500 kcal). Prioritize protein (1g per lb bodyweight) and carbs for recovery. Post-workout nutrition within 2 hours.'
       : 'Follow your balanced macro targets. Adjust calories based on workout days. Stay hydrated (8+ glasses water daily).',
 
-    recoveryRecommendations: [
-      'Sleep 7-9 hours per night for optimal recovery',
-      'Active recovery on rest days (light walking, stretching)',
-      'Foam rolling 10 minutes post-workout',
-      'Listen to your body - extra rest if needed',
-      'Stay hydrated throughout the day',
-    ],
+    recoveryRecommendations: generateRecoveryRecommendations(preferences),
 
     keyMetricsToTrack: [
       'Weekly workout completion rate',
