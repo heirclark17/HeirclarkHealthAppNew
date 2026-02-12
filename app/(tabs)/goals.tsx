@@ -288,6 +288,9 @@ function GoalWizardContent() {
           onPress={handleClose}
           style={[styles.closeButton, { backgroundColor: colors.backgroundSecondary }]}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityLabel="Close goal wizard"
+          accessibilityRole="button"
+          accessibilityHint="Returns to previous screen"
         >
           <Ionicons name="close" size={24} color={colors.text} />
         </TouchableOpacity>
