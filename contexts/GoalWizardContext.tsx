@@ -575,6 +575,12 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
         waterGoalOz: state.waterGoalOz,
         sleepGoalHours: state.sleepGoalHours,
         stepGoal: state.stepGoal,
+        // Strength baseline for training personalization
+        hasLiftingExperience: state.hasLiftingExperience,
+        strengthLevel: state.strengthLevel,
+        benchPress1RM: state.benchPress1RM,
+        squat1RM: state.squat1RM,
+        deadlift1RM: state.deadlift1RM,
       };
 
       try {
@@ -650,6 +656,12 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
             allergies: backendPrefs.allergies || prev.allergies,
             availableEquipment: backendPrefs.availableEquipment || prev.availableEquipment,
             injuries: backendPrefs.injuries || prev.injuries,
+            // Strength baseline
+            hasLiftingExperience: backendPrefs.hasLiftingExperience ?? prev.hasLiftingExperience,
+            strengthLevel: (backendPrefs.strengthLevel as any) || prev.strengthLevel,
+            benchPress1RM: backendPrefs.benchPress1RM ?? prev.benchPress1RM,
+            squat1RM: backendPrefs.squat1RM ?? prev.squat1RM,
+            deadlift1RM: backendPrefs.deadlift1RM ?? prev.deadlift1RM,
           }));
         }
       } catch (backendError) {

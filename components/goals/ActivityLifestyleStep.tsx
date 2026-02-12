@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
   Monitor,
@@ -593,19 +593,16 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                     <Text style={[styles.oneRMLabel, { color: colors.text }]}>Bench Press</Text>
                     <View style={styles.oneRMInputRow}>
                       <GlassCard style={styles.oneRMField} interactive>
-                        <input
-                          type="number"
+                        <TextInput
+                          keyboardType="numeric"
                           placeholder="185"
-                          value={state.benchPress1RM || ''}
-                          onChange={(e) => setBenchPress1RM(e.target.value ? Number(e.target.value) : null)}
+                          placeholderTextColor={colors.textMuted}
+                          value={state.benchPress1RM?.toString() || ''}
+                          onChangeText={(text) => setBenchPress1RM(text ? Number(text) : null)}
                           style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            outline: 'none',
                             fontSize: 16,
                             fontFamily: Fonts.numericRegular,
                             color: colors.text,
-                            width: '100%',
                             textAlign: 'center',
                           }}
                         />
@@ -619,19 +616,16 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                     <Text style={[styles.oneRMLabel, { color: colors.text }]}>Squat</Text>
                     <View style={styles.oneRMInputRow}>
                       <GlassCard style={styles.oneRMField} interactive>
-                        <input
-                          type="number"
+                        <TextInput
+                          keyboardType="numeric"
                           placeholder="225"
-                          value={state.squat1RM || ''}
-                          onChange={(e) => setSquat1RM(e.target.value ? Number(e.target.value) : null)}
+                          placeholderTextColor={colors.textMuted}
+                          value={state.squat1RM?.toString() || ''}
+                          onChangeText={(text) => setSquat1RM(text ? Number(text) : null)}
                           style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            outline: 'none',
                             fontSize: 16,
                             fontFamily: Fonts.numericRegular,
                             color: colors.text,
-                            width: '100%',
                             textAlign: 'center',
                           }}
                         />
@@ -645,19 +639,16 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                     <Text style={[styles.oneRMLabel, { color: colors.text }]}>Deadlift</Text>
                     <View style={styles.oneRMInputRow}>
                       <GlassCard style={styles.oneRMField} interactive>
-                        <input
-                          type="number"
+                        <TextInput
+                          keyboardType="numeric"
                           placeholder="275"
-                          value={state.deadlift1RM || ''}
-                          onChange={(e) => setDeadlift1RM(e.target.value ? Number(e.target.value) : null)}
+                          placeholderTextColor={colors.textMuted}
+                          value={state.deadlift1RM?.toString() || ''}
+                          onChangeText={(text) => setDeadlift1RM(text ? Number(text) : null)}
                           style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            outline: 'none',
                             fontSize: 16,
                             fontFamily: Fonts.numericRegular,
                             color: colors.text,
-                            width: '100%',
                             textAlign: 'center',
                           }}
                         />
