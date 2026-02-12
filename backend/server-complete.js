@@ -1513,6 +1513,17 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
 
     const systemPrompt = `You are an expert nutritionist creating personalized meal plans.
     Generate detailed meal plans with specific recipes, portions, and nutritional information.
+
+    CRITICAL - MEAL DESCRIPTIONS:
+    - The "description" field is MANDATORY and must be VIVID, APPETIZING, and make the meal sound DELICIOUS
+    - Use sensory words: tender, crispy, fresh, savory, zesty, creamy, rich, flavorful, juicy, aromatic
+    - Highlight textures, flavors, and cooking techniques
+    - Make the reader CRAVE the meal
+    - Examples:
+      * "Tender grilled chicken breast seasoned with aromatic herbs, nestled beside fluffy jasmine rice and vibrant steamed broccoli florets"
+      * "Velvety Greek yogurt layered with vibrant mixed berries and crunchy honey granola, creating a perfect balance of creamy, sweet, and satisfying textures"
+      * "Succulent salmon fillet with a crispy herb crust, accompanied by roasted asparagus spears and buttery garlic mashed cauliflower"
+
     Return a JSON object with:
     {
       "weeklyPlan": [
@@ -1523,6 +1534,7 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
             {
               "mealType": "breakfast",
               "name": "Meal Name",
+              "description": "VIVID, APPETIZING 1-2 sentence description that makes the meal irresistible",
               "calories": 400,
               "protein": 25,
               "carbs": 40,
