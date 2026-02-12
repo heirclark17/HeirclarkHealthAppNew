@@ -90,6 +90,9 @@ export default function WorkoutFormCoachCard() {
       <TouchableOpacity
         style={[styles.exerciseItem, { borderBottomColor: colors.glassBorder }]}
         onPress={() => handleExerciseTap(item)}
+        accessibilityLabel={`${item.name}, ${item.musclesWorked.slice(0, 2).join(' and ')}${avgScore !== null ? `, ${avgScore}% average form score` : ''}${favorite ? ', favorited' : ''}`}
+        accessibilityRole="button"
+        accessibilityHint="Opens detailed exercise guide with form cues, common mistakes, and video demonstrations"
       >
         <View style={[styles.exerciseIcon, { backgroundColor: colors.primary + '20' }]}>
           <Ionicons
@@ -172,6 +175,9 @@ export default function WorkoutFormCoachCard() {
           <TouchableOpacity
             style={[styles.browseButton, { backgroundColor: colors.cardGlass }]}
             onPress={() => setShowExercisesModal(true)}
+            accessibilityLabel={`Browse all exercises, ${state.exercises.length} available`}
+            accessibilityRole="button"
+            accessibilityHint="Opens full exercise library with searchable categories and form guides"
           >
             <Text style={[styles.browseButtonText, { color: colors.primary }]}>Browse</Text>
             <Ionicons name="arrow-forward" size={16} color={colors.primary} />
@@ -183,6 +189,9 @@ export default function WorkoutFormCoachCard() {
           <TouchableOpacity
             style={[styles.dailyTipCard, { backgroundColor: colors.primary + '15' }]}
             onPress={handleTipTap}
+            accessibilityLabel={`Tip of the day${!state.dailyTip.seen ? ', new' : ''}: ${state.dailyTip.exerciseName} - ${state.dailyTip.tip}`}
+            accessibilityRole="button"
+            accessibilityHint="Opens detailed exercise guide with form cues and common mistakes"
           >
             <View style={styles.tipHeader}>
               <Ionicons name="bulb" size={18} color={colors.primary} />
@@ -212,6 +221,9 @@ export default function WorkoutFormCoachCard() {
                 setSelectedCategory(category);
                 setShowExercisesModal(true);
               }}
+              accessibilityLabel={`${category.charAt(0).toUpperCase() + category.slice(1)} exercises`}
+              accessibilityRole="button"
+              accessibilityHint={`Opens exercise library filtered to show only ${category} exercises`}
             >
               <Ionicons name={CATEGORY_ICONS[category]} size={14} color={colors.text} />
               <Text style={[styles.categoryText, { color: colors.text }]}>
@@ -231,6 +243,9 @@ export default function WorkoutFormCoachCard() {
                   key={exercise.id}
                   style={[styles.recommendedCard, { backgroundColor: colors.cardGlass }]}
                   onPress={() => handleExerciseTap(exercise)}
+                  accessibilityLabel={`Recommended: ${exercise.name}, ${exercise.category} category`}
+                  accessibilityRole="button"
+                  accessibilityHint="Opens detailed exercise guide with form cues, common mistakes, and variations"
                 >
                   <Text style={[styles.recommendedName, { color: colors.text }]} numberOfLines={1}>
                     {exercise.name}
@@ -265,6 +280,9 @@ export default function WorkoutFormCoachCard() {
                 setShowExercisesModal(false);
                 setSelectedCategory(null);
               }}
+              accessibilityLabel="Close exercise library"
+              accessibilityRole="button"
+              accessibilityHint="Closes exercise list and returns to form coach card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -295,6 +313,10 @@ export default function WorkoutFormCoachCard() {
                 <TouchableOpacity
                   style={[styles.favoriteButton, { backgroundColor: colors.cardGlass }]}
                   onPress={() => toggleFavorite(selectedExercise.id)}
+                  accessibilityLabel={isFavorite(selectedExercise.id) ? 'Remove from favorites' : 'Add to favorites'}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isFavorite(selectedExercise.id) }}
+                  accessibilityHint={isFavorite(selectedExercise.id) ? 'Removes this exercise from your favorites list' : 'Adds this exercise to your favorites for quick access'}
                 >
                   <Ionicons
                     name={isFavorite(selectedExercise.id) ? 'heart' : 'heart-outline'}
@@ -306,6 +328,9 @@ export default function WorkoutFormCoachCard() {
               <TouchableOpacity
                 style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
                 onPress={() => setShowExerciseDetailModal(false)}
+                accessibilityLabel="Close exercise details"
+                accessibilityRole="button"
+                accessibilityHint="Closes exercise detail view and returns to exercise library"
               >
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
