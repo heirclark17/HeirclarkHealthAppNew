@@ -261,10 +261,22 @@ export function GoalStep({
       </View>
 
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={[styles.buttonSecondary, { borderColor: colors.border }]} onPress={onBack}>
+        <TouchableOpacity
+          style={[styles.buttonSecondary, { borderColor: colors.border }]}
+          onPress={onBack}
+          accessibilityLabel="Back"
+          accessibilityRole="button"
+          accessibilityHint="Returns to the previous step in the goal setup process"
+        >
           <Text style={[styles.buttonSecondaryText, { color: colors.text }]}>BACK</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonPrimary, { backgroundColor: colors.primary }]} onPress={onCalculate}>
+        <TouchableOpacity
+          style={[styles.buttonPrimary, { backgroundColor: colors.primary }]}
+          onPress={onCalculate}
+          accessibilityLabel="Calculate my plan"
+          accessibilityRole="button"
+          accessibilityHint="Calculates your personalized nutrition plan based on your goal and timeline"
+        >
           <Text style={[styles.buttonPrimaryText, { color: colors.primaryText }]}>CALCULATE MY PLAN</Text>
           <Ionicons name="chevron-forward" size={18} color={colors.primaryText} />
         </TouchableOpacity>
