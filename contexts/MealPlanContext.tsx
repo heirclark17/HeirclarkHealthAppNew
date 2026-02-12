@@ -321,7 +321,15 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         // Convert AI plan to app format - always start from Sunday of current week
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-        // Calculate Sunday of the current week
+        // Helper: Format date in user's LOCAL timezone (not UTC)
+        const formatLocalDate = (date: Date): string => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        // Calculate Sunday of the current week in USER'S LOCAL TIMEZONE
         const today = new Date();
         const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
         const sunday = new Date(today);
@@ -334,7 +342,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           planDate.setDate(sunday.getDate() + index);
           return {
             dayNumber: index + 1,
-            date: planDate.toISOString().split('T')[0],
+            date: formatLocalDate(planDate), // Use local timezone, not UTC
             dayName: dayNames[index], // Use index directly since we start from Sunday
             meals: day.meals.map((meal: any) => ({
             id: `ai-meal-${Date.now()}-${Math.random()}`,

@@ -47,12 +47,21 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
     }
   }, [currentMonth, showFullCalendar]);
 
+  // Helper: Format date in user's LOCAL timezone (not UTC)
+  const formatLocalDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const generateMonthDays = (month: Date) => {
     const year = month.getFullYear();
     const monthIndex = month.getMonth();
     const firstDay = new Date(year, monthIndex, 1).getDay();
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
     const today = new Date();
+    const todayStr = formatLocalDate(today); // Use local timezone for today
 
     const days = [];
 
@@ -65,13 +74,13 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
     const fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, monthIndex, day);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatLocalDate(date); // Use local timezone, not UTC
 
       // Check if this date is in the weekly plan
       const planDayIndex = weeklyPlan.findIndex(d => d.date === dateStr);
       const isInPlan = planDayIndex !== -1;
       const isSelected = planDayIndex === selectedDayIndex;
-      const isToday = dateStr === today.toISOString().split('T')[0];
+      const isToday = dateStr === todayStr; // Compare local dates
       const dayOfWeek = fullDayNames[date.getDay()];
       const isCheat = cheatDays.includes(dayOfWeek);
 
