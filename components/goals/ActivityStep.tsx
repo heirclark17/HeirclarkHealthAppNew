@@ -90,6 +90,10 @@ export function ActivityStep({
               ]}
               onPress={() => setActivity(option.value)}
               activeOpacity={0.7}
+              accessibilityLabel={`${option.name}: ${option.description}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: activity === option.value }}
+              accessibilityHint={`Select ${option.name} activity level`}
             >
               <View style={[styles.iconContainer, { backgroundColor: iconBg }]}>
                 <Ionicons name={option.icon} size={22} color={colors.text} />
@@ -104,10 +108,22 @@ export function ActivityStep({
       </View>
 
       <View style={styles.buttonRow}>
-        <TouchableOpacity style={[styles.buttonSecondary, { borderColor: colors.border }]} onPress={onBack}>
+        <TouchableOpacity
+          style={[styles.buttonSecondary, { borderColor: colors.border }]}
+          onPress={onBack}
+          accessibilityLabel="Back"
+          accessibilityRole="button"
+          accessibilityHint="Returns to previous step"
+        >
           <Text style={[styles.buttonSecondaryText, { color: colors.text }]}>BACK</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.buttonPrimary, { backgroundColor: colors.primary }]} onPress={onNext}>
+        <TouchableOpacity
+          style={[styles.buttonPrimary, { backgroundColor: colors.primary }]}
+          onPress={onNext}
+          accessibilityLabel="Continue to next step"
+          accessibilityRole="button"
+          accessibilityHint="Proceeds to the next step of the goal wizard"
+        >
           <Text style={[styles.buttonPrimaryText, { color: colors.primaryText }]}>CONTINUE</Text>
           <Ionicons name="chevron-forward" size={18} color={colors.primaryText} />
         </TouchableOpacity>

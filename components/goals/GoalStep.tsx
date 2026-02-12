@@ -120,6 +120,10 @@ export function GoalStep({
           <TouchableOpacity
             style={[styles.goalOption, { backgroundColor: optionBg, borderColor: colors.border }, goalType === 'lose' && [styles.goalOptionActive, { borderColor: colors.primary }]]}
             onPress={() => handleGoalTypeChange('lose')}
+            accessibilityLabel="Lose weight goal"
+            accessibilityRole="button"
+            accessibilityState={{ selected: goalType === 'lose' }}
+            accessibilityHint="Set your goal to lose weight"
           >
             <View style={styles.goalIcon}>
               <Ionicons name="arrow-up" size={24} color={colors.text} />
@@ -130,6 +134,10 @@ export function GoalStep({
           <TouchableOpacity
             style={[styles.goalOption, { backgroundColor: optionBg, borderColor: colors.border }, goalType === 'maintain' && [styles.goalOptionActive, { borderColor: colors.primary }]]}
             onPress={() => handleGoalTypeChange('maintain')}
+            accessibilityLabel="Maintain weight goal"
+            accessibilityRole="button"
+            accessibilityState={{ selected: goalType === 'maintain' }}
+            accessibilityHint="Set your goal to maintain current weight"
           >
             <View style={styles.goalIcon}>
               <Ionicons name="remove" size={24} color={colors.text} />
@@ -140,6 +148,10 @@ export function GoalStep({
           <TouchableOpacity
             style={[styles.goalOption, { backgroundColor: optionBg, borderColor: colors.border }, goalType === 'gain' && [styles.goalOptionActive, { borderColor: colors.primary }]]}
             onPress={() => handleGoalTypeChange('gain')}
+            accessibilityLabel="Gain weight goal"
+            accessibilityRole="button"
+            accessibilityState={{ selected: goalType === 'gain' }}
+            accessibilityHint="Set your goal to gain weight and build muscle"
           >
             <View style={styles.goalIcon}>
               <Ionicons name="arrow-down" size={24} color={colors.text} />
@@ -155,6 +167,9 @@ export function GoalStep({
           <TouchableOpacity
             style={[styles.dateButton, { backgroundColor: inputBg, borderColor: colors.border }]}
             onPress={() => setShowStartPicker(true)}
+            accessibilityLabel={`Plan start date, ${formatDate(startDate)}`}
+            accessibilityRole="button"
+            accessibilityHint="Opens date picker to select when you want to start your plan"
           >
             <Text style={[styles.dateText, { color: colors.text }]}>{formatDate(startDate)}</Text>
             <Ionicons name="calendar-outline" size={20} color={colors.textMuted} />
@@ -198,6 +213,9 @@ export function GoalStep({
               <TouchableOpacity
                 style={[styles.dateButton, { backgroundColor: inputBg, borderColor: colors.border }]}
                 onPress={() => setShowEndPicker(true)}
+                accessibilityLabel={`Target end date, ${formatDate(endDate)}`}
+                accessibilityRole="button"
+                accessibilityHint="Opens date picker to select your goal completion date"
               >
                 <Text style={[styles.dateText, { color: colors.text }]}>{formatDate(endDate)}</Text>
                 <Ionicons name="calendar-outline" size={20} color={colors.textMuted} />

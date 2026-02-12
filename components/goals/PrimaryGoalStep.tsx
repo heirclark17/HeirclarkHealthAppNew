@@ -71,7 +71,14 @@ function GoalCard({ option, isSelected, onSelect, index, colors, isDark, cardWid
 
   return (
     <View style={[styles.cardWrapper, { width: cardWidth }]}>
-      <TouchableOpacity activeOpacity={0.8} onPress={handlePress}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={handlePress}
+        accessibilityLabel={`${option.title}: ${option.subtitle}`}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected }}
+        accessibilityHint={`Select ${option.title} as your primary fitness goal`}
+      >
         <View>
           <GlassCard
             style={[
