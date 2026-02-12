@@ -104,7 +104,7 @@ const upload = multer({
 // Initialize OpenAI client with timeout
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: 25000, // 25 second timeout (Railway has 30s request limit)
+  timeout: 90000, // 90 second timeout (allows complex meal plan generation)
   maxRetries: 0, // Don't retry on timeout to avoid duplicate requests
 });
 
@@ -1654,9 +1654,17 @@ ${mealDiversityInstruction}
     });
   } catch (error) {
     console.error('[Meal Plan] Error:', error);
+    console.error('[Meal Plan] Error type:', error.constructor.name);
+    console.error('[Meal Plan] Error code:', error.code);
+    console.error('[Meal Plan] Error status:', error.status);
 
     // Specific error handling for common issues
-    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+    // Check for timeout errors (multiple possible formats)
+    if (error.code === 'ECONNABORTED' ||
+        error.code === 'ETIMEDOUT' ||
+        error.message?.toLowerCase().includes('timeout') ||
+        error.message?.toLowerCase().includes('timed out') ||
+        error.name === 'TimeoutError') {
       return res.status(504).json({
         error: 'Request timeout',
         message: 'AI generation took too long. Try reducing the number of days or simplifying preferences.',
