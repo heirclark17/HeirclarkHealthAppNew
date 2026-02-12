@@ -18,7 +18,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Activity } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
 // Theme and styling
@@ -73,7 +73,7 @@ export default function AccountabilityScreen() {
           <GlassCard style={styles.headerCard} interactive>
             <View style={styles.headerContent}>
               <View style={[styles.headerIconContainer, { backgroundColor: `${colors.primary}20` }]}>
-                <Ionicons name="pulse" size={24} color={colors.primary} />
+                <Activity size={24} color={colors.primary} strokeWidth={1.5} />
               </View>
               <View style={styles.headerTextContainer}>
                 <Text style={[styles.headerTitle, { color: colors.text }]}>ACCOUNTABILITY</Text>

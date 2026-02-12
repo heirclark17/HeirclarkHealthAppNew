@@ -44,13 +44,13 @@ import { mediumImpact, lightImpact } from '../../utils/haptics';
 
 type FilterType = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'favorites';
 
-const FILTER_OPTIONS: { key: FilterType; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: 'grid-outline' },
-  { key: 'favorites', label: 'Favorites', icon: 'heart' },
-  { key: 'breakfast', label: 'Breakfast', icon: 'sunny-outline' },
-  { key: 'lunch', label: 'Lunch', icon: 'restaurant-outline' },
-  { key: 'dinner', label: 'Dinner', icon: 'moon-outline' },
-  { key: 'snack', label: 'Snack', icon: 'cafe-outline' },
+const FILTER_OPTIONS: { key: FilterType; label: string; icon: any }[] = [
+  { key: 'all', label: 'All', icon: Grid3x3 },
+  { key: 'favorites', label: 'Favorites', icon: Heart },
+  { key: 'breakfast', label: 'Breakfast', icon: Sun },
+  { key: 'lunch', label: 'Lunch', icon: UtensilsCrossed },
+  { key: 'dinner', label: 'Dinner', icon: Moon },
+  { key: 'snack', label: 'Snack', icon: Coffee },
 ];
 
 export default function SavedMealsScreen() {
@@ -193,17 +193,18 @@ export default function SavedMealsScreen() {
                 onPress={() => handleToggleFavorite(item.id)}
                 style={styles.actionButton}
               >
-                <Ionicons
-                  name={isFavorite ? 'heart' : 'heart-outline'}
+                <Heart
                   size={20}
                   color={isFavorite ? '#ff6b6b' : colors.textTertiary}
+                  fill={isFavorite ? '#ff6b6b' : 'transparent'}
+                  strokeWidth={1.5}
                 />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => handleDeleteMeal(item.id, meal.name)}
                 style={styles.actionButton}
               >
-                <Ionicons name="trash-outline" size={18} color={colors.textTertiary} />
+                <Trash2 size={18} color={colors.textTertiary} strokeWidth={1.5} />
               </TouchableOpacity>
             </View>
           </View>
@@ -238,11 +239,11 @@ export default function SavedMealsScreen() {
 
           <View style={[styles.mealFooter, { borderTopColor: colors.surface }]}>
             <View style={styles.sourceBadge}>
-              <Ionicons
-                name={source === 'ai' ? 'sparkles' : 'document-text-outline'}
-                size={12}
-                color={colors.textTertiary}
-              />
+              {source === 'ai' ? (
+                <Sparkles size={12} color={colors.textTertiary} strokeWidth={1.5} />
+              ) : (
+                <FileText size={12} color={colors.textTertiary} strokeWidth={1.5} />
+              )}
               <Text style={[styles.sourceText, { color: colors.textTertiary }]}>
                 {source === 'ai' ? 'AI Generated' : source === 'template' ? 'Template' : 'Custom'}
               </Text>
@@ -266,7 +267,7 @@ export default function SavedMealsScreen() {
     );
   }, [colors, handleToggleFavorite, handleDeleteMeal]);
 
-  const renderFilterChip = useCallback(({ key, label, icon }: typeof FILTER_OPTIONS[0]) => {
+  const renderFilterChip = useCallback(({ key, label, icon: IconComponent }: typeof FILTER_OPTIONS[0]) => {
     const isActive = activeFilter === key;
     // Glass-like backgrounds for filter chips
     const chipBg = isActive
@@ -290,10 +291,10 @@ export default function SavedMealsScreen() {
           setActiveFilter(key);
         }}
       >
-        <Ionicons
-          name={icon as any}
+        <IconComponent
           size={14}
           color={isActive ? colors.background : colors.textSecondary}
+          strokeWidth={1.5}
         />
         <Text
           style={[
@@ -310,11 +311,11 @@ export default function SavedMealsScreen() {
   const renderEmptyState = useCallback(() => (
     <View style={styles.emptyStateWrapper}>
       <GlassCard style={styles.emptyState}>
-        <Ionicons
-          name={activeFilter === 'favorites' ? 'heart-outline' : 'bookmark-outline'}
-          size={48}
-          color={colors.textTertiary}
-        />
+        {activeFilter === 'favorites' ? (
+          <Heart size={48} color={colors.textTertiary} strokeWidth={1.5} />
+        ) : (
+          <Bookmark size={48} color={colors.textTertiary} strokeWidth={1.5} />
+        )}
         <Text style={[styles.emptyTitle, { color: colors.text }]}>
           {activeFilter === 'favorites'
             ? 'No Favorite Meals'
@@ -337,7 +338,7 @@ export default function SavedMealsScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top']}>
         <View style={styles.loadingContainer}>
-          <Ionicons name="bookmark-outline" size={48} color={colors.textTertiary} />
+          <Bookmark size={48} color={colors.textTertiary} strokeWidth={1.5} />
           <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
             Loading saved meals...
           </Text>
@@ -380,7 +381,7 @@ export default function SavedMealsScreen() {
       {/* Search Input */}
       <Animated.View entering={searchAnimation} style={styles.searchWrapper}>
         <GlassCard style={styles.searchContainer} interactive>
-          <Ionicons name="search" size={18} color={colors.textTertiary} />
+          <Search size={18} color={colors.textTertiary} strokeWidth={1.5} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
             placeholder="Search meals..."
@@ -390,7 +391,7 @@ export default function SavedMealsScreen() {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={18} color={colors.textTertiary} />
+              <XCircle size={18} color={colors.textTertiary} strokeWidth={1.5} />
             </TouchableOpacity>
           )}
         </GlassCard>
