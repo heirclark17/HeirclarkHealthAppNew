@@ -50,6 +50,7 @@ function selectBestProgram(preferences: TrainingPreferences): ProgramTemplate {
     daysPerWeek: preferences.workoutsPerWeek,
     duration: preferences.workoutDuration,
     fitnessLevel: preferences.fitnessLevel,
+    programDurationWeeks: preferences.programDurationWeeks,
   });
 
   // Get recommended programs for the goal
@@ -61,7 +62,18 @@ function selectBestProgram(preferences: TrainingPreferences): ProgramTemplate {
     'full_gym' // Default to full gym, can be enhanced later
   );
 
-  if (recommended.length > 0) {
+  // If we have a timeline, filter programs that fit within the duration
+  if (recommended.length > 0 && preferences.programDurationWeeks) {
+    // Prefer programs whose duration is close to user's timeline
+    const sortedByDuration = recommended.sort((a, b) => {
+      const aDiff = Math.abs(a.duration - preferences.programDurationWeeks!);
+      const bDiff = Math.abs(b.duration - preferences.programDurationWeeks!);
+      return aDiff - bDiff;
+    });
+    console.log('[PlanGenerator] Using recommended program (timeline-matched):', sortedByDuration[0].name,
+      `(${sortedByDuration[0].duration} weeks vs user's ${preferences.programDurationWeeks} weeks)`);
+    return sortedByDuration[0];
+  } else if (recommended.length > 0) {
     console.log('[PlanGenerator] Using recommended program:', recommended[0].name);
     return recommended[0];
   }
@@ -72,11 +84,19 @@ function selectBestProgram(preferences: TrainingPreferences): ProgramTemplate {
   );
 
   if (goalMatches.length > 0) {
-    // Sort by days per week to find closest match
-    const sorted = goalMatches.sort((a, b) =>
-      Math.abs(a.daysPerWeek - preferences.workoutsPerWeek) -
-      Math.abs(b.daysPerWeek - preferences.workoutsPerWeek)
-    );
+    // Sort by days per week and duration to find closest match
+    const sorted = goalMatches.sort((a, b) => {
+      const daysScore = Math.abs(a.daysPerWeek - preferences.workoutsPerWeek) -
+                        Math.abs(b.daysPerWeek - preferences.workoutsPerWeek);
+
+      // If timeline is specified, also consider duration
+      if (preferences.programDurationWeeks) {
+        const durationScore = Math.abs(a.duration - preferences.programDurationWeeks) -
+                             Math.abs(b.duration - preferences.programDurationWeeks);
+        return daysScore + (durationScore * 0.5); // Weight duration less than days/week
+      }
+      return daysScore;
+    });
     console.log('[PlanGenerator] Using goal-matched program:', sorted[0].name);
     return sorted[0];
   }

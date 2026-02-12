@@ -114,6 +114,10 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const goalSquat1RM = goalWizardContext?.state?.squat1RM;
   const goalDeadlift1RM = goalWizardContext?.state?.deadlift1RM;
 
+  // Timeline for program duration
+  const goalStartDate = goalWizardContext?.state?.startDate;
+  const goalTargetDate = goalWizardContext?.state?.targetDate;
+
   // Build training preferences from goals
   const buildPreferencesFromGoals = useCallback((): TrainingPreferences => {
     console.log('[Training] buildPreferencesFromGoals - goalState:', {
@@ -190,6 +194,21 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       deadlift1RM,
     });
 
+    // Calculate program duration from timeline
+    let programDurationWeeks: number | undefined;
+    if (goalStartDate && goalTargetDate) {
+      const start = new Date(goalStartDate);
+      const target = new Date(goalTargetDate);
+      const diffMs = target.getTime() - start.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      programDurationWeeks = Math.floor(diffDays / 7);
+      console.log('[Training] Timeline:', {
+        startDate: goalStartDate,
+        targetDate: goalTargetDate,
+        durationWeeks: programDurationWeeks,
+      });
+    }
+
     return {
       primaryGoal,
       workoutsPerWeek,
@@ -209,6 +228,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       benchPress1RM,
       squat1RM,
       deadlift1RM,
+      // Timeline
+      programDurationWeeks,
     };
   }, [
     goalPrimaryGoal,
@@ -228,6 +249,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     goalBenchPress1RM,
     goalSquat1RM,
     goalDeadlift1RM,
+    goalStartDate,
+    goalTargetDate,
   ]);
 
   // Generate weekly training plan with enhanced plan generator

@@ -190,6 +190,9 @@ export interface TrainingPreferences {
   benchPress1RM?: number | null; // 1-rep max in lbs
   squat1RM?: number | null;
   deadlift1RM?: number | null;
+
+  // Timeline for program selection
+  programDurationWeeks?: number; // Duration from start to target date
 }
 
 // Program template
