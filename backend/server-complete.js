@@ -16,6 +16,11 @@ const liveAvatarService = require('./services/liveAvatarService');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// ✅ Enable trust proxy for Railway deployment
+// Railway (and other hosting platforms) put the app behind a reverse proxy
+// This allows express-rate-limit to correctly identify users via X-Forwarded-For header
+app.set('trust proxy', 1); // trust first proxy
+
 // ============================================
 // DATABASE CONNECTION
 // ============================================
