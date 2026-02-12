@@ -141,6 +141,9 @@ export default function SleepRecoveryCard() {
           <TouchableOpacity
             style={[styles.viewButton, { backgroundColor: colors.cardGlass }]}
             onPress={() => setShowStatsModal(true)}
+            accessibilityLabel={`View sleep statistics, average ${formatDuration(state.averageSleepDuration)} per night`}
+            accessibilityRole="button"
+            accessibilityHint="Opens detailed sleep statistics modal with weekly overview, recent sleep logs, and sleep goals"
           >
             <Text style={[styles.viewButtonText, { color: colors.primary }]}>Stats</Text>
             <Ionicons name="arrow-forward" size={14} color={colors.primary} />
@@ -197,6 +200,9 @@ export default function SleepRecoveryCard() {
           <TouchableOpacity
             style={[styles.logButton, { backgroundColor: colors.primary }]}
             onPress={() => setShowLogModal(true)}
+            accessibilityLabel="Log last night's sleep"
+            accessibilityRole="button"
+            accessibilityHint="Opens sleep logging form to enter bedtime, wake time, quality rating, and optional notes"
           >
             <Ionicons name="add-circle" size={20} color="#FFF" />
             <Text style={styles.logButtonText}>Log Last Night's Sleep</Text>
@@ -223,6 +229,9 @@ export default function SleepRecoveryCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowLogModal(false)}
+              accessibilityLabel="Close sleep logging form"
+              accessibilityRole="button"
+              accessibilityHint="Closes the sleep logging modal and returns to sleep & recovery card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -273,6 +282,10 @@ export default function SleepRecoveryCard() {
                     },
                   ]}
                   onPress={() => setQuality(option.value)}
+                  accessibilityLabel={`Sleep quality ${option.label}${quality === option.value ? ', currently selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: quality === option.value }}
+                  accessibilityHint={`Rates your sleep quality as ${option.label.toLowerCase()}`}
                 >
                   <Text style={styles.qualityEmoji}>{option.emoji}</Text>
                   <Text
@@ -307,6 +320,9 @@ export default function SleepRecoveryCard() {
             <TouchableOpacity
               style={[styles.saveButton, { backgroundColor: colors.primary }]}
               onPress={handleLogSleep}
+              accessibilityLabel={`Save sleep log: ${formatDuration(calculateDuration(bedtime, wakeTime))} duration, ${QUALITY_OPTIONS.find(q => q.value === quality)?.label.toLowerCase()} quality`}
+              accessibilityRole="button"
+              accessibilityHint="Saves your sleep log entry and calculates your recovery score for today"
             >
               <Ionicons name="checkmark" size={20} color="#FFF" />
               <Text style={styles.saveButtonText}>Save Sleep Log</Text>
@@ -328,6 +344,9 @@ export default function SleepRecoveryCard() {
             <TouchableOpacity
               style={[styles.closeButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => setShowStatsModal(false)}
+              accessibilityLabel="Close sleep statistics"
+              accessibilityRole="button"
+              accessibilityHint="Closes the sleep statistics modal and returns to sleep & recovery card"
             >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
