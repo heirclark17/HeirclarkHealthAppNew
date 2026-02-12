@@ -148,6 +148,10 @@ export default function SmartMealLoggerCard({
           onPress={() => handleOpenQuickLog(meal)}
           onLongPress={() => handleQuickLog(meal)}
           disabled={isLogging === meal.id}
+          accessibilityLabel={`${meal.name}: ${meal.calories} calories, ${confidence}% confidence match. ${reason}`}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isLogging === meal.id, busy: isLogging === meal.id }}
+          accessibilityHint="Tap to view meal details and customize portions, or long-press to instantly log with default serving"
         >
           <View style={[styles.mealTypeIcon, { backgroundColor: `${mealColor}20` }]}>
             <Ionicons name={MealTypeIcons[meal.mealType]} size={18} color={mealColor} />
@@ -173,6 +177,9 @@ export default function SmartMealLoggerCard({
               <TouchableOpacity
                 style={[styles.quickAddButton, { backgroundColor: mealColor }]}
                 onPress={() => handleQuickLog(meal)}
+                accessibilityLabel={`Quick add ${meal.name} with ${meal.calories} calories`}
+                accessibilityRole="button"
+                accessibilityHint="Instantly logs this meal with default serving size to your food diary"
               >
                 <Ionicons name="add" size={18} color={Colors.text} />
               </TouchableOpacity>
@@ -193,6 +200,10 @@ export default function SmartMealLoggerCard({
         style={[styles.favoriteItem, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}
         onPress={() => handleOpenQuickLog(meal)}
         disabled={isLogging === meal.id}
+        accessibilityLabel={`Favorite: ${meal.name}, ${meal.calories} calories`}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isLogging === meal.id, busy: isLogging === meal.id }}
+        accessibilityHint="Opens meal details to customize portions before logging"
       >
         <View style={[styles.favoriteBadge, { backgroundColor: mealColor }]}>
           <Ionicons name="star" size={10} color={Colors.text} />
@@ -204,7 +215,12 @@ export default function SmartMealLoggerCard({
         {isLogging === meal.id ? (
           <ActivityIndicator size="small" color={mealColor} style={{ marginLeft: 4 }} />
         ) : (
-          <TouchableOpacity onPress={() => handleQuickLog(meal)}>
+          <TouchableOpacity
+            onPress={() => handleQuickLog(meal)}
+            accessibilityLabel={`Quick add ${meal.name} favorite`}
+            accessibilityRole="button"
+            accessibilityHint="Instantly logs this favorite meal with default serving size"
+          >
             <Ionicons name="add-circle" size={20} color={mealColor} />
           </TouchableOpacity>
         )}
@@ -220,6 +236,9 @@ export default function SmartMealLoggerCard({
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           onPress={onOpenFullLogger}
+          accessibilityLabel={`Quick log card: ${state.suggestions.length} ${currentMealType} suggestions${favorites.length > 0 ? `, ${favorites.length} favorites` : ''}`}
+          accessibilityRole="button"
+          accessibilityHint="Opens full meal logger with AI-powered photo recognition and manual entry options"
         >
           <GlassCard variant="elevated" material="thick" interactive animated>
             {/* Header */}
@@ -238,6 +257,9 @@ export default function SmartMealLoggerCard({
               <TouchableOpacity
                 style={[styles.fullLoggerButton, { backgroundColor: 'rgba(74,222,128,0.1)' }]}
                 onPress={onOpenFullLogger}
+                accessibilityLabel="AI meal logger"
+                accessibilityRole="button"
+                accessibilityHint="Opens full meal logger with AI-powered photo recognition to instantly log meals from camera or photo library"
               >
                 <Ionicons name="camera" size={16} color={Colors.successStrong} />
                 <Text style={[styles.fullLoggerText, { color: Colors.successStrong }]}>AI Log</Text>
@@ -257,6 +279,10 @@ export default function SmartMealLoggerCard({
                   <TouchableOpacity
                     style={styles.showMoreButton}
                     onPress={() => setShowAllSuggestions(!showAllSuggestions)}
+                    accessibilityLabel={showAllSuggestions ? 'Show less suggestions' : `Show ${state.suggestions.length - 3} more suggestions`}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: showAllSuggestions }}
+                    accessibilityHint={showAllSuggestions ? 'Collapses suggestion list to show only top 3' : `Expands to show all ${state.suggestions.length} suggestions`}
                   >
                     <Text style={[styles.showMoreText, { color: Colors.successStrong }]}>
                       {showAllSuggestions ? 'Show Less' : `Show ${state.suggestions.length - 3} More`}
