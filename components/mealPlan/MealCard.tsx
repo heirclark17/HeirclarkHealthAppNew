@@ -484,7 +484,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   disabled={isAddingToMeals}
                   activeOpacity={0.7}
                 >
-                  <PlusCircle size={22} color={colors.primary} strokeWidth={1.5} />
+                  <PlusCircle size={20} color={colors.primary} strokeWidth={1.5} />
                   <Text style={[styles.primaryActionText, { color: colors.text }]}>
                     {isAddingToMeals ? 'Adding...' : "Add to Today's Meals"}
                   </Text>
@@ -507,7 +507,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                       disabled={isSavingMeal}
                       activeOpacity={0.7}
                     >
-                      <Bookmark size={18} color={colors.text} strokeWidth={1.5} />
+                      <Bookmark size={16} color={colors.text} strokeWidth={1.5} />
                       <Text style={[styles.secondaryActionText, { color: colors.text }]}>
                         {isSavingMeal ? 'Saving...' : 'Save Meal'}
                       </Text>
@@ -528,7 +528,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     disabled={isGeneratingAIRecipe || isLoadingRecipe}
                     activeOpacity={0.7}
                   >
-                    <Sparkles size={18} color={isDark ? '#a5b4fc' : '#6366f1'} strokeWidth={1.5} />
+                    <Sparkles size={16} color={isDark ? '#a5b4fc' : '#6366f1'} strokeWidth={1.5} />
                     <Text style={[styles.secondaryActionText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>
                       {isGeneratingAIRecipe ? 'Generating...' : 'AI Recipe'}
                     </Text>
@@ -551,7 +551,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     disabled={isAddingToInstacart}
                     activeOpacity={0.7}
                   >
-                    <ShoppingCart size={18} color={colors.text} strokeWidth={1.5} />
+                    <ShoppingCart size={16} color={colors.text} strokeWidth={1.5} />
                     <Text style={[styles.secondaryActionText, { color: colors.text }]}>
                       {isAddingToInstacart ? 'Adding...' : 'Add to Instacart'}
                     </Text>
@@ -572,7 +572,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                       disabled={isSwapping}
                       activeOpacity={0.7}
                     >
-                      <ArrowLeftRight size={18} color={colors.text} strokeWidth={1.5} />
+                      <ArrowLeftRight size={16} color={colors.text} strokeWidth={1.5} />
                       <Text style={[styles.secondaryActionText, { color: colors.text }]}>
                         {isSwapping ? 'Swapping...' : 'Swap Meal'}
                       </Text>
@@ -879,34 +879,34 @@ const styles = StyleSheet.create({
   },
   modalFooter: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-    gap: 12,
+    paddingTop: 16,
+    paddingBottom: 16,
+    gap: 10,
   },
   primaryActionButton: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
   },
   primaryActionButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    gap: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
   },
   primaryActionText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: Fonts.medium,
     letterSpacing: 0.2,
   },
   secondaryActionsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   secondaryActionButton: {
     flex: 1,
-    borderRadius: 14,
+    borderRadius: 18,
     overflow: 'hidden',
   },
   secondaryActionButtonInner: {
@@ -914,11 +914,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
   },
   secondaryActionText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Fonts.thin,
     letterSpacing: 0.1,
   },
