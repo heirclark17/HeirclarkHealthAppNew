@@ -283,11 +283,11 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   styles.recipeButtonContainer,
                   {
                     backgroundColor: colors.cardBackground,
-                    shadowColor: '#ADD8E6',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 4,
-                    elevation: 3,
+                    shadowColor: '#87CEEB',
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.6,
+                    shadowRadius: 6,
+                    elevation: 5,
                   }
                 ]}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -310,11 +310,11 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: colors.cardBackground,
-                  shadowColor: '#C3E6CB',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 3,
+                  shadowColor: '#98D8A0',
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 0.6,
+                  shadowRadius: 6,
+                  elevation: 5,
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Prep: {meal.prepTime}m</Text>
@@ -323,11 +323,11 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: colors.cardBackground,
-                  shadowColor: '#FFDAB9',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 3,
+                  shadowColor: '#FFB6A3',
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 0.6,
+                  shadowRadius: 6,
+                  elevation: 5,
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Cook: {meal.cookTime}m</Text>
@@ -336,11 +336,11 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 styles.timeBadge,
                 {
                   backgroundColor: colors.cardBackground,
-                  shadowColor: '#DDA0DD',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 3,
+                  shadowColor: '#D8A8D8',
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 0.6,
+                  shadowRadius: 6,
+                  elevation: 5,
                 }
               ]}>
                 <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
