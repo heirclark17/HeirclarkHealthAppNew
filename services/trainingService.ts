@@ -607,12 +607,113 @@ function getExercisesByMuscleGroup(muscleGroups: MuscleGroup[], difficulty: Diff
   });
 }
 
+// Calculate recommended weight for an exercise based on user's strength baseline
+function calculateRecommendedWeight(
+  exercise: Exercise,
+  workoutType: WorkoutType,
+  reps: string,
+  preferences?: TrainingPreferences
+): string | undefined {
+  // Only calculate weights for strength exercises (not cardio/bodyweight)
+  if (exercise.category === 'cardio' || exercise.equipment === 'bodyweight' || exercise.equipment === 'none') {
+    return undefined;
+  }
+
+  // If no preferences or no strength data, return undefined
+  if (!preferences || !preferences.hasLiftingExperience || !preferences.strengthLevel) {
+    return undefined;
+  }
+
+  // Base weights by strength level and sex
+  const baseWeights: Record<string, Record<string, Record<string, number>>> = {
+    male: {
+      beginner: {
+        'bench-press': 95, 'squats': 135, 'deadlift': 155,
+        'overhead-press': 65, 'bent-over-rows': 85,
+        'dumbbell-chest-press': 25, 'dumbbell-shoulder-press': 20,
+        'dumbbell-rows': 30, 'goblet-squat': 35,
+      },
+      intermediate: {
+        'bench-press': 155, 'squats': 225, 'deadlift': 275,
+        'overhead-press': 105, 'bent-over-rows': 135,
+        'dumbbell-chest-press': 45, 'dumbbell-shoulder-press': 35,
+        'dumbbell-rows': 50, 'goblet-squat': 60,
+      },
+      advanced: {
+        'bench-press': 225, 'squats': 315, 'deadlift': 405,
+        'overhead-press': 155, 'bent-over-rows': 185,
+        'dumbbell-chest-press': 70, 'dumbbell-shoulder-press': 55,
+        'dumbbell-rows': 75, 'goblet-squat': 90,
+      },
+    },
+    female: {
+      beginner: {
+        'bench-press': 45, 'squats': 65, 'deadlift': 95,
+        'overhead-press': 35, 'bent-over-rows': 45,
+        'dumbbell-chest-press': 12, 'dumbbell-shoulder-press': 10,
+        'dumbbell-rows': 15, 'goblet-squat': 20,
+      },
+      intermediate: {
+        'bench-press': 85, 'squats': 135, 'deadlift': 185,
+        'overhead-press': 65, 'bent-over-rows': 85,
+        'dumbbell-chest-press': 25, 'dumbbell-shoulder-press': 20,
+        'dumbbell-rows': 30, 'goblet-squat': 40,
+      },
+      advanced: {
+        'bench-press': 135, 'squats': 205, 'deadlift': 275,
+        'overhead-press': 95, 'bent-over-rows': 115,
+        'dumbbell-chest-press': 40, 'dumbbell-shoulder-press': 32,
+        'dumbbell-rows': 50, 'goblet-squat': 65,
+      },
+    },
+  };
+
+  const sex = preferences.sex || 'male';
+  const strengthLevel = preferences.strengthLevel === 'never_lifted' ? 'beginner' : preferences.strengthLevel;
+
+  // Use 1RM if available for main lifts
+  let baseWeight: number | undefined;
+  if (exercise.id === 'bench-press' && preferences.benchPress1RM) {
+    baseWeight = preferences.benchPress1RM;
+  } else if (exercise.id === 'squats' && preferences.squat1RM) {
+    baseWeight = preferences.squat1RM;
+  } else if (exercise.id === 'deadlift' && preferences.deadlift1RM) {
+    baseWeight = preferences.deadlift1RM;
+  } else {
+    // Use base weights from table
+    baseWeight = baseWeights[sex]?.[strengthLevel]?.[exercise.id];
+  }
+
+  if (!baseWeight) {
+    return undefined; // No data for this exercise
+  }
+
+  // Adjust weight based on rep range and workout type
+  let percentage = 0.70; // Default to 70% for moderate reps
+
+  // Parse rep range to determine percentage of 1RM
+  const repNum = parseInt(reps.split('-')[0]);
+  if (!isNaN(repNum)) {
+    if (repNum <= 5) percentage = 0.85; // Heavy sets (85% 1RM)
+    else if (repNum <= 8) percentage = 0.80; // Strength sets (80% 1RM)
+    else if (repNum <= 12) percentage = 0.70; // Hypertrophy sets (70% 1RM)
+    else percentage = 0.60; // Endurance sets (60% 1RM)
+  }
+
+  // Calculate working weight
+  const workingWeight = Math.round(baseWeight * percentage / 5) * 5; // Round to nearest 5 lbs
+
+  // Return formatted weight string
+  return `${workingWeight} lbs`;
+}
+
 function selectExercisesForWorkout(
   workoutType: WorkoutType,
   muscleGroups: MuscleGroup[],
   difficulty: DifficultyLevel,
   duration: number,
-  cardioPreference?: CardioPreference
+  cardioPreference?: CardioPreference,
+  preferences?: TrainingPreferences
 ): WorkoutExercise[] {
   let availableExercises = getExercisesByMuscleGroup(muscleGroups, difficulty);
 
@@ -693,6 +794,9 @@ function selectExercisesForWorkout(
     // Enrich exercise with GIF URL and instructions from ExerciseDB
     const enrichedExercise = enrichExerciseWithGif(exercise);
 
+    // Calculate recommended weight based on user's strength baseline
+    const recommendedWeight = calculateRecommendedWeight(exercise, workoutType, reps, preferences);
+
     return {
       id: generateUUID(),
       exerciseId: exercise.id,
@@ -700,6 +804,7 @@ function selectExercisesForWorkout(
       sets,
       reps,
       restSeconds,
+      weight: recommendedWeight,
       completed: false,
     };
   });
@@ -750,7 +855,8 @@ export const trainingService = {
     muscleGroups: MuscleGroup[],
     duration: number,
     difficulty: DifficultyLevel,
-    cardioPreference?: CardioPreference
+    cardioPreference?: CardioPreference,
+    preferences?: TrainingPreferences
   ): Workout {
     if (type === 'rest') {
       return {
@@ -766,7 +872,7 @@ export const trainingService = {
       };
     }
 
-    const exercises = selectExercisesForWorkout(type, muscleGroups, difficulty, duration, cardioPreference);
+    const exercises = selectExercisesForWorkout(type, muscleGroups, difficulty, duration, cardioPreference, preferences);
     const estimatedCalories = calculateEstimatedCalories(exercises, duration);
 
     // Generate workout name based on type, muscles, and cardio preference
@@ -838,7 +944,8 @@ export const trainingService = {
           structureDay.muscleGroups.length > 0 ? structureDay.muscleGroups : ['full_body'],
           preferences.workoutDuration,
           preferences.fitnessLevel,
-          preferences.cardioPreference // Pass user's cardio preference for cardio workouts
+          preferences.cardioPreference, // Pass user's cardio preference for cardio workouts
+          preferences // Pass full preferences for weight calculations
         );
         totalCalories += workout.estimatedCaloriesBurned;
         structureDay.muscleGroups.forEach(mg => focusAreas.add(mg));
