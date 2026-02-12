@@ -271,7 +271,7 @@ export default function SettingsScreen() {
 
               {/* Nuclear option: Clear ALL auth data (debug) */}
               <TouchableOpacity
-                style={[styles.signOutButton, { borderColor: '#ff9800', marginTop: 16 }]}
+                style={[styles.signOutButton, { borderColor: colors.warningOrange, marginTop: 16 }]}
                 onPress={() => {
                   Alert.alert(
                     'Clear All Auth Data',
@@ -318,8 +318,8 @@ export default function SettingsScreen() {
                   );
                 }}
               >
-                <Ionicons name="nuclear-outline" size={18} color="#ff9800" style={{ marginRight: 8 }} />
-                <Text style={[styles.signOutButtonText, { color: '#ff9800' }]}>🔧 Clear All Auth (Debug)</Text>
+                <Ionicons name="nuclear-outline" size={18} color={colors.warningOrange} style={{ marginRight: 8 }} />
+                <Text style={[styles.signOutButtonText, { color: colors.warningOrange }]}>🔧 Clear All Auth (Debug)</Text>
               </TouchableOpacity>
             </>
           ) : (
