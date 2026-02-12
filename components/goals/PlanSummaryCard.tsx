@@ -142,6 +142,10 @@ export function PlanSummaryCard({
           style={styles.headerTouchable}
           onPress={handleToggleExpand}
           activeOpacity={0.8}
+          accessibilityLabel={`Your training plan with ${summary.expectedOutcomes.length} goals${expanded ? ', expanded' : ', collapsed'}`}
+          accessibilityRole="button"
+          accessibilityState={{ expanded }}
+          accessibilityHint={`${expanded ? 'Collapses' : 'Expands'} the training plan details to ${expanded ? 'hide' : 'show'} weekly structure, progression, and nutrition tips`}
         >
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -264,6 +268,9 @@ export function PlanSummaryCard({
             style={[styles.startButton, { backgroundColor: colors.primary }]}
             onPress={handleStartTraining}
             activeOpacity={0.8}
+            accessibilityLabel="Start training plan"
+            accessibilityRole="button"
+            accessibilityHint="Begins your personalized training program with today's workout"
           >
             <Text style={[styles.startButtonText, { color: colors.primaryText }]}>Start Training Plan</Text>
             <Ionicons name="arrow-forward" size={20} color={colors.primaryText} />
@@ -274,6 +281,9 @@ export function PlanSummaryCard({
               style={styles.detailsButton}
               onPress={onViewDetails}
               activeOpacity={0.7}
+              accessibilityLabel="View full schedule"
+              accessibilityRole="button"
+              accessibilityHint="Opens detailed week-by-week workout schedule with exercises and progression"
             >
               <Text style={[styles.detailsButtonText, { color: colors.textMuted }]}>View Full Schedule</Text>
             </TouchableOpacity>
