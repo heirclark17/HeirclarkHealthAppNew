@@ -653,6 +653,9 @@ export function CoachChatModal({
               ]}
               onPress={() => handleSuggestionTap(suggestion)}
               activeOpacity={0.7}
+              accessibilityLabel={`Ask: ${suggestion}`}
+              accessibilityRole="button"
+              accessibilityHint="Sends this pre-filled question to your AI coach"
             >
               <Text style={[styles.suggestionText, { color: glassColors.text }]}>{suggestion}</Text>
             </TouchableOpacity>
@@ -679,7 +682,13 @@ export function CoachChatModal({
           tint={isDark ? 'dark' : 'light'}
           style={[styles.header, { paddingTop: insets.top, borderBottomColor: glassColors.border }]}
         >
-          <TouchableOpacity onPress={handleClose} style={styles.headerButton}>
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.headerButton}
+            accessibilityLabel="Close AI coach chat"
+            accessibilityRole="button"
+            accessibilityHint="Dismisses the chat and returns to the previous screen"
+          >
             <Ionicons name="chevron-down" size={24} color={glassColors.text} />
           </TouchableOpacity>
           {/* Mode Switcher Button */}
@@ -689,12 +698,22 @@ export function CoachChatModal({
               setShowModeSwitcher(!showModeSwitcher);
             }}
             style={styles.headerCenter}
+            accessibilityLabel={`${config.title}, switch coach mode${showModeSwitcher ? ', expanded' : ''}`}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showModeSwitcher }}
+            accessibilityHint="Shows options to switch between meal coach, training coach, and general health coach"
           >
             <Ionicons name={config.icon as any} size={18} color={config.accentColor} />
             <Text style={[styles.headerTitle, { color: glassColors.text }]}>{config.title}</Text>
             <Ionicons name="chevron-down" size={14} color={glassColors.textSecondary} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleClearHistory} style={styles.headerButton}>
+          <TouchableOpacity
+            onPress={handleClearHistory}
+            style={styles.headerButton}
+            accessibilityLabel="Clear chat history"
+            accessibilityRole="button"
+            accessibilityHint="Deletes all messages in this conversation permanently"
+          >
             <Ionicons name="trash-outline" size={20} color={glassColors.textSecondary} />
           </TouchableOpacity>
         </BlurView>
@@ -717,6 +736,10 @@ export function CoachChatModal({
                     isSelected && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
                   ]}
                   onPress={() => handleModeSwitch(modeOption)}
+                  accessibilityLabel={`${modeConfig.title}${isSelected ? ', currently selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityHint={`Switches to ${modeConfig.title.toLowerCase()} to get specialized ${modeOption === 'meal' ? 'nutrition' : modeOption === 'training' ? 'fitness' : 'health'} guidance`}
                 >
                   <Ionicons name={modeConfig.icon as any} size={20} color={modeConfig.accentColor} />
                   <Text style={[styles.modeOptionText, { color: glassColors.text }]}>{modeConfig.title}</Text>
@@ -832,6 +855,10 @@ export function CoachChatModal({
                     handleSendMessage();
                   }}
                   disabled={!inputText.trim() || isLoading}
+                  accessibilityLabel={isLoading ? 'Sending message' : 'Send message'}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: !inputText.trim() || isLoading, busy: isLoading }}
+                  accessibilityHint="Sends your message to the AI coach and receives personalized guidance"
                 >
                   <Ionicons
                     name="arrow-up"
