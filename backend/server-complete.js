@@ -3467,6 +3467,87 @@ async function sendPushNotification(userId, title, body, data = {}) {
 module.exports.sendPushNotification = sendPushNotification;
 
 // ============================================
+// INSTACART INTEGRATION
+// ============================================
+
+const INSTACART_API_KEY = process.env.INSTACART_API_KEY || '';
+const INSTACART_BASE_URL = process.env.INSTACART_ENV === 'production'
+  ? 'https://connect.instacart.com'
+  : 'https://connect.dev.instacart.tools';
+
+// POST /api/instacart/products-link - Create Instacart shopping cart
+app.post('/api/instacart/products-link', async (req, res) => {
+  try {
+    const { items, title } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Missing or empty items array'
+      });
+    }
+
+    if (!INSTACART_API_KEY) {
+      console.error('[Instacart] INSTACART_API_KEY not configured');
+      return res.status(503).json({
+        ok: false,
+        error: 'Instacart integration not configured'
+      });
+    }
+
+    // Format line items for Instacart API
+    const lineItems = items.map(item => ({
+      name: item.name || item.query,
+      quantity: item.quantity || 1,
+      unit: item.unit || 'each'
+    }));
+
+    console.log('[Instacart] Creating products link with', lineItems.length, 'items');
+
+    // Call Instacart IDP API
+    const response = await fetch(`${INSTACART_BASE_URL}/idp/v1/products/products_link`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${INSTACART_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        title: title || 'Shopping List',
+        line_items: lineItems
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('[Instacart] API error:', response.status, data);
+      return res.status(502).json({
+        ok: false,
+        error: 'Failed to create Instacart link'
+      });
+    }
+
+    console.log('[Instacart] ✅ Products link created');
+
+    return res.json({
+      ok: true,
+      data: {
+        link_url: data.products_link_url || data.link_url,
+        items_count: items.length
+      }
+    });
+
+  } catch (error) {
+    console.error('[Instacart] Error:', error);
+    return res.status(500).json({
+      ok: false,
+      error: 'Failed to create Instacart link'
+    });
+  }
+});
+
+// ============================================
 // ERROR HANDLING
 // ============================================
 
