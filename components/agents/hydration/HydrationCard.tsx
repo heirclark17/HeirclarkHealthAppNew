@@ -72,8 +72,8 @@ export default function HydrationCard() {
   const getProgressColor = useCallback(() => {
     if (progressPercent >= 100) return colors.success;
     if (progressPercent >= 70) return colors.primary;
-    if (progressPercent >= 40) return '#FFB74D';
-    return '#EF5350';
+    if (progressPercent >= 40) return colors.warningOrange;
+    return colors.error;
   }, [progressPercent, colors]);
 
   const progressWidth = progressAnim.interpolate({
@@ -87,7 +87,7 @@ export default function HydrationCard() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <View style={[styles.iconContainer, { backgroundColor: '#4FC3F7' + '20' }]}>
+            <View style={[styles.iconContainer, { backgroundColor: colors.accentCyan + '20' }]}>
               <Ionicons name="water" size={20} color="#4FC3F7" />
             </View>
             <View>
@@ -172,7 +172,7 @@ export default function HydrationCard() {
         </ScrollView>
 
         {/* Tip */}
-        <View style={[styles.tipContainer, { backgroundColor: '#4FC3F7' + '10' }]}>
+        <View style={[styles.tipContainer, { backgroundColor: colors.accentCyan + '10' }]}>
           <Ionicons name="bulb" size={16} color="#4FC3F7" />
           <Text style={[styles.tipText, { color: colors.textSecondary }]}>{tip}</Text>
         </View>
@@ -258,7 +258,7 @@ export default function HydrationCard() {
                       <Ionicons
                         name={WATER_SOURCES.find((s) => s.id === entry.source)?.icon as any || 'water'}
                         size={18}
-                        color={WATER_SOURCES.find((s) => s.id === entry.source)?.color || '#4FC3F7'}
+                        color={WATER_SOURCES.find((s) => s.id === entry.source)?.color || colors.accentCyan}
                       />
                       <View>
                         <NumberText weight="semiBold" style={[styles.entryAmount, { color: colors.text }]}>{formatAmount(entry.amount)}</NumberText>

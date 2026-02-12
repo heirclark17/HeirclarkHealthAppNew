@@ -88,13 +88,13 @@ export default function HabitFormationCard() {
               </TouchableOpacity>
             </>
           ) : (
-            <View style={[styles.statusBadge, { backgroundColor: isCompleted ? '#22C55E20' : '#6B728020' }]}>
+            <View style={[styles.statusBadge, { backgroundColor: isCompleted ? 'rgba(34, 197, 94, 0.15)' : 'rgba(107, 114, 128, 0.15)' }]}>
               <Ionicons
                 name={isCompleted ? 'checkmark-circle' : 'remove-circle'}
                 size={18}
-                color={isCompleted ? Colors.successStrong : '#6B7280'}
+                color={isCompleted ? Colors.successStrong : colors.textMuted}
               />
-              <Text style={{ color: isCompleted ? Colors.successStrong : '#6B7280', fontSize: 11, marginLeft: 4, fontFamily: Fonts.medium }}>
+              <Text style={{ color: isCompleted ? Colors.successStrong : colors.textMuted, fontSize: 11, marginLeft: 4, fontFamily: Fonts.medium }}>
                 {isCompleted ? 'Done' : 'Skipped'}
               </Text>
             </View>
