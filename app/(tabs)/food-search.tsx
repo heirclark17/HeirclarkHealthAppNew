@@ -158,6 +158,9 @@ export default function FoodSearchScreen() {
         style={styles.foodCardContent}
         onPress={() => handleAddFood(item)}
         activeOpacity={0.7}
+        accessibilityLabel={`${item.name}${item.brand ? `, ${item.brand}` : ''}, ${item.calories} calories, ${item.protein} grams protein, ${item.carbs} grams carbs, ${item.fat} grams fat`}
+        accessibilityRole="button"
+        accessibilityHint="Adds this food item to your meal log"
       >
         <View style={styles.foodInfo}>
           <Text style={[styles.foodName, { color: colors.text }]} numberOfLines={2}>
@@ -196,6 +199,9 @@ export default function FoodSearchScreen() {
           <TouchableOpacity
             style={[styles.addButton, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.15)' }]}
             onPress={() => handleAddFood(item)}
+            accessibilityLabel={`Add ${item.name}`}
+            accessibilityRole="button"
+            accessibilityHint="Adds this food item to your current meal"
           >
             <Ionicons name="add" size={20} color={colors.accentPurple} />
           </TouchableOpacity>
@@ -220,6 +226,9 @@ export default function FoodSearchScreen() {
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setShowScanner(false)}
+              accessibilityLabel="Close barcode scanner"
+              accessibilityRole="button"
+              accessibilityHint="Closes the barcode scanner and returns to the food search screen"
             >
               <Ionicons name="close" size={28} color="#fff" />
             </TouchableOpacity>
@@ -273,7 +282,12 @@ export default function FoodSearchScreen() {
               autoCorrect={false}
             />
             {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <TouchableOpacity
+                onPress={() => setSearchQuery('')}
+                accessibilityLabel="Clear search"
+                accessibilityRole="button"
+                accessibilityHint="Clears the current search query"
+              >
                 <Ionicons name="close-circle" size={20} color={colors.textMuted} />
               </TouchableOpacity>
             )}
@@ -284,6 +298,9 @@ export default function FoodSearchScreen() {
               { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.15)' }
             ]}
             onPress={openScanner}
+            accessibilityLabel="Scan barcode"
+            accessibilityRole="button"
+            accessibilityHint="Opens the camera to scan a product barcode and automatically look up nutritional information"
           >
             <Ionicons name="barcode-outline" size={24} color={colors.accentPurple} />
           </TouchableOpacity>
@@ -310,6 +327,9 @@ export default function FoodSearchScreen() {
                     setSearchQuery(term);
                     handleSearch(term);
                   }}
+                  accessibilityLabel={`Search for ${term}`}
+                  accessibilityRole="button"
+                  accessibilityHint={`Performs a food search for ${term}`}
                 >
                   <Text style={[styles.recentChipText, { color: colors.text }]}>{term}</Text>
                 </TouchableOpacity>
