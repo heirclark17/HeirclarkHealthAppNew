@@ -484,14 +484,14 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   disabled={isAddingToMeals}
                   activeOpacity={0.7}
                 >
-                  <PlusCircle size={20} color={colors.primary} strokeWidth={1.5} />
-                  <Text style={[styles.primaryActionText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
+                  <PlusCircle size={22} color={colors.primary} strokeWidth={1.5} />
+                  <Text style={[styles.primaryActionText, { color: colors.text }]}>
                     {isAddingToMeals ? 'Adding...' : "Add to Today's Meals"}
                   </Text>
                 </TouchableOpacity>
               </GlassCard>
 
-              {/* Secondary Actions Row */}
+              {/* Secondary Actions - First Row */}
               <View style={styles.secondaryActionsRow}>
                 {/* Save to Saved Meals Button */}
                 {onSaveToSavedMeals && (
@@ -507,9 +507,9 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                       disabled={isSavingMeal}
                       activeOpacity={0.7}
                     >
-                      <Bookmark size={16} color={colors.text} strokeWidth={1.5} />
-                      <Text style={[styles.secondaryActionText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
-                        {isSavingMeal ? 'Saving...' : 'Save'}
+                      <Bookmark size={18} color={colors.text} strokeWidth={1.5} />
+                      <Text style={[styles.secondaryActionText, { color: colors.text }]}>
+                        {isSavingMeal ? 'Saving...' : 'Save Meal'}
                       </Text>
                     </TouchableOpacity>
                   </GlassCard>
@@ -528,13 +528,16 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     disabled={isGeneratingAIRecipe || isLoadingRecipe}
                     activeOpacity={0.7}
                   >
-                    <Sparkles size={16} color={isDark ? '#a5b4fc' : '#6366f1'} strokeWidth={1.5} />
-                    <Text style={[styles.secondaryActionText, { color: isDark ? '#a5b4fc' : '#6366f1' }]} numberOfLines={1} ellipsizeMode="tail">
+                    <Sparkles size={18} color={isDark ? '#a5b4fc' : '#6366f1'} strokeWidth={1.5} />
+                    <Text style={[styles.secondaryActionText, { color: isDark ? '#a5b4fc' : '#6366f1' }]}>
                       {isGeneratingAIRecipe ? 'Generating...' : 'AI Recipe'}
                     </Text>
                   </TouchableOpacity>
                 </GlassCard>
+              </View>
 
+              {/* Secondary Actions - Second Row */}
+              <View style={styles.secondaryActionsRow}>
                 {/* Add to Instacart Button */}
                 <GlassCard
                   style={styles.secondaryActionButton}
@@ -548,9 +551,9 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     disabled={isAddingToInstacart}
                     activeOpacity={0.7}
                   >
-                    <ShoppingCart size={16} color={colors.text} strokeWidth={1.5} />
-                    <Text style={[styles.secondaryActionText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
-                      {isAddingToInstacart ? 'Adding...' : 'Instacart'}
+                    <ShoppingCart size={18} color={colors.text} strokeWidth={1.5} />
+                    <Text style={[styles.secondaryActionText, { color: colors.text }]}>
+                      {isAddingToInstacart ? 'Adding...' : 'Add to Instacart'}
                     </Text>
                   </TouchableOpacity>
                 </GlassCard>
@@ -569,9 +572,9 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                       disabled={isSwapping}
                       activeOpacity={0.7}
                     >
-                      <ArrowLeftRight size={16} color={colors.text} strokeWidth={1.5} />
-                      <Text style={[styles.secondaryActionText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
-                        {isSwapping ? 'Swapping...' : 'Swap'}
+                      <ArrowLeftRight size={18} color={colors.text} strokeWidth={1.5} />
+                      <Text style={[styles.secondaryActionText, { color: colors.text }]}>
+                        {isSwapping ? 'Swapping...' : 'Swap Meal'}
                       </Text>
                     </TouchableOpacity>
                   </GlassCard>
@@ -876,50 +879,48 @@ const styles = StyleSheet.create({
   },
   modalFooter: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
-    gap: 10,
+    paddingTop: 20,
+    paddingBottom: 20,
+    gap: 12,
   },
   primaryActionButton: {
-    borderRadius: 14,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   primaryActionButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    gap: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   primaryActionText: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: Fonts.medium,
-    flexShrink: 1,
+    letterSpacing: 0.2,
   },
   secondaryActionsRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 12,
   },
   secondaryActionButton: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: 'hidden',
-    minWidth: 0,
   },
   secondaryActionButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    minWidth: 0,
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
   secondaryActionText: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: Fonts.thin,
-    flexShrink: 1,
+    letterSpacing: 0.1,
   },
 });
 
