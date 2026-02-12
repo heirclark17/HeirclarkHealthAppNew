@@ -13,10 +13,11 @@ import {
   Heart,
   Zap,
   Target,
-  Coffee,
+  Beef,
+  Wheat,
+  Nut,
   Lightbulb,
   Sparkles,
-  Leaf,
   AlertTriangle,
   UtensilsCrossed,
   Fish,
@@ -316,7 +317,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Calories</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Fish size={20} color={colors.protein} />
+              <Beef size={20} color={colors.protein} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.protein}
@@ -326,7 +327,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Protein</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Leaf size={20} color={colors.carbs} />
+              <Wheat size={20} color={colors.carbs} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.carbs}
@@ -336,7 +337,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Carbs</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Coffee size={20} color={colors.fat} />
+              <Nut size={20} color={colors.fat} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.fat}
