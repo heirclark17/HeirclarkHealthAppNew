@@ -1872,7 +1872,7 @@ app.post('/api/v1/ai/cheat-day-guidance', authenticateToken, async (req, res) =>
     let userContext = '';
     try {
       const userData = await pool.query(
-        `SELECT up.*, ug.daily_calories, ug.daily_protein, ug.goal_type
+        `SELECT up.*, ug.daily_calories, ug.daily_protein, up.goal_type
          FROM user_profiles up
          LEFT JOIN user_goals ug ON up.user_id = ug.user_id AND ug.is_active = true
          WHERE up.user_id = $1`,
