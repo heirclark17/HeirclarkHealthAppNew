@@ -38,10 +38,17 @@ export interface GlassThemeColors {
   text: string;  // Maps to text.primary
   textMuted: string;
   textSecondary: string;
+  textTertiary: string;  // Added missing property
   primary: string;
   success: string;
   error: string;
   warning: string;
+  danger: string;  // Added missing property (alias for error)
+
+  // Glass-specific properties
+  cardGlass: string;  // Added missing property
+  glassBorder: string;  // Added missing property
+  surface: string;  // Added missing property
 }
 
 export interface GlassTheme {
@@ -96,10 +103,17 @@ export function useGlassTheme(): GlassTheme {
       text: colorSystem.text.primary,  // Most common usage
       textMuted: colorSystem.text.muted,
       textSecondary: colorSystem.text.secondary,
+      textTertiary: colorSystem.text.tertiary,  // Added missing property
       primary: colorSystem.icon.accent,
       success: colorSystem.semantic.success,
       error: colorSystem.semantic.error,
       warning: colorSystem.semantic.warning,
+      danger: colorSystem.semantic.error,  // Alias for error
+
+      // Glass-specific properties
+      cardGlass: colorSystem.glass.card,  // Added missing property
+      glassBorder: colorSystem.glass.border,  // Added missing property
+      surface: colorSystem.background,  // Added missing property (same as background)
     };
 
     return {

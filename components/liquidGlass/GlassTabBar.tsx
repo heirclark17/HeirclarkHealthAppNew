@@ -21,6 +21,7 @@ import { GlassSpacing, GlassShadows, GlassMaterials } from '../../theme/liquidGl
 import { useGlassTheme } from './useGlassTheme';
 import { AdaptiveText } from './AdaptiveText';
 import { AdaptiveIcon } from './AdaptiveIcon';
+import { GLASS_SPRING } from '../../constants/Animations';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

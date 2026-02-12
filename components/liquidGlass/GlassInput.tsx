@@ -25,6 +25,7 @@ import { GlassRadius, GlassSpacing, GlassShadows } from '../../theme/liquidGlass
 import { useGlassTheme } from './useGlassTheme';
 import { AdaptiveText } from './AdaptiveText';
 import { AdaptiveIcon } from './AdaptiveIcon';
+import { GLASS_SPRING } from '../../constants/Animations';
 
 export type GlassInputVariant = 'default' | 'filled' | 'outline';
 export type GlassInputSize = 'small' | 'medium' | 'large';

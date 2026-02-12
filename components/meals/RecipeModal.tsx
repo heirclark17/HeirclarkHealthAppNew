@@ -11,10 +11,9 @@ import {
   Alert,
 } from 'react-native';
 import { X, ShoppingCart, Clock, ChefHat } from 'lucide-react-native';
-import { Colors } from '@/constants/Colors';
-import { Fonts } from '@/constants/Theme';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors, Fonts } from '../../constants/Theme';
 import { NumberText } from '../NumberText';
+import { useSettings } from '../../contexts/SettingsContext';
 
 export interface Ingredient {
   ingredient: string;
@@ -53,8 +52,8 @@ interface RecipeModalProps {
 }
 
 export function RecipeModal({ visible, meal, onClose }: RecipeModalProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
 
   if (!meal) return null;
 

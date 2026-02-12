@@ -624,4 +624,15 @@ export const Typography = {
   },
 };
 
-export default { Colors, Fonts, Typography, MidnightGoldColors, SandLightColors, SandDarkColors, LiquidGlass };
+// Wearable Device Brand Colors
+export const WearableBrands = {
+  apple_health: '#FF3B30',   // Apple Health red
+  fitbit: '#00B0B9',         // Fitbit teal
+  garmin: '#007CC3',         // Garmin blue
+  oura: '#8B5CF6',           // Oura purple
+  strava: '#FC4C02',         // Strava orange
+  whoop: '#000000',          // Whoop black
+  withings: '#00A9CE',       // Withings cyan
+};
+
+export default { Colors, Fonts, Typography, MidnightGoldColors, SandLightColors, SandDarkColors, LiquidGlass, WearableBrands };

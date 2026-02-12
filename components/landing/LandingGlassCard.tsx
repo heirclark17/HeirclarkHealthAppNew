@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { liquidGlass, glassBlur, radius } from '../../constants/landingTheme';
+import { GLASS_SPRING } from '../../constants/Animations';
 
 type GlassTier = 'subtle' | 'standard' | 'elevated';
 

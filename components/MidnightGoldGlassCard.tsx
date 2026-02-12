@@ -9,8 +9,10 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withSpring,
 } from 'react-native-reanimated';
 import { Spacing, MidnightGoldColors, LiquidGlass } from '../constants/Theme';
+import { GLASS_SPRING } from '../constants/Animations';
 
 // Try to import Liquid Glass (only works after rebuild)
 let LiquidGlassView: any = null;

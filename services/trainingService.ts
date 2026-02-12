@@ -717,6 +717,101 @@ function selectExercisesForWorkout(
 ): WorkoutExercise[] {
   let availableExercises = getExercisesByMuscleGroup(muscleGroups, difficulty);
 
+  // *** EQUIPMENT FILTERING: Filter exercises by user's available equipment ***
+  if (preferences?.availableEquipment && preferences.availableEquipment.length > 0) {
+    const userEquipment = preferences.availableEquipment;
+    console.log('[TrainingService] Filtering exercises for equipment:', userEquipment);
+
+    // Map user-friendly equipment names to exercise equipment types
+    const equipmentMap: Record<string, string[]> = {
+      'bodyweight': ['bodyweight'],
+      'dumbbells': ['dumbbells', 'dumbbell'],
+      'barbell': ['barbell'],
+      'resistance_bands': ['resistance_band', 'bands'],
+      'kettlebells': ['kettlebell', 'kettlebells'],
+      'pull_up_bar': ['pull_up_bar', 'bar'],
+      'bench': ['bench'],
+      'cable_machine': ['cable_machine', 'cable'],
+      'smith_machine': ['smith_machine'],
+      'squat_rack': ['squat_rack', 'rack'],
+    };
+
+    // Build list of allowed equipment types
+    const allowedEquipmentTypes = new Set<string>();
+    userEquipment.forEach(eq => {
+      const types = equipmentMap[eq] || [eq];
+      types.forEach(t => allowedEquipmentTypes.add(t));
+    });
+
+    // Filter exercises to only those matching user's equipment
+    const beforeCount = availableExercises.length;
+    availableExercises = availableExercises.filter(ex => {
+      // Bodyweight exercises are always available
+      if (ex.equipment === 'bodyweight') return true;
+      // Check if exercise equipment matches user's available equipment
+      return allowedEquipmentTypes.has(ex.equipment);
+    });
+
+    console.log(`[TrainingService] Equipment filter: ${beforeCount} exercises → ${availableExercises.length} exercises`);
+
+    // If equipment filtering leaves no exercises, fall back to bodyweight only
+    if (availableExercises.length === 0) {
+      console.warn('[TrainingService] ⚠️ Equipment filter removed all exercises, falling back to bodyweight');
+      availableExercises = getExercisesByMuscleGroup(muscleGroups, difficulty).filter(
+        ex => ex.equipment === 'bodyweight'
+      );
+    }
+  }
+
+  // *** INJURY/LIMITATION FILTERING: Avoid exercises targeting injured areas ***
+  if (preferences?.injuries && preferences.injuries.length > 0) {
+    const injuries = preferences.injuries;
+    console.log('[TrainingService] Filtering exercises to avoid injuries:', injuries);
+
+    // Map injury areas to muscle groups that should be avoided
+    const injuryToMuscleMap: Record<string, MuscleGroup[]> = {
+      'lower_back': ['core', 'glutes'],
+      'knee': ['quadriceps', 'hamstrings', 'glutes'],
+      'shoulder': ['shoulders', 'chest', 'back'],
+      'elbow': ['biceps', 'triceps'],
+      'wrist': ['biceps', 'triceps', 'chest'],
+      'hip': ['glutes', 'quadriceps', 'hamstrings'],
+      'ankle': ['quadriceps', 'hamstrings', 'calves'],
+      'neck': ['shoulders', 'back'],
+    };
+
+    // Build set of muscle groups to avoid
+    const avoidMuscles = new Set<MuscleGroup>();
+    injuries.forEach(injury => {
+      const muscles = injuryToMuscleMap[injury.toLowerCase()];
+      if (muscles) {
+        muscles.forEach(m => avoidMuscles.add(m));
+      }
+    });
+
+    if (avoidMuscles.size > 0) {
+      const beforeCount = availableExercises.length;
+      // Filter out exercises that primarily target injured areas
+      availableExercises = availableExercises.filter(ex => {
+        // Keep exercise if none of its muscle groups match avoided muscles
+        const hasInjuryConflict = ex.muscleGroups.some(mg => avoidMuscles.has(mg));
+        return !hasInjuryConflict;
+      });
+
+      console.log(`[TrainingService] Injury filter: ${beforeCount} exercises → ${availableExercises.length} exercises`);
+
+      // If injury filtering leaves no exercises, log warning but continue with bodyweight alternatives
+      if (availableExercises.length === 0) {
+        console.warn('[TrainingService] ⚠️ Injury filter removed all exercises, using minimal bodyweight exercises');
+        // Fall back to very safe bodyweight exercises (core, cardio)
+        availableExercises = EXERCISES.filter(ex =>
+          ex.equipment === 'bodyweight' &&
+          (ex.category === 'cardio' || ex.category === 'core')
+        );
+      }
+    }
+  }
+
   // Filter cardio exercises based on user's cardio preference
   if ((workoutType === 'cardio' || workoutType === 'hiit') && cardioPreference) {
     const preferredCardioIds = CARDIO_EXERCISES_BY_PREFERENCE[cardioPreference];

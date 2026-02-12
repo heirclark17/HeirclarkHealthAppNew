@@ -20,6 +20,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { liquidGlass, spacing, radius } from '../../constants/landingTheme';
 import { useBreakpoint } from '../../hooks/useResponsive';
 import { LandingGlassButton } from './LandingGlassButton';
+import { GLASS_SPRING } from '../../constants/Animations';
+import { withSpring } from 'react-native-reanimated';
 
 export function LandingNavbar() {
   const insets = useSafeAreaInsets();

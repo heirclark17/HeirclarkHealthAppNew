@@ -29,6 +29,7 @@ import { GlassRadius, GlassSpacing, GlassShadows, GlassMaterials } from '../../t
 import { useGlassTheme } from './useGlassTheme';
 import { AdaptiveText } from './AdaptiveText';
 import { GlassButton } from './GlassButton';
+import { GLASS_SPRING } from '../../constants/Animations';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 

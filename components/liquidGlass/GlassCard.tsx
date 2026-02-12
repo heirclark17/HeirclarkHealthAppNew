@@ -27,6 +27,7 @@ import {
 } from '../../theme/liquidGlass';
 import { useGlassTheme } from './useGlassTheme';
 import { GlassView, isLiquidGlassAvailable } from './GlassView';
+import { GLASS_SPRING } from '../../constants/Animations';
 
 export type GlassCardVariant = 'standard' | 'elevated' | 'compact' | 'flat';
 

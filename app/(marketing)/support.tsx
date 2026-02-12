@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     color: liquidGlass.text.primary,
     fontSize: 16,
-    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+    ...(Platform.OS === 'web' ? { outline: 'none' } as any : {}),
   },
   textArea: {
     height: 140,

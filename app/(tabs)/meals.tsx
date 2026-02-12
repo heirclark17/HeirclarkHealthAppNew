@@ -370,9 +370,9 @@ export default function MealsScreen() {
             styles.savingsBanner,
             { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.1)' }
           ]}>
-            <Leaf size={18} color={isDark ? '#86efac' : '#22c55e'} />
-            <Text style={[styles.savingsText, { color: isDark ? '#86efac' : '#22c55e', fontFamily: Fonts.light }]}>
-              You're saving ~<NumberText weight="medium" style={{ color: isDark ? '#86efac' : '#22c55e' }}>${(estimatedSavings / 100).toFixed(2)}</NumberText> this week using pantry items!
+            <Leaf size={18} color={colors.successMuted} />
+            <Text style={[styles.savingsText, { color: colors.successMuted, fontFamily: Fonts.light }]}>
+              You're saving ~<NumberText weight="medium" style={{ color: colors.successMuted }}>${(estimatedSavings / 100).toFixed(2)}</NumberText> this week using pantry items!
             </Text>
           </View>
         )}
@@ -434,7 +434,7 @@ export default function MealsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <Sparkles size={20} color={isDark ? '#a5b4fc' : '#6366f1'} />
+                    <Sparkles size={20} color={colors.accentPurple} />
                     <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1', fontFamily: Fonts.light }]}>AI</Text>
                   </TouchableOpacity>
                 </GlassCard>
@@ -450,7 +450,7 @@ export default function MealsScreen() {
                     activeOpacity={0.7}
                     style={styles.halfButtonInner}
                   >
-                    <ShoppingCart size={20} color={isDark ? '#86efac' : '#22c55e'} />
+                    <ShoppingCart size={20} color={colors.successMuted} />
                     <Text style={[styles.halfButtonText, { color: isDark ? '#86efac' : '#22c55e', fontFamily: Fonts.light }]}>Budget</Text>
                   </TouchableOpacity>
                 </GlassCard>
@@ -605,7 +605,7 @@ export default function MealsScreen() {
                         activeOpacity={0.7}
                         style={styles.halfButtonInner}
                       >
-                        <Sparkles size={18} color={isDark ? '#a5b4fc' : '#6366f1'} />
+                        <Sparkles size={18} color={colors.accentPurple} />
                         <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1', fontFamily: Fonts.light }]}>AI-Powered</Text>
                       </TouchableOpacity>
                     </GlassCard>

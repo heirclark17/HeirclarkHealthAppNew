@@ -26,6 +26,7 @@ import Animated, {
 import { useSettings } from '../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../constants/Theme';
 import { lightImpact } from '../utils/haptics';
+import { GLASS_SPRING } from '../constants/Animations';
 
 interface LiquidGlassProfileImageProps {
   size?: number;

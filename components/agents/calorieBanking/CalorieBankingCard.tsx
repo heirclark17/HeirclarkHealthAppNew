@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Colors } from '../../../constants/Theme';
+import { GLASS_SPRING } from '../../../constants/Animations';
 import {
   View,
   Text,

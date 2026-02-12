@@ -19,7 +19,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../services/api';
-import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
+import { Colors, Fonts, Spacing, DarkColors, LightColors, WearableBrands } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../../components/GlassCard';
 
@@ -41,17 +41,6 @@ const PROVIDER_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   strava: 'bicycle-outline',
   whoop: 'pulse-outline',
   withings: 'scale-outline',
-};
-
-// Provider brand colors
-const PROVIDER_COLORS: Record<string, string> = {
-  apple_health: '#FF3B30',
-  fitbit: '#00B0B9',
-  garmin: '#007CC3',
-  oura: '#8B5CF6',
-  strava: '#FC4C02',
-  whoop: '#000000',
-  withings: '#00A9CE',
 };
 
 export default function WearablesScreen() {
@@ -178,7 +167,7 @@ export default function WearablesScreen() {
   // Render provider card
   const renderProvider = useCallback((provider: WearableProvider) => {
     const iconName = PROVIDER_ICONS[provider.id] || 'hardware-chip-outline';
-    const brandColor = PROVIDER_COLORS[provider.id] || colors.primary;
+    const brandColor = WearableBrands[provider.id as keyof typeof WearableBrands] || colors.primary;
     const isConnecting = connectingId === provider.id;
     const isSyncing = syncingId === provider.id;
 
