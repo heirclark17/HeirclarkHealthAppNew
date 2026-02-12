@@ -1133,7 +1133,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
                 <MacroCard
                   label="Protein"
                   value={analysis.protein}
-                  color=colors.protein
+                  color={colors.protein}
                   maxValue={100}
                 />
                 <MacroCard

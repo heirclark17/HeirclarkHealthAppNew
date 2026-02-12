@@ -135,7 +135,7 @@ export function BudgetTierSelector({
               </Text>
               {isSelected && (
                 <View style={styles.checkmark}>
-                  <Ionicons name="checkmark-circle" size={16} color=colors.accentPurple />
+                  <Ionicons name="checkmark-circle" size={16} color={colors.accentPurple} />
                 </View>
               )}
             </TouchableOpacity>

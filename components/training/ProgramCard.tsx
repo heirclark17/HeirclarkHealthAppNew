@@ -34,15 +34,15 @@ export function ProgramCard({ program, isSelected, onSelect, index = 0 }: Progra
   const secondaryBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
 
   // Green selection colors for liquid glass effect
-  const greenColor = isDark ? '#34D399' : '#10B981';
+  const greenColor = Colors.success;
   const greenBgLight = isDark ? 'rgba(52, 211, 153, 0.12)' : 'rgba(16, 185, 129, 0.10)';
   const greenBgMedium = isDark ? 'rgba(52, 211, 153, 0.18)' : 'rgba(16, 185, 129, 0.15)';
   const greenBorder = isDark ? 'rgba(52, 211, 153, 0.35)' : 'rgba(16, 185, 129, 0.30)';
 
   // Difficulty colors (theme-aware)
-  const successColor = isDark ? '#34D399' : '#10B981';
+  const successColor = Colors.success;
   const warningColor = isDark ? Colors.warning : Colors.warningOrange;
-  const dangerColor = isDark ? '#F87171' : '#EF4444';
+  const dangerColor = Colors.error;
 
   const handlePressIn = () => {
     scale.value = withSpring(0.98);
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   cardSelected: {
     ...Platform.select({
       ios: {
-        shadowColor: '#10B981',
+        shadowColor: Colors.success,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.2,
         shadowRadius: 12,
