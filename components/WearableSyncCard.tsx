@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     color: Colors.success,
   },
   providerNeedsRebuild: {
-    color: '#FF9500',
+    color: 'Colors.warningOrange',
   },
   rebuildHint: {
     fontSize: 9,
@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   unavailableButtonText: {
-    color: '#FF9500',
+    color: 'Colors.warningOrange',
     fontSize: 11,
     fontFamily: Fonts.medium,
   },

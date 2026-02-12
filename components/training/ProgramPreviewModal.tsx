@@ -47,7 +47,7 @@ export function ProgramPreviewModal({
   // Theme-aware backgrounds
   const cardBg = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)';
   const accentBg = isDark ? 'rgba(52, 211, 153, 0.15)' : 'rgba(16, 185, 129, 0.12)';
-  const greenColor = isDark ? '#34D399' : '#10B981';
+  const greenColor = Colors.success;
 
   if (!program) return null;
 
@@ -65,7 +65,7 @@ export function ProgramPreviewModal({
       case 'intermediate':
         return colors.protein || Colors.warningOrange;
       case 'advanced':
-        return colors.calories || '#EF4444';
+        return colors.calories || Colors.error;
       default:
         return colors.textMuted;
     }

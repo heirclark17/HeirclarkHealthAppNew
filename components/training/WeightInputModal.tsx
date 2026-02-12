@@ -243,8 +243,8 @@ export function WeightInputModal({
             {/* Progressive Overload Suggestion */}
             {progress && progress.suggestedNextWeight > progress.currentMax && (
               <View style={[styles.suggestion, { backgroundColor: isDark ? 'rgba(76, 217, 100, 0.15)' : 'rgba(76, 217, 100, 0.1)' }]}>
-                <Ionicons name="trending-up" size={16} color="#4CD964" />
-                <NumberText weight="medium" style={[styles.suggestionText, { color: '#4CD964' }]}>
+                <Ionicons name="trending-up" size={16} color="Colors.successStrong" />
+                <NumberText weight="medium" style={[styles.suggestionText, { color: 'Colors.successStrong' }]}>
                   Ready to progress! Try {progress.suggestedNextWeight}{unit}
                 </NumberText>
               </View>
@@ -359,7 +359,7 @@ export function WeightInputModal({
                         {
                           color:
                             progress.trend === 'increasing'
-                              ? '#4CD964'
+                              ? 'Colors.successStrong'
                               : progress.trend === 'decreasing'
                               ? Colors.errorStrong
                               : colors.textMuted,
