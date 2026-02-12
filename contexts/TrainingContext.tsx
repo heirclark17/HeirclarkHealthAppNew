@@ -101,6 +101,19 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const goalInjuries = goalWizardContext?.state?.injuries;
   const goalFitnessLevel = goalWizardContext?.state?.fitnessLevel;
 
+  // Body metrics for personalized training
+  const goalWeight = goalWizardContext?.state?.currentWeight;
+  const goalWeightUnit = goalWizardContext?.state?.weightUnit;
+  const goalAge = goalWizardContext?.state?.age;
+  const goalSex = goalWizardContext?.state?.sex;
+
+  // Strength baseline for weight recommendations
+  const goalHasLiftingExperience = goalWizardContext?.state?.hasLiftingExperience;
+  const goalStrengthLevel = goalWizardContext?.state?.strengthLevel;
+  const goalBenchPress1RM = goalWizardContext?.state?.benchPress1RM;
+  const goalSquat1RM = goalWizardContext?.state?.squat1RM;
+  const goalDeadlift1RM = goalWizardContext?.state?.deadlift1RM;
+
   // Build training preferences from goals
   const buildPreferencesFromGoals = useCallback((): TrainingPreferences => {
     console.log('[Training] buildPreferencesFromGoals - goalState:', {
@@ -152,6 +165,31 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     const injuries = goalInjuries || [];
     console.log('[Training] User injuries/limitations:', injuries);
 
+    // Convert weight to lbs if needed
+    const weightLbs = goalWeight && goalWeightUnit === 'kg'
+      ? goalWeight * 2.20462
+      : goalWeight;
+
+    // Get body metrics
+    const age = goalAge;
+    const sex = goalSex;
+
+    // Get strength baseline
+    const hasLiftingExperience = goalHasLiftingExperience;
+    const strengthLevel = goalStrengthLevel;
+    const benchPress1RM = goalBenchPress1RM;
+    const squat1RM = goalSquat1RM;
+    const deadlift1RM = goalDeadlift1RM;
+
+    console.log('[Training] Body metrics:', { weight: weightLbs, age, sex });
+    console.log('[Training] Strength baseline:', {
+      hasLiftingExperience,
+      strengthLevel,
+      benchPress1RM,
+      squat1RM,
+      deadlift1RM,
+    });
+
     return {
       primaryGoal,
       workoutsPerWeek,
@@ -161,8 +199,36 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       availableEquipment, // User-selected equipment from Goals
       injuries, // User-selected injuries/limitations from Goals
       cardioPreference, // User's preferred cardio type
+      // Body metrics
+      weight: weightLbs,
+      age,
+      sex,
+      // Strength baseline
+      hasLiftingExperience,
+      strengthLevel,
+      benchPress1RM,
+      squat1RM,
+      deadlift1RM,
     };
-  }, [goalPrimaryGoal, goalActivityLevel, goalWorkoutsPerWeek, goalWorkoutDuration, goalCardioPreference, goalAvailableEquipment, goalInjuries, goalFitnessLevel]);
+  }, [
+    goalPrimaryGoal,
+    goalActivityLevel,
+    goalWorkoutsPerWeek,
+    goalWorkoutDuration,
+    goalCardioPreference,
+    goalAvailableEquipment,
+    goalInjuries,
+    goalFitnessLevel,
+    goalWeight,
+    goalWeightUnit,
+    goalAge,
+    goalSex,
+    goalHasLiftingExperience,
+    goalStrengthLevel,
+    goalBenchPress1RM,
+    goalSquat1RM,
+    goalDeadlift1RM,
+  ]);
 
   // Generate weekly training plan with enhanced plan generator
   // If programId is provided, use that specific program

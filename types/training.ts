@@ -178,6 +178,18 @@ export interface TrainingPreferences {
   focusMuscleGroups?: MuscleGroup[];
   excludeExercises?: string[]; // Exercise IDs to exclude (injuries, etc.)
   cardioPreference?: CardioPreference; // User's preferred cardio type
+
+  // Body metrics for personalized training
+  weight?: number; // User's current weight in lbs
+  age?: number; // User's age for recovery adjustments
+  sex?: 'male' | 'female'; // Affects strength calculations and recovery
+
+  // Strength baseline for weight recommendations
+  hasLiftingExperience?: boolean;
+  strengthLevel?: 'never_lifted' | 'beginner' | 'intermediate' | 'advanced';
+  benchPress1RM?: number | null; // 1-rep max in lbs
+  squat1RM?: number | null;
+  deadlift1RM?: number | null;
 }
 
 // Program template
