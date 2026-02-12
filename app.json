@@ -3,7 +3,7 @@
     "owner": "heirclarks-organization",
     "name": "Heirclark",
     "slug": "heirclark",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.heirclark.health",
-      "buildNumber": "9",
+      "buildNumber": "10",
       "infoPlist": {
         "NSHealthShareUsageDescription": "This app needs access to your health data to track your fitness and nutrition goals.",
         "NSHealthUpdateUsageDescription": "This app needs permission to update your health data with tracked meals and activities.",

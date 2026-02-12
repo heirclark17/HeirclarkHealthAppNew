@@ -6,6 +6,7 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://heirclarkinstac
 const AUTH_TOKEN_KEY = 'heirclark_auth_token';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { NutritionVerificationResult } from '../types/nutritionAccuracy';
 import { verifyNutritionData, quickValidate } from './nutritionAccuracyService';
 import { api } from './api';
@@ -83,6 +84,9 @@ class AIService {
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
+      // Send app version for backend version checking
+      'X-App-Version': Constants.expoConfig?.version || '1.0.0',
+      'X-App-Build-Number': Constants.expoConfig?.ios?.buildNumber || '1',
     };
     if (this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;

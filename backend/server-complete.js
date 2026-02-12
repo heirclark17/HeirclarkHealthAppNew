@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 require('dotenv').config();
 const liveAvatarService = require('./services/liveAvatarService');
+const { checkAppVersion } = require('./middleware/versionCheck');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -94,6 +95,9 @@ app.use('/api/v1/auth/', authLimiter);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Version check middleware - blocks old app versions with known bugs
+app.use(checkAppVersion);
 
 // Configure multer for file uploads
 const upload = multer({
