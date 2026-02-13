@@ -88,16 +88,104 @@ export default function ExercisesScreen() {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
 
-  // Initialize ExerciseDB service
+  // API exercise state
+  const [apiExercises, setApiExercises] = useState<ExerciseDBExercise[]>([]);
+  const [isLoadingExercises, setIsLoadingExercises] = useState(true);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const EXERCISES_PER_PAGE = 50;
+
+  // Initialize ExerciseDB service and fetch initial exercises
   useEffect(() => {
-    exerciseDbService.initialize().catch(error => {
-      console.error('[ExercisesScreen] Failed to initialize ExerciseDB service:', error);
-    });
+    const initializeAndFetch = async () => {
+      try {
+        await exerciseDbService.initialize();
+        console.log('[ExercisesScreen] ExerciseDB service initialized');
+
+        // Fetch initial batch of exercises
+        const exercises = await exerciseDbService.getAllExercises(EXERCISES_PER_PAGE, 0);
+        setApiExercises(exercises);
+        setHasMore(exercises.length === EXERCISES_PER_PAGE);
+        console.log(`[ExercisesScreen] Loaded ${exercises.length} exercises from API`);
+      } catch (error) {
+        console.error('[ExercisesScreen] Failed to fetch exercises:', error);
+      } finally {
+        setIsLoadingExercises(false);
+      }
+    };
+
+    initializeAndFetch();
   }, []);
 
-  // Filter exercises
+  // Convert ExerciseDB API format to local Exercise format
+  const convertApiExerciseToLocal = useCallback((apiEx: ExerciseDBExercise): Exercise => {
+    // Map API body parts to our muscle groups
+    const bodyPartToMuscle: Record<string, MuscleGroup> = {
+      'chest': 'chest',
+      'back': 'back',
+      'shoulders': 'shoulders',
+      'upper arms': 'arms',
+      'lower arms': 'arms',
+      'upper legs': 'legs',
+      'lower legs': 'legs',
+      'waist': 'core',
+      'cardio': 'core',
+      'neck': 'core',
+    };
+
+    // Map API equipment to our equipment types
+    const equipmentMap: Record<string, Equipment> = {
+      'barbell': 'barbell',
+      'dumbbell': 'dumbbells',
+      'body weight': 'bodyweight',
+      'cable': 'cable_machine',
+      'resistance band': 'resistance_bands',
+      'machine': 'cable_machine',
+      'ez barbell': 'barbell',
+      'kettlebell': 'dumbbells',
+      'weighted': 'dumbbells',
+      'assisted': 'cable_machine',
+      'leverage machine': 'cable_machine',
+      'medicine ball': 'dumbbells',
+      'stability ball': 'bodyweight',
+      'band': 'resistance_bands',
+      'roller': 'bodyweight',
+      'skierg machine': 'cable_machine',
+      'hammer': 'cable_machine',
+      'smith machine': 'smith_machine',
+      'rope': 'cable_machine',
+      'sled machine': 'cable_machine',
+      'tire': 'bodyweight',
+      'trap bar': 'barbell',
+      'upper body ergometer': 'cable_machine',
+      'wheel roller': 'bodyweight',
+    };
+
+    const primaryMuscle = bodyPartToMuscle[apiEx.bodyPart] || 'core';
+    const secondaryMuscles = apiEx.secondaryMuscles?.map(m => bodyPartToMuscle[m] || 'core' as MuscleGroup) || [];
+    const muscleGroups: MuscleGroup[] = [primaryMuscle, ...secondaryMuscles.filter(m => m !== primaryMuscle)];
+    const equipment = equipmentMap[apiEx.equipment] || 'bodyweight';
+
+    return {
+      id: apiEx.id,
+      name: apiEx.name,
+      muscleGroups,
+      primaryMuscle,
+      secondaryMuscles,
+      category: apiEx.target ? 'isolation' : 'compound',
+      equipment,
+      difficulty: 'intermediate' as DifficultyLevel,
+      caloriesPerMinute: 5,
+      instructions: apiEx.instructions || [],
+      exerciseDbId: apiEx.id,
+      gifUrl: apiEx.gifUrl,
+    };
+  }, []);
+
+  // Filter exercises from API data
   const filteredExercises = useMemo(() => {
-    let exercises = [...EXERCISE_DATABASE];
+    // Convert API exercises to local format
+    let exercises = apiExercises.map(convertApiExerciseToLocal);
 
     // Search filter
     if (searchQuery.trim()) {
@@ -105,8 +193,7 @@ export default function ExercisesScreen() {
       exercises = exercises.filter(
         (ex) =>
           ex.name.toLowerCase().includes(query) ||
-          ex.muscleGroups.some((m) => m.toLowerCase().includes(query)) ||
-          ex.category.toLowerCase().includes(query)
+          ex.muscleGroups.some((m) => m.toLowerCase().includes(query))
       );
     }
 
@@ -120,18 +207,39 @@ export default function ExercisesScreen() {
       exercises = exercises.filter((ex) => ex.equipment === equipmentFilter);
     }
 
-    // Difficulty filter
-    if (difficultyFilter !== 'all') {
-      exercises = exercises.filter((ex) => ex.difficulty === difficultyFilter);
-    }
+    // Difficulty filter is removed since API doesn't provide difficulty level
 
     return exercises;
-  }, [searchQuery, muscleFilter, equipmentFilter, difficultyFilter]);
+  }, [apiExercises, searchQuery, muscleFilter, equipmentFilter, convertApiExerciseToLocal]);
 
   const handleExercisePress = useCallback((exercise: Exercise) => {
     lightImpact();
     setSelectedExercise(exercise);
   }, []);
+
+  // Load more exercises for pagination
+  const loadMoreExercises = useCallback(async () => {
+    if (!hasMore || isLoadingExercises) return;
+
+    try {
+      setIsLoadingExercises(true);
+      const newOffset = currentOffset + EXERCISES_PER_PAGE;
+      const moreExercises = await exerciseDbService.getAllExercises(EXERCISES_PER_PAGE, newOffset);
+
+      if (moreExercises.length > 0) {
+        setApiExercises(prev => [...prev, ...moreExercises]);
+        setCurrentOffset(newOffset);
+        setHasMore(moreExercises.length === EXERCISES_PER_PAGE);
+        console.log(`[ExercisesScreen] Loaded ${moreExercises.length} more exercises (total: ${apiExercises.length + moreExercises.length})`);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('[ExercisesScreen] Failed to load more exercises:', error);
+    } finally {
+      setIsLoadingExercises(false);
+    }
+  }, [hasMore, isLoadingExercises, currentOffset, apiExercises.length]);
 
   const handleToggleFavorite = useCallback((exerciseId: string) => {
     mediumImpact();
@@ -394,16 +502,37 @@ export default function ExercisesScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        onEndReached={loadMoreExercises}
+        onEndReachedThreshold={0.5}
         ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Dumbbell size={48} color={colors.textMuted} strokeWidth={1} />
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              No exercises found
-            </Text>
-            <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
-              Try adjusting your search or filters
-            </Text>
-          </View>
+          isLoadingExercises ? (
+            <View style={styles.emptyState}>
+              <ActivityIndicator size="large" color={colors.text} />
+              <Text style={[styles.emptyText, { color: colors.textMuted, marginTop: Spacing.md }]}>
+                Loading exercises from ExerciseDB...
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Dumbbell size={48} color={colors.textMuted} strokeWidth={1} />
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                No exercises found
+              </Text>
+              <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
+                Try adjusting your search or filters
+              </Text>
+            </View>
+          )
+        }
+        ListFooterComponent={
+          hasMore && !isLoadingExercises && filteredExercises.length > 0 ? (
+            <View style={styles.loadingFooter}>
+              <ActivityIndicator size="small" color={colors.text} />
+              <Text style={[styles.loadingFooterText, { color: colors.textMuted }]}>
+                Loading more exercises...
+              </Text>
+            </View>
+          ) : null
         }
       />
 
@@ -816,6 +945,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.regular,
     marginTop: Spacing.xs,
+  },
+  loadingFooter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.lg,
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  loadingFooterText: {
+    fontSize: 14,
+    fontFamily: Fonts.regular,
   },
   // Modal styles
   modalContainer: {

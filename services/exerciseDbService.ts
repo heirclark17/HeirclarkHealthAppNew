@@ -400,6 +400,53 @@ class ExerciseDbServiceClass {
   }
 
   /**
+   * Get all exercises with pagination
+   * @param limit - Number of exercises to fetch (default: 100, max: 1000)
+   * @param offset - Starting index (default: 0)
+   */
+  async getAllExercises(limit: number = 100, offset: number = 0): Promise<ExerciseDBExercise[]> {
+    await this.initialize();
+
+    if (!this.apiKey) {
+      console.warn('[ExerciseDbService] No API key, returning fallback data');
+      return EXERCISE_DB_FALLBACK.slice(offset, offset + limit);
+    }
+
+    try {
+      const response = await fetch(
+        `${EXERCISEDB_API_URL}/exercises?limit=${limit}&offset=${offset}`,
+        {
+          method: 'GET',
+          headers: this.getHeaders(),
+        }
+      );
+
+      if (!response.ok) {
+        console.error('[ExerciseDbService] API error:', response.status);
+        return EXERCISE_DB_FALLBACK.slice(offset, offset + limit);
+      }
+
+      const exercises: ExerciseDBExercise[] = await response.json();
+
+      // Cache the results
+      this.ensureCache();
+      exercises.forEach(exercise => {
+        this.cache!.exercises[exercise.id] = {
+          ...exercise,
+          cachedAt: new Date().toISOString(),
+        };
+      });
+      await this.saveCache();
+
+      console.log(`[ExerciseDbService] Fetched ${exercises.length} exercises (offset: ${offset})`);
+      return exercises;
+    } catch (error) {
+      console.error('[ExerciseDbService] getAllExercises error:', error);
+      return EXERCISE_DB_FALLBACK.slice(offset, offset + limit);
+    }
+  }
+
+  /**
    * Clear the exercise cache
    */
   async clearCache(): Promise<void> {
