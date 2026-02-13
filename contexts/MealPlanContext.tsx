@@ -433,10 +433,39 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           console.error('[MealPlanContext] ❌ Backend sync error:', syncError);
         }
 
-        // *** Background: Fetch images for all meals and auto-save ***
+        // *** Background: Auto-save meals FIRST, then generate images ***
         (async () => {
           try {
-            console.log('[MealPlanContext] 🖼️ Starting background image generation for all meals...');
+            // STEP 1: Save all meals to saved_meals IMMEDIATELY (no images yet)
+            console.log('[MealPlanContext] 💾 Auto-saving all meals to saved meals...');
+            let savedCount = 0;
+            for (const day of weeklyPlan) {
+              for (const meal of day.meals) {
+                try {
+                  // Save directly to backend (skip aiService.saveMeal which reads ALL saved meals each time)
+                  await api.saveMeal({
+                    mealName: meal.name,
+                    mealType: meal.mealType,
+                    calories: meal.calories,
+                    protein: meal.protein,
+                    carbs: meal.carbs,
+                    fat: meal.fat,
+                    ingredients: meal.ingredients || [],
+                    recipe: meal.description || '',
+                    prepTimeMinutes: meal.prepTime || 15,
+                    photoUrl: '',
+                    tags: [],
+                  });
+                  savedCount++;
+                } catch (saveErr) {
+                  // Skip errors (e.g. duplicates)
+                }
+              }
+            }
+            console.log(`[MealPlanContext] ✅ Saved ${savedCount} meals to saved_meals`);
+
+            // STEP 2: Generate images for all meals (this takes a while)
+            console.log('[MealPlanContext] 🖼️ Starting background image generation...');
             const updatedPlan = [...weeklyPlan];
             let imagesGenerated = 0;
 
@@ -446,7 +475,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
                 const meal = day.meals[mealIdx];
                 if (meal.imageUrl) {
                   imagesGenerated++;
-                  continue; // Already has an image
+                  continue;
                 }
                 try {
                   const imageUrl = await pexelsService.searchFoodPhoto(meal.name, 'card');
@@ -459,6 +488,19 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
                     };
                     imagesGenerated++;
                     console.log(`[MealPlanContext] 🖼️ Image ${imagesGenerated}: ${meal.name}`);
+
+                    // Update state progressively so MealCards show images as they arrive
+                    setState(prev => {
+                      if (!prev.weeklyPlan) return prev;
+                      const newPlan = [...prev.weeklyPlan];
+                      newPlan[dayIdx] = {
+                        ...newPlan[dayIdx],
+                        meals: newPlan[dayIdx].meals.map((m, idx) =>
+                          idx === mealIdx ? { ...m, imageUrl } : m
+                        ),
+                      };
+                      return { ...prev, weeklyPlan: newPlan };
+                    });
                   }
                 } catch (imgErr) {
                   console.error(`[MealPlanContext] ❌ Image error for ${meal.name}:`, imgErr);
@@ -466,10 +508,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
               }
             }
 
-            // Update state with image URLs
-            setState(prev => ({ ...prev, weeklyPlan: updatedPlan }));
-
-            // Re-cache locally with images
+            // STEP 3: Re-cache locally with images
             const updatedCache = {
               weeklyPlan: updatedPlan,
               groceryList: [],
@@ -488,38 +527,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
               );
             } catch {}
 
-            // Auto-save all meals to saved_meals
-            console.log('[MealPlanContext] 💾 Auto-saving all meals to saved meals...');
-            for (const day of updatedPlan) {
-              for (const meal of day.meals) {
-                try {
-                  await aiService.saveMeal({
-                    id: meal.id,
-                    name: meal.name,
-                    mealType: meal.mealType as any,
-                    description: meal.description || '',
-                    nutrients: {
-                      calories: meal.calories,
-                      protein_g: meal.protein,
-                      carbs_g: meal.carbs,
-                      fat_g: meal.fat,
-                    },
-                    ingredients: (meal.ingredients || []).map((ing: any) => ({
-                      name: ing.name || '',
-                      amount: ing.amount || ing.quantity || '',
-                      unit: ing.unit || '',
-                    })),
-                    prepTimeMinutes: meal.prepTime || 15,
-                    servings: meal.servings || 1,
-                    tags: [],
-                    imageUrl: meal.imageUrl,
-                  }, 'ai');
-                } catch (saveErr) {
-                  // Skip duplicates silently
-                }
-              }
-            }
-            console.log(`[MealPlanContext] ✅ Background complete: ${imagesGenerated} images, meals saved`);
+            console.log(`[MealPlanContext] ✅ Background complete: ${imagesGenerated} images generated`);
           } catch (bgError) {
             console.error('[MealPlanContext] ❌ Background task error:', bgError);
           }
@@ -783,6 +791,39 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, [orderWithInstacart]);
 
+  // Background-save all meals from a loaded plan to saved_meals
+  const autoSavePlanMeals = useCallback(async (weeklyPlan: DayPlan[]) => {
+    try {
+      console.log('[MealPlanContext] 💾 Auto-saving loaded plan meals to saved_meals...');
+      let savedCount = 0;
+      for (const day of weeklyPlan) {
+        for (const meal of day.meals) {
+          try {
+            await api.saveMeal({
+              mealName: meal.name,
+              mealType: meal.mealType,
+              calories: meal.calories,
+              protein: meal.protein,
+              carbs: meal.carbs,
+              fat: meal.fat,
+              ingredients: meal.ingredients || [],
+              recipe: meal.description || '',
+              prepTimeMinutes: meal.prepTime || 15,
+              photoUrl: meal.imageUrl || '',
+              tags: [],
+            });
+            savedCount++;
+          } catch {
+            // Skip errors (duplicates, etc.)
+          }
+        }
+      }
+      console.log(`[MealPlanContext] ✅ Auto-saved ${savedCount} meals from loaded plan`);
+    } catch (err) {
+      console.error('[MealPlanContext] ❌ Auto-save error:', err);
+    }
+  }, []);
+
   // Load cached plan (local first, backend fallback)
   const loadCachedPlan = useCallback(async () => {
     try {
@@ -806,6 +847,11 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
               weekSummary: parsed.weekSummary,
               lastGeneratedAt: parsed.lastGeneratedAt,
             }));
+
+            // Auto-save these meals to saved_meals in background
+            if (parsed.weeklyPlan) {
+              autoSavePlanMeals(parsed.weeklyPlan);
+            }
             return;
           } else {
             // Clear old cache
@@ -839,6 +885,9 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           };
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
           console.log('[MealPlanContext] ✅ Cached backend plan locally');
+
+          // Auto-save these meals to saved_meals in background
+          autoSavePlanMeals(planData.weeklyPlan);
         }
       } else {
         console.log('[MealPlanContext] No meal plan found (local or backend)');
@@ -846,7 +895,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('[MealPlanContext] Failed to load cache:', error);
     }
-  }, []);
+  }, [autoSavePlanMeals]);
 
   // Load cached plan on mount
   useEffect(() => {

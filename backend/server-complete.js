@@ -1143,15 +1143,27 @@ app.post('/api/v1/meals/saved', authenticateToken, async (req, res) => {
   try {
     const { mealName, mealType, calories, protein, carbs, fat, ingredients, recipe, prepTimeMinutes, photoUrl, tags } = req.body;
 
+    // Add unique constraint if it doesn't exist (idempotent)
+    try {
+      await pool.query(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_saved_meals_user_meal
+        ON saved_meals (user_id, meal_name)
+      `);
+    } catch {}
+
     const saved = await pool.query(
       `INSERT INTO saved_meals (user_id, meal_name, meal_type, calories, protein, carbs, fat, ingredients, recipe, prep_time_minutes, photo_url, tags)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       ON CONFLICT (user_id, meal_name) DO UPDATE SET
+         photo_url = COALESCE(NULLIF(EXCLUDED.photo_url, ''), saved_meals.photo_url),
+         last_used_at = NOW()
        RETURNING *`,
-      [req.userId, mealName, mealType, calories, protein, carbs, fat, JSON.stringify(ingredients || []), recipe, prepTimeMinutes, photoUrl, tags || []]
+      [req.userId, mealName, mealType, calories, protein, carbs, fat, JSON.stringify(ingredients || []), recipe, prepTimeMinutes, photoUrl || '', tags || []]
     );
 
     res.json({ success: true, savedMeal: saved.rows[0] });
   } catch (error) {
+    console.error('[Saved Meals] Save error:', error.message);
     res.status(500).json({ error: 'Failed to save meal' });
   }
 });
