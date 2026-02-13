@@ -368,17 +368,12 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                   style={[
                     styles.recipeButtonContainer,
                     {
-                      backgroundColor: colors.cardBackground,
-                      shadowColor: colors.accentCyan,
-                      shadowOffset: { width: 0, height: 3 },
-                      shadowOpacity: 0.6,
-                      shadowRadius: 6,
-                      elevation: 5,
+                      backgroundColor: `${colors.accentCyan}25`,
                     }
                   ]}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                  <Text style={[styles.recipeButton, { color: colors.textMuted }]}>View Recipe</Text>
+                  <Text style={[styles.recipeButton, { color: colors.accentCyan }]}>View Recipe</Text>
                 </TouchableOpacity>
               </View>
 
@@ -394,42 +389,21 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               <View style={styles.timeRow}>
                 <View style={[
                   styles.timeBadge,
-                  {
-                    backgroundColor: colors.cardBackground,
-                    shadowColor: Colors.successMuted,
-                    shadowOffset: { width: 0, height: 3 },
-                    shadowOpacity: 0.6,
-                    shadowRadius: 6,
-                    elevation: 5,
-                  }
+                  { backgroundColor: `${colors.successMuted}25` }
                 ]}>
-                  <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Prep: {meal.prepTime}m</Text>
+                  <Text style={[styles.timeBadgeText, { color: colors.successMuted }]}>Prep: {meal.prepTime}m</Text>
                 </View>
                 <View style={[
                   styles.timeBadge,
-                  {
-                    backgroundColor: colors.cardBackground,
-                    shadowColor: Colors.warningOrange,
-                    shadowOffset: { width: 0, height: 3 },
-                    shadowOpacity: 0.6,
-                    shadowRadius: 6,
-                    elevation: 5,
-                  }
+                  { backgroundColor: `${colors.warningOrange}25` }
                 ]}>
-                  <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>Cook: {meal.cookTime}m</Text>
+                  <Text style={[styles.timeBadgeText, { color: colors.warningOrange }]}>Cook: {meal.cookTime}m</Text>
                 </View>
                 <View style={[
                   styles.timeBadge,
-                  {
-                    backgroundColor: colors.cardBackground,
-                    shadowColor: colors.accentPurple,
-                    shadowOffset: { width: 0, height: 3 },
-                    shadowOpacity: 0.6,
-                    shadowRadius: 6,
-                    elevation: 5,
-                  }
+                  { backgroundColor: `${colors.accentPurple}25` }
                 ]}>
-                  <Text style={[styles.timeBadgeText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
+                  <Text style={[styles.timeBadgeText, { color: colors.accentPurple }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
                 </View>
               </View>
 
@@ -759,15 +733,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   recipeButtonContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
+    borderRadius: 16,
   },
   recipeButton: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
   },
   mealName: {
     fontSize: 18,
@@ -790,15 +762,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   timeBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
   timeBadgeText: {
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontFamily: Fonts.thin,
+    fontSize: 12,
+    fontFamily: Fonts.light,
   },
   macroRow: {
     flexDirection: 'row',
