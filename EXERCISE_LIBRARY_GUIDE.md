@@ -4,7 +4,7 @@
 
 The Exercise Library feature provides **two ways** to browse and select exercises:
 
-1. **Exercises Tab** - Dedicated tab for browsing all 100+ exercises
+1. **Exercises Tab** - Dedicated tab for browsing **11,000+ exercises** from ExerciseDB API
 2. **ExerciseLibraryModal** - Reusable modal component for workout screens
 
 ---
@@ -15,15 +15,16 @@ The Exercise Library feature provides **two ways** to browse and select exercise
 Navigate to the **Exercises** tab in the bottom navigation bar.
 
 ### Features
-- ✅ Browse 100+ exercises from the database
-- ✅ Search by name, muscle group, or category
+- ✅ Browse **11,000+ exercises** from ExerciseDB API
+- ✅ **Animated GIFs** showing proper form for each exercise
+- ✅ **Infinite scroll** pagination (loads 50 exercises at a time)
+- ✅ Search by exercise name
 - ✅ Filter by:
   - Muscle Group (chest, back, shoulders, arms, legs, core)
   - Equipment (bodyweight, dumbbells, barbell, cable, bands)
-  - Difficulty (beginner, intermediate, advanced)
-- ✅ View exercise details (instructions, tips, alternatives)
+- ✅ View exercise details with GIF demonstrations
 - ✅ Favorite exercises for quick access
-- ✅ See equipment alternatives for each exercise
+- ✅ Cached results for offline browsing
 
 ### User Flow
 1. Open **Exercises** tab
@@ -210,8 +211,14 @@ Both the tab and modal use:
 
 ## Database
 
-### Location
-`data/exerciseDatabase.ts`
+### Primary Source
+**ExerciseDB API** - 11,000+ exercises with GIFs via RapidAPI
+- Endpoint: `https://exercisedb.p.rapidapi.com`
+- Free tier: 10,000 requests/month
+- Cached locally for offline access
+
+### Local Fallback
+`data/exerciseDatabase.ts` - 16 curated exercises used when API unavailable
 
 ### Helper Functions
 ```typescript
