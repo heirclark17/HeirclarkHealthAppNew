@@ -1521,17 +1521,17 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
     console.log('[Meal Plan] Received preferences:', JSON.stringify(preferences, null, 2));
 
     const systemPrompt = `You are an expert nutritionist creating personalized meal plans.
-    Generate detailed meal plans with specific recipes, portions, and nutritional information.
+    Generate concise meal plans with recipes, portions, and nutritional information.
 
-    CRITICAL - MEAL DESCRIPTIONS:
-    - The "description" field is MANDATORY and must be VIVID, APPETIZING, and make the meal sound DELICIOUS
-    - Use sensory words: tender, crispy, fresh, savory, zesty, creamy, rich, flavorful, juicy, aromatic
-    - Highlight textures, flavors, and cooking techniques
-    - Make the reader CRAVE the meal
-    - Examples:
-      * "Tender grilled chicken breast seasoned with aromatic herbs, nestled beside fluffy jasmine rice and vibrant steamed broccoli florets"
-      * "Velvety Greek yogurt layered with vibrant mixed berries and crunchy honey granola, creating a perfect balance of creamy, sweet, and satisfying textures"
-      * "Succulent salmon fillet with a crispy herb crust, accompanied by roasted asparagus spears and buttery garlic mashed cauliflower"
+    MEAL DESCRIPTIONS:
+    - Keep descriptions SHORT (1 sentence, max 15 words)
+    - Make them appetizing but concise
+    - Example: "Grilled chicken with rice and steamed broccoli"
+
+    INSTRUCTIONS:
+    - Keep instructions BRIEF (max 2-3 steps)
+    - Focus on key cooking methods only
+    - Example: "1. Grill chicken 6-8 min per side. 2. Steam broccoli 5 min. 3. Serve with rice."
 
     Return a JSON object with:
     {
@@ -1543,13 +1543,13 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
             {
               "mealType": "breakfast",
               "name": "Meal Name",
-              "description": "VIVID, APPETIZING 1-2 sentence description that makes the meal irresistible",
+              "description": "Short appetizing description (max 15 words)",
               "calories": 400,
               "protein": 25,
               "carbs": 40,
               "fat": 15,
               "ingredients": [{"name": "item", "amount": "1 cup", "calories": 100}],
-              "instructions": "Step by step...",
+              "instructions": "Brief steps (max 3)",
               "prepTime": 15,
               "cookTime": 10
             }
@@ -1621,21 +1621,30 @@ ${mealDiversityInstruction}
       ],
       response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 8000, // Reduced from 16000 to prevent timeouts (still enough for 7-day plan)
+      max_tokens: 6000, // Reduced to prevent truncation (shorter descriptions/instructions)
     });
 
     const rawContent = completion.choices[0].message.content;
+    console.log(`[Meal Plan] Response length: ${rawContent.length} characters, finish_reason: ${completion.choices[0].finish_reason}`);
+
+    // Check if response was cut off due to token limit
+    if (completion.choices[0].finish_reason === 'length') {
+      console.error('[Meal Plan] ⚠️ Response truncated due to max_tokens limit');
+      throw new Error('Response too long. Try generating fewer days or simpler meals.');
+    }
+
     let mealPlan;
     try {
       mealPlan = JSON.parse(rawContent);
     } catch (parseError) {
       console.error('[Meal Plan] JSON parse error, attempting recovery...');
+      console.error('[Meal Plan] Raw content preview:', rawContent.substring(rawContent.length - 200));
       // Try to fix truncated JSON by finding last complete day
       const fixedContent = rawContent.replace(/,\s*$/, '') + ']}';
       try {
         mealPlan = JSON.parse(fixedContent);
       } catch {
-        throw new Error('AI response was truncated. Please try again.');
+        throw new Error('AI response was truncated. Please try again with simpler preferences or fewer days.');
       }
     }
 
