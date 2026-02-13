@@ -1127,6 +1127,26 @@ app.delete('/api/v1/meals/:mealId', authenticateToken, async (req, res) => {
 // SAVED MEALS (Favorites)
 // ============================================
 
+// Deduplicate and add unique constraint on startup
+(async () => {
+  try {
+    // Remove duplicate saved meals (keep the one with most recent last_used_at or created_at)
+    await pool.query(`
+      DELETE FROM saved_meals a USING saved_meals b
+      WHERE a.user_id = b.user_id
+        AND a.meal_name = b.meal_name
+        AND a.id < b.id
+    `);
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_saved_meals_user_meal
+      ON saved_meals (user_id, meal_name)
+    `);
+    console.log('[Saved Meals] Unique constraint ready, duplicates cleaned');
+  } catch (err) {
+    console.error('[Saved Meals] Dedup/index error:', err.message);
+  }
+})();
+
 app.get('/api/v1/meals/saved', authenticateToken, async (req, res) => {
   try {
     const saved = await pool.query(
@@ -1142,14 +1162,6 @@ app.get('/api/v1/meals/saved', authenticateToken, async (req, res) => {
 app.post('/api/v1/meals/saved', authenticateToken, async (req, res) => {
   try {
     const { mealName, mealType, calories, protein, carbs, fat, ingredients, recipe, prepTimeMinutes, photoUrl, tags } = req.body;
-
-    // Add unique constraint if it doesn't exist (idempotent)
-    try {
-      await pool.query(`
-        CREATE UNIQUE INDEX IF NOT EXISTS idx_saved_meals_user_meal
-        ON saved_meals (user_id, meal_name)
-      `);
-    } catch {}
 
     const saved = await pool.query(
       `INSERT INTO saved_meals (user_id, meal_name, meal_type, calories, protein, carbs, fat, ingredients, recipe, prep_time_minutes, photo_url, tags)

@@ -527,6 +527,30 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
               );
             } catch {}
 
+            // STEP 4: Update saved_meals with photo URLs
+            console.log('[MealPlanContext] 🖼️ Updating saved meals with photo URLs...');
+            for (const day of updatedPlan) {
+              for (const meal of day.meals) {
+                if (meal.imageUrl) {
+                  try {
+                    await api.saveMeal({
+                      mealName: meal.name,
+                      mealType: meal.mealType,
+                      calories: meal.calories,
+                      protein: meal.protein,
+                      carbs: meal.carbs,
+                      fat: meal.fat,
+                      ingredients: meal.ingredients || [],
+                      recipe: meal.description || '',
+                      prepTimeMinutes: meal.prepTime || 15,
+                      photoUrl: meal.imageUrl,
+                      tags: [],
+                    });
+                  } catch {}
+                }
+              }
+            }
+
             console.log(`[MealPlanContext] ✅ Background complete: ${imagesGenerated} images generated`);
           } catch (bgError) {
             console.error('[MealPlanContext] ❌ Background task error:', bgError);

@@ -963,9 +963,19 @@ class AIService {
           timesUsed: m.useCount || m.use_count || 0,
         }));
 
+        // Deduplicate by meal name (keep most recent)
+        const seen = new Map<string, SavedMeal>();
+        for (const sm of localFormat) {
+          const key = sm.meal.name.toLowerCase().trim();
+          if (!seen.has(key)) {
+            seen.set(key, sm);
+          }
+        }
+        const deduped = Array.from(seen.values());
+
         // Cache locally for offline access
-        await AsyncStorage.setItem(STORAGE_KEYS.SAVED_MEALS, JSON.stringify(localFormat));
-        return localFormat;
+        await AsyncStorage.setItem(STORAGE_KEYS.SAVED_MEALS, JSON.stringify(deduped));
+        return deduped;
       }
 
       // Fallback to local storage
