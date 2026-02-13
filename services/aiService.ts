@@ -500,7 +500,7 @@ class AIService {
    * Includes timeout handling for better network reliability
    */
   async generateAIMealPlan(preferences: MealPlanPreferences, days: number = 7): Promise<AIWeeklyMealPlan | null> {
-    const TIMEOUT_MS = 200000; // 3.5 minute timeout for AI generation (handles OpenAI API delays, cold starts, and complex meal plans)
+    const TIMEOUT_MS = 360000; // 6 minute timeout for AI generation (handles OpenAI API delays, cold starts, and complex meal plans)
 
     try {
       console.log('[AIService] Generating AI meal plan with preferences:', JSON.stringify(preferences, null, 2));
