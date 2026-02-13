@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import { Leaf, Settings, Zap, Sparkles, ShoppingCart, User } from 'lucide-react-native';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
@@ -118,8 +118,10 @@ export default function MealsScreen() {
           fat: goals.dailyFat || 65,
         });
       }
+      return goals;
     } catch (error) {
       console.error('Error fetching goals:', error);
+      return null;
     }
   };
 
@@ -140,7 +142,24 @@ export default function MealsScreen() {
   // Handle quick generate (template-based)
   const handleGenerate = async () => {
     // Refresh goals before generating to ensure we use latest values
-    await fetchGoals();
+    const goals = await fetchGoals();
+
+    // Check if goals are set
+    if (!goals || !goals.dailyCalories) {
+      Alert.alert(
+        'Goals Required',
+        'Please complete the goal wizard before generating a meal plan. This helps us create a personalized plan that matches your nutrition needs.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Set Goals',
+            onPress: () => router.push('/goals'),
+          },
+        ]
+      );
+      return;
+    }
+
     const success = await generateMealPlan();
     if (!success && error) {
       console.error('Failed to generate meal plan:', error);
@@ -150,7 +169,24 @@ export default function MealsScreen() {
   // Handle AI-powered generate
   const handleAIGenerate = async () => {
     // Refresh goals before generating to ensure we use latest values
-    await fetchGoals();
+    const goals = await fetchGoals();
+
+    // Check if goals are set
+    if (!goals || !goals.dailyCalories) {
+      Alert.alert(
+        'Goals Required',
+        'Please complete the goal wizard before generating a meal plan. This helps us create a personalized plan that matches your nutrition needs.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Set Goals',
+            onPress: () => router.push('/goals'),
+          },
+        ]
+      );
+      return;
+    }
+
     const success = await generateAIMealPlan();
     if (!success && error) {
       console.error('Failed to generate AI meal plan:', error);
