@@ -31,7 +31,9 @@ async function convertSvgToIcon() {
   // Set viewport to exact icon size
   await page.setViewportSize({ width: ICON_SIZE, height: ICON_SIZE });
 
-  // Create HTML with SVG centered and scaled to fit
+  // Create HTML with SVG zoomed in to fill the icon
+  // The logo is in a 612x792 viewBox but only occupies ~150x180px in the center
+  // We need to zoom in significantly to make it fill the icon
   const html = `
     <!DOCTYPE html>
     <html>
@@ -45,12 +47,14 @@ async function convertSvgToIcon() {
             align-items: center;
             justify-content: center;
             background: white;
+            overflow: hidden;
           }
           svg {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
+            /* Make SVG large enough to fill the space */
+            width: ${ICON_SIZE * 4}px;
+            height: ${ICON_SIZE * 5.2}px;
+            /* Scale up significantly to make logo fill the icon */
+            transform: scale(5);
           }
         </style>
       </head>
