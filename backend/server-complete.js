@@ -83,11 +83,20 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Different rate limits for dev vs production
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit auth attempts to 10 per 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 10 : 100, // Dev: 100, Prod: 10
   message: 'Too many authentication attempts, please try again later',
   skipSuccessfulRequests: true,
+  // Skip rate limiting for development/testing
+  skip: (req) => {
+    // Skip if not in production
+    if (process.env.NODE_ENV !== 'production') return true;
+    // Skip for localhost/development IPs
+    const ip = req.ip || req.connection.remoteAddress;
+    return ip === '127.0.0.1' || ip === '::1' || ip?.startsWith('192.168.');
+  },
 });
 
 app.use('/api/', limiter);
