@@ -280,6 +280,49 @@ export default function ExercisesScreen() {
     ({ item }: { item: ExerciseDBExercise }) => {
       const isFavorite = favoriteIds.has(item.id);
 
+      // Helper: Title case exercise name
+      const toTitleCase = (str: string) => {
+        return str
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+      };
+
+      // Helper: Calculate difficulty from equipment type
+      const getDifficulty = (equipment: string): 'Beginner' | 'Intermediate' | 'Advanced' => {
+        const eq = equipment.toLowerCase();
+        if (eq.includes('body') || eq === 'assisted' || eq === 'stability ball') {
+          return 'Beginner';
+        } else if (eq.includes('dumbbell') || eq.includes('kettlebell') || eq.includes('band') || eq === 'ez barbell') {
+          return 'Intermediate';
+        } else {
+          return 'Advanced';
+        }
+      };
+
+      // Helper: Get difficulty badge color
+      const getDifficultyColor = (difficulty: string) => {
+        switch (difficulty) {
+          case 'Beginner':
+            return '#10b981'; // Green
+          case 'Intermediate':
+            return '#f59e0b'; // Orange
+          case 'Advanced':
+            return '#ef4444'; // Red
+          default:
+            return colors.textMuted;
+        }
+      };
+
+      // Helper: Format equipment name
+      const formatEquipment = (equipment: string) => {
+        if (equipment === 'body weight') return 'Bodyweight';
+        return toTitleCase(equipment);
+      };
+
+      const difficulty = getDifficulty(item.equipment);
+      const difficultyColor = getDifficultyColor(difficulty);
+
       return (
         <TouchableOpacity
           onPress={() => handleExercisePress(item)}
@@ -287,7 +330,7 @@ export default function ExercisesScreen() {
         >
           <GlassCard style={styles.exerciseCard}>
             <View style={styles.cardContent}>
-              {/* GIF Thumbnail */}
+              {/* GIF Thumbnail - Larger for better recognition */}
               {item.gifUrl && (
                 <Image
                   source={{ uri: item.gifUrl }}
@@ -298,20 +341,56 @@ export default function ExercisesScreen() {
 
               {/* Exercise Info */}
               <View style={styles.exerciseInfo}>
+                {/* Exercise Name - Title Cased, Larger Font */}
                 <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={2}>
-                  {item.name}
+                  {toTitleCase(item.name)}
                 </Text>
+
+                {/* Target Muscle Badge - Primary Info */}
+                <View style={[styles.targetBadge, {
+                  backgroundColor: colors.accentCyan + '20',
+                  borderColor: colors.accentCyan + '40'
+                }]}>
+                  <Text style={[styles.targetText, { color: colors.accentCyan }]}>
+                    🎯 {toTitleCase(item.target)}
+                  </Text>
+                </View>
+
+                {/* Metadata Badges - Secondary Info */}
                 <View style={styles.exerciseMeta}>
-                  <View style={[styles.metaBadge, { backgroundColor: colors.backgroundSecondary }]}>
+                  {/* Body Part */}
+                  <View style={[styles.metaBadge, { backgroundColor: 'rgba(255, 255, 255, 0.08)' }]}>
                     <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                      {item.bodyPart}
+                      💪 {toTitleCase(item.bodyPart)}
                     </Text>
                   </View>
-                  <View style={[styles.metaBadge, { backgroundColor: colors.backgroundSecondary }]}>
-                    <Text style={[styles.metaText, { color: colors.textMuted }]}>
-                      {item.equipment}
+
+                  {/* Equipment */}
+                  <View style={[styles.metaBadge, { backgroundColor: 'rgba(255, 255, 255, 0.08)' }]}>
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                      🏋️ {formatEquipment(item.equipment)}
                     </Text>
                   </View>
+
+                  {/* Difficulty Level - Safety Critical */}
+                  <View style={[styles.metaBadge, {
+                    backgroundColor: difficultyColor + '20',
+                    borderWidth: 1,
+                    borderColor: difficultyColor + '40'
+                  }]}>
+                    <Text style={[styles.metaText, { color: difficultyColor }]}>
+                      {difficulty}
+                    </Text>
+                  </View>
+
+                  {/* Instruction Count - Complexity Indicator */}
+                  {item.instructions && item.instructions.length > 0 && (
+                    <View style={[styles.metaBadge, { backgroundColor: 'rgba(255, 255, 255, 0.05)' }]}>
+                      <Text style={[styles.metaText, { color: colors.textMuted }]}>
+                        ℹ️ {item.instructions.length} steps
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </View>
 
@@ -319,16 +398,21 @@ export default function ExercisesScreen() {
               <View style={styles.cardActions}>
                 <TouchableOpacity
                   onPress={() => handleToggleFavorite(item.id)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={isFavorite ?
+                    `Remove ${item.name} from favorites` :
+                    `Add ${item.name} to favorites`
+                  }
                 >
                   <Heart
-                    size={20}
-                    color={isFavorite ? '#ff6b6b' : colors.textMuted}
+                    size={22}
+                    color={isFavorite ? '#ff6b6b' : colors.textSecondary}
                     fill={isFavorite ? '#ff6b6b' : 'transparent'}
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                   />
                 </TouchableOpacity>
-                <ChevronRight size={20} color={colors.textMuted} strokeWidth={1.5} />
               </View>
             </View>
           </GlassCard>
@@ -834,38 +918,52 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   gifThumbnail: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: 80, // Increased from 60 for better recognition
+    height: 80,
+    borderRadius: 12, // Increased from 8 for consistency with Liquid Glass
     marginRight: Spacing.md,
   },
   exerciseInfo: {
     flex: 1,
   },
   exerciseName: {
-    fontSize: 15,
+    fontSize: 17, // Increased from 15 to iOS standard
     fontFamily: Fonts.semiBold,
-    marginBottom: 6,
+    marginBottom: Spacing.sm, // Changed from 6 to use design token (8px)
+  },
+  targetBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignSelf: 'flex-start',
+    marginBottom: Spacing.xs,
+  },
+  targetText: {
+    fontSize: 12, // Slightly larger than metadata
+    fontFamily: Fonts.semiBold,
   },
   exerciseMeta: {
     flexDirection: 'row',
-    gap: 6,
+    gap: Spacing.sm, // Changed from 6 to 8 (design token)
     flexWrap: 'wrap',
   },
   metaBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: Spacing.sm, // 8px
+    paddingVertical: Spacing.xs, // Changed from 3 to 4 (design token)
+    borderRadius: Spacing.xs, // Changed from 6 to 4 for consistency
   },
   metaText: {
-    fontSize: 11,
+    fontSize: 12, // Increased from 11 for better readability
     fontFamily: Fonts.medium,
-    textTransform: 'capitalize',
   },
   cardActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md, // Keep spacing for touch targets
+    marginLeft: Spacing.sm,
   },
   emptyState: {
     alignItems: 'center',
