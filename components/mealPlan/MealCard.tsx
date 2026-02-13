@@ -27,6 +27,7 @@ import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
 import { Meal } from '../../types/mealPlan';
 import { aiService } from '../../services/aiService';
+import { pexelsService } from '../../services/pexelsService';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -54,6 +55,9 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     cookMinutes?: number;
     tips?: string;
   } | null>(null);
+  const [mealImageUrl, setMealImageUrl] = useState<string>('');
+  const [isLoadingImage, setIsLoadingImage] = useState(true);
+  const [imageError, setImageError] = useState(false);
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
 
@@ -198,18 +202,24 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
-  // Generate food photo URL from Unsplash based on meal name
-  const getMealImageUrl = (mealName: string, size: 'card' | 'modal' = 'card') => {
-    // Clean meal name for better search results
-    const searchTerm = encodeURIComponent(mealName.replace(/[^\w\s]/g, ''));
+  // Fetch meal image from Pexels when component mounts or meal changes
+  useEffect(() => {
+    const fetchMealImage = async () => {
+      setIsLoadingImage(true);
+      setImageError(false);
+      try {
+        const imageUrl = await pexelsService.searchFoodPhoto(meal.name, 'card');
+        setMealImageUrl(imageUrl);
+      } catch (error) {
+        console.error('[MealCard] Error loading meal image:', error);
+        setImageError(true);
+      } finally {
+        setIsLoadingImage(false);
+      }
+    };
 
-    // Different sizes for card vs modal
-    const dimensions = size === 'card' ? '600x400' : '800x600';
-
-    // Use Unsplash Source API for free food photos
-    // Adding 'food' to search term for better results
-    return `https://source.unsplash.com/${dimensions}/?${searchTerm},food,meal`;
-  };
+    fetchMealImage();
+  }, [meal.name]);
 
   const handleSwap = () => {
     if (onSwap) {
@@ -288,11 +298,23 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             interactive
           >
             {/* Meal Photo */}
-            <Image
-              source={{ uri: getMealImageUrl(meal.name, 'card') }}
-              style={styles.mealImage}
-              resizeMode="cover"
-            />
+            {isLoadingImage ? (
+              <View style={[styles.mealImage, { backgroundColor: colors.cardBackground, justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="small" color={colors.primary} />
+              </View>
+            ) : imageError || !mealImageUrl ? (
+              <View style={[styles.mealImage, styles.imagePlaceholder, { backgroundColor: isDark ? 'rgba(40, 40, 50, 0.9)' : 'rgba(230, 230, 240, 0.9)' }]}>
+                <UtensilsCrossed size={32} color={colors.textMuted} strokeWidth={1} />
+                <Text style={[styles.placeholderText, { color: colors.textMuted }]}>{getMealTypeLabel(meal.mealType)}</Text>
+              </View>
+            ) : (
+              <Image
+                source={{ uri: mealImageUrl }}
+                style={styles.mealImage}
+                resizeMode="cover"
+                onError={() => setImageError(true)}
+              />
+            )}
 
             {/* Card Content Container */}
             <View style={styles.cardContent}>
@@ -440,11 +462,19 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               showsVerticalScrollIndicator={false}
             >
               {/* Meal Photo - Large */}
-              <Image
-                source={{ uri: getMealImageUrl(meal.name, 'modal') }}
-                style={styles.modalMealImage}
-                resizeMode="cover"
-              />
+              {imageError || !mealImageUrl ? (
+                <View style={[styles.modalMealImage, styles.imagePlaceholder, { backgroundColor: isDark ? 'rgba(40, 40, 50, 0.9)' : 'rgba(230, 230, 240, 0.9)' }]}>
+                  <UtensilsCrossed size={48} color={colors.textMuted} strokeWidth={1} />
+                  <Text style={[styles.placeholderText, { color: colors.textMuted, fontSize: 16 }]}>{meal.name}</Text>
+                </View>
+              ) : (
+                <Image
+                  source={{ uri: mealImageUrl }}
+                  style={styles.modalMealImage}
+                  resizeMode="cover"
+                  onError={() => setImageError(true)}
+                />
+              )}
 
               {/* Meal Title */}
               <Text style={[styles.modalTitle, { color: colors.text }]}>{meal.name}</Text>
@@ -663,6 +693,16 @@ const styles = StyleSheet.create({
     height: 180,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+  },
+  imagePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  placeholderText: {
+    fontSize: 13,
+    fontFamily: Fonts.thin,
+    letterSpacing: 0.5,
   },
   cardContent: {
     padding: 16,
