@@ -1654,7 +1654,7 @@ ${mealDiversityInstruction}
       success: true,
       mealPlan: mealPlan.weeklyPlan,
       weeklyTotals: mealPlan.weeklyTotals,
-      groceryList: mealPlan.groceryList,
+      // groceryList removed - can be generated from ingredients later
     });
   } catch (error) {
     console.error('[Meal Plan] Error:', error);
