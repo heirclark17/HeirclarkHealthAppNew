@@ -502,13 +502,17 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
 
               {/* Quick Info Row */}
               <View style={styles.quickInfoRow}>
-                <View style={styles.quickInfoItem}>
-                  <Clock size={18} color={colors.textMuted} strokeWidth={1.5} />
-                  <Text style={[styles.quickInfoText, { color: colors.textMuted }]}>{meal.prepTime + meal.cookTime} min total</Text>
+                <View style={[styles.modalPill, { backgroundColor: `${colors.successMuted}25` }]}>
+                  <Clock size={14} color={colors.successMuted} strokeWidth={1.5} />
+                  <Text style={[styles.modalPillText, { color: colors.successMuted }]}>Prep: {meal.prepTime}m</Text>
                 </View>
-                <View style={styles.quickInfoItem}>
-                  <UtensilsCrossed size={18} color={colors.textMuted} strokeWidth={1.5} />
-                  <Text style={[styles.quickInfoText, { color: colors.textMuted }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
+                <View style={[styles.modalPill, { backgroundColor: `${colors.warningOrange}25` }]}>
+                  <Clock size={14} color={colors.warningOrange} strokeWidth={1.5} />
+                  <Text style={[styles.modalPillText, { color: colors.warningOrange }]}>Cook: {meal.cookTime}m</Text>
+                </View>
+                <View style={[styles.modalPill, { backgroundColor: `${colors.accentPurple}25` }]}>
+                  <UtensilsCrossed size={14} color={colors.accentPurple} strokeWidth={1.5} />
+                  <Text style={[styles.modalPillText, { color: colors.accentPurple }]}>{meal.servings} serving{meal.servings > 1 ? 's' : ''}</Text>
                 </View>
               </View>
 
@@ -868,18 +872,21 @@ const styles = StyleSheet.create({
   },
   quickInfoRow: {
     flexDirection: 'row',
-    gap: 20,
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 24,
   },
-  quickInfoItem: {
+  modalPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
-  quickInfoText: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontFamily: Fonts.thin,
+  modalPillText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
   },
   nutritionCard: {
     marginBottom: 32,
