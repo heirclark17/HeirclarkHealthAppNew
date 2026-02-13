@@ -129,6 +129,13 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     ? meal.instructions
     : Array.isArray(recipeDetails?.instructions) ? recipeDetails.instructions : [];
 
+  // Merge fetched recipe details into meal so action handlers pass complete data
+  const completeMeal = useMemo(() => ({
+    ...meal,
+    ingredients: displayIngredients,
+    instructions: displayInstructions,
+  }), [meal, displayIngredients, displayInstructions]);
+
   // Generate an appetizing fallback description if none exists
   const displayDescription = useMemo(() => {
     if (meal.description && meal.description.trim().length > 0) {
@@ -246,7 +253,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     if (onAddToTodaysMeals) {
       setIsAddingToMeals(true);
       try {
-        await onAddToTodaysMeals(meal);
+        await onAddToTodaysMeals(completeMeal);
         handleCloseModal();
       } finally {
         setIsAddingToMeals(false);
@@ -258,7 +265,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     if (onAddIngredientsToInstacart) {
       setIsAddingToInstacart(true);
       try {
-        await onAddIngredientsToInstacart(meal);
+        await onAddIngredientsToInstacart(completeMeal);
       } finally {
         setIsAddingToInstacart(false);
       }
@@ -269,7 +276,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     if (onSaveToSavedMeals) {
       setIsSavingMeal(true);
       try {
-        await onSaveToSavedMeals(meal);
+        await onSaveToSavedMeals(completeMeal);
         handleCloseModal();
       } finally {
         setIsSavingMeal(false);
