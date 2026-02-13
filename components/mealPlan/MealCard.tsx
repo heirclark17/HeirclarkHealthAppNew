@@ -58,6 +58,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   const [mealImageUrl, setMealImageUrl] = useState<string>('');
   const [isLoadingImage, setIsLoadingImage] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [imageReady, setImageReady] = useState(false);
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
 
@@ -204,22 +205,28 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
 
   // Use persisted imageUrl if available, otherwise fetch from backend
   useEffect(() => {
+    setImageReady(false);
+    setImageError(false);
+
     if (meal.imageUrl) {
       setMealImageUrl(meal.imageUrl);
       setIsLoadingImage(false);
-      setImageError(false);
       return;
     }
 
+    setIsLoadingImage(true);
     const fetchMealImage = async () => {
-      setIsLoadingImage(true);
-      setImageError(false);
       try {
         const imageUrl = await pexelsService.searchFoodPhoto(meal.name, 'card');
         setMealImageUrl(imageUrl);
+        if (!imageUrl) {
+          setImageError(true);
+          setImageReady(true); // No image to wait for, show card with placeholder
+        }
       } catch (error) {
         console.error('[MealCard] Error loading meal image:', error);
         setImageError(true);
+        setImageReady(true); // Show card with placeholder on error
       } finally {
         setIsLoadingImage(false);
       }
@@ -294,9 +301,37 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     }
   };
 
+  // Card is ready to show when image has loaded (or errored/no image)
+  const cardVisible = imageReady || imageError;
+
   return (
     <>
       <View style={styles.cardContainer}>
+        {/* Preload image offscreen so onLoad fires before we render the card */}
+        {!imageReady && !imageError && mealImageUrl && !isLoadingImage ? (
+          <Image
+            source={{ uri: mealImageUrl }}
+            style={{ width: 0, height: 0, position: 'absolute', opacity: 0 }}
+            onLoad={() => setImageReady(true)}
+            onError={() => { setImageError(true); setImageReady(true); }}
+          />
+        ) : null}
+
+        {!cardVisible ? (
+          // Skeleton placeholder while image loads
+          <GlassCard
+            style={styles.card}
+            intensity={80}
+            tintColor={isDark ? 'rgba(18, 18, 18, 0.85)' : 'rgba(255, 255, 255, 0.9)'}
+          >
+            <View style={[styles.mealImage, { backgroundColor: colors.cardBackground, justifyContent: 'center', alignItems: 'center' }]}>
+              <ActivityIndicator size="small" color={colors.primary} />
+            </View>
+            <View style={[styles.cardContent, { alignItems: 'center', paddingVertical: 24 }]}>
+              <Text style={[styles.mealTypeLabel, { color: colors.textMuted }]}>Preparing {getMealTypeLabel(meal.mealType)}...</Text>
+            </View>
+          </GlassCard>
+        ) : (
         <Animated.View style={[styles.animatedWrapper, cardAnimatedStyle]}>
           <GlassCard
             style={styles.card}
@@ -305,11 +340,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             interactive
           >
             {/* Meal Photo */}
-            {isLoadingImage ? (
-              <View style={[styles.mealImage, { backgroundColor: colors.cardBackground, justifyContent: 'center', alignItems: 'center' }]}>
-                <ActivityIndicator size="small" color={colors.primary} />
-              </View>
-            ) : imageError || !mealImageUrl ? (
+            {imageError || !mealImageUrl ? (
               <View style={[styles.mealImage, styles.imagePlaceholder, { backgroundColor: isDark ? 'rgba(40, 40, 50, 0.9)' : 'rgba(230, 230, 240, 0.9)' }]}>
                 <UtensilsCrossed size={32} color={colors.textMuted} strokeWidth={1} />
                 <Text style={[styles.placeholderText, { color: colors.textMuted }]}>{getMealTypeLabel(meal.mealType)}</Text>
@@ -428,6 +459,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             </View>
         </GlassCard>
         </Animated.View>
+        )}
       </View>
 
       {/* Recipe Modal */}
