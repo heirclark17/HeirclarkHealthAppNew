@@ -16,6 +16,7 @@ import {
   Platform,
   Image,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -40,6 +41,8 @@ import EXERCISE_DATABASE, {
   getExercisesForEquipment,
 } from '../../data/exerciseDatabase';
 import type { Exercise, MuscleGroup, Equipment } from '../../types/training';
+import { exerciseDbService } from '../../services/exerciseDbService';
+import type { ExerciseDBExercise } from '../../types/ai';
 
 // Filter types
 type MuscleFilter = MuscleGroup | 'all';
@@ -431,6 +434,43 @@ function ExerciseDetailModal({
   onToggleFavorite,
 }: ExerciseDetailModalProps) {
   const colors = isDark ? DarkColors : LightColors;
+  const [exerciseGif, setExerciseGif] = useState<ExerciseDBExercise | null>(null);
+  const [isLoadingGif, setIsLoadingGif] = useState(false);
+  const [gifError, setGifError] = useState(false);
+
+  // Fetch exercise GIF from ExerciseDB when modal opens
+  useEffect(() => {
+    if (!visible) {
+      // Reset when modal closes
+      setExerciseGif(null);
+      setGifError(false);
+      return;
+    }
+
+    const fetchGif = async () => {
+      setIsLoadingGif(true);
+      setGifError(false);
+
+      try {
+        // Search for exercise by name in ExerciseDB
+        const results = await exerciseDbService.searchExercisesByName(exercise.name);
+
+        if (results && results.length > 0) {
+          setExerciseGif(results[0]);
+          console.log('[ExerciseLibrary] Loaded GIF for:', exercise.name);
+        } else {
+          console.log('[ExerciseLibrary] No GIF found for:', exercise.name);
+        }
+      } catch (error) {
+        console.error('[ExerciseLibrary] GIF fetch error:', error);
+        setGifError(true);
+      } finally {
+        setIsLoadingGif(false);
+      }
+    };
+
+    fetchGif();
+  }, [visible, exercise.name]);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
@@ -453,6 +493,37 @@ function ExerciseDetailModal({
             </View>
 
             <Text style={[styles.modalTitle, { color: colors.text }]}>{exercise.name}</Text>
+
+            {/* Exercise GIF */}
+            {isLoadingGif && (
+              <View style={[styles.gifContainer, { backgroundColor: colors.backgroundSecondary }]}>
+                <ActivityIndicator size="large" color={colors.text} />
+                <Text style={[styles.gifLoadingText, { color: colors.textMuted }]}>
+                  Loading exercise demo...
+                </Text>
+              </View>
+            )}
+            {!isLoadingGif && exerciseGif?.gifUrl && !gifError && (
+              <View style={styles.gifContainer}>
+                <Image
+                  source={{ uri: exerciseGif.gifUrl }}
+                  style={styles.exerciseGif}
+                  resizeMode="contain"
+                  onError={() => setGifError(true)}
+                />
+                <Text style={[styles.gifCaption, { color: colors.textMuted }]}>
+                  Proper Form Demo
+                </Text>
+              </View>
+            )}
+            {!isLoadingGif && !exerciseGif && !gifError && (
+              <View style={[styles.gifPlaceholder, { backgroundColor: colors.backgroundSecondary }]}>
+                <Dumbbell size={32} color={colors.textMuted} strokeWidth={1} />
+                <Text style={[styles.gifPlaceholderText, { color: colors.textMuted }]}>
+                  Form demo not available
+                </Text>
+              </View>
+            )}
 
             {/* Stats */}
             <View style={styles.statsRow}>
@@ -762,6 +833,43 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: Fonts.bold,
     marginBottom: Spacing.lg,
+  },
+  // GIF styles
+  gifContainer: {
+    marginBottom: Spacing.lg,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  exerciseGif: {
+    width: '100%',
+    height: 300,
+    borderRadius: 16,
+  },
+  gifCaption: {
+    fontSize: 12,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+    marginTop: Spacing.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  gifLoadingText: {
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+    textAlign: 'center',
+    marginTop: Spacing.sm,
+  },
+  gifPlaceholder: {
+    height: 200,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
+  },
+  gifPlaceholderText: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    marginTop: Spacing.sm,
   },
   statsRow: {
     flexDirection: 'row',

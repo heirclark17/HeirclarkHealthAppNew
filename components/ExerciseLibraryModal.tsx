@@ -14,6 +14,8 @@ import {
   ScrollView,
   Modal,
   Platform,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -31,6 +33,8 @@ import { DarkColors, LightColors, Spacing, Fonts } from '../constants/Theme';
 import { lightImpact, mediumImpact } from '../utils/haptics';
 import EXERCISE_DATABASE from '../data/exerciseDatabase';
 import type { Exercise, MuscleGroup, Equipment } from '../types/training';
+import { exerciseDbService } from '../services/exerciseDbService';
+import type { ExerciseDBExercise } from '../types/ai';
 
 // Filter types
 type MuscleFilter = MuscleGroup | 'all';
