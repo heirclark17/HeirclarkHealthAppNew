@@ -315,7 +315,19 @@ class ExerciseDbServiceClass {
         return [];
       }
 
-      const exercises: ExerciseDBExercise[] = await response.json();
+      const rawExercises: any[] = await response.json();
+
+      // Map exercises and construct GIF URLs
+      const exercises: ExerciseDBExercise[] = rawExercises.map(ex => ({
+        id: ex.id,
+        name: ex.name,
+        bodyPart: ex.bodyPart,
+        target: ex.target,
+        equipment: ex.equipment,
+        gifUrl: `https://v2.exercisedb.io/image/${ex.id}`, // Construct GIF URL from ID
+        instructions: ex.instructions || [],
+        secondaryMuscles: ex.secondaryMuscles || []
+      }));
 
       // Cache results
       this.ensureCache();
@@ -426,7 +438,19 @@ class ExerciseDbServiceClass {
         return EXERCISE_DB_FALLBACK.slice(offset, offset + limit);
       }
 
-      const exercises: ExerciseDBExercise[] = await response.json();
+      const rawExercises: any[] = await response.json();
+
+      // Map exercises and construct GIF URLs
+      const exercises: ExerciseDBExercise[] = rawExercises.map(ex => ({
+        id: ex.id,
+        name: ex.name,
+        bodyPart: ex.bodyPart,
+        target: ex.target,
+        equipment: ex.equipment,
+        gifUrl: `https://v2.exercisedb.io/image/${ex.id}`, // Construct GIF URL from ID
+        instructions: ex.instructions || [],
+        secondaryMuscles: ex.secondaryMuscles || []
+      }));
 
       // Cache the results
       this.ensureCache();
