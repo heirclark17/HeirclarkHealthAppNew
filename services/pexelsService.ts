@@ -36,9 +36,11 @@ class PexelsService {
   private baseUrl = 'https://api.pexels.com/v1';
 
   constructor() {
-    this.apiKey = PEXELS_API_KEY || '';
+    const rawKey = PEXELS_API_KEY || '';
+    // Detect placeholder values that aren't real API keys
+    this.apiKey = rawKey.includes('YOUR_') || rawKey.includes('_HERE') || rawKey.length < 10 ? '' : rawKey;
     if (!this.apiKey) {
-      console.warn('[PexelsService] API key not configured. Using fallback images.');
+      console.warn('[PexelsService] API key not configured. Using TheMealDB fallback.');
     }
   }
 
