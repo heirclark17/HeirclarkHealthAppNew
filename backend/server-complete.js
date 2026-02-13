@@ -1391,15 +1391,31 @@ app.get('/api/v1/exercises/count', async (req, res) => {
   }
 });
 
-// GET /api/v1/exercise-gif/:id - Proxy exercise GIF images
+// GET /api/v1/exercise-gif/:id - Serve exercise GIF images (with database caching)
 app.get('/api/v1/exercise-gif/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const resolution = req.query.resolution || '180'; // Default to 180 for free tier
 
-    console.log(`[Exercise GIF] Fetching GIF for exercise ${id} at ${resolution}p`);
+    console.log(`[Exercise GIF] Request for exercise ${id} at ${resolution}p`);
 
-    // Fetch GIF from ExerciseDB API with authentication
+    // Check database cache first
+    const cachedGif = await pool.query(
+      'SELECT gif_data, content_type FROM exercise_gifs WHERE exercise_id = $1 AND resolution = $2',
+      [id, resolution]
+    );
+
+    if (cachedGif.rows.length > 0) {
+      // Serve from database (FAST)
+      console.log(`[Exercise GIF] ✅ Serving from cache (exercise ${id})`);
+      res.setHeader('Content-Type', cachedGif.rows[0].content_type);
+      res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year cache
+      res.setHeader('X-Cache', 'HIT');
+      return res.send(cachedGif.rows[0].gif_data);
+    }
+
+    // Not in cache - fetch from ExerciseDB API
+    console.log(`[Exercise GIF] Cache miss - fetching from API (exercise ${id})`);
     const apiKey = process.env.EXERCISEDB_API_KEY || 'b3c3790038mshcfc571cd8cae3ccp13abefjsn6fb2f32a654d';
     const gifUrl = `https://exercisedb.p.rapidapi.com/image?exerciseId=${id}&resolution=${resolution}&rapidapi-key=${apiKey}`;
 
@@ -1407,17 +1423,34 @@ app.get('/api/v1/exercise-gif/:id', async (req, res) => {
 
     if (!response.ok) {
       console.error(`[Exercise GIF] API error for ${id}:`, response.status);
-      return res.status(response.status).json({ error: 'Failed to fetch GIF' });
+      return res.status(response.status).json({ error: 'Failed to fetch GIF from API' });
     }
 
-    // Stream the GIF to client with caching headers
-    res.setHeader('Content-Type', 'image/gif');
-    res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days cache
+    // Get GIF data as buffer
+    const gifBuffer = await response.buffer();
+    const contentType = response.headers.get('content-type') || 'image/gif';
 
-    // Stream the response
-    response.body.pipe(res);
+    // Store in database for future requests
+    try {
+      await pool.query(
+        `INSERT INTO exercise_gifs (exercise_id, resolution, gif_data, content_type)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (exercise_id, resolution) DO NOTHING`,
+        [id, resolution, gifBuffer, contentType]
+      );
+      console.log(`[Exercise GIF] 💾 Stored in database (exercise ${id})`);
+    } catch (dbError) {
+      console.error(`[Exercise GIF] Database storage error:`, dbError.message);
+      // Continue serving even if storage fails
+    }
 
-    console.log(`[Exercise GIF] ✅ Served GIF for exercise ${id}`);
+    // Serve to client
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year cache
+    res.setHeader('X-Cache', 'MISS');
+    res.send(gifBuffer);
+
+    console.log(`[Exercise GIF] ✅ Served from API and cached (exercise ${id})`);
   } catch (error) {
     console.error('[Exercise GIF] Error:', error);
     res.status(500).json({ error: 'Failed to serve GIF' });
@@ -2166,6 +2199,29 @@ Generate personalized, encouraging guidance for their cheat day that helps them 
     console.log('[Exercises] Table ready');
   } catch (err) {
     console.error('[Exercises] Table creation error:', err.message);
+  }
+})();
+
+// Create exercise_gifs table for caching GIF images
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS exercise_gifs (
+        id SERIAL PRIMARY KEY,
+        exercise_id TEXT NOT NULL,
+        resolution TEXT NOT NULL,
+        gif_data BYTEA NOT NULL,
+        content_type TEXT DEFAULT 'image/gif',
+        created_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(exercise_id, resolution)
+      )
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_exercise_gifs_lookup ON exercise_gifs (exercise_id, resolution);
+    `);
+    console.log('[Exercise GIFs] Table ready');
+  } catch (err) {
+    console.error('[Exercise GIFs] Table creation error:', err.message);
   }
 })();
 
