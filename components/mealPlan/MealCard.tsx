@@ -592,105 +592,69 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                 style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(8, 8, 8, 0.40)' : 'rgba(250, 250, 250, 0.40)' }]}
               />
 
-              {/* Add to Today's Meals Button */}
-              <GlassCard
-                style={styles.primaryActionButton}
-                intensity={80}
-                tintColor={isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'}
-                interactive
-              >
+              <View style={styles.actionPillRow}>
+                {/* Add to Today's Meals */}
                 <TouchableOpacity
-                  style={styles.primaryActionButtonInner}
+                  style={[styles.actionPill, { backgroundColor: `${colors.accentCyan}25` }]}
                   onPress={handleAddToTodaysMeals}
                   disabled={isAddingToMeals}
                   activeOpacity={0.7}
                   accessibilityLabel={`Add ${meal.name} to today's meals`}
                   accessibilityRole="button"
-                  accessibilityState={{ disabled: isAddingToMeals }}
-                  accessibilityHint="Adds this meal to your daily meal log"
                 >
-                  <PlusCircle size={20} color={colors.primary} strokeWidth={1.5} />
-                  <Text style={[styles.primaryActionText, { color: colors.text }]}>
-                    {isAddingToMeals ? 'Adding...' : "Add to Today's Meals"}
+                  <PlusCircle size={14} color={colors.accentCyan} strokeWidth={1.5} />
+                  <Text style={[styles.actionPillText, { color: colors.accentCyan }]}>
+                    {isAddingToMeals ? 'Adding...' : "Today's Meals"}
                   </Text>
                 </TouchableOpacity>
-              </GlassCard>
 
-              {/* Secondary Actions Row */}
-              <View style={styles.secondaryActionsRow}>
-                {/* Save to Saved Meals Button */}
+                {/* Save Meal */}
                 {onSaveToSavedMeals && (
-                  <GlassCard
-                    style={styles.secondaryActionButton}
-                    intensity={60}
-                    tintColor={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'}
-                    interactive
-                  >
-                    <TouchableOpacity
-                      style={styles.secondaryActionButtonInner}
-                      onPress={handleSaveToSavedMeals}
-                      disabled={isSavingMeal}
-                      activeOpacity={0.7}
-                      accessibilityLabel={`Save ${meal.name} to favorites`}
-                      accessibilityRole="button"
-                      accessibilityState={{ disabled: isSavingMeal }}
-                      accessibilityHint="Saves this meal to your favorites for quick access"
-                    >
-                      <Bookmark size={16} color={colors.text} strokeWidth={1.5} />
-                      <Text style={[styles.secondaryActionText, { color: colors.text }]}>
-                        {isSavingMeal ? 'Saving...' : 'Save Meal'}
-                      </Text>
-                    </TouchableOpacity>
-                  </GlassCard>
-                )}
-                {/* Add to Instacart Button */}
-                <GlassCard
-                  style={styles.secondaryActionButton}
-                  intensity={60}
-                  tintColor={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'}
-                  interactive
-                >
                   <TouchableOpacity
-                    style={styles.secondaryActionButtonInner}
-                    onPress={handleAddToInstacart}
-                    disabled={isAddingToInstacart}
+                    style={[styles.actionPill, { backgroundColor: `${colors.successMuted}25` }]}
+                    onPress={handleSaveToSavedMeals}
+                    disabled={isSavingMeal}
                     activeOpacity={0.7}
-                    accessibilityLabel={`Add ${meal.name} ingredients to Instacart`}
+                    accessibilityLabel={`Save ${meal.name} to favorites`}
                     accessibilityRole="button"
-                    accessibilityState={{ disabled: isAddingToInstacart }}
-                    accessibilityHint="Adds all ingredients to your Instacart shopping cart"
                   >
-                    <ShoppingCart size={16} color={colors.text} strokeWidth={1.5} />
-                    <Text style={[styles.secondaryActionText, { color: colors.text }]}>
-                      {isAddingToInstacart ? 'Adding...' : 'Add to Instacart'}
+                    <Bookmark size={14} color={colors.successMuted} strokeWidth={1.5} />
+                    <Text style={[styles.actionPillText, { color: colors.successMuted }]}>
+                      {isSavingMeal ? 'Saving...' : 'Save'}
                     </Text>
                   </TouchableOpacity>
-                </GlassCard>
+                )}
 
-                {/* Swap Meal Button */}
+                {/* Add to Instacart */}
+                <TouchableOpacity
+                  style={[styles.actionPill, { backgroundColor: `${colors.warningOrange}25` }]}
+                  onPress={handleAddToInstacart}
+                  disabled={isAddingToInstacart}
+                  activeOpacity={0.7}
+                  accessibilityLabel={`Add ${meal.name} ingredients to Instacart`}
+                  accessibilityRole="button"
+                >
+                  <ShoppingCart size={14} color={colors.warningOrange} strokeWidth={1.5} />
+                  <Text style={[styles.actionPillText, { color: colors.warningOrange }]}>
+                    {isAddingToInstacart ? 'Adding...' : 'Instacart'}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Swap Meal */}
                 {onSwap && (
-                  <GlassCard
-                    style={styles.secondaryActionButton}
-                    intensity={60}
-                    tintColor={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'}
-                    interactive
+                  <TouchableOpacity
+                    style={[styles.actionPill, { backgroundColor: `${colors.accentPurple}25` }]}
+                    onPress={handleSwap}
+                    disabled={isSwapping}
+                    activeOpacity={0.7}
+                    accessibilityLabel={`Swap ${meal.name} for different meal`}
+                    accessibilityRole="button"
                   >
-                    <TouchableOpacity
-                      style={styles.secondaryActionButtonInner}
-                      onPress={handleSwap}
-                      disabled={isSwapping}
-                      activeOpacity={0.7}
-                      accessibilityLabel={`Swap ${meal.name} for different meal`}
-                      accessibilityRole="button"
-                      accessibilityState={{ disabled: isSwapping }}
-                      accessibilityHint="Replaces this meal with an alternative meal option"
-                    >
-                      <ArrowLeftRight size={16} color={colors.text} strokeWidth={1.5} />
-                      <Text style={[styles.secondaryActionText, { color: colors.text }]}>
-                        {isSwapping ? 'Swapping...' : 'Swap Meal'}
-                      </Text>
-                    </TouchableOpacity>
-                  </GlassCard>
+                    <ArrowLeftRight size={14} color={colors.accentPurple} strokeWidth={1.5} />
+                    <Text style={[styles.actionPillText, { color: colors.accentPurple }]}>
+                      {isSwapping ? 'Swapping...' : 'Swap'}
+                    </Text>
+                  </TouchableOpacity>
                 )}
               </View>
             </View>
@@ -1031,48 +995,25 @@ const styles = StyleSheet.create({
   },
   modalFooter: {
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 12,
     paddingBottom: 16,
+  },
+  actionPillRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
-  primaryActionButton: {
+  actionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
-    overflow: 'hidden',
   },
-  primaryActionButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  primaryActionText: {
-    fontSize: 15,
-    fontFamily: Fonts.medium,
-    letterSpacing: 0.2,
-  },
-  secondaryActionsRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  secondaryActionButton: {
-    flex: 1,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  secondaryActionButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 11,
-    paddingHorizontal: 16,
-  },
-  secondaryActionText: {
+  actionPillText: {
     fontSize: 13,
-    fontFamily: Fonts.thin,
-    letterSpacing: 0.1,
+    fontFamily: Fonts.light,
   },
 });
 
