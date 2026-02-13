@@ -538,35 +538,58 @@ class AIService {
         if (data.success && (data.weeklyPlan || data.mealPlan)) {
           // Railway backend format: { success: true, weeklyPlan: [...] } or { success: true, mealPlan: [...] }
           const mealPlanData = data.weeklyPlan || data.mealPlan;
+
+          // Validate that mealPlanData is an array
+          if (!Array.isArray(mealPlanData)) {
+            console.error('[AIService] Invalid meal plan data structure - not an array:', typeof mealPlanData);
+            return null;
+          }
+
           const plan: AIWeeklyMealPlan = {
-            days: mealPlanData.map((day: any) => ({
-              dayName: day.dayName,
-              dayIndex: day.dayIndex,
-              isCheatDay: day.isCheatDay || false,
-              cheatDayAdvice: day.cheatDayAdvice || null,
-              // Handle cheat days that don't have meals
-              meals: day.isCheatDay ? [] : (day.meals || []).map((meal: any) => ({
-                mealType: meal.mealType,
-                name: meal.name || meal.dishName,
-                description: meal.description || '',
-                calories: meal.calories || 0,
-                protein: meal.protein || meal.macros?.protein || 0,
-                carbs: meal.carbs || meal.macros?.carbs || 0,
-                fat: meal.fat || meal.macros?.fat || 0,
-                servings: meal.servings || 1,
-                prepTime: meal.prepTime || meal.prepMinutes || 15,
-                cookTime: meal.cookTime || meal.cookMinutes || 20,
-                imageUrl: meal.imageUrl,
-                // Map ingredients from backend format
-                ingredients: (meal.ingredients || []).map((ing: any) => ({
-                  name: ing.name,
-                  amount: ing.amount || ing.quantity || '',
-                  unit: ing.unit || '',
-                  calories: ing.calories,
+            days: mealPlanData.map((day: any, index: number) => {
+              // Validate day structure
+              if (!day || typeof day !== 'object') {
+                console.error('[AIService] Invalid day structure at index', index, ':', day);
+                throw new Error('Invalid meal plan day structure');
+              }
+
+              // Ensure meals is an array
+              const dayMeals = day.meals;
+              if (!Array.isArray(dayMeals)) {
+                console.warn('[AIService] Day', day.dayName, 'has invalid meals:', typeof dayMeals);
+                // If meals is missing/invalid, default to empty array
+                day.meals = [];
+              }
+
+              return {
+                dayName: day.dayName,
+                dayIndex: day.dayIndex,
+                isCheatDay: day.isCheatDay || false,
+                cheatDayAdvice: day.cheatDayAdvice || null,
+                // Handle cheat days that don't have meals
+                meals: day.isCheatDay ? [] : (day.meals || []).map((meal: any) => ({
+                  mealType: meal.mealType,
+                  name: meal.name || meal.dishName,
+                  description: meal.description || '',
+                  calories: meal.calories || 0,
+                  protein: meal.protein || meal.macros?.protein || 0,
+                  carbs: meal.carbs || meal.macros?.carbs || 0,
+                  fat: meal.fat || meal.macros?.fat || 0,
+                  servings: meal.servings || 1,
+                  prepTime: meal.prepTime || meal.prepMinutes || 15,
+                  cookTime: meal.cookTime || meal.cookMinutes || 20,
+                  imageUrl: meal.imageUrl,
+                  // Map ingredients from backend format
+                  ingredients: (meal.ingredients || []).map((ing: any) => ({
+                    name: ing.name,
+                    amount: ing.amount || ing.quantity || '',
+                    unit: ing.unit || '',
+                    calories: ing.calories,
+                  })),
+                  instructions: Array.isArray(meal.instructions) ? meal.instructions : [],
                 })),
-                instructions: Array.isArray(meal.instructions) ? meal.instructions : [],
-              })),
-            })),
+              };
+            }),
             generatedAt: data.generatedAt || new Date().toISOString(),
           };
           await this.cacheMealPlan(plan);
