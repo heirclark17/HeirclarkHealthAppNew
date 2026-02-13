@@ -1,46 +1,43 @@
 import Constants from 'expo-constants';
 
-const PEXELS_API_KEY = Constants.expoConfig?.extra?.pexelsApiKey ||
-                       process.env.EXPO_PUBLIC_PEXELS_API_KEY;
+const UNSPLASH_ACCESS_KEY = Constants.expoConfig?.extra?.unsplashAccessKey ||
+                            process.env.EXPO_PUBLIC_UNSPLASH_ACCESS_KEY;
 
-interface PexelsPhoto {
-  id: number;
+interface UnsplashPhoto {
+  id: string;
   width: number;
   height: number;
-  url: string;
-  photographer: string;
-  src: {
-    original: string;
-    large2x: string;
-    large: string;
-    medium: string;
-    small: string;
-    portrait: string;
-    landscape: string;
-    tiny: string;
+  urls: {
+    raw: string;
+    full: string;
+    regular: string;  // 1080px wide
+    small: string;    // 400px wide
+    thumb: string;    // 200px wide
+  };
+  user: {
+    name: string;
   };
 }
 
-interface PexelsSearchResponse {
-  photos: PexelsPhoto[];
-  total_results: number;
-  page: number;
-  per_page: number;
+interface UnsplashSearchResponse {
+  results: UnsplashPhoto[];
+  total: number;
+  total_pages: number;
 }
 
 // In-memory cache to avoid repeated API calls for same meals
 const photoCache = new Map<string, string>();
 
-class PexelsService {
-  private apiKey: string;
-  private baseUrl = 'https://api.pexels.com/v1';
+class FoodImageService {
+  private accessKey: string;
+  private baseUrl = 'https://api.unsplash.com';
 
   constructor() {
-    const rawKey = PEXELS_API_KEY || '';
-    // Detect placeholder values that aren't real API keys
-    this.apiKey = rawKey.includes('YOUR_') || rawKey.includes('_HERE') || rawKey.length < 10 ? '' : rawKey;
-    if (!this.apiKey) {
-      console.warn('[PexelsService] API key not configured. Using TheMealDB fallback.');
+    const rawKey = UNSPLASH_ACCESS_KEY || '';
+    // Detect placeholder values
+    this.accessKey = rawKey.includes('YOUR_') || rawKey.includes('_HERE') || rawKey.length < 10 ? '' : rawKey;
+    if (!this.accessKey) {
+      console.warn('[FoodImageService] Unsplash key not configured. Using TheMealDB fallback.');
     }
   }
 
@@ -55,97 +52,91 @@ class PexelsService {
     }
 
     // If no API key, try TheMealDB fallback
-    if (!this.apiKey) {
-      console.log('[PexelsService] No Pexels API key, trying TheMealDB fallback');
-      return this.getFallbackImageAsync(mealName, size);
+    if (!this.accessKey) {
+      return this.getTheMealDBFallback(mealName, size);
     }
 
     try {
-      // Extract main food item from meal name for better search
       const searchTerm = this.extractFoodKeywords(mealName);
-
-      console.log('[PexelsService] Searching for:', searchTerm);
+      console.log('[FoodImageService] Unsplash searching:', searchTerm);
 
       const response = await fetch(
-        `${this.baseUrl}/search?query=${encodeURIComponent(searchTerm)}&per_page=3&orientation=landscape`,
+        `${this.baseUrl}/search/photos?query=${encodeURIComponent(searchTerm)}&per_page=5&orientation=landscape&content_filter=high`,
         {
           headers: {
-            Authorization: this.apiKey,
+            Authorization: `Client-ID ${this.accessKey}`,
           },
         }
       );
 
       if (!response.ok) {
-        console.error('[PexelsService] API error:', response.status, response.statusText);
-        return this.getFallbackImageAsync(mealName, size);
+        console.error('[FoodImageService] Unsplash API error:', response.status);
+        return this.getTheMealDBFallback(mealName, size);
       }
 
-      const data: PexelsSearchResponse = await response.json();
+      const data: UnsplashSearchResponse = await response.json();
 
-      if (data.photos && data.photos.length > 0) {
-        // Use deterministic selection for consistency
+      if (data.results && data.results.length > 0) {
+        // Deterministic selection based on meal name
         const hash = this.hashString(mealName);
-        const idx = Math.abs(hash) % data.photos.length;
-        const photo = data.photos[idx];
+        const idx = Math.abs(hash) % data.results.length;
+        const photo = data.results[idx];
 
-        // Choose appropriate size
-        const imageUrl = size === 'card' ? photo.src.medium : photo.src.large;
+        // Use raw URL with size parameters for optimal loading
+        // card: 600w, modal: 1080w (regular)
+        const imageUrl = size === 'card'
+          ? `${photo.urls.raw}&w=600&h=400&fit=crop&crop=center&q=80`
+          : `${photo.urls.raw}&w=1080&h=720&fit=crop&crop=center&q=80`;
 
         // Cache the result
         photoCache.set(cacheKey, imageUrl);
 
-        console.log('[PexelsService] Found photo by:', photo.photographer);
+        console.log('[FoodImageService] Found Unsplash photo by:', photo.user.name);
         return imageUrl;
       }
 
-      // No photos found, use TheMealDB fallback
-      console.log('[PexelsService] No Pexels photos found for:', searchTerm);
-      return this.getFallbackImageAsync(mealName, size);
+      console.log('[FoodImageService] No Unsplash results for:', searchTerm);
+      return this.getTheMealDBFallback(mealName, size);
 
     } catch (error) {
-      console.error('[PexelsService] Error fetching photo:', error);
-      return this.getFallbackImageAsync(mealName, size);
+      console.error('[FoodImageService] Unsplash error:', error);
+      return this.getTheMealDBFallback(mealName, size);
     }
   }
 
   /**
-   * Extract main food keywords from meal name for better search results
+   * Extract food keywords from meal name for better search results
    */
   private extractFoodKeywords(mealName: string): string {
-    // Common food terms that make good search queries
     const foodKeywords = [
       'chicken', 'beef', 'pork', 'fish', 'salmon', 'tuna', 'shrimp',
       'pasta', 'rice', 'noodles', 'quinoa', 'oatmeal',
       'salad', 'soup', 'stew', 'burger', 'sandwich', 'wrap', 'taco', 'burrito',
       'pizza', 'stir fry', 'curry', 'grilled', 'roasted', 'baked',
       'eggs', 'omelet', 'pancakes', 'waffles', 'toast', 'bacon',
-      'smoothie', 'bowl', 'plate', 'vegetables', 'fruit',
+      'smoothie', 'bowl', 'vegetables', 'fruit',
       'avocado', 'turkey', 'steak', 'lamb', 'tofu', 'tempeh',
       'yogurt', 'granola', 'cereal', 'muffin', 'bread',
       'sweet potato', 'broccoli', 'spinach', 'kale',
+      'cod', 'tilapia', 'lentil', 'chickpea', 'chili',
     ];
 
     const lowerName = mealName.toLowerCase();
-
-    // Find matching food keywords
     const matches = foodKeywords.filter(keyword => lowerName.includes(keyword));
 
     if (matches.length > 0) {
-      // Use up to 2 matching keywords for more specific results
-      return matches.slice(0, 2).join(' ') + ' food dish';
+      return matches.slice(0, 2).join(' ') + ' food';
     }
 
-    // If no specific match, use the full meal name for search
-    return `${mealName} food dish`;
+    // Use full meal name for search
+    return `${mealName} food`;
   }
 
   /**
-   * Get fallback image using TheMealDB (free, no API key needed)
-   * Falls back to a food-keyword-seeded image if that also fails
+   * TheMealDB fallback (free, no API key needed)
    */
-  private async getFallbackImageAsync(mealName: string, size: 'card' | 'modal' = 'card'): Promise<string> {
+  private async getTheMealDBFallback(mealName: string, size: 'card' | 'modal' = 'card'): Promise<string> {
     try {
-      // Try TheMealDB search (free, no API key)
       const searchTerm = this.extractFoodKeywords(mealName).split(' ')[0];
       const response = await fetch(
         `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`,
@@ -155,61 +146,40 @@ class PexelsService {
       if (response.ok) {
         const data = await response.json();
         if (data.meals && data.meals.length > 0) {
-          // Use a deterministic index based on meal name hash
           const hash = this.hashString(mealName);
           const idx = Math.abs(hash) % data.meals.length;
           const thumbUrl = data.meals[idx].strMealThumb;
           if (thumbUrl) {
-            // TheMealDB supports size suffixes
-            const sizedUrl = size === 'card'
-              ? `${thumbUrl}/preview`
-              : thumbUrl;
+            const sizedUrl = size === 'card' ? `${thumbUrl}/preview` : thumbUrl;
             const cacheKey = `${mealName}-${size}`;
             photoCache.set(cacheKey, sizedUrl);
-            console.log('[PexelsService] Using TheMealDB fallback:', data.meals[idx].strMeal);
+            console.log('[FoodImageService] TheMealDB fallback:', data.meals[idx].strMeal);
             return sizedUrl;
           }
         }
       }
     } catch (error) {
-      console.log('[PexelsService] TheMealDB fallback failed, using static fallback');
+      console.log('[FoodImageService] TheMealDB fallback failed');
     }
 
-    // Final fallback: return empty string to trigger placeholder UI
     return '';
   }
 
-  /**
-   * Simple hash function for deterministic image selection
-   */
   private hashString(str: string): number {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash |= 0; // Convert to 32bit integer
+      hash |= 0;
     }
     return hash;
   }
 
-  /**
-   * Synchronous fallback for legacy callers (returns empty to trigger placeholder)
-   */
-  private getFallbackImage(mealName: string, size: 'card' | 'modal' = 'card'): string {
-    return '';
-  }
-
-  /**
-   * Clear the photo cache (useful for testing or memory management)
-   */
   clearCache(): void {
     photoCache.clear();
-    console.log('[PexelsService] Cache cleared');
+    console.log('[FoodImageService] Cache cleared');
   }
 
-  /**
-   * Get cache statistics
-   */
   getCacheStats(): { size: number; keys: string[] } {
     return {
       size: photoCache.size,
@@ -218,5 +188,5 @@ class PexelsService {
   }
 }
 
-// Export singleton instance
-export const pexelsService = new PexelsService();
+// Export as pexelsService for backward compatibility with MealCard import
+export const pexelsService = new FoodImageService();
