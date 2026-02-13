@@ -78,6 +78,7 @@ export default function ExercisesScreen() {
   const [equipmentFilter, setEquipmentFilter] = useState<EquipmentFilter>('all');
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDBExercise | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   // Exercise data
   const [exercises, setExercises] = useState<ExerciseDBExercise[]>([]);
@@ -90,9 +91,10 @@ export default function ExercisesScreen() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [loadProgressText, setLoadProgressText] = useState('');
 
-  // Initialize: Load exercises from database
+  // Initialize: Load exercises and favorites from database
   useEffect(() => {
     loadExercisesFromDatabase();
+    loadFavorites();
   }, []);
 
   const loadExercisesFromDatabase = async () => {
@@ -113,6 +115,17 @@ export default function ExercisesScreen() {
       console.error('[ExerciseLibrary] Failed to load from database:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadFavorites = async () => {
+    try {
+      console.log('[ExerciseLibrary] Loading favorites...');
+      const favoriteExerciseIds = await api.getFavoriteExercises();
+      setFavoriteIds(new Set(favoriteExerciseIds));
+      console.log(`[ExerciseLibrary] ✅ Loaded ${favoriteExerciseIds.length} favorites`);
+    } catch (error) {
+      console.error('[ExerciseLibrary] Failed to load favorites:', error);
     }
   };
 
@@ -191,6 +204,11 @@ export default function ExercisesScreen() {
   const filteredExercises = useMemo(() => {
     let filtered = [...exercises];
 
+    // Favorites filter (apply first)
+    if (showFavoritesOnly) {
+      filtered = filtered.filter(ex => favoriteIds.has(ex.id));
+    }
+
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -212,25 +230,50 @@ export default function ExercisesScreen() {
     }
 
     return filtered;
-  }, [exercises, searchQuery, muscleFilter, equipmentFilter]);
+  }, [exercises, searchQuery, muscleFilter, equipmentFilter, showFavoritesOnly, favoriteIds]);
 
   const handleExercisePress = useCallback((exercise: ExerciseDBExercise) => {
     lightImpact();
     setSelectedExercise(exercise);
   }, []);
 
-  const handleToggleFavorite = useCallback((id: string) => {
+  const handleToggleFavorite = useCallback(async (id: string) => {
     mediumImpact();
+
+    const isFavorited = favoriteIds.has(id);
+
+    // Optimistic update
     setFavoriteIds(prev => {
       const next = new Set(prev);
-      if (next.has(id)) {
+      if (isFavorited) {
         next.delete(id);
       } else {
         next.add(id);
       }
       return next;
     });
-  }, []);
+
+    // Sync with backend
+    try {
+      if (isFavorited) {
+        await api.removeFavoriteExercise(id);
+      } else {
+        await api.addFavoriteExercise(id);
+      }
+    } catch (error) {
+      console.error('[ExerciseLibrary] Failed to sync favorite:', error);
+      // Revert on error
+      setFavoriteIds(prev => {
+        const next = new Set(prev);
+        if (isFavorited) {
+          next.add(id);
+        } else {
+          next.delete(id);
+        }
+        return next;
+      });
+    }
+  }, [favoriteIds]);
 
   // Render Exercise Card
   const renderExerciseCard = useCallback(
@@ -336,6 +379,43 @@ export default function ExercisesScreen() {
           </TouchableOpacity>
         )}
       </View>
+
+      {/* Favorites Filter */}
+      {favoriteIds.size > 0 && (
+        <View style={styles.favoritesSection}>
+          <TouchableOpacity
+            onPress={() => {
+              lightImpact();
+              setShowFavoritesOnly(!showFavoritesOnly);
+            }}
+            style={[
+              styles.favoritesChip,
+              {
+                backgroundColor: showFavoritesOnly ? '#ff6b6b' : colors.backgroundSecondary,
+                borderColor: showFavoritesOnly ? '#ff6b6b' : 'transparent',
+              },
+            ]}
+          >
+            <Heart
+              size={18}
+              color={showFavoritesOnly ? '#ffffff' : colors.textSecondary}
+              fill={showFavoritesOnly ? '#ffffff' : 'transparent'}
+              strokeWidth={2}
+            />
+            <Text
+              style={[
+                styles.favoritesChipText,
+                {
+                  color: showFavoritesOnly ? '#ffffff' : colors.textSecondary,
+                  fontFamily: showFavoritesOnly ? Fonts.semiBold : Fonts.regular,
+                },
+              ]}
+            >
+              Favorites ({favoriteIds.size})
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Muscle Group Filters */}
       <View style={styles.filterSection}>
@@ -684,6 +764,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.regular,
     paddingVertical: Platform.OS === 'ios' ? 8 : 4,
+  },
+  favoritesSection: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  favoritesChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    gap: 8,
+    borderWidth: 1,
+  },
+  favoritesChipText: {
+    fontSize: 14,
   },
   filterSection: {
     marginBottom: Spacing.lg,

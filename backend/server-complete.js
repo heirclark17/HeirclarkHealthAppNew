@@ -1391,6 +1391,65 @@ app.get('/api/v1/exercises/count', async (req, res) => {
   }
 });
 
+// POST /api/v1/favorite-exercises - Add exercise to favorites
+app.post('/api/v1/favorite-exercises', authenticateToken, async (req, res) => {
+  try {
+    const { exerciseId } = req.body;
+
+    if (!exerciseId) {
+      return res.status(400).json({ error: 'Exercise ID required' });
+    }
+
+    await pool.query(
+      `INSERT INTO favorite_exercises (user_id, exercise_id)
+       VALUES ($1, $2)
+       ON CONFLICT (user_id, exercise_id) DO NOTHING`,
+      [req.userId, exerciseId]
+    );
+
+    console.log(`[Favorite Exercises] Added ${exerciseId} for user ${req.userId}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Favorite Exercises] Add error:', error);
+    res.status(500).json({ error: 'Failed to add favorite' });
+  }
+});
+
+// DELETE /api/v1/favorite-exercises/:exerciseId - Remove exercise from favorites
+app.delete('/api/v1/favorite-exercises/:exerciseId', authenticateToken, async (req, res) => {
+  try {
+    const { exerciseId } = req.params;
+
+    await pool.query(
+      'DELETE FROM favorite_exercises WHERE user_id = $1 AND exercise_id = $2',
+      [req.userId, exerciseId]
+    );
+
+    console.log(`[Favorite Exercises] Removed ${exerciseId} for user ${req.userId}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Favorite Exercises] Remove error:', error);
+    res.status(500).json({ error: 'Failed to remove favorite' });
+  }
+});
+
+// GET /api/v1/favorite-exercises - Get user's favorite exercise IDs
+app.get('/api/v1/favorite-exercises', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT exercise_id FROM favorite_exercises WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.userId]
+    );
+
+    const favoriteIds = result.rows.map(row => row.exercise_id);
+    console.log(`[Favorite Exercises] Retrieved ${favoriteIds.length} favorites for user ${req.userId}`);
+    res.json({ success: true, favoriteIds });
+  } catch (error) {
+    console.error('[Favorite Exercises] Get error:', error);
+    res.status(500).json({ error: 'Failed to get favorites' });
+  }
+});
+
 // GET /api/v1/exercise-gif/:id - Serve exercise GIF images (with database caching)
 app.get('/api/v1/exercise-gif/:id', async (req, res) => {
   try {
@@ -2222,6 +2281,27 @@ Generate personalized, encouraging guidance for their cheat day that helps them 
     console.log('[Exercise GIFs] Table ready');
   } catch (err) {
     console.error('[Exercise GIFs] Table creation error:', err.message);
+  }
+})();
+
+// Create favorite_exercises table for user favorites
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS favorite_exercises (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        exercise_id TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(user_id, exercise_id)
+      )
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_favorite_exercises_user ON favorite_exercises (user_id);
+    `);
+    console.log('[Favorite Exercises] Table ready');
+  } catch (err) {
+    console.error('[Favorite Exercises] Table creation error:', err.message);
   }
 })();
 

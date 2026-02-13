@@ -2452,6 +2452,75 @@ class HeirclarkAPI {
       return 0;
     }
   }
+
+  /**
+   * Add exercise to favorites
+   */
+  async addFavoriteExercise(exerciseId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/favorite-exercises`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ exerciseId }),
+      });
+
+      if (response.ok) {
+        console.log(`[API] ✅ Added exercise ${exerciseId} to favorites`);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[API] Add favorite exercise error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Remove exercise from favorites
+   */
+  async removeFavoriteExercise(exerciseId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/favorite-exercises/${exerciseId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      if (response.ok) {
+        console.log(`[API] ✅ Removed exercise ${exerciseId} from favorites`);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[API] Remove favorite exercise error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get user's favorite exercise IDs
+   */
+  async getFavoriteExercises(): Promise<string[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/favorite-exercises`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Get favorite exercises failed:', response.status);
+        return [];
+      }
+
+      const data = await response.json();
+      if (data.success && Array.isArray(data.favoriteIds)) {
+        console.log(`[API] ✅ Loaded ${data.favoriteIds.length} favorite exercises`);
+        return data.favoriteIds;
+      }
+      return [];
+    } catch (error) {
+      console.error('[API] Get favorite exercises error:', error);
+      return [];
+    }
+  }
 }
 
 // Export singleton instance
