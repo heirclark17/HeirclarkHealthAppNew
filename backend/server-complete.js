@@ -1368,7 +1368,8 @@ app.get('/api/v1/exercises', async (req, res) => {
         bodyPart: row.body_part,
         target: row.target,
         equipment: row.equipment,
-        gifUrl: row.gif_url,
+        // Transform gifUrl to use our backend proxy endpoint
+        gifUrl: `https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/${row.id}?resolution=180`,
         instructions: row.instructions,
         secondaryMuscles: row.secondary_muscles
       })),
