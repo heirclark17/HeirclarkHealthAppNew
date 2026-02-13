@@ -487,9 +487,20 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     ))}
                   </View>
                 ) : (
-                  <Text style={[styles.emptyRecipeText, { color: colors.textSecondary }]}>
-                    Recipe details not available. Search online for "{meal.name}" recipe.
-                  </Text>
+                  <View>
+                    <Text style={[styles.emptyRecipeText, { color: colors.textSecondary }]}>
+                      Recipe details not available yet.
+                    </Text>
+                    <TouchableOpacity
+                      style={[styles.generateRecipeButton, { backgroundColor: colors.primary + '20', borderColor: colors.primary }]}
+                      onPress={handleGenerateAIRecipe}
+                      disabled={isGeneratingAIRecipe}
+                    >
+                      <Text style={[styles.generateRecipeText, { color: colors.primary }]}>
+                        {isGeneratingAIRecipe ? 'Generating Recipe...' : 'Generate Recipe with AI'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
               </View>
 
@@ -902,6 +913,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.thin,
     lineHeight: 20,
     fontStyle: 'italic',
+    marginBottom: 16,
+  },
+  generateRecipeButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  generateRecipeText: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    letterSpacing: 0.3,
   },
   loadingContainer: {
     flexDirection: 'row',
