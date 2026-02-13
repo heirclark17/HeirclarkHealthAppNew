@@ -193,6 +193,12 @@ const TAB_CONFIG: TabConfig[] = [
     label: 'Programs'
   },
   {
+    name: 'exercises',
+    href: '/exercises',
+    Icon: Dumbbell,
+    label: 'Exercises'
+  },
+  {
     name: 'accountability',
     href: '/accountability',
     Icon: Activity,
