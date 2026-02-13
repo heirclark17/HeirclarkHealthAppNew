@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import { mealPlanService } from '../services/mealPlanService';
 import { instacartService } from '../services/instacartService';
 import { aiService } from '../services/aiService';
+import { pexelsService } from '../services/pexelsService';
 import { generateGroceryList } from '../utils/groceryListGenerator';
 import { Linking } from 'react-native';
 import {
@@ -431,6 +432,98 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         } catch (syncError) {
           console.error('[MealPlanContext] ❌ Backend sync error:', syncError);
         }
+
+        // *** Background: Fetch images for all meals and auto-save ***
+        (async () => {
+          try {
+            console.log('[MealPlanContext] 🖼️ Starting background image generation for all meals...');
+            const updatedPlan = [...weeklyPlan];
+            let imagesGenerated = 0;
+
+            for (let dayIdx = 0; dayIdx < updatedPlan.length; dayIdx++) {
+              const day = updatedPlan[dayIdx];
+              for (let mealIdx = 0; mealIdx < day.meals.length; mealIdx++) {
+                const meal = day.meals[mealIdx];
+                if (meal.imageUrl) {
+                  imagesGenerated++;
+                  continue; // Already has an image
+                }
+                try {
+                  const imageUrl = await pexelsService.searchFoodPhoto(meal.name, 'card');
+                  if (imageUrl) {
+                    updatedPlan[dayIdx] = {
+                      ...updatedPlan[dayIdx],
+                      meals: updatedPlan[dayIdx].meals.map((m, idx) =>
+                        idx === mealIdx ? { ...m, imageUrl } : m
+                      ),
+                    };
+                    imagesGenerated++;
+                    console.log(`[MealPlanContext] 🖼️ Image ${imagesGenerated}: ${meal.name}`);
+                  }
+                } catch (imgErr) {
+                  console.error(`[MealPlanContext] ❌ Image error for ${meal.name}:`, imgErr);
+                }
+              }
+            }
+
+            // Update state with image URLs
+            setState(prev => ({ ...prev, weeklyPlan: updatedPlan }));
+
+            // Re-cache locally with images
+            const updatedCache = {
+              weeklyPlan: updatedPlan,
+              groceryList: [],
+              weekSummary: calculatedWeekSummary,
+              lastGeneratedAt: now,
+            };
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCache));
+
+            // Re-sync plan with images to backend
+            try {
+              const weekStart = updatedPlan[0]?.date || new Date().toISOString().split('T')[0];
+              await api.saveMealPlan(
+                { weeklyPlan: updatedPlan, groceryList: [], weekSummary: calculatedWeekSummary },
+                weekStart,
+                preferences.dietStyle
+              );
+            } catch {}
+
+            // Auto-save all meals to saved_meals
+            console.log('[MealPlanContext] 💾 Auto-saving all meals to saved meals...');
+            for (const day of updatedPlan) {
+              for (const meal of day.meals) {
+                try {
+                  await aiService.saveMeal({
+                    id: meal.id,
+                    name: meal.name,
+                    mealType: meal.mealType as any,
+                    description: meal.description || '',
+                    nutrients: {
+                      calories: meal.calories,
+                      protein_g: meal.protein,
+                      carbs_g: meal.carbs,
+                      fat_g: meal.fat,
+                    },
+                    ingredients: (meal.ingredients || []).map((ing: any) => ({
+                      name: ing.name || '',
+                      amount: ing.amount || ing.quantity || '',
+                      unit: ing.unit || '',
+                    })),
+                    prepTimeMinutes: meal.prepTime || 15,
+                    servings: meal.servings || 1,
+                    tags: [],
+                    imageUrl: meal.imageUrl,
+                  }, 'ai');
+                } catch (saveErr) {
+                  // Skip duplicates silently
+                }
+              }
+            }
+            console.log(`[MealPlanContext] ✅ Background complete: ${imagesGenerated} images, meals saved`);
+          } catch (bgError) {
+            console.error('[MealPlanContext] ❌ Background task error:', bgError);
+          }
+        })();
 
         return true;
       } else {

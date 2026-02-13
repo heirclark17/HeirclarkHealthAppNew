@@ -955,6 +955,7 @@ class AIService {
             prepTimeMinutes: m.prepTimeMinutes || m.prep_time_minutes || 15,
             ingredients: m.ingredients || [],
             tags: m.tags || [],
+            imageUrl: m.photoUrl || m.photo_url || undefined,
           },
           savedAt: m.lastUsedAt || m.last_used_at || new Date().toISOString(),
           source: 'custom',
@@ -1040,6 +1041,7 @@ class AIService {
           ingredients: meal.ingredients,
           recipe: meal.description,
           prepTimeMinutes: meal.prepTimeMinutes,
+          photoUrl: meal.imageUrl || '',
           tags: meal.tags,
         });
 

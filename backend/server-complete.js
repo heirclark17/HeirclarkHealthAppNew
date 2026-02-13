@@ -1945,12 +1945,59 @@ Generate personalized, encouraging guidance for their cheat day that helps them 
 });
 
 // ============================================
-// FOOD PHOTO GENERATION (DALL-E)
+// FOOD PHOTO GENERATION (DALL-E) + PERSISTENT STORAGE
 // ============================================
 
-// In-memory cache for generated images (persists across requests until server restart)
+// Create food_images table for permanent storage
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS food_images (
+        id SERIAL PRIMARY KEY,
+        image_key TEXT UNIQUE NOT NULL,
+        image_data TEXT NOT NULL,
+        content_type TEXT DEFAULT 'image/png',
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    console.log('[Food Images] Table ready');
+  } catch (err) {
+    console.error('[Food Images] Table creation error:', err.message);
+  }
+})();
+
+// In-memory cache for fast lookups (maps key -> permanent URL)
 const foodImageCache = new Map();
 
+// Serve permanently stored food images
+app.get('/api/v1/food-images/:key', async (req, res) => {
+  try {
+    const imageKey = decodeURIComponent(req.params.key).toLowerCase().trim();
+    const result = await pool.query(
+      'SELECT image_data, content_type FROM food_images WHERE image_key = $1',
+      [imageKey]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    const { image_data, content_type } = result.rows[0];
+    const buffer = Buffer.from(image_data, 'base64');
+
+    res.set({
+      'Content-Type': content_type || 'image/png',
+      'Content-Length': buffer.length,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    });
+    res.send(buffer);
+  } catch (error) {
+    console.error('[Food Images] Serve error:', error.message);
+    res.status(500).json({ error: 'Failed to serve image' });
+  }
+});
+
+// Generate or retrieve food photos - now with permanent storage
 app.get('/api/v1/food-photo', async (req, res) => {
   try {
     const { query } = req.query;
@@ -1958,18 +2005,33 @@ app.get('/api/v1/food-photo', async (req, res) => {
       return res.status(400).json({ error: 'query parameter required' });
     }
 
-    // Check cache first
     const cacheKey = query.toLowerCase().trim();
+    const encodedKey = encodeURIComponent(cacheKey);
+    const API_URL = `${req.protocol}://${req.get('host')}`;
+    const permanentUrl = `${API_URL}/api/v1/food-images/${encodedKey}`;
+
+    // 1. Check in-memory cache (fast path)
     if (foodImageCache.has(cacheKey)) {
-      const cached = foodImageCache.get(cacheKey);
-      // DALL-E URLs expire after ~1 hour, check if still valid
-      if (Date.now() - cached.timestamp < 55 * 60 * 1000) {
-        console.log('[Food Photo] Cache hit:', query);
-        return res.json({ url: cached.url });
-      }
-      foodImageCache.delete(cacheKey);
+      console.log('[Food Photo] Memory cache hit:', query);
+      return res.json({ url: foodImageCache.get(cacheKey) });
     }
 
+    // 2. Check database for permanent image
+    try {
+      const dbResult = await pool.query(
+        'SELECT id FROM food_images WHERE image_key = $1',
+        [cacheKey]
+      );
+      if (dbResult.rows.length > 0) {
+        console.log('[Food Photo] Database hit:', query);
+        foodImageCache.set(cacheKey, permanentUrl);
+        return res.json({ url: permanentUrl });
+      }
+    } catch (dbErr) {
+      console.error('[Food Photo] DB lookup error:', dbErr.message);
+    }
+
+    // 3. Generate with DALL-E
     console.log('[Food Photo] Generating DALL-E image for:', query);
 
     const response = await openai.images.generate({
@@ -1980,16 +2042,39 @@ app.get('/api/v1/food-photo', async (req, res) => {
       quality: 'standard',
     });
 
-    const imageUrl = response.data[0]?.url;
-    if (imageUrl) {
-      // Cache the result
-      foodImageCache.set(cacheKey, { url: imageUrl, timestamp: Date.now() });
-      console.log('[Food Photo] DALL-E image generated for:', query);
-      return res.json({ url: imageUrl });
+    const dalleUrl = response.data[0]?.url;
+    if (!dalleUrl) {
+      console.error('[Food Photo] No image URL in DALL-E response');
+      return res.json({ url: '' });
     }
 
-    console.error('[Food Photo] No image URL in DALL-E response');
-    res.json({ url: '' });
+    console.log('[Food Photo] DALL-E image generated for:', query);
+
+    // 4. Download DALL-E image and store permanently
+    try {
+      const imgResponse = await fetch(dalleUrl);
+      if (imgResponse.ok) {
+        const arrayBuffer = await imgResponse.arrayBuffer();
+        const base64Data = Buffer.from(arrayBuffer).toString('base64');
+        const contentType = imgResponse.headers.get('content-type') || 'image/png';
+
+        await pool.query(
+          `INSERT INTO food_images (image_key, image_data, content_type)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (image_key) DO NOTHING`,
+          [cacheKey, base64Data, contentType]
+        );
+
+        console.log('[Food Photo] Stored permanently:', query);
+        foodImageCache.set(cacheKey, permanentUrl);
+        return res.json({ url: permanentUrl });
+      }
+    } catch (storeErr) {
+      console.error('[Food Photo] Storage error:', storeErr.message);
+    }
+
+    // Fallback: return DALL-E URL (will expire, but better than nothing)
+    return res.json({ url: dalleUrl });
   } catch (error) {
     console.error('[Food Photo] DALL-E error:', error.message);
     res.json({ url: '' });

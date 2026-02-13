@@ -14,6 +14,7 @@ import {
   RefreshControl,
   Alert,
   Platform,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -182,6 +183,19 @@ export default function SavedMealsScreen() {
     return (
       <Animated.View entering={enteringAnimation}>
         <GlassCard style={styles.mealCard}>
+          {/* Meal Photo */}
+          {meal.imageUrl ? (
+            <Image
+              source={{ uri: meal.imageUrl }}
+              style={styles.mealPhoto}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={[styles.mealPhoto, styles.mealPhotoPlaceholder, { backgroundColor: colors.backgroundSecondary }]}>
+              <UtensilsCrossed size={28} color={colors.textMuted} strokeWidth={1} />
+            </View>
+          )}
+          <View style={styles.mealCardContent}>
           <View style={styles.mealHeader}>
             <View style={[styles.mealTypeIndicator, { backgroundColor: colors.backgroundSecondary }]}>
               <Text style={[styles.mealTypeText, { color: colors.textSecondary }]}>
@@ -269,6 +283,7 @@ export default function SavedMealsScreen() {
               ))}
             </View>
           )}
+          </View>
         </GlassCard>
       </Animated.View>
     );
@@ -554,6 +569,20 @@ const styles = StyleSheet.create({
   },
   mealCard: {
     marginBottom: Spacing.md,
+    padding: 0,
+    overflow: 'hidden',
+  },
+  mealPhoto: {
+    width: '100%',
+    height: 160,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  mealPhotoPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mealCardContent: {
     padding: Spacing.md,
   },
   mealHeader: {

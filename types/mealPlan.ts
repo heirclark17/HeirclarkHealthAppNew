@@ -21,6 +21,7 @@ export interface Meal {
   fat: number;
   ingredients: Ingredient[];
   instructions: string[];
+  imageUrl?: string;
 }
 
 export interface DayPlan {

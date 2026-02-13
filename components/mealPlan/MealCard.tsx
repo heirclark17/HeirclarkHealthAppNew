@@ -202,8 +202,15 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
-  // Fetch meal image from Pexels when component mounts or meal changes
+  // Use persisted imageUrl if available, otherwise fetch from backend
   useEffect(() => {
+    if (meal.imageUrl) {
+      setMealImageUrl(meal.imageUrl);
+      setIsLoadingImage(false);
+      setImageError(false);
+      return;
+    }
+
     const fetchMealImage = async () => {
       setIsLoadingImage(true);
       setImageError(false);
@@ -219,7 +226,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
     };
 
     fetchMealImage();
-  }, [meal.name]);
+  }, [meal.name, meal.imageUrl]);
 
   const handleSwap = () => {
     if (onSwap) {
