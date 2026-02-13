@@ -351,9 +351,14 @@ export default function ExercisesScreen() {
               {/* GIF Thumbnail */}
               {item.gifUrl && (
                 <Image
-                  source={{ uri: item.gifUrl }}
+                  key={`gif-${item.id}`}
+                  source={{
+                    uri: item.gifUrl,
+                    cache: 'force-cache', // Use cached version if available
+                  }}
                   style={styles.gifThumbnail}
                   resizeMode="cover"
+                  defaultSource={require('../../assets/icon.png')} // Fallback while loading
                 />
               )}
 
@@ -681,6 +686,11 @@ export default function ExercisesScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        initialNumToRender={10}
+        windowSize={5}
+        updateCellsBatchingPeriod={50}
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.emptyState}>
