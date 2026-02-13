@@ -93,7 +93,7 @@ export default function ExercisesScreen() {
   const [isLoadingExercises, setIsLoadingExercises] = useState(true);
   const [currentOffset, setCurrentOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const EXERCISES_PER_PAGE = 50;
+  const EXERCISES_PER_PAGE = 10; // API limit is 10 per request
 
   // Initialize ExerciseDB service and fetch initial exercises
   useEffect(() => {
@@ -574,7 +574,7 @@ function ExerciseDetailModal({
   const [isLoadingGif, setIsLoadingGif] = useState(false);
   const [gifError, setGifError] = useState(false);
 
-  // Fetch exercise GIF from ExerciseDB when modal opens
+  // Use exercise GIF URL directly from API data (already fetched)
   useEffect(() => {
     if (!visible) {
       // Reset when modal closes
@@ -583,17 +583,34 @@ function ExerciseDetailModal({
       return;
     }
 
+    // If exercise already has a gifUrl (from API), use it directly
+    if (exercise.gifUrl) {
+      setExerciseGif({
+        id: exercise.exerciseDbId || exercise.id,
+        name: exercise.name,
+        bodyPart: exercise.primaryMuscle || 'core',
+        target: exercise.primaryMuscle || 'core',
+        equipment: exercise.equipment,
+        gifUrl: exercise.gifUrl,
+        instructions: exercise.instructions,
+        secondaryMuscles: exercise.secondaryMuscles?.map(m => m) || [],
+      });
+      setIsLoadingGif(false);
+      console.log('[ExerciseLibrary] Using GIF from API data:', exercise.name);
+      return;
+    }
+
+    // Fallback: search for exercise if no gifUrl
     const fetchGif = async () => {
       setIsLoadingGif(true);
       setGifError(false);
 
       try {
-        // Search for exercise by name in ExerciseDB
         const results = await exerciseDbService.searchExercisesByName(exercise.name);
 
         if (results && results.length > 0) {
           setExerciseGif(results[0]);
-          console.log('[ExerciseLibrary] Loaded GIF for:', exercise.name);
+          console.log('[ExerciseLibrary] Loaded GIF from search for:', exercise.name);
         } else {
           console.log('[ExerciseLibrary] No GIF found for:', exercise.name);
         }
@@ -606,7 +623,7 @@ function ExerciseDetailModal({
     };
 
     fetchGif();
-  }, [visible, exercise.name]);
+  }, [visible, exercise.name, exercise.gifUrl, exercise.exerciseDbId, exercise.primaryMuscle, exercise.equipment, exercise.instructions, exercise.secondaryMuscles]);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
