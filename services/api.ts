@@ -2351,6 +2351,107 @@ class HeirclarkAPI {
       return null;
     }
   }
+
+  /**
+   * Sync exercises to backend database
+   */
+  async syncExercises(exercises: any[]): Promise<{ success: boolean; count: number }> {
+    try {
+      console.log(`[API] Syncing ${exercises.length} exercises to backend...`);
+
+      const response = await fetch(`${this.baseUrl}/api/v1/exercises/sync`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ exercises }),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Sync exercises failed:', response.status);
+        return { success: false, count: 0 };
+      }
+
+      const data = await response.json();
+      console.log(`[API] ✅ Synced ${data.count} exercises to backend`);
+      return { success: true, count: data.count };
+    } catch (error) {
+      console.error('[API] Sync exercises error:', error);
+      return { success: false, count: 0 };
+    }
+  }
+
+  /**
+   * Get exercises from backend database with filters
+   */
+  async getExercises(filters?: {
+    bodyPart?: string;
+    equipment?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<any[]> {
+    try {
+      const params = new URLSearchParams();
+      if (filters?.bodyPart) params.append('bodyPart', filters.bodyPart);
+      if (filters?.equipment) params.append('equipment', filters.equipment);
+      if (filters?.search) params.append('search', filters.search);
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.offset) params.append('offset', filters.offset.toString());
+
+      const queryString = params.toString();
+      const url = `${this.baseUrl}/api/v1/exercises${queryString ? `?${queryString}` : ''}`;
+
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('[API] Get exercises failed:', response.status);
+        return [];
+      }
+
+      const data = await response.json();
+      if (data.success && data.exercises) {
+        console.log(`[API] ✅ Loaded ${data.exercises.length} exercises from backend`);
+        return data.exercises;
+      }
+      return [];
+    } catch (error) {
+      console.error('[API] Get exercises error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get total exercise count from backend
+   */
+  async getExerciseCount(): Promise<number> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/exercises/count`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('[API] Get exercise count failed:', response.status);
+        return 0;
+      }
+
+      const data = await response.json();
+      if (data.success && typeof data.count === 'number') {
+        console.log(`[API] ✅ Total exercises in database: ${data.count}`);
+        return data.count;
+      }
+      return 0;
+    } catch (error) {
+      console.error('[API] Get exercise count error:', error);
+      return 0;
+    }
+  }
 }
 
 // Export singleton instance

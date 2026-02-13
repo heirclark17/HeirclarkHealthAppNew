@@ -1265,6 +1265,133 @@ app.get('/api/v1/meals/plan', authenticateToken, async (req, res) => {
 });
 
 // ============================================
+// EXERCISE LIBRARY ENDPOINTS
+// ============================================
+
+// POST /api/v1/exercises/sync - Bulk insert/update exercises from ExerciseDB
+app.post('/api/v1/exercises/sync', async (req, res) => {
+  try {
+    const { exercises } = req.body;
+
+    if (!exercises || !Array.isArray(exercises) || exercises.length === 0) {
+      return res.status(400).json({ error: 'No exercises provided' });
+    }
+
+    console.log(`[Exercises Sync] Syncing ${exercises.length} exercises to database`);
+
+    // Bulk upsert with conflict handling
+    const values = exercises.map((ex, idx) => {
+      const offset = idx * 8;
+      return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`;
+    }).join(',');
+
+    const params = exercises.flatMap(ex => [
+      ex.id,
+      ex.name,
+      ex.bodyPart || null,
+      ex.target || null,
+      ex.equipment || null,
+      ex.gifUrl || null,
+      JSON.stringify(ex.instructions || []),
+      JSON.stringify(ex.secondaryMuscles || [])
+    ]);
+
+    await pool.query(`
+      INSERT INTO exercises (id, name, body_part, target, equipment, gif_url, instructions, secondary_muscles)
+      VALUES ${values}
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        body_part = EXCLUDED.body_part,
+        target = EXCLUDED.target,
+        equipment = EXCLUDED.equipment,
+        gif_url = EXCLUDED.gif_url,
+        instructions = EXCLUDED.instructions,
+        secondary_muscles = EXCLUDED.secondary_muscles,
+        updated_at = NOW()
+    `, params);
+
+    console.log(`[Exercises Sync] ✅ Synced ${exercises.length} exercises`);
+    res.json({ success: true, count: exercises.length });
+  } catch (error) {
+    console.error('[Exercises Sync] Error:', error);
+    res.status(500).json({ error: 'Failed to sync exercises' });
+  }
+});
+
+// GET /api/v1/exercises - Get all exercises with optional filters
+app.get('/api/v1/exercises', async (req, res) => {
+  try {
+    const { bodyPart, equipment, search, limit, offset } = req.query;
+
+    let query = 'SELECT * FROM exercises WHERE 1=1';
+    const params = [];
+    let paramCount = 1;
+
+    if (bodyPart && bodyPart !== 'all') {
+      query += ` AND body_part = $${paramCount}`;
+      params.push(bodyPart);
+      paramCount++;
+    }
+
+    if (equipment && equipment !== 'all') {
+      query += ` AND equipment = $${paramCount}`;
+      params.push(equipment);
+      paramCount++;
+    }
+
+    if (search) {
+      query += ` AND name ILIKE $${paramCount}`;
+      params.push(`%${search}%`);
+      paramCount++;
+    }
+
+    query += ' ORDER BY name ASC';
+
+    if (limit) {
+      query += ` LIMIT $${paramCount}`;
+      params.push(parseInt(limit));
+      paramCount++;
+    }
+
+    if (offset) {
+      query += ` OFFSET $${paramCount}`;
+      params.push(parseInt(offset));
+    }
+
+    const result = await pool.query(query, params);
+
+    res.json({
+      success: true,
+      exercises: result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        bodyPart: row.body_part,
+        target: row.target,
+        equipment: row.equipment,
+        gifUrl: row.gif_url,
+        instructions: row.instructions,
+        secondaryMuscles: row.secondary_muscles
+      })),
+      count: result.rows.length
+    });
+  } catch (error) {
+    console.error('[Exercises Get] Error:', error);
+    res.status(500).json({ error: 'Failed to get exercises' });
+  }
+});
+
+// GET /api/v1/exercises/count - Get total exercise count
+app.get('/api/v1/exercises/count', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT COUNT(*) FROM exercises');
+    res.json({ success: true, count: parseInt(result.rows[0].count) });
+  } catch (error) {
+    console.error('[Exercises Count] Error:', error);
+    res.status(500).json({ error: 'Failed to get count' });
+  }
+});
+
+// ============================================
 // FOOD PREFERENCES ENDPOINTS
 // ============================================
 
@@ -1980,6 +2107,34 @@ Generate personalized, encouraging guidance for their cheat day that helps them 
 // ============================================
 // FOOD PHOTO GENERATION (DALL-E) + PERSISTENT STORAGE
 // ============================================
+
+// Create exercises table for ExerciseDB data persistence
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS exercises (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        body_part TEXT,
+        target TEXT,
+        equipment TEXT,
+        gif_url TEXT,
+        instructions JSONB,
+        secondary_muscles JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_exercises_body_part ON exercises (body_part);
+      CREATE INDEX IF NOT EXISTS idx_exercises_equipment ON exercises (equipment);
+      CREATE INDEX IF NOT EXISTS idx_exercises_name ON exercises (name);
+    `);
+    console.log('[Exercises] Table ready');
+  } catch (err) {
+    console.error('[Exercises] Table creation error:', err.message);
+  }
+})();
 
 // Create food_images table for permanent storage
 (async () => {
