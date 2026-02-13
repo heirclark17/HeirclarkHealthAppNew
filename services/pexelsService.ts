@@ -1,48 +1,21 @@
 import Constants from 'expo-constants';
 
-const UNSPLASH_ACCESS_KEY = Constants.expoConfig?.extra?.unsplashAccessKey ||
-                            process.env.EXPO_PUBLIC_UNSPLASH_ACCESS_KEY;
-
-interface UnsplashPhoto {
-  id: string;
-  width: number;
-  height: number;
-  urls: {
-    raw: string;
-    full: string;
-    regular: string;  // 1080px wide
-    small: string;    // 400px wide
-    thumb: string;    // 200px wide
-  };
-  user: {
-    name: string;
-  };
-}
-
-interface UnsplashSearchResponse {
-  results: UnsplashPhoto[];
-  total: number;
-  total_pages: number;
-}
+const API_URL = Constants.expoConfig?.extra?.apiUrl ||
+                process.env.EXPO_PUBLIC_API_URL ||
+                'https://heirclarkinstacartbackend-production.up.railway.app';
 
 // In-memory cache to avoid repeated API calls for same meals
 const photoCache = new Map<string, string>();
 
 class FoodImageService {
-  private accessKey: string;
-  private baseUrl = 'https://api.unsplash.com';
+  private baseUrl: string;
 
   constructor() {
-    const rawKey = UNSPLASH_ACCESS_KEY || '';
-    // Detect placeholder values
-    this.accessKey = rawKey.includes('YOUR_') || rawKey.includes('_HERE') || rawKey.length < 10 ? '' : rawKey;
-    if (!this.accessKey) {
-      console.warn('[FoodImageService] Unsplash key not configured. Using TheMealDB fallback.');
-    }
+    this.baseUrl = API_URL;
   }
 
   /**
-   * Search for food photos based on meal name
+   * Search for food photos via backend (Unsplash key stored on Railway)
    */
   async searchFoodPhoto(mealName: string, size: 'card' | 'modal' = 'card'): Promise<string> {
     // Check cache first
@@ -51,55 +24,43 @@ class FoodImageService {
       return photoCache.get(cacheKey)!;
     }
 
-    // If no API key, try TheMealDB fallback
-    if (!this.accessKey) {
-      return this.getTheMealDBFallback(mealName, size);
-    }
-
     try {
       const searchTerm = this.extractFoodKeywords(mealName);
-      console.log('[FoodImageService] Unsplash searching:', searchTerm);
+      console.log('[FoodImageService] Searching:', searchTerm);
 
       const response = await fetch(
-        `${this.baseUrl}/search/photos?query=${encodeURIComponent(searchTerm)}&per_page=5&orientation=landscape&content_filter=high`,
-        {
-          headers: {
-            Authorization: `Client-ID ${this.accessKey}`,
-          },
-        }
+        `${this.baseUrl}/api/v1/food-photo?query=${encodeURIComponent(searchTerm)}&size=${size}`,
+        { signal: AbortSignal.timeout(8000) }
       );
 
       if (!response.ok) {
-        console.error('[FoodImageService] Unsplash API error:', response.status);
+        console.error('[FoodImageService] API error:', response.status);
         return this.getTheMealDBFallback(mealName, size);
       }
 
-      const data: UnsplashSearchResponse = await response.json();
+      const data = await response.json();
 
-      if (data.results && data.results.length > 0) {
+      if (data.photos && data.photos.length > 0) {
         // Deterministic selection based on meal name
         const hash = this.hashString(mealName);
-        const idx = Math.abs(hash) % data.results.length;
-        const photo = data.results[idx];
+        const idx = Math.abs(hash) % data.photos.length;
+        const photo = data.photos[idx];
 
         // Use raw URL with size parameters for optimal loading
-        // card: 600w, modal: 1080w (regular)
         const imageUrl = size === 'card'
-          ? `${photo.urls.raw}&w=600&h=400&fit=crop&crop=center&q=80`
-          : `${photo.urls.raw}&w=1080&h=720&fit=crop&crop=center&q=80`;
+          ? `${photo.raw}&w=600&h=400&fit=crop&crop=center&q=80`
+          : `${photo.raw}&w=1080&h=720&fit=crop&crop=center&q=80`;
 
-        // Cache the result
         photoCache.set(cacheKey, imageUrl);
-
-        console.log('[FoodImageService] Found Unsplash photo by:', photo.user.name);
+        console.log('[FoodImageService] Found photo by:', photo.photographer);
         return imageUrl;
       }
 
-      console.log('[FoodImageService] No Unsplash results for:', searchTerm);
+      console.log('[FoodImageService] No results, trying TheMealDB');
       return this.getTheMealDBFallback(mealName, size);
 
     } catch (error) {
-      console.error('[FoodImageService] Unsplash error:', error);
+      console.error('[FoodImageService] Error:', error);
       return this.getTheMealDBFallback(mealName, size);
     }
   }
@@ -125,11 +86,11 @@ class FoodImageService {
     const matches = foodKeywords.filter(keyword => lowerName.includes(keyword));
 
     if (matches.length > 0) {
-      return matches.slice(0, 2).join(' ') + ' food';
+      return matches.slice(0, 2).join(' ');
     }
 
-    // Use full meal name for search
-    return `${mealName} food`;
+    // Use first 3 words of meal name
+    return mealName.split(' ').slice(0, 3).join(' ');
   }
 
   /**

@@ -1945,6 +1945,55 @@ Generate personalized, encouraging guidance for their cheat day that helps them 
 });
 
 // ============================================
+// FOOD PHOTO SEARCH (Unsplash)
+// ============================================
+
+app.get('/api/v1/food-photo', async (req, res) => {
+  try {
+    const { query, size } = req.query;
+    if (!query) {
+      return res.status(400).json({ error: 'query parameter required' });
+    }
+
+    const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
+    if (!unsplashKey) {
+      console.error('[Food Photo] UNSPLASH_ACCESS_KEY not configured');
+      return res.json({ url: '' });
+    }
+
+    const searchTerm = `${query} food`;
+    const response = await fetch(
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchTerm)}&per_page=5&orientation=landscape&content_filter=high`,
+      {
+        headers: { Authorization: `Client-ID ${unsplashKey}` },
+      }
+    );
+
+    if (!response.ok) {
+      console.error('[Food Photo] Unsplash API error:', response.status);
+      return res.json({ url: '' });
+    }
+
+    const data = await response.json();
+    if (data.results && data.results.length > 0) {
+      // Return all results so frontend can pick deterministically
+      const photos = data.results.map(p => ({
+        raw: p.urls.raw,
+        regular: p.urls.regular,
+        small: p.urls.small,
+        photographer: p.user.name,
+      }));
+      return res.json({ photos });
+    }
+
+    res.json({ photos: [] });
+  } catch (error) {
+    console.error('[Food Photo] Error:', error.message);
+    res.json({ photos: [] });
+  }
+});
+
+// ============================================
 // AI RECIPE DETAILS
 // ============================================
 
