@@ -1391,6 +1391,39 @@ app.get('/api/v1/exercises/count', async (req, res) => {
   }
 });
 
+// GET /api/v1/exercise-gif/:id - Proxy exercise GIF images
+app.get('/api/v1/exercise-gif/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resolution = req.query.resolution || '180'; // Default to 180 for free tier
+
+    console.log(`[Exercise GIF] Fetching GIF for exercise ${id} at ${resolution}p`);
+
+    // Fetch GIF from ExerciseDB API with authentication
+    const apiKey = process.env.EXERCISEDB_API_KEY || 'b3c3790038mshcfc571cd8cae3ccp13abefjsn6fb2f32a654d';
+    const gifUrl = `https://exercisedb.p.rapidapi.com/image?exerciseId=${id}&resolution=${resolution}&rapidapi-key=${apiKey}`;
+
+    const response = await fetch(gifUrl);
+
+    if (!response.ok) {
+      console.error(`[Exercise GIF] API error for ${id}:`, response.status);
+      return res.status(response.status).json({ error: 'Failed to fetch GIF' });
+    }
+
+    // Stream the GIF to client with caching headers
+    res.setHeader('Content-Type', 'image/gif');
+    res.setHeader('Cache-Control', 'public, max-age=2592000'); // 30 days cache
+
+    // Stream the response
+    response.body.pipe(res);
+
+    console.log(`[Exercise GIF] ✅ Served GIF for exercise ${id}`);
+  } catch (error) {
+    console.error('[Exercise GIF] Error:', error);
+    res.status(500).json({ error: 'Failed to serve GIF' });
+  }
+});
+
 // ============================================
 // FOOD PREFERENCES ENDPOINTS
 // ============================================

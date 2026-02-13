@@ -14,7 +14,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'chest',
     target: 'pectorals',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0025.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0025?resolution=180',
     instructions: [
       'Lie flat on a bench with feet flat on the floor.',
       'Grip the barbell slightly wider than shoulder-width.',
@@ -31,7 +31,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'chest',
     target: 'pectorals',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0662.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0662?resolution=180',
     instructions: [
       'Start in a plank position with hands slightly wider than shoulders.',
       'Keep your body in a straight line from head to heels.',
@@ -48,7 +48,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'chest',
     target: 'pectorals',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0289.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0289?resolution=180',
     instructions: [
       'Lie on a flat bench holding dumbbells at chest level.',
       'Press dumbbells up until arms are fully extended.',
@@ -64,7 +64,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'chest',
     target: 'pectorals',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0227.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0227?resolution=180',
     instructions: [
       'Set bench to 30-45 degree incline.',
       'Hold dumbbells at shoulder level.',
@@ -80,7 +80,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'chest',
     target: 'pectorals',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0251.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0251?resolution=180',
     instructions: [
       'Lie on a flat bench with dumbbells above chest.',
       'Keep a slight bend in elbows throughout.',
@@ -98,7 +98,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'back',
     target: 'lats',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0652.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0652?resolution=180',
     instructions: [
       'Grip the bar slightly wider than shoulder-width.',
       'Hang with arms fully extended.',
@@ -115,7 +115,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'back',
     target: 'lats',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0027.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0027?resolution=180',
     instructions: [
       'Stand with feet hip-width apart, holding barbell.',
       'Hinge at hips until torso is nearly parallel to floor.',
@@ -132,7 +132,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'back',
     target: 'lats',
     equipment: 'cable',
-    gifUrl: 'https://v2.exercisedb.io/image/0580.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0580?resolution=180',
     instructions: [
       'Sit at lat pulldown machine and grip bar wide.',
       'Lean back slightly and pull bar to upper chest.',
@@ -148,7 +148,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'back',
     target: 'lats',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0293.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0293?resolution=180',
     instructions: [
       'Place one knee and hand on a bench for support.',
       'Hold dumbbell in opposite hand, arm hanging.',
@@ -165,7 +165,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'back',
     target: 'spine',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0017.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0017?resolution=180',
     instructions: [
       'Stand with feet hip-width apart, bar over mid-foot.',
       'Bend at hips and knees to grip bar.',
@@ -184,7 +184,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'shoulders',
     target: 'deltoids',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0561.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0561?resolution=180',
     instructions: [
       'Sit or stand holding dumbbells at shoulder level.',
       'Press weights overhead until arms are extended.',
@@ -200,7 +200,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'shoulders',
     target: 'deltoids',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0041.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0041?resolution=180',
     instructions: [
       'Start with bar at shoulder level, grip slightly wider than shoulders.',
       'Press bar straight overhead.',
@@ -216,7 +216,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'shoulders',
     target: 'deltoids',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0310.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0310?resolution=180',
     instructions: [
       'Stand holding dumbbells at sides.',
       'Raise arms out to sides until parallel to floor.',
@@ -232,7 +232,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'shoulders',
     target: 'deltoids',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0306.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0306?resolution=180',
     instructions: [
       'Stand holding dumbbells in front of thighs.',
       'Raise one or both arms forward to shoulder height.',
@@ -248,7 +248,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'shoulders',
     target: 'deltoids',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0315.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0315?resolution=180',
     instructions: [
       'Bend over at hips holding dumbbells.',
       'Let arms hang below with slight elbow bend.',
@@ -266,7 +266,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'quads',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0043.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0043?resolution=180',
     instructions: [
       'Position bar on upper back, feet shoulder-width apart.',
       'Brace core and begin descent by bending knees.',
@@ -283,7 +283,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'quads',
     equipment: 'leverage machine',
-    gifUrl: 'https://v2.exercisedb.io/image/0594.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0594?resolution=180',
     instructions: [
       'Sit in leg press machine with back flat against pad.',
       'Place feet hip-width apart on platform.',
@@ -300,7 +300,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'quads',
     equipment: 'leverage machine',
-    gifUrl: 'https://v2.exercisedb.io/image/0585.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0585?resolution=180',
     instructions: [
       'Sit in machine with back against pad.',
       'Hook ankles under roller pad.',
@@ -317,7 +317,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'hamstrings',
     equipment: 'leverage machine',
-    gifUrl: 'https://v2.exercisedb.io/image/0584.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0584?resolution=180',
     instructions: [
       'Lie face down on leg curl machine.',
       'Position ankles under roller pad.',
@@ -334,7 +334,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'quads',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0334.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0334?resolution=180',
     instructions: [
       'Stand holding dumbbells at sides.',
       'Step forward with one leg.',
@@ -351,7 +351,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'hamstrings',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0420.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0420?resolution=180',
     instructions: [
       'Stand holding dumbbells in front of thighs.',
       'Keep slight bend in knees throughout.',
@@ -368,7 +368,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'quads',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0388.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0388?resolution=180',
     instructions: [
       'Hold dumbbell vertically at chest level.',
       'Stand with feet wider than shoulder-width.',
@@ -387,7 +387,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'biceps',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0023.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0023?resolution=180',
     instructions: [
       'Stand holding barbell with underhand grip.',
       'Keep elbows close to sides.',
@@ -404,7 +404,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'biceps',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0294.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0294?resolution=180',
     instructions: [
       'Stand holding dumbbells at sides, palms forward.',
       'Curl weights up toward shoulders.',
@@ -421,7 +421,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'biceps',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0406.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0406?resolution=180',
     instructions: [
       'Stand holding dumbbells with neutral grip (palms facing each other).',
       'Curl weights up keeping palms facing in.',
@@ -437,7 +437,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'biceps',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0410.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0410?resolution=180',
     instructions: [
       'Sit on bench, lean forward slightly.',
       'Brace elbow against inner thigh.',
@@ -456,7 +456,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'triceps',
     equipment: 'cable',
-    gifUrl: 'https://v2.exercisedb.io/image/0083.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0083?resolution=180',
     instructions: [
       'Stand facing cable machine with rope or bar attachment.',
       'Grip handle with elbows at sides.',
@@ -473,7 +473,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'triceps',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0187.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0187?resolution=180',
     instructions: [
       'Stand or sit holding one dumbbell with both hands.',
       'Raise weight overhead with arms extended.',
@@ -489,7 +489,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'triceps',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0188.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0188?resolution=180',
     instructions: [
       'Hinge forward at hips, one hand on bench.',
       'Hold dumbbell with elbow bent at 90 degrees.',
@@ -506,7 +506,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'triceps',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0274.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0274?resolution=180',
     instructions: [
       'Grip parallel bars and lift body up.',
       'Start with arms fully extended.',
@@ -523,7 +523,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper arms',
     target: 'triceps',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0812.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0812?resolution=180',
     instructions: [
       'Lie on bench and grip bar with hands shoulder-width or closer.',
       'Unrack bar and hold above chest.',
@@ -541,7 +541,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'waist',
     target: 'abs',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0628.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0628?resolution=180',
     instructions: [
       'Start in push-up position on forearms.',
       'Keep body in straight line from head to heels.',
@@ -558,7 +558,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'waist',
     target: 'abs',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0214.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0214?resolution=180',
     instructions: [
       'Lie on back with knees bent, feet flat.',
       'Place hands behind head or across chest.',
@@ -575,7 +575,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'waist',
     target: 'abs',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0464.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0464?resolution=180',
     instructions: [
       'Hang from pull-up bar with arms extended.',
       'Keep legs straight or slightly bent.',
@@ -592,7 +592,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'waist',
     target: 'abs',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0727.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0727?resolution=180',
     instructions: [
       'Sit with knees bent, lean back slightly.',
       'Lift feet off floor if able.',
@@ -609,7 +609,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'waist',
     target: 'abs',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0491.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0491?resolution=180',
     instructions: [
       'Lie on back with hands behind head.',
       'Lift shoulders off floor.',
@@ -626,7 +626,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'waist',
     target: 'abs',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0547.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0547?resolution=180',
     instructions: [
       'Lie on back with arms extended toward ceiling.',
       'Lift legs with knees bent at 90 degrees.',
@@ -645,7 +645,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'glutes',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0495.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0495?resolution=180',
     instructions: [
       'Sit on ground with upper back against bench.',
       'Roll barbell over hips, pad bar for comfort.',
@@ -662,7 +662,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'glutes',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0389.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0389?resolution=180',
     instructions: [
       'Lie on back with knees bent, feet flat.',
       'Arms at sides for stability.',
@@ -679,7 +679,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'glutes',
     equipment: 'cable',
-    gifUrl: 'https://v2.exercisedb.io/image/0088.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0088?resolution=180',
     instructions: [
       'Face away from low cable, straddle rope.',
       'Hinge at hips reaching back through legs.',
@@ -698,7 +698,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'shoulders',
     target: 'deltoids',
     equipment: 'barbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0032.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0032?resolution=180',
     instructions: [
       'Start with bar on floor, feet hip-width.',
       'Grip bar and pull it up explosively.',
@@ -715,7 +715,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'cardio',
     target: 'cardiovascular system',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0201.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0201?resolution=180',
     instructions: [
       'Start standing, then squat down.',
       'Place hands on floor and jump feet back to plank.',
@@ -732,7 +732,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'cardio',
     target: 'cardiovascular system',
     equipment: 'body weight',
-    gifUrl: 'https://v2.exercisedb.io/image/0513.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0513?resolution=180',
     instructions: [
       'Start in push-up position.',
       'Drive one knee toward chest.',
@@ -749,7 +749,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'upper legs',
     target: 'glutes',
     equipment: 'kettlebell',
-    gifUrl: 'https://v2.exercisedb.io/image/0286.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0286?resolution=180',
     instructions: [
       'Stand with feet wider than shoulder-width.',
       'Hold kettlebell with both hands.',
@@ -766,7 +766,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'forearms',
     target: 'forearms',
     equipment: 'dumbbell',
-    gifUrl: 'https://v2.exercisedb.io/image/0814.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0814?resolution=180',
     instructions: [
       'Hold heavy dumbbells or kettlebells at sides.',
       'Stand tall with shoulders back.',
@@ -785,7 +785,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'lower legs',
     target: 'calves',
     equipment: 'machine',
-    gifUrl: 'https://v2.exercisedb.io/image/0088.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0088?resolution=180',
     instructions: [
       'Stand on calf raise machine with shoulders under pads.',
       'Balls of feet on platform, heels hanging off.',
@@ -802,7 +802,7 @@ export const EXERCISE_DB_FALLBACK: ExerciseDBExercise[] = [
     bodyPart: 'lower legs',
     target: 'calves',
     equipment: 'machine',
-    gifUrl: 'https://v2.exercisedb.io/image/0738.gif',
+    gifUrl: 'https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/0738?resolution=180',
     instructions: [
       'Sit at machine with knees under pad.',
       'Balls of feet on platform.',

@@ -324,7 +324,7 @@ class ExerciseDbServiceClass {
         bodyPart: ex.bodyPart,
         target: ex.target,
         equipment: ex.equipment,
-        gifUrl: `https://v2.exercisedb.io/image/${ex.id}`, // Construct GIF URL from ID
+        gifUrl: `https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/${ex.id}?resolution=180`,
         instructions: ex.instructions || [],
         secondaryMuscles: ex.secondaryMuscles || []
       }));
@@ -447,7 +447,7 @@ class ExerciseDbServiceClass {
         bodyPart: ex.bodyPart,
         target: ex.target,
         equipment: ex.equipment,
-        gifUrl: `https://v2.exercisedb.io/image/${ex.id}`, // Construct GIF URL from ID
+        gifUrl: `https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/${ex.id}?resolution=180`,
         instructions: ex.instructions || [],
         secondaryMuscles: ex.secondaryMuscles || []
       }));
