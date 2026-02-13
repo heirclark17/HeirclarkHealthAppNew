@@ -45,26 +45,26 @@ import type { Exercise, MuscleGroup, Equipment } from '../../types/training';
 type MuscleFilter = 'all' | 'chest' | 'back' | 'shoulders' | 'upper arms' | 'lower arms' | 'upper legs' | 'lower legs' | 'waist' | 'cardio';
 type EquipmentFilter = 'all' | 'barbell' | 'dumbbell' | 'cable' | 'body weight' | 'resistance band' | 'machine';
 
-const MUSCLE_GROUPS: { key: MuscleFilter; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: '💪' },
-  { key: 'chest', label: 'Chest', icon: '🦾' },
-  { key: 'back', label: 'Back', icon: '🏋️' },
-  { key: 'shoulders', label: 'Shoulders', icon: '🤸' },
-  { key: 'upper arms', label: 'Arms', icon: '💪' },
-  { key: 'upper legs', label: 'Legs', icon: '🦵' },
-  { key: 'lower legs', label: 'Calves', icon: '🦿' },
-  { key: 'waist', label: 'Core', icon: '🧘' },
-  { key: 'cardio', label: 'Cardio', icon: '❤️' },
+const MUSCLE_GROUPS: { key: MuscleFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'chest', label: 'Chest' },
+  { key: 'back', label: 'Back' },
+  { key: 'shoulders', label: 'Shoulders' },
+  { key: 'upper arms', label: 'Arms' },
+  { key: 'upper legs', label: 'Legs' },
+  { key: 'lower legs', label: 'Calves' },
+  { key: 'waist', label: 'Core' },
+  { key: 'cardio', label: 'Cardio' },
 ];
 
-const EQUIPMENT_TYPES: { key: EquipmentFilter; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: '🏋️' },
-  { key: 'body weight', label: 'Bodyweight', icon: '🤸' },
-  { key: 'dumbbell', label: 'Dumbbells', icon: '🏋️' },
-  { key: 'barbell', label: 'Barbell', icon: '🏋️' },
-  { key: 'cable', label: 'Cable', icon: '⚙️' },
-  { key: 'resistance band', label: 'Bands', icon: '🎗️' },
-  { key: 'machine', label: 'Machine', icon: '🏋️' },
+const EQUIPMENT_TYPES: { key: EquipmentFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'body weight', label: 'Bodyweight' },
+  { key: 'dumbbell', label: 'Dumbbells' },
+  { key: 'barbell', label: 'Barbell' },
+  { key: 'cable', label: 'Cable' },
+  { key: 'resistance band', label: 'Bands' },
+  { key: 'machine', label: 'Machine' },
 ];
 
 export default function ExercisesScreen() {
@@ -358,7 +358,6 @@ export default function ExercisesScreen() {
                 },
               ]}
             >
-              <Text style={{ fontSize: 16 }}>{group.icon}</Text>
               <Text
                 style={[
                   styles.filterChipText,
@@ -396,7 +395,6 @@ export default function ExercisesScreen() {
                 },
               ]}
             >
-              <Text style={{ fontSize: 16 }}>{eq.icon}</Text>
               <Text
                 style={[
                   styles.filterChipText,
