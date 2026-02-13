@@ -1521,19 +1521,14 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
     console.log('[Meal Plan] Received preferences:', JSON.stringify(preferences, null, 2));
 
     const systemPrompt = `You are an expert nutritionist creating personalized meal plans.
-    Generate concise meal plans with recipes, portions, and nutritional information.
+    Generate MINIMAL meal plans with ONLY essential information.
 
-    MEAL DESCRIPTIONS:
-    - Keep descriptions SHORT (1 sentence, max 15 words)
-    - Make them appetizing but concise
-    - Example: "Grilled chicken with rice and steamed broccoli"
+    CRITICAL - KEEP IT MINIMAL:
+    - Descriptions: Max 10 words, just name the main components
+    - NO ingredients, NO instructions, NO grocery list (user can request these later)
+    - Focus on accurate macros and meal names only
 
-    INSTRUCTIONS:
-    - Keep instructions BRIEF (max 2-3 steps)
-    - Focus on key cooking methods only
-    - Example: "1. Grill chicken 6-8 min per side. 2. Steam broccoli 5 min. 3. Serve with rice."
-
-    Return a JSON object with:
+    Return a JSON object with ONLY this structure:
     {
       "weeklyPlan": [
         {
@@ -1542,23 +1537,19 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
           "meals": [
             {
               "mealType": "breakfast",
-              "name": "Meal Name",
-              "description": "Short appetizing description (max 15 words)",
+              "name": "Scrambled Eggs with Toast",
+              "description": "Protein-rich breakfast with whole grain toast",
               "calories": 400,
               "protein": 25,
               "carbs": 40,
               "fat": 15,
-              "ingredients": [{"name": "item", "amount": "1 cup", "calories": 100}],
-              "instructions": "Brief steps (max 3)",
-              "prepTime": 15,
-              "cookTime": 10
+              "prepTime": 10,
+              "cookTime": 5
             }
-          ],
-          "dailyTotals": {"calories": 2000, "protein": 150, "carbs": 200, "fat": 65}
+          ]
         }
       ],
-      "weeklyTotals": {"avgCalories": 2000, "avgProtein": 150},
-      "groceryList": [{"item": "Chicken breast", "amount": "2 lbs", "category": "protein"}]
+      "weeklyTotals": {"avgCalories": 2000, "avgProtein": 150}
     }`;
 
     // FIXED: Use actual frontend field names from preferences object
@@ -1621,7 +1612,7 @@ ${mealDiversityInstruction}
       ],
       response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 6000, // Reduced to prevent truncation (shorter descriptions/instructions)
+      max_tokens: 3500, // Reduced further - minimal structure without ingredients/instructions
     });
 
     const rawContent = completion.choices[0].message.content;
