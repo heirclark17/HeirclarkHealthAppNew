@@ -44,6 +44,7 @@ import type { Exercise, MuscleGroup, Equipment } from '../../types/training';
 // Filter types
 type MuscleFilter = 'all' | 'chest' | 'back' | 'shoulders' | 'upper arms' | 'lower arms' | 'upper legs' | 'lower legs' | 'waist' | 'cardio';
 type EquipmentFilter = 'all' | 'barbell' | 'dumbbell' | 'cable' | 'body weight' | 'resistance band' | 'machine';
+type DifficultyFilter = 'all' | 'Beginner' | 'Intermediate' | 'Advanced';
 
 const MUSCLE_GROUPS: { key: MuscleFilter; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -67,6 +68,13 @@ const EQUIPMENT_TYPES: { key: EquipmentFilter; label: string }[] = [
   { key: 'machine', label: 'Machine' },
 ];
 
+const DIFFICULTY_LEVELS: { key: DifficultyFilter; label: string }[] = [
+  { key: 'all', label: 'All Levels' },
+  { key: 'Beginner', label: 'Beginner' },
+  { key: 'Intermediate', label: 'Intermediate' },
+  { key: 'Advanced', label: 'Advanced' },
+];
+
 export default function ExercisesScreen() {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
@@ -76,6 +84,7 @@ export default function ExercisesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [muscleFilter, setMuscleFilter] = useState<MuscleFilter>('all');
   const [equipmentFilter, setEquipmentFilter] = useState<EquipmentFilter>('all');
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all');
   const [selectedExercise, setSelectedExercise] = useState<ExerciseDBExercise | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -200,6 +209,18 @@ export default function ExercisesScreen() {
     }
   };
 
+  // Helper: Calculate difficulty from equipment type (shared logic)
+  const getDifficultyFromEquipment = useCallback((equipment: string): DifficultyFilter => {
+    const eq = equipment.toLowerCase();
+    if (eq.includes('body') || eq === 'assisted' || eq === 'stability ball') {
+      return 'Beginner';
+    } else if (eq.includes('dumbbell') || eq.includes('kettlebell') || eq.includes('band') || eq === 'ez barbell') {
+      return 'Intermediate';
+    } else {
+      return 'Advanced';
+    }
+  }, []);
+
   // Filter exercises
   const filteredExercises = useMemo(() => {
     let filtered = [...exercises];
@@ -229,8 +250,16 @@ export default function ExercisesScreen() {
       filtered = filtered.filter(ex => ex.equipment === equipmentFilter);
     }
 
+    // Difficulty filter
+    if (difficultyFilter !== 'all') {
+      filtered = filtered.filter(ex => {
+        const exerciseDifficulty = getDifficultyFromEquipment(ex.equipment);
+        return exerciseDifficulty === difficultyFilter;
+      });
+    }
+
     return filtered;
-  }, [exercises, searchQuery, muscleFilter, equipmentFilter, showFavoritesOnly, favoriteIds]);
+  }, [exercises, searchQuery, muscleFilter, equipmentFilter, difficultyFilter, showFavoritesOnly, favoriteIds, getDifficultyFromEquipment]);
 
   const handleExercisePress = useCallback((exercise: ExerciseDBExercise) => {
     lightImpact();
@@ -288,17 +317,6 @@ export default function ExercisesScreen() {
           .join(' ');
       };
 
-      // Helper: Calculate difficulty from equipment type
-      const getDifficulty = (equipment: string): 'Beginner' | 'Intermediate' | 'Advanced' => {
-        const eq = equipment.toLowerCase();
-        if (eq.includes('body') || eq === 'assisted' || eq === 'stability ball') {
-          return 'Beginner';
-        } else if (eq.includes('dumbbell') || eq.includes('kettlebell') || eq.includes('band') || eq === 'ez barbell') {
-          return 'Intermediate';
-        } else {
-          return 'Advanced';
-        }
-      };
 
       // Helper: Get difficulty badge color (using theme tokens)
       const getDifficultyColor = (difficulty: string) => {
@@ -320,7 +338,7 @@ export default function ExercisesScreen() {
         return toTitleCase(equipment);
       };
 
-      const difficulty = getDifficulty(item.equipment);
+      const difficulty = getDifficultyFromEquipment(item.equipment);
       const difficultyColor = getDifficultyColor(difficulty);
 
       return (
@@ -454,7 +472,7 @@ export default function ExercisesScreen() {
         </TouchableOpacity>
       );
     },
-    [colors, favoriteIds, handleExercisePress, handleToggleFavorite, isDark]
+    [colors, favoriteIds, handleExercisePress, handleToggleFavorite, isDark, getDifficultyFromEquipment]
   );
 
   return (
@@ -610,8 +628,45 @@ export default function ExercisesScreen() {
         </ScrollView>
       </View>
 
+      {/* Difficulty Level Filters */}
+      <View style={styles.filterSection}>
+        <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>
+          Difficulty Level
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+          {DIFFICULTY_LEVELS.map((level) => (
+            <TouchableOpacity
+              key={level.key}
+              onPress={() => {
+                lightImpact();
+                setDifficultyFilter(level.key);
+              }}
+              style={[
+                styles.filterChip,
+                {
+                  backgroundColor: difficultyFilter === level.key ? colors.text : colors.backgroundSecondary,
+                  borderColor: difficultyFilter === level.key ? colors.text : 'transparent',
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.filterChipText,
+                  {
+                    color: difficultyFilter === level.key ? colors.background : colors.textSecondary,
+                    fontFamily: difficultyFilter === level.key ? Fonts.semiBold : Fonts.regular,
+                  },
+                ]}
+              >
+                {level.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       {/* Results Count */}
-      {(searchQuery || muscleFilter !== 'all' || equipmentFilter !== 'all') && (
+      {(searchQuery || muscleFilter !== 'all' || equipmentFilter !== 'all' || difficultyFilter !== 'all') && (
         <View style={styles.resultsCount}>
           <Text style={[styles.resultsText, { color: colors.textMuted }]}>
             {filteredExercises.length} {filteredExercises.length === 1 ? 'exercise' : 'exercises'} found
