@@ -28,10 +28,15 @@ class FoodImageService {
       const searchTerm = this.extractFoodKeywords(mealName);
       console.log('[FoodImageService] Searching:', searchTerm);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
       const response = await fetch(
         `${this.baseUrl}/api/v1/food-photo?query=${encodeURIComponent(searchTerm)}&size=${size}`,
-        { signal: AbortSignal.timeout(8000) }
+        { signal: controller.signal }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         console.error('[FoodImageService] API error:', response.status);
@@ -99,10 +104,15 @@ class FoodImageService {
   private async getTheMealDBFallback(mealName: string, size: 'card' | 'modal' = 'card'): Promise<string> {
     try {
       const searchTerm = this.extractFoodKeywords(mealName).split(' ')[0];
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       const response = await fetch(
         `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`,
-        { signal: AbortSignal.timeout(5000) }
+        { signal: controller.signal }
       );
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
