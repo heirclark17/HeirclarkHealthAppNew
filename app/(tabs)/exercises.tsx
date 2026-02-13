@@ -88,6 +88,13 @@ export default function ExercisesScreen() {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
 
+  // Initialize ExerciseDB service
+  useEffect(() => {
+    exerciseDbService.initialize().catch(error => {
+      console.error('[ExercisesScreen] Failed to initialize ExerciseDB service:', error);
+    });
+  }, []);
+
   // Filter exercises
   const filteredExercises = useMemo(() => {
     let exercises = [...EXERCISE_DATABASE];
