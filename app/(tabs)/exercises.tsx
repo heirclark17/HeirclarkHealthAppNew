@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
+    paddingBottom: Spacing.lg,
   },
   title: {
     fontSize: 28,
@@ -672,7 +672,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.md,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xl,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: 12,
@@ -685,7 +686,7 @@ const styles = StyleSheet.create({
     paddingVertical: Platform.OS === 'ios' ? 8 : 4,
   },
   filterSection: {
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
   filterLabel: {
     fontSize: 11,
@@ -713,7 +714,8 @@ const styles = StyleSheet.create({
   },
   resultsCount: {
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.xs,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
   },
   resultsText: {
     fontSize: 12,
@@ -721,6 +723,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
     paddingBottom: Spacing.xl,
   },
   exerciseCard: {
