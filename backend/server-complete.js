@@ -77,10 +77,20 @@ app.use(cors({
 // Rate Limiting - Prevent API abuse
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  // Much higher limit for development (hot reload triggers many requests)
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
   message: 'Too many requests from this IP, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
+  // Skip rate limiting for localhost during development
+  skip: (req) => {
+    if (process.env.NODE_ENV !== 'production') {
+      const ip = req.ip || req.connection.remoteAddress;
+      // Skip for localhost/development IPs
+      return ip === '127.0.0.1' || ip === '::1' || ip?.startsWith('192.168.');
+    }
+    return false;
+  },
 });
 
 // Different rate limits for dev vs production
