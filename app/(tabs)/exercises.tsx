@@ -300,15 +300,15 @@ export default function ExercisesScreen() {
         }
       };
 
-      // Helper: Get difficulty badge color
+      // Helper: Get difficulty badge color (using theme tokens)
       const getDifficultyColor = (difficulty: string) => {
         switch (difficulty) {
           case 'Beginner':
-            return '#10b981'; // Green
+            return colors.successStrong; // #4ADE80
           case 'Intermediate':
-            return '#f59e0b'; // Orange
+            return colors.warningOrange; // #FB923C
           case 'Advanced':
-            return '#ef4444'; // Red
+            return colors.errorStrong; // #FF3B30
           default:
             return colors.textMuted;
         }
@@ -330,7 +330,7 @@ export default function ExercisesScreen() {
         >
           <GlassCard style={styles.exerciseCard}>
             <View style={styles.cardContent}>
-              {/* GIF Thumbnail - Larger for better recognition */}
+              {/* GIF Thumbnail */}
               {item.gifUrl && (
                 <Image
                   source={{ uri: item.gifUrl }}
@@ -341,55 +341,90 @@ export default function ExercisesScreen() {
 
               {/* Exercise Info */}
               <View style={styles.exerciseInfo}>
-                {/* Exercise Name - Title Cased, Larger Font */}
+                {/* Exercise Name */}
                 <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={2}>
                   {toTitleCase(item.name)}
                 </Text>
 
-                {/* Target Muscle Badge - Primary Info */}
-                <View style={[styles.targetBadge, {
-                  backgroundColor: colors.accentCyan + '20',
-                  borderColor: colors.accentCyan + '40'
-                }]}>
+                {/* Target Muscle Badge - Primary Info with Frosted Glass */}
+                <BlurView
+                  intensity={isDark ? 20 : 35}
+                  tint={isDark ? 'dark' : 'light'}
+                  style={[styles.targetBadge, {
+                    backgroundColor: colors.accentCyan + '20',
+                    borderColor: colors.accentCyan + '40',
+                    overflow: 'hidden',
+                  }]}
+                >
+                  <Target size={14} color={colors.accentCyan} strokeWidth={2} />
                   <Text style={[styles.targetText, { color: colors.accentCyan }]}>
-                    🎯 {toTitleCase(item.target)}
+                    {toTitleCase(item.target)}
                   </Text>
-                </View>
+                </BlurView>
 
                 {/* Metadata Badges - Secondary Info */}
                 <View style={styles.exerciseMeta}>
                   {/* Body Part */}
-                  <View style={[styles.metaBadge, { backgroundColor: 'rgba(255, 255, 255, 0.08)' }]}>
+                  <BlurView
+                    intensity={isDark ? 15 : 30}
+                    tint={isDark ? 'dark' : 'light'}
+                    style={[styles.metaBadge, {
+                      backgroundColor: colors.glassCard,
+                      overflow: 'hidden',
+                    }]}
+                  >
+                    <Zap size={12} color={colors.textSecondary} strokeWidth={2} />
                     <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                      💪 {toTitleCase(item.bodyPart)}
+                      {toTitleCase(item.bodyPart)}
                     </Text>
-                  </View>
+                  </BlurView>
 
                   {/* Equipment */}
-                  <View style={[styles.metaBadge, { backgroundColor: 'rgba(255, 255, 255, 0.08)' }]}>
+                  <BlurView
+                    intensity={isDark ? 15 : 30}
+                    tint={isDark ? 'dark' : 'light'}
+                    style={[styles.metaBadge, {
+                      backgroundColor: colors.glassCard,
+                      overflow: 'hidden',
+                    }]}
+                  >
+                    <Dumbbell size={12} color={colors.textSecondary} strokeWidth={2} />
                     <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                      🏋️ {formatEquipment(item.equipment)}
+                      {formatEquipment(item.equipment)}
                     </Text>
-                  </View>
+                  </BlurView>
 
-                  {/* Difficulty Level - Safety Critical */}
-                  <View style={[styles.metaBadge, {
-                    backgroundColor: difficultyColor + '20',
-                    borderWidth: 1,
-                    borderColor: difficultyColor + '40'
-                  }]}>
+                  {/* Difficulty Level */}
+                  <BlurView
+                    intensity={isDark ? 20 : 35}
+                    tint={isDark ? 'dark' : 'light'}
+                    style={[styles.metaBadge, {
+                      backgroundColor: difficultyColor + '20',
+                      borderWidth: 1,
+                      borderColor: difficultyColor + '40',
+                      overflow: 'hidden',
+                    }]}
+                  >
                     <Text style={[styles.metaText, { color: difficultyColor }]}>
                       {difficulty}
                     </Text>
-                  </View>
+                  </BlurView>
 
-                  {/* Instruction Count - Complexity Indicator */}
+                  {/* Instruction Count */}
                   {item.instructions && item.instructions.length > 0 && (
-                    <View style={[styles.metaBadge, { backgroundColor: 'rgba(255, 255, 255, 0.05)' }]}>
+                    <BlurView
+                      intensity={isDark ? 15 : 30}
+                      tint={isDark ? 'dark' : 'light'}
+                      style={[styles.metaBadge, {
+                        backgroundColor: colors.glassCard,
+                        overflow: 'hidden',
+                      }]}
+                    >
+                      <Info size={12} color={colors.textMuted} strokeWidth={2} />
                       <Text style={[styles.metaText, { color: colors.textMuted }]}>
-                        ℹ️ {item.instructions.length} steps
+                        {item.instructions.length} steps
                       </Text>
-                    </View>
+                    </BlurView>
                   )}
                 </View>
               </View>
@@ -419,7 +454,7 @@ export default function ExercisesScreen() {
         </TouchableOpacity>
       );
     },
-    [colors, favoriteIds, handleExercisePress, handleToggleFavorite]
+    [colors, favoriteIds, handleExercisePress, handleToggleFavorite, isDark]
   );
 
   return (
@@ -911,6 +946,18 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     padding: 0,
     overflow: 'hidden',
+    // Glass-appropriate shadow for depth
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   cardContent: {
     flexDirection: 'row',
@@ -918,46 +965,53 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   gifThumbnail: {
-    width: 80, // Increased from 60 for better recognition
+    width: 80,
     height: 80,
-    borderRadius: 12, // Increased from 8 for consistency with Liquid Glass
+    borderRadius: 12, // LiquidGlass.borderRadius.sm
     marginRight: Spacing.md,
   },
   exerciseInfo: {
     flex: 1,
   },
   exerciseName: {
-    fontSize: 17, // Increased from 15 to iOS standard
+    fontSize: 17, // iOS standard body text
     fontFamily: Fonts.semiBold,
-    marginBottom: Spacing.sm, // Changed from 6 to use design token (8px)
+    marginBottom: Spacing.sm,
+    letterSpacing: -0.4, // Apple standard tracking for 17pt
   },
   targetBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.xs, // Icon-to-text spacing
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 12, // LiquidGlass.borderRadius.sm
+    borderWidth: 0.5, // LiquidGlass.borderWidth.subtle
     alignSelf: 'flex-start',
     marginBottom: Spacing.xs,
   },
   targetText: {
-    fontSize: 12, // Slightly larger than metadata
+    fontSize: 13, // iOS footnote
     fontFamily: Fonts.semiBold,
+    letterSpacing: -0.08, // Apple standard tracking for 13pt
   },
   exerciseMeta: {
     flexDirection: 'row',
-    gap: Spacing.sm, // Changed from 6 to 8 (design token)
+    gap: Spacing.sm,
     flexWrap: 'wrap',
   },
   metaBadge: {
-    paddingHorizontal: Spacing.sm, // 8px
-    paddingVertical: Spacing.xs, // Changed from 3 to 4 (design token)
-    borderRadius: Spacing.xs, // Changed from 6 to 4 for consistency
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs, // Icon-to-text spacing
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: Spacing.sm, // 8px for compact badges
   },
   metaText: {
-    fontSize: 12, // Increased from 11 for better readability
+    fontSize: 12, // iOS caption1
     fontFamily: Fonts.medium,
+    letterSpacing: 0, // Standard tracking for 12pt
   },
   cardActions: {
     flexDirection: 'row',
