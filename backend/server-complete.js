@@ -1485,8 +1485,9 @@ app.get('/api/v1/exercise-gif/:id', async (req, res) => {
       return res.status(response.status).json({ error: 'Failed to fetch GIF from API' });
     }
 
-    // Get GIF data as buffer
-    const gifBuffer = await response.buffer();
+    // Get GIF data as buffer (use arrayBuffer for Node.js 18+ fetch)
+    const arrayBuffer = await response.arrayBuffer();
+    const gifBuffer = Buffer.from(arrayBuffer);
     const contentType = response.headers.get('content-type') || 'image/gif';
 
     // Store in database for future requests
