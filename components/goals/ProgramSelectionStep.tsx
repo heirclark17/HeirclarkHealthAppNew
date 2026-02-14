@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: Spacing.md,
-    paddingBottom: Platform.OS === 'ios' ? 34 : Spacing.md,
+    paddingBottom: Platform.OS === 'ios' ? 100 : 80,
   },
   buttonRow: {
     flexDirection: 'row',
