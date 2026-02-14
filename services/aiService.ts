@@ -700,10 +700,19 @@ class AIService {
 
       const data = await response.json();
 
-      if (data.ok && data.plan) {
-        // Cache the plan
-        await this.cacheWorkoutPlan(data.plan);
-        return data.plan;
+      // Backend now returns: { success, strengthPlan, cardioRecommendations, nutritionGuidance }
+      if (data.success && data.strengthPlan) {
+        // For backward compatibility, return strengthPlan as the main plan
+        // Cardio and nutrition will be handled separately by TrainingContext
+        const plan = {
+          ...data.strengthPlan,
+          cardioRecommendations: data.cardioRecommendations,
+          nutritionGuidance: data.nutritionGuidance
+        };
+
+        // Cache the complete plan
+        await this.cacheWorkoutPlan(plan);
+        return plan;
       }
 
       return null;

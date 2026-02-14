@@ -570,10 +570,13 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           lastGeneratedAt,
           preferences,
           planSummary: summary,
+          // Extract cardio and nutrition from AI response
+          cardioRecommendations: (aiPlan as any).cardioRecommendations || null,
+          nutritionGuidance: (aiPlan as any).nutritionGuidance || null,
         }));
 
-        // Cache the plan
-        console.log('[Training] Caching AI plan...');
+        // Cache the plan (including cardio and nutrition)
+        console.log('[Training] Caching AI plan with cardio and nutrition...');
         await trainingStorage.savePlanCache({
           weeklyPlan,
           selectedProgram: program,
@@ -582,6 +585,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           lastGeneratedAt,
           preferences,
           planSummary: summary,
+          cardioRecommendations: (aiPlan as any).cardioRecommendations || null,
+          nutritionGuidance: (aiPlan as any).nutritionGuidance || null,
         });
 
         // *** Sync AI workout plan to backend ***
@@ -1106,6 +1111,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             lastGeneratedAt: cached.lastGeneratedAt,
             preferences: cached.preferences,
             planSummary: cached.planSummary || null,
+            cardioRecommendations: (cached as any).cardioRecommendations || null,
+            nutritionGuidance: (cached as any).nutritionGuidance || null,
           }));
           return;
         }
