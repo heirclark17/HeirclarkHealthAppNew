@@ -589,8 +589,8 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
-    marginBottom: 100,
+    marginTop: 24,
+    marginBottom: Platform.OS === 'ios' ? 120 : 100,
   },
   backButton: {
     flexDirection: 'row',
