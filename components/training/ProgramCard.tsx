@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
   },
   iconContainer: {
     width: 46,
@@ -311,12 +311,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.regular,
     lineHeight: 19,
-    marginBottom: 10,
+    marginBottom: 16,
   },
   statsRow: {
     flexDirection: 'row',
     gap: 16,
-    marginBottom: 10,
+    marginBottom: 16,
   },
   statItem: {
     flexDirection: 'row',
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 16,
   },
   tag: {
     paddingHorizontal: 10,
