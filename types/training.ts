@@ -473,3 +473,63 @@ export interface WeightTrackingSettings {
     kg: number; // e.g., 1.25 or 2.5
   };
 }
+
+// ============================================================================
+// CARDIO & NUTRITION GUIDANCE (Separate from Strength Training)
+// ============================================================================
+
+/**
+ * Daily cardio recommendation (separate from strength training calendar)
+ * User requested: "extremely detailed for the user to follow"
+ */
+export interface DailyCardioRecommendation {
+  activity: string; // e.g., "Steady-State Cardio", "HIIT", "Active Recovery Walk"
+  duration: number; // minutes
+  intensity: 'low' | 'moderate' | 'high' | 'interval';
+  heartRateZone?: string; // e.g., "Zone 2 (60-70% max HR)", "Zone 4-5 (80-90% max HR)"
+  caloriesBurned: number; // estimated
+  description: string; // Detailed description of what to do
+  tips: string[]; // Specific form cues, pacing advice, safety tips
+  warmup?: string; // e.g., "5 min easy walk"
+  cooldown?: string; // e.g., "5 min walking, light stretching"
+  alternatives?: string[]; // Alternative activities if equipment not available
+}
+
+/**
+ * Weekly cardio recommendations (one for each day)
+ */
+export interface CardioRecommendations {
+  monday: DailyCardioRecommendation;
+  tuesday: DailyCardioRecommendation;
+  wednesday: DailyCardioRecommendation;
+  thursday: DailyCardioRecommendation;
+  friday: DailyCardioRecommendation;
+  saturday: DailyCardioRecommendation;
+  sunday: DailyCardioRecommendation;
+}
+
+/**
+ * Nutrition guidance for calorie deficit and macro targets
+ * User requested: "extremely detailed for the user to follow"
+ */
+export interface NutritionGuidance {
+  dailyCalories: number; // Target daily calories
+  deficit: number; // Calorie deficit amount (e.g., 500 = lose 1 lb/week)
+  proteinGrams: number; // Daily protein target
+  carbsGrams: number; // Daily carbs target
+  fatGrams: number; // Daily fat target
+  mealTiming: string; // e.g., "3-4 meals per day", "16:8 intermittent fasting"
+  hydration: string; // e.g., "Drink 0.5oz per lb of bodyweight = 100oz/day"
+  preworkoutNutrition: string; // What to eat before training
+  postworkoutNutrition: string; // What to eat after training
+  supplementRecommendations?: string[]; // Optional supplements (protein powder, creatine, etc.)
+  mealExamples: {
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+    snacks: string[];
+  };
+  tips: string[]; // Detailed nutrition tips
+  deficitStrategy: string; // How to maintain the deficit sustainably
+  progressMonitoring: string; // How to track progress (weekly weigh-ins, measurements, etc.)
+}

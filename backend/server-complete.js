@@ -2177,47 +2177,94 @@ app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res)
     console.log('[Workout Plan] Received preferences:', JSON.stringify(preferences, null, 2));
 
     const systemPrompt = `You are an expert fitness coach creating personalized workout plans.
-    Return a JSON object with:
+    Return a JSON object with THREE SEPARATE sections:
     {
-      "planName": "Program Name",
-      "description": "Brief description",
-      "weeklySchedule": [
-        {
-          "day": "Monday",
-          "dayType": "Push",
-          "exercises": [
-            {
-              "name": "Bench Press",
-              "sets": 4,
-              "reps": "8-10",
-              "restSeconds": 90,
-              "notes": "Focus on controlled movement",
-              "targetMuscles": ["chest", "triceps"]
-            }
-          ],
-          "estimatedDuration": 45,
-          "warmup": "5 min cardio + dynamic stretches",
-          "cooldown": "5 min stretching"
-        }
-      ],
-      "progressionPlan": "Weekly progression guidelines",
-      "tips": ["Tip 1", "Tip 2"]
-    }`;
+      "strengthPlan": {
+        "planName": "Program Name",
+        "description": "Brief description",
+        "weeklySchedule": [
+          {
+            "day": "Monday",
+            "dayType": "Push",
+            "exercises": [
+              {
+                "name": "Bench Press",
+                "sets": 4,
+                "reps": "8-10",
+                "restSeconds": 90,
+                "notes": "Focus on controlled movement",
+                "targetMuscles": ["chest", "triceps"]
+              }
+            ],
+            "estimatedDuration": 45,
+            "warmup": "5 min dynamic stretches",
+            "cooldown": "5 min stretching"
+          }
+        ],
+        "progressionPlan": "Weekly progression guidelines",
+        "tips": ["Tip 1", "Tip 2"]
+      },
+      "cardioRecommendations": {
+        "monday": "20 min steady-state cardio at 65-70% max HR",
+        "tuesday": "Rest or light walk",
+        "wednesday": "15 min HIIT intervals",
+        "thursday": "Rest",
+        "friday": "20 min steady-state cardio",
+        "saturday": "30 min moderate cardio or active recovery",
+        "sunday": "Rest"
+      },
+      "nutritionGuidance": {
+        "dailyCalories": 2000,
+        "deficit": 500,
+        "proteinGrams": 150,
+        "carbsGrams": 200,
+        "fatGrams": 67,
+        "mealTiming": "3-4 meals per day",
+        "hydration": "Drink 0.5oz per lb of bodyweight",
+        "tips": ["Prioritize protein at every meal", "Time carbs around workouts"]
+      }
+    }
+
+    IMPORTANT:
+    - strengthPlan contains ONLY strength training exercises (no cardio)
+    - cardioRecommendations are separate daily cardio activities
+    - nutritionGuidance must ensure user is in a calorie deficit for fat loss goals`;
+
+    // Get user profile data for nutrition calculations
+    const userProfile = await pool.query(
+      'SELECT weight_kg, height_cm, age, sex, activity_level, goal_type FROM profiles WHERE user_id = $1',
+      [req.userId]
+    );
+    const profile = userProfile.rows[0] || {};
 
     // FIXED: Use actual frontend field names from preferences object
-    const userPrompt = `Create a ${preferences?.daysPerWeek || 4}-day workout plan:
-    - Goal: ${preferences?.fitnessGoal || 'general_fitness'}
+    const userPrompt = `Create a comprehensive training and nutrition plan:
+
+    USER PROFILE:
+    - Goal: ${preferences?.fitnessGoal || profile.goal_type || 'general_fitness'}
     - Fitness level: ${preferences?.experienceLevel || 'intermediate'}
+    - Weight: ${profile.weight_kg || 'unknown'}kg
+    - Height: ${profile.height_cm || 'unknown'}cm
+    - Age: ${profile.age || 'unknown'}
+    - Sex: ${profile.sex || 'unknown'}
+    - Activity level: ${profile.activity_level || preferences?.activityLevel || 'moderate'}
+
+    TRAINING PREFERENCES:
     - Available equipment: ${preferences?.availableEquipment?.join(', ') || 'full gym'}
     - Days per week: ${preferences?.daysPerWeek || 4}
     - Session length: ${preferences?.sessionDuration || 45} minutes
     - Cardio preference: ${preferences?.cardioPreference || 'moderate'}
     - Injuries to avoid: ${preferences?.injuries?.length > 0 ? preferences.injuries.join(', ') : 'none'}
 
-    Create workouts that match the user's fitness goal (${preferences?.fitnessGoal || 'general_fitness'}).
-    Use only the available equipment: ${preferences?.availableEquipment?.join(', ') || 'full gym'}.
-    If injuries are listed, avoid exercises that could aggravate them.
-    Include appropriate cardio based on preference: ${preferences?.cardioPreference || 'moderate'}.`;
+    GENERATE:
+    1. STRENGTH PLAN: ${preferences?.daysPerWeek || 4}-day strength training program (NO cardio in these workouts)
+    2. CARDIO RECOMMENDATIONS: Separate daily cardio activities based on ${preferences?.cardioPreference || 'moderate'} preference
+    3. NUTRITION GUIDANCE: Calculate calorie deficit for ${preferences?.fitnessGoal || 'weight loss'} goal using user's profile data
+
+    Ensure strength workouts match equipment available.
+    Avoid exercises that aggravate listed injuries.
+    Calculate nutrition macros to ensure calorie deficit for fat loss.`;
+
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4.1-mini',
@@ -2230,24 +2277,44 @@ app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res)
       max_tokens: 4000, // Restored to 4000 (Railway timeout increased to 300s)
     });
 
-    const workoutPlan = JSON.parse(completion.choices[0].message.content);
+    const aiResponse = JSON.parse(completion.choices[0].message.content);
+    const { strengthPlan, cardioRecommendations, nutritionGuidance } = aiResponse;
 
-    // Save to database (upsert - update if user already has a plan)
+    // Save strength plan to database (upsert - update if user already has a plan)
     await pool.query(
-      `INSERT INTO workout_plans (user_id, plan_name, description, weekly_schedule, goal_type, difficulty_level)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO workout_plans (
+        user_id, plan_name, description, weekly_schedule,
+        goal_type, difficulty_level, cardio_recommendations, nutrition_guidance
+      )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (user_id) DO UPDATE SET
          plan_name = EXCLUDED.plan_name,
          description = EXCLUDED.description,
          weekly_schedule = EXCLUDED.weekly_schedule,
          goal_type = EXCLUDED.goal_type,
          difficulty_level = EXCLUDED.difficulty_level,
+         cardio_recommendations = EXCLUDED.cardio_recommendations,
+         nutrition_guidance = EXCLUDED.nutrition_guidance,
          updated_at = NOW()
        RETURNING id`,
-      [req.userId, workoutPlan.planName, workoutPlan.description, JSON.stringify(workoutPlan.weeklySchedule), preferences?.fitnessGoal, preferences?.experienceLevel]
+      [
+        req.userId,
+        strengthPlan.planName,
+        strengthPlan.description,
+        JSON.stringify(strengthPlan.weeklySchedule),
+        preferences?.fitnessGoal,
+        preferences?.experienceLevel,
+        JSON.stringify(cardioRecommendations),
+        JSON.stringify(nutritionGuidance)
+      ]
     );
 
-    res.json({ success: true, workoutPlan });
+    res.json({
+      success: true,
+      strengthPlan,
+      cardioRecommendations,
+      nutritionGuidance
+    });
   } catch (error) {
     console.error('[Workout Plan] Error:', error);
     res.status(500).json({ error: 'Failed to generate workout plan', message: error.message });

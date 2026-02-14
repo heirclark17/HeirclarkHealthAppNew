@@ -20,6 +20,8 @@ import {
   ProgramTemplate,
   Exercise,
   ExerciseAlternative,
+  CardioRecommendations,
+  NutritionGuidance,
 } from '../types/training';
 
 const STORAGE_KEY = 'hc_training_plan_cache';
@@ -37,6 +39,9 @@ interface TrainingState {
   planSummary: PlanSummary | null;
   selectedExercise: Exercise | null;
   showAlternativesModal: boolean;
+  // Separate cardio and nutrition guidance (not mixed with strength training)
+  cardioRecommendations: CardioRecommendations | null;
+  nutritionGuidance: NutritionGuidance | null;
 }
 
 interface TrainingContextType {
@@ -77,6 +82,8 @@ const initialState: TrainingState = {
   planSummary: null,
   selectedExercise: null,
   showAlternativesModal: false,
+  cardioRecommendations: null,
+  nutritionGuidance: null,
 };
 
 const TrainingContext = createContext<TrainingContextType | undefined>(undefined);
