@@ -264,6 +264,29 @@ CREATE INDEX idx_workout_sessions_user ON workout_sessions(user_id);
 CREATE INDEX idx_workout_sessions_date ON workout_sessions(started_at);
 
 -- ============================================
+-- CUSTOM WORKOUTS (User-Created Workout Plans)
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS custom_workouts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    workout_structure JSONB NOT NULL, -- {days: [{dayName, exercises: [...]}]}
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT false -- Only one custom workout can be active at a time
+);
+
+CREATE INDEX idx_custom_workouts_user ON custom_workouts(user_id);
+CREATE INDEX idx_custom_workouts_active ON custom_workouts(user_id, is_active) WHERE is_active = true;
+
+CREATE TRIGGER update_custom_workouts_updated_at
+    BEFORE UPDATE ON custom_workouts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================
 -- HEALTH METRICS
 -- ============================================
 

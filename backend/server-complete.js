@@ -1041,6 +1041,156 @@ app.get('/api/v1/workouts/state', authenticateToken, async (req, res) => {
 });
 
 // ============================================
+// CUSTOM WORKOUTS ENDPOINTS
+// ============================================
+
+// POST /api/v1/custom-workouts - Create custom workout
+app.post('/api/v1/custom-workouts', authenticateToken, async (req, res) => {
+  try {
+    const { name, description, workout_structure } = req.body;
+
+    // Validate workout_structure has required fields
+    if (!workout_structure || !workout_structure.days || !Array.isArray(workout_structure.days)) {
+      return res.status(400).json({ error: 'Invalid workout structure. Must have days array.' });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO custom_workouts (user_id, name, description, workout_structure)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [req.userId, name, description || null, JSON.stringify(workout_structure)]
+    );
+
+    console.log('[Custom Workout] ✅ Created custom workout:', name);
+    res.json({ success: true, workout: result.rows[0] });
+  } catch (error) {
+    console.error('[Custom Workout] Create error:', error.message);
+    res.status(500).json({ error: 'Failed to create custom workout', message: error.message });
+  }
+});
+
+// GET /api/v1/custom-workouts - Get all custom workouts for user
+app.get('/api/v1/custom-workouts', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM custom_workouts
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [req.userId]
+    );
+
+    console.log('[Custom Workout] ✅ Retrieved', result.rows.length, 'custom workouts');
+    res.json({ success: true, workouts: result.rows });
+  } catch (error) {
+    console.error('[Custom Workout] Get all error:', error.message);
+    res.status(500).json({ error: 'Failed to get custom workouts', message: error.message });
+  }
+});
+
+// PUT /api/v1/custom-workouts/:id - Update custom workout
+app.put('/api/v1/custom-workouts/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, workout_structure } = req.body;
+
+    // Validate workout_structure if provided
+    if (workout_structure && (!workout_structure.days || !Array.isArray(workout_structure.days))) {
+      return res.status(400).json({ error: 'Invalid workout structure. Must have days array.' });
+    }
+
+    const result = await pool.query(
+      `UPDATE custom_workouts
+       SET name = $1, description = $2, workout_structure = $3, updated_at = NOW()
+       WHERE id = $4 AND user_id = $5
+       RETURNING *`,
+      [name, description || null, JSON.stringify(workout_structure), id, req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Custom workout not found' });
+    }
+
+    console.log('[Custom Workout] ✅ Updated custom workout:', id);
+    res.json({ success: true, workout: result.rows[0] });
+  } catch (error) {
+    console.error('[Custom Workout] Update error:', error.message);
+    res.status(500).json({ error: 'Failed to update custom workout', message: error.message });
+  }
+});
+
+// DELETE /api/v1/custom-workouts/:id - Delete custom workout
+app.delete('/api/v1/custom-workouts/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `DELETE FROM custom_workouts
+       WHERE id = $1 AND user_id = $2
+       RETURNING *`,
+      [id, req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Custom workout not found' });
+    }
+
+    console.log('[Custom Workout] ✅ Deleted custom workout:', id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Custom Workout] Delete error:', error.message);
+    res.status(500).json({ error: 'Failed to delete custom workout', message: error.message });
+  }
+});
+
+// POST /api/v1/custom-workouts/:id/activate - Set custom workout as active
+app.post('/api/v1/custom-workouts/:id/activate', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Deactivate all other custom workouts first
+    await pool.query(
+      `UPDATE custom_workouts SET is_active = false WHERE user_id = $1`,
+      [req.userId]
+    );
+
+    // Activate this one
+    const result = await pool.query(
+      `UPDATE custom_workouts
+       SET is_active = true, updated_at = NOW()
+       WHERE id = $1 AND user_id = $2
+       RETURNING *`,
+      [id, req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Custom workout not found' });
+    }
+
+    console.log('[Custom Workout] ✅ Activated custom workout:', id);
+    res.json({ success: true, workout: result.rows[0] });
+  } catch (error) {
+    console.error('[Custom Workout] Activate error:', error.message);
+    res.status(500).json({ error: 'Failed to activate custom workout', message: error.message });
+  }
+});
+
+// POST /api/v1/custom-workouts/deactivate-all - Deactivate all custom workouts (return to AI plan)
+app.post('/api/v1/custom-workouts/deactivate-all', authenticateToken, async (req, res) => {
+  try {
+    await pool.query(
+      `UPDATE custom_workouts SET is_active = false WHERE user_id = $1`,
+      [req.userId]
+    );
+
+    console.log('[Custom Workout] ✅ Deactivated all custom workouts');
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Custom Workout] Deactivate all error:', error.message);
+    res.status(500).json({ error: 'Failed to deactivate custom workouts', message: error.message });
+  }
+});
+
+// ============================================
 // MEAL LOGGING ENDPOINTS
 // ============================================
 
