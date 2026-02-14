@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
@@ -96,12 +96,11 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
@@ -268,12 +267,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
           })}
         </View>
 
-        {/* Bottom Spacing - extra space to prevent blending with buttons */}
-        <View style={{ height: 180 }} />
-      </ScrollView>
-
-      {/* Bottom Buttons */}
-      <View style={styles.bottomContainer}>
+        {/* Bottom Buttons */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             onPress={() => {
@@ -313,23 +307,20 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
           </TouchableOpacity>
         </View>
       </View>
+    </ScrollView>
 
-      {/* Program Preview Modal */}
-      <ProgramPreviewModal
-        visible={showPreviewModal}
-        program={previewProgram}
-        onClose={handleClosePreview}
-        onConfirm={handleConfirmProgram}
-      />
-    </View>
+    {/* Program Preview Modal */}
+    <ProgramPreviewModal
+      visible={showPreviewModal}
+      program={previewProgram}
+      onClose={handleClosePreview}
+      onConfirm={handleConfirmProgram}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  scrollView: {
     flex: 1,
   },
   scrollContent: {
@@ -456,17 +447,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Fonts.regular,
   },
-  bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: Spacing.md,
-    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
-  },
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 8,
+    marginBottom: 100,
   },
   backButton: {
     flexDirection: 'row',
