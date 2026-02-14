@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import {
   Flame,
   Dumbbell,
@@ -37,6 +37,7 @@ import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
+import { useTraining } from '../../contexts/TrainingContext';
 import { successNotification, lightImpact } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 import {
@@ -60,6 +61,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   const { state, resetWizard, calculateResults } = useGoalWizard();
   const { settings } = useSettings();
   const foodPrefs = useFoodPreferencesSafe();
+  const { state: trainingState } = useTraining();
   const hasPlayedHaptic = useRef(false);
   const hasCalculatedResults = useRef(false);
 
@@ -216,6 +218,29 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
   const handleStartTrainingPlan = () => {
     lightImpact();
+
+    // Check if user has selected a training program
+    if (!trainingState.selectedProgram) {
+      Alert.alert(
+        'Program Required',
+        'Please select a training program before generating your workout plan.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Select Program',
+            onPress: () => {
+              // Navigate to programs tab to select a program
+              if (onViewDashboard) {
+                onViewDashboard();
+              }
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    // Program selected - proceed with generation
     if (onStartTrainingPlan) {
       onStartTrainingPlan();
     }

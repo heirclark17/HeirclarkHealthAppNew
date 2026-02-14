@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Modal, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 // Animations removed for performance
@@ -190,6 +190,19 @@ export default function ProgramsScreen() {
   const handleGenerate = useCallback(async () => {
     console.log('[Programs] Quick generate button clicked');
     console.log('[Programs] Goal wizard state:', goalWizardState?.primaryGoal);
+
+    // Check if user has selected a training program
+    if (!selectedProgram) {
+      Alert.alert(
+        'Program Required',
+        'Please select a training program before generating your workout plan.',
+        [
+          { text: 'OK', style: 'default' }
+        ]
+      );
+      return;
+    }
+
     mediumImpact();
     console.log('[Programs] Calling generateWeeklyPlan()...');
     const success = await generateWeeklyPlan();
@@ -197,12 +210,25 @@ export default function ProgramsScreen() {
     if (!success && error) {
       console.error('[Programs] Failed to generate training plan:', error);
     }
-  }, [generateWeeklyPlan, error, goalWizardState?.primaryGoal]);
+  }, [generateWeeklyPlan, error, goalWizardState?.primaryGoal, selectedProgram]);
 
   // Handle AI-powered generate - memoized
   const handleAIGenerate = useCallback(async () => {
     console.log('[Programs] AI generate button clicked');
     console.log('[Programs] Goal wizard state:', goalWizardState?.primaryGoal);
+
+    // Check if user has selected a training program
+    if (!selectedProgram) {
+      Alert.alert(
+        'Program Required',
+        'Please select a training program before generating your workout plan.',
+        [
+          { text: 'OK', style: 'default' }
+        ]
+      );
+      return;
+    }
+
     mediumImpact();
     console.log('[Programs] Calling generateAIWorkoutPlan()...');
     const success = await generateAIWorkoutPlan();
@@ -210,7 +236,7 @@ export default function ProgramsScreen() {
     if (!success && error) {
       console.error('[Programs] Failed to generate AI training plan:', error);
     }
-  }, [generateAIWorkoutPlan, error, goalWizardState?.primaryGoal]);
+  }, [generateAIWorkoutPlan, error, goalWizardState?.primaryGoal, selectedProgram]);
 
   // Handle program tap - shows preview modal - memoized
   const handleProgramTap = useCallback((program: any) => {
