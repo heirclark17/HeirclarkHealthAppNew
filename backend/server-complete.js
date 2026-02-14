@@ -4347,10 +4347,36 @@ async function runMigrations() {
       ADD COLUMN IF NOT EXISTS workout_days_per_week INTEGER DEFAULT 3
     `);
 
-    console.log('[Migrations] Completed successfully');
+    // Create custom_workouts table if missing
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS custom_workouts (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        workout_structure JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        is_active BOOLEAN DEFAULT false
+      )
+    `);
+
+    // Create indexes for custom_workouts
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_custom_workouts_user
+      ON custom_workouts(user_id)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_custom_workouts_active
+      ON custom_workouts(user_id, is_active)
+      WHERE is_active = true
+    `);
+
+    console.log('[Migrations] ✅ Completed successfully');
   } catch (error) {
     console.error('[Migrations] Error:', error.message);
-    // Don't crash - the column might already exist in a different form
+    // Don't crash - migrations are non-critical on startup
   }
 }
 
