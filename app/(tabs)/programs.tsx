@@ -304,21 +304,6 @@ export default function ProgramsScreen() {
     return `Training for: ${goalLabels[goalWizardState.primaryGoal] || 'General Fitness'}`;
   }, [goalWizardState?.primaryGoal]);
 
-  // Weekly stats - handle both old and new formats
-  const weeklyStats = useMemo(() => {
-    if (!weeklyPlan) return null;
-
-    // Calculate from days if direct properties don't exist
-    const workoutsWithData = allDays.filter(d => d?.workout);
-    const completedCount = workoutsWithData.filter(d => d?.workout?.completed).length;
-
-    return {
-      completedWorkouts: weeklyPlan.completedWorkouts ?? completedCount,
-      totalWorkouts: weeklyPlan.totalWorkouts ?? workoutsWithData.length,
-      caloriesBurned: weeklyPlan.totalCaloriesBurned ?? 0,
-    };
-  }, [weeklyPlan, allDays]);
-
   // Memoized handlers for WorkoutCard to prevent unnecessary re-renders
   const handleMarkComplete = useCallback(() => {
     markWorkoutComplete(selectedDayIndex);
@@ -444,27 +429,6 @@ export default function ProgramsScreen() {
           <Text style={[styles.title, { color: colors.text }]}>Training</Text>
         </View>
 
-        {/* Weekly Stats Cards - Frosted Liquid Glass */}
-        {weeklyStats && (
-          <View style={styles.statsRow}>
-            <GlassCard style={styles.statCard} interactive>
-              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>
-                {weeklyStats.completedWorkouts}/{weeklyStats.totalWorkouts}
-              </NumberText>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Workouts</Text>
-            </GlassCard>
-            <GlassCard style={styles.statCard} interactive>
-              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>Week {currentWeek}</NumberText>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Current</Text>
-            </GlassCard>
-          </View>
-        )}
-
-        {/* Goal Alignment Card - Above Calendar */}
-        {weeklyPlan && goalAlignment && preferences && (
-          <GoalAlignmentCard alignment={goalAlignment} preferences={preferences} />
-        )}
-
         {/* Workout Calendar Card - Frosted Liquid Glass */}
         {weeklyPlan && (
           <WorkoutCalendarCard
@@ -472,6 +436,11 @@ export default function ProgramsScreen() {
             selectedDayIndex={selectedDayIndex}
             onSelectDay={setSelectedDay}
           />
+        )}
+
+        {/* Goal Alignment Card - Below Calendar */}
+        {weeklyPlan && goalAlignment && preferences && (
+          <GoalAlignmentCard alignment={goalAlignment} preferences={preferences} />
         )}
 
         {/* Today's Workout - Below Calendar */}
@@ -927,29 +896,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textMuted,
     fontFamily: Fonts.medium,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 24,
-    gap: 8,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 18,
-    color: Colors.text,
-    letterSpacing: 0.5,
-  },
-  statLabel: {
-    fontSize: 10,
-    color: Colors.textMuted,
-    marginTop: 4,
-    fontFamily: Fonts.thin,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   card: {
     marginHorizontal: 16,
