@@ -80,13 +80,19 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
   };
 
   const handleContinue = () => {
-    if (!selectedProgramId) return;
+    mediumImpact();
 
-    const selectedProgram = programs.find(p => p.id === selectedProgramId);
-    if (selectedProgram) {
-      mediumImpact();
-      onContinue(selectedProgram.id, selectedProgram.name);
+    // If a program was selected, pass it to the next step
+    if (selectedProgramId) {
+      const selectedProgram = programs.find(p => p.id === selectedProgramId);
+      if (selectedProgram) {
+        onContinue(selectedProgram.id, selectedProgram.name);
+        return;
+      }
     }
+
+    // Continue anyway - program selection is optional (can be done in modal)
+    onContinue('', '');
   };
 
   return (
@@ -119,7 +125,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                 accessibilityLabel={`${program.name}, ${program.difficulty} level program`}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
-                accessibilityHint="Tap to view program details and select"
+                accessibilityHint="Tap to view program details and select in modal"
               >
                 <GlassCard
                   style={[
@@ -262,8 +268,8 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
           })}
         </View>
 
-        {/* Bottom Spacing */}
-        <View style={{ height: 120 }} />
+        {/* Bottom Spacing - extra space to prevent blending with buttons */}
+        <View style={{ height: 180 }} />
       </ScrollView>
 
       {/* Bottom Buttons */}
@@ -289,21 +295,19 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
             onPress={handleContinue}
             activeOpacity={0.7}
             style={{ flex: 2 }}
-            disabled={!selectedProgramId}
             accessibilityLabel="Continue"
             accessibilityRole="button"
-            accessibilityHint="Proceeds to next step with selected program"
+            accessibilityHint="Proceeds to next step (program selection optional)"
           >
             <GlassCard
               style={[
                 styles.continueButton,
                 { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' },
-                !selectedProgramId && styles.continueButtonDisabled,
               ]}
               interactive
             >
               <Text style={[styles.continueButtonText, { color: colors.primary }]}>
-                {selectedProgramId ? 'CONTINUE' : 'SELECT A PROGRAM'}
+                CONTINUE
               </Text>
             </GlassCard>
           </TouchableOpacity>
@@ -457,7 +461,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: Spacing.md,
-    paddingBottom: Platform.OS === 'ios' ? 100 : 80,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -482,9 +486,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
-  },
-  continueButtonDisabled: {
-    opacity: 0.5,
   },
   continueButtonText: {
     fontSize: 14,
