@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   programHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
   },
   iconContainer: {
     width: 46,
@@ -411,12 +411,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.regular,
     lineHeight: 19,
-    marginBottom: 10,
+    marginBottom: 16,
   },
   statsRow: {
     flexDirection: 'row',
     gap: 16,
-    marginBottom: 10,
+    marginBottom: 14,
   },
   statItem: {
     flexDirection: 'row',
@@ -431,6 +431,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginBottom: 6,
   },
   tag: {
     paddingHorizontal: 10,
@@ -446,8 +447,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    paddingTop: 8,
-    marginTop: 4,
+    paddingTop: 12,
+    marginTop: 8,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(128, 128, 128, 0.2)',
   },

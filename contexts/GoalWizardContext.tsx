@@ -594,6 +594,9 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
         benchPress1RM: state.benchPress1RM,
         squat1RM: state.squat1RM,
         deadlift1RM: state.deadlift1RM,
+        // Selected training program from goal wizard
+        selectedProgramId: state.selectedProgramId,
+        selectedProgramName: state.selectedProgramName,
       };
 
       try {

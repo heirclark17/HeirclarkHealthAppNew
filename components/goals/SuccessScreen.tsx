@@ -63,7 +63,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   const { state, resetWizard, calculateResults } = useGoalWizard();
   const { settings } = useSettings();
   const foodPrefs = useFoodPreferencesSafe();
-  const { state: trainingState } = useTraining();
+  const { state: trainingState, getEnhancedPrograms } = useTraining();
   const { goalAlignment, preferences, planSummary } = trainingState;
   const hasPlayedHaptic = useRef(false);
   const hasCalculatedResults = useRef(false);
@@ -109,6 +109,23 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
       setIsLoadingWorkout(true);
       try {
+        // Get selected program details if a program was selected
+        let selectedProgramInfo = undefined;
+        if (state.selectedProgramId) {
+          const programs = getEnhancedPrograms();
+          const selectedProgram = programs.find(p => p.id === state.selectedProgramId);
+          if (selectedProgram) {
+            selectedProgramInfo = {
+              name: selectedProgram.name,
+              description: selectedProgram.description,
+              difficulty: selectedProgram.difficulty,
+              duration: selectedProgram.duration,
+              daysPerWeek: selectedProgram.daysPerWeek,
+              focus: selectedProgram.focus,
+            };
+          }
+        }
+
         const guidance = await generateWorkoutGuidance({
           primaryGoal: state.primaryGoal,
           workoutsPerWeek: state.workoutsPerWeek || 3,
@@ -116,6 +133,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           activityLevel: state.activityLevel || 'moderate',
           equipmentAccess: state.equipmentAccess || [],
           injuries: state.injuries,
+          selectedProgram: selectedProgramInfo,
         });
         setWorkoutGuidance(guidance);
       } catch (error) {
@@ -127,7 +145,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
     }
 
     generateWorkout();
-  }, [state.primaryGoal, state.workoutsPerWeek, state.workoutDuration, state.activityLevel]);
+  }, [state.primaryGoal, state.workoutsPerWeek, state.workoutDuration, state.activityLevel, state.selectedProgramId, getEnhancedPrograms]);
 
   // Generate AI daily guidance
   useEffect(() => {

@@ -28,6 +28,7 @@ import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
+import { useTraining } from '../../contexts/TrainingContext';
 import { lightImpact, successNotification } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 
@@ -84,13 +85,35 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
   const { state, calculateResults, saveGoals } = useGoalWizard();
   const { settings } = useSettings();
   const foodPrefs = useFoodPreferencesSafe();
+  const { getEnhancedPrograms } = useTraining();
   const [isConfirming, setIsConfirming] = useState(false);
+
+  // Get selected program details if a program was selected
+  const selectedProgram = useMemo(() => {
+    if (!state.selectedProgramId) return null;
+    const programs = getEnhancedPrograms();
+    return programs.find(p => p.id === state.selectedProgramId) || null;
+  }, [state.selectedProgramId, getEnhancedPrograms]);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
     return settings.themeMode === 'light' ? LightColors : DarkColors;
   }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
+
+  // Helper function for difficulty badge colors
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner':
+        return Colors.success;
+      case 'intermediate':
+        return isDark ? Colors.warning : Colors.warningOrange;
+      case 'advanced':
+        return Colors.error;
+      default:
+        return colors.textMuted;
+    }
+  };
 
   // Create a dependency key from state values that affect calculation
   // This ensures we recalculate when user edits goals and returns
@@ -504,19 +527,65 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
           <View style={styles.workoutPlanHeaderText}>
             <Text style={styles.workoutPlanTitle}>YOUR TRAINING PLAN</Text>
             <Text style={[styles.workoutPlanSubtitle, { color: colors.text }]}>
-              {state.primaryGoal === 'lose_weight' && (
-                state.cardioPreference === 'walking' ? 'Fat Loss Walking Program' :
-                state.cardioPreference === 'running' ? 'Fat Loss Running Program' :
-                state.cardioPreference === 'hiit' ? 'Fat Burning HIIT Program' :
-                'Fat Loss & Conditioning'
+              {selectedProgram ? selectedProgram.name : (
+                <>
+                  {state.primaryGoal === 'lose_weight' && (
+                    state.cardioPreference === 'walking' ? 'Fat Loss Walking Program' :
+                    state.cardioPreference === 'running' ? 'Fat Loss Running Program' :
+                    state.cardioPreference === 'hiit' ? 'Fat Burning HIIT Program' :
+                    'Fat Loss & Conditioning'
+                  )}
+                  {state.primaryGoal === 'build_muscle' && 'Progressive Overload Muscle Building'}
+                  {state.primaryGoal === 'maintain' && 'Fitness Maintenance Program'}
+                  {state.primaryGoal === 'improve_health' && 'Health & Wellness Program'}
+                  {!state.primaryGoal && 'General Fitness Program'}
+                </>
               )}
-              {state.primaryGoal === 'build_muscle' && 'Progressive Overload Muscle Building'}
-              {state.primaryGoal === 'maintain' && 'Fitness Maintenance Program'}
-              {state.primaryGoal === 'improve_health' && 'Health & Wellness Program'}
-              {!state.primaryGoal && 'General Fitness Program'}
             </Text>
           </View>
         </View>
+
+        {/* Selected Program Details */}
+        {selectedProgram && (
+          <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
+            <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>PROGRAM DETAILS</Text>
+            <Text style={[styles.programDescription, { color: colors.textSecondary }]}>
+              {selectedProgram.description}
+            </Text>
+            <View style={styles.programMetaRow}>
+              <View style={[styles.programMetaBadge, { backgroundColor: `${getDifficultyColor(selectedProgram.difficulty)}20` }]}>
+                <Text style={[styles.programMetaText, { color: getDifficultyColor(selectedProgram.difficulty) }]}>
+                  {selectedProgram.difficulty.toUpperCase()}
+                </Text>
+              </View>
+              <View style={[styles.programMetaBadge, { backgroundColor: colors.backgroundSecondary }]}>
+                <Calendar size={12} color={colors.textMuted} />
+                <NumberText weight="regular" style={[styles.programMetaText, { color: colors.text }]}>
+                  {selectedProgram.duration}
+                </NumberText>
+                <Text style={[styles.programMetaText, { color: colors.text }]}>weeks</Text>
+              </View>
+              <View style={[styles.programMetaBadge, { backgroundColor: colors.backgroundSecondary }]}>
+                <Dumbbell size={12} color={colors.textMuted} />
+                <NumberText weight="regular" style={[styles.programMetaText, { color: colors.text }]}>
+                  {selectedProgram.daysPerWeek}
+                </NumberText>
+                <Text style={[styles.programMetaText, { color: colors.text }]}>days/week</Text>
+              </View>
+            </View>
+            {selectedProgram.focus && selectedProgram.focus.length > 0 && (
+              <View style={styles.programFocusRow}>
+                {selectedProgram.focus.slice(0, 4).map((tag, i) => (
+                  <View key={i} style={[styles.programFocusTag, { backgroundColor: `${colors.primary}20` }]}>
+                    <Text style={[styles.programFocusText, { color: colors.primary }]}>
+                      {tag}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </GlassCard>
+        )}
 
         {/* Training Schedule Overview */}
         <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
@@ -1694,6 +1763,44 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: Colors.textMuted,
     marginBottom: 12,
+  },
+  programDescription: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  programMetaRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+    flexWrap: 'wrap',
+  },
+  programMetaBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  programMetaText: {
+    fontSize: 11,
+    fontFamily: Fonts.medium,
+  },
+  programFocusRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  programFocusTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  programFocusText: {
+    fontSize: 11,
+    fontFamily: Fonts.regular,
   },
   scheduleGrid: {
     flexDirection: 'row',

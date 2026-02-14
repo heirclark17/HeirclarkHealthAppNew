@@ -41,6 +41,14 @@ export interface WorkoutGuidanceParams {
   activityLevel: string;
   equipmentAccess: string[];
   injuries?: string;
+  selectedProgram?: {
+    name: string;
+    description: string;
+    difficulty: string;
+    duration: number;
+    daysPerWeek: number;
+    focus: string[];
+  };
 }
 
 export interface DailyGuidanceParams {
@@ -73,6 +81,15 @@ export async function generateWorkoutGuidance(
   params: WorkoutGuidanceParams
 ): Promise<string> {
   try {
+    const programInfo = params.selectedProgram
+      ? `Selected Training Program: ${params.selectedProgram.name}
+Program Description: ${params.selectedProgram.description}
+Program Duration: ${params.selectedProgram.duration} weeks
+Difficulty Level: ${params.selectedProgram.difficulty}
+Focus Areas: ${params.selectedProgram.focus.join(', ')}
+`
+      : '';
+
     const prompt = `You are a professional fitness coach. Create a detailed, personalized workout guidance summary (3-4 paragraphs) for a client with the following profile:
 
 Goal: ${params.primaryGoal.replace('_', ' ')}
@@ -81,14 +98,16 @@ Session Duration: ${params.workoutDuration} minutes
 Fitness Level: ${params.activityLevel}
 Equipment Access: ${params.equipmentAccess.join(', ') || 'Bodyweight only'}
 ${params.injuries ? `Injuries/Limitations: ${params.injuries}` : ''}
+${programInfo}
+${params.selectedProgram ? `IMPORTANT: This client has selected the "${params.selectedProgram.name}" program. Tailor your guidance specifically to this program's focus areas and difficulty level. Reference the program by name and explain how it aligns with their goals.` : ''}
 
 Provide:
-1. An overview of the recommended training approach and split
-2. Specific exercises or movement patterns they should focus on
+1. ${params.selectedProgram ? `How the ${params.selectedProgram.name} aligns with their ${params.primaryGoal.replace('_', ' ')} goal` : 'An overview of the recommended training approach and split'}
+2. Specific exercises or movement patterns they should focus on${params.selectedProgram ? ' within this program' : ''}
 3. Progressive overload strategy (how to advance over time)
 4. Recovery recommendations
 
-Keep it motivating, practical, and specific to their goals and constraints. Write in second person ("you should..."). Be concise but comprehensive.`;
+Keep it motivating, practical, and specific to their goals${params.selectedProgram ? ' and chosen program' : ' and constraints'}. Write in second person ("you should..."). Be concise but comprehensive.`;
 
     const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
