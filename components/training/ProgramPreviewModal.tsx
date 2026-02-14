@@ -335,9 +335,9 @@ export function ProgramPreviewModal({
               accessibilityRole="button"
               accessibilityHint="Closes the program preview and returns to program list"
             >
-              <GlassCard style={styles.backButton} interactive>
+              <View style={styles.backButton}>
                 <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
-              </GlassCard>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -350,12 +350,11 @@ export function ProgramPreviewModal({
               accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
               accessibilityHint="Confirms your selection and generates a personalized training plan based on this program"
             >
-              <GlassCard
+              <View
                 style={[
                   styles.continueButton,
                   { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }
                 ]}
-                interactive
               >
                 {isGenerating ? (
                   <Text style={[styles.continueButtonText, { color: colors.primary }]}>
@@ -366,7 +365,7 @@ export function ProgramPreviewModal({
                     SELECT THIS PROGRAM
                   </Text>
                 )}
-              </GlassCard>
+              </View>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -598,13 +597,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
     paddingVertical: 16,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   backButtonText: {
     fontSize: 14,
     fontFamily: Fonts.light,
     fontWeight: '200',
     letterSpacing: 1,
-    color: Colors.text,
   },
   continueButton: {
     flexDirection: 'row',
@@ -612,13 +614,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(150, 206, 180, 0.4)',
   },
   continueButtonText: {
     fontSize: 14,
     fontFamily: Fonts.light,
     fontWeight: '200',
     letterSpacing: 1,
-    color: Colors.primaryText,
   },
 });
 
