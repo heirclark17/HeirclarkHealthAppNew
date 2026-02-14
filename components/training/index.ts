@@ -8,3 +8,5 @@ export { ProgramCard } from './ProgramCard';
 export { ProgramPreviewModal } from './ProgramPreviewModal';
 export { ExerciseAlternativesModal } from './ExerciseAlternativesModal';
 export { WeightInputModal } from './WeightInputModal';
+export { CardioRecommendationCard } from './CardioRecommendationCard';
+export { CalorieDeficitCard } from './CalorieDeficitCard';

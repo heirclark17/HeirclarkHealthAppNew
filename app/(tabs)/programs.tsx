@@ -21,6 +21,8 @@ import {
   ProgramPreviewModal,
   ExerciseAlternativesModal,
   WeightInputModal,
+  CardioRecommendationCard,
+  CalorieDeficitCard,
 } from '../../components/training';
 import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
@@ -93,6 +95,8 @@ export default function ProgramsScreen() {
     planSummary,
     selectedExercise,
     showAlternativesModal,
+    cardioRecommendations,
+    nutritionGuidance,
   } = trainingState;
 
   // Goal wizard context - use safe wrapper hook
@@ -513,6 +517,23 @@ export default function ProgramsScreen() {
               </GlassCard>
             ) : null}
           </View>
+        )}
+
+        {/* Today's Cardio Recommendation - Separate from strength training */}
+        {weeklyPlan && cardioRecommendations && currentDay && (
+          <CardioRecommendationCard
+            recommendation={cardioRecommendations[currentDay.dayOfWeek.toLowerCase() as keyof typeof cardioRecommendations]}
+            dayName={currentDay.dayOfWeek}
+            isDark={isDark}
+          />
+        )}
+
+        {/* Nutrition Guidance - Calorie Deficit Card */}
+        {weeklyPlan && nutritionGuidance && (
+          <CalorieDeficitCard
+            nutrition={nutritionGuidance}
+            isDark={isDark}
+          />
         )}
 
         {/* Generate Plan Section - show when no plan exists */}
