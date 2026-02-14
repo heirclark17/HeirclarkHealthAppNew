@@ -499,7 +499,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <View style={styles.statItem}>
                 <Weight size={16} color={Colors.success} />
                 <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
-                  {Math.round(state.results.bmi)}
+                  {state.results.bmi.toFixed(1)}
                 </NumberText>
                 <Text style={[styles.statLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>BMI</Text>
               </View>

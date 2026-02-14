@@ -158,7 +158,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
       : weightUnit === 'kg'
         ? log.weightKg
         : log.weightLbs;
-    return `${Math.round(displayWeight)} ${weightUnit}`;
+    return `${displayWeight.toFixed(1)} ${weightUnit}`;
   };
 
   // Get weight change indicator
@@ -176,8 +176,8 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
     }
 
     return displayChange > 0
-      ? { icon: 'trending-up' as const, color: Colors.warningOrange, text: `+${Math.round(displayChange)} ${weightUnit}` }
-      : { icon: 'trending-down' as const, color: Colors.successStrong, text: `${Math.round(displayChange)} ${weightUnit}` };
+      ? { icon: 'trending-up' as const, color: Colors.warningOrange, text: `+${displayChange.toFixed(1)} ${weightUnit}` }
+      : { icon: 'trending-down' as const, color: Colors.successStrong, text: `${displayChange.toFixed(1)} ${weightUnit}` };
   };
 
   const weightChange = getWeightChange();
@@ -398,7 +398,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                       onPress={() => {
                         const current = parseFloat(weightInput) || (latestWeight ?
                           (weightUnit === 'kg' ? latestWeight.weightKg : latestWeight.weightLbs) : 150);
-                        setWeightInput(Math.round(current + delta).toString());
+                        setWeightInput((current + delta).toFixed(1));
                       }}
                       accessibilityLabel={`${delta > 0 ? 'Add' : 'Subtract'} ${Math.abs(delta)} ${weightUnit}`}
                       accessibilityRole="button"

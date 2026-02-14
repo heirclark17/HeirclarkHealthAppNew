@@ -104,7 +104,7 @@ export function ResultsStep({
         <View style={styles.statRow}>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>BMI</Text>
           <NumberText weight="medium" style={[styles.statValue, { color: colors.text }]}>
-            {Math.round(results.bmi)}
+            {results.bmi.toFixed(1)}
           </NumberText>
         </View>
         <View style={styles.statRow}>
@@ -140,7 +140,7 @@ export function ResultsStep({
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Weekly Change</Text>
             <NumberText weight="medium" style={[styles.statValue, { color: colors.text }]}>
               {results.weeklyChange > 0 ? '+' : ''}
-              {Math.round(Math.abs(results.weeklyChange))} lb/week
+              {Math.abs(results.weeklyChange).toFixed(2)} lb/week
             </NumberText>
           </View>
           <View style={styles.statRow}>

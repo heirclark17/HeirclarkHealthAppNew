@@ -63,7 +63,7 @@ export function StepsCard({
 
   // Calculate estimated distance (average stride ~2.5 feet)
   const distanceMiles = useMemo(() => {
-    return Math.round((steps * 2.5) / 5280).toString();
+    return ((steps * 2.5) / 5280).toFixed(1);
   }, [steps]);
 
   // Calculate estimated calories burned (rough estimate: 0.04 cal per step)
