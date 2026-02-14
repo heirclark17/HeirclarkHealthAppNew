@@ -240,19 +240,19 @@ export default function SavedMealsScreen() {
           <View style={styles.mealMeta}>
             <View style={styles.nutrientBadge}>
               <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
-                {meal.nutrients.calories}
+                {Math.round(meal.nutrients.calories)}
               </NumberText>
               <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>cal</Text>
             </View>
             <View style={styles.nutrientBadge}>
               <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
-                {meal.nutrients.protein_g}g
+                {Math.round(meal.nutrients.protein_g)}g
               </NumberText>
               <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>protein</Text>
             </View>
             <View style={styles.nutrientBadge}>
               <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
-                {meal.prepTimeMinutes}
+                {Math.round(meal.prepTimeMinutes)}
               </NumberText>
               <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>min</Text>
             </View>
