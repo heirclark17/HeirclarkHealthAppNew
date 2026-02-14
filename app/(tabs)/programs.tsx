@@ -16,13 +16,11 @@ import {
   LoadingState,
   WorkoutCard,
   WorkoutCalendarCard,
-  GoalAlignmentCard,
   ProgramCard,
   ProgramPreviewModal,
   ExerciseAlternativesModal,
   WeightInputModal,
 } from '../../components/training';
-import { PlanSummaryCard } from '../../components/goals';
 import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { ExerciseAlternative, WorkoutExercise, WeightLog } from '../../types/training';
@@ -594,15 +592,6 @@ export default function ProgramsScreen() {
         {/* Training Plan Content - show when plan exists */}
         {weeklyPlan && !isGenerating && (
           <View>
-            {/* Plan Summary Card */}
-            {planSummary && (
-              <PlanSummaryCard
-                summary={planSummary}
-                onStartTraining={handleStartTraining}
-                showStartButton={false}
-              />
-            )}
-
             {/* Week Navigation */}
             <View style={styles.weekNavigation}>
               <TouchableOpacity
