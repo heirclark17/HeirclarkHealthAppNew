@@ -672,7 +672,7 @@ class AIService {
    * Generate AI-powered workout plan based on user preferences
    */
   async generateAIWorkoutPlan(preferences: WorkoutPlanPreferences, weeks: number = 4): Promise<AIWorkoutPlan | null> {
-    const TIMEOUT_MS = 30000; // 30 second timeout for AI generation (reduced from 200s to prevent UI freezing)
+    const TIMEOUT_MS = 300000; // 5 minute timeout (matches Railway backend timeout)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
