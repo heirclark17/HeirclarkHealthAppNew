@@ -1447,17 +1447,29 @@ app.delete('/api/v1/favorite-exercises/:exerciseId', authenticateToken, async (r
 // GET /api/v1/favorite-exercises - Get user's favorite exercise IDs
 app.get('/api/v1/favorite-exercises', authenticateToken, async (req, res) => {
   try {
+    console.log(`[Favorite Exercises] Fetching favorites for user ${req.userId}`);
+
+    // Check if user is authenticated
+    if (!req.userId) {
+      console.error('[Favorite Exercises] No user ID provided');
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
     const result = await pool.query(
       'SELECT exercise_id FROM favorite_exercises WHERE user_id = $1 ORDER BY created_at DESC',
       [req.userId]
     );
 
     const favoriteIds = result.rows.map(row => row.exercise_id);
-    console.log(`[Favorite Exercises] Retrieved ${favoriteIds.length} favorites for user ${req.userId}`);
+    console.log(`[Favorite Exercises] ✅ Retrieved ${favoriteIds.length} favorites for user ${req.userId}`);
     res.json({ success: true, favoriteIds });
   } catch (error) {
-    console.error('[Favorite Exercises] Get error:', error);
-    res.status(500).json({ error: 'Failed to get favorites' });
+    console.error('[Favorite Exercises] ❌ Get error:', error.message);
+    console.error('[Favorite Exercises] Stack:', error.stack);
+    res.status(500).json({
+      error: 'Failed to get favorites',
+      message: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message
+    });
   }
 });
 
