@@ -13,7 +13,7 @@ import {
   Urbanist_600SemiBold,
   Urbanist_700Bold,
 } from '@expo-google-fonts/urbanist';
-import { GoalWizardProvider, MealPlanProvider, TrainingProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
+import { GoalWizardProvider, MealPlanProvider, TrainingProvider, CustomWorkoutProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { BackgroundLayer } from '../components/BackgroundLayer';
@@ -111,9 +111,10 @@ export default function RootLayout() {
               <GoalWizardProvider>
                 <MealPlanProvider>
                   <TrainingProvider>
-                    <FastingTimerProvider>
-                      <WorkoutTrackingProvider>
-                        <CalorieBankingProvider>
+                    <CustomWorkoutProvider>
+                      <FastingTimerProvider>
+                        <WorkoutTrackingProvider>
+                          <CalorieBankingProvider>
                           <RestaurantMenuProvider>
                             <FoodPreferencesProvider>
                               <AccountabilityPartnerProvider>
@@ -137,9 +138,10 @@ export default function RootLayout() {
                               </AccountabilityPartnerProvider>
                             </FoodPreferencesProvider>
                           </RestaurantMenuProvider>
-                        </CalorieBankingProvider>
-                      </WorkoutTrackingProvider>
-                    </FastingTimerProvider>
+                          </CalorieBankingProvider>
+                        </WorkoutTrackingProvider>
+                      </FastingTimerProvider>
+                    </CustomWorkoutProvider>
                   </TrainingProvider>
                 </MealPlanProvider>
               </GoalWizardProvider>
