@@ -45,6 +45,7 @@ import {
   generateDailyGuidance,
   generateNutritionGuidance
 } from '../../services/openaiService';
+import { GoalAlignmentCard } from '../training/GoalAlignmentCard';
 
 interface SuccessScreenProps {
   onLogMeal: () => void;
@@ -62,6 +63,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   const { settings } = useSettings();
   const foodPrefs = useFoodPreferencesSafe();
   const { state: trainingState } = useTraining();
+  const { goalAlignment, preferences } = trainingState;
   const hasPlayedHaptic = useRef(false);
   const hasCalculatedResults = useRef(false);
 
@@ -450,6 +452,11 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           </GlassCard>
         </GlassCard>
       </View>
+
+      {/* Goal Alignment Card */}
+      {goalAlignment && preferences && (
+        <GoalAlignmentCard alignment={goalAlignment} preferences={preferences} />
+      )}
 
       {/* Detailed Profile Summary */}
       <View>

@@ -438,10 +438,6 @@ export default function ProgramsScreen() {
           />
         )}
 
-        {/* Goal Alignment Card - Below Calendar */}
-        {weeklyPlan && goalAlignment && preferences && (
-          <GoalAlignmentCard alignment={goalAlignment} preferences={preferences} />
-        )}
 
         {/* Today's Workout - Below Calendar */}
         {weeklyPlan && !isGenerating && (
