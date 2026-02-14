@@ -109,7 +109,7 @@ export function ProgramPreviewModal({
             accessibilityHint="Closes the program preview modal and returns to the program list"
           >
             <GlassCard style={styles.closeButton} interactive>
-              <Ionicons name="close" size={22} color={colors.text} />
+              <Ionicons name="close-outline" size={24} color={colors.text} />
             </GlassCard>
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Program Details</Text>
@@ -222,7 +222,7 @@ export function ProgramPreviewModal({
                       ]}
                     >
                       <Text style={[styles.dayLabel, { color: colors.textMuted }]}>
-                        Day {day.day}
+                        Day <NumberText weight="medium">{day.day}</NumberText>
                       </Text>
                       <Text
                         style={[
@@ -270,7 +270,7 @@ export function ProgramPreviewModal({
                         ]}
                       >
                         <Text style={[styles.dayLabel, { color: colors.textMuted }]}>
-                          Day {index + 1}
+                          Day <NumberText weight="medium">{index + 1}</NumberText>
                         </Text>
                         <Text
                           style={[
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.medium,
   },
   section: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 16,

@@ -273,7 +273,7 @@ export function ExerciseAlternativesModal({
                 accessibilityRole="button"
                 accessibilityHint="Closes the alternatives modal and returns to the workout"
               >
-                <Ionicons name="close" size={24} color={glassColors.text} />
+                <Ionicons name="close-outline" size={26} color={glassColors.text} />
               </TouchableOpacity>
             </Animated.View>
             <View style={styles.headerCenter}>

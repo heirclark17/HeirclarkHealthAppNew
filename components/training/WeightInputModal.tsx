@@ -209,7 +209,7 @@ export function WeightInputModal({
               accessibilityHint="Closes the weight logging modal without saving"
             >
               <GlassCard style={styles.closeButtonGlass} interactive>
-                <Ionicons name="close" size={24} color={colors.text} />
+                <Ionicons name="close-outline" size={26} color={colors.text} />
               </GlassCard>
             </TouchableOpacity>
             <Text style={[styles.title, { color: colors.text }]}>Log Weight</Text>
