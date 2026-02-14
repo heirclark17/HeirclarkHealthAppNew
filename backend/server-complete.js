@@ -2227,7 +2227,7 @@ app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res)
       ],
       response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 4000,
+      max_tokens: 2000, // Reduced from 4000 to stay under Railway's 30s timeout
     });
 
     const workoutPlan = JSON.parse(completion.choices[0].message.content);
