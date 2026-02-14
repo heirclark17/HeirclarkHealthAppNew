@@ -10,6 +10,7 @@ import { NumberText } from '../NumberText';
 interface GoalAlignmentCardProps {
   alignment: GoalWorkoutAlignment;
   preferences: TrainingPreferences;
+  containerStyle?: any;
 }
 
 function AlignmentBar({
@@ -39,7 +40,7 @@ function AlignmentBar({
   );
 }
 
-export function GoalAlignmentCard({ alignment, preferences }: GoalAlignmentCardProps) {
+export function GoalAlignmentCard({ alignment, preferences, containerStyle }: GoalAlignmentCardProps) {
   const { settings } = useSettings();
 
   // Dynamic theme colors
@@ -80,7 +81,7 @@ export function GoalAlignmentCard({ alignment, preferences }: GoalAlignmentCardP
 
   return (
     <View>
-      <GlassCard style={styles.container} interactive>
+      <GlassCard style={[styles.container, containerStyle]} interactive>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>

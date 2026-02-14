@@ -23,6 +23,7 @@ interface PlanSummaryCardProps {
   onViewDetails?: () => void;
   isExpanded?: boolean;
   showStartButton?: boolean;
+  containerStyle?: any;
 }
 
 // Confidence color mapping
@@ -111,6 +112,7 @@ export function PlanSummaryCard({
   onViewDetails,
   isExpanded = false,
   showStartButton = true,
+  containerStyle,
 }: PlanSummaryCardProps) {
   const { settings } = useSettings();
   const [expanded, setExpanded] = useState(isExpanded);
@@ -136,7 +138,7 @@ export function PlanSummaryCard({
   return (
     <View>
       <View>
-        <GlassCard style={styles.container} interactive>
+        <GlassCard style={[styles.container, containerStyle]} interactive>
         {/* Header Section - Always Visible */}
         <TouchableOpacity
           style={styles.headerTouchable}

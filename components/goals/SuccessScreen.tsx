@@ -456,20 +456,21 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
       {/* Your Training Plan Card */}
       {planSummary && (
-        <View style={{ marginHorizontal: -16 }}>
-          <PlanSummaryCard
-            summary={planSummary}
-            onStartTraining={handleStartTrainingPlan}
-            showStartButton={false}
-          />
-        </View>
+        <PlanSummaryCard
+          summary={planSummary}
+          onStartTraining={handleStartTrainingPlan}
+          showStartButton={false}
+          containerStyle={{ marginHorizontal: 0 }}
+        />
       )}
 
       {/* Goal Alignment Card */}
       {goalAlignment && preferences && (
-        <View style={{ marginHorizontal: -16 }}>
-          <GoalAlignmentCard alignment={goalAlignment} preferences={preferences} />
-        </View>
+        <GoalAlignmentCard
+          alignment={goalAlignment}
+          preferences={preferences}
+          containerStyle={{ marginHorizontal: 0 }}
+        />
       )}
 
       {/* Detailed Profile Summary */}
