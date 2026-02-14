@@ -27,6 +27,7 @@ import { useRouter } from 'expo-router';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePostHog } from '../../contexts/PostHogContext';
 import {
   GoalWizardProvider,
   useGoalWizard,
@@ -76,6 +77,7 @@ function GoalWizardContent() {
   const [isGeneratingTrainingPlan, setIsGeneratingTrainingPlan] = useState(false);
   const { settings } = useSettings();
   const { user, isAuthenticated } = useAuth();
+  const { capture } = usePostHog();
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -86,10 +88,33 @@ function GoalWizardContent() {
   useEffect(() => {
     // Load any saved progress when component mounts
     loadSavedProgress();
+
+    // Track screen view
+    capture('screen_viewed', {
+      screen_name: 'Goal Wizard',
+      screen_type: 'tab',
+    });
   }, [loadSavedProgress]);
+
+  const getStepName = (step: number) => {
+    const stepNames = [
+      'Primary Goal',
+      'Body Metrics',
+      'Activity Lifestyle',
+      'Nutrition Preferences',
+      'Program Selection',
+      'Plan Preview',
+    ];
+    return stepNames[step - 1] || 'Unknown';
+  };
 
   const handleNext = () => {
     setDirection('forward');
+    capture('goal_wizard_step_completed', {
+      screen_name: 'Goal Wizard',
+      current_step: state.currentStep,
+      step_name: getStepName(state.currentStep),
+    });
     nextStep();
   };
 

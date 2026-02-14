@@ -12,6 +12,7 @@ import { aiService } from '../../services/aiService';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../../components/NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
+import { usePostHog } from '../../contexts/PostHogContext';
 import { GlassCard } from '../../components/GlassCard';
 import { Meal, PantryItem } from '../../types/mealPlan';
 import {
@@ -28,6 +29,7 @@ import { FoodPreferencesModal } from '../../components/FoodPreferences';
 
 export default function MealsScreen() {
   const { settings } = useSettings();
+  const { capture } = usePostHog();
   const insets = useSafeAreaInsets();
 
   // Dynamic theme colors
@@ -136,11 +138,23 @@ export default function MealsScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchGoals();
+
+      // Track screen view
+      capture('screen_viewed', {
+        screen_name: 'Meal Plan',
+        screen_type: 'tab',
+      });
     }, [])
   );
 
   // Handle quick generate (template-based)
   const handleGenerate = async () => {
+    // Track meal plan generation
+    capture('meal_plan_generated', {
+      screen_name: 'Meal Plan',
+      generation_type: 'quick',
+    });
+
     // Refresh goals before generating to ensure we use latest values
     const goals = await fetchGoals();
 
@@ -168,6 +182,12 @@ export default function MealsScreen() {
 
   // Handle AI-powered generate
   const handleAIGenerate = async () => {
+    // Track AI meal plan generation
+    capture('meal_plan_generated', {
+      screen_name: 'Meal Plan',
+      generation_type: 'ai_powered',
+    });
+
     // Refresh goals before generating to ensure we use latest values
     const goals = await fetchGoals();
 
@@ -253,6 +273,13 @@ export default function MealsScreen() {
 
   // Handle meal swap
   const handleSwapMeal = async (mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => {
+    // Track meal swap
+    capture('meal_swapped', {
+      screen_name: 'Meal Plan',
+      meal_type: mealType,
+      day_index: selectedDayIndex,
+    });
+
     await swapMeal(selectedDayIndex, mealType, 'Want variety');
   };
 

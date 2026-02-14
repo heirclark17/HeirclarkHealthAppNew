@@ -9,6 +9,7 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants
 import { NumberText } from '../../components/NumberText';
 import { GlassCard } from '../../components/GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
+import { usePostHog } from '../../contexts/PostHogContext';
 import { useTraining } from '../../contexts/TrainingContext';
 import { useCustomWorkout } from '../../contexts/CustomWorkoutContext';
 import { useSafeGoalWizard } from '../../hooks/useSafeGoalWizard';
@@ -30,6 +31,7 @@ import { api } from '../../services/api';
 
 export default function ProgramsScreen() {
   const router = useRouter();
+  const { capture } = usePostHog();
   const [refreshing, setRefreshing] = useState(false);
   const [showProgramModal, setShowProgramModal] = useState(false);
   const [showProgramPreview, setShowProgramPreview] = useState(false);
@@ -193,6 +195,12 @@ export default function ProgramsScreen() {
     useCallback(() => {
       loadCachedPlan();
       loadCustomWorkouts();
+
+      // Track screen view
+      capture('screen_viewed', {
+        screen_name: 'Programs',
+        screen_type: 'tab',
+      });
     }, [loadCachedPlan, loadCustomWorkouts])
   );
 
@@ -200,6 +208,13 @@ export default function ProgramsScreen() {
   const handleGenerate = useCallback(async () => {
     console.log('[Programs] Quick generate button clicked');
     console.log('[Programs] Goal wizard state:', goalWizardState?.primaryGoal);
+
+    // Track training plan generation
+    capture('training_plan_generated', {
+      screen_name: 'Programs',
+      generation_type: 'quick',
+      program: selectedProgram?.name || 'none',
+    });
 
     // Check if user has selected a training program
     if (!selectedProgram) {
@@ -226,6 +241,13 @@ export default function ProgramsScreen() {
   const handleAIGenerate = useCallback(async () => {
     console.log('[Programs] AI generate button clicked');
     console.log('[Programs] Goal wizard state:', goalWizardState?.primaryGoal);
+
+    // Track AI training plan generation
+    capture('training_plan_generated', {
+      screen_name: 'Programs',
+      generation_type: 'ai_powered',
+      program: selectedProgram?.name || 'none',
+    });
 
     // Check if user has selected a training program
     if (!selectedProgram) {

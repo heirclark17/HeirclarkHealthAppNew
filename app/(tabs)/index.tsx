@@ -35,6 +35,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTraining } from '../../contexts/TrainingContext';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
+import { usePostHog } from '../../contexts/PostHogContext';
 import { NumberText } from '../../components/NumberText';
 
 const AnimatedPressable = ReanimatedModule.createAnimatedComponent(Pressable);
@@ -48,6 +49,7 @@ export default function DashboardScreen() {
   const router = useRouter();
   const { settings } = useSettings();
   const { user, isAuthenticated, signInWithApple, isAppleSignInAvailable, isLoading: authLoading } = useAuth();
+  const { capture } = usePostHog();
 
   // Training context for today's workout
   let trainingState: any = null;
@@ -430,11 +432,14 @@ export default function DashboardScreen() {
   // Refresh handler
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    capture('pull_to_refresh', {
+      screen_name: 'Home Dashboard',
+    });
     await checkApiConnection();
     await fetchData();
     await fetchAppleHealthCalories();
     setRefreshing(false);
-  }, [fetchData, fetchAppleHealthCalories]);
+  }, [fetchData, fetchAppleHealthCalories, capture]);
 
   // Sync with fitness tracker
   const handleSync = async () => {
@@ -541,6 +546,12 @@ export default function DashboardScreen() {
     checkApiConnection();
     fetchData();
     fetchAppleHealthCalories();
+
+    // Track screen view
+    capture('screen_viewed', {
+      screen_name: 'Home Dashboard',
+      screen_type: 'tab',
+    });
   }, []);
 
   // Refetch when date changes
