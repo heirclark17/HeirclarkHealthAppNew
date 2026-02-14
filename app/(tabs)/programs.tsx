@@ -193,7 +193,10 @@ export default function ProgramsScreen() {
   // Refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      loadCachedPlan();
+      // Don't reload cache if AI generation is in progress (prevents race condition)
+      if (!isGenerating) {
+        loadCachedPlan();
+      }
       loadCustomWorkouts();
 
       // Track screen view
@@ -201,7 +204,7 @@ export default function ProgramsScreen() {
         screen_name: 'Programs',
         screen_type: 'tab',
       });
-    }, [loadCachedPlan, loadCustomWorkouts])
+    }, [loadCachedPlan, loadCustomWorkouts, isGenerating])
   );
 
   // Handle quick generate (template-based) - memoized
