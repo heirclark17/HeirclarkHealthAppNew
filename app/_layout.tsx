@@ -16,6 +16,7 @@ import {
 import { GoalWizardProvider, MealPlanProvider, TrainingProvider, CustomWorkoutProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
+import { PostHogProvider } from '../contexts/PostHogContext';
 import { BackgroundLayer } from '../components/BackgroundLayer';
 import { ProviderComposer } from '../utils/ProviderComposer';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -106,8 +107,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
       <AuthProvider>
         <AuthGatedContent>
-          <NotificationProvider>
-            <SettingsProvider>
+          <PostHogProvider>
+            <NotificationProvider>
+              <SettingsProvider>
               <GoalWizardProvider>
                 <MealPlanProvider>
                   <TrainingProvider>
@@ -145,8 +147,9 @@ export default function RootLayout() {
                   </TrainingProvider>
                 </MealPlanProvider>
               </GoalWizardProvider>
-            </SettingsProvider>
-          </NotificationProvider>
+              </SettingsProvider>
+            </NotificationProvider>
+          </PostHogProvider>
         </AuthGatedContent>
       </AuthProvider>
     </SafeAreaProvider>
