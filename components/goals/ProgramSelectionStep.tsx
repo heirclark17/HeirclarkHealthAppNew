@@ -276,6 +276,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
               onBack();
             }}
             style={styles.backButton}
+            variant="secondary"
           >
             <Ionicons name="arrow-back" size={20} color={colors.text} />
             <Text style={[styles.backButtonText, { color: colors.text }]}>Back</Text>
@@ -288,10 +289,11 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
               !selectedProgramId && styles.continueButtonDisabled,
             ]}
             disabled={!selectedProgramId}
+            variant="secondary"
           >
             <Text style={[
               styles.continueButtonText,
-              { color: isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)' }
+              { color: colors.text }
             ]}>
               {selectedProgramId ? 'Continue' : 'Select a Program'}
             </Text>
@@ -299,7 +301,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
               <Ionicons
                 name="arrow-forward"
                 size={20}
-                color={isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'}
+                color={colors.text}
               />
             )}
           </GlassButton>
