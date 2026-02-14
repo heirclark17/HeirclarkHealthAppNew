@@ -241,10 +241,10 @@ export function GoalStep({
               <View style={[styles.computedRate, { backgroundColor: computedBg, borderColor: colors.border }]}>
                 <Text style={[styles.computedLabel, { color: colors.textMuted }]}>Estimated Weekly Change</Text>
                 <Text style={[styles.computedValue, { color: colors.text }]}>
-                  {weeklyChange > 0 ? '+' : ''}{Math.abs(weeklyChange).toFixed(2)} lb/week
+                  {weeklyChange > 0 ? '+' : ''}{Math.round(Math.abs(weeklyChange))} lb/week
                 </Text>
                 <Text style={[styles.computedNote, { color: colors.textMuted }]}>
-                  Over {totalWeeks.toFixed(1)} weeks ({Math.round(totalWeeks * 7)} days)
+                  Over {Math.round(totalWeeks)} weeks ({Math.round(totalWeeks * 7)} days)
                 </Text>
               </View>
             )}

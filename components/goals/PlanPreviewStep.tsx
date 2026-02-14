@@ -372,7 +372,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               <View style={styles.profileStatBox}>
                 <User size={18} color={results.bmiCategory.color} />
                 <NumberText weight="semiBold" style={[styles.profileStatValue, { color: colors.text }]}>
-                  {results.bmi.toFixed(1)}
+                  {Math.round(results.bmi)}
                 </NumberText>
                 <Text style={[styles.profileStatLabel, { color: colors.textMuted }]}>BMI</Text>
                 <Text style={[styles.profileStatDesc, { color: results.bmiCategory.color }]}>
@@ -424,7 +424,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 styles.weeklyRateValue,
                 { color: state.primaryGoal === 'lose_weight' ? Colors.error : Colors.success }
               ]}>
-                {Math.abs(results.weeklyChange).toFixed(1)}
+                {Math.round(Math.abs(results.weeklyChange))}
               </NumberText>
               <Text style={[styles.weeklyRateUnit, { color: colors.textMuted }]}>lbs/week</Text>
             </View>
@@ -798,7 +798,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             {state.primaryGoal === 'lose_weight'
               ? `Your ${results.protein}g protein target preserves muscle while training in a ${Math.abs(results.dailyDelta).toFixed(0)} cal deficit maximizes fat loss without strength loss`
               : state.primaryGoal === 'build_muscle'
-              ? `${results.calories.toLocaleString()} cal surplus + ${results.protein}g protein + progressive training = optimal muscle growth of ~${Math.abs(results.weeklyChange).toFixed(2)}lb/week`
+              ? `${results.calories.toLocaleString()} cal surplus + ${results.protein}g protein + progressive training = optimal muscle growth of ~${Math.round(Math.abs(results.weeklyChange))}lb/week`
               : `Balanced ${results.calories.toLocaleString()} cal intake with ${results.protein}g protein supports your training and recovery needs`}
           </Text>
         </View>

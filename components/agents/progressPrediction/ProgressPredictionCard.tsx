@@ -246,10 +246,10 @@ export default function ProgressPredictionCard() {
           </View>
           <View style={styles.progressStats}>
             <NumberText weight="regular" style={[styles.progressStat, { color: colors.textSecondary }]}>
-              {totalLost > 0 ? '+' : ''}{totalLost.toFixed(1)} lbs lost
+              {totalLost > 0 ? '+' : ''}{totalLost.toFixed(0)} lbs lost
             </NumberText>
             <NumberText weight="regular" style={[styles.progressStat, { color: colors.textSecondary }]}>
-              {state.snapshot?.totalToLose.toFixed(1) || 0} lbs to go
+              {state.snapshot?.totalToLose.toFixed(0) || 0} lbs to go
             </NumberText>
           </View>
         </View>
@@ -272,7 +272,7 @@ export default function ProgressPredictionCard() {
 
           <View style={[styles.statCard, { backgroundColor: colors.cardGlass }]}>
             <NumberText weight="bold" style={[styles.rateValue, { color: colors.primary }]}>
-              {Math.abs(weeklyRate).toFixed(1)}
+              {Math.abs(weeklyRate).toFixed(0)}
             </NumberText>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>LBS/WEEK</Text>
             <Text style={[styles.statSubvalue, { color: colors.textSecondary }]}>
@@ -405,13 +405,13 @@ export default function ProgressPredictionCard() {
               <View style={styles.detailRow}>
                 <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Weekly Rate:</Text>
                 <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
-                  {Math.abs(weeklyRate).toFixed(2)} lbs/week
+                  {Math.abs(weeklyRate).toFixed(0)} lbs/week
                 </NumberText>
               </View>
               <View style={styles.detailRow}>
                 <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Monthly Rate:</Text>
                 <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
-                  {Math.abs(state.trendAnalysis?.monthlyChange || 0).toFixed(2)} lbs/month
+                  {Math.abs(state.trendAnalysis?.monthlyChange || 0).toFixed(0)} lbs/month
                 </NumberText>
               </View>
               <View style={styles.detailRow}>
@@ -437,19 +437,19 @@ export default function ProgressPredictionCard() {
                     Current Weight:
                   </Text>
                   <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
-                    {state.goalProjection.currentWeight.toFixed(1)} lbs
+                    {state.goalProjection.currentWeight.toFixed(0)} lbs
                   </NumberText>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Goal Weight:</Text>
                   <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
-                    {state.goalProjection.goalWeight.toFixed(1)} lbs
+                    {state.goalProjection.goalWeight.toFixed(0)} lbs
                   </NumberText>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Remaining:</Text>
                   <NumberText weight="semiBold" style={[styles.detailValue, { color: colors.text }]}>
-                    {Math.abs(state.goalProjection.weightToLose).toFixed(1)} lbs
+                    {Math.abs(state.goalProjection.weightToLose).toFixed(0)} lbs
                   </NumberText>
                 </View>
                 <View style={styles.detailRow}>

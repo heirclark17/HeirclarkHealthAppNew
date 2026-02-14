@@ -54,7 +54,7 @@ export function RestingEnergyCard({
   }, [restingEnergy]);
 
   const caloriesPerMinute = useMemo(() => {
-    return (restingEnergy / 1440).toFixed(2);
+    return Math.round(restingEnergy / 1440).toString();
   }, [restingEnergy]);
 
   // Weekly average

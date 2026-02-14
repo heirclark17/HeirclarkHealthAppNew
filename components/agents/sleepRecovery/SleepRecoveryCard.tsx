@@ -116,8 +116,8 @@ export default function SleepRecoveryCard() {
   const getSleepDebtStatus = useCallback(() => {
     const debtHours = state.sleepDebt / 60;
     if (debtHours <= 0) return { text: 'No debt', color: colors.success };
-    if (debtHours <= 2) return { text: `${debtHours.toFixed(1)}h debt`, color: colors.warning };
-    return { text: `${debtHours.toFixed(1)}h debt`, color: colors.danger };
+    if (debtHours <= 2) return { text: `${Math.round(debtHours)}h debt`, color: colors.warning };
+    return { text: `${Math.round(debtHours)}h debt`, color: colors.danger };
   }, [state.sleepDebt, colors]);
 
   const sleepDebtStatus = getSleepDebtStatus();

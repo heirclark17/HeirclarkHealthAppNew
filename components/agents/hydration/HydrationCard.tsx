@@ -64,7 +64,7 @@ export default function HydrationCard() {
 
   const formatAmount = useCallback((ml: number): string => {
     if (ml >= 1000) {
-      return `${(ml / 1000).toFixed(1)}L`;
+      return `${Math.round(ml / 1000)}L`;
     }
     return `${ml}ml`;
   }, []);

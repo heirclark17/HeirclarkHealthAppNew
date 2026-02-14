@@ -95,7 +95,7 @@ export const DailyFatLossCard: React.FC<DailyFatLossCardProps> = ({
               {isDeficit ? 'ESTIMATED FAT LOST TODAY' : isSurplus ? 'ESTIMATED FAT GAINED TODAY' : 'MAINTENANCE'}
             </Text>
             <Text style={[styles.fatLossValue, { color: colors.text }, isDeficit && { color: 'Colors.successStrong' }, isSurplus && { color: Colors.errorStrong }]}>
-              {Math.abs(dailyFatChange).toFixed(3)} lbs
+              {Math.round(Math.abs(dailyFatChange))} lbs
             </Text>
             {isDeficit && <Text style={[styles.helperText, { color: colors.textSecondary }]}>You're in a calorie deficit - great work!</Text>}
             {isSurplus && <Text style={[styles.helperText, { color: colors.textSecondary }]}>You're in a calorie surplus</Text>}
@@ -122,7 +122,7 @@ export const DailyFatLossCard: React.FC<DailyFatLossCardProps> = ({
               <View style={styles.weeklyTargetRow}>
                 <View style={styles.weeklyTargetItem}>
                   <Text style={[styles.weeklyTargetValue, { color: colors.text }]}>
-                    {Math.abs(weeklyTarget).toFixed(1)}
+                    {Math.round(Math.abs(weeklyTarget))}
                   </Text>
                   <Text style={[styles.weeklyTargetLabel, { color: colors.textMuted }]}>
                     lbs/{goalType === 'lose' ? 'loss' : goalType === 'gain' ? 'gain' : 'week'}
@@ -134,7 +134,7 @@ export const DailyFatLossCard: React.FC<DailyFatLossCardProps> = ({
                     styles.weeklyTargetValue,
                     { color: isOnTrack ? 'Colors.successStrong' : Colors.error }
                   ]}>
-                    {Math.abs(weeklyProjected).toFixed(1)}
+                    {Math.round(Math.abs(weeklyProjected))}
                   </Text>
                   <Text style={[styles.weeklyTargetLabel, { color: colors.textMuted }]}>lbs/projected</Text>
                 </View>

@@ -34,7 +34,7 @@ export default function StepsScreen() {
   const [caloriesBurned, setCaloriesBurned] = useState(0);
 
   const weeklyGoal = stepsGoal * 7;
-  const distance = (currentSteps * 0.0005).toFixed(2); // Approximate miles
+  const distance = Math.round(currentSteps * 0.0005); // Approximate miles
   const dailyAvg = Math.round(weeklySteps / 7);
   const stepsPercent = Math.round((currentSteps / stepsGoal) * 100);
   const weeklyPercent = Math.round((weeklySteps / weeklyGoal) * 100);
