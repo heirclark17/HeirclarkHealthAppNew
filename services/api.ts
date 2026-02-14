@@ -2,6 +2,7 @@
 // Railway Backend with PostgreSQL + JWT Auth + 11 AI Agents
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
 const API_BASE_URL = 'https://heirclarkinstacartbackend-production.up.railway.app';
 const AUTH_TOKEN_KEY = 'heirclark_auth_token';
@@ -194,6 +195,12 @@ class HeirclarkAPI {
     if (includeContentType) {
       headers['Content-Type'] = 'application/json';
     }
+
+    // Add app version headers for backend version checking
+    const appVersion = Constants.expoConfig?.version || '1.0.1';
+    const buildNumber = Constants.expoConfig?.ios?.buildNumber || '10';
+    headers['x-app-version'] = appVersion;
+    headers['x-app-build-number'] = buildNumber;
 
     return headers;
   }
