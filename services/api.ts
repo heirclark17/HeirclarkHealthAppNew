@@ -857,6 +857,158 @@ class HeirclarkAPI {
   }
 
   // ============================================
+  // CUSTOM WORKOUTS
+  // ============================================
+
+  // Create custom workout
+  async createCustomWorkout(workout: {
+    name: string;
+    description?: string;
+    workout_structure: any;
+  }): Promise<any | null> {
+    try {
+      console.log('[API] Creating custom workout:', workout.name);
+      const response = await fetch(`${this.baseUrl}/api/v1/custom-workouts`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(workout),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Create custom workout error:', response.status, errorText);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log('[API] ✅ Custom workout created successfully');
+      return data.success ? data.workout : null;
+    } catch (error) {
+      console.error('[API] Create custom workout error:', error);
+      return null;
+    }
+  }
+
+  // Get all custom workouts for user
+  async getCustomWorkouts(): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/custom-workouts`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 401) return [];
+        throw new Error('Failed to get custom workouts');
+      }
+
+      const data = await response.json();
+      return data.success ? data.workouts : [];
+    } catch (error) {
+      console.error('[API] Get custom workouts error:', error);
+      return [];
+    }
+  }
+
+  // Update custom workout
+  async updateCustomWorkout(id: string, workout: {
+    name: string;
+    description?: string;
+    workout_structure: any;
+  }): Promise<any | null> {
+    try {
+      console.log('[API] Updating custom workout:', id);
+      const response = await fetch(`${this.baseUrl}/api/v1/custom-workouts/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(workout),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Update custom workout error:', response.status, errorText);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log('[API] ✅ Custom workout updated successfully');
+      return data.success ? data.workout : null;
+    } catch (error) {
+      console.error('[API] Update custom workout error:', error);
+      return null;
+    }
+  }
+
+  // Delete custom workout
+  async deleteCustomWorkout(id: string): Promise<boolean> {
+    try {
+      console.log('[API] Deleting custom workout:', id);
+      const response = await fetch(`${this.baseUrl}/api/v1/custom-workouts/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Delete custom workout error:', response.status, errorText);
+        return false;
+      }
+
+      console.log('[API] ✅ Custom workout deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Delete custom workout error:', error);
+      return false;
+    }
+  }
+
+  // Activate custom workout (sets it as active workout, deactivates others)
+  async activateCustomWorkout(id: string): Promise<any | null> {
+    try {
+      console.log('[API] Activating custom workout:', id);
+      const response = await fetch(`${this.baseUrl}/api/v1/custom-workouts/${id}/activate`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Activate custom workout error:', response.status, errorText);
+        return null;
+      }
+
+      const data = await response.json();
+      console.log('[API] ✅ Custom workout activated successfully');
+      return data.success ? data.workout : null;
+    } catch (error) {
+      console.error('[API] Activate custom workout error:', error);
+      return null;
+    }
+  }
+
+  // Deactivate all custom workouts (return to AI-generated plan)
+  async deactivateAllCustomWorkouts(): Promise<boolean> {
+    try {
+      console.log('[API] Deactivating all custom workouts');
+      const response = await fetch(`${this.baseUrl}/api/v1/custom-workouts/deactivate-all`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Deactivate all custom workouts error:', response.status, errorText);
+        return false;
+      }
+
+      console.log('[API] ✅ All custom workouts deactivated successfully');
+      return true;
+    } catch (error) {
+      console.error('[API] Deactivate all custom workouts error:', error);
+      return false;
+    }
+  }
+
+  // ============================================
   // MEALS
   // ============================================
 
