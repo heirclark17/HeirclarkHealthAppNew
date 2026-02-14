@@ -325,46 +325,51 @@ export function ProgramPreviewModal({
             </View>
           )}
 
-          {/* Spacer for button */}
-          <View style={{ height: 100 }} />
-        </ScrollView>
-
-        {/* Confirm Button - Fixed at bottom */}
-        <View style={[styles.bottomContainer, { backgroundColor: 'transparent' }]}>
-          <BlurView
-            intensity={isDark ? 50 : 70}
-            tint={isDark ? 'dark' : 'light'}
-            style={styles.bottomBlur}
-          />
-          <TouchableOpacity
-            onPress={handleConfirm}
-            disabled={isGenerating}
-            activeOpacity={0.8}
-            style={styles.confirmButtonWrapper}
-            accessibilityLabel={program ? `Select ${program.name} program` : 'Select this program'}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-            accessibilityHint="Confirms your selection and generates a personalized training plan based on this program"
-          >
-            <GlassCard
-              style={[styles.confirmButton, { backgroundColor: accentBg }]}
-              interactive
+          {/* Button Row */}
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              onPress={handleClose}
+              activeOpacity={0.7}
+              style={{ flex: 1 }}
+              accessibilityLabel="Back"
+              accessibilityRole="button"
+              accessibilityHint="Closes the program preview and returns to program list"
             >
-              {isGenerating ? (
-                <Text style={[styles.confirmButtonText, { color: greenColor }]}>
-                  Generating Plan...
-                </Text>
-              ) : (
-                <>
-                  <Ionicons name="checkmark-circle" size={22} color={greenColor} />
-                  <Text style={[styles.confirmButtonText, { color: greenColor }]}>
-                    Select This Program
+              <GlassCard style={styles.backButton} interactive>
+                <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
+              </GlassCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleConfirm}
+              disabled={isGenerating}
+              activeOpacity={0.7}
+              style={{ flex: 2 }}
+              accessibilityLabel={program ? `Select ${program.name} program` : 'Select this program'}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+              accessibilityHint="Confirms your selection and generates a personalized training plan based on this program"
+            >
+              <GlassCard
+                style={[
+                  styles.continueButton,
+                  { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }
+                ]}
+                interactive
+              >
+                {isGenerating ? (
+                  <Text style={[styles.continueButtonText, { color: colors.primary }]}>
+                    GENERATING...
                   </Text>
-                </>
-              )}
-            </GlassCard>
-          </TouchableOpacity>
-        </View>
+                ) : (
+                  <Text style={[styles.continueButtonText, { color: colors.primary }]}>
+                    SELECT THIS PROGRAM
+                  </Text>
+                )}
+              </GlassCard>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -581,32 +586,39 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     marginLeft: 26,
   },
-  bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
-    paddingTop: 16,
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 100,
   },
-  bottomBlur: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  confirmButtonWrapper: {
-    zIndex: 1,
-  },
-  confirmButton: {
+  backButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 4,
     paddingVertical: 16,
-    gap: 8,
-    borderRadius: Spacing.borderRadius,
   },
-  confirmButtonText: {
-    fontSize: 16,
-    fontFamily: Fonts.semiBold,
+  backButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    letterSpacing: 1,
+    color: Colors.text,
+  },
+  continueButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+  },
+  continueButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    letterSpacing: 1,
+    color: Colors.primaryText,
   },
 });
 
