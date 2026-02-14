@@ -60,6 +60,20 @@ All data flows verified through code review:
 4. Added card spacing in ProgramSelectionStep
 **Commit:** 66b7169 (previous session)
 
+### Fix #3: Race Condition - Cache Reload During AI Generation (Feb 14, 2026)
+**Issue:** Training plan not displaying on programs tab after AI generation
+**Root Cause:** Programs tab `useFocusEffect` was calling `loadCachedPlan()` while AI generation was in progress, loading old/empty cache before new plan was saved
+**Timeline:**
+1. User clicks "Start Your Training Plan" → AI generation starts (`isGenerating = true`)
+2. User navigates to programs tab
+3. `useFocusEffect` runs → calls `loadCachedPlan()`
+4. `loadCachedPlan()` loads OLD/empty cache
+5. AI generation completes and saves NEW plan to cache
+6. UI displays empty cache (race condition)
+**Fix:** Added `isGenerating` check in `useFocusEffect` to skip cache reload during active AI generation
+**File:** `app/(tabs)/programs.tsx` line 196
+**Commit:** 862d08d
+
 ---
 
 ## Playwright Test
@@ -114,6 +128,7 @@ node test-goal-wizard-complete-e2e.js
 3. ✅ Selected program persistence to database
 4. ✅ AI generation missing program data
 5. ✅ Card spacing in ProgramSelectionStep
+6. ✅ Race condition: programs tab cache reload during AI generation
 
 ---
 
