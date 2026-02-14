@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from '
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
-import { GlassButton } from '../liquidGlass/GlassButton';
 import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useTraining } from '../../contexts/TrainingContext';
@@ -270,41 +269,44 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
       {/* Bottom Buttons */}
       <View style={styles.bottomContainer}>
         <View style={styles.buttonRow}>
-          <GlassButton
+          <TouchableOpacity
             onPress={() => {
               lightImpact();
               onBack();
             }}
-            style={styles.backButton}
-            variant="secondary"
+            activeOpacity={0.7}
+            style={{ flex: 1 }}
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityHint="Returns to previous step"
           >
-            <Ionicons name="arrow-back" size={20} color={colors.text} />
-            <Text style={[styles.backButtonText, { color: colors.text }]}>Back</Text>
-          </GlassButton>
+            <GlassCard style={styles.backButton} interactive>
+              <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
+            </GlassCard>
+          </TouchableOpacity>
 
-          <GlassButton
+          <TouchableOpacity
             onPress={handleContinue}
-            style={[
-              styles.continueButton,
-              !selectedProgramId && styles.continueButtonDisabled,
-            ]}
+            activeOpacity={0.7}
+            style={{ flex: 2 }}
             disabled={!selectedProgramId}
-            variant="secondary"
+            accessibilityLabel="Continue"
+            accessibilityRole="button"
+            accessibilityHint="Proceeds to next step with selected program"
           >
-            <Text style={[
-              styles.continueButtonText,
-              { color: colors.text }
-            ]}>
-              {selectedProgramId ? 'Continue' : 'Select a Program'}
-            </Text>
-            {selectedProgramId && (
-              <Ionicons
-                name="arrow-forward"
-                size={20}
-                color={colors.text}
-              />
-            )}
-          </GlassButton>
+            <GlassCard
+              style={[
+                styles.continueButton,
+                { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' },
+                !selectedProgramId && styles.continueButtonDisabled,
+              ]}
+              interactive
+            >
+              <Text style={[styles.continueButtonText, { color: colors.primary }]}>
+                {selectedProgramId ? 'CONTINUE' : 'SELECT A PROGRAM'}
+              </Text>
+            </GlassCard>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -462,22 +464,32 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   backButton: {
-    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 16,
   },
   backButtonText: {
-    fontSize: 16,
-    fontFamily: Fonts.medium,
-    marginLeft: 8,
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    letterSpacing: 1,
   },
   continueButton: {
-    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
   },
   continueButtonDisabled: {
     opacity: 0.5,
   },
   continueButtonText: {
-    fontSize: 16,
-    fontFamily: Fonts.semiBold,
-    marginRight: 8,
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
+    letterSpacing: 1,
   },
 });
