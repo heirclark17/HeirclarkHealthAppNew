@@ -222,8 +222,8 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   const handleStartTrainingPlan = () => {
     lightImpact();
 
-    // Check if user has selected a training program
-    if (!trainingState.selectedProgram) {
+    // Check if user has selected a training program from goal wizard
+    if (!state.selectedProgramId) {
       Alert.alert(
         'Program Required',
         'Please select a training program before generating your workout plan.',

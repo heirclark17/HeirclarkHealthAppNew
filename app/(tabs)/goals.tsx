@@ -38,6 +38,7 @@ import { PrimaryGoalStep } from '../../components/goals/PrimaryGoalStep';
 import { BodyMetricsStep } from '../../components/goals/BodyMetricsStep';
 import { ActivityLifestyleStep } from '../../components/goals/ActivityLifestyleStep';
 import { NutritionPreferencesStep } from '../../components/goals/NutritionPreferencesStep';
+import { ProgramSelectionStep } from '../../components/goals/ProgramSelectionStep';
 import { PlanPreviewStep } from '../../components/goals/PlanPreviewStep';
 import { SuccessScreen } from '../../components/goals/SuccessScreen';
 import { CoachingModal } from '../../components/goals/CoachingModal';
@@ -65,9 +66,9 @@ function AnimatedStep({ children, direction, stepKey }: AnimatedStepProps) {
 
 function GoalWizardContent() {
   const router = useRouter();
-  const { state, nextStep, prevStep, loadSavedProgress, resetWizard, startEditing } = useGoalWizard();
+  const { state, nextStep, prevStep, loadSavedProgress, resetWizard, startEditing, setSelectedProgram } = useGoalWizard();
   const { generateAIMealPlan, state: mealPlanState } = useMealPlan();
-  const { generateAIWorkoutPlan, state: trainingState } = useTraining();
+  const { generateAIWorkoutPlan, state: trainingState, selectProgram, getEnhancedPrograms } = useTraining();
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showCoachingModal, setShowCoachingModal] = useState(false);
@@ -99,6 +100,11 @@ function GoalWizardContent() {
       setDirection('backward');
       prevStep();
     }
+  };
+
+  const handleProgramSelect = (programId: string, programName: string) => {
+    setSelectedProgram(programId, programName);
+    handleNext();
   };
 
   const handleConfirm = () => {
@@ -157,9 +163,20 @@ function GoalWizardContent() {
   };
 
   const handleStartTrainingPlan = async () => {
-    // Generate AI workout plan then navigate to programs tab
+    // Select the program from goal wizard, then generate AI workout plan
     setIsGeneratingTrainingPlan(true);
     try {
+      // First, select the program that was chosen in the goal wizard
+      if (state.selectedProgramId) {
+        const programs = getEnhancedPrograms();
+        const selectedProgram = programs.find(p => p.id === state.selectedProgramId);
+
+        if (selectedProgram) {
+          selectProgram(selectedProgram);
+        }
+      }
+
+      // Now generate the AI workout plan
       const success = await generateAIWorkoutPlan();
       if (success) {
         router.push('/programs');
@@ -272,6 +289,12 @@ function GoalWizardContent() {
       case 5:
         return (
           <AnimatedStep direction={direction} stepKey={5}>
+            <ProgramSelectionStep onContinue={handleProgramSelect} onBack={handleBack} />
+          </AnimatedStep>
+        );
+      case 6:
+        return (
+          <AnimatedStep direction={direction} stepKey={6}>
             <PlanPreviewStep onBack={handleBack} onConfirm={handleConfirm} />
           </AnimatedStep>
         );
@@ -301,8 +324,8 @@ function GoalWizardContent() {
       {/* Step Progress Bar */}
       <StepProgressBar
         currentStep={state.currentStep}
-        totalSteps={5}
-        labels={['Goal', 'Body', 'Activity', 'Nutrition', 'Review']}
+        totalSteps={6}
+        labels={['Goal', 'Body', 'Activity', 'Nutrition', 'Program', 'Review']}
       />
 
       {/* Step Content */}

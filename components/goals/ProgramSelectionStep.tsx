@@ -1,0 +1,424 @@
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
+import { GlassCard } from '../GlassCard';
+import { GlassButton } from '../liquidGlass/GlassButton';
+import { NumberText } from '../NumberText';
+import { useSettings } from '../../contexts/SettingsContext';
+import { useTraining } from '../../contexts/TrainingContext';
+import { TrainingProgram, ProgramTemplate } from '../../types/training';
+import { lightImpact, mediumImpact } from '../../utils/haptics';
+
+interface ProgramSelectionStepProps {
+  onContinue: (programId: string, programName: string) => void;
+  onBack: () => void;
+}
+
+export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionStepProps) {
+  const { settings } = useSettings();
+  const { getEnhancedPrograms } = useTraining();
+  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+
+  // Get all available programs
+  const programs = useMemo(() => getEnhancedPrograms(), [getEnhancedPrograms]);
+
+  // Dynamic theme colors
+  const colors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
+  const isDark = settings.themeMode === 'dark';
+
+  // Theme-aware colors
+  const secondaryBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+  const greenColor = Colors.success;
+  const greenBgLight = isDark ? 'rgba(52, 211, 153, 0.12)' : 'rgba(16, 185, 129, 0.10)';
+  const greenBgMedium = isDark ? 'rgba(52, 211, 153, 0.18)' : 'rgba(16, 185, 129, 0.15)';
+  const greenBorder = isDark ? 'rgba(52, 211, 153, 0.35)' : 'rgba(16, 185, 129, 0.30)';
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner':
+        return Colors.success;
+      case 'intermediate':
+        return isDark ? Colors.warning : Colors.warningOrange;
+      case 'advanced':
+        return Colors.error;
+      default:
+        return colors.textMuted;
+    }
+  };
+
+  const getProgramIcon = (id: string): keyof typeof Ionicons.glyphMap => {
+    if (id.includes('fat-loss') || id.includes('hiit')) return 'flame-outline';
+    if (id.includes('muscle') || id.includes('strength')) return 'barbell-outline';
+    if (id.includes('health') || id.includes('wellness')) return 'heart-outline';
+    return 'fitness-outline';
+  };
+
+  const handleSelectProgram = (program: TrainingProgram | ProgramTemplate) => {
+    mediumImpact();
+    setSelectedProgramId(program.id);
+  };
+
+  const handleContinue = () => {
+    if (!selectedProgramId) return;
+
+    const selectedProgram = programs.find(p => p.id === selectedProgramId);
+    if (selectedProgram) {
+      mediumImpact();
+      onContinue(selectedProgram.id, selectedProgram.name);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            Choose Your Training Program
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            Select a program that aligns with your goals and fitness level. Your AI workout plan will be generated based on this selection.
+          </Text>
+        </View>
+
+        {/* Program Cards */}
+        <View style={styles.programsContainer}>
+          {programs.map((program) => {
+            const isSelected = selectedProgramId === program.id;
+
+            return (
+              <TouchableOpacity
+                key={program.id}
+                onPress={() => handleSelectProgram(program)}
+                activeOpacity={0.9}
+                accessibilityLabel={`${program.name}, ${program.difficulty} level program`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+              >
+                <GlassCard
+                  style={[
+                    styles.programCard,
+                    isSelected && {
+                      backgroundColor: greenBgLight,
+                      borderColor: greenBorder,
+                      borderWidth: 1.5,
+                    },
+                  ]}
+                  interactive
+                >
+                  {/* Header */}
+                  <View style={styles.programHeader}>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        { backgroundColor: isSelected ? greenBgMedium : secondaryBg },
+                      ]}
+                    >
+                      <Ionicons
+                        name={getProgramIcon(program.id)}
+                        size={24}
+                        color={isSelected ? greenColor : colors.text}
+                      />
+                    </View>
+                    <View style={styles.headerText}>
+                      <Text
+                        style={[
+                          styles.programName,
+                          { color: isSelected ? greenColor : colors.text },
+                        ]}
+                      >
+                        {program.name}
+                      </Text>
+                      <View
+                        style={[
+                          styles.difficultyBadge,
+                          { backgroundColor: `${getDifficultyColor(program.difficulty)}20` },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.difficultyText,
+                            { color: getDifficultyColor(program.difficulty) },
+                          ]}
+                        >
+                          {program.difficulty}
+                        </Text>
+                      </View>
+                    </View>
+                    {isSelected && (
+                      <View style={[styles.selectedBadge, { backgroundColor: greenBgMedium }]}>
+                        <Ionicons name="checkmark-circle" size={22} color={greenColor} />
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Description */}
+                  <Text
+                    style={[
+                      styles.description,
+                      { color: isSelected ? colors.text : colors.textSecondary },
+                    ]}
+                    numberOfLines={2}
+                  >
+                    {program.description}
+                  </Text>
+
+                  {/* Stats Row */}
+                  <View style={styles.statsRow}>
+                    <View style={styles.statItem}>
+                      <Ionicons
+                        name="calendar-outline"
+                        size={15}
+                        color={isSelected ? greenColor : colors.textMuted}
+                      />
+                      <Text
+                        style={[
+                          styles.statText,
+                          { color: isSelected ? greenColor : colors.textMuted },
+                        ]}
+                      >
+                        <NumberText weight="regular">{program.duration}</NumberText> weeks
+                      </Text>
+                    </View>
+                    <View style={styles.statItem}>
+                      <Ionicons
+                        name="repeat-outline"
+                        size={15}
+                        color={isSelected ? greenColor : colors.textMuted}
+                      />
+                      <Text
+                        style={[
+                          styles.statText,
+                          { color: isSelected ? greenColor : colors.textMuted },
+                        ]}
+                      >
+                        <NumberText weight="regular">{program.daysPerWeek}</NumberText> days/week
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Focus Tags */}
+                  <View style={styles.tagsRow}>
+                    {program.focus.slice(0, 3).map((tag, i) => (
+                      <View
+                        key={i}
+                        style={[
+                          styles.tag,
+                          {
+                            backgroundColor: isSelected ? greenBgLight : secondaryBg,
+                            borderWidth: isSelected ? 1 : 0,
+                            borderColor: isSelected ? greenBorder : 'transparent',
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.tagText,
+                            { color: isSelected ? greenColor : colors.textSecondary },
+                          ]}
+                        >
+                          {tag}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </GlassCard>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Bottom Spacing */}
+        <View style={{ height: 120 }} />
+      </ScrollView>
+
+      {/* Bottom Buttons */}
+      <View style={styles.bottomContainer}>
+        <View style={styles.buttonRow}>
+          <GlassButton
+            onPress={() => {
+              lightImpact();
+              onBack();
+            }}
+            style={styles.backButton}
+          >
+            <Ionicons name="arrow-back" size={20} color={colors.text} />
+            <Text style={[styles.backButtonText, { color: colors.text }]}>Back</Text>
+          </GlassButton>
+
+          <GlassButton
+            onPress={handleContinue}
+            style={[
+              styles.continueButton,
+              !selectedProgramId && styles.continueButtonDisabled,
+            ]}
+            disabled={!selectedProgramId}
+          >
+            <Text style={styles.continueButtonText}>
+              {selectedProgramId ? 'Continue' : 'Select a Program'}
+            </Text>
+            {selectedProgramId && (
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            )}
+          </GlassButton>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: Spacing.md,
+  },
+  header: {
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: Fonts.bold,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15,
+    fontFamily: Fonts.regular,
+    lineHeight: 22,
+  },
+  programsContainer: {
+    gap: 12,
+  },
+  programCard: {
+    marginBottom: 12,
+    borderWidth: 0,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.background,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  programHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  iconContainer: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  programName: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    marginBottom: 4,
+  },
+  difficultyBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  difficultyText: {
+    fontSize: 10,
+    fontFamily: Fonts.medium,
+    textTransform: 'capitalize',
+    letterSpacing: 0.3,
+  },
+  selectedBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  description: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    lineHeight: 19,
+    marginBottom: 10,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 10,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  statText: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+  },
+  tagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tag: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  tagText: {
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+  },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: Spacing.md,
+    paddingBottom: Platform.OS === 'ios' ? 34 : Spacing.md,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  backButton: {
+    flex: 1,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontFamily: Fonts.medium,
+    marginLeft: 8,
+  },
+  continueButton: {
+    flex: 2,
+  },
+  continueButtonDisabled: {
+    opacity: 0.5,
+  },
+  continueButtonText: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    color: '#fff',
+    marginRight: 8,
+  },
+});

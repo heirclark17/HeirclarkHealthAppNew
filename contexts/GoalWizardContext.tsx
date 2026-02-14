@@ -64,6 +64,10 @@ export interface WizardState {
   // Calculated Results
   results: CalculatedResults | null;
 
+  // Step 5: Program Selection
+  selectedProgramId: string | null;
+  selectedProgramName: string | null;
+
   // Wizard state
   currentStep: number;
   isComplete: boolean;
@@ -123,6 +127,9 @@ interface GoalWizardContextType {
   setSleepGoalHours: (hours: number) => void;
   setStepGoal: (steps: number) => void;
 
+  // Step 5: Program Selection
+  setSelectedProgram: (programId: string, programName: string) => void;
+
   // Actions
   calculateResults: () => void;
   saveGoals: () => Promise<boolean>;
@@ -167,6 +174,8 @@ const initialState: WizardState = {
   sleepGoalHours: 8,
   stepGoal: 10000,
   results: null,
+  selectedProgramId: null,
+  selectedProgramName: null,
   currentStep: 1,
   isComplete: false,
   isSaving: false,
@@ -412,6 +421,10 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
 
   const setStepGoal = useCallback((steps: number) => {
     setState(prev => ({ ...prev, stepGoal: steps }));
+  }, []);
+
+  const setSelectedProgram = useCallback((programId: string, programName: string) => {
+    setState(prev => ({ ...prev, selectedProgramId: programId, selectedProgramName: programName }));
   }, []);
 
   // Calculate results - using a ref to avoid infinite loops
@@ -724,6 +737,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setWaterGoalOz,
     setSleepGoalHours,
     setStepGoal,
+    setSelectedProgram,
     calculateResults,
     saveGoals,
     resetWizard,
@@ -766,6 +780,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
     setWaterGoalOz,
     setSleepGoalHours,
     setStepGoal,
+    setSelectedProgram,
     calculateResults,
     saveGoals,
     resetWizard,
