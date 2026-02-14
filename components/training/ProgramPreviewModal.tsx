@@ -335,7 +335,13 @@ export function ProgramPreviewModal({
               accessibilityRole="button"
               accessibilityHint="Closes the program preview and returns to program list"
             >
-              <View style={styles.backButton}>
+              <View style={[
+                styles.backButton,
+                {
+                  backgroundColor: cardBg,
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+                }
+              ]}>
                 <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
               </View>
             </TouchableOpacity>
@@ -353,7 +359,10 @@ export function ProgramPreviewModal({
               <View
                 style={[
                   styles.continueButton,
-                  { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }
+                  {
+                    backgroundColor: accentBg,
+                    borderColor: isDark ? 'rgba(52, 211, 153, 0.3)' : 'rgba(16, 185, 129, 0.25)',
+                  }
                 ]}
               >
                 {isGenerating ? (
@@ -598,9 +607,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 16,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   backButtonText: {
     fontSize: 14,
@@ -616,7 +623,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(150, 206, 180, 0.4)',
   },
   continueButtonText: {
     fontSize: 14,
