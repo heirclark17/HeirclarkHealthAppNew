@@ -214,7 +214,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
 
   // Step navigation
   const nextStep = useCallback(() => {
-    setState(prev => ({ ...prev, currentStep: Math.min(prev.currentStep + 1, 5) }));
+    setState(prev => ({ ...prev, currentStep: Math.min(prev.currentStep + 1, 6) }));
   }, []);
 
   const prevStep = useCallback(() => {
@@ -222,7 +222,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const goToStep = useCallback((step: number) => {
-    setState(prev => ({ ...prev, currentStep: Math.max(1, Math.min(step, 5)) }));
+    setState(prev => ({ ...prev, currentStep: Math.max(1, Math.min(step, 6)) }));
   }, []);
 
   // Start editing - reset isComplete and go back to step 1 (keeps all data)
