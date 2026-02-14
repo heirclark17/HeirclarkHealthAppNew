@@ -61,6 +61,7 @@ interface TrainingContextType {
   hideExerciseAlternatives: () => void;
   hasPlan: () => boolean;
   getPlanSummary: () => PlanSummary | null;
+  switchToAIPlan: () => Promise<void>;
 }
 
 const initialState: TrainingState = {
@@ -1008,7 +1009,72 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   // Load cached plan (local first, then backend fallback)
   const loadCachedPlan = useCallback(async () => {
     try {
-      // First try local storage
+      // FIRST: Check for active custom workout (highest priority)
+      try {
+        const customWorkouts = await api.getCustomWorkouts();
+        const activeCustom = customWorkouts?.find((w: any) => w.is_active);
+
+        if (activeCustom) {
+          console.log('[Training] ✅ Loading active custom workout:', activeCustom.name);
+
+          // Convert custom workout structure to weeklyPlan format
+          // Custom workouts use day-based structure, need to convert to weekly format
+          const weeklyPlan: WeeklyPlan = {
+            days: activeCustom.workout_structure.days.map((day: any, index: number) => ({
+              dayOfWeek: index,
+              date: new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              workout: {
+                id: `custom-${activeCustom.id}-day-${index}`,
+                name: day.dayName,
+                exercises: day.exercises.map((exercise: any) => ({
+                  id: `${activeCustom.id}-${exercise.id}`,
+                  exerciseId: exercise.id,
+                  exercise: {
+                    id: exercise.id,
+                    name: exercise.name,
+                    bodyPart: exercise.bodyPart || exercise.target || 'general',
+                    equipment: exercise.equipment || 'bodyweight',
+                    target: exercise.target || exercise.bodyPart || 'general',
+                    gifUrl: exercise.gifUrl,
+                  },
+                  sets: exercise.sets || 3,
+                  reps: exercise.reps || '8-12',
+                  rest: exercise.rest || '60s',
+                  duration: exercise.duration,
+                  intensity: exercise.intensity,
+                  completed: false,
+                })),
+                duration: 45,
+                caloriesBurned: 0,
+                completed: false,
+              },
+            })),
+            completedWorkouts: 0,
+            totalWorkouts: activeCustom.workout_structure.days.length,
+            totalCaloriesBurned: 0,
+          };
+
+          setState(prev => ({
+            ...prev,
+            weeklyPlan,
+            selectedProgram: {
+              id: `custom-${activeCustom.id}`,
+              name: activeCustom.name,
+              description: activeCustom.description || 'Custom Workout',
+            } as ProgramTemplate,
+            currentWeek: 1,
+            lastGeneratedAt: activeCustom.updated_at,
+          }));
+
+          console.log('[Training] ✅ Custom workout loaded as active plan');
+          return; // Exit early - custom workout takes priority
+        }
+      } catch (customError) {
+        console.log('[Training] Custom workout check failed (non-critical):', customError);
+        // Continue to AI plan fallback
+      }
+
+      // SECOND: Try local storage (AI-generated plan)
       const cached = await trainingStorage.loadPlanCache();
       if (cached) {
         console.log('[Training] ✅ Loaded plan from local cache');
@@ -1025,7 +1091,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // No local cache - try backend
+      // THIRD: Try backend (AI-generated plan)
       console.log('[Training] 🔄 No local cache, checking backend...');
       const backendPlan = await api.getWorkoutPlan();
       if (backendPlan && backendPlan.planData) {
@@ -1076,6 +1142,23 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const getPlanSummary = useCallback((): PlanSummary | null => {
     return state.planSummary;
   }, [state.planSummary]);
+
+  // Switch back to AI-generated plan (deactivate custom workouts)
+  const switchToAIPlan = useCallback(async () => {
+    try {
+      console.log('[Training] Switching to AI-generated plan...');
+
+      // Deactivate all custom workouts
+      await api.deactivateAllCustomWorkout();
+
+      // Reload plan (will now load AI plan since no custom workout is active)
+      await loadCachedPlan();
+
+      console.log('[Training] ✅ Switched to AI-generated plan');
+    } catch (error) {
+      console.error('[Training] Error switching to AI plan:', error);
+    }
+  }, [loadCachedPlan]);
 
   // Load cached data on mount and sync PRs from backend
   useEffect(() => {
@@ -1147,6 +1230,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     hasPlan,
     getPlanSummary,
     generateAIWorkoutPlan,
+    switchToAIPlan,
   }), [
     state,
     generateWeeklyPlan,
@@ -1169,6 +1253,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     hideExerciseAlternatives,
     hasPlan,
     getPlanSummary,
+    switchToAIPlan,
   ]);
 
   return (
