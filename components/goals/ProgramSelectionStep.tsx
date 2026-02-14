@@ -8,6 +8,7 @@ import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useTraining } from '../../contexts/TrainingContext';
 import { TrainingProgram, ProgramTemplate } from '../../types/training';
+import { ProgramPreviewModal } from '../training/ProgramPreviewModal';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 
 interface ProgramSelectionStepProps {
@@ -19,6 +20,8 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
   const { settings } = useSettings();
   const { getEnhancedPrograms } = useTraining();
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewProgram, setPreviewProgram] = useState<ProgramTemplate | null>(null);
 
   // Get all available programs
   const programs = useMemo(() => getEnhancedPrograms(), [getEnhancedPrograms]);
@@ -56,9 +59,25 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
     return 'fitness-outline';
   };
 
-  const handleSelectProgram = (program: TrainingProgram | ProgramTemplate) => {
+  const handleShowPreview = (program: TrainingProgram | ProgramTemplate) => {
     mediumImpact();
-    setSelectedProgramId(program.id);
+    setPreviewProgram(program as ProgramTemplate);
+    setShowPreviewModal(true);
+  };
+
+  const handleClosePreview = () => {
+    lightImpact();
+    setShowPreviewModal(false);
+  };
+
+  const handleConfirmProgram = () => {
+    if (previewProgram) {
+      mediumImpact();
+      setSelectedProgramId(previewProgram.id);
+      setShowPreviewModal(false);
+      // Automatically continue to next step after selection
+      onContinue(previewProgram.id, previewProgram.name);
+    }
   };
 
   const handleContinue = () => {
@@ -96,11 +115,12 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
             return (
               <TouchableOpacity
                 key={program.id}
-                onPress={() => handleSelectProgram(program)}
+                onPress={() => handleShowPreview(program)}
                 activeOpacity={0.9}
                 accessibilityLabel={`${program.name}, ${program.difficulty} level program`}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
+                accessibilityHint="Tap to view program details and select"
               >
                 <GlassCard
                   style={[
@@ -229,6 +249,14 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                       </View>
                     ))}
                   </View>
+
+                  {/* View Details hint */}
+                  <View style={styles.viewDetailsRow}>
+                    <Text style={[styles.viewDetailsText, { color: colors.textMuted }]}>
+                      Tap to preview full program details
+                    </Text>
+                    <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+                  </View>
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -270,6 +298,14 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
           </GlassButton>
         </View>
       </View>
+
+      {/* Program Preview Modal */}
+      <ProgramPreviewModal
+        visible={showPreviewModal}
+        program={previewProgram}
+        onClose={handleClosePreview}
+        onConfirm={handleConfirmProgram}
+      />
     </View>
   );
 }
@@ -386,6 +422,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   tagText: {
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+  },
+  viewDetailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingTop: 8,
+    marginTop: 4,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(128, 128, 128, 0.2)',
+  },
+  viewDetailsText: {
     fontSize: 11,
     fontFamily: Fonts.regular,
   },
