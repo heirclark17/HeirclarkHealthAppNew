@@ -1078,17 +1078,30 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       const cached = await trainingStorage.loadPlanCache();
       if (cached) {
         console.log('[Training] ✅ Loaded plan from local cache');
-        setState(prev => ({
-          ...prev,
-          weeklyPlan: cached.weeklyPlan,
-          selectedProgram: cached.selectedProgram,
-          goalAlignment: cached.goalAlignment,
-          currentWeek: cached.currentWeek || 1,
-          lastGeneratedAt: cached.lastGeneratedAt,
-          preferences: cached.preferences,
-          planSummary: cached.planSummary || null,
-        }));
-        return;
+        console.log('[Training] 📊 Cached plan details:', {
+          hasWeeklyPlan: !!cached.weeklyPlan,
+          daysCount: cached.weeklyPlan?.days?.length || 0,
+          selectedProgram: cached.selectedProgram?.name || 'none',
+          lastGenerated: cached.lastGeneratedAt,
+        });
+
+        // Check if cache is valid
+        if (!cached.weeklyPlan || !cached.weeklyPlan.days || cached.weeklyPlan.days.length === 0) {
+          console.warn('[Training] ⚠️ Cached plan is empty - will try backend or generate new plan');
+          // Don't return - fall through to backend check
+        } else {
+          setState(prev => ({
+            ...prev,
+            weeklyPlan: cached.weeklyPlan,
+            selectedProgram: cached.selectedProgram,
+            goalAlignment: cached.goalAlignment,
+            currentWeek: cached.currentWeek || 1,
+            lastGeneratedAt: cached.lastGeneratedAt,
+            preferences: cached.preferences,
+            planSummary: cached.planSummary || null,
+          }));
+          return;
+        }
       }
 
       // THIRD: Try backend (AI-generated plan)
