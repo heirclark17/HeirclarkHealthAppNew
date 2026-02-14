@@ -96,11 +96,12 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
@@ -306,16 +307,16 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
             </GlassCard>
           </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
 
-    {/* Program Preview Modal */}
-    <ProgramPreviewModal
-      visible={showPreviewModal}
-      program={previewProgram}
-      onClose={handleClosePreview}
-      onConfirm={handleConfirmProgram}
-    />
+      {/* Program Preview Modal */}
+      <ProgramPreviewModal
+        visible={showPreviewModal}
+        program={previewProgram}
+        onClose={handleClosePreview}
+        onConfirm={handleConfirmProgram}
+      />
+    </>
   );
 }
 
