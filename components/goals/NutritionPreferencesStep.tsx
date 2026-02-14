@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput, Platform } from 'react-native';
 import {
   Apple,
   Egg,
@@ -258,7 +258,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Nutrition Preferences</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -987,41 +988,49 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         </View>
       </GlassSection>
 
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          onPress={onBack}
-          activeOpacity={0.7}
-          style={{ flex: 1 }}
-          accessibilityLabel="Back"
-          accessibilityRole="button"
-          accessibilityHint="Returns to previous step"
-        >
-          <GlassCard style={styles.backButton} interactive>
-            <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
-          </GlassCard>
-        </TouchableOpacity>
+      {/* Bottom Spacing - extra space to prevent blending with buttons */}
+      <View style={{ height: 180 }} />
+      </ScrollView>
 
-        <TouchableOpacity
-          onPress={handleContinue}
-          activeOpacity={0.7}
-          style={{ flex: 2 }}
-          accessibilityLabel="Continue"
-          accessibilityRole="button"
-          accessibilityHint="Saves nutrition preferences and proceeds to next step"
-        >
-          <GlassCard style={[styles.continueButton, { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }]} interactive>
-            <Text style={[styles.continueButtonText, { color: colors.primary }]}>CONTINUE</Text>
-          </GlassCard>
-        </TouchableOpacity>
+      {/* Bottom Buttons */}
+      <View style={styles.bottomContainer}>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            onPress={onBack}
+            activeOpacity={0.7}
+            style={{ flex: 1 }}
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityHint="Returns to previous step"
+          >
+            <GlassCard style={styles.backButton} interactive>
+              <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
+            </GlassCard>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleContinue}
+            activeOpacity={0.7}
+            style={{ flex: 2 }}
+            accessibilityLabel="Continue"
+            accessibilityRole="button"
+            accessibilityHint="Saves nutrition preferences and proceeds to next step"
+          >
+            <GlassCard style={[styles.continueButton, { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }]} interactive>
+              <Text style={[styles.continueButtonText, { color: colors.primary }]}>CONTINUE</Text>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
       </View>
-
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   header: {
@@ -1329,11 +1338,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '100%', // Ensure description takes full width
   },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
-    marginBottom: 100,
   },
   backButton: {
     flexDirection: 'row',

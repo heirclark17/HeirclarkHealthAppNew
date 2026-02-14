@@ -184,10 +184,16 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
           ))}
         </View>
 
-        {/* Action Buttons */}
+        {/* Bottom Spacing - extra space to prevent blending with buttons */}
+        <View style={{ height: 180 }} />
+      </ScrollView>
+
+      {/* Bottom Buttons */}
+      <View style={styles.bottomContainer}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
             onPress={handleBack}
+            activeOpacity={0.7}
             style={{ flex: 1 }}
             accessibilityLabel="Exit goal wizard"
             accessibilityRole="button"
@@ -197,9 +203,11 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
               <Text style={[styles.backButtonText, { color: colors.text }]}>EXIT</Text>
             </GlassCard>
           </TouchableOpacity>
+
           <TouchableOpacity
             onPress={handleContinue}
             disabled={!state.primaryGoal}
+            activeOpacity={0.7}
             style={{ flex: 2 }}
             accessibilityLabel={state.primaryGoal ? 'Continue to next step' : 'Continue, select a goal first'}
             accessibilityRole="button"
@@ -209,7 +217,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
             <GlassCard
               style={[
                 styles.continueButton,
-                state.primaryGoal && { backgroundColor: primaryGlassBg },
+                { backgroundColor: state.primaryGoal ? primaryGlassBg : 'transparent' },
               ]}
               interactive
             >
@@ -219,7 +227,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
             </GlassCard>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -232,7 +240,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100, // Space for tab bar
+    // Removed paddingBottom - now handled by bottomContainer
   },
   header: {
     marginTop: 48,
@@ -299,11 +307,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: Spacing.md,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 37,
-    marginHorizontal: 24,
   },
   backButton: {
     flexDirection: 'row',
@@ -311,7 +325,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
     paddingVertical: 16,
-    borderRadius: 20,
   },
   backButtonText: {
     fontSize: 14,
@@ -326,7 +339,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
-    borderRadius: 20,
   },
   continueButtonText: {
     fontSize: 14,

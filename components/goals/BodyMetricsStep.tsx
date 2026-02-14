@@ -582,7 +582,8 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Your Body Metrics</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -854,47 +855,59 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
         </View>
       </GlassSection>
 
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          onPress={onBack}
-          style={{ flex: 1 }}
-          accessibilityLabel="Back"
-          accessibilityRole="button"
-          accessibilityHint="Returns to previous step"
-        >
-          <GlassCard style={styles.backButton} interactive>
-            <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
-          </GlassCard>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleContinue}
-          disabled={!isValid()}
-          style={{ flex: 2 }}
-          accessibilityLabel="Continue to next step"
-          accessibilityRole="button"
-          accessibilityState={{ disabled: !isValid() }}
-          accessibilityHint="Proceeds to the next step if all fields are filled"
-        >
-          <GlassCard
-            style={[
-              styles.continueButton,
-              isValid() && { backgroundColor: primaryGlassBg },
-            ]}
-            interactive
+      {/* Bottom Spacing - extra space to prevent blending with buttons */}
+      <View style={{ height: 180 }} />
+      </ScrollView>
+
+      {/* Bottom Buttons */}
+      <View style={styles.bottomContainer}>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            onPress={onBack}
+            activeOpacity={0.7}
+            style={{ flex: 1 }}
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityHint="Returns to previous step"
           >
-            <Text style={[styles.continueButtonText, { color: isValid() ? colors.primary : colors.textMuted }]}>
-              CONTINUE
-            </Text>
-          </GlassCard>
-        </TouchableOpacity>
+            <GlassCard style={styles.backButton} interactive>
+              <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
+            </GlassCard>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleContinue}
+            disabled={!isValid()}
+            activeOpacity={0.7}
+            style={{ flex: 2 }}
+            accessibilityLabel="Continue to next step"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !isValid() }}
+            accessibilityHint="Proceeds to the next step if all fields are filled"
+          >
+            <GlassCard
+              style={[
+                styles.continueButton,
+                { backgroundColor: isValid() ? primaryGlassBg : 'transparent' },
+              ]}
+              interactive
+            >
+              <Text style={[styles.continueButtonText, { color: isValid() ? colors.primary : colors.textMuted }]}>
+                CONTINUE
+              </Text>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   header: {
@@ -1192,11 +1205,17 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   // Button Styles
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 16,
-    marginBottom: 100,
   },
   backButton: {
     flexDirection: 'row',
@@ -1218,7 +1237,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
-    borderRadius: 12,
   },
   continueButtonText: {
     fontSize: 14,

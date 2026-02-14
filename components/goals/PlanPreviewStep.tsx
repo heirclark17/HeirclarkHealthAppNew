@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
 import {
   TrendingDown,
   TrendingUp,
@@ -184,7 +184,8 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Your Personalized Plan</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -1059,8 +1060,13 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         </View>
       )}
 
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
+      {/* Bottom Spacing - extra space to prevent blending with buttons */}
+      <View style={{ height: 180 }} />
+    </ScrollView>
+
+      {/* Bottom Buttons */}
+      <View style={styles.bottomContainer}>
+        <View style={styles.buttonRow}>
         <TouchableOpacity
           onPress={onBack}
           disabled={isConfirming}
@@ -1098,13 +1104,17 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             </View>
           </GlassCard>
         </TouchableOpacity>
+        </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   loadingContainer: {
@@ -1429,11 +1439,17 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     lineHeight: 16,
   },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: Spacing.md,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
-    marginBottom: 100,
   },
   backButton: {
     flexDirection: 'row',

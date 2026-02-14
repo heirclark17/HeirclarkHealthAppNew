@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
   Monitor,
@@ -393,7 +393,8 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Activity Level</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -832,37 +833,49 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         </View>
       </GlassCard>
 
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          onPress={onBack}
-          style={{ flex: 1 }}
-          accessibilityLabel="Back"
-          accessibilityRole="button"
-          accessibilityHint="Returns to previous step"
-        >
-          <GlassCard style={styles.backButton} interactive>
-            <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
-          </GlassCard>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleContinue}
-          style={{ flex: 2 }}
-          accessibilityLabel="Continue"
-          accessibilityRole="button"
-          accessibilityHint="Saves activity preferences and proceeds to next step"
-        >
-          <GlassCard style={[styles.continueButton, { backgroundColor: primaryGlassBg }]} interactive>
-            <Text style={[styles.continueButtonText, { color: colors.primary }]}>CONTINUE</Text>
-          </GlassCard>
-        </TouchableOpacity>
+      {/* Bottom Spacing - extra space to prevent blending with buttons */}
+      <View style={{ height: 180 }} />
+      </ScrollView>
+
+      {/* Bottom Buttons */}
+      <View style={styles.bottomContainer}>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            onPress={onBack}
+            activeOpacity={0.7}
+            style={{ flex: 1 }}
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityHint="Returns to previous step"
+          >
+            <GlassCard style={styles.backButton} interactive>
+              <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
+            </GlassCard>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleContinue}
+            activeOpacity={0.7}
+            style={{ flex: 2 }}
+            accessibilityLabel="Continue"
+            accessibilityRole="button"
+            accessibilityHint="Saves activity preferences and proceeds to next step"
+          >
+            <GlassCard style={[styles.continueButton, { backgroundColor: primaryGlassBg }]} interactive>
+              <Text style={[styles.continueButtonText, { color: colors.primary }]}>CONTINUE</Text>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   header: {
@@ -1011,11 +1024,17 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     lineHeight: 20,
   },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
-    marginBottom: 100,
   },
   backButton: {
     flexDirection: 'row',
