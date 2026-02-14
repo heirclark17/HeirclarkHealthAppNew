@@ -670,50 +670,6 @@ export default function ProgramsScreen() {
                 <ChevronRight size={20} color={colors.text} strokeWidth={1.5} />
               </TouchableOpacity>
             </View>
-
-            {/* Regenerate Buttons - Frosted Liquid Glass */}
-            <View style={styles.regenerateSection}>
-              <Text style={[styles.regenerateLabel, { color: colors.textMuted }]}>Regenerate Plan</Text>
-              <View style={styles.generateButtonsRow}>
-                <GlassCard
-                  style={styles.halfButtonGlass}
-                  interactive
-                >
-                  <TouchableOpacity
-                    onPress={handleGenerate}
-                    disabled={isGenerating}
-                    activeOpacity={0.7}
-                    style={styles.halfButtonInner}
-                    accessibilityLabel="Quick regenerate training plan"
-                    accessibilityRole="button"
-                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-                    accessibilityHint="Regenerates the entire training plan quickly using template-based approach"
-                  >
-                    <Zap size={18} color={colors.textSecondary} strokeWidth={1.5} />
-                    <Text style={[styles.halfButtonText, { color: colors.textSecondary }]}>Quick</Text>
-                  </TouchableOpacity>
-                </GlassCard>
-
-                <GlassCard
-                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.15)' }]}
-                  interactive
-                >
-                  <TouchableOpacity
-                    onPress={handleAIGenerate}
-                    disabled={isGenerating}
-                    activeOpacity={0.7}
-                    style={styles.halfButtonInner}
-                    accessibilityLabel="AI-powered regenerate training plan"
-                    accessibilityRole="button"
-                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-                    accessibilityHint="Regenerates the entire training plan using AI personalization based on your fitness goals and preferences"
-                  >
-                    <Sparkles size={18} color={colors.primary} strokeWidth={1.5} />
-                    <Text style={[styles.halfButtonText, { color: colors.primary }]}>AI-Powered</Text>
-                  </TouchableOpacity>
-                </GlassCard>
-              </View>
-            </View>
           </View>
         )}
 
@@ -946,36 +902,6 @@ const styles = StyleSheet.create({
   generateButtonsRow: {
     flexDirection: 'row',
     gap: 12,
-  },
-  halfButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: Spacing.borderRadius,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  halfButtonGlass: {
-    flex: 1,
-    borderRadius: Spacing.borderRadius,
-  },
-  halfButtonInner: {
-    paddingVertical: 14,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  halfButtonText: {
-    fontSize: 14,
-    fontFamily: Fonts.semiBold,
-  },
-  regenerateLabel: {
-    fontSize: 13,
-    fontFamily: Fonts.medium,
-    marginBottom: 10,
-    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -1214,23 +1140,6 @@ const styles = StyleSheet.create({
   },
   weekButtonDisabled: {
     color: Colors.border,
-  },
-  regenerateSection: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  regenerateButton: {
-    // GlassCard handles styling
-  },
-  regenerateButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  regenerateButtonText: {
-    fontSize: 14,
-    fontFamily: Fonts.medium,
   },
   actionRow: {
     flexDirection: 'row',
