@@ -3210,18 +3210,22 @@ app.post('/api/v1/health/ingest-simple', authenticateToken, async (req, res) => 
     const logDate = date || new Date().toISOString().split('T')[0];
 
     if (steps !== undefined) {
+      // Round steps to integer (Apple Health can send decimals like 12111.99875120482)
+      const roundedSteps = Math.floor(parseFloat(steps));
       await pool.query(
         `INSERT INTO step_logs (user_id, date, steps, source) VALUES ($1, $2, $3, 'apple_health')
          ON CONFLICT (user_id, date) DO UPDATE SET steps = $3`,
-        [req.userId, logDate, steps]
+        [req.userId, logDate, roundedSteps]
       );
     }
 
     if (activeCalories !== undefined) {
+      // Round calories to integer (health tracking apps can send decimals)
+      const roundedCalories = Math.floor(parseFloat(activeCalories));
       await pool.query(
         `INSERT INTO calorie_logs (user_id, date, calories_burned) VALUES ($1, $2, $3)
          ON CONFLICT (user_id, date) DO UPDATE SET calories_burned = $3`,
-        [req.userId, logDate, activeCalories]
+        [req.userId, logDate, roundedCalories]
       );
     }
 
