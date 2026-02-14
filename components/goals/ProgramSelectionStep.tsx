@@ -289,11 +289,18 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
             ]}
             disabled={!selectedProgramId}
           >
-            <Text style={styles.continueButtonText}>
+            <Text style={[
+              styles.continueButtonText,
+              { color: isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)' }
+            ]}>
               {selectedProgramId ? 'Continue' : 'Select a Program'}
             </Text>
             {selectedProgramId && (
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
+              <Ionicons
+                name="arrow-forward"
+                size={20}
+                color={isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'}
+              />
             )}
           </GlassButton>
         </View>
@@ -469,7 +476,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     fontSize: 16,
     fontFamily: Fonts.semiBold,
-    color: '#fff',
     marginRight: 8,
   },
 });
