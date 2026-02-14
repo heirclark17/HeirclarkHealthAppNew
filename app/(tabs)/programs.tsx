@@ -1030,11 +1030,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
   restDayCard: {
-    backgroundColor: 'transparent',
-    borderRadius: Spacing.borderRadius,
     padding: 24,
-    borderWidth: 1,
-    borderColor: Colors.border,
     alignItems: 'center',
     marginBottom: 12,
   },

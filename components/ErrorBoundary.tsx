@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts } from '../constants/Theme';
+import { GlassCard } from './GlassCard';
+import { GlassButton } from './liquidGlass/GlassButton';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -69,7 +71,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               The app encountered an error and couldn't continue.
             </Text>
 
-            <View style={styles.errorBox}>
+            <GlassCard style={styles.errorBox}>
               <Text style={styles.errorTitle}>Error:</Text>
               <Text style={styles.errorMessage}>{this.state.error.message}</Text>
 
@@ -85,16 +87,15 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                   </Text>
                 </ScrollView>
               )}
-            </View>
+            </GlassCard>
 
-            <TouchableOpacity
-              style={styles.reloadButton}
+            <GlassButton
               onPress={this.handleReload}
-              activeOpacity={0.8}
+              style={styles.reloadButton}
             >
               <Ionicons name="refresh" size={20} color="#fff" style={styles.reloadIcon} />
               <Text style={styles.reloadButtonText}>Try Again</Text>
-            </TouchableOpacity>
+            </GlassButton>
 
             {__DEV__ && (
               <Text style={styles.devNote}>
@@ -139,10 +140,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   errorBox: {
-    backgroundColor: 'rgba(255, 59, 48, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 59, 48, 0.3)',
-    borderRadius: 12,
     padding: 16,
     width: '100%',
     marginBottom: 24,
@@ -177,13 +174,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   reloadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
     marginBottom: 16,
     minWidth: 200,
   },
