@@ -136,11 +136,9 @@ export function PlanSummaryCard({
   };
 
   return (
-    <View>
-      <View>
-        <GlassCard style={[styles.container, containerStyle]} interactive>
-        {/* Header Section - Always Visible */}
-        <TouchableOpacity
+    <GlassCard style={[styles.container, containerStyle]} interactive>
+      {/* Header Section - Always Visible */}
+      <TouchableOpacity
           style={styles.headerTouchable}
           onPress={handleToggleExpand}
           activeOpacity={0.8}
@@ -292,9 +290,7 @@ export function PlanSummaryCard({
           )}
         </View>
       )}
-      </GlassCard>
-      </View>
-    </View>
+    </GlassCard>
   );
 }
 

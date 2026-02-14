@@ -80,10 +80,9 @@ export function GoalAlignmentCard({ alignment, preferences, containerStyle }: Go
   };
 
   return (
-    <View>
-      <GlassCard style={[styles.container, containerStyle]} interactive>
-        {/* Header */}
-        <View style={styles.header}>
+    <GlassCard style={[styles.container, containerStyle]} interactive>
+      {/* Header */}
+      <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={[styles.iconContainer, { backgroundColor: `${getAlignmentColor(alignment.overallAlignment)}20` }]}>
               <Ionicons
@@ -174,8 +173,7 @@ export function GoalAlignmentCard({ alignment, preferences, containerStyle }: Go
             </Text>
           </View>
         )}
-      </GlassCard>
-    </View>
+    </GlassCard>
   );
 }
 

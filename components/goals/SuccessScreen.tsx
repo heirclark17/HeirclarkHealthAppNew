@@ -460,7 +460,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           summary={planSummary}
           onStartTraining={handleStartTrainingPlan}
           showStartButton={false}
-          containerStyle={{ marginHorizontal: 0 }}
+          containerStyle={{ marginHorizontal: 0, width: '100%' }}
         />
       )}
 
@@ -469,7 +469,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         <GoalAlignmentCard
           alignment={goalAlignment}
           preferences={preferences}
-          containerStyle={{ marginHorizontal: 0 }}
+          containerStyle={{ marginHorizontal: 0, width: '100%' }}
         />
       )}
 
