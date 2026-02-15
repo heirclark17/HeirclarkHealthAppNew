@@ -184,17 +184,17 @@ export function ProgramPreviewModal({
               <View style={styles.statsGrid}>
                 <View style={[styles.statBox, { backgroundColor: cardBg }]}>
                   <Ionicons name="calendar-outline" size={20} color={greenColor} />
-                  <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{program.duration}</NumberText>
+                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{program.duration}</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Weeks</Text>
                 </View>
                 <View style={[styles.statBox, { backgroundColor: cardBg }]}>
                   <Ionicons name="repeat-outline" size={20} color={greenColor} />
-                  <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{program.daysPerWeek}</NumberText>
+                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{program.daysPerWeek}</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Days/Week</Text>
                 </View>
                 <View style={[styles.statBox, { backgroundColor: cardBg }]}>
                   <Ionicons name="time-outline" size={20} color={greenColor} />
-                  <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>45-60</NumberText>
+                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>45-60</NumberText>
                   <Text style={[styles.statLabel, { color: colors.textMuted }]}>Min/Session</Text>
                 </View>
               </View>
@@ -221,7 +221,7 @@ export function ProgramPreviewModal({
                       ]}
                     >
                       <Text style={[styles.dayLabel, { color: colors.textMuted }]}>
-                        Day <NumberText weight="medium">{day.day}</NumberText>
+                        Day <NumberText weight="light">{day.day}</NumberText>
                       </Text>
                       <Text
                         style={[
@@ -269,7 +269,7 @@ export function ProgramPreviewModal({
                         ]}
                       >
                         <Text style={[styles.dayLabel, { color: colors.textMuted }]}>
-                          Day <NumberText weight="medium">{index + 1}</NumberText>
+                          Day <NumberText weight="light">{index + 1}</NumberText>
                         </Text>
                         <Text
                           style={[
@@ -482,7 +482,6 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 20,
-    fontFamily: Fonts.semiBold,
   },
   statLabel: {
     fontSize: 11,
