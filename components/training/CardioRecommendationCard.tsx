@@ -19,16 +19,30 @@ interface CardioRecommendationCardProps {
 export function CardioRecommendationCard({ recommendation, dayName, isDark }: CardioRecommendationCardProps) {
   const colors = isDark ? DarkColors : LightColors;
 
+  // Defensive: Provide default values if data is missing
+  const safeRecommendation = {
+    activity: recommendation?.activity || 'Rest Day',
+    duration: recommendation?.duration || 0,
+    intensity: recommendation?.intensity || 'moderate',
+    heartRateZone: recommendation?.heartRateZone,
+    caloriesBurned: recommendation?.caloriesBurned || 0,
+    description: recommendation?.description || 'Take a rest day to recover.',
+    tips: recommendation?.tips || [],
+    warmup: recommendation?.warmup,
+    cooldown: recommendation?.cooldown,
+    alternatives: recommendation?.alternatives || [],
+  };
+
   // Get intensity color
   const intensityColor = useMemo(() => {
-    switch (recommendation.intensity) {
+    switch (safeRecommendation.intensity) {
       case 'low': return '#4ade80'; // green
       case 'moderate': return '#fbbf24'; // yellow
       case 'high': return '#f87171'; // red
       case 'interval': return '#a78bfa'; // purple
       default: return colors.primary;
     }
-  }, [recommendation.intensity, colors.primary]);
+  }, [safeRecommendation.intensity, colors.primary]);
 
   return (
     <GlassCard style={styles.card}>
@@ -42,14 +56,14 @@ export function CardioRecommendationCard({ recommendation, dayName, isDark }: Ca
         </View>
         <View style={[styles.intensityBadge, { backgroundColor: `${intensityColor}20` }]}>
           <Text style={[styles.intensityText, { color: intensityColor }]}>
-            {recommendation.intensity.toUpperCase()}
+            {safeRecommendation.intensity.toUpperCase()}
           </Text>
         </View>
       </View>
 
       {/* Activity Name */}
       <Text style={[styles.activityName, { color: colors.text }]}>
-        {recommendation.activity}
+        {safeRecommendation.activity}
       </Text>
 
       {/* Stats Row */}
@@ -58,7 +72,7 @@ export function CardioRecommendationCard({ recommendation, dayName, isDark }: Ca
         <View style={styles.statItem}>
           <Clock size={18} color={colors.textMuted} />
           <NumberText style={[styles.statValue, { color: colors.text }]}>
-            {recommendation.duration}
+            {safeRecommendation.duration}
           </NumberText>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>min</Text>
         </View>
@@ -67,17 +81,17 @@ export function CardioRecommendationCard({ recommendation, dayName, isDark }: Ca
         <View style={styles.statItem}>
           <Zap size={18} color={colors.textMuted} />
           <NumberText style={[styles.statValue, { color: colors.text }]}>
-            {recommendation.caloriesBurned}
+            {safeRecommendation.caloriesBurned}
           </NumberText>
           <Text style={[styles.statLabel, { color: colors.textMuted }]}>cal</Text>
         </View>
 
         {/* Heart Rate Zone (if provided) */}
-        {recommendation.heartRateZone && (
+        {safeRecommendation.heartRateZone && (
           <View style={styles.statItem}>
             <Activity size={18} color={colors.textMuted} />
             <Text style={[styles.statLabel, { color: colors.text }]} numberOfLines={1}>
-              {recommendation.heartRateZone}
+              {safeRecommendation.heartRateZone}
             </Text>
           </View>
         )}
@@ -89,41 +103,41 @@ export function CardioRecommendationCard({ recommendation, dayName, isDark }: Ca
           WHAT TO DO
         </Text>
         <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {recommendation.description}
+          {safeRecommendation.description}
         </Text>
       </View>
 
       {/* Warmup */}
-      {recommendation.warmup && (
+      {safeRecommendation.warmup && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             WARMUP
           </Text>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {recommendation.warmup}
+            {safeRecommendation.warmup}
           </Text>
         </View>
       )}
 
       {/* Cooldown */}
-      {recommendation.cooldown && (
+      {safeRecommendation.cooldown && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             COOLDOWN
           </Text>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {recommendation.cooldown}
+            {safeRecommendation.cooldown}
           </Text>
         </View>
       )}
 
       {/* Tips */}
-      {recommendation.tips && recommendation.tips.length > 0 && (
+      {safeRecommendation.tips && safeRecommendation.tips.length > 0 && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             TIPS & FORM CUES
           </Text>
-          {recommendation.tips.map((tip, index) => (
+          {safeRecommendation.tips.map((tip, index) => (
             <View key={index} style={styles.tipItem}>
               <Text style={[styles.bulletPoint, { color: colors.primary }]}>•</Text>
               <Text style={[styles.tipText, { color: colors.textSecondary }]}>
@@ -135,12 +149,12 @@ export function CardioRecommendationCard({ recommendation, dayName, isDark }: Ca
       )}
 
       {/* Alternatives */}
-      {recommendation.alternatives && recommendation.alternatives.length > 0 && (
+      {safeRecommendation.alternatives && safeRecommendation.alternatives.length > 0 && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             ALTERNATIVES
           </Text>
-          {recommendation.alternatives.map((alt, index) => (
+          {safeRecommendation.alternatives.map((alt, index) => (
             <View key={index} style={styles.tipItem}>
               <Text style={[styles.bulletPoint, { color: colors.primary }]}>•</Text>
               <Text style={[styles.tipText, { color: colors.textSecondary }]}>

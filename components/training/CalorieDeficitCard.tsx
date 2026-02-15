@@ -18,6 +18,29 @@ interface CalorieDeficitCardProps {
 export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProps) {
   const colors = isDark ? DarkColors : LightColors;
 
+  // Defensive: Provide default values if data is missing
+  const safeNutrition = {
+    dailyCalories: nutrition?.dailyCalories || 2000,
+    deficit: nutrition?.deficit || 500,
+    proteinGrams: nutrition?.proteinGrams || 150,
+    carbsGrams: nutrition?.carbsGrams || 200,
+    fatGrams: nutrition?.fatGrams || 65,
+    mealTiming: nutrition?.mealTiming || '3-4 meals per day',
+    hydration: nutrition?.hydration || 'Drink 8-10 glasses of water daily',
+    preworkoutNutrition: nutrition?.preworkoutNutrition,
+    postworkoutNutrition: nutrition?.postworkoutNutrition,
+    supplementRecommendations: nutrition?.supplementRecommendations,
+    mealExamples: nutrition?.mealExamples || {
+      breakfast: 'Balanced breakfast',
+      lunch: 'Lean protein with vegetables',
+      dinner: 'Healthy dinner option',
+      snacks: ['Fruits', 'Nuts'],
+    },
+    tips: nutrition?.tips || [],
+    deficitStrategy: nutrition?.deficitStrategy,
+    progressMonitoring: nutrition?.progressMonitoring,
+  };
+
   return (
     <GlassCard style={styles.card}>
       {/* Header */}
@@ -37,11 +60,11 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
           </Text>
           <View style={styles.deficitRow}>
             <NumberText style={[styles.deficitValue, { color: colors.primary }]}>
-              -{nutrition.deficit}
+              -{safeNutrition.deficit}
             </NumberText>
             <Text style={[styles.deficitUnit, { color: colors.primary }]}>cal</Text>
             <Text style={[styles.deficitResult, { color: colors.textMuted }]}>
-              = ~{Math.round(nutrition.deficit * 7 / 3500)} lb/week
+              = ~{Math.round(safeNutrition.deficit * 7 / 3500)} lb/week
             </Text>
           </View>
         </View>
@@ -55,7 +78,7 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
         <View style={styles.calorieRow}>
           <Flame size={20} color={colors.primary} />
           <NumberText style={[styles.calorieValue, { color: colors.text }]}>
-            {nutrition.dailyCalories}
+            {safeNutrition.dailyCalories}
           </NumberText>
           <Text style={[styles.calorieUnit, { color: colors.text }]}>calories/day</Text>
         </View>
@@ -72,12 +95,12 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
             <Text style={[styles.macroName, { color: colors.textMuted }]}>Protein</Text>
             <View style={styles.macroValueRow}>
               <NumberText style={[styles.macroValue, { color: colors.text }]}>
-                {nutrition.proteinGrams}
+                {safeNutrition.proteinGrams}
               </NumberText>
               <Text style={[styles.macroUnit, { color: colors.textMuted }]}>g</Text>
             </View>
             <Text style={[styles.macroCalories, { color: colors.textMuted }]}>
-              <NumberText>{nutrition.proteinGrams * 4}</NumberText> cal
+              <NumberText>{safeNutrition.proteinGrams * 4}</NumberText> cal
             </Text>
           </View>
 
@@ -86,12 +109,12 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
             <Text style={[styles.macroName, { color: colors.textMuted }]}>Carbs</Text>
             <View style={styles.macroValueRow}>
               <NumberText style={[styles.macroValue, { color: colors.text }]}>
-                {nutrition.carbsGrams}
+                {safeNutrition.carbsGrams}
               </NumberText>
               <Text style={[styles.macroUnit, { color: colors.textMuted }]}>g</Text>
             </View>
             <Text style={[styles.macroCalories, { color: colors.textMuted }]}>
-              <NumberText>{nutrition.carbsGrams * 4}</NumberText> cal
+              <NumberText>{safeNutrition.carbsGrams * 4}</NumberText> cal
             </Text>
           </View>
 
@@ -100,12 +123,12 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
             <Text style={[styles.macroName, { color: colors.textMuted }]}>Fat</Text>
             <View style={styles.macroValueRow}>
               <NumberText style={[styles.macroValue, { color: colors.text }]}>
-                {nutrition.fatGrams}
+                {safeNutrition.fatGrams}
               </NumberText>
               <Text style={[styles.macroUnit, { color: colors.textMuted }]}>g</Text>
             </View>
             <Text style={[styles.macroCalories, { color: colors.textMuted }]}>
-              <NumberText>{nutrition.fatGrams * 9}</NumberText> cal
+              <NumberText>{safeNutrition.fatGrams * 9}</NumberText> cal
             </Text>
           </View>
         </View>
@@ -117,7 +140,7 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
           MEAL TIMING
         </Text>
         <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {nutrition.mealTiming}
+          {safeNutrition.mealTiming}
         </Text>
       </View>
 
@@ -129,36 +152,36 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
         <View style={styles.hydrationRow}>
           <Droplet size={18} color={colors.primary} />
           <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {nutrition.hydration}
+            {safeNutrition.hydration}
           </Text>
         </View>
       </View>
 
       {/* Workout Nutrition */}
-      {nutrition.preworkoutNutrition && (
+      {safeNutrition.preworkoutNutrition && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             PRE-WORKOUT NUTRITION
           </Text>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {nutrition.preworkoutNutrition}
+            {safeNutrition.preworkoutNutrition}
           </Text>
         </View>
       )}
 
-      {nutrition.postworkoutNutrition && (
+      {safeNutrition.postworkoutNutrition && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             POST-WORKOUT NUTRITION
           </Text>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {nutrition.postworkoutNutrition}
+            {safeNutrition.postworkoutNutrition}
           </Text>
         </View>
       )}
 
       {/* Meal Examples */}
-      {nutrition.mealExamples && (
+      {safeNutrition.mealExamples && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             MEAL EXAMPLES
@@ -167,28 +190,28 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
           <View style={styles.mealExample}>
             <Text style={[styles.mealName, { color: colors.text }]}>Breakfast:</Text>
             <Text style={[styles.mealDescription, { color: colors.textSecondary }]}>
-              {nutrition.mealExamples.breakfast}
+              {safeNutrition.mealExamples.breakfast}
             </Text>
           </View>
 
           <View style={styles.mealExample}>
             <Text style={[styles.mealName, { color: colors.text }]}>Lunch:</Text>
             <Text style={[styles.mealDescription, { color: colors.textSecondary }]}>
-              {nutrition.mealExamples.lunch}
+              {safeNutrition.mealExamples.lunch}
             </Text>
           </View>
 
           <View style={styles.mealExample}>
             <Text style={[styles.mealName, { color: colors.text }]}>Dinner:</Text>
             <Text style={[styles.mealDescription, { color: colors.textSecondary }]}>
-              {nutrition.mealExamples.dinner}
+              {safeNutrition.mealExamples.dinner}
             </Text>
           </View>
 
-          {nutrition.mealExamples.snacks && nutrition.mealExamples.snacks.length > 0 && (
+          {safeNutrition.mealExamples.snacks && safeNutrition.mealExamples.snacks.length > 0 && (
             <View style={styles.mealExample}>
               <Text style={[styles.mealName, { color: colors.text }]}>Snacks:</Text>
-              {nutrition.mealExamples.snacks.map((snack, index) => (
+              {safeNutrition.mealExamples.snacks.map((snack, index) => (
                 <Text key={index} style={[styles.mealDescription, { color: colors.textSecondary }]}>
                   • {snack}
                 </Text>
@@ -199,12 +222,12 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
       )}
 
       {/* Tips */}
-      {nutrition.tips && nutrition.tips.length > 0 && (
+      {safeNutrition.tips && safeNutrition.tips.length > 0 && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             NUTRITION TIPS
           </Text>
-          {nutrition.tips.map((tip, index) => (
+          {safeNutrition.tips.map((tip, index) => (
             <View key={index} style={styles.tipItem}>
               <Text style={[styles.bulletPoint, { color: colors.primary }]}>•</Text>
               <Text style={[styles.tipText, { color: colors.textSecondary }]}>
@@ -216,36 +239,36 @@ export function CalorieDeficitCard({ nutrition, isDark }: CalorieDeficitCardProp
       )}
 
       {/* Deficit Strategy */}
-      {nutrition.deficitStrategy && (
+      {safeNutrition.deficitStrategy && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             SUSTAINABLE DEFICIT STRATEGY
           </Text>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {nutrition.deficitStrategy}
+            {safeNutrition.deficitStrategy}
           </Text>
         </View>
       )}
 
       {/* Progress Monitoring */}
-      {nutrition.progressMonitoring && (
+      {safeNutrition.progressMonitoring && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             TRACKING YOUR PROGRESS
           </Text>
           <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {nutrition.progressMonitoring}
+            {safeNutrition.progressMonitoring}
           </Text>
         </View>
       )}
 
       {/* Supplements (if provided) */}
-      {nutrition.supplementRecommendations && nutrition.supplementRecommendations.length > 0 && (
+      {safeNutrition.supplementRecommendations && safeNutrition.supplementRecommendations.length > 0 && (
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             SUPPLEMENT RECOMMENDATIONS (OPTIONAL)
           </Text>
-          {nutrition.supplementRecommendations.map((supplement, index) => (
+          {safeNutrition.supplementRecommendations.map((supplement, index) => (
             <View key={index} style={styles.tipItem}>
               <Text style={[styles.bulletPoint, { color: colors.primary }]}>•</Text>
               <Text style={[styles.tipText, { color: colors.textSecondary }]}>
