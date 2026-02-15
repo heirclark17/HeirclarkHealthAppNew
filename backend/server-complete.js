@@ -2232,7 +2232,7 @@ app.post('/api/v1/ai/generate-workout-plan', authenticateToken, async (req, res)
 
     // Get user profile data for nutrition calculations
     const userProfile = await pool.query(
-      'SELECT weight_kg, height_cm, age, sex, activity_level, goal_type FROM profiles WHERE user_id = $1',
+      'SELECT weight_kg, height_cm, age, sex, activity_level, goal_type FROM user_profiles WHERE user_id = $1',
       [req.userId]
     );
     const profile = userProfile.rows[0] || {};
