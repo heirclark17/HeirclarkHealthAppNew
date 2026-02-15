@@ -11,6 +11,8 @@ import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { GlassCard } from '../../GlassCard';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
+import { useTraining } from '../../../contexts/TrainingContext';
+import { useMealPlan } from '../../../contexts/MealPlanContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -39,6 +41,17 @@ function formatDateStr(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 interface Props {
   selectedDate: string;
   onDateChange: (date: string) => void;
@@ -50,6 +63,12 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const insets = useSafeAreaInsets();
+
+  // Access training and meal plan contexts for full month data
+  let trainingState: any = null;
+  try { trainingState = useTraining()?.state; } catch {}
+  let mealPlanState: any = null;
+  try { mealPlanState = useMealPlan()?.state; } catch {}
 
   const bottomPadding = TAB_BAR_HEIGHT + TAB_BAR_BOTTOM_MARGIN + (insets.bottom || 0) + 20;
 
@@ -64,9 +83,11 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
     'July', 'August', 'September', 'October', 'November', 'December',
   ];
 
-  // Build set of dates that have blocks in the weekly plan
+  // Build set of dates that have blocks across the entire month
   const datesWithBlocks = useMemo(() => {
     const set = new Set<string>();
+
+    // Include days from the weekly planner plan
     if (state.weeklyPlan?.days) {
       for (const day of state.weeklyPlan.days) {
         if (day.blocks.length > 0) {
@@ -74,8 +95,118 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
         }
       }
     }
+
+    // Check training and meal data for all days of the displayed month
+    const year = currentMonth.getFullYear();
+    const monthIndex = currentMonth.getMonth();
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+    // Build set of day-of-week names that have workouts
+    const workoutDayNames = new Set<string>();
+    if (trainingState?.weeklyPlan?.days) {
+      for (const td of trainingState.weeklyPlan.days) {
+        if (td.workout && !td.isRestDay) {
+          workoutDayNames.add(td.dayOfWeek);
+        }
+      }
+    }
+
+    // Build set of day-of-week indices that have meals
+    const mealDayIndices = new Set<number>();
+    if (mealPlanState?.weeklyPlan) {
+      for (const md of mealPlanState.weeklyPlan) {
+        if (md.meals?.length > 0) {
+          if (md.dayName) {
+            const idx = DAY_NAMES.indexOf(md.dayName);
+            if (idx >= 0) mealDayIndices.add(idx);
+          } else if (md.dayNumber) {
+            mealDayIndices.add(md.dayNumber === 7 ? 0 : md.dayNumber);
+          }
+        }
+      }
+    }
+
+    // Mark each day of the month that has workout or meal data
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      if (set.has(dateStr)) continue;
+      const date = new Date(year, monthIndex, day);
+      const dayOfWeek = date.getDay();
+      if (workoutDayNames.has(DAY_NAMES[dayOfWeek]) || mealDayIndices.has(dayOfWeek)) {
+        set.add(dateStr);
+      }
+    }
+
     return set;
-  }, [state.weeklyPlan]);
+  }, [state.weeklyPlan, currentMonth, trainingState?.weeklyPlan, mealPlanState?.weeklyPlan]);
+
+  // Compute blocks for the selected day (works for any day, not just weekly plan)
+  const selectedDayBlocks = useMemo(() => {
+    // First check weekly planner data
+    if (state.weeklyPlan?.days) {
+      const planDay = state.weeklyPlan.days.find((d) => d.date === selectedDate);
+      if (planDay) return planDay;
+    }
+
+    // Compute from training + meal data for days outside the weekly plan
+    const date = parseLocalDate(selectedDate);
+    const dayOfWeek = date.getDay();
+    const dayName = DAY_NAMES[dayOfWeek];
+    const blocks: any[] = [];
+
+    // Workout
+    if (trainingState?.weeklyPlan?.days) {
+      const trainingDay = trainingState.weeklyPlan.days.find((d: any) => d.dayOfWeek === dayName);
+      if (trainingDay?.workout && !trainingDay.isRestDay) {
+        blocks.push({
+          id: `workout_${selectedDate}`,
+          type: 'workout',
+          title: trainingDay.workout.name || 'Workout',
+          startTime: '07:00',
+          endTime: '08:00',
+          duration: trainingDay.workout.duration || 45,
+          color: Colors.activeEnergy || '#FF6B6B',
+          status: 'scheduled',
+        });
+      }
+    }
+
+    // Meals
+    if (mealPlanState?.weeklyPlan) {
+      const mappedDayNum = dayOfWeek === 0 ? 7 : dayOfWeek;
+      const mealDay = mealPlanState.weeklyPlan.find((d: any) => {
+        if (d.dayName === dayName) return true;
+        return d.dayNumber === mappedDayNum;
+      });
+      if (mealDay?.meals?.length > 0) {
+        const mealTimes: Record<string, string> = {
+          breakfast: '08:00', lunch: '12:00', dinner: '18:00', snack: '15:00',
+        };
+        for (const meal of mealDay.meals) {
+          const startTime = mealTimes[meal.mealType] || '12:00';
+          blocks.push({
+            id: `meal_${selectedDate}_${meal.mealType}`,
+            type: 'meal_eating',
+            title: `${capitalize(meal.mealType)}: ${meal.name}`,
+            startTime,
+            endTime: startTime,
+            duration: 30,
+            color: Colors.protein || '#4ECDC4',
+            status: 'scheduled',
+          });
+        }
+      }
+    }
+
+    if (blocks.length === 0) return null;
+
+    return {
+      date: selectedDate,
+      blocks,
+      completionRate: 0,
+      totalFreeMinutes: 0,
+    };
+  }, [selectedDate, state.weeklyPlan, trainingState?.weeklyPlan, mealPlanState?.weeklyPlan]);
 
   const changeMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth((prev) => {
@@ -231,21 +362,16 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
       </GlassCard>
 
       {/* Selected Day Summary */}
-      {state.weeklyPlan?.days && (() => {
-        const dayData = state.weeklyPlan.days.find((d) => d.date === selectedDate);
-        if (!dayData) return null;
-
-        const nonSleepBlocks = dayData.blocks.filter((b) => b.type !== 'sleep');
+      {selectedDayBlocks && (() => {
+        const nonSleepBlocks = selectedDayBlocks.blocks.filter((b: any) => b.type !== 'sleep');
         if (nonSleepBlocks.length === 0) return null;
 
         return (
           <GlassCard style={styles.summaryCard}>
             <Text style={[styles.summaryTitle, { color: themeColors.text }]}>
-              {new Date(
-                parseInt(selectedDate.split('-')[0]),
-                parseInt(selectedDate.split('-')[1]) - 1,
-                parseInt(selectedDate.split('-')[2])
-              ).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              {parseLocalDate(selectedDate).toLocaleDateString('en-US', {
+                weekday: 'long', month: 'short', day: 'numeric',
+              })}
             </Text>
             <View style={styles.summaryStats}>
               <View style={styles.summaryStatItem}>
@@ -256,24 +382,28 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
                   Blocks
                 </Text>
               </View>
-              <View style={styles.summaryStatItem}>
-                <Text style={[styles.summaryStatValue, { color: themeColors.primary }]}>
-                  {dayData.completionRate}%
-                </Text>
-                <Text style={[styles.summaryStatLabel, { color: themeColors.textSecondary }]}>
-                  Done
-                </Text>
-              </View>
-              <View style={styles.summaryStatItem}>
-                <Text style={[styles.summaryStatValue, { color: themeColors.primary }]}>
-                  {Math.round(dayData.totalFreeMinutes / 60)}h
-                </Text>
-                <Text style={[styles.summaryStatLabel, { color: themeColors.textSecondary }]}>
-                  Free
-                </Text>
-              </View>
+              {selectedDayBlocks.completionRate > 0 && (
+                <View style={styles.summaryStatItem}>
+                  <Text style={[styles.summaryStatValue, { color: themeColors.primary }]}>
+                    {selectedDayBlocks.completionRate}%
+                  </Text>
+                  <Text style={[styles.summaryStatLabel, { color: themeColors.textSecondary }]}>
+                    Done
+                  </Text>
+                </View>
+              )}
+              {selectedDayBlocks.totalFreeMinutes > 0 && (
+                <View style={styles.summaryStatItem}>
+                  <Text style={[styles.summaryStatValue, { color: themeColors.primary }]}>
+                    {Math.round(selectedDayBlocks.totalFreeMinutes / 60)}h
+                  </Text>
+                  <Text style={[styles.summaryStatLabel, { color: themeColors.textSecondary }]}>
+                    Free
+                  </Text>
+                </View>
+              )}
             </View>
-            {nonSleepBlocks.map((block) => (
+            {nonSleepBlocks.map((block: any) => (
               <View key={block.id} style={[styles.blockRow, { borderLeftColor: block.color }]}>
                 <Text style={[styles.blockTime, { color: themeColors.textSecondary }]}>
                   {to12h(block.startTime)}
@@ -357,7 +487,7 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     position: 'absolute',
-    bottom: 4,
+    bottom: Math.floor(CELL_SIZE * 0.22),
   },
   summaryCard: {
     marginHorizontal: 16,
