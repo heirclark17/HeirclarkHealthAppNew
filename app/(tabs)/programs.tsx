@@ -21,9 +21,8 @@ import {
   ProgramPreviewModal,
   ExerciseAlternativesModal,
   WeightInputModal,
-  CardioRecommendationCard,
-  CalorieDeficitCard,
 } from '../../components/training';
+import { CardioRecommendationCard } from '../../components/programs/CardioRecommendationCard';
 import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { ExerciseAlternative, WorkoutExercise, WeightLog } from '../../types/training';
@@ -519,27 +518,8 @@ export default function ProgramsScreen() {
           </View>
         )}
 
-        {/* Today's Cardio Recommendation - Separate from strength training */}
-        {weeklyPlan && cardioRecommendations && currentDay && (() => {
-          const dayKey = currentDay.dayOfWeek.toLowerCase() as keyof typeof cardioRecommendations;
-          const todaysCardio = cardioRecommendations[dayKey];
-          // Only render if we have cardio data for this day
-          return todaysCardio ? (
-            <CardioRecommendationCard
-              recommendation={todaysCardio}
-              dayName={currentDay.dayOfWeek}
-              isDark={isDark}
-            />
-          ) : null;
-        })()}
-
-        {/* Nutrition Guidance - Calorie Deficit Card */}
-        {weeklyPlan && nutritionGuidance && (
-          <CalorieDeficitCard
-            nutrition={nutritionGuidance}
-            isDark={isDark}
-          />
-        )}
+        {/* Today's Cardio Recommendation - Dynamic based on calorie balance */}
+        <CardioRecommendationCard />
 
         {/* Generate Plan Section - show when no plan exists */}
         {!weeklyPlan && !isGenerating && (

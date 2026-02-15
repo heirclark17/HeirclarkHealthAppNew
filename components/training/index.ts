@@ -8,5 +8,6 @@ export { ProgramCard } from './ProgramCard';
 export { ProgramPreviewModal } from './ProgramPreviewModal';
 export { ExerciseAlternativesModal } from './ExerciseAlternativesModal';
 export { WeightInputModal } from './WeightInputModal';
+// Note: Old static CardioRecommendationCard kept for backward compatibility
+// New dynamic CardioRecommendationCard is at components/programs/CardioRecommendationCard.tsx
 export { CardioRecommendationCard } from './CardioRecommendationCard';
-export { CalorieDeficitCard } from './CalorieDeficitCard';

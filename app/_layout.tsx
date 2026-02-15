@@ -14,6 +14,7 @@ import {
   Urbanist_700Bold,
 } from '@expo-google-fonts/urbanist';
 import { GoalWizardProvider, MealPlanProvider, TrainingProvider, CustomWorkoutProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
+import { CardioRecommendationProvider } from '../contexts/CardioRecommendationContext';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { PostHogProvider } from '../contexts/PostHogContext';
@@ -126,11 +127,13 @@ export default function RootLayout() {
                                       <HydrationProvider>
                                         <HabitFormationProvider>
                                           <AdaptiveTDEEProvider>
-                                            <SmartMealLoggerProvider>
-                                              <BackgroundLayer>
-                                                <Slot />
-                                              </BackgroundLayer>
-                                            </SmartMealLoggerProvider>
+                                            <CardioRecommendationProvider>
+                                              <SmartMealLoggerProvider>
+                                                <BackgroundLayer>
+                                                  <Slot />
+                                                </BackgroundLayer>
+                                              </SmartMealLoggerProvider>
+                                            </CardioRecommendationProvider>
                                           </AdaptiveTDEEProvider>
                                         </HabitFormationProvider>
                                       </HydrationProvider>

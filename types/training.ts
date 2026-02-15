@@ -533,3 +533,111 @@ export interface NutritionGuidance {
   deficitStrategy: string; // How to maintain the deficit sustainably
   progressMonitoring: string; // How to track progress (weekly weigh-ins, measurements, etc.)
 }
+
+// ============================================================================
+// Progressive Overload Tracking System Types
+// ============================================================================
+
+/** Status of an exercise's overload progression */
+export type OverloadStatus =
+  | 'progressing'
+  | 'maintaining'
+  | 'stalling'
+  | 'regressing'
+  | 'deload_recommended'
+  | 'new_exercise'
+  | 'pr_set';
+
+/** Weekly aggregate per exercise for overload tracking */
+export interface ProgressiveOverloadEntry {
+  exerciseId: string;
+  exerciseName: string;
+  weekNumber: number;
+  weekStartDate: string;
+  totalSets: number;
+  totalReps: number;
+  totalVolume: number; // sets * reps * weight
+  maxWeight: number;
+  estimated1RM: number; // Brzycki formula
+  averageRPE: number;
+  volumeChangePercent: number; // vs previous week
+  estimated1RMChangePercent: number;
+  overloadStatus: OverloadStatus;
+  sessions: number; // how many sessions this week
+}
+
+/** AI-generated targets for next session */
+export interface AISetRecommendation {
+  exerciseId: string;
+  exerciseName: string;
+  sets: {
+    setNumber: number;
+    targetWeight: number;
+    targetReps: number;
+    isWarmup: boolean;
+    notes?: string;
+  }[];
+  reasoning: string;
+  confidence: 'high' | 'medium' | 'low';
+  progressionStrategy: string;
+  generatedAt: string;
+}
+
+/** AI weekly analysis report */
+export interface AIWeeklyAnalysis {
+  weekNumber: number;
+  weekStartDate: string;
+  overallScore: number; // 0-100
+  headline: string;
+  exerciseAnalyses: {
+    exerciseId: string;
+    exerciseName: string;
+    status: OverloadStatus;
+    volumeChange: number;
+    strengthChange: number;
+    recommendation: string;
+  }[];
+  muscleVolumeAudit: {
+    muscleGroup: MuscleGroup;
+    weeklySets: number;
+    mev: number; // minimum effective volume
+    mrv: number; // maximum recoverable volume
+    status: 'under' | 'optimal' | 'over';
+  }[];
+  recoveryAssessment: string;
+  nutritionNote: string;
+  achievements: string[];
+  generatedAt: string;
+}
+
+/** User's progression preferences */
+export interface UserProgressionProfile {
+  fitnessLevel: 'beginner' | 'intermediate' | 'advanced';
+  progressionModel: 'linear' | 'double_progression' | 'wave_loading' | 'rpe_based';
+  weightIncrements: {
+    upper: number; // lb increment for upper body
+    lower: number; // lb increment for lower body
+  };
+  preferredUnit: WeightUnit;
+  deloadFrequency: number; // weeks between deloads
+  targetRPE: number; // default target RPE
+  repRanges: {
+    strength: [number, number]; // e.g. [3, 5]
+    hypertrophy: [number, number]; // e.g. [8, 12]
+    endurance: [number, number]; // e.g. [12, 20]
+  };
+}
+
+/** Long-term trend data for charts */
+export interface OverloadTrend {
+  exerciseId: string;
+  exerciseName: string;
+  dataPoints: {
+    weekNumber: number;
+    weekStartDate: string;
+    estimated1RM: number;
+    totalVolume: number;
+    maxWeight: number;
+    averageReps: number;
+  }[];
+}
