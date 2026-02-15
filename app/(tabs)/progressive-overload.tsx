@@ -578,7 +578,7 @@ export default function ProgressiveOverloadPage() {
         {/* Floating Log Workout Button (inline) */}
         {/* ============================================================ */}
         <TouchableOpacity
-          style={[styles.logButton, { backgroundColor: colors.primary }]}
+          activeOpacity={0.7}
           onPress={() => {
             mediumImpact();
             // Open logger with first exercise or empty
@@ -586,8 +586,15 @@ export default function ProgressiveOverloadPage() {
             handleLogWorkout(first?.exerciseId || '', first?.exerciseName || 'New Exercise');
           }}
         >
-          <Dumbbell size={20} color={colors.primaryText} />
-          <Text style={[styles.logButtonText, { color: colors.primaryText }]}>Log Workout</Text>
+          <GlassCard
+            style={[
+              styles.logButton,
+              { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' },
+            ]}
+            interactive
+          >
+            <Text style={[styles.logButtonText, { color: colors.primary }]}>LOG WORKOUT</Text>
+          </GlassCard>
         </TouchableOpacity>
       </ScrollView>
 
@@ -767,13 +774,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
-    borderRadius: 14,
     marginTop: 8,
     marginBottom: 8,
   },
   logButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Fonts.light,
     fontWeight: '200',
+    letterSpacing: 1,
   },
 });
