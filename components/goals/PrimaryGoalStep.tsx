@@ -7,6 +7,7 @@ import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
+import { WizardHeader } from './WizardHeader';
 
 interface GoalOption {
   id: PrimaryGoal;
@@ -156,15 +157,26 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
   return (
     <View style={styles.container}>
+      {/* Modern Liquid Glass Sticky Header */}
+      <WizardHeader
+        currentStep={1}
+        totalSteps={6}
+        title="What's Your Goal?"
+        onBack={handleBack}
+        isDark={isDark}
+      />
+
       {/* Scrollable content area */}
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>What's Your Goal?</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        {/* Spacer for sticky header */}
+        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+
+        <View style={styles.subtitle}>
+          <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
             Select your primary fitness objective. This helps us personalize your nutrition plan.
           </Text>
         </View>
@@ -192,23 +204,10 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
       <View style={styles.bottomContainer}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            onPress={handleBack}
-            activeOpacity={0.7}
-            style={{ flex: 1 }}
-            accessibilityLabel="Exit goal wizard"
-            accessibilityRole="button"
-            accessibilityHint="Returns to the previous screen and exits the goal setup wizard"
-          >
-            <GlassCard style={styles.backButton} interactive>
-              <Text style={[styles.backButtonText, { color: colors.text }]}>EXIT</Text>
-            </GlassCard>
-          </TouchableOpacity>
-
-          <TouchableOpacity
             onPress={handleContinue}
             disabled={!state.primaryGoal}
             activeOpacity={0.7}
-            style={{ flex: 2 }}
+            style={{ flex: 1 }}
             accessibilityLabel={state.primaryGoal ? 'Continue to next step' : 'Continue, select a goal first'}
             accessibilityRole="button"
             accessibilityState={{ disabled: !state.primaryGoal }}
@@ -240,23 +239,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    // Removed paddingBottom - now handled by bottomContainer
-  },
-  header: {
-    marginTop: 48,
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.text,
-    marginBottom: 8,
+    // Content starts after sticky header
   },
   subtitle: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  subtitleText: {
     fontSize: 15,
     color: Colors.textSecondary,
     lineHeight: 22,
+    textAlign: 'center',
   },
   grid: {
     flexDirection: 'row',
@@ -317,21 +310,6 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 12,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 16,
-  },
-  backButtonText: {
-    fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    letterSpacing: 1,
-    color: Colors.text,
   },
   continueButton: {
     flexDirection: 'row',
