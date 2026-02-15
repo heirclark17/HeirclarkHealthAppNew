@@ -5,12 +5,25 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// Lazy import: expo-calendar requires native module, gracefully degrade if unavailable
-let Calendar: typeof import('expo-calendar') | null = null;
-try {
-  Calendar = require('expo-calendar');
-} catch (e) {
-  console.warn('[Planner] expo-calendar native module not available - calendar sync disabled');
+// expo-calendar requires a native build with ExpoCalendar module.
+// Completely deferred - no require() at module level to avoid crash on
+// dev clients that don't have it built in yet.
+let _Calendar: any = null;
+let _calendarChecked = false;
+
+function getCalendar(): any {
+  if (_calendarChecked) return _Calendar;
+  _calendarChecked = true;
+  try {
+    // String concat hides from Metro static analysis so module isn't eagerly evaluated.
+    // After a native build includes ExpoCalendar, this will resolve at runtime.
+    const mod = 'expo-' + 'calendar';
+    _Calendar = require(mod);
+  } catch (e) {
+    console.warn('[Planner] expo-calendar native module not available - calendar sync disabled');
+    _Calendar = null;
+  }
+  return _Calendar;
 }
 import { api } from '../services/api';
 import { SchedulingEngine } from '../services/schedulingEngine';
@@ -268,14 +281,15 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
    * Sync calendar events from device (CLIENT-SIDE ONLY)
    */
   const syncCalendar = async (): Promise<boolean> => {
-    if (!Calendar) {
+    const Cal = getCalendar();
+    if (!Cal) {
       console.warn('[Planner] Calendar sync unavailable - native module not built');
       return false;
     }
 
     // Check/request permission
     if (!state.calendarPermission) {
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      const { status } = await Cal.requestCalendarPermissionsAsync();
       const granted = status === 'granted';
       setState((prev) => ({ ...prev, calendarPermission: granted }));
       await AsyncStorage.setItem(STORAGE_KEYS.CALENDAR_PERMISSION, granted.toString());
@@ -290,7 +304,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     try {
       // Get all calendars
-      const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+      const calendars = await Cal.getCalendarsAsync(Cal.EntityTypes.EVENT);
 
       // Get events for next 7 days
       const startDate = new Date();
@@ -299,7 +313,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
       const events: DeviceCalendarEvent[] = [];
       for (const calendar of calendars) {
-        const calendarEvents = await Calendar.getEventsAsync(
+        const calendarEvents = await Cal.getEventsAsync(
           [calendar.id],
           startDate,
           endDate
