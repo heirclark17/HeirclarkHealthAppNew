@@ -16,6 +16,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
+import { WizardHeader } from './WizardHeader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -583,13 +584,24 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
   return (
     <View style={styles.container}>
+      {/* Modern Liquid Glass Sticky Header */}
+      <WizardHeader
+        currentStep={2}
+        totalSteps={6}
+        title="Your Body Metrics"
+        onBack={onBack}
+        isDark={isDark}
+      />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Your Body Metrics</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Help us calculate your ideal nutrition targets with accurate measurements.
-        </Text>
-      </View>
+        {/* Spacer for sticky header */}
+        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+
+        <View style={styles.subtitle}>
+          <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
+            Help us calculate your ideal nutrition targets with accurate measurements.
+          </Text>
+        </View>
 
       {/* Weight Section */}
       <GlassSection isDark={isDark}>
@@ -910,21 +922,15 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  header: {
-    marginTop: 48,
+  subtitle: {
+    paddingHorizontal: 20,
     marginBottom: 24,
   },
-  title: {
-    fontSize: 28,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  subtitle: {
+  subtitleText: {
     fontSize: 15,
     color: Colors.textSecondary,
     lineHeight: 22,
+    textAlign: 'center',
   },
   glassSection: {
     marginBottom: 24,
