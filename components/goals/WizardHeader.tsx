@@ -25,7 +25,7 @@ export function WizardHeader({ currentStep, totalSteps, title, onBack, isDark = 
   const progressBg = isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)';
   const progressFill = isDark ? '#96CEB4' : '#4A9B7A';
   const glassOverlay = isDark ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 255, 255, 0.75)';
-  const borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+
 
   // Calculate progress percentage
   const progressPercentage = (currentStep / totalSteps) * 100;
@@ -39,7 +39,7 @@ export function WizardHeader({ currentStep, totalSteps, title, onBack, isDark = 
       </BlurView>
 
       {/* Header Content */}
-      <View style={[styles.headerContent, { borderBottomColor: borderColor }]}>
+      <View style={styles.headerContent}>
         {/* Top Row: Back Button + Step Counter */}
         <View style={styles.topRow}>
           <TouchableOpacity
@@ -131,7 +131,6 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : 20,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    borderBottomWidth: 0.5,
   },
   topRow: {
     flexDirection: 'row',
@@ -148,18 +147,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    // Soft shadow for floating effect
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
   },
   stepCounter: {
     fontSize: 13,
@@ -185,15 +172,6 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 2,
     position: 'relative',
-    // Soft glow effect
-    ...Platform.select({
-      ios: {
-        shadowColor: '#96CEB4',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.4,
-        shadowRadius: 4,
-      },
-    }),
   },
   shimmerOverlay: {
     ...StyleSheet.absoluteFillObject,
