@@ -2371,17 +2371,21 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
     const assistantMessage = completion.choices[0].message.content;
     messages.push({ role: 'assistant', content: assistantMessage });
 
+    // Trim to last 30 messages to prevent unbounded DB growth
+    // (only last 10 are sent to OpenAI anyway)
+    const trimmedMessages = messages.slice(-30);
+
     // Save conversation
     if (conversation.rows.length > 0) {
       await pool.query(
         `UPDATE coach_conversations SET messages = $2, updated_at = NOW() WHERE id = $1`,
-        [conversation.rows[0].id, JSON.stringify(messages)]
+        [conversation.rows[0].id, JSON.stringify(trimmedMessages)]
       );
     } else {
       await pool.query(
         `INSERT INTO coach_conversations (user_id, conversation_type, messages, context)
          VALUES ($1, $2, $3, $4)`,
-        [req.userId, conversationType || 'general', JSON.stringify(messages), JSON.stringify(context)]
+        [req.userId, conversationType || 'general', JSON.stringify(trimmedMessages), JSON.stringify(context)]
       );
     }
 
