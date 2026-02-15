@@ -12,7 +12,7 @@ import {
   PlannerPreferences,
   EnergyPeak,
   PLANNER_CONSTANTS,
-} from '@/types/planner';
+} from '../types/planner';
 
 export class SchedulingEngine {
   /**
