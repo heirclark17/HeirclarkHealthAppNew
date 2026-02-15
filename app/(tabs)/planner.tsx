@@ -1,28 +1,50 @@
 /**
  * Planner Tab - AI-Powered Day & Week Planner
- * Coming soon placeholder
+ * Main screen with daily/weekly view toggle
  */
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Fonts } from '../../constants/Theme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { useDayPlanner } from '@/contexts/DayPlannerContext';
+import { DayPlannerOnboardingModal } from '@/components/planner/onboarding/DayPlannerOnboardingModal';
+import { DailyTimelineView } from '@/components/planner/timeline/DailyTimelineView';
+import { WeeklyOverviewView } from '@/components/planner/weekly/WeeklyOverviewView';
+import { SegmentedControl } from '@/components/SegmentedControl';
+import { colors } from '@/constants/Theme';
 
 export default function PlannerScreen() {
-  const insets = useSafeAreaInsets();
+  const { state, actions } = useDayPlanner();
+  const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
+
+  // Show onboarding if not completed
+  if (!state.hasCompletedOnboarding) {
+    return (
+      <DayPlannerOnboardingModal
+        visible={true}
+        onComplete={actions.completeOnboarding}
+        onClose={() => router.back()}
+      />
+    );
+  }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="calendar-outline" size={48} color={Colors.primary} />
-        </View>
-        <Text style={styles.title}>Day Planner</Text>
-        <Text style={styles.subtitle}>
-          AI-powered daily and weekly planning is coming soon.
-        </Text>
+    <View style={styles.container}>
+      {/* Header with view toggle */}
+      <View style={styles.header}>
+        <SegmentedControl
+          values={['Daily', 'Weekly']}
+          selectedIndex={viewMode === 'daily' ? 0 : 1}
+          onChange={(index) => setViewMode(index === 0 ? 'daily' : 'weekly')}
+        />
       </View>
+
+      {/* Content */}
+      {viewMode === 'daily' ? (
+        <DailyTimelineView />
+      ) : (
+        <WeeklyOverviewView />
+      )}
     </View>
   );
 }
@@ -30,34 +52,11 @@ export default function PlannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: `${Colors.primary}15`,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontFamily: Fonts.semiBold,
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    fontFamily: Fonts.regular,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.background,
   },
 });

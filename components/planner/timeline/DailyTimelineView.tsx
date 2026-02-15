@@ -1,22 +1,26 @@
 /**
  * DailyTimelineView - Main daily timeline with hourly grid and time blocks
+ * iOS 26 Liquid Glass design
  */
 
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { Calendar, RefreshCw } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDayPlanner } from '@/contexts/DayPlannerContext';
 import { TimeSlotGrid } from './TimeSlotGrid';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
 import { TimeBlockCard } from './TimeBlockCard';
 import { CalendarSyncButton } from '../shared/CalendarSyncButton';
+import { GlassCard } from '@/components/GlassCard';
 import { colors } from '@/constants/Theme';
 
 export function DailyTimelineView() {
   const { state, actions } = useDayPlanner();
   const scrollRef = useRef<ScrollView>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const insets = useSafeAreaInsets();
 
   // Get current day's timeline
   const timeline = state.weeklyPlan?.days[state.selectedDayIndex];
@@ -34,23 +38,35 @@ export function DailyTimelineView() {
 
   if (!timeline) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No timeline available</Text>
-        <TouchableOpacity
-          style={styles.generateButton}
-          onPress={actions.generateWeeklyPlan}
-        >
-          <RefreshCw size={20} color={colors.background} />
-          <Text style={styles.generateButtonText}>Generate Schedule</Text>
-        </TouchableOpacity>
+      <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
+        <View style={styles.emptyContainer}>
+          <GlassCard style={styles.emptyCard}>
+            <RefreshCw size={48} color={colors.primary} style={{ opacity: 0.3 }} />
+            <Text style={styles.emptyText}>No timeline available</Text>
+            <TouchableOpacity
+              style={styles.generateButton}
+              onPress={actions.generateWeeklyPlan}
+              disabled={state.isGeneratingPlan}
+            >
+              {state.isGeneratingPlan ? (
+                <Text style={styles.generateButtonText}>Generating...</Text>
+              ) : (
+                <>
+                  <RefreshCw size={20} color={colors.background} />
+                  <Text style={styles.generateButtonText}>Generate Schedule</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </GlassCard>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <GlassCard style={styles.header}>
         <TouchableOpacity onPress={() => setShowDatePicker(true)}>
           <Text style={styles.dateText}>
             {format(new Date(timeline.date), 'EEEE, MMM d')}
@@ -65,6 +81,7 @@ export function DailyTimelineView() {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={actions.generateWeeklyPlan}
+            disabled={state.isGeneratingPlan}
           >
             <RefreshCw
               size={20}
@@ -72,7 +89,7 @@ export function DailyTimelineView() {
             />
           </TouchableOpacity>
         </View>
-      </View>
+      </GlassCard>
 
       {/* Timeline */}
       <ScrollView
@@ -101,24 +118,26 @@ export function DailyTimelineView() {
       </ScrollView>
 
       {/* Stats Footer */}
-      <View style={styles.footer}>
+      <GlassCard style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
         <View style={styles.statItem}>
           <Text style={styles.statValue}>{timeline.completionRate}%</Text>
           <Text style={styles.statLabel}>Completed</Text>
         </View>
+        <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text style={styles.statValue}>
             {Math.round(timeline.totalScheduledMinutes / 60)}h
           </Text>
           <Text style={styles.statLabel}>Scheduled</Text>
         </View>
+        <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text style={styles.statValue}>
             {Math.round(timeline.totalFreeMinutes / 60)}h
           </Text>
           <Text style={styles.statLabel}>Free Time</Text>
         </View>
-      </View>
+      </GlassCard>
     </View>
   );
 }
@@ -126,6 +145,7 @@ export function DailyTimelineView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -133,19 +153,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.surface + '40',
+    marginHorizontal: 16,
+    marginBottom: 8,
   },
   dateText: {
-    fontSize: 18,
-    fontFamily: 'Urbanist_600SemiBold',
+    fontSize: 20,
+    fontFamily: 'Urbanist_700Bold',
     color: colors.text,
   },
   actionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.surface + '40',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.glassTint,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -154,7 +174,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
   timeline: {
     position: 'relative',
@@ -164,48 +184,63 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 20,
+    paddingHorizontal: 24,
+  },
+  emptyCard: {
+    padding: 40,
+    alignItems: 'center',
+    gap: 16,
+    maxWidth: 400,
+    width: '100%',
   },
   emptyText: {
-    fontSize: 16,
-    fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    fontSize: 18,
+    fontFamily: 'Urbanist_600SemiBold',
+    color: colors.text,
+    textAlign: 'center',
   },
   generateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 16,
+    marginTop: 8,
   },
   generateButtonText: {
     fontSize: 16,
-    fontFamily: 'Urbanist_600SemiBold',
+    fontFamily: 'Urbanist_700Bold',
     color: colors.background,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.surface + '40',
-    backgroundColor: colors.background,
+    paddingTop: 20,
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
   statItem: {
+    flex: 1,
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: colors.glassTint,
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 24,
     fontFamily: 'SFProRounded-Bold',
     color: colors.primary,
   },
   statLabel: {
-    fontSize: 12,
-    fontFamily: 'Urbanist_500Medium',
+    fontSize: 13,
+    fontFamily: 'Urbanist_600SemiBold',
     color: colors.textSecondary,
   },
 });
