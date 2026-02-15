@@ -307,7 +307,9 @@ export class SchedulingEngine {
   }
 
   /**
-   * Find available time slot for a block
+   * Find available time slot for a block.
+   * Guarantees no overlap with existing blocks (calendar events, sleep, etc.)
+   * by requiring a minimum buffer between adjacent blocks.
    */
   private static findAvailableSlot(
     existingBlocks: TimeBlock[],
@@ -315,34 +317,96 @@ export class SchedulingEngine {
     duration: number,
     preferences: PlannerPreferences
   ): string {
+    const buffer = PLANNER_CONSTANTS.DEFAULT_BUFFER; // min gap between blocks
+    const wakeMinutes = this.timeToMinutes(preferences.wakeTime);
+    const sleepMinutes = this.timeToMinutes(preferences.sleepTime);
+
+    // First pass: try forward from preferred time in 15-min increments
     let candidateTime = preferredTime;
     let attempts = 0;
-    const maxAttempts = 48; // Try every 30 minutes for 24 hours
+    const maxAttempts = 96; // Try every 15 minutes across full waking window
 
     while (attempts < maxAttempts) {
-      const candidateEnd = this.addMinutesToTime(candidateTime, duration);
+      const candStart = this.timeToMinutes(candidateTime);
+      const candEnd = candStart + duration;
 
-      // Check if slot is available
-      const hasConflict = existingBlocks.some(block => {
-        const blockStart = this.timeToMinutes(block.startTime);
-        const blockEnd = this.timeToMinutes(block.endTime);
-        const candStart = this.timeToMinutes(candidateTime);
-        const candEnd = this.timeToMinutes(candidateEnd);
+      // Stay within waking hours
+      if (candStart >= wakeMinutes && candEnd <= sleepMinutes) {
+        // Check overlap with buffer: require `buffer` minutes gap on each side
+        const hasConflict = existingBlocks.some(block => {
+          const blockStart = this.timeToMinutes(block.startTime);
+          const blockEnd = this.timeToMinutes(block.endTime);
 
-        // Check overlap
-        return (candStart < blockEnd && candEnd > blockStart);
-      });
+          // Conflict if candidate overlaps OR is too close to an existing block
+          return (candStart < blockEnd + buffer && candEnd + buffer > blockStart);
+        });
 
-      if (!hasConflict) {
-        return candidateTime;
+        if (!hasConflict) {
+          return candidateTime;
+        }
       }
 
-      // Try 30 minutes later
-      candidateTime = this.addMinutesToTime(candidateTime, 30);
+      // Try 15 minutes later
+      candidateTime = this.addMinutesToTime(candidateTime, 15);
       attempts++;
     }
 
-    // Fallback: return preferred time even with conflict
+    // Second pass: try backward from preferred time in 15-min increments
+    candidateTime = preferredTime;
+    attempts = 0;
+    while (attempts < maxAttempts) {
+      const candStart = this.timeToMinutes(candidateTime);
+      const candEnd = candStart + duration;
+
+      if (candStart >= wakeMinutes && candEnd <= sleepMinutes) {
+        const hasConflict = existingBlocks.some(block => {
+          const blockStart = this.timeToMinutes(block.startTime);
+          const blockEnd = this.timeToMinutes(block.endTime);
+          return (candStart < blockEnd + buffer && candEnd + buffer > blockStart);
+        });
+
+        if (!hasConflict) {
+          return candidateTime;
+        }
+      }
+
+      // Try 15 minutes earlier
+      candidateTime = this.addMinutesToTime(candidateTime, -15);
+      attempts++;
+    }
+
+    // Last resort: find ANY open gap in the waking window
+    const sorted = [...existingBlocks].sort(
+      (a, b) => this.timeToMinutes(a.startTime) - this.timeToMinutes(b.startTime)
+    );
+
+    // Check gap before first block
+    if (sorted.length > 0) {
+      const firstStart = this.timeToMinutes(sorted[0].startTime);
+      if (wakeMinutes + duration + buffer <= firstStart) {
+        return this.minutesToTime(wakeMinutes);
+      }
+    }
+
+    // Check gaps between blocks
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const gapStart = this.timeToMinutes(sorted[i].endTime) + buffer;
+      const gapEnd = this.timeToMinutes(sorted[i + 1].startTime) - buffer;
+      if (gapEnd - gapStart >= duration) {
+        return this.minutesToTime(gapStart);
+      }
+    }
+
+    // Check gap after last block
+    if (sorted.length > 0) {
+      const lastEnd = this.timeToMinutes(sorted[sorted.length - 1].endTime) + buffer;
+      if (lastEnd + duration <= sleepMinutes) {
+        return this.minutesToTime(lastEnd);
+      }
+    }
+
+    // Truly no space - log warning and return preferred time
+    console.warn('[SchedulingEngine] No conflict-free slot found for', duration, 'min block. Day may be over-scheduled.');
     return preferredTime;
   }
 
