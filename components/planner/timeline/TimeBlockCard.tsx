@@ -63,9 +63,11 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
     };
   });
 
+  // Calendar events get stronger backgrounds for visual clarity
+  const isCalendarEvent = block.type === 'calendar_event';
   const cardBg = isDark
-    ? (block.color + '25')
-    : (block.color + '15');
+    ? (block.color + (isCalendarEvent ? '35' : '25'))
+    : (block.color + (isCalendarEvent ? '22' : '15'));
   const cardBorder = isDark
     ? 'rgba(255,255,255,0.08)'
     : 'rgba(0,0,0,0.06)';
@@ -90,6 +92,7 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
               {
                 backgroundColor: cardBg,
                 borderLeftColor: block.color,
+                borderLeftWidth: isCalendarEvent ? 4 : 3,
                 borderColor: cardBorder,
               },
             ]}

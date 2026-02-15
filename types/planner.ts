@@ -105,6 +105,8 @@ export interface DeviceCalendarEvent {
   startDate: Date;
   endDate: Date;
   isAllDay: boolean;
+  color?: string; // Source calendar color (Apple/Google/Teams)
+  calendarName?: string; // e.g. "Work", "Personal", "Teams"
 }
 
 export interface SchedulingRequest {

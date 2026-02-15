@@ -595,6 +595,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
             startDate: new Date(e.startDate),
             endDate: new Date(e.endDate),
             isAllDay: e.allDay,
+            color: (calendar as any).color || undefined,
+            calendarName: (calendar as any).title || undefined,
           }))
         );
       }
@@ -842,10 +844,26 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  // Distinct colors for calendar events that don't have a source color
+  const CALENDAR_PALETTE = [
+    '#457B9D', // steel blue
+    '#E76F51', // burnt sienna
+    '#2A9D8F', // teal
+    '#E9C46A', // saffron
+    '#264653', // dark teal
+    '#F4A261', // sandy orange
+    '#6A4C93', // purple
+    '#1982C4', // bright blue
+  ];
+  let calendarColorIndex = 0;
+
   const convertCalendarEventToBlock = (event: DeviceCalendarEvent): TimeBlock => {
     const duration = Math.round(
       (event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60)
     );
+
+    // Use source calendar color if available, otherwise rotate through palette
+    const eventColor = event.color || CALENDAR_PALETTE[calendarColorIndex++ % CALENDAR_PALETTE.length];
 
     return {
       id: `calendar_${event.id}`,
@@ -855,7 +873,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       endTime: formatTime(event.endDate),
       duration,
       status: 'scheduled',
-      color: PLANNER_CONSTANTS.BLOCK_COLORS.calendar_event,
+      color: eventColor,
       icon: PLANNER_CONSTANTS.BLOCK_ICONS.calendar_event,
       priority: 4,
       flexibility: 0,
