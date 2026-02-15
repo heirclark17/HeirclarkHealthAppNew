@@ -15,8 +15,18 @@ function getCalendar(): any {
   if (_calendarChecked) return _Calendar;
   _calendarChecked = true;
   try {
+    // Probe for native module without triggering Metro's global error handler.
+    // requireOptionalNativeModule returns null instead of throwing.
+    const core = require('expo-modules-core');
+    if (core.requireOptionalNativeModule) {
+      const nativeMod = core.requireOptionalNativeModule('ExpoCalendar');
+      if (!nativeMod) {
+        console.warn('[Planner] expo-calendar native module not available - calendar sync disabled');
+        _Calendar = null;
+        return null;
+      }
+    }
     // String concat hides from Metro static analysis so module isn't eagerly evaluated.
-    // After a native build includes ExpoCalendar, this will resolve at runtime.
     const mod = 'expo-' + 'calendar';
     _Calendar = require(mod);
   } catch (e) {

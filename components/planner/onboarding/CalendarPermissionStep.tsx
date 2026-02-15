@@ -6,14 +6,25 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 // Lazy load to avoid crash when native module isn't built yet
 let _Calendar: any = null;
+let _calendarChecked = false;
 function getCalendar(): any {
-  if (_Calendar !== null) return _Calendar;
+  if (_calendarChecked) return _Calendar;
+  _calendarChecked = true;
   try {
+    // Probe for native module without triggering Metro's global error handler
+    const core = require('expo-modules-core');
+    if (core.requireOptionalNativeModule) {
+      const nativeMod = core.requireOptionalNativeModule('ExpoCalendar');
+      if (!nativeMod) {
+        _Calendar = null;
+        return null;
+      }
+    }
     _Calendar = require('expo-' + 'calendar');
   } catch {
-    _Calendar = false;
+    _Calendar = null;
   }
-  return _Calendar || null;
+  return _Calendar;
 }
 import { CalendarCheck, Lock, Shield } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
