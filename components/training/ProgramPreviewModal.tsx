@@ -103,14 +103,13 @@ export function ProgramPreviewModal({
         <View style={styles.header}>
           <TouchableOpacity
             onPress={handleClose}
-            style={styles.closeButtonWrapper}
+            style={[styles.closeButton, { backgroundColor: colors.backgroundSecondary }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             accessibilityLabel="Close program preview"
             accessibilityRole="button"
             accessibilityHint="Closes the program preview modal and returns to the program list"
           >
-            <GlassCard style={styles.closeButton} interactive>
-              <Ionicons name="close-outline" size={24} color={colors.text} />
-            </GlassCard>
+            <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Program Details</Text>
           <View style={styles.headerSpacer} />
@@ -325,59 +324,34 @@ export function ProgramPreviewModal({
             </View>
           )}
 
-          {/* Button Row */}
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              onPress={handleClose}
-              activeOpacity={0.7}
-              style={{ flex: 1 }}
-              accessibilityLabel="Back"
-              accessibilityRole="button"
-              accessibilityHint="Closes the program preview and returns to program list"
-            >
-              <View style={[
-                styles.backButton,
-                {
-                  backgroundColor: cardBg,
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
-                }
-              ]}>
-                <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleConfirm}
-              disabled={isGenerating}
-              activeOpacity={0.7}
-              style={{ flex: 2 }}
-              accessibilityLabel={program ? `Select ${program.name} program` : 'Select this program'}
-              accessibilityRole="button"
-              accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-              accessibilityHint="Confirms your selection and generates a personalized training plan based on this program"
-            >
-              <View
-                style={[
-                  styles.continueButton,
-                  {
-                    backgroundColor: accentBg,
-                    borderColor: isDark ? 'rgba(52, 211, 153, 0.3)' : 'rgba(16, 185, 129, 0.25)',
-                  }
-                ]}
-              >
-                {isGenerating ? (
-                  <Text style={[styles.continueButtonText, { color: colors.primary }]}>
-                    GENERATING...
-                  </Text>
-                ) : (
-                  <Text style={[styles.continueButtonText, { color: colors.primary }]}>
-                    SELECT THIS PROGRAM
-                  </Text>
-                )}
-              </View>
-            </TouchableOpacity>
-          </View>
+          {/* Bottom Spacing - extra space to prevent blending with buttons */}
+          <View style={{ height: 180 }} />
         </ScrollView>
+
+        {/* Bottom Button */}
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity
+            onPress={handleConfirm}
+            disabled={isGenerating}
+            activeOpacity={0.7}
+            accessibilityLabel={program ? `Select ${program.name} program` : 'Select this program'}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+            accessibilityHint="Confirms your selection and generates a personalized training plan based on this program"
+          >
+            <GlassCard
+              style={[
+                styles.continueButton,
+                { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' },
+              ]}
+              interactive
+            >
+              <Text style={[styles.continueButtonText, { color: colors.primary }]}>
+                {isGenerating ? 'GENERATING...' : 'SELECT THIS PROGRAM'}
+              </Text>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
       </View>
     </Modal>
   );
@@ -394,10 +368,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 12,
-  },
-  closeButtonWrapper: {
-    width: 40,
-    height: 40,
   },
   closeButton: {
     width: 40,
@@ -594,26 +564,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     marginLeft: 26,
   },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 24,
-    marginBottom: Platform.OS === 'ios' ? 120 : 100,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  backButtonText: {
-    fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    letterSpacing: 1,
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 50 : 32,
   },
   continueButton: {
     flexDirection: 'row',
@@ -621,8 +578,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 16,
-    borderRadius: 16,
-    borderWidth: 1,
   },
   continueButtonText: {
     fontSize: 14,
