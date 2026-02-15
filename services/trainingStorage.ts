@@ -10,6 +10,8 @@ import {
   ProgramTemplate,
   UserTrainingProfile,
   TrainingStats,
+  CardioRecommendations,
+  NutritionGuidance,
 } from '../types/training';
 
 // Storage Keys
@@ -31,6 +33,8 @@ export interface TrainingPlanCache {
   lastGeneratedAt: string;
   preferences: TrainingPreferences | null;
   planSummary?: PlanSummary;
+  cardioRecommendations?: CardioRecommendations | null;
+  nutritionGuidance?: NutritionGuidance | null;
 }
 
 // Hash function to detect goal changes

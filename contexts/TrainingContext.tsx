@@ -225,7 +225,6 @@ interface TrainingContextType {
   state: TrainingState;
   generateWeeklyPlan: (programId?: string) => Promise<boolean>;
   generateAIWorkoutPlan: () => Promise<boolean>;
-  regeneratePlan: () => Promise<boolean>;
   selectProgram: (program: TrainingProgram | ProgramTemplate) => void;
   selectProgramAndGenerate: (program: TrainingProgram | ProgramTemplate) => Promise<boolean>;
   setSelectedDay: (index: number) => void;
@@ -243,7 +242,6 @@ interface TrainingContextType {
   hideExerciseAlternatives: () => void;
   hasPlan: () => boolean;
   getPlanSummary: () => PlanSummary | null;
-  switchToAIPlan: () => Promise<void>;
 }
 
 const initialState: TrainingState = {
@@ -887,11 +885,6 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     }
   }, [buildPreferencesFromGoals, state.currentWeek]);
 
-  // Regenerate plan with current settings
-  const regeneratePlan = useCallback(async (): Promise<boolean> => {
-    return generateWeeklyPlan();
-  }, [generateWeeklyPlan]);
-
   // Select a specific program (state only - doesn't regenerate)
   const selectProgram = useCallback((program: TrainingProgram | ProgramTemplate) => {
     setState(prev => ({ ...prev, selectedProgram: program }));
@@ -1366,8 +1359,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             lastGeneratedAt: cached.lastGeneratedAt,
             preferences: cached.preferences,
             planSummary: cached.planSummary || null,
-            cardioRecommendations: (cached as any).cardioRecommendations || null,
-            nutritionGuidance: (cached as any).nutritionGuidance || null,
+            cardioRecommendations: cached.cardioRecommendations || null,
+            nutritionGuidance: cached.nutritionGuidance || null,
           }));
           return;
         }
@@ -1425,23 +1418,6 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     return state.planSummary;
   }, [state.planSummary]);
 
-  // Switch back to AI-generated plan (deactivate custom workouts)
-  const switchToAIPlan = useCallback(async () => {
-    try {
-      console.log('[Training] Switching to AI-generated plan...');
-
-      // Deactivate all custom workouts
-      await api.deactivateAllCustomWorkout();
-
-      // Reload plan (will now load AI plan since no custom workout is active)
-      await loadCachedPlan();
-
-      console.log('[Training] ✅ Switched to AI-generated plan');
-    } catch (error) {
-      console.error('[Training] Error switching to AI plan:', error);
-    }
-  }, [loadCachedPlan]);
-
   // Load cached data on mount and sync PRs from backend
   useEffect(() => {
     loadCachedPlan();
@@ -1493,7 +1469,6 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<TrainingContextType>(() => ({
     state,
     generateWeeklyPlan,
-    regeneratePlan,
     selectProgram,
     selectProgramAndGenerate,
     setSelectedDay,
@@ -1512,12 +1487,10 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     hasPlan,
     getPlanSummary,
     generateAIWorkoutPlan,
-    switchToAIPlan,
   }), [
     state,
     generateWeeklyPlan,
     generateAIWorkoutPlan,
-    regeneratePlan,
     selectProgram,
     selectProgramAndGenerate,
     setSelectedDay,
@@ -1535,7 +1508,6 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     hideExerciseAlternatives,
     hasPlan,
     getPlanSummary,
-    switchToAIPlan,
   ]);
 
   return (
