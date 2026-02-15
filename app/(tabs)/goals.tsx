@@ -164,12 +164,22 @@ function GoalWizardContent() {
     try {
       const success = await generateAIMealPlan();
       if (success) {
-        router.push('/meals');
+        // Delay navigation to ensure router is ready
+        setTimeout(() => {
+          router.push('/meals');
+        }, 100);
       } else {
         Alert.alert(
           'Generation Started',
           'Your AI meal plan is being created. Head to the Meals tab to see it!',
-          [{ text: 'Go to Meals', onPress: () => router.push('/meals') }]
+          [{
+            text: 'Go to Meals',
+            onPress: () => {
+              setTimeout(() => {
+                router.push('/meals');
+              }, 100);
+            }
+          }]
         );
       }
     } catch (error) {
@@ -179,7 +189,14 @@ function GoalWizardContent() {
         'Would you like to try again or go to Meals to generate manually?',
         [
           { text: 'Try Again', onPress: handleStartMealPlan },
-          { text: 'Go to Meals', onPress: () => router.push('/meals') },
+          {
+            text: 'Go to Meals',
+            onPress: () => {
+              setTimeout(() => {
+                router.push('/meals');
+              }, 100);
+            }
+          },
         ]
       );
     } finally {
@@ -204,12 +221,22 @@ function GoalWizardContent() {
       // Now generate the AI workout plan
       const success = await generateAIWorkoutPlan();
       if (success) {
-        router.push('/programs');
+        // Delay navigation to ensure router is ready
+        setTimeout(() => {
+          router.push('/programs');
+        }, 100);
       } else {
         Alert.alert(
           'Generation Started',
           'Your AI training plan is being created. Head to the Programs tab to see it!',
-          [{ text: 'Go to Programs', onPress: () => router.push('/programs') }]
+          [{
+            text: 'Go to Programs',
+            onPress: () => {
+              setTimeout(() => {
+                router.push('/programs');
+              }, 100);
+            }
+          }]
         );
       }
     } catch (error) {
@@ -219,7 +246,14 @@ function GoalWizardContent() {
         'Would you like to try again or go to Programs to generate manually?',
         [
           { text: 'Try Again', onPress: handleStartTrainingPlan },
-          { text: 'Go to Programs', onPress: () => router.push('/programs') },
+          {
+            text: 'Go to Programs',
+            onPress: () => {
+              setTimeout(() => {
+                router.push('/programs');
+              }, 100);
+            }
+          },
         ]
       );
     } finally {
