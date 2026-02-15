@@ -782,6 +782,7 @@ class AIService {
         headers: await this.getHeaders(),
         body: JSON.stringify({
           message,
+          conversationType: context.mode || 'general',
           context,
           shopifyCustomerId: 'guest_ios_app',
         }),
@@ -795,10 +796,17 @@ class AIService {
 
       const data = await response.json();
 
+      // Backend returns { success: true, message: "..." }
+      if (data.success && data.message) {
+        return { message: data.message };
+      }
+
+      // Legacy format: { ok: true, response: {...} }
       if (data.ok && data.response) {
         return data.response;
       }
 
+      console.warn('[AIService] Unexpected coach response format:', Object.keys(data));
       return null;
     } catch (error) {
       console.error('[AIService] sendCoachMessage error:', error);
