@@ -113,8 +113,8 @@ export function DailyTimelineView() {
         </View>
       </ScrollView>
 
-      {/* Stats Footer */}
-      <View style={[styles.footerRow, { marginBottom: bottomPadding }]}>
+      {/* Floating Stats */}
+      <View style={[styles.floatingFooter, { bottom: bottomPadding }]}>
         <GlassCard style={styles.statCard}>
           <Text style={[styles.statValue, { color: themeColors.primary }]}>{timeline.completionRate}%</Text>
           <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Completed</Text>
@@ -197,10 +197,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
   },
-  footerRow: {
+  floatingFooter: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
     flexDirection: 'row',
     gap: 8,
-    paddingHorizontal: 16,
   },
   statCard: {
     flex: 1,
