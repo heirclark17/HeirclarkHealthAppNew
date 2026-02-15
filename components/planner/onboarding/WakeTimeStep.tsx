@@ -8,7 +8,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Sun } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { Button } from '../../Button';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   value?: string;
@@ -27,6 +28,10 @@ export function WakeTimeStep({
   currentStep,
   totalSteps,
 }: Props) {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+
   // Initialize with 6:00 AM or existing value
   const [time, setTime] = useState(() => {
     if (value) {
@@ -65,8 +70,8 @@ export function WakeTimeStep({
         {/* Header */}
         <View style={styles.header}>
           <Sun size={48} color={Colors.protein} />
-          <Text style={styles.title}>What time do you wake up?</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: themeColors.text }]}>What time do you wake up?</Text>
+          <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             Choose your typical wake time on weekdays
           </Text>
         </View>
@@ -78,13 +83,13 @@ export function WakeTimeStep({
             mode="time"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={handleTimeChange}
-            textColor={Colors.text}
+            textColor={themeColors.text}
             style={styles.picker}
           />
         </View>
 
         {/* Current Selection */}
-        <Text style={styles.selectedTime}>
+        <Text style={[styles.selectedTime, { color: themeColors.primary }]}>
           {time.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
@@ -93,7 +98,7 @@ export function WakeTimeStep({
         </Text>
 
         {/* Progress */}
-        <Text style={styles.progress}>
+        <Text style={[styles.progress, { color: themeColors.textSecondary }]}>
           Step {currentStep} of {totalSteps}
         </Text>
 
@@ -132,14 +137,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: 'Urbanist_700Bold',
-    color: Colors.text,
+    fontFamily: Fonts.bold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'Urbanist_400Regular',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -153,14 +156,12 @@ const styles = StyleSheet.create({
   },
   selectedTime: {
     fontSize: 32,
-    fontFamily: 'SFProRounded-Bold',
-    color: Colors.primary,
+    fontFamily: Fonts.numericBold,
     textAlign: 'center',
   },
   progress: {
     fontSize: 14,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
     textAlign: 'center',
   },
   actions: {

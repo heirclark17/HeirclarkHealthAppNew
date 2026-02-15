@@ -7,7 +7,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { CheckCircle, Edit2 } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { Button } from '../../Button';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 import { PlannerPreferences } from '../../../types/planner';
 
 interface Props {
@@ -27,6 +28,11 @@ export function ReviewStep({
   currentStep,
   totalSteps,
 }: Props) {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
     const period = hours >= 12 ? 'PM' : 'AM';
@@ -70,8 +76,8 @@ export function ReviewStep({
         {/* Header */}
         <View style={styles.header}>
           <CheckCircle size={48} color={Colors.protein} />
-          <Text style={styles.title}>Review Your Preferences</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: themeColors.text }]}>Review Your Preferences</Text>
+          <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             Make sure everything looks good before we create your schedule
           </Text>
         </View>
@@ -83,37 +89,49 @@ export function ReviewStep({
               label="Wake Time"
               value={formatTime(preferences.wakeTime)}
               onEdit={() => onEdit(2)}
+              themeColors={themeColors}
+              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Sleep Time"
               value={formatTime(preferences.sleepTime)}
               onEdit={() => onEdit(3)}
+              themeColors={themeColors}
+              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Priorities"
               value={formatPriorities(preferences.priorities)}
               onEdit={() => onEdit(4)}
+              themeColors={themeColors}
+              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Energy Peak"
               value={formatEnergyPeak(preferences.energyPeak)}
               onEdit={() => onEdit(5)}
+              themeColors={themeColors}
+              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Flexibility"
               value={formatFlexibility(preferences.flexibility)}
               onEdit={() => onEdit(6)}
+              themeColors={themeColors}
+              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Calendar Sync"
               value={preferences.calendarSyncEnabled ? 'Enabled' : 'Disabled'}
               onEdit={() => onEdit(7)}
+              themeColors={themeColors}
+              surfaceColor={surfaceColor}
             />
           </View>
         </ScrollView>
 
         {/* Progress */}
-        <Text style={styles.progress}>
+        <Text style={[styles.progress, { color: themeColors.textSecondary }]}>
           Step {currentStep} of {totalSteps}
         </Text>
 
@@ -141,19 +159,26 @@ function ReviewItem({
   label,
   value,
   onEdit,
+  themeColors,
+  surfaceColor,
 }: {
   label: string;
   value: string;
   onEdit: () => void;
+  themeColors: typeof DarkColors;
+  surfaceColor: string;
 }) {
   return (
-    <View style={styles.reviewItem}>
+    <View style={[styles.reviewItem, { backgroundColor: surfaceColor }]}>
       <View style={styles.reviewContent}>
-        <Text style={styles.reviewLabel}>{label}</Text>
-        <Text style={styles.reviewValue}>{value}</Text>
+        <Text style={[styles.reviewLabel, { color: themeColors.textSecondary }]}>{label}</Text>
+        <Text style={[styles.reviewValue, { color: themeColors.text }]}>{value}</Text>
       </View>
-      <TouchableOpacity onPress={onEdit} style={styles.editButton}>
-        <Edit2 size={16} color={Colors.primary} />
+      <TouchableOpacity
+        onPress={onEdit}
+        style={[styles.editButton, { backgroundColor: themeColors.primary + '20' }]}
+      >
+        <Edit2 size={16} color={themeColors.primary} />
       </TouchableOpacity>
     </View>
   );
@@ -175,14 +200,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: 'Urbanist_700Bold',
-    color: Colors.text,
+    fontFamily: Fonts.bold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'Urbanist_400Regular',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -196,7 +219,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.surface + '40',
     borderRadius: 12,
     padding: 16,
   },
@@ -206,28 +228,24 @@ const styles = StyleSheet.create({
   },
   reviewLabel: {
     fontSize: 12,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   reviewValue: {
     fontSize: 16,
-    fontFamily: 'Urbanist_600SemiBold',
-    color: Colors.text,
+    fontFamily: Fonts.semiBold,
   },
   editButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: Colors.primary + '20',
     alignItems: 'center',
     justifyContent: 'center',
   },
   progress: {
     fontSize: 14,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
     textAlign: 'center',
   },
   actions: {

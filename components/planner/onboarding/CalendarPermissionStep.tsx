@@ -18,7 +18,8 @@ function getCalendar(): any {
 import { CalendarCheck, Lock, Shield } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { Button } from '../../Button';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   onGranted: () => void;
@@ -39,6 +40,10 @@ export function CalendarPermissionStep({
 }: Props) {
   const [isRequesting, setIsRequesting] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
+
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
 
   const handleRequestPermission = async () => {
     setIsRequesting(true);
@@ -78,9 +83,9 @@ export function CalendarPermissionStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <CalendarCheck size={48} color={Colors.primary} />
-          <Text style={styles.title}>Sync with your calendar?</Text>
-          <Text style={styles.subtitle}>
+          <CalendarCheck size={48} color={themeColors.primary} />
+          <Text style={[styles.title, { color: themeColors.text }]}>Sync with your calendar?</Text>
+          <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             Import your calendar events to avoid scheduling conflicts
           </Text>
         </View>
@@ -89,13 +94,13 @@ export function CalendarPermissionStep({
         <View style={styles.privacy}>
           <View style={styles.privacyItem}>
             <Lock size={20} color={Colors.protein} />
-            <Text style={styles.privacyText}>
+            <Text style={[styles.privacyText, { color: themeColors.text }]}>
               Calendar data stays on your device
             </Text>
           </View>
           <View style={styles.privacyItem}>
             <Shield size={20} color={Colors.carbs} />
-            <Text style={styles.privacyText}>
+            <Text style={[styles.privacyText, { color: themeColors.text }]}>
               Never shared with our servers
             </Text>
           </View>
@@ -103,15 +108,15 @@ export function CalendarPermissionStep({
 
         {/* Permission Status */}
         {permissionGranted && (
-          <View style={styles.successBanner}>
-            <Text style={styles.successText}>
-              ✓ Calendar access granted
+          <View style={[styles.successBanner, { backgroundColor: Colors.protein + '20' }]}>
+            <Text style={[styles.successText, { color: Colors.protein }]}>
+              Calendar access granted
             </Text>
           </View>
         )}
 
         {/* Progress */}
-        <Text style={styles.progress}>
+        <Text style={[styles.progress, { color: themeColors.textSecondary }]}>
           Step {currentStep} of {totalSteps}
         </Text>
 
@@ -147,7 +152,7 @@ export function CalendarPermissionStep({
                 disabled={isRequesting}
               >
                 {isRequesting && (
-                  <ActivityIndicator size="small" color={Colors.background} />
+                  <ActivityIndicator size="small" color={themeColors.primaryText} />
                 )}
               </Button>
             </>
@@ -173,14 +178,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: 'Urbanist_700Bold',
-    color: Colors.text,
+    fontFamily: Fonts.bold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'Urbanist_400Regular',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -195,24 +198,20 @@ const styles = StyleSheet.create({
   },
   privacyText: {
     fontSize: 14,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.text,
+    fontFamily: Fonts.medium,
   },
   successBanner: {
-    backgroundColor: Colors.protein + '20',
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
   },
   successText: {
     fontSize: 16,
-    fontFamily: 'Urbanist_600SemiBold',
-    color: Colors.protein,
+    fontFamily: Fonts.semiBold,
   },
   progress: {
     fontSize: 14,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
     textAlign: 'center',
   },
   actions: {

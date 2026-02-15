@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Modal, View, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSettings } from '../../../contexts/SettingsContext';
 import { PlannerPreferences, Priority, EnergyPeak, Flexibility } from '../../../types/planner';
 import { WelcomeStep } from './WelcomeStep';
 import { WakeTimeStep } from './WakeTimeStep';
@@ -28,6 +29,9 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
   const [preferences, setPreferences] = useState<Partial<PlannerPreferences>>({
     calendarSyncEnabled: false,
   });
+
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
 
   const totalSteps = 8;
 
@@ -169,7 +173,7 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
       animationType="slide"
       onRequestClose={onClose}
     >
-      <BlurView intensity={80} style={styles.blurContainer}>
+      <BlurView intensity={isDark ? 60 : 80} tint={isDark ? 'dark' : 'light'} style={styles.blurContainer}>
         <SafeAreaView style={styles.safeArea}>
           {renderStep()}
         </SafeAreaView>

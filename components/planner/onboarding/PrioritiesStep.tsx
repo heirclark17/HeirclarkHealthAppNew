@@ -7,7 +7,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Target, Briefcase, Heart, BookOpen, Gamepad, Coffee } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { Button } from '../../Button';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 import { Priority } from '../../../types/planner';
 
 interface Props {
@@ -30,7 +31,7 @@ const PRIORITY_OPTIONS: {
   { id: 'family', label: 'Family & Friends', icon: Heart, color: Colors.protein },
   { id: 'learning', label: 'Learning', icon: BookOpen, color: Colors.carbs },
   { id: 'hobbies', label: 'Hobbies', icon: Gamepad, color: Colors.fat },
-  { id: 'relaxation', label: 'Relaxation', icon: Coffee, color: Colors.sleep },
+  { id: 'relaxation', label: 'Relaxation', icon: Coffee, color: Colors.accentPurple },
 ];
 
 export function PrioritiesStep({
@@ -41,6 +42,12 @@ export function PrioritiesStep({
   currentStep,
   totalSteps,
 }: Props) {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+
   const togglePriority = (priority: Priority) => {
     if (value.includes(priority)) {
       onChange(value.filter((p) => p !== priority));
@@ -56,11 +63,11 @@ export function PrioritiesStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>What are your top priorities?</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: themeColors.text }]}>What are your top priorities?</Text>
+          <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             Select up to 3 areas that matter most to you
           </Text>
-          <Text style={styles.counter}>
+          <Text style={[styles.counter, { color: themeColors.primary }]}>
             {value.length} / 3 selected
           </Text>
         </View>
@@ -76,6 +83,10 @@ export function PrioritiesStep({
                 key={option.id}
                 style={[
                   styles.priorityCard,
+                  {
+                    backgroundColor: surfaceColor,
+                    borderColor: surfaceBorder,
+                  },
                   isSelected && {
                     borderColor: option.color,
                     borderWidth: 2,
@@ -87,11 +98,12 @@ export function PrioritiesStep({
               >
                 <Icon
                   size={32}
-                  color={isSelected ? option.color : Colors.textSecondary}
+                  color={isSelected ? option.color : themeColors.textSecondary}
                 />
                 <Text
                   style={[
                     styles.priorityLabel,
+                    { color: themeColors.text },
                     isSelected && { color: option.color },
                   ]}
                 >
@@ -103,7 +115,7 @@ export function PrioritiesStep({
         </View>
 
         {/* Progress */}
-        <Text style={styles.progress}>
+        <Text style={[styles.progress, { color: themeColors.textSecondary }]}>
           Step {currentStep} of {totalSteps}
         </Text>
 
@@ -143,21 +155,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: 'Urbanist_700Bold',
-    color: Colors.text,
+    fontFamily: Fonts.bold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'Urbanist_400Regular',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
   counter: {
     fontSize: 14,
-    fontFamily: 'SFProRounded-Medium',
-    color: Colors.primary,
+    fontFamily: Fonts.numericMedium,
     marginTop: 4,
   },
   grid: {
@@ -170,9 +179,7 @@ const styles = StyleSheet.create({
     width: '45%',
     aspectRatio: 1.2,
     borderRadius: 16,
-    backgroundColor: Colors.surface + '40',
     borderWidth: 1,
-    borderColor: Colors.surface,
     padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -180,14 +187,12 @@ const styles = StyleSheet.create({
   },
   priorityLabel: {
     fontSize: 14,
-    fontFamily: 'Urbanist_600SemiBold',
-    color: Colors.text,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   progress: {
     fontSize: 14,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
     textAlign: 'center',
   },
   actions: {

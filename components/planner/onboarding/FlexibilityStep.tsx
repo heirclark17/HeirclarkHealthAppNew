@@ -7,7 +7,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Zap, TrendingUp, Lock } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { Button } from '../../Button';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 import { Flexibility } from '../../../types/planner';
 
 interface Props {
@@ -57,13 +58,19 @@ export function FlexibilityStep({
   currentStep,
   totalSteps,
 }: Props) {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+
   return (
     <View style={styles.container}>
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>How flexible is your schedule?</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: themeColors.text }]}>How flexible is your schedule?</Text>
+          <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             This helps us optimize your daily timeline
           </Text>
         </View>
@@ -79,6 +86,10 @@ export function FlexibilityStep({
                 key={option.id}
                 style={[
                   styles.optionCard,
+                  {
+                    backgroundColor: surfaceColor,
+                    borderColor: surfaceBorder,
+                  },
                   isSelected && {
                     borderColor: option.color,
                     borderWidth: 2,
@@ -91,18 +102,19 @@ export function FlexibilityStep({
                 <View style={styles.optionContent}>
                   <Icon
                     size={32}
-                    color={isSelected ? option.color : Colors.textSecondary}
+                    color={isSelected ? option.color : themeColors.textSecondary}
                   />
                   <View style={styles.optionText}>
                     <Text
                       style={[
                         styles.optionLabel,
+                        { color: themeColors.text },
                         isSelected && { color: option.color },
                       ]}
                     >
                       {option.label}
                     </Text>
-                    <Text style={styles.optionDescription}>
+                    <Text style={[styles.optionDescription, { color: themeColors.textSecondary }]}>
                       {option.description}
                     </Text>
                   </View>
@@ -113,7 +125,7 @@ export function FlexibilityStep({
         </View>
 
         {/* Progress */}
-        <Text style={styles.progress}>
+        <Text style={[styles.progress, { color: themeColors.textSecondary }]}>
           Step {currentStep} of {totalSteps}
         </Text>
 
@@ -153,14 +165,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: 'Urbanist_700Bold',
-    color: Colors.text,
+    fontFamily: Fonts.bold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: 'Urbanist_400Regular',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -169,9 +179,7 @@ const styles = StyleSheet.create({
   },
   optionCard: {
     borderRadius: 16,
-    backgroundColor: Colors.surface + '40',
     borderWidth: 1,
-    borderColor: Colors.surface,
     padding: 16,
   },
   optionContent: {
@@ -185,19 +193,16 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontSize: 16,
-    fontFamily: 'Urbanist_600SemiBold',
-    color: Colors.text,
+    fontFamily: Fonts.semiBold,
   },
   optionDescription: {
     fontSize: 14,
-    fontFamily: 'Urbanist_400Regular',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.regular,
     lineHeight: 20,
   },
   progress: {
     fontSize: 14,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
     textAlign: 'center',
   },
   actions: {
