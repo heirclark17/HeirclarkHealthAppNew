@@ -1067,10 +1067,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 13,
+    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 19,
     paddingHorizontal: 16,
   },
   targetsSection: {

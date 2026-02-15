@@ -271,7 +271,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Spacer for sticky header */}
-        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+        <View style={{ height: Platform.OS === 'ios' ? 220 : 170 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
@@ -981,7 +981,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             >
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
-            <NumberText weight="bold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+            <NumberText weight="light" style={[styles.dailyGoalValue, { color: colors.primary }]}>
               {(state.stepGoal / 1000).toFixed(0)}k
             </NumberText>
             <TouchableOpacity
@@ -1050,10 +1050,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   subtitleText: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
-    lineHeight: 22,
+    lineHeight: 19,
     textAlign: 'center',
   },
   glassSection: {
@@ -1421,6 +1421,7 @@ const styles = StyleSheet.create({
   },
   dailyGoalValue: {
     fontSize: 18,
+    fontFamily: Fonts.light,
     fontWeight: '100',
     minWidth: 60,
     textAlign: 'center',
