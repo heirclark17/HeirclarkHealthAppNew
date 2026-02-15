@@ -4396,6 +4396,217 @@ app.post('/api/instacart/products-link', async (req, res) => {
 });
 
 // ============================================
+// DAY PLANNER API ENDPOINTS
+// ============================================
+
+// POST /api/v1/planner/onboarding - Save planner preferences
+app.post('/api/v1/planner/onboarding', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { preferences } = req.body;
+
+  try {
+    if (!preferences) {
+      return res.status(400).json({ error: 'Missing preferences' });
+    }
+
+    const query = `
+      INSERT INTO planner_onboarding (user_id, preferences, updated_at)
+      VALUES ($1, $2, NOW())
+      ON CONFLICT (user_id) DO UPDATE SET preferences = $2, updated_at = NOW()
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, [userId, JSON.stringify(preferences)]);
+    console.log(`[Planner] Onboarding saved for user ${userId}`);
+
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('[Planner] Onboarding save error:', error);
+    res.status(500).json({ error: 'Failed to save planner preferences', message: error.message });
+  }
+});
+
+// GET /api/v1/planner/onboarding - Get planner preferences
+app.get('/api/v1/planner/onboarding', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const query = 'SELECT * FROM planner_onboarding WHERE user_id = $1';
+    const result = await pool.query(query, [userId]);
+
+    if (result.rows.length === 0) {
+      return res.json({ success: true, data: null });
+    }
+
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('[Planner] Onboarding fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch planner preferences', message: error.message });
+  }
+});
+
+// POST /api/v1/planner/weekly-plan - Save weekly plan (excludes calendar events)
+app.post('/api/v1/planner/weekly-plan', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { weeklyPlan } = req.body;
+
+  try {
+    if (!weeklyPlan || !weeklyPlan.weekStartDate) {
+      return res.status(400).json({ error: 'Missing weekly plan data' });
+    }
+
+    // IMPORTANT: Remove any calendar events before saving (privacy)
+    const sanitizedPlan = {
+      ...weeklyPlan,
+      days: weeklyPlan.days.map(day => ({
+        ...day,
+        blocks: day.blocks.filter(block => block.type !== 'calendar_event')
+      }))
+    };
+
+    const query = `
+      INSERT INTO planner_weekly_plans (user_id, week_start_date, plan_data, updated_at)
+      VALUES ($1, $2, $3, NOW())
+      ON CONFLICT (user_id, week_start_date) DO UPDATE SET plan_data = $3, updated_at = NOW()
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, [
+      userId,
+      weeklyPlan.weekStartDate,
+      JSON.stringify(sanitizedPlan)
+    ]);
+
+    console.log(`[Planner] Weekly plan saved for user ${userId}, week ${weeklyPlan.weekStartDate}`);
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('[Planner] Weekly plan save error:', error);
+    res.status(500).json({ error: 'Failed to save weekly plan', message: error.message });
+  }
+});
+
+// GET /api/v1/planner/weekly-plan - Get weekly plan
+app.get('/api/v1/planner/weekly-plan', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { weekStartDate } = req.query;
+
+  try {
+    if (!weekStartDate) {
+      return res.status(400).json({ error: 'Missing weekStartDate parameter' });
+    }
+
+    const query = 'SELECT * FROM planner_weekly_plans WHERE user_id = $1 AND week_start_date = $2';
+    const result = await pool.query(query, [userId, weekStartDate]);
+
+    if (result.rows.length === 0) {
+      return res.json({ success: true, data: null });
+    }
+
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('[Planner] Weekly plan fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch weekly plan', message: error.message });
+  }
+});
+
+// POST /api/v1/planner/update-block-status - Update time block status
+app.post('/api/v1/planner/update-block-status', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { blockId, status } = req.body;
+
+  try {
+    if (!blockId || !status) {
+      return res.status(400).json({ error: 'Missing blockId or status' });
+    }
+
+    console.log(`[Planner] Block ${blockId} status updated to ${status} for user ${userId}`);
+
+    // Status updates are handled client-side and synced via weekly plan
+    // This endpoint is for logging/analytics purposes
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Planner] Block status update error:', error);
+    res.status(500).json({ error: 'Failed to update block status', message: error.message });
+  }
+});
+
+// POST /api/v1/planner/update-block-time - Update time block start time
+app.post('/api/v1/planner/update-block-time', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { blockId, startTime } = req.body;
+
+  try {
+    if (!blockId || !startTime) {
+      return res.status(400).json({ error: 'Missing blockId or startTime' });
+    }
+
+    console.log(`[Planner] Block ${blockId} rescheduled to ${startTime} for user ${userId}`);
+
+    // Time updates are handled client-side and synced via weekly plan
+    // This endpoint is for logging/analytics purposes
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Planner] Block time update error:', error);
+    res.status(500).json({ error: 'Failed to update block time', message: error.message });
+  }
+});
+
+// POST /api/v1/planner/optimize - AI weekly optimization (GPT-4.1-mini)
+app.post('/api/v1/planner/optimize', authenticateToken, async (req, res) => {
+  const { currentWeekPlan, completionHistory } = req.body;
+
+  try {
+    if (!currentWeekPlan || !completionHistory) {
+      return res.status(400).json({ error: 'Missing currentWeekPlan or completionHistory' });
+    }
+
+    const systemPrompt = `You are a time management and productivity coach specializing in health-focused daily scheduling.
+Analyze the user's weekly plan and provide actionable optimization suggestions.
+Focus on: completion rate improvement, energy alignment, buffer time recommendations, stress reduction.
+Be specific and actionable.`;
+
+    const userPrompt = `Analyze this weekly schedule:
+
+Weekly Stats:
+${JSON.stringify(currentWeekPlan.weeklyStats, null, 2)}
+
+Recent Completion History:
+${completionHistory.map(h => `${h.date}: ${h.completionRate}% completion, ${h.skippedBlocks.length} skipped`).join('\n')}
+
+Provide:
+1. Weekly insights summary (2-3 paragraphs analyzing patterns)
+2. Top 3-5 optimization suggestions (specific blocks to reschedule, buffers to add, etc.)
+3. Predicted impact on completion rate and stress
+
+Format as JSON: {
+  "weeklyInsights": "...",
+  "suggestions": [{"type": "reschedule", "recommendation": "...", "reason": "...", "priority": "high"}],
+  "predictedImprovements": {"completionRateIncrease": 15, "stressReduction": "moderate"}
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 800,
+      response_format: { type: 'json_object' }
+    });
+
+    const optimization = JSON.parse(completion.choices[0].message.content);
+    optimization.generatedAt = new Date().toISOString();
+
+    console.log('[Planner] AI optimization generated');
+    res.json({ success: true, optimization });
+  } catch (error) {
+    console.error('[Planner] Optimization error:', error);
+    res.status(500).json({ error: 'Failed to generate optimization', message: error.message });
+  }
+});
+
+// ============================================
 // ERROR HANDLING
 // ============================================
 
@@ -4442,6 +4653,47 @@ async function runMigrations() {
       CREATE INDEX IF NOT EXISTS idx_custom_workouts_active
       ON custom_workouts(user_id, is_active)
       WHERE is_active = true
+    `);
+
+    // Create planner_onboarding table if missing
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS planner_onboarding (
+        id SERIAL PRIMARY KEY,
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        preferences JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id)
+      )
+    `);
+
+    // Create planner_weekly_plans table if missing
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS planner_weekly_plans (
+        id SERIAL PRIMARY KEY,
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        week_start_date DATE NOT NULL,
+        plan_data JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id, week_start_date)
+      )
+    `);
+
+    // Create indexes for planner tables
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_planner_onboarding_user
+      ON planner_onboarding(user_id)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_planner_weekly_plans_user
+      ON planner_weekly_plans(user_id)
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_planner_weekly_plans_week
+      ON planner_weekly_plans(week_start_date)
     `);
 
     console.log('[Migrations] ✅ Completed successfully');
