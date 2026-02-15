@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Colors } from '../../../constants/Theme';
+import { Colors, DarkColors, LightColors } from '../../../constants/Theme';
 import {
   StyleSheet,
   Text,
@@ -45,30 +45,30 @@ const GLASS_SPRING = {
   mass: 0.8,
 };
 
-// iOS 26 Liquid Glass colors
+// iOS 26 Liquid Glass colors - use LightColors/DarkColors directly to avoid hardcoded dark values
 const GLASS_COLORS = {
   light: {
-    background: Colors.backgroundSecondary,
-    headerBg: 'rgba(255, 255, 255, 0.85)',
-    inputBg: 'rgba(255, 255, 255, 0.85)',
+    background: LightColors.background,
+    headerBg: 'rgba(255, 255, 255, 0.92)',
+    inputBg: 'rgba(255, 255, 255, 0.92)',
     userBubble: 'rgba(0, 122, 255, 0.9)',
-    assistantBubble: 'rgba(255, 255, 255, 0.75)',
-    text: Colors.text,
-    textSecondary: 'rgba(60, 60, 67, 0.6)',
+    assistantBubble: 'rgba(0, 0, 0, 0.05)',
+    text: LightColors.text,
+    textSecondary: LightColors.textSecondary,
     border: 'rgba(0, 0, 0, 0.08)',
     inputBorder: 'rgba(0, 0, 0, 0.12)',
     accent: 'rgba(78, 205, 196, 0.9)',
     card: 'rgba(255, 255, 255, 0.75)',
-    cardBorder: 'rgba(255, 255, 255, 0.5)',
+    cardBorder: 'rgba(0, 0, 0, 0.08)',
   },
   dark: {
-    background: Colors.background,
+    background: DarkColors.background,
     headerBg: 'rgba(44, 44, 46, 0.85)',
     inputBg: 'rgba(44, 44, 46, 0.85)',
     userBubble: 'rgba(10, 132, 255, 0.9)',
     assistantBubble: 'rgba(255, 255, 255, 0.08)',
-    text: Colors.text,
-    textSecondary: 'rgba(235, 235, 245, 0.6)',
+    text: DarkColors.text,
+    textSecondary: DarkColors.textSecondary,
     border: 'rgba(255, 255, 255, 0.1)',
     inputBorder: 'rgba(255, 255, 255, 0.12)',
     accent: 'rgba(78, 205, 196, 0.9)',
@@ -618,7 +618,7 @@ export function CoachChatModal({
         ]}>
           <Text style={[
             styles.messageText,
-            { color: isUser ? Colors.text : glassColors.text }
+            { color: isUser ? '#ffffff' : glassColors.text }
           ]}>
             {item.content}
           </Text>
@@ -863,7 +863,7 @@ export function CoachChatModal({
                   <Ionicons
                     name="arrow-up"
                     size={20}
-                    color={inputText.trim() ? Colors.text : glassColors.textSecondary}
+                    color={inputText.trim() ? '#ffffff' : glassColors.textSecondary}
                   />
                 </TouchableOpacity>
               </Animated.View>
