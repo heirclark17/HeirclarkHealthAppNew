@@ -26,6 +26,11 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  FadeIn,
+  FadeInDown,
+  FadeInLeft,
+  FadeInRight,
+  Layout,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
@@ -43,6 +48,21 @@ const GLASS_SPRING = {
   damping: 15,
   stiffness: 300,
   mass: 0.8,
+};
+
+// Apple iMessage-style animation configs
+// Sent messages: quick, crisp, nearly no bounce
+const SENT_SPRING = {
+  mass: 1,
+  stiffness: 300,
+  damping: 24,
+};
+
+// Received messages: slight spring bounce
+const RECEIVED_SPRING = {
+  mass: 1,
+  stiffness: 200,
+  damping: 18,
 };
 
 // iOS 26 Liquid Glass colors - use LightColors/DarkColors directly to avoid hardcoded dark values
@@ -629,11 +649,26 @@ export function CoachChatModal({
     onClose();
   };
 
-  const renderMessage = ({ item }: { item: CoachMessage }) => {
+  const renderMessage = ({ item, index }: { item: CoachMessage; index: number }) => {
     const isUser = item.role === 'user';
 
+    // Apple iMessage-style entering animations
+    const enteringAnimation = isUser
+      ? FadeInRight.springify()
+          .mass(SENT_SPRING.mass)
+          .stiffness(SENT_SPRING.stiffness)
+          .damping(SENT_SPRING.damping)
+      : FadeInLeft.springify()
+          .mass(RECEIVED_SPRING.mass)
+          .stiffness(RECEIVED_SPRING.stiffness)
+          .damping(RECEIVED_SPRING.damping);
+
     return (
-      <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}>
+      <Animated.View
+        entering={enteringAnimation}
+        layout={Layout.springify().damping(20).stiffness(200)}
+        style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}
+      >
         {!isUser && (
           <View style={[styles.avatarBadge, { backgroundColor: `${config.accentColor}20` }]}>
             <Ionicons name={config.icon as any} size={14} color={config.accentColor} />
@@ -655,7 +690,7 @@ export function CoachChatModal({
             ]}
           />
         </View>
-      </View>
+      </Animated.View>
     );
   };
 
@@ -834,7 +869,13 @@ export function CoachChatModal({
 
           {/* Typing indicator */}
           {isLoading && (
-            <View style={styles.typingIndicator}>
+            <Animated.View
+              entering={FadeInLeft.springify()
+                .mass(RECEIVED_SPRING.mass)
+                .stiffness(RECEIVED_SPRING.stiffness)
+                .damping(RECEIVED_SPRING.damping)}
+              style={styles.typingIndicator}
+            >
               <View style={[styles.avatarBadge, { backgroundColor: `${config.accentColor}20` }]}>
                 <Ionicons name={config.icon as any} size={14} color={config.accentColor} />
               </View>
@@ -842,7 +883,7 @@ export function CoachChatModal({
                 <ActivityIndicator size="small" color={config.accentColor} />
                 <Text style={[styles.typingText, { color: glassColors.textSecondary }]}>Thinking...</Text>
               </View>
-            </View>
+            </Animated.View>
           )}
 
           {/* Input Area with Liquid Glass */}
