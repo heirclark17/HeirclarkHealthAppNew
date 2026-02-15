@@ -271,7 +271,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Spacer for sticky header */}
-        <View style={{ height: Platform.OS === 'ios' ? 220 : 170 }} />
+        <View style={{ height: Platform.OS === 'ios' ? 260 : 210 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
@@ -1050,10 +1050,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   subtitleText: {
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
-    lineHeight: 19,
+    lineHeight: 16,
     textAlign: 'center',
   },
   glassSection: {
