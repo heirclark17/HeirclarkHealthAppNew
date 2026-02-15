@@ -753,7 +753,7 @@ export function CoachChatModal({
         {/* Avatar Video Section */}
         {showAvatar && (
           <View style={styles.avatarSection}>
-            <View style={[styles.webViewContainer, { borderColor: glassColors.cardBorder }]}>
+            <View style={styles.webViewContainer}>
               <WebView
                 ref={webViewRef}
                 source={{ html: getLiveAvatarHTML(avatarSession!, avatarToken) }}
@@ -918,7 +918,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#1a1a2e',
-    borderWidth: 1,
   },
   webView: {
     flex: 1,
