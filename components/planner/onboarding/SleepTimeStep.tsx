@@ -6,9 +6,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Moon } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
-import { Button } from '@/components/Button';
-import { colors } from '@/constants/Theme';
+import { GlassCard } from '../../GlassCard';
+import { Button } from '../../Button';
+import { Colors } from '../../../constants/Theme';
 
 interface Props {
   value?: string;
@@ -64,7 +64,7 @@ export function SleepTimeStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <Moon size={48} color={colors.sleep} />
+          <Moon size={48} color={Colors.sleep} />
           <Text style={styles.title}>What time do you go to bed?</Text>
           <Text style={styles.subtitle}>
             Choose your typical bedtime on weeknights
@@ -78,7 +78,7 @@ export function SleepTimeStep({
             mode="time"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={handleTimeChange}
-            textColor={colors.text}
+            textColor={Colors.text}
             style={styles.picker}
           />
         </View>
@@ -133,13 +133,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -154,13 +154,13 @@ const styles = StyleSheet.create({
   selectedTime: {
     fontSize: 32,
     fontFamily: 'SFProRounded-Bold',
-    color: colors.sleep,
+    color: Colors.sleep,
     textAlign: 'center',
   },
   progress: {
     fontSize: 14,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   actions: {

@@ -5,9 +5,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Calendar, Clock, Zap } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
-import { Button } from '@/components/Button';
-import { colors } from '@/constants/Theme';
+import { GlassCard } from '../../GlassCard';
+import { Button } from '../../Button';
+import { Colors } from '../../../constants/Theme';
 
 interface Props {
   onNext: () => void;
@@ -21,7 +21,7 @@ export function WelcomeStep({ onNext, currentStep, totalSteps }: Props) {
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <Calendar size={48} color={colors.primary} />
+          <Calendar size={48} color={Colors.primary} />
           <Text style={styles.title}>Welcome to Day Planner</Text>
           <Text style={styles.subtitle}>
             Let's set up your personalized daily scheduling assistant
@@ -31,17 +31,17 @@ export function WelcomeStep({ onNext, currentStep, totalSteps }: Props) {
         {/* Features */}
         <View style={styles.features}>
           <FeatureItem
-            icon={<Clock size={24} color={colors.primary} />}
+            icon={<Clock size={24} color={Colors.primary} />}
             title="Smart Scheduling"
             description="AI-powered timeline that balances workouts, meals, and your calendar"
           />
           <FeatureItem
-            icon={<Zap size={24} color={colors.protein} />}
+            icon={<Zap size={24} color={Colors.protein} />}
             title="Energy Optimization"
             description="Schedule activities when you're at your peak energy level"
           />
           <FeatureItem
-            icon={<Calendar size={24} color={colors.carbs} />}
+            icon={<Calendar size={24} color={Colors.carbs} />}
             title="Calendar Integration"
             description="Sync with your device calendar for conflict-free planning"
           />
@@ -95,13 +95,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -129,18 +129,18 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 16,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.text,
+    color: Colors.text,
   },
   featureDescription: {
     fontSize: 14,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     lineHeight: 20,
   },
   progress: {
     fontSize: 14,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
 });

@@ -5,10 +5,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Target, Briefcase, Heart, BookOpen, Gamepad, Coffee } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
-import { Button } from '@/components/Button';
-import { colors } from '@/constants/Theme';
-import { Priority } from '@/types/planner';
+import { GlassCard } from '../../GlassCard';
+import { Button } from '../../Button';
+import { Colors } from '../../../constants/Theme';
+import { Priority } from '../../../types/planner';
 
 interface Props {
   value: Priority[];
@@ -25,12 +25,12 @@ const PRIORITY_OPTIONS: {
   icon: any;
   color: string;
 }[] = [
-  { id: 'health', label: 'Health & Fitness', icon: Target, color: colors.activeEnergy },
-  { id: 'work', label: 'Work & Career', icon: Briefcase, color: colors.primary },
-  { id: 'family', label: 'Family & Friends', icon: Heart, color: colors.protein },
-  { id: 'learning', label: 'Learning', icon: BookOpen, color: colors.carbs },
-  { id: 'hobbies', label: 'Hobbies', icon: Gamepad, color: colors.fat },
-  { id: 'relaxation', label: 'Relaxation', icon: Coffee, color: colors.sleep },
+  { id: 'health', label: 'Health & Fitness', icon: Target, color: Colors.activeEnergy },
+  { id: 'work', label: 'Work & Career', icon: Briefcase, color: Colors.primary },
+  { id: 'family', label: 'Family & Friends', icon: Heart, color: Colors.protein },
+  { id: 'learning', label: 'Learning', icon: BookOpen, color: Colors.carbs },
+  { id: 'hobbies', label: 'Hobbies', icon: Gamepad, color: Colors.fat },
+  { id: 'relaxation', label: 'Relaxation', icon: Coffee, color: Colors.sleep },
 ];
 
 export function PrioritiesStep({
@@ -87,7 +87,7 @@ export function PrioritiesStep({
               >
                 <Icon
                   size={32}
-                  color={isSelected ? option.color : colors.textSecondary}
+                  color={isSelected ? option.color : Colors.textSecondary}
                 />
                 <Text
                   style={[
@@ -144,20 +144,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
   counter: {
     fontSize: 14,
     fontFamily: 'SFProRounded-Medium',
-    color: colors.primary,
+    color: Colors.primary,
     marginTop: 4,
   },
   grid: {
@@ -170,9 +170,9 @@ const styles = StyleSheet.create({
     width: '45%',
     aspectRatio: 1.2,
     borderRadius: 16,
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
     borderWidth: 1,
-    borderColor: colors.surface,
+    borderColor: Colors.surface,
     padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -181,13 +181,13 @@ const styles = StyleSheet.create({
   priorityLabel: {
     fontSize: 14,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   progress: {
     fontSize: 14,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   actions: {

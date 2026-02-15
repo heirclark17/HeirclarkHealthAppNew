@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors } from '@/constants/Theme';
+import { Colors } from '../constants/Theme';
 
 interface Props {
   values: string[];
@@ -44,7 +44,7 @@ export function SegmentedControl({ values, selectedIndex, onChange }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
     borderRadius: 12,
     padding: 4,
   },
@@ -64,14 +64,14 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 8,
   },
   selectedSegment: {
-    backgroundColor: colors.primary,
+    backgroundColor: Colors.primary,
   },
   segmentText: {
     fontSize: 14,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
   },
   selectedText: {
-    color: colors.background,
+    color: Colors.background,
   },
 });

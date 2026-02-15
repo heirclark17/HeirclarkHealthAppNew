@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { Modal, View, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PlannerPreferences, Priority, EnergyPeak, Flexibility } from '@/types/planner';
+import { PlannerPreferences, Priority, EnergyPeak, Flexibility } from '../../../types/planner';
 import { WelcomeStep } from './WelcomeStep';
 import { WakeTimeStep } from './WakeTimeStep';
 import { SleepTimeStep } from './SleepTimeStep';

@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '@/constants/Theme';
+import { Colors } from '../../../constants/Theme';
 
 export function TimeSlotGrid() {
   // Generate 24 hours (6 AM to 6 AM next day)
@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
   timeLabel: {
     fontSize: 12,
     fontFamily: 'SFProRounded-Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     width: 50,
     textAlign: 'right',
   },
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
   },
 });

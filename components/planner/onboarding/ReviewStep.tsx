@@ -5,10 +5,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { CheckCircle, Edit2 } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
-import { Button } from '@/components/Button';
-import { colors } from '@/constants/Theme';
-import { PlannerPreferences } from '@/types/planner';
+import { GlassCard } from '../../GlassCard';
+import { Button } from '../../Button';
+import { Colors } from '../../../constants/Theme';
+import { PlannerPreferences } from '../../../types/planner';
 
 interface Props {
   preferences: PlannerPreferences;
@@ -69,7 +69,7 @@ export function ReviewStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <CheckCircle size={48} color={colors.protein} />
+          <CheckCircle size={48} color={Colors.protein} />
           <Text style={styles.title}>Review Your Preferences</Text>
           <Text style={styles.subtitle}>
             Make sure everything looks good before we create your schedule
@@ -153,7 +153,7 @@ function ReviewItem({
         <Text style={styles.reviewValue}>{value}</Text>
       </View>
       <TouchableOpacity onPress={onEdit} style={styles.editButton}>
-        <Edit2 size={16} color={colors.primary} />
+        <Edit2 size={16} color={Colors.primary} />
       </TouchableOpacity>
     </View>
   );
@@ -176,13 +176,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
     borderRadius: 12,
     padding: 16,
   },
@@ -207,27 +207,27 @@ const styles = StyleSheet.create({
   reviewLabel: {
     fontSize: 12,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   reviewValue: {
     fontSize: 16,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.text,
+    color: Colors.text,
   },
   editButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.primary + '20',
+    backgroundColor: Colors.primary + '20',
     alignItems: 'center',
     justifyContent: 'center',
   },
   progress: {
     fontSize: 14,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   actions: {

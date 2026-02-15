@@ -5,9 +5,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
-import { GlassCard } from '@/components/GlassCard';
-import { DailyTimeline } from '@/types/planner';
-import { colors } from '@/constants/Theme';
+import { GlassCard } from '../../GlassCard';
+import { DailyTimeline } from '../../../types/planner';
+import { Colors } from '../../../constants/Theme';
 
 interface Props {
   day: DailyTimeline;
@@ -29,18 +29,18 @@ export function DayCard({ day, isSelected, onPress }: Props) {
         style={[
           styles.card,
           isSelected && {
-            borderColor: colors.primary,
+            borderColor: Colors.primary,
             borderWidth: 2,
           },
         ]}
       >
         {/* Day Name */}
-        <Text style={[styles.dayName, isSelected && { color: colors.primary }]}>
+        <Text style={[styles.dayName, isSelected && { color: Colors.primary }]}>
           {dayName}
         </Text>
 
         {/* Day Number */}
-        <Text style={[styles.dayNumber, isSelected && { color: colors.primary }]}>
+        <Text style={[styles.dayNumber, isSelected && { color: Colors.primary }]}>
           {dayNumber}
         </Text>
 
@@ -51,7 +51,7 @@ export function DayCard({ day, isSelected, onPress }: Props) {
               styles.progressBar,
               {
                 width: `${day.completionRate}%`,
-                backgroundColor: isSelected ? colors.primary : colors.protein,
+                backgroundColor: isSelected ? Colors.primary : Colors.protein,
               },
             ]}
           />
@@ -76,18 +76,18 @@ const styles = StyleSheet.create({
   dayName: {
     fontSize: 12,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textTransform: 'uppercase',
   },
   dayNumber: {
     fontSize: 32,
     fontFamily: 'SFProRounded-Bold',
-    color: colors.text,
+    color: Colors.text,
   },
   progressContainer: {
     width: '100%',
     height: 4,
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -98,6 +98,6 @@ const styles = StyleSheet.create({
   stats: {
     fontSize: 10,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
   },
 });

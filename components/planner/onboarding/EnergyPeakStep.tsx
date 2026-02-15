@@ -5,10 +5,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Sunrise, Sun, Sunset } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
-import { Button } from '@/components/Button';
-import { colors } from '@/constants/Theme';
-import { EnergyPeak } from '@/types/planner';
+import { GlassCard } from '../../GlassCard';
+import { Button } from '../../Button';
+import { Colors } from '../../../constants/Theme';
+import { EnergyPeak } from '../../../types/planner';
 
 interface Props {
   value?: EnergyPeak;
@@ -33,7 +33,7 @@ const ENERGY_OPTIONS: {
     description: "I'm most productive and energetic in the morning",
     time: '6 AM - 12 PM',
     icon: Sunrise,
-    color: colors.protein,
+    color: Colors.protein,
   },
   {
     id: 'afternoon',
@@ -41,7 +41,7 @@ const ENERGY_OPTIONS: {
     description: 'I hit my stride after lunch',
     time: '12 PM - 5 PM',
     icon: Sun,
-    color: colors.carbs,
+    color: Colors.carbs,
   },
   {
     id: 'evening',
@@ -49,7 +49,7 @@ const ENERGY_OPTIONS: {
     description: "I'm most focused and creative in the evening",
     time: '5 PM - 10 PM',
     icon: Sunset,
-    color: colors.sleep,
+    color: Colors.sleep,
   },
 ];
 
@@ -95,7 +95,7 @@ export function EnergyPeakStep({
                 <View style={styles.optionContent}>
                   <Icon
                     size={40}
-                    color={isSelected ? option.color : colors.textSecondary}
+                    color={isSelected ? option.color : Colors.textSecondary}
                   />
                   <View style={styles.optionText}>
                     <Text
@@ -159,13 +159,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -174,9 +174,9 @@ const styles = StyleSheet.create({
   },
   optionCard: {
     borderRadius: 16,
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
     borderWidth: 1,
-    borderColor: colors.surface,
+    borderColor: Colors.surface,
     padding: 16,
   },
   optionContent: {
@@ -191,24 +191,24 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 18,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.text,
+    color: Colors.text,
   },
   optionTime: {
     fontSize: 14,
     fontFamily: 'SFProRounded-Medium',
-    color: colors.primary,
+    color: Colors.primary,
   },
   optionDescription: {
     fontSize: 14,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     lineHeight: 20,
     marginTop: 4,
   },
   progress: {
     fontSize: 14,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   actions: {

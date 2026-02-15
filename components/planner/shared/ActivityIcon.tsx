@@ -14,7 +14,7 @@ import {
   Calendar,
   Clock,
 } from 'lucide-react-native';
-import { BlockType } from '@/types/planner';
+import { BlockType } from '../../../types/planner';
 
 interface Props {
   type: BlockType;

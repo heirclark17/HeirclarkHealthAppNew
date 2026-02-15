@@ -6,12 +6,12 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { useDayPlanner } from '@/contexts/DayPlannerContext';
-import { DayPlannerOnboardingModal } from '@/components/planner/onboarding/DayPlannerOnboardingModal';
-import { DailyTimelineView } from '@/components/planner/timeline/DailyTimelineView';
-import { WeeklyOverviewView } from '@/components/planner/weekly/WeeklyOverviewView';
-import { SegmentedControl } from '@/components/SegmentedControl';
-import { colors } from '@/constants/Theme';
+import { useDayPlanner } from '../../contexts/DayPlannerContext';
+import { DayPlannerOnboardingModal } from '../../components/planner/onboarding/DayPlannerOnboardingModal';
+import { DailyTimelineView } from '../../components/planner/timeline/DailyTimelineView';
+import { WeeklyOverviewView } from '../../components/planner/weekly/WeeklyOverviewView';
+import { SegmentedControl } from '../../components/SegmentedControl';
+import { Colors } from '../../constants/Theme';
 
 export default function PlannerScreen() {
   const { state, actions } = useDayPlanner();
@@ -52,11 +52,11 @@ export default function PlannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: Colors.background,
   },
   header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.background,
+    backgroundColor: Colors.background,
   },
 });

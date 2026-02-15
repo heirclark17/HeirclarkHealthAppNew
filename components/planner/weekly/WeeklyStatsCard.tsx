@@ -5,9 +5,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Dumbbell, Utensils, Clock, TrendingUp } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
-import { WeeklyStats } from '@/types/planner';
-import { colors } from '@/constants/Theme';
+import { GlassCard } from '../../GlassCard';
+import { WeeklyStats } from '../../../types/planner';
+import { Colors } from '../../../constants/Theme';
 
 interface Props {
   stats: WeeklyStats;
@@ -20,22 +20,22 @@ export function WeeklyStatsCard({ stats }: Props) {
 
       <View style={styles.statsGrid}>
         <StatItem
-          icon={<Dumbbell size={20} color={colors.activeEnergy} />}
+          icon={<Dumbbell size={20} color={Colors.activeEnergy} />}
           label="Workouts"
           value={`${stats.workoutsCompleted}/${stats.workoutsScheduled}`}
         />
         <StatItem
-          icon={<Utensils size={20} color={colors.protein} />}
+          icon={<Utensils size={20} color={Colors.protein} />}
           label="Meals"
           value={`${stats.mealsCompleted}/${stats.mealsScheduled}`}
         />
         <StatItem
-          icon={<Clock size={20} color={colors.carbs} />}
+          icon={<Clock size={20} color={Colors.carbs} />}
           label="Free Time/Day"
           value={`${Math.round(stats.avgFreeTime / 60)}h`}
         />
         <StatItem
-          icon={<TrendingUp size={20} color={colors.primary} />}
+          icon={<TrendingUp size={20} color={Colors.primary} />}
           label="Productivity"
           value={`${stats.productivityScore}%`}
         />
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.text,
+    color: Colors.text,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -81,18 +81,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 12,
-    backgroundColor: colors.surface + '20',
+    backgroundColor: Colors.surface + '20',
     borderRadius: 12,
   },
   statValue: {
     fontSize: 20,
     fontFamily: 'SFProRounded-Bold',
-    color: colors.text,
+    color: Colors.text,
   },
   statLabel: {
     fontSize: 12,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
 });

@@ -5,10 +5,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Zap, TrendingUp, Lock } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
-import { Button } from '@/components/Button';
-import { colors } from '@/constants/Theme';
-import { Flexibility } from '@/types/planner';
+import { GlassCard } from '../../GlassCard';
+import { Button } from '../../Button';
+import { Colors } from '../../../constants/Theme';
+import { Flexibility } from '../../../types/planner';
 
 interface Props {
   value?: Flexibility;
@@ -31,21 +31,21 @@ const FLEXIBILITY_OPTIONS: {
     label: 'Very Flexible',
     description: 'I can easily adjust my schedule and move activities around',
     icon: Zap,
-    color: colors.carbs,
+    color: Colors.carbs,
   },
   {
     id: 'somewhat',
     label: 'Somewhat Flexible',
     description: 'I have some fixed commitments but can adapt when needed',
     icon: TrendingUp,
-    color: colors.protein,
+    color: Colors.protein,
   },
   {
     id: 'not_very',
     label: 'Not Very Flexible',
     description: 'My schedule is pretty fixed with limited room for changes',
     icon: Lock,
-    color: colors.activeEnergy,
+    color: Colors.activeEnergy,
   },
 ];
 
@@ -91,7 +91,7 @@ export function FlexibilityStep({
                 <View style={styles.optionContent}>
                   <Icon
                     size={32}
-                    color={isSelected ? option.color : colors.textSecondary}
+                    color={isSelected ? option.color : Colors.textSecondary}
                   />
                   <View style={styles.optionText}>
                     <Text
@@ -154,13 +154,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -169,9 +169,9 @@ const styles = StyleSheet.create({
   },
   optionCard: {
     borderRadius: 16,
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
     borderWidth: 1,
-    borderColor: colors.surface,
+    borderColor: Colors.surface,
     padding: 16,
   },
   optionContent: {
@@ -186,18 +186,18 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontSize: 16,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.text,
+    color: Colors.text,
   },
   optionDescription: {
     fontSize: 14,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     lineHeight: 20,
   },
   progress: {
     fontSize: 14,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   actions: {

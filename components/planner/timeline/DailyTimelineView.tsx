@@ -8,13 +8,13 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-nati
 import { format } from 'date-fns';
 import { Calendar, RefreshCw } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useDayPlanner } from '@/contexts/DayPlannerContext';
+import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { TimeSlotGrid } from './TimeSlotGrid';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
 import { TimeBlockCard } from './TimeBlockCard';
 import { CalendarSyncButton } from '../shared/CalendarSyncButton';
-import { GlassCard } from '@/components/GlassCard';
-import { colors } from '@/constants/Theme';
+import { GlassCard } from '../../GlassCard';
+import { Colors } from '../../../constants/Theme';
 
 export function DailyTimelineView() {
   const { state, actions } = useDayPlanner();
@@ -41,7 +41,7 @@ export function DailyTimelineView() {
       <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
         <View style={styles.emptyContainer}>
           <GlassCard style={styles.emptyCard}>
-            <RefreshCw size={48} color={colors.primary} style={{ opacity: 0.3 }} />
+            <RefreshCw size={48} color={Colors.primary} style={{ opacity: 0.3 }} />
             <Text style={styles.emptyText}>No timeline available</Text>
             <TouchableOpacity
               style={styles.generateButton}
@@ -52,7 +52,7 @@ export function DailyTimelineView() {
                 <Text style={styles.generateButtonText}>Generating...</Text>
               ) : (
                 <>
-                  <RefreshCw size={20} color={colors.background} />
+                  <RefreshCw size={20} color={Colors.background} />
                   <Text style={styles.generateButtonText}>Generate Schedule</Text>
                 </>
               )}
@@ -85,7 +85,7 @@ export function DailyTimelineView() {
           >
             <RefreshCw
               size={20}
-              color={state.isGeneratingPlan ? colors.textSecondary : colors.primary}
+              color={state.isGeneratingPlan ? Colors.textSecondary : Colors.primary}
             />
           </TouchableOpacity>
         </View>
@@ -145,7 +145,7 @@ export function DailyTimelineView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -159,13 +159,13 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 20,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.text,
+    color: Colors.text,
   },
   actionButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.glassTint,
+    backgroundColor: Colors.glassTint,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -196,14 +196,14 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   generateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: colors.primary,
+    backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 16,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   generateButtonText: {
     fontSize: 16,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.background,
+    color: Colors.background,
   },
   footer: {
     flexDirection: 'row',
@@ -231,16 +231,16 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 40,
-    backgroundColor: colors.glassTint,
+    backgroundColor: Colors.glassTint,
   },
   statValue: {
     fontSize: 24,
     fontFamily: 'SFProRounded-Bold',
-    color: colors.primary,
+    color: Colors.primary,
   },
   statLabel: {
     fontSize: 13,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
   },
 });

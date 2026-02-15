@@ -13,10 +13,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { CheckCircle2, X } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
+import { GlassCard } from '../../GlassCard';
 import { ActivityIcon } from '../shared/ActivityIcon';
-import { TimeBlock } from '@/types/planner';
-import { colors } from '@/constants/Theme';
+import { TimeBlock } from '../../../types/planner';
+import { Colors } from '../../../constants/Theme';
 
 interface Props {
   block: TimeBlock;
@@ -88,10 +88,10 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
                 </Text>
               </View>
               {block.status === 'completed' && (
-                <CheckCircle2 size={16} color={colors.protein} />
+                <CheckCircle2 size={16} color={Colors.protein} />
               )}
               {block.status === 'skipped' && (
-                <X size={16} color={colors.textSecondary} />
+                <X size={16} color={Colors.textSecondary} />
               )}
             </View>
 
@@ -143,19 +143,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.text,
+    color: Colors.text,
     flex: 1,
   },
   time: {
     fontSize: 12,
     fontFamily: 'SFProRounded-Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     marginTop: 4,
   },
   duration: {
     fontSize: 10,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     marginTop: 2,
   },
 });

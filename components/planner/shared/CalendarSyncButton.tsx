@@ -5,7 +5,7 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { CalendarSync } from 'lucide-react-native';
-import { colors } from '@/constants/Theme';
+import { Colors } from '../../../constants/Theme';
 
 interface Props {
   onPress: () => void;
@@ -21,9 +21,9 @@ export function CalendarSyncButton({ onPress, loading }: Props) {
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={colors.primary} />
+        <ActivityIndicator size="small" color={Colors.primary} />
       ) : (
-        <CalendarSync size={20} color={colors.primary} />
+        <CalendarSync size={20} color={Colors.primary} />
       )}
     </TouchableOpacity>
   );
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.surface + '40',
+    backgroundColor: Colors.surface + '40',
     alignItems: 'center',
     justifyContent: 'center',
   },

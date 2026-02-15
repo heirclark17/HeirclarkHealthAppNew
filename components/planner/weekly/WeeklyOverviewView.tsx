@@ -4,10 +4,10 @@
 
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { useDayPlanner } from '@/contexts/DayPlannerContext';
+import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { WeeklyStatsCard } from './WeeklyStatsCard';
 import { DayCard } from './DayCard';
-import { colors } from '@/constants/Theme';
+import { Colors } from '../../../constants/Theme';
 
 export function WeeklyOverviewView() {
   const { state, actions } = useDayPlanner();
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
   },
   daysScroll: {
     flex: 1,

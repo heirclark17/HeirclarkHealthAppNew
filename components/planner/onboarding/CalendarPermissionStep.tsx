@@ -6,9 +6,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import { CalendarCheck, Lock, Shield } from 'lucide-react-native';
-import { GlassCard } from '@/components/GlassCard';
-import { Button } from '@/components/Button';
-import { colors } from '@/constants/Theme';
+import { GlassCard } from '../../GlassCard';
+import { Button } from '../../Button';
+import { Colors } from '../../../constants/Theme';
 
 interface Props {
   onGranted: () => void;
@@ -63,7 +63,7 @@ export function CalendarPermissionStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <CalendarCheck size={48} color={colors.primary} />
+          <CalendarCheck size={48} color={Colors.primary} />
           <Text style={styles.title}>Sync with your calendar?</Text>
           <Text style={styles.subtitle}>
             Import your calendar events to avoid scheduling conflicts
@@ -73,13 +73,13 @@ export function CalendarPermissionStep({
         {/* Privacy Notice */}
         <View style={styles.privacy}>
           <View style={styles.privacyItem}>
-            <Lock size={20} color={colors.protein} />
+            <Lock size={20} color={Colors.protein} />
             <Text style={styles.privacyText}>
               Calendar data stays on your device
             </Text>
           </View>
           <View style={styles.privacyItem}>
-            <Shield size={20} color={colors.carbs} />
+            <Shield size={20} color={Colors.carbs} />
             <Text style={styles.privacyText}>
               Never shared with our servers
             </Text>
@@ -132,7 +132,7 @@ export function CalendarPermissionStep({
                 disabled={isRequesting}
               >
                 {isRequesting && (
-                  <ActivityIndicator size="small" color={colors.background} />
+                  <ActivityIndicator size="small" color={Colors.background} />
                 )}
               </Button>
             </>
@@ -159,13 +159,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: 'Urbanist_700Bold',
-    color: colors.text,
+    color: Colors.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontFamily: 'Urbanist_400Regular',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -181,10 +181,10 @@ const styles = StyleSheet.create({
   privacyText: {
     fontSize: 14,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.text,
+    color: Colors.text,
   },
   successBanner: {
-    backgroundColor: colors.protein + '20',
+    backgroundColor: Colors.protein + '20',
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
@@ -192,12 +192,12 @@ const styles = StyleSheet.create({
   successText: {
     fontSize: 16,
     fontFamily: 'Urbanist_600SemiBold',
-    color: colors.protein,
+    color: Colors.protein,
   },
   progress: {
     fontSize: 14,
     fontFamily: 'Urbanist_500Medium',
-    color: colors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   actions: {

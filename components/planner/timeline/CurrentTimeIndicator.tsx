@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '@/constants/Theme';
+import { Colors } from '../../../constants/Theme';
 
 export function CurrentTimeIndicator() {
   const [currentMinutes, setCurrentMinutes] = useState(() => {
@@ -61,18 +61,18 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: colors.protein,
+    backgroundColor: Colors.protein,
     marginLeft: 44, // Align with grid
   },
   line: {
     flex: 1,
     height: 2,
-    backgroundColor: colors.protein,
+    backgroundColor: Colors.protein,
   },
   timeContainer: {
     position: 'absolute',
     right: 0,
-    backgroundColor: colors.protein,
+    backgroundColor: Colors.protein,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -80,6 +80,6 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 10,
     fontFamily: 'SFProRounded-Bold',
-    color: colors.background,
+    color: Colors.background,
   },
 });
