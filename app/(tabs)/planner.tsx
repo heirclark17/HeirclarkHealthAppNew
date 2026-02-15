@@ -1,6 +1,6 @@
 /**
- * Planner Tab - AI-Powered Day & Week Planner
- * Main screen with daily/weekly/monthly view toggle and calendar strip
+ * Planner Tab - AI-Powered Day Planner
+ * Main screen with daily/monthly view toggle and calendar strip
  */
 
 import React, { useState, useMemo } from 'react';
@@ -12,7 +12,6 @@ import { useDayPlanner } from '../../contexts/DayPlannerContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DayPlannerOnboardingModal } from '../../components/planner/onboarding/DayPlannerOnboardingModal';
 import { DailyTimelineView } from '../../components/planner/timeline/DailyTimelineView';
-import { WeeklyOverviewView } from '../../components/planner/weekly/WeeklyOverviewView';
 import { MonthlyCalendarView } from '../../components/planner/monthly/MonthlyCalendarView';
 import { PlannerCalendarStrip } from '../../components/planner/shared/PlannerCalendarStrip';
 import { SegmentedControl } from '../../components/SegmentedControl';
@@ -30,7 +29,7 @@ export default function PlannerScreen() {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const [viewMode, setViewMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [viewMode, setViewMode] = useState<'daily' | 'monthly'>('daily');
   const insets = useSafeAreaInsets();
 
   // Derive selected date from weekly plan + selectedDayIndex
@@ -65,11 +64,10 @@ export default function PlannerScreen() {
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <SegmentedControl
-              values={['Daily', 'Weekly', 'Monthly']}
-              selectedIndex={viewMode === 'daily' ? 0 : viewMode === 'weekly' ? 1 : 2}
+              values={['Daily', 'Monthly']}
+              selectedIndex={viewMode === 'daily' ? 0 : 1}
               onChange={(index) => {
-                const modes: Array<'daily' | 'weekly' | 'monthly'> = ['daily', 'weekly', 'monthly'];
-                setViewMode(modes[index]);
+                setViewMode(index === 0 ? 'daily' : 'monthly');
               }}
             />
           </View>
@@ -84,8 +82,8 @@ export default function PlannerScreen() {
         </View>
       </View>
 
-      {/* Calendar Strip (shown for Daily and Weekly views) */}
-      {viewMode !== 'monthly' && (
+      {/* Calendar Strip (shown for Daily view) */}
+      {viewMode === 'daily' && (
         <PlannerCalendarStrip
           selectedDate={selectedDate}
           onDateChange={handleDateChange}
@@ -100,8 +98,6 @@ export default function PlannerScreen() {
       {/* Content */}
       {viewMode === 'daily' ? (
         <DailyTimelineView />
-      ) : viewMode === 'weekly' ? (
-        <WeeklyOverviewView />
       ) : (
         <MonthlyCalendarView
           selectedDate={selectedDate}
