@@ -315,6 +315,35 @@ const getLiveAvatarHTML = (session: StreamingSession, token: string) => `
 </html>
 `;
 
+/**
+ * Renders text with SF Pro Rounded for numbers and Urbanist for letters.
+ * Splits on boundaries between numeric (digits, commas, dots, %, +, -)
+ * and non-numeric characters.
+ */
+function MixedFontText({ text, textFont, numericFont, style }: {
+  text: string;
+  textFont: string;
+  numericFont: string;
+  style?: any;
+}) {
+  // Split text into segments of numbers vs non-numbers
+  // Numbers include: digits, commas in numbers, decimal points, %, +, -
+  const segments = text.split(/(\d[\d,.*%+-]*)/g).filter(Boolean);
+
+  return (
+    <Text style={style}>
+      {segments.map((segment, i) => {
+        const isNumeric = /^\d/.test(segment);
+        return (
+          <Text key={i} style={{ fontFamily: isNumeric ? numericFont : textFont }}>
+            {segment}
+          </Text>
+        );
+      })}
+    </Text>
+  );
+}
+
 export function CoachChatModal({
   visible,
   onClose,
@@ -616,12 +645,15 @@ export function CoachChatModal({
             ? [styles.userMessageContent, { backgroundColor: glassColors.userBubble }]
             : [styles.assistantMessageContent, { backgroundColor: glassColors.assistantBubble }],
         ]}>
-          <Text style={[
-            styles.messageText,
-            { color: isUser ? '#ffffff' : glassColors.text }
-          ]}>
-            {item.content}
-          </Text>
+          <MixedFontText
+            text={item.content}
+            textFont={Fonts.regular}
+            numericFont={Fonts.numericRegular}
+            style={[
+              styles.messageText,
+              { color: isUser ? '#ffffff' : glassColors.text }
+            ]}
+          />
         </View>
       </View>
     );
