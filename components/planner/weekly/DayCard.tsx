@@ -7,7 +7,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
 import { GlassCard } from '../../GlassCard';
 import { DailyTimeline } from '../../../types/planner';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   day: DailyTimeline;
@@ -16,6 +17,10 @@ interface Props {
 }
 
 export function DayCard({ day, isSelected, onPress }: Props) {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+
   const date = new Date(day.date);
   const dayName = format(date, 'EEE');
   const dayNumber = format(date, 'd');
@@ -29,36 +34,36 @@ export function DayCard({ day, isSelected, onPress }: Props) {
         style={[
           styles.card,
           isSelected && {
-            borderColor: Colors.primary,
+            borderColor: themeColors.primary,
             borderWidth: 2,
           },
         ]}
       >
         {/* Day Name */}
-        <Text style={[styles.dayName, isSelected && { color: Colors.primary }]}>
+        <Text style={[styles.dayName, { color: themeColors.textSecondary }, isSelected && { color: themeColors.primary }]}>
           {dayName}
         </Text>
 
         {/* Day Number */}
-        <Text style={[styles.dayNumber, isSelected && { color: Colors.primary }]}>
+        <Text style={[styles.dayNumber, { color: themeColors.text }, isSelected && { color: themeColors.primary }]}>
           {dayNumber}
         </Text>
 
         {/* Completion Rate */}
-        <View style={styles.progressContainer}>
+        <View style={[styles.progressContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
           <View
             style={[
               styles.progressBar,
               {
                 width: `${day.completionRate}%`,
-                backgroundColor: isSelected ? Colors.primary : Colors.protein,
+                backgroundColor: isSelected ? themeColors.primary : Colors.protein,
               },
             ]}
           />
         </View>
 
         {/* Stats */}
-        <Text style={styles.stats}>
+        <Text style={[styles.stats, { color: themeColors.textSecondary }]}>
           {blocksCompleted}/{totalBlocks} done
         </Text>
       </GlassCard>
@@ -75,19 +80,16 @@ const styles = StyleSheet.create({
   },
   dayName: {
     fontSize: 12,
-    fontFamily: 'Urbanist_600SemiBold',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.semiBold,
     textTransform: 'uppercase',
   },
   dayNumber: {
     fontSize: 32,
-    fontFamily: 'SFProRounded-Bold',
-    color: Colors.text,
+    fontFamily: Fonts.numericBold,
   },
   progressContainer: {
     width: '100%',
     height: 4,
-    backgroundColor: Colors.surface + '40',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -97,7 +99,6 @@ const styles = StyleSheet.create({
   },
   stats: {
     fontSize: 10,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
   },
 });

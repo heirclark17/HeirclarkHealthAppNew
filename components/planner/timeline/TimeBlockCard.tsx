@@ -16,7 +16,8 @@ import { CheckCircle2, X } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { ActivityIcon } from '../shared/ActivityIcon';
 import { TimeBlock } from '../../../types/planner';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   block: TimeBlock;
@@ -26,6 +27,9 @@ interface Props {
 }
 
 export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Props) {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
   const translateX = useSharedValue(0);
 
   // Calculate position (absolute positioning in timeline)
@@ -83,7 +87,7 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
             <View style={styles.header}>
               <View style={styles.titleRow}>
                 <ActivityIcon type={block.type} size={16} color={block.color} />
-                <Text style={styles.title} numberOfLines={1}>
+                <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
                   {block.title}
                 </Text>
               </View>
@@ -91,16 +95,16 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
                 <CheckCircle2 size={16} color={Colors.protein} />
               )}
               {block.status === 'skipped' && (
-                <X size={16} color={Colors.textSecondary} />
+                <X size={16} color={themeColors.textSecondary} />
               )}
             </View>
 
-            <Text style={styles.time}>
+            <Text style={[styles.time, { color: themeColors.textSecondary }]}>
               {block.startTime} - {block.endTime}
             </Text>
 
             {height > 60 && (
-              <Text style={styles.duration} numberOfLines={1}>
+              <Text style={[styles.duration, { color: themeColors.textSecondary }]} numberOfLines={1}>
                 {block.duration} min
               </Text>
             )}
@@ -142,20 +146,17 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontFamily: 'Urbanist_600SemiBold',
-    color: Colors.text,
+    fontFamily: Fonts.semiBold,
     flex: 1,
   },
   time: {
     fontSize: 12,
-    fontFamily: 'SFProRounded-Regular',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.numericRegular,
     marginTop: 4,
   },
   duration: {
     fontSize: 10,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
     marginTop: 2,
   },
 });

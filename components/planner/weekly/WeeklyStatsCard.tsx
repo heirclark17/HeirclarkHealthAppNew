@@ -7,53 +7,68 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Dumbbell, Utensils, Clock, TrendingUp } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { WeeklyStats } from '../../../types/planner';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   stats: WeeklyStats;
 }
 
 export function WeeklyStatsCard({ stats }: Props) {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+
   return (
     <GlassCard style={styles.card}>
-      <Text style={styles.title}>This Week</Text>
+      <Text style={[styles.title, { color: themeColors.text }]}>This Week</Text>
 
       <View style={styles.statsGrid}>
         <StatItem
           icon={<Dumbbell size={20} color={Colors.activeEnergy} />}
           label="Workouts"
           value={`${stats.workoutsCompleted}/${stats.workoutsScheduled}`}
+          themeColors={themeColors}
+          isDark={isDark}
         />
         <StatItem
           icon={<Utensils size={20} color={Colors.protein} />}
           label="Meals"
           value={`${stats.mealsCompleted}/${stats.mealsScheduled}`}
+          themeColors={themeColors}
+          isDark={isDark}
         />
         <StatItem
           icon={<Clock size={20} color={Colors.carbs} />}
           label="Free Time/Day"
           value={`${Math.round(stats.avgFreeTime / 60)}h`}
+          themeColors={themeColors}
+          isDark={isDark}
         />
         <StatItem
-          icon={<TrendingUp size={20} color={Colors.primary} />}
+          icon={<TrendingUp size={20} color={themeColors.primary} />}
           label="Productivity"
           value={`${stats.productivityScore}%`}
+          themeColors={themeColors}
+          isDark={isDark}
         />
       </View>
     </GlassCard>
   );
 }
 
-function StatItem({ icon, label, value }: {
+function StatItem({ icon, label, value, themeColors, isDark }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  themeColors: typeof DarkColors;
+  isDark: boolean;
 }) {
   return (
-    <View style={styles.statItem}>
+    <View style={[styles.statItem, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
       {icon}
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statValue, { color: themeColors.text }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>{label}</Text>
     </View>
   );
 }
@@ -67,8 +82,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontFamily: 'Urbanist_600SemiBold',
-    color: Colors.text,
+    fontFamily: Fonts.semiBold,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -81,18 +95,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     padding: 12,
-    backgroundColor: Colors.surface + '20',
     borderRadius: 12,
   },
   statValue: {
     fontSize: 20,
-    fontFamily: 'SFProRounded-Bold',
-    color: Colors.text,
+    fontFamily: Fonts.numericBold,
   },
   statLabel: {
     fontSize: 12,
-    fontFamily: 'Urbanist_500Medium',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.medium,
     textAlign: 'center',
   },
 });

@@ -4,9 +4,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 export function CurrentTimeIndicator() {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+
   const [currentMinutes, setCurrentMinutes] = useState(() => {
     const now = new Date();
     return now.getHours() * 60 + now.getMinutes();
@@ -39,10 +44,10 @@ export function CurrentTimeIndicator() {
 
   return (
     <View style={[styles.container, { top: yPosition }]} pointerEvents="none">
-      <View style={styles.dot} />
-      <View style={styles.line} />
-      <View style={styles.timeContainer}>
-        <Text style={styles.timeText}>{timeStr}</Text>
+      <View style={[styles.dot, { backgroundColor: Colors.protein }]} />
+      <View style={[styles.line, { backgroundColor: Colors.protein }]} />
+      <View style={[styles.timeContainer, { backgroundColor: Colors.protein }]}>
+        <Text style={[styles.timeText, { color: isDark ? themeColors.background : '#FFFFFF' }]}>{timeStr}</Text>
       </View>
     </View>
   );
@@ -61,25 +66,21 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: Colors.protein,
     marginLeft: 44, // Align with grid
   },
   line: {
     flex: 1,
     height: 2,
-    backgroundColor: Colors.protein,
   },
   timeContainer: {
     position: 'absolute',
     right: 0,
-    backgroundColor: Colors.protein,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
   timeText: {
     fontSize: 10,
-    fontFamily: 'SFProRounded-Bold',
-    color: Colors.background,
+    fontFamily: Fonts.numericBold,
   },
 });

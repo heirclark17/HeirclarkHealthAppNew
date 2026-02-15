@@ -4,9 +4,14 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '../../../constants/Theme';
+import { useSettings } from '../../../contexts/SettingsContext';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 export function TimeSlotGrid() {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+
   // Generate 24 hours (6 AM to 6 AM next day)
   const hours = Array.from({ length: 24 }, (_, i) => (i + 6) % 24);
 
@@ -22,10 +27,10 @@ export function TimeSlotGrid() {
             key={hour}
             style={[styles.gridLine, { top: yPosition }]}
           >
-            <Text style={styles.timeLabel}>
+            <Text style={[styles.timeLabel, { color: themeColors.textSecondary }]}>
               {displayHour} {period}
             </Text>
-            <View style={styles.line} />
+            <View style={[styles.line, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
           </View>
         );
       })}
@@ -51,14 +56,12 @@ const styles = StyleSheet.create({
   },
   timeLabel: {
     fontSize: 12,
-    fontFamily: 'SFProRounded-Regular',
-    color: Colors.textSecondary,
+    fontFamily: Fonts.numericRegular,
     width: 50,
     textAlign: 'right',
   },
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.surface + '40',
   },
 });
