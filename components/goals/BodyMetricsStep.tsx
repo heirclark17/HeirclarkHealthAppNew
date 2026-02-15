@@ -16,7 +16,7 @@ import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
-import { WizardHeader } from './WizardHeader';
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -584,18 +584,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
   return (
     <View style={styles.container}>
-      {/* Modern Liquid Glass Sticky Header */}
-      <WizardHeader
-        currentStep={2}
-        totalSteps={6}
-        title="Your Body Metrics"
-        onBack={onBack}
-        isDark={isDark}
-      />
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Spacer for sticky header */}
-        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
