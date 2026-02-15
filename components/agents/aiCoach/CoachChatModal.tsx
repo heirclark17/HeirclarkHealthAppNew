@@ -915,7 +915,7 @@ const styles = StyleSheet.create({
   webViewContainer: {
     width: SCREEN_WIDTH - 32,
     height: 200,
-    borderRadius: 16,
+    borderRadius: 28,
     overflow: 'hidden',
     backgroundColor: '#1a1a2e',
   },
