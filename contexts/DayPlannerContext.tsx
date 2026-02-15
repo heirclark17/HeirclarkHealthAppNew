@@ -216,6 +216,21 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     loadCachedData();
   }, []);
 
+  // Auto-regenerate plan when calendar events are synced so meals/workouts
+  // get rescheduled around imported calendar events (no overlaps).
+  useEffect(() => {
+    if (
+      state.lastCalendarSync &&
+      state.deviceCalendarEvents.length > 0 &&
+      state.hasCompletedOnboarding &&
+      state.preferences &&
+      !state.isGeneratingPlan
+    ) {
+      console.log('[Planner] Calendar synced – optimizing schedule around', state.deviceCalendarEvents.length, 'events');
+      generateWeeklyPlan();
+    }
+  }, [state.lastCalendarSync]);
+
   /**
    * Load cached data from AsyncStorage
    */
@@ -609,7 +624,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         isSyncingCalendar: false,
       }));
 
-      Alert.alert('Calendar Synced', `${events.length} events imported from your calendar.`);
+      Alert.alert('Calendar Synced', `${events.length} events imported. Your schedule is being optimized to avoid conflicts.`);
       console.log(`[Planner] Synced ${events.length} calendar events (client-side only)`);
       return true;
     } catch (error: any) {
