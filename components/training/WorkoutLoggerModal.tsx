@@ -20,7 +20,7 @@ import { X, Plus, Trash2, ChevronDown } from 'lucide-react-native';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
-import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { SetLog, WeightLog, AISetRecommendation } from '../../types/training';
 import { weightTrackingStorage } from '../../services/weightTrackingStorage';
 import { calculateSmartWeight } from '../../services/progressiveOverloadAI';
@@ -52,7 +52,7 @@ export default function WorkoutLoggerModal({
 }: WorkoutLoggerModalProps) {
   const { settings: appSettings } = useSettings();
   const isDark = appSettings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : SandLightColors;
+  const colors = isDark ? DarkColors : LightColors;
 
   const [sets, setSets] = useState<SetEntry[]>([
     { weight: '', reps: '', rpe: '', isWarmup: false },
@@ -183,7 +183,7 @@ export default function WorkoutLoggerModal({
             </View>
             <TouchableOpacity
               onPress={() => { lightImpact(); onClose(); }}
-              style={[styles.closeBtn, { backgroundColor: isDark ? '#1a1a1a' : '#E5DDD2' }]}
+              style={[styles.closeBtn, { backgroundColor: isDark ? '#1a1a1a' : '#E5E5E5' }]}
             >
               <X size={20} color={colors.text} />
             </TouchableOpacity>
@@ -251,7 +251,7 @@ export default function WorkoutLoggerModal({
                         styles.input,
                         {
                           color: colors.text,
-                          backgroundColor: isDark ? '#111' : '#F5EDE4',
+                          backgroundColor: isDark ? '#111' : 'rgba(0, 0, 0, 0.04)',
                           borderColor: weightDiff !== null && weightDiff > 0
                             ? colors.success + '40'
                             : weightDiff !== null && weightDiff < 0
@@ -283,7 +283,7 @@ export default function WorkoutLoggerModal({
                         styles.input,
                         {
                           color: colors.text,
-                          backgroundColor: isDark ? '#111' : '#F5EDE4',
+                          backgroundColor: isDark ? '#111' : 'rgba(0, 0, 0, 0.04)',
                           borderColor: colors.border,
                         },
                       ]}
@@ -300,7 +300,7 @@ export default function WorkoutLoggerModal({
                       styles.rpeInput,
                       {
                         color: colors.text,
-                        backgroundColor: isDark ? '#111' : '#F5EDE4',
+                        backgroundColor: isDark ? '#111' : 'rgba(0, 0, 0, 0.04)',
                         borderColor: colors.border,
                       },
                     ]}
@@ -333,7 +333,7 @@ export default function WorkoutLoggerModal({
                 styles.notesInput,
                 {
                   color: colors.text,
-                  backgroundColor: isDark ? '#111' : '#F5EDE4',
+                  backgroundColor: isDark ? '#111' : 'rgba(0, 0, 0, 0.04)',
                   borderColor: colors.border,
                 },
               ]}

@@ -15,7 +15,7 @@ import {
 import { X, Zap, Check, Clock } from 'lucide-react-native';
 import { GlassCard } from '../GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
-import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 
 interface Strategy {
@@ -46,7 +46,7 @@ export default function PlateauBreakerModal({
 }: PlateauBreakerModalProps) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : SandLightColors;
+  const colors = isDark ? DarkColors : LightColors;
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" transparent>
@@ -60,7 +60,7 @@ export default function PlateauBreakerModal({
             </View>
             <TouchableOpacity
               onPress={() => { lightImpact(); onClose(); }}
-              style={[styles.closeBtn, { backgroundColor: isDark ? '#1a1a1a' : '#E5DDD2' }]}
+              style={[styles.closeBtn, { backgroundColor: isDark ? '#1a1a1a' : '#E5E5E5' }]}
             >
               <X size={20} color={colors.text} />
             </TouchableOpacity>
@@ -130,7 +130,7 @@ export default function PlateauBreakerModal({
                           {
                             backgroundColor: strategy.isRecommended
                               ? colors.success + '15'
-                              : isDark ? '#1a1a1a' : '#E5DDD2',
+                              : isDark ? '#1a1a1a' : '#E5E5E5',
                             borderColor: strategy.isRecommended ? colors.success + '30' : colors.border,
                           },
                         ]}

@@ -33,7 +33,7 @@ import WeeklyAnalysisModal from '../../components/training/WeeklyAnalysisModal';
 import PlateauBreakerModal from '../../components/training/PlateauBreakerModal';
 import WorkoutLoggerModal from '../../components/training/WorkoutLoggerModal';
 import { useSettings } from '../../contexts/SettingsContext';
-import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { weightTrackingStorage } from '../../services/weightTrackingStorage';
 import {
   generateWeeklyAnalysis,
@@ -81,7 +81,7 @@ function TrendLineChart({ data, color, height = 140, isDark }: TrendChartProps) 
   if (data.length < 2) {
     return (
       <View style={{ height, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ color: isDark ? '#888' : '#7A7067', fontFamily: Fonts.regular, fontSize: 12 }}>
+        <Text style={{ color: isDark ? '#888' : '#86868B', fontFamily: Fonts.regular, fontSize: 12 }}>
           Need at least 2 weeks of data
         </Text>
       </View>
@@ -121,14 +121,14 @@ function TrendLineChart({ data, color, height = 140, isDark }: TrendChartProps) 
               y1={y}
               x2={width - padding.right}
               y2={y}
-              stroke={isDark ? '#222' : '#DDD5CA'}
+              stroke={isDark ? '#222' : '#E5E5E5'}
               strokeWidth={1}
             />
             <SvgText
               x={padding.left - 4}
               y={y + 4}
               textAnchor="end"
-              fill={isDark ? '#666' : '#7A7067'}
+              fill={isDark ? '#666' : '#86868B'}
               fontSize={10}
               fontFamily={Fonts.numericRegular}
             >
@@ -148,7 +148,7 @@ function TrendLineChart({ data, color, height = 140, isDark }: TrendChartProps) 
             x={x}
             y={height - 4}
             textAnchor="middle"
-            fill={isDark ? '#666' : '#7A7067'}
+            fill={isDark ? '#666' : '#86868B'}
             fontSize={9}
             fontFamily={Fonts.numericRegular}
           >
@@ -195,7 +195,7 @@ export default function ProgressiveOverloadPage() {
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : SandLightColors;
+  const colors = isDark ? DarkColors : LightColors;
 
   // State
   const [currentWeekStart, setCurrentWeekStart] = useState(getCurrentWeekStart());

@@ -8,7 +8,7 @@ import { TrendingUp, TrendingDown, Minus, Zap, AlertTriangle, Star } from 'lucid
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
-import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { ProgressiveOverloadEntry, OverloadStatus } from '../../types/training';
 import { lightImpact } from '../../utils/haptics';
 
@@ -43,7 +43,7 @@ export default function ExerciseOverloadCard({
 }: ExerciseOverloadCardProps) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : SandLightColors;
+  const colors = isDark ? DarkColors : LightColors;
   const status = STATUS_CONFIG[current.overloadStatus] || STATUS_CONFIG.maintaining;
   const StatusIcon = status.icon;
   const statusColor = colors[status.colorKey] as string;

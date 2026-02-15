@@ -4,7 +4,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSettings } from '../../contexts/SettingsContext';
-import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { NumberText } from '../NumberText';
 import { MuscleGroup } from '../../types/training';
 
@@ -39,7 +39,7 @@ const MUSCLE_LABELS: Record<string, string> = {
 export default function MuscleVolumeChart({ data }: MuscleVolumeChartProps) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : SandLightColors;
+  const colors = isDark ? DarkColors : LightColors;
 
   const maxSets = Math.max(25, ...data.map(d => d.weeklySets));
 
@@ -73,7 +73,7 @@ export default function MuscleVolumeChart({ data }: MuscleVolumeChartProps) {
               <View
                 style={[
                   styles.track,
-                  { backgroundColor: isDark ? '#1a1a1a' : '#E5DDD2' },
+                  { backgroundColor: isDark ? '#1a1a1a' : '#E5E5E5' },
                 ]}
               >
                 {/* MEV marker */}

@@ -17,7 +17,7 @@ import { NumberText } from '../NumberText';
 import OverloadScoreBar from './OverloadScoreBar';
 import MuscleVolumeChart from './MuscleVolumeChart';
 import { useSettings } from '../../contexts/SettingsContext';
-import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { AIWeeklyAnalysis, OverloadStatus } from '../../types/training';
 import { lightImpact } from '../../utils/haptics';
 
@@ -46,7 +46,7 @@ export default function WeeklyAnalysisModal({
 }: WeeklyAnalysisModalProps) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : SandLightColors;
+  const colors = isDark ? DarkColors : LightColors;
 
   const getStatusColor = (status: OverloadStatus) => {
     switch (status) {
@@ -68,7 +68,7 @@ export default function WeeklyAnalysisModal({
           <Text style={[styles.title, { color: colors.text }]}>Weekly Analysis</Text>
           <TouchableOpacity
             onPress={() => { lightImpact(); onClose(); }}
-            style={[styles.closeBtn, { backgroundColor: isDark ? '#1a1a1a' : '#E5DDD2' }]}
+            style={[styles.closeBtn, { backgroundColor: isDark ? '#1a1a1a' : '#E5E5E5' }]}
           >
             <X size={20} color={colors.text} />
           </TouchableOpacity>

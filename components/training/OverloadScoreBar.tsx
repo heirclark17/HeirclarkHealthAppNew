@@ -4,7 +4,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { useSettings } from '../../contexts/SettingsContext';
-import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { NumberText } from '../NumberText';
 
 let Animated: any = View;
@@ -36,7 +36,7 @@ interface OverloadScoreBarProps {
 export default function OverloadScoreBar({ score, label }: OverloadScoreBarProps) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : SandLightColors;
+  const colors = isDark ? DarkColors : LightColors;
 
   const width = useSharedValue(0);
 
@@ -70,7 +70,7 @@ export default function OverloadScoreBar({ score, label }: OverloadScoreBarProps
           </NumberText>
         )}
       </View>
-      <View style={[styles.track, { backgroundColor: isDark ? '#1a1a1a' : '#E5DDD2' }]}>
+      <View style={[styles.track, { backgroundColor: isDark ? '#1a1a1a' : '#E5E5E5' }]}>
         <AnimatedView
           style={[
             styles.fill,
