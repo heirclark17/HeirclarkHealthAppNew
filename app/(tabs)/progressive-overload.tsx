@@ -471,7 +471,7 @@ export default function ProgressiveOverloadPage() {
 
           {/* AI Analysis button */}
           <TouchableOpacity
-            style={[styles.aiButton, { backgroundColor: colors.accentPurple + '15', borderColor: colors.accentPurple + '30' }]}
+            style={[styles.aiButton, { backgroundColor: colors.accentPurple + '15' }]}
             onPress={handleAIAnalysis}
           >
             <Brain size={16} color={colors.accentPurple} />
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
   // Hero Card
   heroCard: {
     padding: 20,
-    marginBottom: 20,
+    marginBottom: 32,
   },
   weekNav: {
     flexDirection: 'row',
@@ -690,7 +690,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 0,
   },
   aiButtonText: {
     fontSize: 14,
@@ -703,7 +703,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: Fonts.light,
     fontWeight: '200',
-    marginBottom: 12,
+    marginTop: 12,
+    marginBottom: 16,
   },
 
   // Empty state
@@ -711,7 +712,7 @@ const styles = StyleSheet.create({
     padding: 40,
     alignItems: 'center',
     gap: 8,
-    marginBottom: 20,
+    marginBottom: 32,
   },
   emptyText: {
     fontSize: 15,
@@ -726,7 +727,7 @@ const styles = StyleSheet.create({
   // Muscle volume
   muscleCard: {
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 32,
   },
 
   // Trends
@@ -751,7 +752,7 @@ const styles = StyleSheet.create({
   },
   chartCard: {
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 32,
   },
   chartLabel: {
     fontSize: 12,
