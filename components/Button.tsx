@@ -7,7 +7,6 @@ import {
   TextStyle,
   ActivityIndicator,
   View,
-  useColorScheme,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Animated, {
@@ -15,7 +14,8 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { Colors, Fonts, Spacing, Typography } from '../constants/Theme';
+import { DarkColors, LightColors, Fonts, Spacing, Typography } from '../constants/Theme';
+import { useSettings } from '../contexts/SettingsContext';
 import { lightImpact, mediumImpact, successNotification } from '../utils/haptics';
 
 type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'glass';
@@ -29,29 +29,31 @@ const GLASS_SPRING = {
   mass: 0.8,
 };
 
-// iOS 26 Liquid Glass colors
-const GLASS_COLORS = {
-  light: {
-    primary: 'rgba(0, 122, 255, 0.85)',
-    primaryText: Colors.text,
-    secondary: 'rgba(255, 255, 255, 0.6)',
-    secondaryBorder: 'rgba(0, 0, 0, 0.08)',
-    tertiary: 'rgba(255, 255, 255, 0.4)',
-    destructive: 'rgba(255, 59, 48, 0.85)',
-    glass: 'rgba(255, 255, 255, 0.5)',
-    glassBorder: 'rgba(255, 255, 255, 0.3)',
-  },
-  dark: {
-    primary: 'rgba(10, 132, 255, 0.85)',
-    primaryText: Colors.text,
-    secondary: 'rgba(255, 255, 255, 0.12)',
-    secondaryBorder: 'rgba(255, 255, 255, 0.15)',
-    tertiary: 'rgba(255, 255, 255, 0.08)',
-    destructive: 'rgba(255, 69, 58, 0.85)',
-    glass: 'rgba(255, 255, 255, 0.1)',
-    glassBorder: 'rgba(255, 255, 255, 0.12)',
-  },
-};
+// iOS 26 Liquid Glass colors - resolved dynamically based on theme
+function getGlassColors(isDark: boolean) {
+  const themeColors = isDark ? DarkColors : LightColors;
+  return isDark
+    ? {
+        primary: 'rgba(10, 132, 255, 0.85)',
+        primaryText: themeColors.text,
+        secondary: 'rgba(255, 255, 255, 0.12)',
+        secondaryBorder: 'rgba(255, 255, 255, 0.15)',
+        tertiary: 'rgba(255, 255, 255, 0.08)',
+        destructive: 'rgba(255, 69, 58, 0.85)',
+        glass: 'rgba(255, 255, 255, 0.1)',
+        glassBorder: 'rgba(255, 255, 255, 0.12)',
+      }
+    : {
+        primary: 'rgba(0, 122, 255, 0.85)',
+        primaryText: themeColors.text,
+        secondary: 'rgba(255, 255, 255, 0.6)',
+        secondaryBorder: 'rgba(0, 0, 0, 0.08)',
+        tertiary: 'rgba(255, 255, 255, 0.4)',
+        destructive: 'rgba(255, 59, 48, 0.85)',
+        glass: 'rgba(255, 255, 255, 0.5)',
+        glassBorder: 'rgba(255, 255, 255, 0.3)',
+      };
+}
 
 interface ButtonProps {
   title: string;
@@ -100,9 +102,10 @@ export function Button({
   accessibilityHint,
   useBlur = false,
 }: ButtonProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+  const glassColors = getGlassColors(isDark);
 
   // Spring animation for press state
   const scale = useSharedValue(1);
@@ -163,26 +166,26 @@ export function Button({
             borderWidth: 1,
             borderColor: glassColors.secondaryBorder,
           },
-          text: { color: isDark ? Colors.text : Colors.text },
+          text: { color: themeColors.text },
         };
       case 'tertiary':
         return {
           container: {
             backgroundColor: glassColors.tertiary,
           },
-          text: { color: isDark ? 'rgba(255, 255, 255, 0.8)' : Colors.text },
+          text: { color: isDark ? 'rgba(255, 255, 255, 0.8)' : themeColors.text },
         };
       case 'destructive':
         return {
           container: {
             backgroundColor: glassColors.destructive,
-            shadowColor: Colors.errorStrong,
+            shadowColor: themeColors.errorStrong,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.25,
             shadowRadius: 8,
             elevation: 3,
           },
-          text: { color: Colors.text },
+          text: { color: themeColors.text },
         };
       case 'glass':
         return {
@@ -190,13 +193,13 @@ export function Button({
             backgroundColor: glassColors.glass,
             borderWidth: 1,
             borderColor: glassColors.glassBorder,
-            shadowColor: Colors.background,
+            shadowColor: themeColors.background,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.08,
             shadowRadius: 8,
             elevation: 2,
           },
-          text: { color: isDark ? Colors.text : Colors.text },
+          text: { color: themeColors.text },
         };
       default:
         return {

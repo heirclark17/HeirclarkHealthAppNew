@@ -1,10 +1,12 @@
 /**
  * SegmentedControl - Toggle between multiple options
+ * Frosted liquid glass styling with light/dark mode support
  */
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors } from '../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../constants/Theme';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface Props {
   values: string[];
@@ -13,8 +15,21 @@ interface Props {
 }
 
 export function SegmentedControl({ values, selectedIndex, onChange }: Props) {
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
+  const themeColors = isDark ? DarkColors : LightColors;
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark
+            ? 'rgba(255, 255, 255, 0.08)'
+            : 'rgba(0, 0, 0, 0.05)',
+        },
+      ]}
+    >
       {values.map((value, index) => (
         <TouchableOpacity
           key={index}
@@ -22,7 +37,14 @@ export function SegmentedControl({ values, selectedIndex, onChange }: Props) {
             styles.segment,
             index === 0 && styles.firstSegment,
             index === values.length - 1 && styles.lastSegment,
-            selectedIndex === index && styles.selectedSegment,
+            selectedIndex === index && [
+              styles.selectedSegment,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(255, 255, 255, 0.15)'
+                  : 'rgba(0, 0, 0, 0.1)',
+              },
+            ],
           ]}
           onPress={() => onChange(index)}
           activeOpacity={0.7}
@@ -30,7 +52,10 @@ export function SegmentedControl({ values, selectedIndex, onChange }: Props) {
           <Text
             style={[
               styles.segmentText,
-              selectedIndex === index && styles.selectedText,
+              { color: themeColors.textSecondary },
+              selectedIndex === index && {
+                color: themeColors.text,
+              },
             ]}
           >
             {value}
@@ -44,7 +69,6 @@ export function SegmentedControl({ values, selectedIndex, onChange }: Props) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface + '40',
     borderRadius: 12,
     padding: 4,
   },
@@ -64,14 +88,10 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 8,
   },
   selectedSegment: {
-    backgroundColor: Colors.primary,
+    borderRadius: 8,
   },
   segmentText: {
     fontSize: 14,
-    fontFamily: 'Urbanist_600SemiBold',
-    color: Colors.textSecondary,
-  },
-  selectedText: {
-    color: Colors.background,
+    fontFamily: Fonts.semiBold,
   },
 });
