@@ -1,30 +1,21 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  Easing,
   SlideInRight,
   SlideOutLeft,
   SlideInLeft,
   SlideOutRight,
-  FadeIn,
-  FadeOut,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useRouter } from 'expo-router';
-import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
+import { Colors, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePostHog } from '../../contexts/PostHogContext';
@@ -34,7 +25,6 @@ import {
 } from '../../contexts/GoalWizardContext';
 import { useMealPlan } from '../../contexts/MealPlanContext';
 import { useTraining } from '../../contexts/TrainingContext';
-import { StepProgressBar } from '../../components/goals/StepProgressBar';
 import { PrimaryGoalStep } from '../../components/goals/PrimaryGoalStep';
 import { BodyMetricsStep } from '../../components/goals/BodyMetricsStep';
 import { ActivityLifestyleStep } from '../../components/goals/ActivityLifestyleStep';
@@ -43,7 +33,7 @@ import { ProgramSelectionStep } from '../../components/goals/ProgramSelectionSte
 import { PlanPreviewStep } from '../../components/goals/PlanPreviewStep';
 import { SuccessScreen } from '../../components/goals/SuccessScreen';
 import { CoachingModal } from '../../components/goals/CoachingModal';
-import { lightImpact } from '../../utils/haptics';
+
 
 // Animated wrapper for step transitions
 interface AnimatedStepProps {
@@ -261,11 +251,6 @@ function GoalWizardContent() {
     }
   };
 
-  const handleClose = async () => {
-    await lightImpact();
-    router.back();
-  };
-
   // Prepare coaching data from state
   const coachingGoalData = state.results ? {
     calories: state.results.calories,
@@ -363,30 +348,7 @@ function GoalWizardContent() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top', 'left', 'right']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={handleClose}
-          style={[styles.closeButton, { backgroundColor: colors.backgroundSecondary }]}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          accessibilityLabel="Close goal wizard"
-          accessibilityRole="button"
-          accessibilityHint="Returns to previous screen"
-        >
-          <Ionicons name="close" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>SET YOUR GOALS</Text>
-        <View style={styles.headerSpacer} />
-      </View>
-
-      {/* Step Progress Bar */}
-      <StepProgressBar
-        currentStep={state.currentStep}
-        totalSteps={6}
-        labels={['Goal', 'Body', 'Activity', 'Nutrition', 'Program', 'Review']}
-      />
-
+    <View style={[styles.container, { backgroundColor: 'transparent' }]}>
       {/* Step Content */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -395,7 +357,7 @@ function GoalWizardContent() {
       >
         {renderStep()}
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -412,35 +374,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    backgroundColor: Colors.backgroundSecondary,
-  },
-  headerTitle: {
-    fontSize: 14,
-    fontFamily: Fonts.semiBold,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: Colors.text,
-  },
-  headerSpacer: {
-    width: 40,
-  },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 8,
   },
   stepContainer: {
     flex: 1,
