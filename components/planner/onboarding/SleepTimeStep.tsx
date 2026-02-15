@@ -8,7 +8,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Moon } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
-import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   value?: string;
@@ -30,7 +30,8 @@ export function SleepTimeStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   // Initialize with 10:00 PM or existing value
   const [time, setTime] = useState(() => {
@@ -56,7 +57,6 @@ export function SleepTimeStep({
 
   const handleNext = () => {
     if (!value) {
-      // Auto-save current time if not manually set
       const hours = String(time.getHours()).padStart(2, '0');
       const minutes = String(time.getMinutes()).padStart(2, '0');
       onChange(`${hours}:${minutes}`);
@@ -69,7 +69,7 @@ export function SleepTimeStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <Moon size={48} color={Colors.accentPurple} />
+          <Moon size={48} color={themeColors.accentPurple} />
           <Text style={[styles.title, { color: themeColors.text }]}>What time do you go to bed?</Text>
           <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             Choose your typical bedtime on weeknights
@@ -89,7 +89,7 @@ export function SleepTimeStep({
         </View>
 
         {/* Current Selection */}
-        <Text style={[styles.selectedTime, { color: Colors.accentPurple }]}>
+        <Text style={[styles.selectedTime, { color: themeColors.text }]}>
           {time.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
@@ -106,7 +106,7 @@ export function SleepTimeStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
@@ -114,7 +114,7 @@ export function SleepTimeStep({
             onPress={handleNext}
             style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
           >
-            <Text style={[styles.actionButtonText, { color: '#fff' }]}>Next</Text>
+            <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Next</Text>
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -137,13 +137,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -157,14 +156,12 @@ const styles = StyleSheet.create({
   },
   selectedTime: {
     fontSize: 32,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   actions: {
@@ -178,8 +175,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.medium,
     fontSize: 16,
-    fontWeight: '200' as const,
   },
 });

@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { CheckCircle, Edit2 } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
-import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 import { PlannerPreferences } from '../../../types/planner';
 
 interface Props {
@@ -30,7 +30,8 @@ export function ReviewStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
@@ -40,7 +41,7 @@ export function ReviewStep({
   };
 
   const formatEnergyPeak = (peak: string) => {
-    const labels = {
+    const labels: Record<string, string> = {
       morning: 'Morning Person (6 AM - 12 PM)',
       afternoon: 'Afternoon Peak (12 PM - 5 PM)',
       evening: 'Night Owl (5 PM - 10 PM)',
@@ -49,7 +50,7 @@ export function ReviewStep({
   };
 
   const formatFlexibility = (flex: string) => {
-    const labels = {
+    const labels: Record<string, string> = {
       very: 'Very Flexible',
       somewhat: 'Somewhat Flexible',
       not_very: 'Not Very Flexible',
@@ -58,7 +59,7 @@ export function ReviewStep({
   };
 
   const formatPriorities = (priorities: string[]) => {
-    const labels = {
+    const labels: Record<string, string> = {
       health: 'Health & Fitness',
       work: 'Work & Career',
       family: 'Family & Friends',
@@ -74,7 +75,7 @@ export function ReviewStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <CheckCircle size={48} color={Colors.protein} />
+          <CheckCircle size={48} color={themeColors.protein} />
           <Text style={[styles.title, { color: themeColors.text }]}>Review Your Preferences</Text>
           <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             Make sure everything looks good before we create your schedule
@@ -132,7 +133,7 @@ export function ReviewStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
@@ -140,7 +141,7 @@ export function ReviewStep({
             onPress={onConfirm}
             style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
           >
-            <Text style={[styles.actionButtonText, { color: '#fff' }]}>Complete Setup</Text>
+            <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Complete Setup</Text>
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -191,13 +192,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -218,15 +218,13 @@ const styles = StyleSheet.create({
   },
   reviewLabel: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.medium,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   reviewValue: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
   },
   editButton: {
     width: 32,
@@ -237,8 +235,7 @@ const styles = StyleSheet.create({
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   actions: {
@@ -252,8 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.medium,
     fontSize: 16,
-    fontWeight: '200' as const,
   },
 });

@@ -29,7 +29,7 @@ function getCalendar(): any {
 import { CalendarCheck, Lock, Shield } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
-import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   onGranted: () => void;
@@ -54,7 +54,8 @@ export function CalendarPermissionStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   const handleRequestPermission = async () => {
     setIsRequesting(true);
@@ -104,13 +105,13 @@ export function CalendarPermissionStep({
         {/* Privacy Notice */}
         <View style={styles.privacy}>
           <View style={styles.privacyItem}>
-            <Lock size={20} color={Colors.protein} />
+            <Lock size={20} color={themeColors.protein} />
             <Text style={[styles.privacyText, { color: themeColors.text }]}>
               Calendar data stays on your device
             </Text>
           </View>
           <View style={styles.privacyItem}>
-            <Shield size={20} color={Colors.carbs} />
+            <Shield size={20} color={themeColors.carbs} />
             <Text style={[styles.privacyText, { color: themeColors.text }]}>
               Never shared with our servers
             </Text>
@@ -119,8 +120,8 @@ export function CalendarPermissionStep({
 
         {/* Permission Status */}
         {permissionGranted && (
-          <View style={[styles.successBanner, { backgroundColor: Colors.protein + '20' }]}>
-            <Text style={[styles.successText, { color: Colors.protein }]}>
+          <View style={[styles.successBanner, { backgroundColor: themeColors.protein + '20' }]}>
+            <Text style={[styles.successText, { color: themeColors.protein }]}>
               Calendar access granted
             </Text>
           </View>
@@ -135,7 +136,7 @@ export function CalendarPermissionStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
@@ -145,13 +146,13 @@ export function CalendarPermissionStep({
               onPress={handleContinue}
               style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
             >
-              <Text style={[styles.actionButtonText, { color: '#fff' }]}>Continue</Text>
+              <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Continue</Text>
             </TouchableOpacity>
           ) : (
             <>
               <TouchableOpacity
                 onPress={handleSkip}
-                style={[styles.actionButton, { backgroundColor: surfaceColor }]}
+                style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
               >
                 <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Skip</Text>
               </TouchableOpacity>
@@ -161,9 +162,9 @@ export function CalendarPermissionStep({
                 style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary, opacity: isRequesting ? 0.5 : 1 }]}
               >
                 {isRequesting ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator size="small" color={themeColors.primaryText} />
                 ) : (
-                  <Text style={[styles.actionButtonText, { color: '#fff' }]}>Allow Access</Text>
+                  <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Allow Access</Text>
                 )}
               </TouchableOpacity>
             </>
@@ -189,13 +190,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -210,8 +210,7 @@ const styles = StyleSheet.create({
   },
   privacyText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
   },
   successBanner: {
     borderRadius: 12,
@@ -220,13 +219,11 @@ const styles = StyleSheet.create({
   },
   successText: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.medium,
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   actions: {
@@ -240,8 +237,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.medium,
     fontSize: 16,
-    fontWeight: '200' as const,
   },
 });

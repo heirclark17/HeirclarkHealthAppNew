@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Calendar, Clock, Zap, X } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
-import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   onNext: () => void;
@@ -51,21 +51,18 @@ export function WelcomeStep({ onNext, onClose, currentStep, totalSteps }: Props)
             icon={<Clock size={24} color={themeColors.primary} />}
             title="Smart Scheduling"
             description="AI-powered timeline that balances workouts, meals, and your calendar"
-            isDark={isDark}
             themeColors={themeColors}
           />
           <FeatureItem
-            icon={<Zap size={24} color={Colors.protein} />}
+            icon={<Zap size={24} color={themeColors.protein} />}
             title="Energy Optimization"
             description="Schedule activities when you're at your peak energy level"
-            isDark={isDark}
             themeColors={themeColors}
           />
           <FeatureItem
-            icon={<Calendar size={24} color={Colors.carbs} />}
+            icon={<Calendar size={24} color={themeColors.carbs} />}
             title="Calendar Integration"
             description="Sync with your device calendar for conflict-free planning"
-            isDark={isDark}
             themeColors={themeColors}
           />
         </View>
@@ -80,18 +77,17 @@ export function WelcomeStep({ onNext, onClose, currentStep, totalSteps }: Props)
           onPress={onNext}
           style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
         >
-          <Text style={[styles.actionButtonText, { color: '#fff' }]}>Get Started</Text>
+          <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Get Started</Text>
         </TouchableOpacity>
       </GlassCard>
     </View>
   );
 }
 
-function FeatureItem({ icon, title, description, isDark, themeColors }: {
+function FeatureItem({ icon, title, description, themeColors }: {
   icon: React.ReactNode;
   title: string;
   description: string;
-  isDark: boolean;
   themeColors: typeof DarkColors;
 }) {
   return (
@@ -131,13 +127,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -156,18 +151,16 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.medium,
   },
   featureDescription: {
     fontSize: 14,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     lineHeight: 20,
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   actionButton: {
@@ -176,8 +169,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.medium,
     fontSize: 16,
-    fontWeight: '200' as const,
   },
 });

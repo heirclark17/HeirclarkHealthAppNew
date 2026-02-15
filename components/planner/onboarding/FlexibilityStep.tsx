@@ -60,7 +60,8 @@ export function FlexibilityStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   return (
     <View style={styles.container}>
@@ -87,19 +88,19 @@ export function FlexibilityStep({
               >
                 <GlassCard style={[
                   styles.optionCard,
-                  isSelected && { backgroundColor: option.color + '15' },
+                  isSelected && { backgroundColor: option.color + '20' },
                 ]}>
                   <View style={styles.optionContent}>
                     <Icon
                       size={32}
-                      color={isSelected ? option.color : themeColors.textSecondary}
+                      color={isSelected ? option.color : themeColors.textMuted}
                     />
                     <View style={styles.optionText}>
                       <Text
                         style={[
                           styles.optionLabel,
                           { color: themeColors.text },
-                          isSelected && { color: option.color },
+                          isSelected && { color: option.color, fontFamily: Fonts.semiBold },
                         ]}
                       >
                         {option.label}
@@ -124,7 +125,7 @@ export function FlexibilityStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
@@ -133,7 +134,7 @@ export function FlexibilityStep({
             disabled={!value}
             style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary, opacity: !value ? 0.5 : 1 }]}
           >
-            <Text style={[styles.actionButtonText, { color: '#fff' }]}>Next</Text>
+            <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Next</Text>
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -156,13 +157,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -183,18 +183,16 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.medium,
   },
   optionDescription: {
     fontSize: 14,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     lineHeight: 20,
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   actions: {
@@ -208,8 +206,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.medium,
     fontSize: 16,
-    fontWeight: '200' as const,
   },
 });

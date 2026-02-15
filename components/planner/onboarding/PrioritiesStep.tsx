@@ -26,7 +26,7 @@ const PRIORITY_OPTIONS: {
   color: string;
 }[] = [
   { id: 'health', label: 'Health & Fitness', icon: Target, color: Colors.activeEnergy },
-  { id: 'work', label: 'Work & Career', icon: Briefcase, color: Colors.primary },
+  { id: 'work', label: 'Work & Career', icon: Briefcase, color: Colors.restingEnergy },
   { id: 'family', label: 'Family & Friends', icon: Heart, color: Colors.protein },
   { id: 'learning', label: 'Learning', icon: BookOpen, color: Colors.carbs },
   { id: 'hobbies', label: 'Hobbies', icon: Gamepad, color: Colors.fat },
@@ -44,7 +44,8 @@ export function PrioritiesStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   const togglePriority = (priority: Priority) => {
     if (value.includes(priority)) {
@@ -65,7 +66,7 @@ export function PrioritiesStep({
           <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             Select up to 3 areas that matter most to you
           </Text>
-          <Text style={[styles.counter, { color: themeColors.primary }]}>
+          <Text style={[styles.counter, { color: themeColors.text }]}>
             {value.length} / 3 selected
           </Text>
         </View>
@@ -85,17 +86,17 @@ export function PrioritiesStep({
               >
                 <GlassCard style={[
                   styles.priorityCard,
-                  isSelected && { backgroundColor: option.color + '15' },
+                  isSelected && { backgroundColor: option.color + '20' },
                 ]}>
                   <Icon
                     size={32}
-                    color={isSelected ? option.color : themeColors.textSecondary}
+                    color={isSelected ? option.color : themeColors.textMuted}
                   />
                   <Text
                     style={[
                       styles.priorityLabel,
                       { color: themeColors.text },
-                      isSelected && { color: option.color },
+                      isSelected && { color: option.color, fontFamily: Fonts.medium },
                     ]}
                   >
                     {option.label}
@@ -115,7 +116,7 @@ export function PrioritiesStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
@@ -124,7 +125,7 @@ export function PrioritiesStep({
             disabled={value.length === 0}
             style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary, opacity: value.length === 0 ? 0.5 : 1 }]}
           >
-            <Text style={[styles.actionButtonText, { color: '#fff' }]}>Next</Text>
+            <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Next</Text>
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -147,20 +148,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
   counter: {
     fontSize: 14,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericMedium,
     marginTop: 4,
   },
   grid: {
@@ -181,14 +180,12 @@ const styles = StyleSheet.create({
   },
   priorityLabel: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   actions: {
@@ -202,8 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.medium,
     fontSize: 16,
-    fontWeight: '200' as const,
   },
 });

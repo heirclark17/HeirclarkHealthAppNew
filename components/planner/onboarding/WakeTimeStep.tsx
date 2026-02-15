@@ -8,7 +8,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Sun } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
-import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   value?: string;
@@ -30,7 +30,8 @@ export function WakeTimeStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   // Initialize with 6:00 AM or existing value
   const [time, setTime] = useState(() => {
@@ -69,7 +70,7 @@ export function WakeTimeStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <Sun size={48} color={Colors.protein} />
+          <Sun size={48} color={themeColors.protein} />
           <Text style={[styles.title, { color: themeColors.text }]}>What time do you wake up?</Text>
           <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
             Choose your typical wake time on weekdays
@@ -89,7 +90,7 @@ export function WakeTimeStep({
         </View>
 
         {/* Current Selection */}
-        <Text style={[styles.selectedTime, { color: themeColors.primary }]}>
+        <Text style={[styles.selectedTime, { color: themeColors.text }]}>
           {time.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
@@ -106,7 +107,7 @@ export function WakeTimeStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
@@ -114,7 +115,7 @@ export function WakeTimeStep({
             onPress={handleNext}
             style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
           >
-            <Text style={[styles.actionButtonText, { color: '#fff' }]}>Next</Text>
+            <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Next</Text>
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -137,13 +138,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -157,14 +157,12 @@ const styles = StyleSheet.create({
   },
   selectedTime: {
     fontSize: 32,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
   actions: {
@@ -178,8 +176,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.medium,
     fontSize: 16,
-    fontWeight: '200' as const,
   },
 });
