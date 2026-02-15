@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
-
+import { router } from 'expo-router';
 import { Flame, Dumbbell, ShieldCheck, Heart, Check } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
-
+import { WizardHeader } from './WizardHeader';
 
 interface GoalOption {
   id: PrimaryGoal;
@@ -144,6 +144,11 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
     setPrimaryGoal(goalId);
   };
 
+  const handleBack = async () => {
+    await lightImpact();
+    router.back();
+  };
+
   const handleContinue = async () => {
     if (!state.primaryGoal) return;
     await lightImpact();
@@ -152,12 +157,23 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
   return (
     <View style={styles.container}>
+      {/* Modern Liquid Glass Sticky Header */}
+      <WizardHeader
+        currentStep={1}
+        totalSteps={6}
+        title="What's Your Goal?"
+        onBack={handleBack}
+        isDark={isDark}
+      />
+
       {/* Scrollable content area */}
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Spacer for sticky header */}
+        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
@@ -223,7 +239,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 8,
+    // Content starts after sticky header
   },
   subtitle: {
     paddingHorizontal: 20,

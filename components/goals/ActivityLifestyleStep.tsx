@@ -28,7 +28,7 @@ import { ActivityLevel } from '../../constants/goals';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
-
+import { WizardHeader } from './WizardHeader';
 
 // Section wrapper using GlassCard
 function GlassSection({ children, style }: { children: React.ReactNode; style?: any }) {
@@ -395,7 +395,18 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
   return (
     <View style={styles.container}>
+      {/* Modern Liquid Glass Sticky Header */}
+      <WizardHeader
+        currentStep={3}
+        totalSteps={6}
+        title="Activity & Lifestyle"
+        onBack={onBack}
+        isDark={isDark}
+      />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Spacer for sticky header */}
+        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
