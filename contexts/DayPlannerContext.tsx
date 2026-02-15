@@ -6,8 +6,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Calendar from 'expo-calendar';
-import { api } from '@/services/api';
-import { SchedulingEngine } from '@/services/schedulingEngine';
+import { api } from '../services/api';
+import { SchedulingEngine } from '../services/schedulingEngine';
 import {
   PlannerPreferences,
   WeeklyPlan,
@@ -18,7 +18,7 @@ import {
   SchedulingRequest,
   CompletionHistory,
   PLANNER_CONSTANTS,
-} from '@/types/planner';
+} from '../types/planner';
 
 // AsyncStorage keys
 const STORAGE_KEYS = {
