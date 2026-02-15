@@ -15,7 +15,8 @@ import {
 } from '@expo-google-fonts/urbanist';
 import { GoalWizardProvider, MealPlanProvider, TrainingProvider, CustomWorkoutProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
 import { CardioRecommendationProvider } from '../contexts/CardioRecommendationContext';
-import { DayPlannerProvider } from '../contexts/DayPlannerContext';
+// DayPlannerProvider disabled until expo-calendar native module is built
+// import { DayPlannerProvider } from '../contexts/DayPlannerContext';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { PostHogProvider } from '../contexts/PostHogContext';
@@ -129,13 +130,11 @@ export default function RootLayout() {
                                         <HabitFormationProvider>
                                           <AdaptiveTDEEProvider>
                                             <CardioRecommendationProvider>
-                                              <DayPlannerProvider>
                                                 <SmartMealLoggerProvider>
                                                   <BackgroundLayer>
                                                     <Slot />
                                                   </BackgroundLayer>
                                                 </SmartMealLoggerProvider>
-                                              </DayPlannerProvider>
                                             </CardioRecommendationProvider>
                                           </AdaptiveTDEEProvider>
                                         </HabitFormationProvider>
