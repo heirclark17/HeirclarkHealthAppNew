@@ -520,13 +520,18 @@ export default function ProgramsScreen() {
         )}
 
         {/* Today's Cardio Recommendation - Separate from strength training */}
-        {weeklyPlan && cardioRecommendations && currentDay && (
-          <CardioRecommendationCard
-            recommendation={cardioRecommendations[currentDay.dayOfWeek.toLowerCase() as keyof typeof cardioRecommendations]}
-            dayName={currentDay.dayOfWeek}
-            isDark={isDark}
-          />
-        )}
+        {weeklyPlan && cardioRecommendations && currentDay && (() => {
+          const dayKey = currentDay.dayOfWeek.toLowerCase() as keyof typeof cardioRecommendations;
+          const todaysCardio = cardioRecommendations[dayKey];
+          // Only render if we have cardio data for this day
+          return todaysCardio ? (
+            <CardioRecommendationCard
+              recommendation={todaysCardio}
+              dayName={currentDay.dayOfWeek}
+              isDark={isDark}
+            />
+          ) : null;
+        })()}
 
         {/* Nutrition Guidance - Calorie Deficit Card */}
         {weeklyPlan && nutritionGuidance && (
