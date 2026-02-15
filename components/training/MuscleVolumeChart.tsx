@@ -5,7 +5,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
-import NumberText from '../NumberText';
+import { NumberText } from '../NumberText';
 import { MuscleGroup } from '../../types/training';
 
 interface MuscleVolumeData {

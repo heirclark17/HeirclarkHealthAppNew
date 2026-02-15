@@ -408,7 +408,7 @@ export const weightTrackingStorage = {
 
   async getExercisesWithHistory(): Promise<string[]> {
     const logs = await this.getAllWeightLogs();
-    const exerciseIds = new Set(logs.map(l => l.exerciseId));
+    const exerciseIds = new Set<string>(logs.map(l => l.exerciseId));
     return Array.from(exerciseIds);
   },
 

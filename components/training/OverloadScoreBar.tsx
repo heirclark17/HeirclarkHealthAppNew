@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
-import NumberText from '../NumberText';
+import { NumberText } from '../NumberText';
 
 let Animated: any = View;
 let useSharedValue: any;

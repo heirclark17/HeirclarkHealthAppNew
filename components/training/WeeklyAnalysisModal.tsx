@@ -12,8 +12,8 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { X, TrendingUp, TrendingDown, Minus, Star, AlertTriangle, Zap } from 'lucide-react-native';
-import GlassCard from '../GlassCard';
-import NumberText from '../NumberText';
+import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 import OverloadScoreBar from './OverloadScoreBar';
 import MuscleVolumeChart from './MuscleVolumeChart';
 import { useSettings } from '../../contexts/SettingsContext';

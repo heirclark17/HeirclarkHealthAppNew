@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { X, Zap, Check, Clock } from 'lucide-react-native';
-import GlassCard from '../GlassCard';
+import { GlassCard } from '../GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
 import { lightImpact, mediumImpact } from '../../utils/haptics';

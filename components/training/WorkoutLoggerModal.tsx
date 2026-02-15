@@ -17,8 +17,8 @@ import {
   Platform,
 } from 'react-native';
 import { X, Plus, Trash2, ChevronDown } from 'lucide-react-native';
-import GlassCard from '../GlassCard';
-import NumberText from '../NumberText';
+import { GlassCard } from '../GlassCard';
+import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DarkColors, SandLightColors, Fonts } from '../../constants/Theme';
 import { SetLog, WeightLog, AISetRecommendation } from '../../types/training';
