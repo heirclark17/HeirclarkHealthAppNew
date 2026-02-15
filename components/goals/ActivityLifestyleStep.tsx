@@ -28,6 +28,7 @@ import { ActivityLevel } from '../../constants/goals';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
+import { WizardHeader } from './WizardHeader';
 
 // Section wrapper using GlassCard
 function GlassSection({ children, style }: { children: React.ReactNode; style?: any }) {
@@ -394,13 +395,24 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
   return (
     <View style={styles.container}>
+      {/* Modern Liquid Glass Sticky Header */}
+      <WizardHeader
+        currentStep={3}
+        totalSteps={6}
+        title="Activity & Lifestyle"
+        onBack={onBack}
+        isDark={isDark}
+      />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Activity Level</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Tell us about your typical day and exercise habits for accurate calorie calculations.
-        </Text>
-      </View>
+        {/* Spacer for sticky header */}
+        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+
+        <View style={styles.subtitle}>
+          <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
+            Tell us about your typical day and exercise habits for accurate calorie calculations.
+          </Text>
+        </View>
 
       {/* Activity Level Selection */}
       <View style={styles.activityList}>
@@ -878,22 +890,16 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  header: {
-    marginTop: 48,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.text,
-    marginBottom: 8,
-  },
   subtitle: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  subtitleText: {
     fontSize: 15,
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 22,
+    textAlign: 'center',
   },
   glassSection: {
     marginBottom: 24,

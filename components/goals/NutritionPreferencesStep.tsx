@@ -29,6 +29,7 @@ import { useGoalWizard, DietStyle } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
+import { WizardHeader } from './WizardHeader';
 
 // iOS 26 Liquid Glass Section wrapper
 function GlassSection({ children, isDark, style }: { children: React.ReactNode; isDark: boolean; style?: any }) {

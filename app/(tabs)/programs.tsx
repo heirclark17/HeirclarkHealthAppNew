@@ -432,14 +432,12 @@ export default function ProgramsScreen() {
   const handlePreviousWeek = useCallback(() => {
     lightImpact();
     goToPreviousWeek();
-    generateWeeklyPlan();
-  }, [goToPreviousWeek, generateWeeklyPlan]);
+  }, [goToPreviousWeek]);
 
   const handleNextWeek = useCallback(() => {
     lightImpact();
     goToNextWeek();
-    generateWeeklyPlan();
-  }, [goToNextWeek, generateWeeklyPlan]);
+  }, [goToNextWeek]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: 'transparent' }]} edges={['top', 'left', 'right']}>
@@ -565,6 +563,27 @@ export default function ProgramsScreen() {
                 </TouchableOpacity>
               )}
 
+              {/* Program Selection */}
+              {selectedProgram ? (
+                <TouchableOpacity
+                  onPress={handleOpenProgramModal}
+                  style={[styles.selectedProgramBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)', borderColor: colors.border }]}
+                >
+                  <Dumbbell size={16} color={colors.accent} strokeWidth={1.5} />
+                  <Text style={[styles.selectedProgramText, { color: colors.text }]}>{selectedProgram.name}</Text>
+                  <Text style={[styles.changeProgramText, { color: colors.accent }]}>Change</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleOpenProgramModal}
+                  style={[styles.selectProgramButton, { borderColor: colors.accent }]}
+                >
+                  <Dumbbell size={18} color={colors.accent} strokeWidth={1.5} />
+                  <Text style={[styles.selectProgramButtonText, { color: colors.accent }]}>Select a Training Program</Text>
+                  <ArrowRight size={16} color={colors.accent} strokeWidth={1.5} />
+                </TouchableOpacity>
+              )}
+
               {/* Generate Buttons Row */}
               <View style={styles.generateButtonsRow}>
                 <GlassButton
@@ -572,7 +591,7 @@ export default function ProgramsScreen() {
                   icon="flash-outline"
                   variant="secondary"
                   size="large"
-                  disabled={isGenerating || !goalWizardState?.primaryGoal}
+                  disabled={isGenerating || !goalWizardState?.primaryGoal || !selectedProgram}
                   onPress={handleGenerate}
                   style={{ flex: 1 }}
                 />
@@ -581,7 +600,7 @@ export default function ProgramsScreen() {
                   icon="sparkles"
                   variant="primary"
                   size="large"
-                  disabled={isGenerating || !goalWizardState?.primaryGoal}
+                  disabled={isGenerating || !goalWizardState?.primaryGoal || !selectedProgram}
                   onPress={handleAIGenerate}
                   style={{ flex: 1 }}
                 />

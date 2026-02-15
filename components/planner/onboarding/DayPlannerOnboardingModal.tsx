@@ -1,0 +1,190 @@
+/**
+ * DayPlannerOnboardingModal - 8-step wizard for planner preferences
+ * Guides users through setting up their daily scheduling preferences
+ */
+
+import React, { useState } from 'react';
+import { Modal, View, StyleSheet } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { PlannerPreferences, Priority, EnergyPeak, Flexibility } from '@/types/planner';
+import { WelcomeStep } from './WelcomeStep';
+import { WakeTimeStep } from './WakeTimeStep';
+import { SleepTimeStep } from './SleepTimeStep';
+import { PrioritiesStep } from './PrioritiesStep';
+import { EnergyPeakStep } from './EnergyPeakStep';
+import { FlexibilityStep } from './FlexibilityStep';
+import { CalendarPermissionStep } from './CalendarPermissionStep';
+import { ReviewStep } from './ReviewStep';
+
+interface Props {
+  visible: boolean;
+  onComplete: (preferences: PlannerPreferences) => void;
+  onClose: () => void;
+}
+
+export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Props) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [preferences, setPreferences] = useState<Partial<PlannerPreferences>>({
+    calendarSyncEnabled: false,
+  });
+
+  const totalSteps = 8;
+
+  /**
+   * Update a single preference field
+   */
+  const updatePreference = <K extends keyof PlannerPreferences>(
+    key: K,
+    value: PlannerPreferences[K]
+  ) => {
+    setPreferences((prev) => ({ ...prev, [key]: value }));
+  };
+
+  /**
+   * Navigate to next step
+   */
+  const goToNext = () => {
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep((prev) => prev + 1);
+    }
+  };
+
+  /**
+   * Navigate to previous step
+   */
+  const goToPrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
+
+  /**
+   * Complete onboarding
+   */
+  const handleComplete = () => {
+    // Validate all fields are set
+    if (
+      !preferences.wakeTime ||
+      !preferences.sleepTime ||
+      !preferences.priorities ||
+      !preferences.energyPeak ||
+      !preferences.flexibility
+    ) {
+      console.error('[Onboarding] Missing required preferences');
+      return;
+    }
+
+    onComplete(preferences as PlannerPreferences);
+  };
+
+  /**
+   * Render current step
+   */
+  const renderStep = () => {
+    const stepProps = {
+      onNext: goToNext,
+      onPrevious: goToPrevious,
+      currentStep: currentStep + 1,
+      totalSteps,
+    };
+
+    switch (currentStep) {
+      case 0:
+        return <WelcomeStep {...stepProps} />;
+
+      case 1:
+        return (
+          <WakeTimeStep
+            {...stepProps}
+            value={preferences.wakeTime}
+            onChange={(value) => updatePreference('wakeTime', value)}
+          />
+        );
+
+      case 2:
+        return (
+          <SleepTimeStep
+            {...stepProps}
+            value={preferences.sleepTime}
+            onChange={(value) => updatePreference('sleepTime', value)}
+          />
+        );
+
+      case 3:
+        return (
+          <PrioritiesStep
+            {...stepProps}
+            value={preferences.priorities || []}
+            onChange={(value) => updatePreference('priorities', value)}
+          />
+        );
+
+      case 4:
+        return (
+          <EnergyPeakStep
+            {...stepProps}
+            value={preferences.energyPeak}
+            onChange={(value) => updatePreference('energyPeak', value)}
+          />
+        );
+
+      case 5:
+        return (
+          <FlexibilityStep
+            {...stepProps}
+            value={preferences.flexibility}
+            onChange={(value) => updatePreference('flexibility', value)}
+          />
+        );
+
+      case 6:
+        return (
+          <CalendarPermissionStep
+            {...stepProps}
+            onGranted={() => updatePreference('calendarSyncEnabled', true)}
+            onSkipped={() => updatePreference('calendarSyncEnabled', false)}
+          />
+        );
+
+      case 7:
+        return (
+          <ReviewStep
+            preferences={preferences as PlannerPreferences}
+            onConfirm={handleComplete}
+            onEdit={(step) => setCurrentStep(step - 1)}
+            {...stepProps}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <BlurView intensity={80} style={styles.blurContainer}>
+        <SafeAreaView style={styles.safeArea}>
+          {renderStep()}
+        </SafeAreaView>
+      </BlurView>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  blurContainer: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+  },
+});
