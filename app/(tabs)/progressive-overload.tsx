@@ -644,7 +644,8 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontSize: 28,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
     marginBottom: 16,
   },
 
@@ -661,7 +662,8 @@ const styles = StyleSheet.create({
   },
   weekLabel: {
     fontSize: 15,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
   },
   quickStats: {
     flexDirection: 'row',
@@ -675,7 +677,7 @@ const styles = StyleSheet.create({
   },
   quickStatValue: {
     fontSize: 20,
-    fontFamily: Fonts.numericBold,
+    fontFamily: Fonts.numericRegular,
   },
   quickStatLabel: {
     fontSize: 10,
@@ -692,13 +694,15 @@ const styles = StyleSheet.create({
   },
   aiButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
   },
 
   // Sections
   sectionTitle: {
     fontSize: 20,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
     marginBottom: 12,
   },
 
@@ -711,7 +715,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
   },
   emptySubtext: {
     fontSize: 12,
@@ -742,7 +747,7 @@ const styles = StyleSheet.create({
   },
   trendToggleText: {
     fontSize: 12,
-    fontFamily: Fonts.numericSemiBold,
+    fontFamily: Fonts.numericRegular,
   },
   chartCard: {
     padding: 16,
@@ -767,6 +772,7 @@ const styles = StyleSheet.create({
   },
   logButtonText: {
     fontSize: 16,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200',
   },
 });
