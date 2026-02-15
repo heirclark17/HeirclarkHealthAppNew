@@ -114,26 +114,24 @@ export function DailyTimelineView() {
       </ScrollView>
 
       {/* Stats Footer */}
-      <GlassCard style={[styles.footer, { marginBottom: bottomPadding }]}>
-        <View style={styles.statItem}>
+      <View style={[styles.footerRow, { marginBottom: bottomPadding }]}>
+        <GlassCard style={styles.statCard}>
           <Text style={[styles.statValue, { color: themeColors.primary }]}>{timeline.completionRate}%</Text>
           <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Completed</Text>
-        </View>
-        <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]} />
-        <View style={styles.statItem}>
+        </GlassCard>
+        <GlassCard style={styles.statCard}>
           <Text style={[styles.statValue, { color: themeColors.primary }]}>
             {Math.round(timeline.totalScheduledMinutes / 60)}h
           </Text>
           <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Scheduled</Text>
-        </View>
-        <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]} />
-        <View style={styles.statItem}>
+        </GlassCard>
+        <GlassCard style={styles.statCard}>
           <Text style={[styles.statValue, { color: themeColors.primary }]}>
             {Math.round(timeline.totalFreeMinutes / 60)}h
           </Text>
           <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Free Time</Text>
-        </View>
-      </GlassCard>
+        </GlassCard>
+      </View>
     </View>
   );
 }
@@ -199,30 +197,23 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
   },
-  footer: {
+  footerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginHorizontal: 16,
+    gap: 8,
+    paddingHorizontal: 16,
   },
-  statItem: {
+  statCard: {
     flex: 1,
     alignItems: 'center',
     gap: 6,
   },
-  statDivider: {
-    width: 1,
-    height: 40,
-  },
   statValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
   },
