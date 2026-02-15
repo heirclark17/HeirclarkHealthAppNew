@@ -328,7 +328,7 @@ export function WorkoutCard({
       case 'hiit':
         return Colors.fat;
       case 'flexibility':
-        return 'colors.accentCyan';
+        return Colors.accentCyan;
       default:
         return Colors.text;
     }
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
   lastWeightText: {
     fontSize: 11,
     fontFamily: Fonts.semiBold,
-    color: 'Colors.successStrong',
+    color: Colors.success,
   },
   weightButton: {
     width: 32,

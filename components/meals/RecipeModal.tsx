@@ -137,7 +137,7 @@ export function RecipeModal({ visible, meal, onClose }: RecipeModalProps) {
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* Meal Type Badge */}
           <View style={styles.badgeContainer}>
-            <View style={[styles.badge, { backgroundColor: isDark ? 'Colors.cardBackground' : '#f0f0f0' }]}>
+            <View style={[styles.badge, { backgroundColor: isDark ? Colors.card : '#f0f0f0' }]}>
               <ChefHat size={14} color={isDark ? '#888' : '#666'} />
               <Text style={[styles.badgeText, { color: isDark ? '#888' : '#666', fontFamily: Fonts.medium }]}>
                 {meal.mealType?.toUpperCase() || 'MEAL'}
@@ -158,7 +158,7 @@ export function RecipeModal({ visible, meal, onClose }: RecipeModalProps) {
           )}
 
           {/* Macros Card */}
-          <View style={[styles.macrosCard, { backgroundColor: isDark ? 'Colors.cardBackground' : '#f5f5f5' }]}>
+          <View style={[styles.macrosCard, { backgroundColor: isDark ? Colors.card : '#f5f5f5' }]}>
             <View style={styles.macroItem}>
               <NumberText weight="bold" style={[styles.macroValue, { color: isDark ? '#fff' : '#000' }]}>
                 {calories}
@@ -229,7 +229,7 @@ export function RecipeModal({ visible, meal, onClose }: RecipeModalProps) {
               <Text style={[styles.sectionTitle, { color: isDark ? '#fff' : '#000', fontFamily: Fonts.semiBold }]}>
                 Ingredients
               </Text>
-              <View style={[styles.ingredientsList, { backgroundColor: isDark ? 'Colors.cardBackground' : '#f5f5f5' }]}>
+              <View style={[styles.ingredientsList, { backgroundColor: isDark ? Colors.card : '#f5f5f5' }]}>
                 {meal.ingredients.map((ing, index) => (
                   <View key={index} style={styles.ingredientItem}>
                     <View style={[styles.bullet, { backgroundColor: isDark ? '#333' : '#ddd' }]} />
@@ -256,7 +256,7 @@ export function RecipeModal({ visible, meal, onClose }: RecipeModalProps) {
               <Text style={[styles.sectionTitle, { color: isDark ? '#fff' : '#000', fontFamily: Fonts.semiBold }]}>
                 Instructions
               </Text>
-              <View style={[styles.instructionsCard, { backgroundColor: isDark ? 'Colors.cardBackground' : '#f5f5f5' }]}>
+              <View style={[styles.instructionsCard, { backgroundColor: isDark ? Colors.card : '#f5f5f5' }]}>
                 <Text style={[styles.instructionsText, { color: isDark ? '#ccc' : '#333', fontFamily: Fonts.light }]}>
                   {meal.instructions}
                 </Text>
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   instacartButton: {
-    backgroundColor: 'Colors.successStrong',
+    backgroundColor: Colors.successStrong,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

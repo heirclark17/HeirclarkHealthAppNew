@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     color: Colors.success,
   },
   providerNeedsRebuild: {
-    color: 'Colors.warningOrange',
+    color: Colors.warningOrange,
   },
   lastSyncText: {
     fontSize: 10,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   unavailableButtonText: {
-    color: 'Colors.warningOrange',
+    color: Colors.warningOrange,
     fontSize: 12,
     fontFamily: Fonts.medium,
   },

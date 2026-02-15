@@ -94,7 +94,7 @@ export const DailyFatLossCard: React.FC<DailyFatLossCardProps> = ({
             <Text style={[styles.label, { color: colors.textMuted }]}>
               {isDeficit ? 'ESTIMATED FAT LOST TODAY' : isSurplus ? 'ESTIMATED FAT GAINED TODAY' : 'MAINTENANCE'}
             </Text>
-            <Text style={[styles.fatLossValue, { color: colors.text }, isDeficit && { color: 'Colors.successStrong' }, isSurplus && { color: Colors.errorStrong }]}>
+            <Text style={[styles.fatLossValue, { color: colors.text }, isDeficit && { color: Colors.successStrong }, isSurplus && { color: Colors.errorStrong }]}>
               {Math.round(Math.abs(dailyFatChange))} lbs
             </Text>
             {isDeficit && <Text style={[styles.helperText, { color: colors.textSecondary }]}>You're in a calorie deficit - great work!</Text>}
@@ -111,9 +111,9 @@ export const DailyFatLossCard: React.FC<DailyFatLossCardProps> = ({
                   <Ionicons
                     name={isOnTrack ? 'checkmark-circle' : 'alert-circle'}
                     size={12}
-                    color={isOnTrack ? 'Colors.successStrong' : Colors.error}
+                    color={isOnTrack ? Colors.successStrong : Colors.error}
                   />
-                  <Text style={[styles.trackingText, { color: isOnTrack ? 'Colors.successStrong' : Colors.error }]}>
+                  <Text style={[styles.trackingText, { color: isOnTrack ? Colors.successStrong : Colors.error }]}>
                     {isOnTrack ? 'On Track' : 'Off Track'}
                   </Text>
                 </View>
@@ -132,7 +132,7 @@ export const DailyFatLossCard: React.FC<DailyFatLossCardProps> = ({
                 <View style={styles.weeklyTargetItem}>
                   <Text style={[
                     styles.weeklyTargetValue,
-                    { color: isOnTrack ? 'Colors.successStrong' : Colors.error }
+                    { color: isOnTrack ? Colors.successStrong : Colors.error }
                   ]}>
                     {Math.round(Math.abs(weeklyProjected))}
                   </Text>
@@ -148,7 +148,7 @@ export const DailyFatLossCard: React.FC<DailyFatLossCardProps> = ({
                       styles.progressBarFill,
                       {
                         width: `${Math.min(progressPercent, 100)}%`,
-                        backgroundColor: isOnTrack ? 'Colors.successStrong' : Colors.error,
+                        backgroundColor: isOnTrack ? Colors.successStrong : Colors.error,
                       },
                     ]}
                   />

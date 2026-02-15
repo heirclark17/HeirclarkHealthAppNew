@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: 20,
     overflow: 'hidden',
-    backgroundColor: 'Colors.cardBackground',
+    backgroundColor: Colors.card,
     borderWidth: 1,
   },
   webView: {
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: SCREEN_WIDTH - 48,
     height: 220,
-    backgroundColor: 'Colors.cardBackground',
+    backgroundColor: Colors.card,
     borderRadius: 20,
     borderWidth: 1,
   },

@@ -661,7 +661,7 @@ export default function ProgramsScreen() {
         {/* Custom Workouts Section */}
         {customWorkoutState.customWorkouts.length > 0 && (
           <View style={styles.customWorkoutsSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>My Custom Workouts</Text>
+            <Text style={[styles.customSectionTitle, { color: colors.text }]}>My Custom Workouts</Text>
             {customWorkoutState.customWorkouts.map((workout) => (
               <GlassCard key={workout.id} style={styles.customWorkoutCard}>
                 <View style={styles.customWorkoutHeader}>
@@ -669,7 +669,7 @@ export default function ProgramsScreen() {
                     <Text style={[styles.customWorkoutName, { color: colors.text }]}>
                       {workout.name}
                       {workout.is_active && (
-                        <Text style={[styles.activeLabel, { color: colors.accentBlue }]}> (Active)</Text>
+                        <Text style={[styles.activeLabel, { color: colors.accentCyan }]}> (Active)</Text>
                       )}
                     </Text>
                     {workout.description && (
@@ -686,11 +686,11 @@ export default function ProgramsScreen() {
                   {!workout.is_active && (
                     <TouchableOpacity
                       onPress={() => handleActivateCustomWorkout(workout.id)}
-                      style={[styles.customWorkoutButton, { backgroundColor: colors.accentBlue + '20', borderColor: colors.accentBlue + '40' }]}
+                      style={[styles.customWorkoutButton, { backgroundColor: colors.accentCyan + '20', borderColor: colors.accentCyan + '40' }]}
                       activeOpacity={0.7}
                     >
-                      <Check size={16} color={colors.accentBlue} />
-                      <Text style={[styles.customWorkoutButtonText, { color: colors.accentBlue }]}>Activate</Text>
+                      <Check size={16} color={colors.accentCyan} />
+                      <Text style={[styles.customWorkoutButtonText, { color: colors.accentCyan }]}>Activate</Text>
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity
@@ -1184,7 +1184,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.lg,
     marginHorizontal: Spacing.md,
   },
-  sectionTitle: {
+  customSectionTitle: {
     fontSize: 20,
     fontFamily: Fonts.semiBold,
     marginBottom: Spacing.md,

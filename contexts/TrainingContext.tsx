@@ -1031,7 +1031,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
           // Convert custom workout structure to weeklyPlan format
           // Custom workouts use day-based structure, need to convert to weekly format
-          const weeklyPlan: WeeklyPlan = {
+          const weeklyPlan: WeeklyTrainingPlan = {
             days: activeCustom.workout_structure.days.map((day: any, index: number) => ({
               dayOfWeek: index,
               date: new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
