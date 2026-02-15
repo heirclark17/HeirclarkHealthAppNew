@@ -45,7 +45,6 @@ export function PrioritiesStep({
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
 
   const togglePriority = (priority: Priority) => {
     if (value.includes(priority)) {
@@ -80,34 +79,28 @@ export function PrioritiesStep({
             return (
               <TouchableOpacity
                 key={option.id}
-                style={[
-                  styles.priorityCard,
-                  {
-                    backgroundColor: surfaceColor,
-                    borderColor: surfaceBorder,
-                  },
-                  isSelected && {
-                    borderColor: option.color,
-                    borderWidth: 2,
-                    backgroundColor: option.color + '20',
-                  },
-                ]}
+                style={styles.priorityCardOuter}
                 onPress={() => togglePriority(option.id)}
                 activeOpacity={0.7}
               >
-                <Icon
-                  size={32}
-                  color={isSelected ? option.color : themeColors.textSecondary}
-                />
-                <Text
-                  style={[
-                    styles.priorityLabel,
-                    { color: themeColors.text },
-                    isSelected && { color: option.color },
-                  ]}
-                >
-                  {option.label}
-                </Text>
+                <GlassCard style={[
+                  styles.priorityCard,
+                  isSelected && { backgroundColor: option.color + '15' },
+                ]}>
+                  <Icon
+                    size={32}
+                    color={isSelected ? option.color : themeColors.textSecondary}
+                  />
+                  <Text
+                    style={[
+                      styles.priorityLabel,
+                      { color: themeColors.text },
+                      isSelected && { color: option.color },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </GlassCard>
               </TouchableOpacity>
             );
           })}
@@ -122,14 +115,14 @@ export function PrioritiesStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onNext}
             disabled={value.length === 0}
-            style={[styles.actionButton, { backgroundColor: themeColors.primary, opacity: value.length === 0 ? 0.5 : 1 }]}
+            style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary, opacity: value.length === 0 ? 0.5 : 1 }]}
           >
             <Text style={[styles.actionButtonText, { color: '#fff' }]}>Next</Text>
           </TouchableOpacity>
@@ -176,12 +169,12 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: 'center',
   },
-  priorityCard: {
+  priorityCardOuter: {
     width: '45%',
     aspectRatio: 1.2,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
+  },
+  priorityCard: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

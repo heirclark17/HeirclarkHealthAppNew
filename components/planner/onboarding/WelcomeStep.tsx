@@ -95,18 +95,13 @@ function FeatureItem({ icon, title, description, isDark, themeColors }: {
   themeColors: typeof DarkColors;
 }) {
   return (
-    <View style={styles.featureItem}>
-      <View style={[
-        styles.iconContainer,
-        { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' },
-      ]}>
-        {icon}
-      </View>
+    <GlassCard style={styles.featureItem}>
+      {icon}
       <View style={styles.featureText}>
         <Text style={[styles.featureTitle, { color: themeColors.text }]}>{title}</Text>
         <Text style={[styles.featureDescription, { color: themeColors.textSecondary }]}>{description}</Text>
       </View>
-    </View>
+    </GlassCard>
   );
 }
 
@@ -153,14 +148,7 @@ const styles = StyleSheet.create({
   featureItem: {
     flexDirection: 'row',
     gap: 12,
-    alignItems: 'flex-start',
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   featureText: {
     flex: 1,

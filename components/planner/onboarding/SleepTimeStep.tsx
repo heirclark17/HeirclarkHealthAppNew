@@ -31,7 +31,6 @@ export function SleepTimeStep({
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
 
   // Initialize with 10:00 PM or existing value
   const [time, setTime] = useState(() => {
@@ -107,13 +106,13 @@ export function SleepTimeStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={handleNext}
-            style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
+            style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
           >
             <Text style={[styles.actionButtonText, { color: '#fff' }]}>Next</Text>
           </TouchableOpacity>

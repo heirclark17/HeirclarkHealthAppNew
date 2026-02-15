@@ -65,7 +65,6 @@ export function EnergyPeakStep({
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
 
   return (
     <View style={styles.container}>
@@ -87,42 +86,35 @@ export function EnergyPeakStep({
             return (
               <TouchableOpacity
                 key={option.id}
-                style={[
-                  styles.optionCard,
-                  {
-                    backgroundColor: surfaceColor,
-                    borderColor: surfaceBorder,
-                  },
-                  isSelected && {
-                    borderColor: option.color,
-                    borderWidth: 2,
-                    backgroundColor: option.color + '20',
-                  },
-                ]}
                 onPress={() => onChange(option.id)}
                 activeOpacity={0.7}
               >
-                <View style={styles.optionContent}>
-                  <Icon
-                    size={40}
-                    color={isSelected ? option.color : themeColors.textSecondary}
-                  />
-                  <View style={styles.optionText}>
-                    <Text
-                      style={[
-                        styles.optionLabel,
-                        { color: themeColors.text },
-                        isSelected && { color: option.color },
-                      ]}
-                    >
-                      {option.label}
-                    </Text>
-                    <Text style={[styles.optionTime, { color: themeColors.primary }]}>{option.time}</Text>
-                    <Text style={[styles.optionDescription, { color: themeColors.textSecondary }]}>
-                      {option.description}
-                    </Text>
+                <GlassCard style={[
+                  styles.optionCard,
+                  isSelected && { backgroundColor: option.color + '15' },
+                ]}>
+                  <View style={styles.optionContent}>
+                    <Icon
+                      size={40}
+                      color={isSelected ? option.color : themeColors.textSecondary}
+                    />
+                    <View style={styles.optionText}>
+                      <Text
+                        style={[
+                          styles.optionLabel,
+                          { color: themeColors.text },
+                          isSelected && { color: option.color },
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                      <Text style={[styles.optionTime, { color: themeColors.primary }]}>{option.time}</Text>
+                      <Text style={[styles.optionDescription, { color: themeColors.textSecondary }]}>
+                        {option.description}
+                      </Text>
+                    </View>
                   </View>
-                </View>
+                </GlassCard>
               </TouchableOpacity>
             );
           })}
@@ -137,14 +129,14 @@ export function EnergyPeakStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onNext}
             disabled={!value}
-            style={[styles.actionButton, { backgroundColor: themeColors.primary, opacity: !value ? 0.5 : 1 }]}
+            style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary, opacity: !value ? 0.5 : 1 }]}
           >
             <Text style={[styles.actionButtonText, { color: '#fff' }]}>Next</Text>
           </TouchableOpacity>
@@ -183,9 +175,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   optionCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
+    flexDirection: 'row',
   },
   optionContent: {
     flexDirection: 'row',

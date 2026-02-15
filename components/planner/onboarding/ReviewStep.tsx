@@ -31,7 +31,6 @@ export function ReviewStep({
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
@@ -90,42 +89,36 @@ export function ReviewStep({
               value={formatTime(preferences.wakeTime)}
               onEdit={() => onEdit(2)}
               themeColors={themeColors}
-              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Sleep Time"
               value={formatTime(preferences.sleepTime)}
               onEdit={() => onEdit(3)}
               themeColors={themeColors}
-              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Priorities"
               value={formatPriorities(preferences.priorities)}
               onEdit={() => onEdit(4)}
               themeColors={themeColors}
-              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Energy Peak"
               value={formatEnergyPeak(preferences.energyPeak)}
               onEdit={() => onEdit(5)}
               themeColors={themeColors}
-              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Flexibility"
               value={formatFlexibility(preferences.flexibility)}
               onEdit={() => onEdit(6)}
               themeColors={themeColors}
-              surfaceColor={surfaceColor}
             />
             <ReviewItem
               label="Calendar Sync"
               value={preferences.calendarSyncEnabled ? 'Enabled' : 'Disabled'}
               onEdit={() => onEdit(7)}
               themeColors={themeColors}
-              surfaceColor={surfaceColor}
             />
           </View>
         </ScrollView>
@@ -139,13 +132,13 @@ export function ReviewStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onConfirm}
-            style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
+            style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
           >
             <Text style={[styles.actionButtonText, { color: '#fff' }]}>Complete Setup</Text>
           </TouchableOpacity>
@@ -160,16 +153,14 @@ function ReviewItem({
   value,
   onEdit,
   themeColors,
-  surfaceColor,
 }: {
   label: string;
   value: string;
   onEdit: () => void;
   themeColors: typeof DarkColors;
-  surfaceColor: string;
 }) {
   return (
-    <View style={[styles.reviewItem, { backgroundColor: surfaceColor }]}>
+    <GlassCard style={styles.reviewItem}>
       <View style={styles.reviewContent}>
         <Text style={[styles.reviewLabel, { color: themeColors.textSecondary }]}>{label}</Text>
         <Text style={[styles.reviewValue, { color: themeColors.text }]}>{value}</Text>
@@ -180,7 +171,7 @@ function ReviewItem({
       >
         <Edit2 size={16} color={themeColors.primary} />
       </TouchableOpacity>
-    </View>
+    </GlassCard>
   );
 }
 
@@ -220,8 +211,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 12,
-    padding: 16,
   },
   reviewContent: {
     flex: 1,

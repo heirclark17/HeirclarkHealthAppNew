@@ -55,7 +55,6 @@ export function CalendarPermissionStep({
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
 
   const handleRequestPermission = async () => {
     setIsRequesting(true);
@@ -136,7 +135,7 @@ export function CalendarPermissionStep({
         <View style={styles.actions}>
           <TouchableOpacity
             onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+            style={[styles.actionButton, { backgroundColor: surfaceColor }]}
           >
             <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
           </TouchableOpacity>
@@ -144,7 +143,7 @@ export function CalendarPermissionStep({
           {permissionGranted ? (
             <TouchableOpacity
               onPress={handleContinue}
-              style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
+              style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
             >
               <Text style={[styles.actionButtonText, { color: '#fff' }]}>Continue</Text>
             </TouchableOpacity>
@@ -152,14 +151,14 @@ export function CalendarPermissionStep({
             <>
               <TouchableOpacity
                 onPress={handleSkip}
-                style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+                style={[styles.actionButton, { backgroundColor: surfaceColor }]}
               >
                 <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Skip</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleRequestPermission}
                 disabled={isRequesting}
-                style={[styles.actionButton, { backgroundColor: themeColors.primary, opacity: isRequesting ? 0.5 : 1 }]}
+                style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary, opacity: isRequesting ? 0.5 : 1 }]}
               >
                 {isRequesting ? (
                   <ActivityIndicator size="small" color="#fff" />

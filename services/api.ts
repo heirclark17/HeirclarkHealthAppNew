@@ -2619,7 +2619,7 @@ class HeirclarkAPI {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/favorite-exercises`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(true),
         body: JSON.stringify({ exerciseId }),
       });
 
@@ -2692,7 +2692,7 @@ class HeirclarkAPI {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/planner/onboarding`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(true),
         body: JSON.stringify({ preferences }),
       });
 
@@ -2746,7 +2746,7 @@ class HeirclarkAPI {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/planner/weekly-plan`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(true),
         body: JSON.stringify({ weeklyPlan }),
       });
 
@@ -2800,7 +2800,7 @@ class HeirclarkAPI {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/planner/update-block-status`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(true),
         body: JSON.stringify({ blockId, status, date }),
       });
 
@@ -2828,7 +2828,7 @@ class HeirclarkAPI {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/planner/update-block-time`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(true),
         body: JSON.stringify({ blockId, newStartTime, newEndTime, date }),
       });
 
@@ -2856,7 +2856,7 @@ class HeirclarkAPI {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/planner/optimize`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(true),
         body: JSON.stringify(params),
       });
 
