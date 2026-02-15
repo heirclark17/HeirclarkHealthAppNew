@@ -5,7 +5,13 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Calendar from 'expo-calendar';
+// Lazy import: expo-calendar requires native module, gracefully degrade if unavailable
+let Calendar: typeof import('expo-calendar') | null = null;
+try {
+  Calendar = require('expo-calendar');
+} catch (e) {
+  console.warn('[Planner] expo-calendar native module not available - calendar sync disabled');
+}
 import { api } from '../services/api';
 import { SchedulingEngine } from '../services/schedulingEngine';
 import {
@@ -262,6 +268,11 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
    * Sync calendar events from device (CLIENT-SIDE ONLY)
    */
   const syncCalendar = async (): Promise<boolean> => {
+    if (!Calendar) {
+      console.warn('[Planner] Calendar sync unavailable - native module not built');
+      return false;
+    }
+
     // Check/request permission
     if (!state.calendarPermission) {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
