@@ -1,7 +1,7 @@
 # Training System Restructure: Cardio & Strength Separation
 
 **Date:** February 14, 2026
-**Status:** ✅ COMPLETE - Ready for Testing
+**Status:** ✅ COMPLETE - Database Migration Executed - Ready for Testing
 
 ---
 
@@ -104,15 +104,16 @@ Completely restructured the training system to separate cardio and strength trai
 
 **File:** `backend/migrations/add_cardio_nutrition_columns.sql`
 
-### Run on Railway:
+### ✅ Migration Status: COMPLETE (February 14, 2026)
 
-```bash
-# Option 1: Railway CLI
-railway run psql -c "$(cat backend/migrations/add_cardio_nutrition_columns.sql)"
+**Executed using:** `backend/run_migration.py` (Python script with psycopg2)
 
-# Option 2: Railway Dashboard
-# Go to Railway project → Database → Query tab
-# Paste the SQL from the migration file
+**Result:**
+```
+[SUCCESS] Migration completed successfully!
+[SUCCESS] Columns verified:
+  - cardio_recommendations: jsonb
+  - nutrition_guidance: jsonb
 ```
 
 ### Migration SQL:
@@ -121,6 +122,14 @@ ALTER TABLE workout_plans
 ADD COLUMN IF NOT EXISTS cardio_recommendations JSONB,
 ADD COLUMN IF NOT EXISTS nutrition_guidance JSONB;
 ```
+
+### How It Was Run:
+```bash
+cd backend
+python run_migration.py
+```
+
+**Note:** Migration script uses ASCII output (no Unicode emojis) for Windows console compatibility.
 
 ---
 
