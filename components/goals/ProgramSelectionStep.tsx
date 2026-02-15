@@ -278,46 +278,51 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
           })}
         </View>
 
-        {/* Bottom Buttons */}
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            onPress={() => {
-              lightImpact();
-              onBack();
-            }}
-            activeOpacity={0.7}
-            style={{ flex: 1 }}
-            accessibilityLabel="Back"
-            accessibilityRole="button"
-            accessibilityHint="Returns to previous step"
-          >
-            <GlassCard style={styles.backButton} interactive>
-              <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
-            </GlassCard>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={handleContinue}
-            activeOpacity={0.7}
-            style={{ flex: 2 }}
-            accessibilityLabel="Continue"
-            accessibilityRole="button"
-            accessibilityHint="Proceeds to next step (program selection optional)"
-          >
-            <GlassCard
-              style={[
-                styles.continueButton,
-                { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' },
-              ]}
-              interactive
-            >
-              <Text style={[styles.continueButtonText, { color: colors.primary }]}>
-                CONTINUE
-              </Text>
-            </GlassCard>
-          </TouchableOpacity>
-        </View>
+        {/* Bottom Spacing - extra space to prevent blending with buttons */}
+        <View style={{ height: 180 }} />
         </ScrollView>
+
+        {/* Bottom Buttons */}
+        <View style={styles.bottomContainer}>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              onPress={() => {
+                lightImpact();
+                onBack();
+              }}
+              activeOpacity={0.7}
+              style={{ flex: 1 }}
+              accessibilityLabel="Back"
+              accessibilityRole="button"
+              accessibilityHint="Returns to previous step"
+            >
+              <GlassCard style={styles.backButton} interactive>
+                <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
+              </GlassCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleContinue}
+              activeOpacity={0.7}
+              style={{ flex: 2 }}
+              accessibilityLabel="Continue"
+              accessibilityRole="button"
+              accessibilityHint="Proceeds to next step (program selection optional)"
+            >
+              <GlassCard
+                style={[
+                  styles.continueButton,
+                  { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' },
+                ]}
+                interactive
+              >
+                <Text style={[styles.continueButtonText, { color: colors.primary }]}>
+                  CONTINUE
+                </Text>
+              </GlassCard>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* Program Preview Modal */}
@@ -459,11 +464,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Fonts.regular,
   },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
-    marginBottom: 100,
   },
   backButton: {
     flexDirection: 'row',
