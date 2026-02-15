@@ -30,7 +30,7 @@ const ENERGY_OPTIONS: {
   {
     id: 'morning',
     label: 'Morning Person',
-    description: 'I'm most productive and energetic in the morning',
+    description: "I'm most productive and energetic in the morning",
     time: '6 AM - 12 PM',
     icon: Sunrise,
     color: colors.protein,
@@ -46,7 +46,7 @@ const ENERGY_OPTIONS: {
   {
     id: 'evening',
     label: 'Night Owl',
-    description: 'I'm most focused and creative in the evening',
+    description: "I'm most focused and creative in the evening",
     time: '5 PM - 10 PM',
     icon: Sunset,
     color: colors.sleep,

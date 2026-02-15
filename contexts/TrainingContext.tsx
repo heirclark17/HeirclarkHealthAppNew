@@ -21,10 +21,187 @@ import {
   Exercise,
   ExerciseAlternative,
   CardioRecommendations,
+  DailyCardioRecommendation,
   NutritionGuidance,
 } from '../types/training';
 
 const STORAGE_KEY = 'hc_training_plan_cache';
+
+// Generate template-based cardio recommendations from preferences
+function buildTemplateCardioRecommendations(
+  preferences: TrainingPreferences,
+  weeklyPlan: WeeklyTrainingPlan
+): CardioRecommendations {
+  const pref = preferences.cardioPreference || 'walking';
+  const goal = preferences.primaryGoal;
+  const weight = preferences.weight || 170;
+
+  // Base templates by cardio preference
+  const templates: Record<string, { activity: string; intensity: DailyCardioRecommendation['intensity']; zone: string; calPer15: number; desc: string; tips: string[] }> = {
+    walking: {
+      activity: 'Brisk Walking',
+      intensity: 'low',
+      zone: 'Zone 2 (60-70% max HR)',
+      calPer15: Math.round(weight * 0.035 * 15),
+      desc: 'Maintain a brisk pace where you can hold a conversation but not sing. Swing arms naturally and keep posture upright.',
+      tips: ['Great for active recovery', 'Low impact on joints', 'Aim for 3.5-4.0 mph pace'],
+    },
+    running: {
+      activity: 'Steady-State Run',
+      intensity: 'moderate',
+      zone: 'Zone 3 (70-80% max HR)',
+      calPer15: Math.round(weight * 0.075 * 15),
+      desc: 'Maintain a conversational pace. Focus on consistent cadence and relaxed shoulders.',
+      tips: ['Land midfoot, not on heels', 'Keep breathing rhythmic', 'Start with run/walk intervals if needed'],
+    },
+    hiit: {
+      activity: 'HIIT Circuit',
+      intensity: 'high',
+      zone: 'Zone 4-5 (80-95% max HR)',
+      calPer15: Math.round(weight * 0.1 * 15),
+      desc: 'Alternate 30-45 seconds of max effort with 15-30 seconds rest. Include burpees, jump squats, mountain climbers.',
+      tips: ['Focus on form even when fatigued', 'Scale intensity to your fitness level', 'Allow 48 hours between HIIT sessions'],
+    },
+  };
+
+  const base = templates[pref] || templates.walking;
+
+  // Determine session duration and frequency based on goal
+  let sessionDuration = 30;
+  let sessionsPerWeek = 3;
+  if (goal === 'lose_weight') { sessionDuration = 35; sessionsPerWeek = 4; }
+  else if (goal === 'build_muscle') { sessionDuration = 20; sessionsPerWeek = 2; }
+  else if (goal === 'improve_health') { sessionDuration = 30; sessionsPerWeek = 3; }
+
+  const makeDay = (isTrainingDay: boolean, isRestDay: boolean): DailyCardioRecommendation => {
+    if (isRestDay) {
+      return {
+        activity: 'Active Recovery Walk',
+        duration: 15,
+        intensity: 'low',
+        heartRateZone: 'Zone 1-2 (50-65% max HR)',
+        caloriesBurned: Math.round(weight * 0.03 * 15),
+        description: 'Light walking or stretching to promote blood flow and recovery.',
+        tips: ['Keep it easy and enjoyable', 'Focus on mobility work', 'Gentle foam rolling after'],
+        warmup: '2 min easy walk',
+        cooldown: '3 min stretching',
+      };
+    }
+
+    if (isTrainingDay) {
+      // Post-workout cardio (shorter)
+      return {
+        activity: `Post-Workout ${base.activity}`,
+        duration: Math.round(sessionDuration * 0.5),
+        intensity: pref === 'hiit' ? 'moderate' : base.intensity,
+        heartRateZone: 'Zone 2 (60-70% max HR)',
+        caloriesBurned: Math.round(base.calPer15 * (sessionDuration * 0.5 / 15)),
+        description: `Light ${pref === 'hiit' ? 'cooldown cardio' : base.activity.toLowerCase()} after strength training.`,
+        tips: ['Keep intensity moderate after lifting', 'Great for fat burning in a glycogen-depleted state'],
+        warmup: 'Already warmed up from lifting',
+        cooldown: '5 min walking, light stretching',
+      };
+    }
+
+    // Dedicated cardio day
+    return {
+      activity: base.activity,
+      duration: sessionDuration,
+      intensity: base.intensity,
+      heartRateZone: base.zone,
+      caloriesBurned: Math.round(base.calPer15 * (sessionDuration / 15)),
+      description: base.desc,
+      tips: base.tips,
+      warmup: '5 min easy walk',
+      cooldown: '5 min walking, light stretching',
+    };
+  };
+
+  const days = weeklyPlan.days;
+  const dayKeys: (keyof CardioRecommendations)[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+  const result: any = {};
+  dayKeys.forEach((key, i) => {
+    const day = days[i];
+    const isTraining = !!day?.workout && !day.isRestDay;
+    const isRest = day?.isRestDay ?? true;
+    result[key] = makeDay(isTraining, isRest);
+  });
+
+  return result as CardioRecommendations;
+}
+
+// Generate template-based nutrition guidance from preferences
+function buildTemplateNutritionGuidance(preferences: TrainingPreferences): NutritionGuidance {
+  const weight = preferences.weight || 170;
+  const targetWeight = preferences.targetWeight || weight;
+  const goal = preferences.primaryGoal;
+  const age = preferences.age || 30;
+  const sex = preferences.sex || 'male';
+
+  // Estimate BMR using Mifflin-St Jeor
+  const heightIn = preferences.heightInches || 70; // default 5'10"
+  const heightCm = heightIn * 2.54;
+  const weightKg = weight * 0.453592;
+  const bmr = sex === 'male'
+    ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
+    : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+
+  // Activity multipliers
+  const multipliers: Record<string, number> = {
+    sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9,
+  };
+  const tdee = Math.round(bmr * (multipliers[preferences.activityLevel] || 1.55));
+
+  // Calorie target based on goal
+  let deficit = 0;
+  let dailyCalories = tdee;
+  if (goal === 'lose_weight') { deficit = 500; dailyCalories = tdee - 500; }
+  else if (goal === 'build_muscle') { deficit = -300; dailyCalories = tdee + 300; }
+
+  // Macros
+  const proteinGrams = Math.round(weight * 0.85); // 0.85g per lb bodyweight
+  const fatGrams = Math.round(dailyCalories * 0.25 / 9);
+  const carbsGrams = Math.round((dailyCalories - proteinGrams * 4 - fatGrams * 9) / 4);
+
+  const mealsPerDay = preferences.sleepGoalHours && preferences.sleepGoalHours >= 9 ? 3 : 4;
+  const hydrationOz = Math.round(weight * 0.5);
+
+  return {
+    dailyCalories,
+    deficit: Math.abs(deficit),
+    proteinGrams,
+    carbsGrams: Math.max(carbsGrams, 50),
+    fatGrams,
+    mealTiming: `${mealsPerDay} meals per day, evenly spaced every 3-4 hours`,
+    hydration: `Drink ${hydrationOz}oz (${Math.round(hydrationOz / 8)} glasses) of water daily`,
+    preworkoutNutrition: 'Light meal with carbs and protein 1-2 hours before training (e.g., banana + protein shake)',
+    postworkoutNutrition: 'Protein-rich meal within 2 hours after training (30-40g protein + complex carbs)',
+    supplementRecommendations: [
+      'Creatine monohydrate: 5g daily',
+      'Protein powder: as needed to hit daily protein target',
+      'Vitamin D: 2000-4000 IU if limited sun exposure',
+    ],
+    mealExamples: {
+      breakfast: 'Eggs (3) + oatmeal + berries + coffee',
+      lunch: 'Grilled chicken + brown rice + mixed vegetables',
+      dinner: 'Salmon + sweet potato + steamed broccoli',
+      snacks: ['Greek yogurt + almonds', 'Protein shake + banana', 'Rice cakes + peanut butter'],
+    },
+    tips: [
+      `Target ${proteinGrams}g protein daily to support your ${goal === 'build_muscle' ? 'muscle growth' : 'training'}`,
+      'Prep meals in advance to stay consistent',
+      `Aim for ${dailyCalories} calories${deficit > 0 ? ` (${deficit} calorie deficit from TDEE of ${tdee})` : ''}`,
+      'Eat whole, minimally processed foods 80% of the time',
+    ],
+    deficitStrategy: goal === 'lose_weight'
+      ? `Maintain a ${deficit}-calorie deficit through a combination of diet and exercise. Reduce portions slightly rather than eliminating food groups.`
+      : goal === 'build_muscle'
+      ? `Eat in a ${Math.abs(deficit)}-calorie surplus to fuel muscle growth. Prioritize protein timing around workouts.`
+      : 'Eat at maintenance calories to sustain current body composition while fueling training.',
+    progressMonitoring: 'Weigh in weekly (same day, same time, after waking). Track body measurements monthly. Take progress photos every 2 weeks.',
+  };
+}
 
 interface TrainingState {
   weeklyPlan: WeeklyTrainingPlan | null;
@@ -111,9 +288,18 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
   // Body metrics for personalized training
   const goalWeight = goalWizardContext?.state?.currentWeight;
+  const goalTargetWeight = goalWizardContext?.state?.targetWeight;
   const goalWeightUnit = goalWizardContext?.state?.weightUnit;
+  const goalHeightFt = goalWizardContext?.state?.heightFt;
+  const goalHeightIn = goalWizardContext?.state?.heightIn;
+  const goalHeightUnit = goalWizardContext?.state?.heightUnit;
+  const goalHeightCm = goalWizardContext?.state?.heightCm;
   const goalAge = goalWizardContext?.state?.age;
   const goalSex = goalWizardContext?.state?.sex;
+
+  // Lifestyle/recovery goals
+  const goalSleepGoalHours = goalWizardContext?.state?.sleepGoalHours;
+  const goalStepGoal = goalWizardContext?.state?.stepGoal;
 
   // Strength baseline for weight recommendations
   const goalHasLiftingExperience = goalWizardContext?.state?.hasLiftingExperience;
@@ -182,6 +368,19 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       ? goalWeight * 2.20462
       : goalWeight;
 
+    // Convert target weight to lbs if needed
+    const targetWeightLbs = goalTargetWeight && goalWeightUnit === 'kg'
+      ? goalTargetWeight * 2.20462
+      : goalTargetWeight;
+
+    // Calculate height in total inches
+    let heightInches: number | undefined;
+    if (goalHeightUnit === 'cm' && goalHeightCm) {
+      heightInches = Math.round(goalHeightCm / 2.54);
+    } else if (goalHeightFt !== undefined && goalHeightIn !== undefined) {
+      heightInches = goalHeightFt * 12 + goalHeightIn;
+    }
+
     // Get body metrics
     const age = goalAge;
     const sex = goalSex;
@@ -238,6 +437,12 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       deadlift1RM,
       // Timeline
       programDurationWeeks,
+      // Additional body metrics
+      targetWeight: targetWeightLbs,
+      heightInches,
+      // Lifestyle/recovery
+      sleepGoalHours: goalSleepGoalHours,
+      stepGoal: goalStepGoal,
     };
   }, [
     goalPrimaryGoal,
@@ -259,6 +464,13 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     goalDeadlift1RM,
     goalStartDate,
     goalTargetDate,
+    goalTargetWeight,
+    goalHeightFt,
+    goalHeightIn,
+    goalHeightUnit,
+    goalHeightCm,
+    goalSleepGoalHours,
+    goalStepGoal,
   ]);
 
   // Generate weekly training plan with enhanced plan generator
@@ -288,6 +500,11 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       const today = new Date().getDay();
       const todayIndex = today === 0 ? 6 : today - 1; // Convert to Monday = 0
 
+      // Generate cardio and nutrition guidance for template path
+      console.log('[Training] Generating cardio & nutrition guidance...');
+      const templateCardio = buildTemplateCardioRecommendations(preferences, weeklyPlan);
+      const templateNutrition = buildTemplateNutritionGuidance(preferences);
+
       console.log('[Training] Updating state with new plan...');
       const lastGeneratedAt = new Date().toISOString();
 
@@ -301,6 +518,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         lastGeneratedAt,
         preferences,
         planSummary: summary,
+        cardioRecommendations: templateCardio,
+        nutritionGuidance: templateNutrition,
       }));
 
       // Cache the plan using trainingStorage
@@ -313,6 +532,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         lastGeneratedAt,
         preferences,
         planSummary: summary,
+        cardioRecommendations: templateCardio,
+        nutritionGuidance: templateNutrition,
       });
 
       // Update goal hash to track changes

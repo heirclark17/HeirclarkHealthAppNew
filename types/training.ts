@@ -193,6 +193,14 @@ export interface TrainingPreferences {
 
   // Timeline for program selection
   programDurationWeeks?: number; // Duration from start to target date
+
+  // Additional body metrics
+  targetWeight?: number; // Target weight in lbs
+  heightInches?: number; // Total height in inches (for BMI calculations)
+
+  // Lifestyle/recovery
+  sleepGoalHours?: number; // User's sleep target (for recovery recommendations)
+  stepGoal?: number; // Daily step target
 }
 
 // Program template
