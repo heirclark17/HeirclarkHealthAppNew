@@ -234,7 +234,7 @@ export function PlannerCalendarStrip({
                 <Text
                   style={[
                     styles.holidayLabel,
-                    { color: isSelected ? (isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)') : themeColors.accentGold },
+                    { color: isSelected ? (isDark ? '#000' : '#fff') : themeColors.accentGold },
                   ]}
                   numberOfLines={1}
                 >
