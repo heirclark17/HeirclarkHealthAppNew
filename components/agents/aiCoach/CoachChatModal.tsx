@@ -824,7 +824,6 @@ export function CoachChatModal({
                 style={[styles.input, {
                   backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
                   color: glassColors.text,
-                  borderColor: glassColors.inputBorder,
                 }]}
                 value={inputText}
                 onChangeText={setInputText}
@@ -1038,7 +1037,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderRadius: 20,
-    borderWidth: 1,
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 10,
