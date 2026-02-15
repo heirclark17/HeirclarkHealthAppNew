@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Colors, DarkColors, LightColors } from '../../../constants/Theme';
+import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 import {
   StyleSheet,
   Text,
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
   },
   content: {
     flex: 1,
@@ -939,7 +939,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: Fonts.medium,
   },
   // Message styles
   messagesList: {
@@ -963,11 +963,12 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: Fonts.semiBold,
     marginBottom: 8,
   },
   emptySubtitle: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -1005,6 +1006,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     lineHeight: 21,
   },
   typingIndicator: {
@@ -1023,6 +1025,7 @@ const styles = StyleSheet.create({
   },
   typingText: {
     fontSize: 13,
+    fontFamily: Fonts.regular,
   },
   inputContainer: {
     paddingTop: 12,
@@ -1041,6 +1044,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     fontSize: 15,
+    fontFamily: Fonts.regular,
     maxHeight: 100,
   },
   sendButton: {
@@ -1083,7 +1087,7 @@ const styles = StyleSheet.create({
   modeOptionText: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '500',
+    fontFamily: Fonts.medium,
   },
   // Suggestion Chips styles
   suggestionsContainer: {
@@ -1092,7 +1096,7 @@ const styles = StyleSheet.create({
   },
   suggestionsLabel: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: Fonts.medium,
     marginBottom: 12,
     textAlign: 'center',
   },
@@ -1110,7 +1114,7 @@ const styles = StyleSheet.create({
   },
   suggestionText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: Fonts.medium,
   },
 });
 
