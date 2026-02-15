@@ -98,6 +98,7 @@ interface DayPlannerActions {
   updateBlockTime: (blockId: string, date: string, newStartTime: string) => Promise<void>;
   requestWeeklyOptimization: () => Promise<void>;
   setSelectedDay: (dayIndex: number) => void;
+  setSelectedDate: (dateStr: string) => void;
   clearError: () => void;
 }
 
@@ -756,6 +757,24 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
+   * Set selected day by date string (YYYY-MM-DD).
+   * Finds the matching day in the weekly plan and updates selectedDayIndex.
+   */
+  const setSelectedDate = useCallback((dateStr: string) => {
+    const currentPlan = stateRef.current.weeklyPlan;
+    if (currentPlan) {
+      const idx = currentPlan.days.findIndex((d) => d.date === dateStr);
+      if (idx !== -1) {
+        setState((prev) => ({ ...prev, selectedDayIndex: idx }));
+        return;
+      }
+    }
+    // If date is not in current weekly plan, still update index based on day of week
+    const date = parseLocalDate(dateStr);
+    setState((prev) => ({ ...prev, selectedDayIndex: date.getDay() }));
+  }, []);
+
+  /**
    * Clear error
    */
   const clearError = useCallback(() => {
@@ -849,6 +868,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     updateBlockTime,
     requestWeeklyOptimization,
     setSelectedDay,
+    setSelectedDate,
     clearError,
   };
 

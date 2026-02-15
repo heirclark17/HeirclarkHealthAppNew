@@ -1,9 +1,12 @@
 /**
  * TimeBlockCard - Individual time block with swipe gestures
+ *
+ * Uses a plain View instead of GlassCard to avoid double padding
+ * and overflow:hidden clipping that cut off text in short blocks.
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -13,7 +16,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { CheckCircle2, X } from 'lucide-react-native';
-import { GlassCard } from '../../GlassCard';
 import { ActivityIcon } from '../shared/ActivityIcon';
 import { TimeBlock } from '../../../types/planner';
 import { useSettings } from '../../../contexts/SettingsContext';
@@ -35,7 +37,7 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
   // Calculate position (absolute positioning in timeline)
   const startMinutes = timeToMinutes(block.startTime);
   const top = ((startMinutes - 6 * 60) / 60) * 60; // Offset from 6 AM
-  const height = (block.duration / 60) * 60; // 60px per hour
+  const height = Math.max((block.duration / 60) * 60, 56); // 60px per hour, min 56px
 
   // Gesture handler
   const panGesture = Gesture.Pan()
@@ -61,11 +63,18 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
     };
   });
 
+  const cardBg = isDark
+    ? (block.color + '25')
+    : (block.color + '15');
+  const cardBorder = isDark
+    ? 'rgba(255,255,255,0.08)'
+    : 'rgba(0,0,0,0.06)';
+
   return (
     <Animated.View
       style={[
         styles.container,
-        { top, height, minHeight: 40 },
+        { top, height },
         animatedStyle,
       ]}
     >
@@ -75,40 +84,35 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
           activeOpacity={0.8}
           style={{ flex: 1 }}
         >
-          <GlassCard
+          <View
             style={[
               styles.card,
               {
-                backgroundColor: block.color + '20',
+                backgroundColor: cardBg,
                 borderLeftColor: block.color,
+                borderColor: cardBorder,
               },
             ]}
           >
             <View style={styles.header}>
               <View style={styles.titleRow}>
-                <ActivityIcon type={block.type} size={16} color={block.color} />
+                <ActivityIcon type={block.type} size={14} color={block.color} />
                 <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
                   {block.title}
                 </Text>
               </View>
               {block.status === 'completed' && (
-                <CheckCircle2 size={16} color={Colors.protein} />
+                <CheckCircle2 size={14} color={Colors.protein} />
               )}
               {block.status === 'skipped' && (
-                <X size={16} color={themeColors.textSecondary} />
+                <X size={14} color={themeColors.textSecondary} />
               )}
             </View>
 
-            <Text style={[styles.time, { color: themeColors.textSecondary }]}>
-              {block.startTime} - {block.endTime}
+            <Text style={[styles.time, { color: themeColors.textSecondary }]} numberOfLines={1}>
+              {to12h(block.startTime)} – {to12h(block.endTime)}  ·  {block.duration}m
             </Text>
-
-            {height > 60 && (
-              <Text style={[styles.duration, { color: themeColors.textSecondary }]} numberOfLines={1}>
-                {block.duration} min
-              </Text>
-            )}
-          </GlassCard>
+          </View>
         </TouchableOpacity>
       </GestureDetector>
     </Animated.View>
@@ -120,18 +124,40 @@ function timeToMinutes(time: string): number {
   return hours * 60 + minutes;
 }
 
+/** Convert "HH:MM" (24h) to "h:MM AM/PM" */
+function to12h(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 || 12;
+  return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     left: 60,
     right: 0,
     paddingRight: 16,
+    zIndex: 1,
   },
   card: {
     flex: 1,
-    padding: 12,
-    borderLeftWidth: 4,
-    justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderLeftWidth: 3,
+    borderWidth: 0.5,
+    borderRadius: 12,
+    justifyContent: 'center',
+    gap: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(0,0,0,0.08)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+      },
+      android: { elevation: 2 },
+    }),
   },
   header: {
     flexDirection: 'row',
@@ -141,24 +167,18 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     flex: 1,
   },
   title: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
     flex: 1,
   },
   time: {
-    fontSize: 12,
-    fontFamily: Fonts.numericRegular,
-    marginTop: 4,
-  },
-  duration: {
-    fontSize: 10,
-    fontFamily: Fonts.light,
+    fontSize: 11,
+    fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
-    marginTop: 2,
   },
 });
