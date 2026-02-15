@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 10,
-    fontFamily: Fonts.numericBold,
+    fontFamily: Fonts.numericLight,
+    fontWeight: '200' as const,
   },
 });

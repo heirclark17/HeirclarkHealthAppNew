@@ -161,7 +161,8 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 20,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   actionButton: {
     width: 44,
@@ -196,7 +197,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   generateButton: {
@@ -210,7 +212,8 @@ const styles = StyleSheet.create({
   },
   generateButtonText: {
     fontSize: 16,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   footer: {
     flexDirection: 'row',
@@ -232,10 +235,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontFamily: Fonts.numericBold,
+    fontFamily: Fonts.numericLight,
+    fontWeight: '200' as const,
   },
   statLabel: {
     fontSize: 13,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
 });

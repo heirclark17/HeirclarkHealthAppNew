@@ -82,7 +82,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -99,11 +100,13 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 20,
-    fontFamily: Fonts.numericBold,
+    fontFamily: Fonts.numericLight,
+    fontWeight: '200' as const,
   },
   statLabel: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
 });

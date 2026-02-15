@@ -63,7 +63,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   daysScroll: {
     flex: 1,

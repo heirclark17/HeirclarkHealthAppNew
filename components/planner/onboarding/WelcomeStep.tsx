@@ -3,10 +3,9 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Calendar, Clock, Zap } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
-import { Button } from '../../Button';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
@@ -64,11 +63,12 @@ export function WelcomeStep({ onNext, currentStep, totalSteps }: Props) {
         </Text>
 
         {/* Action Button */}
-        <Button
-          title="Get Started"
+        <TouchableOpacity
           onPress={onNext}
-          variant="primary"
-        />
+          style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
+        >
+          <Text style={[styles.actionButtonText, { color: '#fff' }]}>Get Started</Text>
+        </TouchableOpacity>
       </GlassCard>
     </View>
   );
@@ -112,12 +112,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -143,16 +144,28 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: 16,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   featureDescription: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
     lineHeight: 20,
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
+  },
+  actionButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+  },
+  actionButtonText: {
+    fontFamily: Fonts.light,
+    fontSize: 16,
+    fontWeight: '200' as const,
   },
 });

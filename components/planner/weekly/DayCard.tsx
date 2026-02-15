@@ -80,12 +80,14 @@ const styles = StyleSheet.create({
   },
   dayName: {
     fontSize: 12,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textTransform: 'uppercase',
   },
   dayNumber: {
     fontSize: 32,
-    fontFamily: Fonts.numericBold,
+    fontFamily: Fonts.numericLight,
+    fontWeight: '200' as const,
   },
   progressContainer: {
     width: '100%',
@@ -99,6 +101,7 @@ const styles = StyleSheet.create({
   },
   stats: {
     fontSize: 10,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
 });

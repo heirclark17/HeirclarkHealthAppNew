@@ -3,11 +3,10 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Sun } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
-import { Button } from '../../Button';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
@@ -31,6 +30,8 @@ export function WakeTimeStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
 
   // Initialize with 6:00 AM or existing value
   const [time, setTime] = useState(() => {
@@ -104,18 +105,18 @@ export function WakeTimeStep({
 
         {/* Actions */}
         <View style={styles.actions}>
-          <Button
-            title="Back"
+          <TouchableOpacity
             onPress={onPrevious}
-            variant="secondary"
-            style={{ flex: 1 }}
-          />
-          <Button
-            title="Next"
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+          >
+            <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={handleNext}
-            variant="primary"
-            style={{ flex: 1 }}
-          />
+            style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
+          >
+            <Text style={[styles.actionButtonText, { color: '#fff' }]}>Next</Text>
+          </TouchableOpacity>
         </View>
       </GlassCard>
     </View>
@@ -137,12 +138,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -156,16 +158,29 @@ const styles = StyleSheet.create({
   },
   selectedTime: {
     fontSize: 32,
-    fontFamily: Fonts.numericBold,
+    fontFamily: Fonts.numericLight,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   actions: {
     flexDirection: 'row',
     gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+  },
+  actionButtonText: {
+    fontFamily: Fonts.light,
+    fontSize: 16,
+    fontWeight: '200' as const,
   },
 });

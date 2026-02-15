@@ -146,7 +146,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     flex: 1,
   },
   time: {
@@ -156,7 +157,8 @@ const styles = StyleSheet.create({
   },
   duration: {
     fontSize: 10,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     marginTop: 2,
   },
 });

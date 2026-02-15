@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 // Lazy load to avoid crash when native module isn't built yet
 let _Calendar: any = null;
 let _calendarChecked = false;
@@ -28,7 +28,6 @@ function getCalendar(): any {
 }
 import { CalendarCheck, Lock, Shield } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
-import { Button } from '../../Button';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
@@ -55,6 +54,8 @@ export function CalendarPermissionStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
+  const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
 
   const handleRequestPermission = async () => {
     setIsRequesting(true);
@@ -133,39 +134,39 @@ export function CalendarPermissionStep({
 
         {/* Actions */}
         <View style={styles.actions}>
-          <Button
-            title="Back"
+          <TouchableOpacity
             onPress={onPrevious}
-            variant="secondary"
-            style={{ flex: 1 }}
-          />
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+          >
+            <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+          </TouchableOpacity>
 
           {permissionGranted ? (
-            <Button
-              title="Continue"
+            <TouchableOpacity
               onPress={handleContinue}
-              variant="primary"
-              style={{ flex: 1 }}
-            />
+              style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
+            >
+              <Text style={[styles.actionButtonText, { color: '#fff' }]}>Continue</Text>
+            </TouchableOpacity>
           ) : (
             <>
-              <Button
-                title="Skip"
+              <TouchableOpacity
                 onPress={handleSkip}
-                variant="secondary"
-                style={{ flex: 1 }}
-              />
-              <Button
-                title={isRequesting ? '' : 'Allow Access'}
-                onPress={handleRequestPermission}
-                variant="primary"
-                style={{ flex: 1 }}
-                disabled={isRequesting}
+                style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
               >
-                {isRequesting && (
-                  <ActivityIndicator size="small" color={themeColors.primaryText} />
+                <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Skip</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleRequestPermission}
+                disabled={isRequesting}
+                style={[styles.actionButton, { backgroundColor: themeColors.primary, opacity: isRequesting ? 0.5 : 1 }]}
+              >
+                {isRequesting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={[styles.actionButtonText, { color: '#fff' }]}>Allow Access</Text>
                 )}
-              </Button>
+              </TouchableOpacity>
             </>
           )}
         </View>
@@ -189,12 +190,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -209,7 +211,8 @@ const styles = StyleSheet.create({
   },
   privacyText: {
     fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   successBanner: {
     borderRadius: 12,
@@ -218,15 +221,28 @@ const styles = StyleSheet.create({
   },
   successText: {
     fontSize: 16,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   actions: {
     flexDirection: 'row',
     gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+  },
+  actionButtonText: {
+    fontFamily: Fonts.light,
+    fontSize: 16,
+    fontWeight: '200' as const,
   },
 });

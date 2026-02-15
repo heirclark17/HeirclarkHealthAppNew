@@ -6,7 +6,6 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { CheckCircle, Edit2 } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
-import { Button } from '../../Button';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 import { PlannerPreferences } from '../../../types/planner';
@@ -32,6 +31,7 @@ export function ReviewStep({
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const surfaceColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const surfaceBorder = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
@@ -137,18 +137,18 @@ export function ReviewStep({
 
         {/* Actions */}
         <View style={styles.actions}>
-          <Button
-            title="Back"
+          <TouchableOpacity
             onPress={onPrevious}
-            variant="secondary"
-            style={{ flex: 1 }}
-          />
-          <Button
-            title="Complete Setup"
+            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
+          >
+            <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={onConfirm}
-            variant="primary"
-            style={{ flex: 1 }}
-          />
+            style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
+          >
+            <Text style={[styles.actionButtonText, { color: '#fff' }]}>Complete Setup</Text>
+          </TouchableOpacity>
         </View>
       </GlassCard>
     </View>
@@ -200,12 +200,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -228,13 +229,15 @@ const styles = StyleSheet.create({
   },
   reviewLabel: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   reviewValue: {
     fontSize: 16,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   editButton: {
     width: 32,
@@ -245,11 +248,23 @@ const styles = StyleSheet.create({
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   actions: {
     flexDirection: 'row',
     gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+  },
+  actionButtonText: {
+    fontFamily: Fonts.light,
+    fontSize: 16,
+    fontWeight: '200' as const,
   },
 });
