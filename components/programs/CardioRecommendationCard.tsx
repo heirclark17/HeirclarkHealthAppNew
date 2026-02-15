@@ -17,7 +17,7 @@ import { router } from 'expo-router';
 import { useCardioRecommendation } from '../../contexts/CardioRecommendationContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { GlassCard } from '../GlassCard';
-import { GlassButton } from '../GlassButton';
+import { GlassButton } from '../liquidGlass/GlassButton';
 import { NumberText } from '../NumberText';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { Activity, TrendingDown, CheckCircle, AlertCircle } from 'lucide-react-native';
