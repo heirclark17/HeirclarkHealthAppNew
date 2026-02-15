@@ -181,14 +181,14 @@ export default function ExerciseOverloadCard({
 
 const styles = StyleSheet.create({
   card: {
-    padding: 16,
-    marginBottom: 8,
+    padding: 20,
+    marginBottom: 16,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 18,
   },
   exerciseName: {
     fontSize: 16,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   comparisonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 18,
   },
   weekCol: {
     flex: 1,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   weekLabel: {
     fontSize: 10,
     fontFamily: Fonts.regular,
-    marginBottom: 2,
+    marginBottom: 6,
   },
   weekValue: {
     fontSize: 14,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   volumeLabel: {
     fontSize: 11,
     fontFamily: Fonts.regular,
-    marginTop: 2,
+    marginTop: 6,
   },
   volumeValue: {
     fontSize: 11,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   changeCol: {
     alignItems: 'flex-end',
-    gap: 2,
+    gap: 6,
   },
   changeRow: {
     flexDirection: 'row',
@@ -263,12 +263,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.regular,
     fontStyle: 'italic',
-    marginBottom: 10,
+    marginBottom: 16,
     lineHeight: 17,
   },
   actions: {
     flexDirection: 'row',
     gap: 8,
+    marginTop: 4,
   },
   actionBtn: {
     paddingHorizontal: 12,
