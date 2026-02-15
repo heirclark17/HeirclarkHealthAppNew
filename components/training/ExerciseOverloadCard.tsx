@@ -152,7 +152,7 @@ export default function ExerciseOverloadCard({
       <View style={styles.actions}>
         {onViewHistory && (
           <TouchableOpacity
-            style={[styles.actionBtn, { borderColor: colors.border }]}
+            style={[styles.actionBtn]}
             onPress={() => { lightImpact(); onViewHistory(); }}
           >
             <Text style={[styles.actionText, { color: colors.textSecondary }]}>History</Text>
@@ -160,7 +160,7 @@ export default function ExerciseOverloadCard({
         )}
         {current.overloadStatus === 'stalling' && onBreakPlateau && (
           <TouchableOpacity
-            style={[styles.actionBtn, { borderColor: colors.warningOrange + '40', backgroundColor: colors.warningOrange + '10' }]}
+            style={[styles.actionBtn, { backgroundColor: colors.warningOrange + '10' }]}
             onPress={() => { lightImpact(); onBreakPlateau(); }}
           >
             <Text style={[styles.actionText, { color: colors.warningOrange }]}>Break Plateau</Text>
@@ -168,7 +168,7 @@ export default function ExerciseOverloadCard({
         )}
         {onGetAIPlan && (
           <TouchableOpacity
-            style={[styles.actionBtn, { borderColor: colors.accentPurple + '40', backgroundColor: colors.accentPurple + '10' }]}
+            style={[styles.actionBtn, { backgroundColor: colors.accentPurple + '10' }]}
             onPress={() => { lightImpact(); onGetAIPlan(); }}
           >
             <Text style={[styles.actionText, { color: colors.accentPurple }]}>AI Plan</Text>
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 0,
   },
   actionText: {
     fontSize: 12,
