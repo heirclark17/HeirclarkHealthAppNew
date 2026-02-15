@@ -260,13 +260,24 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
   return (
     <View style={styles.container}>
+      {/* Modern Liquid Glass Sticky Header */}
+      <WizardHeader
+        currentStep={4}
+        totalSteps={6}
+        title="Nutrition Preferences"
+        onBack={onBack}
+        isDark={isDark}
+      />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Nutrition Preferences</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Customize your meal plan to match your lifestyle and dietary needs.
-        </Text>
-      </View>
+        {/* Spacer for sticky header */}
+        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+
+        <View style={styles.subtitle}>
+          <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
+            Customize your meal plan to match your lifestyle and dietary needs.
+          </Text>
+        </View>
 
       {/* Diet Style Selection */}
       <GlassSection isDark={isDark}>
@@ -1034,22 +1045,16 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  header: {
-    marginTop: 48,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.text,
-    marginBottom: 8,
-  },
   subtitle: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  subtitleText: {
     fontSize: 15,
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 22,
+    textAlign: 'center',
   },
   glassSection: {
     marginBottom: 24,

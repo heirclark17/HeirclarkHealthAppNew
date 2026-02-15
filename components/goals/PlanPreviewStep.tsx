@@ -31,6 +31,7 @@ import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { useTraining } from '../../contexts/TrainingContext';
 import { lightImpact, successNotification } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
+import { WizardHeader } from './WizardHeader';
 
 interface AnimatedNumberProps {
   value: number;
@@ -208,13 +209,24 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
 
   return (
     <View style={styles.container}>
+      {/* Modern Liquid Glass Sticky Header */}
+      <WizardHeader
+        currentStep={6}
+        totalSteps={6}
+        title="Review Your Plan"
+        onBack={onBack}
+        isDark={isDark}
+      />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Your Personalized Plan</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Based on your inputs, here's your daily nutrition target to reach your goal.
-        </Text>
-      </View>
+        {/* Spacer for sticky header */}
+        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+
+        <View style={styles.subtitle}>
+          <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
+            Based on your inputs, here's your daily nutrition target to reach your goal.
+          </Text>
+        </View>
 
       {/* Main Calorie Card */}
       <View>
@@ -1197,22 +1209,15 @@ const styles = StyleSheet.create({
     fontWeight: '200',
     color: Colors.textSecondary,
   },
-  header: {
-    marginTop: 48,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.text,
-    marginBottom: 8,
-  },
   subtitle: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  subtitleText: {
     fontSize: 15,
-    fontFamily: Fonts.light,
-    color: Colors.textSecondary,
+    fontFamily: Fonts.regular,
     lineHeight: 22,
+    textAlign: 'center',
   },
   mainCard: {
     marginBottom: 16,

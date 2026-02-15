@@ -18,7 +18,7 @@ import { Tabs, TabList, TabTrigger, TabSlot } from 'expo-router/ui';
 import { Platform, StyleSheet, View, Pressable, useWindowDimensions, ActivityIndicator, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, Flag, UtensilsCrossed, Bookmark, Dumbbell, Activity, Watch, Settings, Plus, BicepsFlexed, TrendingUp } from 'lucide-react-native';
+import { Home, Flag, UtensilsCrossed, Bookmark, Dumbbell, Activity, Watch, Settings, Plus, BicepsFlexed, TrendingUp, CalendarDays } from 'lucide-react-native';
 import { lightImpact, mediumImpact, rigidImpact, selectionFeedback } from '../../utils/haptics';
 import { useState, useEffect, forwardRef, useRef, useCallback, useMemo } from 'react';
 import type { TabTriggerSlotProps } from 'expo-router/ui';
@@ -185,6 +185,12 @@ const TAB_CONFIG: TabConfig[] = [
     href: '/programs',
     Icon: Dumbbell,
     label: 'Training'
+  },
+  {
+    name: 'planner',
+    href: '/planner',
+    Icon: CalendarDays,
+    label: 'Planner'
   },
   {
     name: 'exercises',

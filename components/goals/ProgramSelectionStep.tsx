@@ -9,6 +9,7 @@ import { useTraining } from '../../contexts/TrainingContext';
 import { TrainingProgram, ProgramTemplate } from '../../types/training';
 import { ProgramPreviewModal } from '../training/ProgramPreviewModal';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
+import { WizardHeader } from './WizardHeader';
 
 interface ProgramSelectionStepProps {
   onContinue: (programId: string, programName: string) => void;
@@ -97,20 +98,29 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
 
   return (
     <>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            Choose Your Training Program
-          </Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Select a program that aligns with your goals and fitness level. Your AI workout plan will be generated based on this selection.
-          </Text>
-        </View>
+      <View style={styles.container}>
+        {/* Modern Liquid Glass Sticky Header */}
+        <WizardHeader
+          currentStep={5}
+          totalSteps={6}
+          title="Training Program"
+          onBack={onBack}
+          isDark={isDark}
+        />
+
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Spacer for sticky header */}
+          <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+
+          <View style={styles.subtitle}>
+            <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
+              Select a program that aligns with your goals and fitness level. Your AI workout plan will be generated based on this selection.
+            </Text>
+          </View>
 
         {/* Program Cards */}
         <View style={styles.programsContainer}>
@@ -307,7 +317,8 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
             </GlassCard>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {/* Program Preview Modal */}
       <ProgramPreviewModal
@@ -324,22 +335,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
   },
-  header: {
+  subtitle: {
+    paddingHorizontal: 20,
     marginBottom: 24,
   },
-  title: {
-    fontSize: 28,
-    fontFamily: Fonts.bold,
-    marginBottom: 8,
-  },
-  subtitle: {
+  subtitleText: {
     fontSize: 15,
     fontFamily: Fonts.regular,
     lineHeight: 22,
+    textAlign: 'center',
   },
   programsContainer: {
     gap: 12,
