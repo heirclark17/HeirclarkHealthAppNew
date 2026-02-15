@@ -420,9 +420,12 @@ export class SchedulingEngine {
 
   /**
    * Format date to day of week
+   * Uses local-timezone parsing to avoid UTC date shift
+   * (e.g. new Date("2026-02-16") in CST would show Feb 15)
    */
   private static formatDayOfWeek(dateStr: string): string {
-    const date = new Date(dateStr);
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return days[date.getDay()];
   }

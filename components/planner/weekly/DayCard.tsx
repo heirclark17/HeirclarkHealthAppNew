@@ -16,12 +16,22 @@ interface Props {
   onPress: () => void;
 }
 
+/**
+ * Parse a "YYYY-MM-DD" string as a local-timezone date (not UTC).
+ * new Date("2026-02-16") creates a UTC midnight date which can shift the day
+ * when displayed in local timezone (e.g. CST is -6h so it shows Feb 15).
+ */
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export function DayCard({ day, isSelected, onPress }: Props) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
 
-  const date = new Date(day.date);
+  const date = parseLocalDate(day.date);
   const dayName = format(date, 'EEE');
   const dayNumber = format(date, 'd');
 

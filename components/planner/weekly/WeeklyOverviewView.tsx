@@ -4,28 +4,41 @@
 
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { WeeklyStatsCard } from './WeeklyStatsCard';
 import { DayCard } from './DayCard';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
+// Must match _layout.tsx tab bar constants
+const TAB_BAR_HEIGHT = 64;
+const TAB_BAR_BOTTOM_MARGIN = 12;
+
 export function WeeklyOverviewView() {
   const { state, actions } = useDayPlanner();
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
+  const insets = useSafeAreaInsets();
+
+  // Bottom padding: account for tab bar floating above safe area bottom
+  const bottomPadding = TAB_BAR_HEIGHT + TAB_BAR_BOTTOM_MARGIN + (insets.bottom || 0) + 20;
 
   if (!state.weeklyPlan) {
     return (
-      <View style={styles.emptyContainer}>
+      <View style={[styles.emptyContainer, { paddingBottom: bottomPadding }]}>
         <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No weekly plan available</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: bottomPadding }}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Weekly Stats */}
       <WeeklyStatsCard stats={state.weeklyPlan.weeklyStats} />
 
@@ -47,7 +60,7 @@ export function WeeklyOverviewView() {
           />
         ))}
       </ScrollView>
-    </View>
+    </ScrollView>
   );
 }
 

@@ -4,18 +4,19 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Calendar, Clock, Zap } from 'lucide-react-native';
+import { Calendar, Clock, Zap, X } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
 interface Props {
   onNext: () => void;
+  onClose?: () => void;
   currentStep: number;
   totalSteps: number;
 }
 
-export function WelcomeStep({ onNext, currentStep, totalSteps }: Props) {
+export function WelcomeStep({ onNext, onClose, currentStep, totalSteps }: Props) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
@@ -23,6 +24,18 @@ export function WelcomeStep({ onNext, currentStep, totalSteps }: Props) {
   return (
     <View style={styles.container}>
       <GlassCard style={styles.card}>
+        {/* Close Button */}
+        {onClose && (
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <X size={24} color={themeColors.textSecondary} />
+          </TouchableOpacity>
+        )}
+
         {/* Header */}
         <View style={styles.header}>
           <Calendar size={48} color={themeColors.primary} />
@@ -105,6 +118,17 @@ const styles = StyleSheet.create({
   card: {
     padding: 24,
     gap: 24,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
   header: {
     alignItems: 'center',

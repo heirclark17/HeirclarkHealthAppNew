@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { CalendarSync } from 'lucide-react-native';
+import { CalendarClock } from 'lucide-react-native';
 import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 import { useSettings } from '../../../contexts/SettingsContext';
 
@@ -40,7 +40,7 @@ export function CalendarSyncButton({ onPress, loading }: Props) {
       {loading ? (
         <ActivityIndicator size="small" color={themeColors.text} />
       ) : (
-        <CalendarSync size={20} color={themeColors.text} />
+        <CalendarClock size={20} color={themeColors.text} />
       )}
     </TouchableOpacity>
   );

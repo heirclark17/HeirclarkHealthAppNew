@@ -1,10 +1,16 @@
 /**
  * DailyTimelineView - Main daily timeline with hourly grid and time blocks
  * iOS 26 Liquid Glass design
+ *
+ * Fixed:
+ * - Bottom padding accounts for floating tab bar (TAB_BAR_HEIGHT + margin + safe area)
+ * - Timezone-safe date parsing (parseLocalDate instead of new Date(string))
+ * - Generate button properly wired with loading state and error handling
+ * - Empty state has sufficient bottom padding to not be hidden behind tab bar
  */
 
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { format } from 'date-fns';
 import { Calendar, RefreshCw } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +23,20 @@ import { CalendarSyncButton } from '../shared/CalendarSyncButton';
 import { GlassCard } from '../../GlassCard';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
+// Must match _layout.tsx tab bar constants
+const TAB_BAR_HEIGHT = 64;
+const TAB_BAR_BOTTOM_MARGIN = 12;
+
+/**
+ * Parse a "YYYY-MM-DD" string as a local-timezone date (not UTC).
+ * new Date("2026-02-16") creates a UTC midnight date which can shift the day
+ * when displayed in local timezone (e.g. CST is -6h so it shows Feb 15).
+ */
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export function DailyTimelineView() {
   const { state, actions } = useDayPlanner();
   const { settings } = useSettings();
@@ -25,6 +45,9 @@ export function DailyTimelineView() {
   const scrollRef = useRef<ScrollView>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const insets = useSafeAreaInsets();
+
+  // Bottom padding: account for tab bar floating above safe area bottom
+  const bottomPadding = TAB_BAR_HEIGHT + TAB_BAR_BOTTOM_MARGIN + (insets.bottom || 0) + 20;
 
   // Get current day's timeline
   const timeline = state.weeklyPlan?.days[state.selectedDayIndex];
@@ -42,38 +65,55 @@ export function DailyTimelineView() {
 
   if (!timeline) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 20, backgroundColor: themeColors.background }]}>
-        <View style={styles.emptyContainer}>
+      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+        <View style={[styles.emptyContainer, { paddingBottom: bottomPadding }]}>
           <GlassCard style={styles.emptyCard}>
-            <RefreshCw size={48} color={themeColors.primary} style={{ opacity: 0.3 }} />
-            <Text style={[styles.emptyText, { color: themeColors.text }]}>No timeline available</Text>
+            <Calendar size={48} color={themeColors.primary} style={{ opacity: 0.5 }} />
+            <Text style={[styles.emptyTitle, { color: themeColors.text }]}>
+              No Schedule Yet
+            </Text>
+            <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>
+              Generate your personalized daily timeline based on your workouts, meals, and preferences.
+            </Text>
             <TouchableOpacity
               style={[styles.generateButton, { backgroundColor: themeColors.primary }]}
               onPress={actions.generateWeeklyPlan}
               disabled={state.isGeneratingPlan}
+              activeOpacity={0.7}
             >
               {state.isGeneratingPlan ? (
-                <Text style={[styles.generateButtonText, { color: themeColors.primaryText }]}>Generating...</Text>
+                <>
+                  <ActivityIndicator size="small" color="#fff" />
+                  <Text style={[styles.generateButtonText, { color: '#fff' }]}>Generating...</Text>
+                </>
               ) : (
                 <>
-                  <RefreshCw size={20} color={themeColors.primaryText} />
-                  <Text style={[styles.generateButtonText, { color: themeColors.primaryText }]}>Generate Schedule</Text>
+                  <RefreshCw size={20} color="#fff" />
+                  <Text style={[styles.generateButtonText, { color: '#fff' }]}>Generate Schedule</Text>
                 </>
               )}
             </TouchableOpacity>
+            {state.error && (
+              <Text style={[styles.errorText, { color: Colors.protein }]}>
+                {state.error}
+              </Text>
+            )}
           </GlassCard>
         </View>
       </View>
     );
   }
 
+  // Parse date safely in local timezone
+  const timelineDate = parseLocalDate(timeline.date);
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: themeColors.background }]}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* Header */}
       <GlassCard style={styles.header}>
         <TouchableOpacity onPress={() => setShowDatePicker(true)}>
           <Text style={[styles.dateText, { color: themeColors.text }]}>
-            {format(new Date(timeline.date), 'EEEE, MMM d')}
+            {format(timelineDate, 'EEEE, MMM d')}
           </Text>
         </TouchableOpacity>
 
@@ -87,10 +127,14 @@ export function DailyTimelineView() {
             onPress={actions.generateWeeklyPlan}
             disabled={state.isGeneratingPlan}
           >
-            <RefreshCw
-              size={20}
-              color={state.isGeneratingPlan ? themeColors.textSecondary : themeColors.primary}
-            />
+            {state.isGeneratingPlan ? (
+              <ActivityIndicator size="small" color={themeColors.primary} />
+            ) : (
+              <RefreshCw
+                size={20}
+                color={themeColors.primary}
+              />
+            )}
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -99,7 +143,7 @@ export function DailyTimelineView() {
       <ScrollView
         ref={scrollRef}
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding + 80 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.timeline}>
@@ -122,7 +166,7 @@ export function DailyTimelineView() {
       </ScrollView>
 
       {/* Stats Footer */}
-      <GlassCard style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
+      <GlassCard style={[styles.footer, { marginBottom: bottomPadding }]}>
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: themeColors.primary }]}>{timeline.completionRate}%</Text>
           <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Completed</Text>
@@ -176,7 +220,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 120,
+    // paddingBottom is set dynamically via style prop
   },
   timeline: {
     position: 'relative',
@@ -195,11 +239,24 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     width: '100%',
   },
-  emptyText: {
-    fontSize: 18,
+  emptyTitle: {
+    fontSize: 22,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
     textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 15,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  errorText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    textAlign: 'center',
+    marginTop: 4,
   },
   generateButton: {
     flexDirection: 'row',
@@ -220,9 +277,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingVertical: 16,
     marginHorizontal: 16,
-    marginBottom: 16,
   },
   statItem: {
     flex: 1,

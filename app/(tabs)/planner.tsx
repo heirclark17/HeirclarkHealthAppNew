@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDayPlanner } from '../../contexts/DayPlannerContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DayPlannerOnboardingModal } from '../../components/planner/onboarding/DayPlannerOnboardingModal';
@@ -20,6 +21,7 @@ export default function PlannerScreen() {
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
+  const insets = useSafeAreaInsets();
 
   // Show onboarding if not completed
   if (!state.hasCompletedOnboarding) {
@@ -35,7 +37,7 @@ export default function PlannerScreen() {
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* Header with view toggle */}
-      <View style={[styles.header, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.header, { backgroundColor: themeColors.background, paddingTop: insets.top + 8 }]}>
         <SegmentedControl
           values={['Daily', 'Weekly']}
           selectedIndex={viewMode === 'daily' ? 0 : 1}

@@ -95,7 +95,7 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
 
     switch (currentStep) {
       case 0:
-        return <WelcomeStep {...stepProps} />;
+        return <WelcomeStep {...stepProps} onClose={onClose} />;
 
       case 1:
         return (
