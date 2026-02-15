@@ -1,6 +1,6 @@
 /**
  * MonthlyCalendarView - Full month grid view for the planner
- * Matches CalendarCard's full calendar modal style
+ * Properly aligned calendar with correct day-of-week mapping
  */
 
 import React, { useState, useMemo } from 'react';
@@ -12,8 +12,13 @@ import { useSettings } from '../../../contexts/SettingsContext';
 import { GlassCard } from '../../GlassCard';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
-const { width } = Dimensions.get('window');
-const CELL_SIZE = Math.floor((width - 64) / 7);
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Grid sizing: screen - (marginHorizontal*2) - (GlassCard internal padding*2) - (grid inner padding*2)
+// 16px margin each side = 32, 16px GlassCard padding each side = 32, 4px grid padding each side = 8
+// Total horizontal space eaten: 72px
+const GRID_INNER_WIDTH = SCREEN_WIDTH - 32 - 32 - 8;
+const CELL_SIZE = Math.floor(GRID_INNER_WIDTH / 7);
 
 /** Convert "HH:MM" (24h) to "h:MM AM/PM" */
 function to12h(time: string): string {
@@ -50,7 +55,6 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
 
   const todayStr = useMemo(() => formatDateStr(new Date()), []);
   const [currentMonth, setCurrentMonth] = useState(() => {
-    // Start on the month of the selected date
     const parts = selectedDate.split('-').map(Number);
     return new Date(parts[0], parts[1] - 1, 1);
   });
@@ -81,26 +85,33 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
     });
   };
 
-  // Generate calendar grid
-  const calendarDays = useMemo(() => {
+  // Generate calendar grid - always produces complete rows of 7
+  const calendarRows = useMemo(() => {
     const year = currentMonth.getFullYear();
     const monthIndex = currentMonth.getMonth();
-    const firstDay = new Date(year, monthIndex, 1).getDay();
+    const firstDayOfWeek = new Date(year, monthIndex, 1).getDay(); // 0=Sun, 6=Sat
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
-    const days: Array<{ empty?: boolean; day?: number; dateStr?: string; isToday?: boolean; isSelected?: boolean; hasBlocks?: boolean }> = [];
+    type CellData = { empty: true } | {
+      empty?: false;
+      day: number;
+      dateStr: string;
+      isToday: boolean;
+      isSelected: boolean;
+      hasBlocks: boolean;
+    };
 
-    // Empty cells for days before month starts
-    for (let i = 0; i < firstDay; i++) {
-      days.push({ empty: true });
+    const allCells: CellData[] = [];
+
+    // Leading empty cells for days before month starts
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      allCells.push({ empty: true });
     }
 
     // All days in month
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, monthIndex, day);
-      const dateStr = formatDateStr(date);
-
-      days.push({
+      const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      allCells.push({
         day,
         dateStr,
         isToday: dateStr === todayStr,
@@ -109,7 +120,21 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
       });
     }
 
-    return days;
+    // Trailing empty cells to complete last row
+    const remainder = allCells.length % 7;
+    if (remainder > 0) {
+      for (let i = 0; i < 7 - remainder; i++) {
+        allCells.push({ empty: true });
+      }
+    }
+
+    // Split into rows of 7
+    const rows: CellData[][] = [];
+    for (let i = 0; i < allCells.length; i += 7) {
+      rows.push(allCells.slice(i, i + 7));
+    }
+
+    return rows;
   }, [currentMonth, todayStr, selectedDate, datesWithBlocks]);
 
   return (
@@ -120,64 +145,89 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
     >
       {/* Month Header */}
       <GlassCard style={styles.monthHeader}>
-        <TouchableOpacity onPress={() => changeMonth('prev')} activeOpacity={0.7} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <ChevronLeft size={24} color={themeColors.text} />
-        </TouchableOpacity>
+        <View style={styles.monthHeaderInner}>
+          <TouchableOpacity
+            onPress={() => changeMonth('prev')}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <ChevronLeft size={24} color={themeColors.text} />
+          </TouchableOpacity>
 
-        <Text style={[styles.monthTitle, { color: themeColors.text }]}>
-          {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-        </Text>
+          <Text style={[styles.monthTitle, { color: themeColors.text }]}>
+            {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+          </Text>
 
-        <TouchableOpacity onPress={() => changeMonth('next')} activeOpacity={0.7} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-          <ChevronRight size={24} color={themeColors.text} />
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => changeMonth('next')}
+            activeOpacity={0.7}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <ChevronRight size={24} color={themeColors.text} />
+          </TouchableOpacity>
+        </View>
       </GlassCard>
 
-      {/* Day Labels */}
-      <View style={styles.dayLabels}>
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-          <Text key={day} style={[styles.dayLabel, { color: themeColors.textSecondary }]}>
-            {day}
-          </Text>
-        ))}
-      </View>
-
-      {/* Calendar Grid */}
+      {/* Calendar Grid (day labels + date cells inside same card) */}
       <GlassCard style={styles.gridCard}>
-        <View style={styles.calendarGrid}>
-          {calendarDays.map((item, index) =>
-            item.empty ? (
-              <View key={`empty-${index}`} style={styles.emptyDay} />
-            ) : (
-              <TouchableOpacity
-                key={item.dateStr}
-                style={[
-                  styles.calendarDay,
-                  item.isToday && [styles.calendarDayToday, { borderColor: themeColors.primary }],
-                  item.isSelected && { backgroundColor: themeColors.primary },
-                ]}
-                onPress={() => onDateChange(item.dateStr!)}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.calendarDayText,
-                    { color: themeColors.text },
-                    item.isSelected && { color: isDark ? Colors.background : '#fff' },
-                  ]}
-                >
-                  {item.day}
-                </Text>
-                {item.hasBlocks && !item.isSelected && (
-                  <View style={[styles.blockDot, { backgroundColor: themeColors.primary }]} />
-                )}
-                {item.hasBlocks && item.isSelected && (
-                  <View style={[styles.blockDot, { backgroundColor: isDark ? Colors.background : '#fff' }]} />
-                )}
-              </TouchableOpacity>
-            )
-          )}
+        {/* Day Labels Row */}
+        <View style={styles.dayLabelsRow}>
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            <View key={day} style={styles.dayLabelCell}>
+              <Text style={[styles.dayLabelText, { color: themeColors.textSecondary }]}>
+                {day}
+              </Text>
+            </View>
+          ))}
         </View>
+
+        {/* Date Rows */}
+        {calendarRows.map((row, rowIndex) => (
+          <View key={`row-${rowIndex}`} style={styles.calendarRow}>
+            {row.map((item, colIndex) =>
+              item.empty ? (
+                <View key={`empty-${rowIndex}-${colIndex}`} style={styles.calendarCell} />
+              ) : (
+                <TouchableOpacity
+                  key={item.dateStr}
+                  style={styles.calendarCell}
+                  onPress={() => onDateChange(item.dateStr)}
+                  activeOpacity={0.7}
+                >
+                  <View
+                    style={[
+                      styles.dayCircle,
+                      item.isToday && !item.isSelected && [styles.dayCircleToday, { borderColor: themeColors.primary }],
+                      item.isSelected && { backgroundColor: themeColors.primary },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.calendarDayText,
+                        { color: themeColors.text },
+                        item.isSelected && { color: isDark ? Colors.background : '#fff' },
+                      ]}
+                    >
+                      {item.day}
+                    </Text>
+                  </View>
+                  {item.hasBlocks && (
+                    <View
+                      style={[
+                        styles.blockDot,
+                        {
+                          backgroundColor: item.isSelected
+                            ? (isDark ? Colors.background : '#fff')
+                            : themeColors.primary,
+                        },
+                      ]}
+                    />
+                  )}
+                </TouchableOpacity>
+              )
+            )}
+          </View>
+        ))}
       </GlassCard>
 
       {/* Selected Day Summary */}
@@ -244,55 +294,57 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  // Month header: GlassCard wraps, inner view handles centering
   monthHeader: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+  },
+  monthHeaderInner: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
   },
   monthTitle: {
     fontSize: 18,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
-  },
-  dayLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    marginBottom: 8,
-  },
-  dayLabel: {
-    fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
-    width: CELL_SIZE,
     textAlign: 'center',
   },
+  // Grid card contains both day labels and date rows
   gridCard: {
     marginHorizontal: 16,
     marginBottom: 16,
   },
-  calendarGrid: {
+  dayLabelsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 4,
+    marginBottom: 8,
   },
-  emptyDay: {
+  dayLabelCell: {
     width: CELL_SIZE,
-    height: CELL_SIZE,
-  },
-  calendarDay: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
-    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: CELL_SIZE / 2,
-    marginBottom: 2,
   },
-  calendarDayToday: {
+  dayLabelText: {
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+  },
+  calendarRow: {
+    flexDirection: 'row',
+  },
+  calendarCell: {
+    width: CELL_SIZE,
+    height: CELL_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayCircle: {
+    width: CELL_SIZE - 6,
+    height: CELL_SIZE - 6,
+    borderRadius: (CELL_SIZE - 6) / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayCircleToday: {
     borderWidth: 1.5,
   },
   calendarDayText: {
@@ -304,9 +356,8 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    marginTop: 2,
     position: 'absolute',
-    bottom: 6,
+    bottom: 4,
   },
   summaryCard: {
     marginHorizontal: 16,
