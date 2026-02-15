@@ -110,7 +110,7 @@ function GoalWizardContent() {
 
   const handleBack = () => {
     if (state.currentStep === 1) {
-      router.back();
+      router.replace('/');
     } else {
       setDirection('backward');
       prevStep();

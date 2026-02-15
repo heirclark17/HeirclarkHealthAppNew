@@ -146,7 +146,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
   const handleBack = async () => {
     await lightImpact();
-    router.back();
+    router.replace('/');
   };
 
   const handleContinue = async () => {
