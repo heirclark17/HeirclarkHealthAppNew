@@ -4,9 +4,10 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Settings } from 'lucide-react-native';
 import { useDayPlanner } from '../../contexts/DayPlannerContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DayPlannerOnboardingModal } from '../../components/planner/onboarding/DayPlannerOnboardingModal';
@@ -59,16 +60,28 @@ export default function PlannerScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      {/* Header with view toggle */}
+      {/* Header with view toggle + preferences button */}
       <View style={[styles.header, { backgroundColor: themeColors.background, paddingTop: insets.top + 8 }]}>
-        <SegmentedControl
-          values={['Daily', 'Weekly', 'Monthly']}
-          selectedIndex={viewMode === 'daily' ? 0 : viewMode === 'weekly' ? 1 : 2}
-          onChange={(index) => {
-            const modes: Array<'daily' | 'weekly' | 'monthly'> = ['daily', 'weekly', 'monthly'];
-            setViewMode(modes[index]);
-          }}
-        />
+        <View style={styles.headerRow}>
+          <View style={{ flex: 1 }}>
+            <SegmentedControl
+              values={['Daily', 'Weekly', 'Monthly']}
+              selectedIndex={viewMode === 'daily' ? 0 : viewMode === 'weekly' ? 1 : 2}
+              onChange={(index) => {
+                const modes: Array<'daily' | 'weekly' | 'monthly'> = ['daily', 'weekly', 'monthly'];
+                setViewMode(modes[index]);
+              }}
+            />
+          </View>
+          <TouchableOpacity
+            style={[styles.prefsButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
+            onPress={actions.reopenOnboarding}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Settings size={20} color={themeColors.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Calendar Strip (shown for Daily and Weekly views) */}
@@ -77,6 +90,10 @@ export default function PlannerScreen() {
           selectedDate={selectedDate}
           onDateChange={handleDateChange}
           weekStartDate={weekStartDate}
+          onSyncCalendar={actions.syncCalendar}
+          isSyncingCalendar={state.isSyncingCalendar}
+          onRefresh={actions.generateWeeklyPlan}
+          isRefreshing={state.isGeneratingPlan}
         />
       )}
 
@@ -102,5 +119,17 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  prefsButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

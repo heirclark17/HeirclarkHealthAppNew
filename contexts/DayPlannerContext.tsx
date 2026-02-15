@@ -91,6 +91,7 @@ interface DayPlannerState {
 
 interface DayPlannerActions {
   completeOnboarding: (preferences: PlannerPreferences) => Promise<void>;
+  reopenOnboarding: () => void;
   generateWeeklyPlan: () => Promise<void>;
   syncCalendar: () => Promise<boolean>;
   markBlockComplete: (blockId: string, date: string) => Promise<void>;
@@ -781,6 +782,10 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, error: null }));
   }, []);
 
+  const reopenOnboarding = useCallback(() => {
+    setState((prev) => ({ ...prev, hasCompletedOnboarding: false }));
+  }, []);
+
   // ========================================================================
   // Internal helpers
   // ========================================================================
@@ -861,6 +866,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
   const actions: DayPlannerActions = {
     completeOnboarding,
+    reopenOnboarding,
     generateWeeklyPlan,
     syncCalendar,
     markBlockComplete,

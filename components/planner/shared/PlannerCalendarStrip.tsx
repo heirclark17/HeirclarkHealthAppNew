@@ -1,10 +1,12 @@
 /**
  * PlannerCalendarStrip - Horizontal week date strip for the planner
  * Matches CalendarCard style from the calorie counter dashboard
+ * Includes action buttons (calendar sync + refresh) below the date strip
  */
 
 import React, { useMemo, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import { CalendarClock, RefreshCw } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -13,6 +15,10 @@ interface Props {
   selectedDate: string; // YYYY-MM-DD
   onDateChange: (date: string) => void;
   weekStartDate?: string; // YYYY-MM-DD of the week's Sunday
+  onSyncCalendar?: () => void;
+  isSyncingCalendar?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 function parseLocalDate(dateStr: string): Date {
@@ -27,7 +33,15 @@ function formatDateStr(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export function PlannerCalendarStrip({ selectedDate, onDateChange, weekStartDate }: Props) {
+export function PlannerCalendarStrip({
+  selectedDate,
+  onDateChange,
+  weekStartDate,
+  onSyncCalendar,
+  isSyncingCalendar,
+  onRefresh,
+  isRefreshing,
+}: Props) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
@@ -35,6 +49,7 @@ export function PlannerCalendarStrip({ selectedDate, onDateChange, weekStartDate
 
   const dayItemBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
   const dayNameColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
+  const actionBtnBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
 
   const todayStr = useMemo(() => formatDateStr(new Date()), []);
 
@@ -70,6 +85,12 @@ export function PlannerCalendarStrip({ selectedDate, onDateChange, weekStartDate
     return dateList;
   }, [weekStartDate, todayStr]);
 
+  // Selected date display label
+  const selectedLabel = useMemo(() => {
+    const date = parseLocalDate(selectedDate);
+    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  }, [selectedDate]);
+
   // Scroll to selected date on mount
   useEffect(() => {
     const selectedIdx = weekDays.findIndex((d) => d.dateStr === selectedDate);
@@ -80,8 +101,48 @@ export function PlannerCalendarStrip({ selectedDate, onDateChange, weekStartDate
     }
   }, [selectedDate, weekDays]);
 
+  const hasActions = onSyncCalendar || onRefresh;
+
   return (
     <GlassCard style={styles.container}>
+      {/* Action row: date label + buttons */}
+      {hasActions && (
+        <View style={styles.actionRow}>
+          <Text style={[styles.dateLabel, { color: themeColors.text }]}>{selectedLabel}</Text>
+          <View style={styles.actionButtons}>
+            {onSyncCalendar && (
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: actionBtnBg }]}
+                onPress={onSyncCalendar}
+                disabled={isSyncingCalendar}
+                activeOpacity={0.7}
+              >
+                {isSyncingCalendar ? (
+                  <ActivityIndicator size="small" color={themeColors.text} />
+                ) : (
+                  <CalendarClock size={18} color={themeColors.text} />
+                )}
+              </TouchableOpacity>
+            )}
+            {onRefresh && (
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: actionBtnBg }]}
+                onPress={onRefresh}
+                disabled={isRefreshing}
+                activeOpacity={0.7}
+              >
+                {isRefreshing ? (
+                  <ActivityIndicator size="small" color={themeColors.primary} />
+                ) : (
+                  <RefreshCw size={18} color={themeColors.primary} />
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      )}
+
+      {/* Week strip */}
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -134,6 +195,28 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginBottom: 8,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  dateLabel: {
+    fontSize: 16,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   weekStrip: {
     flexDirection: 'row',

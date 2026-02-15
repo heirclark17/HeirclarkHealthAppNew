@@ -1,17 +1,10 @@
 /**
  * DailyTimelineView - Main daily timeline with hourly grid and time blocks
- * iOS 26 Liquid Glass design
- *
- * Fixed:
- * - Bottom padding accounts for floating tab bar (TAB_BAR_HEIGHT + margin + safe area)
- * - Timezone-safe date parsing (parseLocalDate instead of new Date(string))
- * - Generate button properly wired with loading state and error handling
- * - Empty state has sufficient bottom padding to not be hidden behind tab bar
+ * Header date/actions moved to PlannerCalendarStrip in planner.tsx
  */
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { format } from 'date-fns';
 import { Calendar, RefreshCw } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDayPlanner } from '../../../contexts/DayPlannerContext';
@@ -19,7 +12,6 @@ import { useSettings } from '../../../contexts/SettingsContext';
 import { TimeSlotGrid } from './TimeSlotGrid';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
 import { TimeBlockCard } from './TimeBlockCard';
-import { CalendarSyncButton } from '../shared/CalendarSyncButton';
 import { GlassCard } from '../../GlassCard';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
@@ -27,23 +19,12 @@ import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme
 const TAB_BAR_HEIGHT = 64;
 const TAB_BAR_BOTTOM_MARGIN = 12;
 
-/**
- * Parse a "YYYY-MM-DD" string as a local-timezone date (not UTC).
- * new Date("2026-02-16") creates a UTC midnight date which can shift the day
- * when displayed in local timezone (e.g. CST is -6h so it shows Feb 15).
- */
-function parseLocalDate(dateStr: string): Date {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-}
-
 export function DailyTimelineView() {
   const { state, actions } = useDayPlanner();
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const scrollRef = useRef<ScrollView>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const insets = useSafeAreaInsets();
 
   // Bottom padding: account for tab bar floating above safe area bottom
@@ -104,41 +85,8 @@ export function DailyTimelineView() {
     );
   }
 
-  // Parse date safely in local timezone
-  const timelineDate = parseLocalDate(timeline.date);
-
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      {/* Header */}
-      <GlassCard style={styles.header}>
-        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-          <Text style={[styles.dateText, { color: themeColors.text }]}>
-            {format(timelineDate, 'EEEE, MMM d')}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <CalendarSyncButton
-            onPress={actions.syncCalendar}
-            loading={state.isSyncingCalendar}
-          />
-          <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
-            onPress={actions.generateWeeklyPlan}
-            disabled={state.isGeneratingPlan}
-          >
-            {state.isGeneratingPlan ? (
-              <ActivityIndicator size="small" color={themeColors.primary} />
-            ) : (
-              <RefreshCw
-                size={20}
-                color={themeColors.primary}
-              />
-            )}
-          </TouchableOpacity>
-        </View>
-      </GlassCard>
-
       {/* Timeline */}
       <ScrollView
         ref={scrollRef}
@@ -193,27 +141,6 @@ export function DailyTimelineView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-  },
-  dateText: {
-    fontSize: 20,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
-  },
-  actionButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   scrollView: {
     flex: 1,
