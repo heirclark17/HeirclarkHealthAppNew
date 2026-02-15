@@ -114,7 +114,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
           showsVerticalScrollIndicator={false}
         >
           {/* Spacer for sticky header */}
-          <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+          <View style={{ height: Platform.OS === 'ios' ? 200 : 160 }} />
 
           <View style={styles.subtitle}>
             <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
@@ -352,9 +352,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   subtitleText: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: Fonts.regular,
-    lineHeight: 22,
+    lineHeight: 19,
     textAlign: 'center',
   },
   programsContainer: {
