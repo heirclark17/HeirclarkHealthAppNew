@@ -2680,6 +2680,202 @@ class HeirclarkAPI {
       return [];
     }
   }
+
+  // ============================================
+  // PLANNER API METHODS
+  // ============================================
+
+  /**
+   * Save planner onboarding preferences
+   */
+  async savePlannerOnboarding(preferences: any): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/onboarding`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ preferences }),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Save planner onboarding failed:', response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('[API] ✅ Planner onboarding saved');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[API] Save planner onboarding error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get planner onboarding preferences
+   */
+  async getPlannerOnboarding(): Promise<any | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/onboarding`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Get planner onboarding failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        console.log('[API] ✅ Planner onboarding loaded');
+        return data.data.preferences;
+      }
+      return null;
+    } catch (error) {
+      console.error('[API] Get planner onboarding error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Save weekly plan (filters calendar events for privacy)
+   */
+  async saveWeeklyPlan(weeklyPlan: any): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/weekly-plan`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ weeklyPlan }),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Save weekly plan failed:', response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        console.log('[API] ✅ Weekly plan saved (calendar events filtered)');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[API] Save weekly plan error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get weekly plan for a specific week
+   */
+  async getWeeklyPlan(weekStartDate: string): Promise<any | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/weekly-plan?week=${weekStartDate}`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Get weekly plan failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        console.log('[API] ✅ Weekly plan loaded');
+        return data.data.plan_data;
+      }
+      return null;
+    } catch (error) {
+      console.error('[API] Get weekly plan error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Update time block status (completed, skipped, etc.)
+   */
+  async updateBlockStatus(blockId: string, status: string, date: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/update-block-status`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ blockId, status, date }),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Update block status failed:', response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        console.log(`[API] ✅ Block ${blockId} status updated to ${status}`);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[API] Update block status error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Update time block time (reschedule)
+   */
+  async updateBlockTime(blockId: string, newStartTime: string, newEndTime: string, date: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/update-block-time`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ blockId, newStartTime, newEndTime, date }),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Update block time failed:', response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        console.log(`[API] ✅ Block ${blockId} rescheduled to ${newStartTime}-${newEndTime}`);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[API] Update block time error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get AI-powered weekly optimization insights
+   */
+  async getWeeklyOptimization(params: { currentWeekPlan: any; completionHistory: any[] }): Promise<any | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/optimize`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(params),
+      });
+
+      if (!response.ok) {
+        console.error('[API] Get weekly optimization failed:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.success && data.optimization) {
+        console.log('[API] ✅ Weekly optimization insights generated');
+        return data.optimization;
+      }
+      return null;
+    } catch (error) {
+      console.error('[API] Get weekly optimization error:', error);
+      return null;
+    }
+  }
 }
 
 // Export singleton instance

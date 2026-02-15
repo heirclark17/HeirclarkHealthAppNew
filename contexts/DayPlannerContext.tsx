@@ -145,7 +145,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING, JSON.stringify(preferences));
 
       // Save to backend
-      await api.post('/planner/onboarding', { preferences });
+      await api.savePlannerOnboarding(preferences);
 
       setState((prev) => ({
         ...prev,
@@ -203,7 +203,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(weeklyPlan));
 
       // Save to backend (excludes calendar events)
-      await api.post('/planner/weekly-plan', { weeklyPlan });
+      await api.saveWeeklyPlan(weeklyPlan);
 
       setState((prev) => ({
         ...prev,
@@ -345,7 +345,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     // Save
     await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updatedPlan));
-    await api.post('/planner/update-block-status', { blockId, status: 'completed' });
+    await api.updateBlockStatus(blockId, 'completed', date);
 
     setState((prev) => ({ ...prev, weeklyPlan: updatedPlan }));
     console.log(`[Planner] ✅ Block ${blockId} marked complete`);
@@ -371,7 +371,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     // Save
     await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updatedPlan));
-    await api.post('/planner/update-block-status', { blockId, status: 'skipped' });
+    await api.updateBlockStatus(blockId, 'skipped', date);
 
     setState((prev) => ({ ...prev, weeklyPlan: updatedPlan }));
     console.log(`[Planner] Block ${blockId} skipped`);
@@ -396,7 +396,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     // Save
     await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updatedPlan));
-    await api.post('/planner/update-block-time', { blockId, startTime: newStartTime });
+    await api.updateBlockTime(blockId, newStartTime, block.endTime, date);
 
     setState((prev) => ({ ...prev, weeklyPlan: updatedPlan }));
     console.log(`[Planner] Block ${blockId} rescheduled to ${newStartTime}`);
@@ -416,12 +416,14 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     try {
       const completionHistory = buildCompletionHistory(state.weeklyPlan);
 
-      const response = await api.post('/planner/optimize', {
+      const optimization = await api.getWeeklyOptimization({
         currentWeekPlan: state.weeklyPlan,
         completionHistory,
       });
 
-      const optimization = response.data.optimization;
+      if (!optimization) {
+        throw new Error('No optimization data returned');
+      }
 
       // Cache for 7 days
       await AsyncStorage.setItem(STORAGE_KEYS.AI_OPTIMIZATION, JSON.stringify(optimization));
