@@ -406,7 +406,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Spacer for sticky header */}
-        <View style={{ height: Platform.OS === 'ios' ? 180 : 140 }} />
+        <View style={{ height: Platform.OS === 'ios' ? 220 : 170 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
@@ -895,10 +895,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   subtitleText: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
-    lineHeight: 22,
+    lineHeight: 19,
     textAlign: 'center',
   },
   glassSection: {
@@ -1138,6 +1138,7 @@ const styles = StyleSheet.create({
   },
   cardioMetaText: {
     fontSize: 11,
+    fontFamily: Fonts.light,
     color: Colors.textMuted,
   },
   // Equipment styles
