@@ -1031,39 +1031,73 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
           // Convert custom workout structure to weeklyPlan format
           // Custom workouts use day-based structure, need to convert to weekly format
-          const weeklyPlan: WeeklyTrainingPlan = {
-            days: activeCustom.workout_structure.days.map((day: any, index: number) => ({
-              dayOfWeek: index,
-              date: new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-              workout: {
+          const dayNames: Array<'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'> =
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+          const customStartDate = new Date();
+          const dayOfWeekNum = customStartDate.getDay();
+          const daysToMonday = dayOfWeekNum === 0 ? 6 : dayOfWeekNum - 1;
+          customStartDate.setDate(customStartDate.getDate() - daysToMonday);
+          customStartDate.setHours(0, 0, 0, 0);
+          const customEndDate = new Date(customStartDate);
+          customEndDate.setDate(customStartDate.getDate() + 6);
+
+          // Create 7 days, mapping custom workout days and filling remaining with rest
+          const customDays = activeCustom.workout_structure.days;
+          const weeklyPlanDays = dayNames.map((dayName, index) => {
+            const dayDate = new Date(customStartDate);
+            dayDate.setDate(customStartDate.getDate() + index);
+            const customDay = index < customDays.length ? customDays[index] : null;
+
+            return {
+              id: `custom-day-${activeCustom.id}-${index}`,
+              dayOfWeek: dayName,
+              dayNumber: index + 1,
+              date: dayDate.toISOString().split('T')[0],
+              isRestDay: !customDay || customDay.exercises.length === 0,
+              completed: false,
+              workout: customDay && customDay.exercises.length > 0 ? {
                 id: `custom-${activeCustom.id}-day-${index}`,
-                name: day.dayName,
-                exercises: day.exercises.map((exercise: any) => ({
-                  id: `${activeCustom.id}-${exercise.id}`,
+                name: customDay.dayName || `Day ${index + 1}`,
+                type: 'strength' as const,
+                duration: 45,
+                estimatedCaloriesBurned: 0,
+                muscleGroupsFocused: [],
+                difficulty: 'intermediate' as const,
+                exercises: customDay.exercises.map((exercise: any) => ({
+                  id: `${activeCustom.id}-${exercise.id}-${index}`,
                   exerciseId: exercise.id,
                   exercise: {
                     id: exercise.id,
                     name: exercise.name,
-                    bodyPart: exercise.bodyPart || exercise.target || 'general',
+                    category: 'compound' as const,
+                    muscleGroups: [],
                     equipment: exercise.equipment || 'bodyweight',
+                    difficulty: 'intermediate' as const,
+                    caloriesPerMinute: 8,
+                    bodyPart: exercise.bodyPart || exercise.target || 'general',
                     target: exercise.target || exercise.bodyPart || 'general',
                     gifUrl: exercise.gifUrl,
                   },
                   sets: exercise.sets || 3,
                   reps: exercise.reps || '8-12',
-                  rest: exercise.rest || '60s',
-                  duration: exercise.duration,
-                  intensity: exercise.intensity,
+                  restSeconds: parseInt(exercise.rest) || 60,
                   completed: false,
                 })),
-                duration: 45,
-                caloriesBurned: 0,
                 completed: false,
-              },
-            })),
+              } : null,
+            };
+          });
+
+          const weeklyPlan: WeeklyTrainingPlan = {
+            id: `custom-plan-${activeCustom.id}`,
+            weekNumber: 1,
+            startDate: customStartDate.toISOString().split('T')[0],
+            endDate: customEndDate.toISOString().split('T')[0],
+            days: weeklyPlanDays,
             completedWorkouts: 0,
-            totalWorkouts: activeCustom.workout_structure.days.length,
+            totalWorkouts: customDays.filter((d: any) => d.exercises && d.exercises.length > 0).length,
             totalCaloriesBurned: 0,
+            focusAreas: [],
           };
 
           setState(prev => ({

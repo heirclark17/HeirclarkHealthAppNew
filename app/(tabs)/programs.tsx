@@ -107,9 +107,9 @@ export default function ProgramsScreen() {
     return weeklyPlan.days || [];
   }, [weeklyPlan]);
 
-  // Get current day's workout
-  const dayIndexInWeek = selectedDayIndex % 7;
-  const currentDay = allDays[dayIndexInWeek];
+  // Get current day's workout (clamp to valid range)
+  const dayIndexInWeek = allDays.length > 0 ? Math.min(selectedDayIndex % 7, allDays.length - 1) : 0;
+  const currentDay = allDays.length > 0 ? allDays[dayIndexInWeek] : undefined;
   const currentWorkout = currentDay?.workout;
 
   // Available programs - use enhanced program templates
@@ -468,7 +468,7 @@ export default function ProgramsScreen() {
           <View style={styles.workoutsContainer}>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionHeaderTitle, { color: colors.text }]}>
-                {currentDay?.dayOfWeek}'s Workout
+                {currentDay?.dayOfWeek ? `${currentDay.dayOfWeek}'s Workout` : "Today's Workout"}
               </Text>
               {currentDay?.isRestDay && (
                 <View style={[styles.restBadge, { backgroundColor: colors.backgroundSecondary }]}>
@@ -760,6 +760,23 @@ export default function ProgramsScreen() {
         {weeklyPlan && (
           <View style={styles.actionRow}>
             <TouchableOpacity
+              onPress={handleOpenProgramModal}
+              activeOpacity={0.7}
+              style={styles.actionButtonWrapper}
+              accessibilityLabel="Change program"
+              accessibilityRole="button"
+              accessibilityHint="Opens the program library to select a different training program"
+            >
+              <GlassCard style={styles.actionButton} interactive>
+                <View style={styles.actionButtonInner}>
+                  <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
+                    <Dumbbell size={20} color={colors.textMuted} strokeWidth={1.5} />
+                  </View>
+                  <Text style={[styles.actionText, { color: colors.textSecondary }]}>Programs</Text>
+                </View>
+              </GlassCard>
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={handleSetGoals}
               activeOpacity={0.7}
               style={styles.actionButtonWrapper}
@@ -772,7 +789,7 @@ export default function ProgramsScreen() {
                   <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
                     <Settings size={20} color={colors.textMuted} strokeWidth={1.5} />
                   </View>
-                  <Text style={[styles.actionText, { color: colors.textSecondary }]}>Adjust Goals</Text>
+                  <Text style={[styles.actionText, { color: colors.textSecondary }]}>Goals</Text>
                 </View>
               </GlassCard>
             </TouchableOpacity>
@@ -1283,5 +1300,41 @@ const styles = StyleSheet.create({
   createCustomButtonSubtitle: {
     fontSize: 14,
     fontFamily: Fonts.regular,
+  },
+  selectProgramButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    marginBottom: 16,
+    width: '100%',
+  },
+  selectProgramButtonText: {
+    fontSize: 15,
+    fontFamily: Fonts.medium,
+  },
+  selectedProgramBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 16,
+    width: '100%',
+  },
+  selectedProgramText: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    flex: 1,
+  },
+  changeProgramText: {
+    fontSize: 13,
+    fontFamily: Fonts.medium,
   },
 });
