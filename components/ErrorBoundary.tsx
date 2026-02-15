@@ -1,9 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts } from '../constants/Theme';
-import { GlassCard } from './GlassCard';
-import { GlassButton } from './liquidGlass/GlassButton';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -71,7 +69,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               The app encountered an error and couldn't continue.
             </Text>
 
-            <GlassCard style={styles.errorBox}>
+            <View style={styles.errorBox}>
               <Text style={styles.errorTitle}>Error:</Text>
               <Text style={styles.errorMessage}>{this.state.error.message}</Text>
 
@@ -87,15 +85,15 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                   </Text>
                 </ScrollView>
               )}
-            </GlassCard>
+            </View>
 
-            <GlassButton
+            <TouchableOpacity
               onPress={this.handleReload}
               style={styles.reloadButton}
             >
               <Ionicons name="refresh" size={20} color="#fff" style={styles.reloadIcon} />
               <Text style={styles.reloadButtonText}>Try Again</Text>
-            </GlassButton>
+            </TouchableOpacity>
 
             {__DEV__ && (
               <Text style={styles.devNote}>
@@ -143,6 +141,10 @@ const styles = StyleSheet.create({
     padding: 16,
     width: '100%',
     marginBottom: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   errorTitle: {
     fontSize: 14,
@@ -174,8 +176,17 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   reloadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
     minWidth: 200,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   reloadIcon: {
     marginRight: 8,
