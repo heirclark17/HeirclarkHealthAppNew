@@ -4,7 +4,17 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import * as Calendar from 'expo-calendar';
+// Lazy load to avoid crash when native module isn't built yet
+let _Calendar: any = null;
+function getCalendar(): any {
+  if (_Calendar !== null) return _Calendar;
+  try {
+    _Calendar = require('expo-' + 'calendar');
+  } catch {
+    _Calendar = false;
+  }
+  return _Calendar || null;
+}
 import { CalendarCheck, Lock, Shield } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { Button } from '../../Button';
@@ -33,7 +43,12 @@ export function CalendarPermissionStep({
   const handleRequestPermission = async () => {
     setIsRequesting(true);
     try {
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      const Cal = getCalendar();
+      if (!Cal) {
+        console.warn('[CalendarPermission] expo-calendar not available');
+        return;
+      }
+      const { status } = await Cal.requestCalendarPermissionsAsync();
       const granted = status === 'granted';
       setPermissionGranted(granted);
 
