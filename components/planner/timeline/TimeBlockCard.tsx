@@ -82,6 +82,13 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
     ? (blockColor + (isCalendarEvent ? '35' : '25'))
     : (blockColor + (isCalendarEvent ? '22' : '15'));
 
+  // Use smaller text/icons for calendar events, normal size for meals/workouts
+  const titleSize = isCalendarEvent ? 11 : 13;
+  const timeSize = isCalendarEvent ? 10 : 11;
+  const iconSize = isCalendarEvent ? (isCompact ? 11 : 12) : (isCompact ? 12 : 14);
+  const statusIconSize = isCalendarEvent ? (isCompact ? 11 : 12) : (isCompact ? 12 : 14);
+  const compactTextSize = isCalendarEvent ? 10 : 11;
+
   return (
     <Animated.View
       style={[
@@ -109,15 +116,15 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
             {isCompact ? (
               // Compact single-line layout for short events (like Outlook/Teams)
               <View style={styles.compactRow}>
-                <ActivityIcon type={block.type} size={11} color={blockColor} />
-                <Text style={[styles.compactText, { color: themeColors.text }]} numberOfLines={1}>
+                <ActivityIcon type={block.type} size={iconSize} color={blockColor} />
+                <Text style={[styles.compactText, { color: themeColors.text, fontSize: compactTextSize }]} numberOfLines={1}>
                   {block.title} · {to12h(block.startTime)}
                 </Text>
                 {block.status === 'completed' && (
-                  <CheckCircle2 size={11} color={Colors.protein} />
+                  <CheckCircle2 size={statusIconSize} color={Colors.protein} />
                 )}
                 {block.status === 'skipped' && (
-                  <X size={11} color={themeColors.textSecondary} />
+                  <X size={statusIconSize} color={themeColors.textSecondary} />
                 )}
               </View>
             ) : (
@@ -125,20 +132,20 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
               <>
                 <View style={styles.header}>
                   <View style={styles.titleRow}>
-                    <ActivityIcon type={block.type} size={12} color={blockColor} />
-                    <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
+                    <ActivityIcon type={block.type} size={iconSize} color={blockColor} />
+                    <Text style={[styles.title, { color: themeColors.text, fontSize: titleSize }]} numberOfLines={1}>
                       {block.title}
                     </Text>
                   </View>
                   {block.status === 'completed' && (
-                    <CheckCircle2 size={12} color={Colors.protein} />
+                    <CheckCircle2 size={statusIconSize} color={Colors.protein} />
                   )}
                   {block.status === 'skipped' && (
-                    <X size={12} color={themeColors.textSecondary} />
+                    <X size={statusIconSize} color={themeColors.textSecondary} />
                   )}
                 </View>
 
-                <Text style={[styles.time, { color: themeColors.textSecondary }]} numberOfLines={1}>
+                <Text style={[styles.time, { color: themeColors.textSecondary, fontSize: timeSize }]} numberOfLines={1}>
                   {to12h(block.startTime)} – {to12h(block.endTime)}  ·  {block.duration}m
                 </Text>
               </>
@@ -202,13 +209,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 11,
+    fontSize: 13, // Default for meals/workouts, overridden inline for calendar events
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
     flex: 1,
   },
   time: {
-    fontSize: 10,
+    fontSize: 11, // Default for meals/workouts, overridden inline for calendar events
     fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
   },
@@ -219,7 +226,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   compactText: {
-    fontSize: 10,
+    fontSize: 11, // Default for meals/workouts, overridden inline for calendar events
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
     flex: 1,
