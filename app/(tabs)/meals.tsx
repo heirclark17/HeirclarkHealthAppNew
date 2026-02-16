@@ -63,6 +63,7 @@ export default function MealsScreen() {
     swapMeal,
     setSelectedDay,
     toggleGroceryItem,
+    deleteGroceryItem,
     openInstacart,
     loadCachedPlan,
     generateGroceryListOnDemand,
@@ -764,6 +765,7 @@ export default function MealsScreen() {
         onClose={() => setShowGroceryModal(false)}
         groceryList={groceryList}
         onToggleItem={toggleGroceryItem}
+        onDeleteItem={deleteGroceryItem}
         onOrderInstacart={handleOrderInstacart}
         isLoading={isGeneratingGroceryList}
         onGenerateList={weeklyPlan ? generateGroceryListOnDemand : undefined}

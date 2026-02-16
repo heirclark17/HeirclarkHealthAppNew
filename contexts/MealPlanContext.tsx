@@ -45,6 +45,7 @@ interface MealPlanContextType {
   setSelectedDay: (index: number) => void;
   clearPlan: () => void;
   toggleGroceryItem: (categoryIndex: number, itemIndex: number) => void;
+  deleteGroceryItem: (categoryIndex: number, itemIndex: number) => void;
   openInstacart: () => Promise<boolean>;
   loadCachedPlan: () => Promise<void>;
   generateGroceryListOnDemand: () => Promise<void>; // NEW
@@ -720,6 +721,39 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
   }, [state.groceryList, state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
 
+  // Delete a grocery item from the list
+  const deleteGroceryItem = useCallback((categoryIndex: number, itemIndex: number) => {
+    if (!state.groceryList) return;
+
+    const updatedGroceryList = [...state.groceryList];
+    const category = { ...updatedGroceryList[categoryIndex] };
+    const items = [...category.items];
+
+    // Remove the item from the array
+    items.splice(itemIndex, 1);
+
+    // If category is now empty, remove it entirely
+    if (items.length === 0) {
+      updatedGroceryList.splice(categoryIndex, 1);
+    } else {
+      category.items = items;
+      updatedGroceryList[categoryIndex] = category;
+    }
+
+    setState(prev => ({ ...prev, groceryList: updatedGroceryList }));
+
+    // Update cache
+    const cacheData = {
+      weeklyPlan: state.weeklyPlan,
+      groceryList: updatedGroceryList,
+      weekSummary: state.weekSummary,
+      lastGeneratedAt: state.lastGeneratedAt,
+    };
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+
+    console.log('[MealPlanContext] 🗑️ Deleted grocery item');
+  }, [state.groceryList, state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
+
   // NEW: Generate grocery list on demand from weekly meal plan
   const generateGroceryListOnDemand = useCallback(async () => {
     if (!state.weeklyPlan || state.weeklyPlan.length === 0) {
@@ -934,6 +968,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     setSelectedDay,
     clearPlan,
     toggleGroceryItem,
+    deleteGroceryItem,
     openInstacart,
     loadCachedPlan,
     generateAIMealPlan,
@@ -947,6 +982,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     setSelectedDay,
     clearPlan,
     toggleGroceryItem,
+    deleteGroceryItem,
     openInstacart,
     loadCachedPlan,
     generateGroceryListOnDemand,

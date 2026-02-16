@@ -50,20 +50,36 @@ export function generateGroceryList(weeklyPlan: DayPlan[]): GroceryCategory[] {
 function extractIngredientsFromMealPlan(weeklyPlan: DayPlan[]): Ingredient[] {
   const ingredients: Ingredient[] = [];
 
-  weeklyPlan.forEach((day) => {
-    if (!day.meals || day.meals.length === 0) return;
+  console.log('[GroceryListGenerator] 📊 Extracting from weekly plan:', {
+    totalDays: weeklyPlan.length,
+    dayNames: weeklyPlan.map(d => d.dayName),
+  });
 
+  weeklyPlan.forEach((day, dayIndex) => {
+    if (!day.meals || day.meals.length === 0) {
+      console.log(`[GroceryListGenerator] ⚠️ Day ${dayIndex + 1} (${day.dayName}): No meals found`);
+      return;
+    }
+
+    let dayIngredientsCount = 0;
     day.meals.forEach((meal) => {
-      if (!meal.ingredients || meal.ingredients.length === 0) return;
+      if (!meal.ingredients || meal.ingredients.length === 0) {
+        console.log(`[GroceryListGenerator] ⚠️ Day ${dayIndex + 1} (${day.dayName}), ${meal.mealType}: No ingredients`);
+        return;
+      }
 
       meal.ingredients.forEach((ingredient) => {
         if (ingredient && ingredient.name) {
           ingredients.push(ingredient);
+          dayIngredientsCount++;
         }
       });
     });
+
+    console.log(`[GroceryListGenerator] ✅ Day ${dayIndex + 1} (${day.dayName}): ${dayIngredientsCount} ingredients from ${day.meals.length} meals`);
   });
 
+  console.log('[GroceryListGenerator] 📦 Total ingredients extracted:', ingredients.length);
   return ingredients;
 }
 

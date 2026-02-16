@@ -53,6 +53,7 @@ interface GroceryListModalProps {
   onClose: () => void;
   groceryList: GroceryCategory[] | null;
   onToggleItem: (categoryIndex: number, itemIndex: number) => void;
+  onDeleteItem: (categoryIndex: number, itemIndex: number) => void;
   onOrderInstacart: (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => void;
   isLoading?: boolean;
   onGenerateList?: () => void;
@@ -71,11 +72,13 @@ const CATEGORY_ICONS: Record<string, string> = {
 const CheckboxItem = ({
   item,
   onToggle,
+  onDelete,
   glassColors,
   isDark,
 }: {
   item: GroceryItem;
   onToggle: () => void;
+  onDelete: () => void;
   glassColors: ReturnType<typeof getGlassColors>;
   isDark: boolean;
 }) => {
@@ -92,6 +95,11 @@ const CheckboxItem = ({
       scale.value = withSpring(1, GLASS_SPRING);
     }, 100);
     onToggle();
+  };
+
+  const handleDelete = async () => {
+    await mediumImpact();
+    onDelete();
   };
 
   return (
@@ -127,6 +135,15 @@ const CheckboxItem = ({
               {item.totalAmount} {item.unit}
             </Text>
           </View>
+          <TouchableOpacity
+            onPress={handleDelete}
+            style={styles.deleteButton}
+            accessibilityLabel={`Delete ${item.name}`}
+            accessibilityRole="button"
+            accessibilityHint="Removes this item from your grocery list"
+          >
+            <Ionicons name="trash-outline" size={18} color={glassColors.textMuted} />
+          </TouchableOpacity>
         </Pressable>
       </GlassCard>
     </Animated.View>
@@ -137,12 +154,14 @@ const CategorySection = ({
   category,
   categoryIndex,
   onToggleItem,
+  onDeleteItem,
   glassColors,
   isDark,
 }: {
   category: GroceryCategory;
   categoryIndex: number;
   onToggleItem: (categoryIndex: number, itemIndex: number) => void;
+  onDeleteItem: (categoryIndex: number, itemIndex: number) => void;
   glassColors: ReturnType<typeof getGlassColors>;
   isDark: boolean;
 }) => {
@@ -165,6 +184,7 @@ const CategorySection = ({
           key={`${item.name}-${itemIndex}`}
           item={item}
           onToggle={() => onToggleItem(categoryIndex, itemIndex)}
+          onDelete={() => onDeleteItem(categoryIndex, itemIndex)}
           glassColors={glassColors}
           isDark={isDark}
         />
@@ -178,6 +198,7 @@ export function GroceryListModal({
   onClose,
   groceryList,
   onToggleItem,
+  onDeleteItem,
   onOrderInstacart,
   isLoading = false,
   onGenerateList,
@@ -409,6 +430,7 @@ export function GroceryListModal({
                   category={category}
                   categoryIndex={categoryIndex}
                   onToggleItem={onToggleItem}
+                  onDeleteItem={onDeleteItem}
                   glassColors={glassColors}
                   isDark={isDark}
                 />
@@ -571,6 +593,10 @@ const styles = StyleSheet.create({
   itemAmount: {
     fontSize: 13,
     fontFamily: Fonts.regular,
+  },
+  deleteButton: {
+    padding: 8,
+    marginLeft: 8,
   },
   bottomSection: {
     position: 'absolute',
