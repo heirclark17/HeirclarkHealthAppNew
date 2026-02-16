@@ -287,19 +287,14 @@ export class SchedulingEngine {
 
       if (mealPattern?.preferredWindow && mealPattern.completionRate > 0.6) {
         preferredTime = mealPattern.preferredWindow;
-        console.log(`[Schedule] ${meal.title}: Using learned pattern ${preferredTime}`);
       } else if (meal.title.toLowerCase().includes('breakfast')) {
         preferredTime = this.addMinutesToTime(preferences.wakeTime, 15);
-        console.log(`[Schedule] ${meal.title}: Preferred ${preferredTime} (wake+15min)`);
       } else if (meal.title.toLowerCase().includes('lunch')) {
         preferredTime = '12:00';
-        console.log(`[Schedule] ${meal.title}: Preferred ${preferredTime}`);
       } else if (meal.title.toLowerCase().includes('dinner')) {
         preferredTime = '18:00';
-        console.log(`[Schedule] ${meal.title}: Preferred ${preferredTime}`);
       } else {
         preferredTime = '12:00';
-        console.log(`[Schedule] ${meal.title}: Default preferred ${preferredTime} (unrecognized meal type)`);
       }
 
       // Tier 4a: IF fasting window enforcement
@@ -327,8 +322,6 @@ export class SchedulingEngine {
         preferences,
         meal.type // Pass meal type (meal_eating or meal_prep)
       );
-
-      console.log(`[Schedule] ${meal.title}: Scheduled at ${startTime} (duration: ${adjustedDuration}min)`);
 
       blocks.push({
         ...meal,
