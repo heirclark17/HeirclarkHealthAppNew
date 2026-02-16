@@ -573,7 +573,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
     >
       <View style={styles.sheetContainer}>
         {/* Header */}
-        <View style={[styles.header, { borderBottomColor: glass.border }]}>
+        <View style={styles.header}>
           <Sparkles size={18} color={glass.accent} />
           <Text style={[styles.headerTitle, { color: glass.text }]}>Schedule Assistant</Text>
           <TouchableOpacity onPress={() => bottomSheetRef.current?.dismiss()} hitSlop={12}>
@@ -658,7 +658,6 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headerTitle: {
     flex: 1,
