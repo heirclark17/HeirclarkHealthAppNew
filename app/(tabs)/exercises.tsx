@@ -821,11 +821,11 @@ function ExerciseDetailModal({
 
             <Text style={[styles.modalTitle, { color: colors.text }]}>{exercise.name}</Text>
 
-            {/* Exercise GIF */}
+            {/* Exercise GIF - use higher resolution for detail view */}
             {exercise.gifUrl && (
               <View style={styles.gifContainer}>
                 <Image
-                  source={{ uri: exercise.gifUrl }}
+                  source={{ uri: exercise.gifUrl.replace('resolution=180', 'resolution=360') }}
                   style={styles.exerciseGif}
                   resizeMode="contain"
                 />
