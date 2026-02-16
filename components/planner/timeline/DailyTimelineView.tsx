@@ -596,6 +596,9 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 26,
     overflow: 'hidden',
+    padding: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   chatFabInner: {
     width: 52,
