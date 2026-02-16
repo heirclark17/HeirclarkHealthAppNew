@@ -69,9 +69,6 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
   const cardBg = isDark
     ? (blockColor + (isCalendarEvent ? '35' : '25'))
     : (blockColor + (isCalendarEvent ? '22' : '15'));
-  const cardBorder = isDark
-    ? 'rgba(255,255,255,0.08)'
-    : 'rgba(0,0,0,0.06)';
 
   return (
     <Animated.View
@@ -94,7 +91,6 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
                 backgroundColor: cardBg,
                 borderLeftColor: blockColor,
                 borderLeftWidth: isCalendarEvent ? 4 : 3,
-                borderColor: cardBorder,
               },
             ]}
           >
@@ -149,7 +145,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderLeftWidth: 3,
-    borderWidth: 0.5,
     borderRadius: 12,
     justifyContent: 'center',
     gap: 3,
