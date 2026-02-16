@@ -84,6 +84,57 @@ function extractIngredientsFromMealPlan(weeklyPlan: DayPlan[]): Ingredient[] {
 }
 
 /**
+ * Normalize unit to standard form
+ * Examples:
+ * "cups" -> "cup"
+ * "tbsp" -> "tablespoon"
+ * "tsp" -> "teaspoon"
+ */
+function normalizeUnit(unit: string): string {
+  const normalized = unit.toLowerCase().trim();
+
+  // Unit standardization map
+  const unitMap: { [key: string]: string } = {
+    'cups': 'cup',
+    'c': 'cup',
+    'tablespoons': 'tablespoon',
+    'tbsp': 'tablespoon',
+    'tbs': 'tablespoon',
+    't': 'tablespoon',
+    'teaspoons': 'teaspoon',
+    'tsp': 'teaspoon',
+    'ounces': 'ounce',
+    'oz': 'ounce',
+    'pounds': 'pound',
+    'lbs': 'pound',
+    'lb': 'pound',
+    'grams': 'gram',
+    'g': 'gram',
+    'kilograms': 'kilogram',
+    'kg': 'kilogram',
+    'milliliters': 'milliliter',
+    'ml': 'milliliter',
+    'liters': 'liter',
+    'l': 'liter',
+    'pieces': 'piece',
+    'pcs': 'piece',
+    'cloves': 'clove',
+    'slices': 'slice',
+    'pinches': 'pinch',
+    'dashes': 'dash',
+    'cans': 'can',
+    'packages': 'package',
+    'pkg': 'package',
+    'bunches': 'bunch',
+    'heads': 'head',
+    'stalks': 'stalk',
+    'sprigs': 'sprig',
+  };
+
+  return unitMap[normalized] || normalized || 'each';
+}
+
+/**
  * Aggregate ingredients with same name and unit
  * Example: "milk, 2, cup" + "milk, 1, cup" = "milk, 3, cup"
  */
@@ -93,28 +144,28 @@ function aggregateByName(ingredients: Ingredient[]): AggregatedIngredient[] {
   console.log('[GroceryListGenerator] 🔄 Starting aggregation for', ingredients.length, 'ingredients');
 
   ingredients.forEach((ingredient, index) => {
-    // Normalize name: lowercase, trim whitespace
+    // Normalize name: lowercase, trim whitespace, remove descriptors, singularize
     const normalizedName = normalizeIngredientName(ingredient.name);
-    const unit = ingredient.unit?.toLowerCase().trim() || 'each';
+    const normalizedUnit = normalizeUnit(ingredient.unit || 'each');
 
-    // Create unique key: name + unit (so "milk cups" and "milk ml" stay separate)
-    const key = `${normalizedName}::${unit}`;
+    // Create unique key: name + unit (so "milk cup" and "milk ml" stay separate)
+    const key = `${normalizedName}::${normalizedUnit}`;
 
     if (ingredientMap.has(key)) {
       // Ingredient exists - add to quantity
       const existing = ingredientMap.get(key)!;
       const oldAmount = existing.totalAmount;
       existing.totalAmount = addAmounts(existing.totalAmount, ingredient.amount);
-      console.log(`[GroceryListGenerator] ➕ Aggregating: "${normalizedName}" ${oldAmount} ${unit} + ${ingredient.amount} ${unit} = ${existing.totalAmount} ${unit}`);
+      console.log(`[GroceryListGenerator] ➕ Aggregating: "${normalizedName}" ${oldAmount} ${normalizedUnit} + ${ingredient.amount} ${normalizedUnit} = ${existing.totalAmount} ${normalizedUnit}`);
     } else {
       // New ingredient - add to map
       ingredientMap.set(key, {
         name: normalizedName,
         totalAmount: ingredient.amount || '1',
-        unit: unit,
+        unit: normalizedUnit,
         category: ingredient.category || '',
       });
-      console.log(`[GroceryListGenerator] 🆕 New ingredient: "${normalizedName}" ${ingredient.amount} ${unit}`);
+      console.log(`[GroceryListGenerator] 🆕 New ingredient: "${normalizedName}" ${ingredient.amount} ${normalizedUnit}`);
     }
   });
 
@@ -131,11 +182,84 @@ function aggregateByName(ingredients: Ingredient[]): AggregatedIngredient[] {
 
 /**
  * Normalize ingredient name for consistent aggregation
- * "Chicken Breast" -> "chicken breast"
- * "  Tomatoes  " -> "tomatoes"
+ * Removes plurals, descriptive words, and standardizes variations
+ *
+ * Examples:
+ * "Chicken Breasts" -> "chicken breast"
+ * "Fresh Tomatoes, diced" -> "tomato"
+ * "Extra Virgin Olive Oil" -> "olive oil"
  */
 function normalizeIngredientName(name: string): string {
-  return name.toLowerCase().trim();
+  let normalized = name.toLowerCase().trim();
+
+  // Remove common descriptive words
+  const descriptors = [
+    'fresh', 'dried', 'frozen', 'canned', 'cooked', 'raw',
+    'chopped', 'diced', 'sliced', 'minced', 'crushed', 'grated',
+    'whole', 'large', 'small', 'medium', 'ripe', 'unripe',
+    'organic', 'extra virgin', 'virgin', 'light', 'dark',
+    'boneless', 'skinless', 'peeled', 'seeded',
+    'to taste', 'optional', 'for serving', 'for garnish',
+  ];
+
+  // Remove descriptors (word boundaries to avoid partial matches)
+  descriptors.forEach(descriptor => {
+    const regex = new RegExp(`\\b${descriptor}\\b,?\\s*`, 'gi');
+    normalized = normalized.replace(regex, '');
+  });
+
+  // Remove commas and extra spaces
+  normalized = normalized.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+
+  // Singularize common plurals
+  const pluralMap: { [key: string]: string } = {
+    'tomatoes': 'tomato',
+    'potatoes': 'potato',
+    'onions': 'onion',
+    'peppers': 'pepper',
+    'carrots': 'carrot',
+    'mushrooms': 'mushroom',
+    'berries': 'berry',
+    'strawberries': 'strawberry',
+    'blueberries': 'blueberry',
+    'apples': 'apple',
+    'bananas': 'banana',
+    'oranges': 'orange',
+    'lemons': 'lemon',
+    'limes': 'lime',
+    'avocados': 'avocado',
+    'beans': 'bean',
+    'peas': 'pea',
+    'eggs': 'egg',
+    'breasts': 'breast',
+    'thighs': 'thigh',
+    'cloves': 'clove',
+    'leaves': 'leaf',
+    'stalks': 'stalk',
+  };
+
+  // Check for exact plural matches first
+  if (pluralMap[normalized]) {
+    normalized = pluralMap[normalized];
+  } else {
+    // Handle multi-word ingredients (e.g., "chicken breasts" -> "chicken breast")
+    const words = normalized.split(' ');
+    const lastWord = words[words.length - 1];
+    if (pluralMap[lastWord]) {
+      words[words.length - 1] = pluralMap[lastWord];
+      normalized = words.join(' ');
+    } else if (lastWord.endsWith('es') && lastWord.length > 3) {
+      // Remove 'es' ending
+      words[words.length - 1] = lastWord.slice(0, -2);
+      normalized = words.join(' ');
+    } else if (lastWord.endsWith('s') && lastWord.length > 2 && !lastWord.endsWith('ss')) {
+      // Remove 's' ending (but not 'ss' like "grass")
+      words[words.length - 1] = lastWord.slice(0, -1);
+      normalized = words.join(' ');
+    }
+  }
+
+  return normalized;
 }
 
 /**

@@ -42,8 +42,8 @@ import type { ExerciseDBExercise } from '../../types/ai';
 import type { Exercise, MuscleGroup, Equipment } from '../../types/training';
 
 // Filter types
-type MuscleFilter = 'all' | 'chest' | 'back' | 'shoulders' | 'upper arms' | 'lower arms' | 'upper legs' | 'lower legs' | 'waist' | 'cardio';
-type EquipmentFilter = 'all' | 'barbell' | 'dumbbell' | 'cable' | 'body weight' | 'resistance band' | 'machine';
+type MuscleFilter = 'all' | 'chest' | 'back' | 'shoulders' | 'upper arms' | 'lower arms' | 'upper legs' | 'lower legs' | 'waist' | 'neck' | 'cardio';
+type EquipmentFilter = 'all' | 'barbell' | 'dumbbell' | 'cable' | 'body weight' | 'kettlebell' | 'resistance band' | 'machine';
 type DifficultyFilter = 'all' | 'Beginner' | 'Intermediate' | 'Advanced';
 
 const MUSCLE_GROUPS: { key: MuscleFilter; label: string }[] = [
@@ -52,9 +52,11 @@ const MUSCLE_GROUPS: { key: MuscleFilter; label: string }[] = [
   { key: 'back', label: 'Back' },
   { key: 'shoulders', label: 'Shoulders' },
   { key: 'upper arms', label: 'Arms' },
+  { key: 'lower arms', label: 'Forearms' },
   { key: 'upper legs', label: 'Legs' },
   { key: 'lower legs', label: 'Calves' },
   { key: 'waist', label: 'Core' },
+  { key: 'neck', label: 'Neck' },
   { key: 'cardio', label: 'Cardio' },
 ];
 
@@ -245,9 +247,14 @@ export default function ExercisesScreen() {
       filtered = filtered.filter(ex => ex.bodyPart === muscleFilter);
     }
 
-    // Equipment filter
+    // Equipment filter (use includes for broader matching: 'barbell' matches 'ez barbell', 'machine' matches 'leverage machine', etc.)
     if (equipmentFilter !== 'all') {
-      filtered = filtered.filter(ex => ex.equipment === equipmentFilter);
+      filtered = filtered.filter(ex => {
+        const eq = ex.equipment.toLowerCase();
+        const filter = equipmentFilter.toLowerCase();
+        // Match exact, or equipment contains filter keyword, or filter contains equipment keyword
+        return eq === filter || eq.includes(filter) || filter.includes(eq);
+      });
     }
 
     // Difficulty filter
