@@ -464,6 +464,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
           data={messages}
           renderItem={renderMessage}
           keyExtractor={(item) => item.id}
+          style={{ flex: 1 }}
           contentContainerStyle={styles.messageList}
           ListEmptyComponent={renderSuggestionChips}
           showsVerticalScrollIndicator={false}
@@ -547,7 +548,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
-    flexGrow: 1,
   },
   messageBubble: {
     maxWidth: '82%',
