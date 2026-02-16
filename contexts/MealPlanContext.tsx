@@ -810,8 +810,12 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
       console.log(`[MealPlanContext] 📋 Fetching ingredients for ${mealsNeedingIngredients.length} meals in ONE batch call...`);
 
+      // TEMPORARY: Limit to 5 meals to test if timeout is the issue
+      const mealsToFetch = mealsNeedingIngredients.slice(0, 5);
+      console.log(`[MealPlanContext] ⚠️ TESTING: Limited to ${mealsToFetch.length} meals to avoid timeout`);
+
       // Step 2: Call NEW batch endpoint to get ALL ingredients at once
-      const batchResponse = await api.getBatchRecipeDetails(mealsNeedingIngredients, budgetTier || 'medium');
+      const batchResponse = await api.getBatchRecipeDetails(mealsToFetch, budgetTier || 'medium');
 
       if (!batchResponse || !batchResponse.recipes) {
         throw new Error('Failed to fetch batch recipes');
