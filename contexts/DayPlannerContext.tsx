@@ -41,6 +41,7 @@ function getCalendar(): any {
 }
 import { api } from '../services/api';
 import { SchedulingEngine } from '../services/schedulingEngine';
+import { generateAISchedule } from '../services/aiSchedulingService';
 import { useTraining } from './TrainingContext';
 import { useMealPlan } from './MealPlanContext';
 import { useSleepRecovery } from './SleepRecoveryContext';
@@ -536,13 +537,13 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       sunday.setDate(today.getDate() - today.getDay());
       sunday.setHours(0, 0, 0, 0);
 
-      // Generate 7 daily timelines
+      // Generate 7 daily timelines with AI
       const days: DailyTimeline[] = [];
       for (let i = 0; i < 7; i++) {
         const date = new Date(sunday);
         date.setDate(sunday.getDate() + i);
 
-        const timeline = generateDailyTimeline(date, currentPrefs);
+        const timeline = await generateDailyTimeline(date, currentPrefs);
         days.push(timeline);
       }
 
@@ -582,9 +583,9 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   }, [getWorkoutBlocksForDay, getMealBlocksForDay]);
 
   /**
-   * Generate daily timeline for a specific date (synchronous -- no async needed).
+   * Generate daily timeline for a specific date using AI (with algorithmic fallback).
    */
-  const generateDailyTimeline = (date: Date, preferences: PlannerPreferences): DailyTimeline => {
+  const generateDailyTimeline = async (date: Date, preferences: PlannerPreferences): Promise<DailyTimeline> => {
     const dateStr = formatLocalDate(date);
 
     // Extract real workouts from TrainingContext
@@ -648,20 +649,33 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       lifeContext,
     };
 
-    // Run scheduling engine
-    const result = SchedulingEngine.generateTimeline(request);
+    // Run AI scheduling (with fallback to algorithm)
+    let timeline: DailyTimeline;
 
-    if (!result.success) {
-      console.warn(`[Planner] Timeline for ${dateStr} has conflicts:`, result.conflicts);
+    try {
+      // Use AI to generate schedule
+      console.log('[Planner] 🤖 Using AI to generate schedule...');
+      timeline = await generateAISchedule(request);
+      console.log('[Planner] ✅ AI schedule generated successfully');
+    } catch (aiError: any) {
+      // Fallback to algorithmic scheduling
+      console.warn('[Planner] AI scheduling failed, falling back to algorithm:', aiError.message);
+      const result = SchedulingEngine.generateTimeline(request);
+
+      if (!result.success) {
+        console.warn(`[Planner] Timeline for ${dateStr} has conflicts:`, result.conflicts);
+      }
+
+      timeline = result.timeline;
     }
 
     // Mark day as OOO if any all-day block is an out-of-office event
-    const hasOOO = result.timeline.blocks.some((b) => b.isAllDay && b.isOOO);
+    const hasOOO = timeline.blocks.some((b) => b.isAllDay && b.isOOO);
     if (hasOOO) {
-      result.timeline.isOOODay = true;
+      timeline.isOOODay = true;
     }
 
-    return result.timeline;
+    return timeline;
   };
 
   // ========================================================================
