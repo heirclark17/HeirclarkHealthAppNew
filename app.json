@@ -18,10 +18,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.heirclark.health",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "infoPlist": {
         "NSHealthShareUsageDescription": "This app needs access to your health data to track your fitness and nutrition goals.",
         "NSHealthUpdateUsageDescription": "This app needs permission to update your health data with tracked meals and activities.",
+        "NSCalendarsUsageDescription": "This app needs access to your calendar to schedule workouts and meals around your existing events.",
+        "NSRemindersUsageDescription": "This app needs access to your reminders to help you stay on track with your health goals.",
         "NSCameraUsageDescription": "This app needs camera access to take photos of your meals for AI nutrition analysis.",
         "NSMicrophoneUsageDescription": "This app needs microphone access to record voice descriptions of your meals.",
         "NSPhotoLibraryUsageDescription": "This app needs photo library access to select meal photos for AI nutrition analysis.",
@@ -120,6 +122,13 @@
           "color": "#22C55E",
           "sounds": [],
           "mode": "production"
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "This app needs access to your calendar to schedule workouts and meals around your existing events.",
+          "remindersPermission": "This app needs access to your reminders to help you stay on track with your health goals."
         }
       ],
       "@react-native-community/datetimepicker",
