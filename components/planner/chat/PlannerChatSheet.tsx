@@ -23,6 +23,7 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import Animated, { FadeInLeft, FadeInRight } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sparkles, Send, Check, X, ChevronDown } from 'lucide-react-native';
 import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { useSettings } from '../../../contexts/SettingsContext';
@@ -116,6 +117,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const glass = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
+  const insets = useSafeAreaInsets();
 
   let recoveryScore: number | null = null;
   try {
@@ -480,7 +482,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
         )}
 
         {/* Input bar */}
-        <View style={[styles.inputBar, { borderTopColor: glass.border, backgroundColor: isDark ? 'rgba(28, 28, 30, 0.98)' : 'rgba(248, 248, 250, 0.98)' }]}>
+        <View style={[styles.inputBar, { borderTopColor: glass.border, backgroundColor: isDark ? 'rgba(28, 28, 30, 0.98)' : 'rgba(248, 248, 250, 0.98)', paddingBottom: Math.max(insets.bottom, 8) }]}>
           <TextInput
             style={[
               styles.textInput,
