@@ -896,16 +896,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   filtersCardInner: {
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 16,
   },
   filterSection: {
-    marginVertical: 6,
+    marginVertical: 4,
   },
   compactFilterLabel: {
     fontSize: 11,
     fontFamily: Fonts.semiBold,
-    marginBottom: 8,
+    marginBottom: 6,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -914,12 +914,12 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   compactPillButton: {
-    paddingVertical: 6,
+    paddingVertical: 5,
     paddingHorizontal: 14,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 32,
+    minHeight: 28,
   },
   compactPillText: {
     fontSize: 12,
