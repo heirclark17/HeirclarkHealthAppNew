@@ -679,7 +679,7 @@ export class SchedulingEngine {
         endTime: preferences.sleepTime,
         duration,
         status: 'scheduled',
-        color: '#E0E0E040', // very light gray with transparency
+        color: '#4A90E240', // transparent blue
         icon: 'timer',
         priority: 1,
         flexibility: 0,
