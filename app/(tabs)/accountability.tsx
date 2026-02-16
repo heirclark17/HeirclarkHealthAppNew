@@ -18,14 +18,12 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Activity } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
 // Theme and styling
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
-import { GlassCard } from '../../components/GlassCard';
 
 // Agent Cards
 import { AdaptiveTDEECard, WeightLoggingCard } from '../../components/agents/tdee';
@@ -86,19 +84,9 @@ export default function AccountabilityScreen() {
           }
         >
           {/* Header */}
-          <GlassCard style={styles.headerCard} interactive>
-            <View style={styles.headerContent}>
-              <View style={[styles.headerIconContainer, { backgroundColor: `${colors.primary}20` }]}>
-                <Activity size={24} color={colors.primary} strokeWidth={1.5} />
-              </View>
-              <View style={styles.headerTextContainer}>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>ACCOUNTABILITY</Text>
-                <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-                  Track your progress and stay consistent
-                </Text>
-              </View>
-            </View>
-          </GlassCard>
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: colors.text }]}>Accountability</Text>
+          </View>
 
           {/* Weight Log Summary - First card */}
           <View style={styles.cardWrapper}>
@@ -188,37 +176,15 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  headerCard: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    marginBottom: 24,
-    padding: 20,
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
   },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  headerIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTextContainer: {
-    flex: 1,
-  },
-  headerTitle: {
+  title: {
     fontSize: 32,
     fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 13,
-    fontFamily: Fonts.regular,
-    letterSpacing: 0.2,
   },
   sectionContainer: {
     marginBottom: 24,
