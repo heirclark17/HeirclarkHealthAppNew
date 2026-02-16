@@ -319,23 +319,24 @@ export function DailyTimelineView() {
 
       {/* Floating AI Chat Button */}
       {timeline && !isChatOpen && (
-        <TouchableOpacity
-          style={[
-            styles.chatFab,
-            {
-              bottom: bottomPadding + 60,
-              backgroundColor: isDark ? 'rgba(139, 92, 246, 0.12)' : 'rgba(139, 92, 246, 0.08)',
-            },
-          ]}
-          onPress={() => {
-            mediumImpact();
-            setIsChatOpen(true);
-            chatSheetRef.current?.present();
-          }}
-          activeOpacity={0.8}
-        >
-          <Sparkles size={22} color="#a855f7" />
-        </TouchableOpacity>
+        <View style={[styles.chatFab, { bottom: bottomPadding + 60 }]}>
+          <GlassCard
+            style={[styles.chatFabGlass, { backgroundColor: isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)' }]}
+            interactive
+          >
+            <TouchableOpacity
+              style={styles.chatFabInner}
+              onPress={() => {
+                mediumImpact();
+                setIsChatOpen(true);
+                chatSheetRef.current?.present();
+              }}
+              activeOpacity={0.8}
+            >
+              <Sparkles size={22} color="#a855f7" />
+            </TouchableOpacity>
+          </GlassCard>
+        </View>
       )}
 
       {/* Planner Chat Sheet */}
@@ -589,9 +590,16 @@ const styles = StyleSheet.create({
   chatFab: {
     position: 'absolute',
     right: 16,
+  },
+  chatFabGlass: {
     width: 52,
     height: 52,
     borderRadius: 26,
+    overflow: 'hidden',
+  },
+  chatFabInner: {
+    width: 52,
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
