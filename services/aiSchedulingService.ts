@@ -48,7 +48,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       messages: [
         {
           role: 'system',
-          content: 'You are an expert daily planner AI for a health and fitness app. Your job is to create optimal daily schedules that balance workouts, meals, meetings, and recovery. You understand intermittent fasting, workout recovery, meeting preparation, and work-life balance. Always provide specific times in HH:MM 24-hour format. CRITICAL: When intermittent fasting is active, you MUST schedule ALL meals within the specified eating window - this is a hard constraint that cannot be violated under any circumstances.',
+          content: 'You are a scheduling AI for a health and fitness app. Your job is to schedule the user\'s workouts and meals around their imported calendar events. Always provide specific times in HH:MM 24-hour format. CRITICAL: When intermittent fasting is active, you MUST schedule ALL meals within the specified eating window.',
         },
         {
           role: 'user',
@@ -130,71 +130,47 @@ function buildSchedulingPrompt(request: SchedulingRequest): string {
   const isFasting = lifeContext?.isFasting && !lifeContext?.isCheatDay;
   const isCheatDay = lifeContext?.isCheatDay;
 
-  let prompt = `Create an optimal daily schedule for ${dayOfWeek}, ${date}.
-
-**User Preferences:**
-- Wake time: ${preferences.wakeTime}
-- Sleep time: ${preferences.sleepTime}
-- Energy peak: ${preferences.energyPeak || 'morning'}
+  let prompt = `Schedule workouts and meals for ${dayOfWeek}, ${date}.
 
 **Intermittent Fasting:**
-${isFasting ? `- ⚠️ ACTIVE FASTING SCHEDULE:
-  - YOU CAN EAT: ${lifeContext.fastingEnd} to ${lifeContext.fastingStart} (eating window)
-  - YOU CANNOT EAT: ${lifeContext.fastingStart} to ${lifeContext.fastingEnd} next day (fasting period)
-- ⚠️ CRITICAL: ALL meal_eating blocks MUST have startTime >= ${lifeContext.fastingEnd} AND endTime <= ${lifeContext.fastingStart}
-- ⚠️ Example: If eating window is 12:00 to 20:00, meals can be at 12:30, 16:00, 19:30 but NOT at 08:00, 10:00, or 21:00
-- ⚠️ Fasting = NO FOOD from ${lifeContext.fastingStart} until ${lifeContext.fastingEnd} next day` : '- Not active today'}
-${isCheatDay ? '- **CHEAT DAY**: No fasting restrictions, normal meal times allowed' : ''}
+${isFasting ? `- ⚠️ EATING WINDOW: ${lifeContext.fastingEnd} to ${lifeContext.fastingStart}
+- ⚠️ ALL meals MUST be between ${lifeContext.fastingEnd} and ${lifeContext.fastingStart}` : '- Not active'}
+${isCheatDay ? '- CHEAT DAY: No fasting restrictions' : ''}
 
-**Recovery Status:**
-${recoveryContext ? `- Recovery score: ${recoveryContext.score}/100
-- Status: ${recoveryContext.isLowRecovery ? 'LOW RECOVERY - suggest lighter activities, more rest' : 'GOOD - normal intensity OK'}
-- Sleep quality: ${recoveryContext.sleepQuality}` : '- Not available'}
+**Workouts to Schedule:**
+${workoutBlocks.length > 0 ? workoutBlocks.map(w => `- ${w.title} (${w.duration} min)`).join('\n') : '- None'}
 
-**Scheduled Workouts (must include):**
-${workoutBlocks.length > 0 ? workoutBlocks.map(w => `- ${w.title} (${w.duration} min, type: ${w.type})`).join('\n') : '- None scheduled'}
-
-**Meals to Schedule (must include):**
+**Meals to Schedule:**
 ${mealBlocks.length > 0 ? mealBlocks.map(m => `- ${m.title} (${m.duration} min)`).join('\n') : '- Breakfast (30 min), Lunch (45 min), Dinner (45 min)'}
 
-**Calendar Events (fixed times):**
-${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- No meetings today'}
+**Calendar Events (DO NOT SCHEDULE OVER THESE):**
+${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- None'}
 
 **Instructions:**
-1. ⚠️ CRITICAL: If IF active, EVERY meal_eating block MUST have startTime AND endTime within the eating window - ZERO EXCEPTIONS
-2. Leave 15-30 min gap BEFORE workouts (for prep/commute)
-3. Leave 15-20 min gap AFTER workouts (for shower/cooldown)
-4. Leave 15 min gap after calendar meetings (for transitions)
-5. Consider meeting prep time (10-15 min gap before important meetings)
-6. Balance work and rest - avoid over-scheduling
-7. Respect recovery status (low recovery = easier day)
-8. Meals should be evenly spaced (4-6 hours apart if possible) WITHIN eating window
-9. Don't schedule activities too close to sleep time
-10. **DO NOT create separate "buffer" blocks - just leave gaps between activities**
-11. ⚠️ VALIDATION: Before returning, verify EVERY meal_eating block is within eating window bounds
+1. Schedule all workouts in free time slots (not during calendar events)
+2. Schedule all meals in free time slots (not during calendar events)
+3. If fasting active, meals MUST be within eating window
+4. Spread meals evenly throughout the day (within eating window if applicable)
+5. Keep gaps between activities for transitions
 
 **Output Format (JSON):**
 {
-  "reasoning": "Brief explanation of your scheduling decisions",
-  "warnings": ["Any concerns or notes about the schedule"],
+  "reasoning": "Brief explanation",
   "blocks": [
     {
-      "type": "sleep|workout|meal_eating|meal_prep|calendar_event",
+      "type": "workout|meal_eating",
       "title": "Activity name",
       "startTime": "HH:MM (24-hour format)",
       "endTime": "HH:MM",
-      "duration": minutes (number),
-      "notes": "Optional context or reasoning"
+      "duration": minutes (number)
     }
   ]
 }
 
 **Important:**
-- Include sleep block from previous night (${preferences.sleepTime} to ${preferences.wakeTime})
-- All times must be in 24-hour format (e.g., "06:30", "14:00", "20:00")
-- Duration should match endTime - startTime
-- Be realistic about time needed for each activity
-- Don't over-pack the schedule - leave breathing room
+- Only return workout and meal_eating blocks
+- Use 24-hour format (e.g., "14:00", "20:00")
+- Do not overlap with calendar events
 `;
 
   return prompt;
