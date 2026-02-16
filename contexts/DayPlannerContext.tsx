@@ -758,6 +758,65 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   // ========================================================================
 
   /**
+   * Tier 2a: Record block completion/skip patterns for adaptive learning.
+   */
+  const recordBlockCompletion = useCallback(async (
+    block: TimeBlock,
+    status: 'completed' | 'skipped'
+  ) => {
+    const blockType = block.type; // 'workout', 'meal_eating', etc.
+    const timeStr = block.startTime; // "HH:MM"
+
+    setState((prev) => {
+      const patterns = { ...prev.completionPatterns };
+      if (!patterns[blockType]) {
+        patterns[blockType] = {
+          completedAt: [],
+          skippedAt: [],
+          preferredWindow: null,
+          completionRate: 0,
+        };
+      }
+
+      const entry = { ...patterns[blockType] };
+      if (status === 'completed') {
+        entry.completedAt = [...entry.completedAt, timeStr].slice(-50); // keep last 50
+      } else {
+        entry.skippedAt = [...entry.skippedAt, timeStr].slice(-50);
+      }
+
+      // Recompute preferred window (mode of completedAt, rounded to nearest hour)
+      if (entry.completedAt.length > 0) {
+        const hourCounts: Record<string, number> = {};
+        for (const t of entry.completedAt) {
+          const hour = t.split(':')[0] + ':00';
+          hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+        }
+        let bestHour = entry.completedAt[0]?.split(':')[0] + ':00';
+        let bestCount = 0;
+        for (const [hour, count] of Object.entries(hourCounts)) {
+          if (count > bestCount) {
+            bestCount = count;
+            bestHour = hour;
+          }
+        }
+        entry.preferredWindow = bestHour;
+      }
+
+      // Recompute completion rate
+      const total = entry.completedAt.length + entry.skippedAt.length;
+      entry.completionRate = total > 0 ? entry.completedAt.length / total : 0;
+
+      patterns[blockType] = entry;
+
+      // Persist asynchronously
+      AsyncStorage.setItem(STORAGE_KEYS.COMPLETION_PATTERNS, JSON.stringify(patterns)).catch(() => {});
+
+      return { ...prev, completionPatterns: patterns };
+    });
+  }, []);
+
+  /**
    * Mark a time block as completed
    */
   const markBlockComplete = useCallback(async (blockId: string, date: string) => {
@@ -925,65 +984,6 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
   const reopenOnboarding = useCallback(() => {
     setState((prev) => ({ ...prev, hasCompletedOnboarding: false }));
-  }, []);
-
-  /**
-   * Tier 2a: Record block completion or skip for adaptive learning.
-   */
-  const recordBlockCompletion = useCallback(async (
-    block: TimeBlock,
-    status: 'completed' | 'skipped'
-  ) => {
-    const blockType = block.type; // 'workout', 'meal_eating', etc.
-    const timeStr = block.startTime; // "HH:MM"
-
-    setState((prev) => {
-      const patterns = { ...prev.completionPatterns };
-      if (!patterns[blockType]) {
-        patterns[blockType] = {
-          completedAt: [],
-          skippedAt: [],
-          preferredWindow: null,
-          completionRate: 0,
-        };
-      }
-
-      const entry = { ...patterns[blockType] };
-      if (status === 'completed') {
-        entry.completedAt = [...entry.completedAt, timeStr].slice(-50); // keep last 50
-      } else {
-        entry.skippedAt = [...entry.skippedAt, timeStr].slice(-50);
-      }
-
-      // Recompute preferred window (mode of completedAt, rounded to nearest hour)
-      if (entry.completedAt.length > 0) {
-        const hourCounts: Record<string, number> = {};
-        for (const t of entry.completedAt) {
-          const hour = t.split(':')[0] + ':00';
-          hourCounts[hour] = (hourCounts[hour] || 0) + 1;
-        }
-        let bestHour = entry.completedAt[0]?.split(':')[0] + ':00';
-        let bestCount = 0;
-        for (const [hour, count] of Object.entries(hourCounts)) {
-          if (count > bestCount) {
-            bestCount = count;
-            bestHour = hour;
-          }
-        }
-        entry.preferredWindow = bestHour;
-      }
-
-      // Recompute completion rate
-      const total = entry.completedAt.length + entry.skippedAt.length;
-      entry.completionRate = total > 0 ? entry.completedAt.length / total : 0;
-
-      patterns[blockType] = entry;
-
-      // Persist asynchronously
-      AsyncStorage.setItem(STORAGE_KEYS.COMPLETION_PATTERNS, JSON.stringify(patterns)).catch(() => {});
-
-      return { ...prev, completionPatterns: patterns };
-    });
   }, []);
 
   /**

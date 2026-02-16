@@ -27,6 +27,8 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
@@ -38,8 +40,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [notification, setNotification] = useState<Notifications.Notification | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'undetermined'>('undetermined');
 
-  const notificationListener = useRef<Notifications.Subscription>();
-  const responseListener = useRef<Notifications.Subscription>();
+  const notificationListener = useRef<Notifications.Subscription>(undefined);
+  const responseListener = useRef<Notifications.Subscription>(undefined);
 
   // Register for push notifications
   const registerForPushNotifications = useCallback(async () => {
@@ -169,7 +171,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
         },
-        trigger: { seconds: 1 },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 1 },
       });
       console.log('[Notifications] Local notification scheduled');
     } catch (error) {
@@ -201,7 +203,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
         },
-        trigger: { date },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date },
       });
       return identifier;
     } catch (error) {

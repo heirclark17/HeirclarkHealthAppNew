@@ -2884,7 +2884,7 @@ class HeirclarkAPI {
   /**
    * Get AI-powered weekly optimization insights
    */
-  async getWeeklyOptimization(params: { currentWeekPlan: any; completionHistory: any[] }): Promise<any | null> {
+  async getWeeklyOptimization(params: { currentWeekPlan: any; completionHistory: any[]; recoveryContext?: any; completionPatterns?: any; lifeContext?: any }): Promise<any | null> {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/planner/optimize`, {
         method: 'POST',
