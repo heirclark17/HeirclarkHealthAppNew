@@ -470,10 +470,10 @@ export function GroceryListModal({
                       key={tier}
                       style={[
                         styles.compactPillButton,
-                        {
-                          backgroundColor: budgetTier === tier
-                            ? glassColors.checkboxChecked
-                            : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                        budgetTier !== tier && {
+                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                          paddingVertical: 5,
+                          paddingHorizontal: 14,
                         },
                       ]}
                       onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
@@ -481,15 +481,33 @@ export function GroceryListModal({
                       accessibilityRole="button"
                       accessibilityState={{ selected: budgetTier === tier }}
                     >
-                      <Text
-                        style={[
-                          styles.compactPillText,
-                          { color: budgetTier === tier ? glassColors.buttonText : glassColors.text },
-                          budgetTier === tier && { fontFamily: Fonts.semiBold },
-                        ]}
-                      >
-                        {tier.charAt(0).toUpperCase() + tier.slice(1)}
-                      </Text>
+                      {budgetTier === tier ? (
+                        <LinearGradient
+                          colors={['#FFB347', '#4ECDC4']}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={styles.gradientPill}
+                        >
+                          <Text
+                            style={[
+                              styles.compactPillText,
+                              { color: '#FFFFFF' },
+                              { fontFamily: Fonts.semiBold },
+                            ]}
+                          >
+                            {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                          </Text>
+                        </LinearGradient>
+                      ) : (
+                        <Text
+                          style={[
+                            styles.compactPillText,
+                            { color: glassColors.text },
+                          ]}
+                        >
+                          {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                        </Text>
+                      )}
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -519,10 +537,10 @@ export function GroceryListModal({
                       key={filter}
                       style={[
                         styles.compactPillButton,
-                        {
-                          backgroundColor: dietaryFilters.includes(filter)
-                            ? glassColors.checkboxChecked
-                            : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                        !dietaryFilters.includes(filter) && {
+                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                          paddingVertical: 5,
+                          paddingHorizontal: 14,
                         },
                       ]}
                       onPress={() => toggleDietaryFilter(filter)}
@@ -530,15 +548,33 @@ export function GroceryListModal({
                       accessibilityRole="button"
                       accessibilityState={{ selected: dietaryFilters.includes(filter) }}
                     >
-                      <Text
-                        style={[
-                          styles.compactPillText,
-                          { color: dietaryFilters.includes(filter) ? glassColors.buttonText : glassColors.text },
-                          dietaryFilters.includes(filter) && { fontFamily: Fonts.semiBold },
-                        ]}
-                      >
-                        {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                      </Text>
+                      {dietaryFilters.includes(filter) ? (
+                        <LinearGradient
+                          colors={['#FFB347', '#4ECDC4']}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={styles.gradientPill}
+                        >
+                          <Text
+                            style={[
+                              styles.compactPillText,
+                              { color: '#FFFFFF' },
+                              { fontFamily: Fonts.semiBold },
+                            ]}
+                          >
+                            {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                          </Text>
+                        </LinearGradient>
+                      ) : (
+                        <Text
+                          style={[
+                            styles.compactPillText,
+                            { color: glassColors.text },
+                          ]}
+                        >
+                          {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                        </Text>
+                      )}
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -999,9 +1035,15 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   compactPillButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 28,
+  },
+  gradientPill: {
     paddingVertical: 5,
     paddingHorizontal: 14,
-    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 28,
