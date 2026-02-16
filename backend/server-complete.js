@@ -1528,8 +1528,8 @@ app.get('/api/v1/exercises', async (req, res) => {
         bodyPart: row.body_part,
         target: row.target,
         equipment: row.equipment,
-        // Transform gifUrl to use our backend proxy endpoint
-        gifUrl: `https://heirclarkinstacartbackend-production.up.railway.app/api/v1/exercise-gif/${row.id}?resolution=180`,
+        // Direct ExerciseDB image URL (no proxy hop - faster loading)
+        gifUrl: `https://exercisedb.p.rapidapi.com/image?exerciseId=${row.id}&resolution=180&rapidapi-key=${process.env.EXERCISEDB_API_KEY || 'b3c3790038mshcfc571cd8cae3ccp13abefjsn6fb2f32a654d'}`,
         instructions: row.instructions,
         secondaryMuscles: row.secondary_muscles
       })),
