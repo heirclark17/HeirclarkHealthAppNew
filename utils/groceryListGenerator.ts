@@ -366,6 +366,7 @@ function addAmounts(amount1: string, amount2: string): string {
 
 /**
  * Categorize ingredients into food groups
+ * Ensures no duplicates - each ingredient appears in only one category
  */
 function categorizeIngredients(ingredients: AggregatedIngredient[]): GroceryCategory[] {
   const categories: Record<string, GroceryItem[]> = {
@@ -378,22 +379,91 @@ function categorizeIngredients(ingredients: AggregatedIngredient[]): GroceryCate
     Other: [],
   };
 
+  // Track ingredients by name+unit to prevent duplicates across categories
+  const seenIngredients = new Map<string, { category: string; item: GroceryItem }>();
+
+  // Category priority order (higher priority = better fit for ingredient)
+  const categoryPriority: Record<string, number> = {
+    Produce: 7,
+    Protein: 6,
+    Dairy: 5,
+    Grains: 4,
+    Pantry: 3,
+    Spices: 2,
+    Other: 1,
+  };
+
   ingredients.forEach((ingredient) => {
     // Use existing category if provided, otherwise infer from name
     const category = ingredient.category || inferCategory(ingredient.name);
 
-    if (!categories[category]) {
-      categories[category] = [];
-    }
+    // Create unique key for this ingredient (name + unit)
+    const key = `${ingredient.name}::${ingredient.unit}`;
 
-    categories[category].push({
-      name: ingredient.name,
-      totalAmount: ingredient.totalAmount,
-      unit: ingredient.unit,
-      category: category,
-      checked: false,
-    });
+    // Check if we've already seen this exact ingredient
+    if (seenIngredients.has(key)) {
+      const existing = seenIngredients.get(key)!;
+
+      // Compare category priorities - keep ingredient in higher priority category
+      const existingPriority = categoryPriority[existing.category] || 0;
+      const newPriority = categoryPriority[category] || 0;
+
+      console.log(`[GroceryListGenerator] 🔄 Duplicate detected: "${ingredient.name}" in ${existing.category} vs ${category}`);
+
+      // If new category has higher priority, move the ingredient
+      if (newPriority > existingPriority) {
+        // Remove from old category
+        const oldCategoryItems = categories[existing.category];
+        const itemIndex = oldCategoryItems.findIndex(item =>
+          item.name === ingredient.name && item.unit === ingredient.unit
+        );
+        if (itemIndex !== -1) {
+          oldCategoryItems.splice(itemIndex, 1);
+        }
+
+        // Add to new category with combined quantity
+        const combinedAmount = addAmounts(existing.item.totalAmount, ingredient.totalAmount);
+        const newItem: GroceryItem = {
+          name: ingredient.name,
+          totalAmount: combinedAmount,
+          unit: ingredient.unit,
+          category: category,
+          checked: false,
+        };
+
+        if (!categories[category]) {
+          categories[category] = [];
+        }
+        categories[category].push(newItem);
+        seenIngredients.set(key, { category, item: newItem });
+
+        console.log(`[GroceryListGenerator] ✅ Moved "${ingredient.name}" to ${category} with combined amount: ${combinedAmount} ${ingredient.unit}`);
+      } else {
+        // Keep in existing category but combine quantities
+        const combinedAmount = addAmounts(existing.item.totalAmount, ingredient.totalAmount);
+        existing.item.totalAmount = combinedAmount;
+
+        console.log(`[GroceryListGenerator] ✅ Kept "${ingredient.name}" in ${existing.category} with combined amount: ${combinedAmount} ${ingredient.unit}`);
+      }
+    } else {
+      // First time seeing this ingredient - add it
+      const newItem: GroceryItem = {
+        name: ingredient.name,
+        totalAmount: ingredient.totalAmount,
+        unit: ingredient.unit,
+        category: category,
+        checked: false,
+      };
+
+      if (!categories[category]) {
+        categories[category] = [];
+      }
+      categories[category].push(newItem);
+      seenIngredients.set(key, { category, item: newItem });
+    }
   });
+
+  console.log(`[GroceryListGenerator] 📊 Deduplication complete: ${ingredients.length} ingredients → ${seenIngredients.size} unique items`);
 
   // Convert to array and filter out empty categories
   return Object.entries(categories)
