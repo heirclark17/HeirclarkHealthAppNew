@@ -19,7 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Leaf, Apple, Coffee, Wheat, Package, Flame, Box, ShoppingCart } from 'lucide-react-native';
+import { Leaf, Beef, Milk, Wheat, Package, Flame, Box, ShoppingCart } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../NumberText';
 import { GroceryCategory, GroceryItem } from '../../types/mealPlan';
@@ -68,9 +68,9 @@ const getCategoryIcon = (category: string, color: string, size: number = 18) => 
     case 'Produce':
       return <Leaf {...iconProps} color="#4CAF50" />;
     case 'Protein':
-      return <Apple {...iconProps} color="#E91E63" />;
+      return <Beef {...iconProps} color="#E91E63" />;
     case 'Dairy':
-      return <Coffee {...iconProps} color="#2196F3" />;
+      return <Milk {...iconProps} color="#2196F3" />;
     case 'Grains':
       return <Wheat {...iconProps} color="#FF9800" />;
     case 'Pantry':
