@@ -802,7 +802,7 @@ const styles = StyleSheet.create({
   progressContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 10,
   },
   circularProgressContainer: {
     position: 'relative',
@@ -1069,12 +1069,12 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.borderRadius,
   },
   filterSection: {
-    marginVertical: 2,
+    marginVertical: 0,
   },
   compactFilterLabel: {
     fontSize: 11,
     fontFamily: Fonts.semiBold,
-    marginBottom: 6,
+    marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
