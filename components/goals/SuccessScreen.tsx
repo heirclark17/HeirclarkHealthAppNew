@@ -4,13 +4,10 @@ import {
   Flame,
   Dumbbell,
   TrendingUp,
-  User,
   Activity,
-  Weight,
   Calendar,
   Utensils,
   Heart,
-  Zap,
   Target,
   Beef,
   Wheat,
@@ -221,56 +218,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
     }
   };
 
-  // Helper functions for displaying user profile data
-  const getGoalLabel = () => {
-    switch (state.primaryGoal) {
-      case 'lose_weight': return 'Lose Weight';
-      case 'build_muscle': return 'Build Muscle';
-      case 'maintain': return 'Maintain Weight';
-      case 'improve_health': return 'Improve Health';
-      case 'custom': return 'Custom Goal';
-      default: return 'Not Set';
-    }
-  };
-
-  const getActivityLabel = () => {
-    switch (state.activityLevel) {
-      case 'sedentary': return 'Sedentary';
-      case 'light': return 'Lightly Active';
-      case 'moderate': return 'Moderately Active';
-      case 'very': return 'Very Active';
-      case 'extra': return 'Extremely Active';
-      default: return 'Not Set';
-    }
-  };
-
-  const getDietLabel = () => {
-    switch (state.dietStyle) {
-      case 'standard': return 'Standard';
-      case 'keto': return 'Keto';
-      case 'high_protein': return 'High Protein';
-      case 'vegetarian': return 'Vegetarian';
-      case 'vegan': return 'Vegan';
-      case 'custom': return 'Custom';
-      default: return 'Standard';
-    }
-  };
-
-  const formatWeight = (weight: number | null) => {
-    if (!weight) return '--';
-    return state.weightUnit === 'kg' ? `${weight} kg` : `${weight} lbs`;
-  };
-
-  const formatHeight = () => {
-    if (!state.heightFt) return '--';
-    if (state.heightUnit === 'cm') {
-      const totalInches = (state.heightFt * 12) + (state.heightIn || 0);
-      const cm = Math.round(totalInches * 2.54);
-      return `${cm} cm`;
-    }
-    return `${state.heightFt}'${state.heightIn || 0}"`;
-  };
-
   // Show loading while calculating results
   if (!state.results) {
     return (
@@ -444,88 +391,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           containerStyle={{ marginHorizontal: 0, width: '100%' }}
         />
       )}
-
-      {/* Detailed Profile Summary */}
-      <View>
-        <GlassCard style={styles.profileCard} interactive>
-          <View style={styles.profileHeader}>
-            <User size={20} color={Colors.success} />
-            <Text style={[styles.profileTitle, { fontFamily: Fonts.light }]}>YOUR PROFILE SUMMARY</Text>
-          </View>
-
-          <View style={styles.profileGrid}>
-            <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Goal</Text>
-              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{getGoalLabel()}</Text>
-            </GlassCard>
-            <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Activity</Text>
-              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{getActivityLabel()}</Text>
-            </GlassCard>
-            <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Current Weight</Text>
-              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{formatWeight(state.currentWeight)}</Text>
-            </GlassCard>
-            <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Target Weight</Text>
-              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{formatWeight(state.targetWeight)}</Text>
-            </GlassCard>
-            <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Height</Text>
-              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{formatHeight()}</Text>
-            </GlassCard>
-            <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Age</Text>
-              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                {state.age ? (
-                  <>
-                    <NumberText weight="medium" style={[styles.profileValue, { color: colors.text }]}>
-                      {state.age}
-                    </NumberText> years
-                  </>
-                ) : '--'}
-              </Text>
-            </GlassCard>
-            <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Diet Style</Text>
-              <Text style={[styles.profileValue, { color: colors.text, fontFamily: Fonts.light }]}>{getDietLabel()}</Text>
-            </GlassCard>
-            <GlassCard style={styles.profileItem} interactive>
-              <Text style={[styles.profileLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Workouts/Week</Text>
-              <NumberText weight="medium" style={[styles.profileValue, { color: colors.text }]}>
-                {state.workoutsPerWeek || 0}
-              </NumberText>
-            </GlassCard>
-          </View>
-
-          {/* Stats Row */}
-          {state.results && (
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Flame size={16} color={Colors.error} />
-                <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
-                  {state.results.bmr.toLocaleString()}
-                </NumberText>
-                <Text style={[styles.statLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>BMR</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Zap size={16} color={Colors.warning} />
-                <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
-                  {state.results.tdee.toLocaleString()}
-                </NumberText>
-                <Text style={[styles.statLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>TDEE</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Weight size={16} color={Colors.success} />
-                <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>
-                  {state.results.bmi.toFixed(1)}
-                </NumberText>
-                <Text style={[styles.statLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>BMI</Text>
-              </View>
-            </View>
-          )}
-        </GlassCard>
-      </View>
 
       {/* Guidance Card */}
       <View>
@@ -872,67 +737,6 @@ const styles = StyleSheet.create({
     fontWeight: '100',
     color: Colors.textMuted,
     lineHeight: 16,
-  },
-  profileCard: {
-    width: '100%',
-    padding: 16,
-    marginBottom: 16,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  profileTitle: {
-    fontSize: 10,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    letterSpacing: 1.5,
-    color: Colors.success,
-  },
-  profileGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  profileItem: {
-    width: '47%',
-    padding: 12,
-  },
-  profileLabel: {
-    fontSize: 10,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  profileValue: {
-    fontSize: 14,
-    color: Colors.text,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 16,
-    paddingTop: 16,
-  },
-  statItem: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  statValue: {
-    fontSize: 16,
-    color: Colors.text,
-  },
-  statLabel: {
-    fontSize: 9,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.textMuted,
-    letterSpacing: 0.5,
   },
   guidanceCard: {
     width: '100%',
