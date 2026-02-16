@@ -929,12 +929,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
+    paddingTop: 20,
     paddingBottom: 20,
   },
   title: {
     fontSize: 32,
     color: Colors.text,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0.5,
   },
   programButton: {

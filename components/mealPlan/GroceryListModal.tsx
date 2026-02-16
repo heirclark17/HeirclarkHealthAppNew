@@ -61,7 +61,7 @@ interface GroceryListModalProps {
   onOrderInstacart: (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => void;
   isLoading?: boolean;
   onGenerateList?: (budgetTier?: 'low' | 'medium' | 'high') => void;
-  progress?: { current: number; total: number } | null; // NEW: Batch progress tracking
+  batchProgress?: { current: number; total: number } | null; // Batch progress tracking
 }
 
 const getCategoryIcon = (category: string, size: number = 18) => {
@@ -221,7 +221,7 @@ export function GroceryListModal({
   onOrderInstacart,
   isLoading = false,
   onGenerateList,
-  progress = null,
+  batchProgress = null,
 }: GroceryListModalProps) {
   const { settings } = useSettings();
   const insets = useSafeAreaInsets();
@@ -430,11 +430,11 @@ export function GroceryListModal({
 
               {/* Loading Title */}
               <Text style={[styles.loadingTitle, { color: glassColors.text }]}>
-                {progress ? `Fetching Batch ${progress.current} of ${progress.total}` : 'Fetching Recipes for Entire Week'}
+                {batchProgress ? `Fetching Batch ${batchProgress.current} of ${batchProgress.total}` : 'Fetching Recipes for Entire Week'}
               </Text>
 
               {/* Progress Bar */}
-              {progress && (
+              {batchProgress && (
                 <View style={styles.progressBarContainer}>
                   <View style={[styles.progressBarBackground, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
                     <Animated.View
@@ -442,21 +442,21 @@ export function GroceryListModal({
                         styles.progressBarFill,
                         {
                           backgroundColor: glassColors.checkboxChecked,
-                          width: `${(progress.current / progress.total) * 100}%`,
+                          width: `${(batchProgress.current / batchProgress.total) * 100}%`,
                         },
                       ]}
                     />
                   </View>
                   <Text style={[styles.progressText, { color: glassColors.textSecondary }]}>
-                    {Math.round((progress.current / progress.total) * 100)}% Complete
+                    {Math.round((batchProgress.current / batchProgress.total) * 100)}% Complete
                   </Text>
                 </View>
               )}
 
               {/* Loading Description */}
               <Text style={[styles.loadingDescription, { color: glassColors.textMuted }]}>
-                {progress
-                  ? `Processing ${progress.current * 7} of ${progress.total * 7} meals with ${budgetTier} budget ingredients...`
+                {batchProgress
+                  ? `Processing ${batchProgress.current * 7} of ${batchProgress.total * 7} meals with ${budgetTier} budget ingredients...`
                   : `AI is generating detailed ingredient lists for all 7 days with ${budgetTier} budget ingredients...`
                 }
               </Text>
