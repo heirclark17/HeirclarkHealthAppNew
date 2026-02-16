@@ -314,34 +314,7 @@ export function GroceryListModal({
               <Text style={[styles.closeButtonText, { color: glassColors.checkboxChecked }]}>Close</Text>
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: glassColors.text }]}>Grocery List</Text>
-            {groceryList && groceryList.length > 0 && (
-              <TouchableOpacity
-                onPress={() => {
-                  // Toggle select all/deselect all
-                  const allChecked = checkedItems === totalItems;
-
-                  // Defer to next tick to avoid mutating frozen objects in Reanimated
-                  setTimeout(() => {
-                    groceryList.forEach((category, catIndex) => {
-                      category.items.forEach((item, itemIndex) => {
-                        if (item.checked === allChecked) {
-                          onToggleItem(catIndex, itemIndex);
-                        }
-                      });
-                    });
-                  }, 0);
-                }}
-                style={styles.closeButton}
-                accessibilityLabel={checkedItems === totalItems ? "Deselect all items" : "Select all items"}
-                accessibilityRole="button"
-                accessibilityHint={checkedItems === totalItems ? "Unchecks all grocery items" : "Checks all grocery items"}
-              >
-                <Text style={[styles.closeButtonText, { color: glassColors.checkboxChecked }]}>
-                  {checkedItems === totalItems ? 'Deselect All' : 'Select All'}
-                </Text>
-              </TouchableOpacity>
-            )}
-            {(!groceryList || groceryList.length === 0) && <View style={styles.placeholder} />}
+            <View style={styles.placeholder} />
           </Animated.View>
         </BlurView>
 
@@ -652,6 +625,67 @@ export function GroceryListModal({
                 </View>
               </View>
             </GlassCard>
+          </Animated.View>
+        )}
+
+        {/* Select All Button - Above Ingredients */}
+        {groceryList && !isLoading && (
+          <Animated.View
+            entering={FadeIn.delay(250)}
+            style={styles.selectAllContainer}
+          >
+            <TouchableOpacity
+              onPress={async () => {
+                await lightImpact();
+
+                // Determine if we're selecting all or deselecting all
+                const shouldSelectAll = checkedItems < totalItems;
+
+                console.log('[GroceryListModal] Select All clicked:', {
+                  shouldSelectAll,
+                  checkedItems,
+                  totalItems,
+                  action: shouldSelectAll ? 'SELECTING ALL' : 'DESELECTING ALL'
+                });
+
+                // Defer to next tick to avoid mutating frozen objects in Reanimated
+                setTimeout(() => {
+                  groceryList.forEach((category, catIndex) => {
+                    category.items.forEach((item, itemIndex) => {
+                      if (shouldSelectAll) {
+                        // Selecting all: toggle only unchecked items
+                        if (!item.checked) {
+                          console.log(`[GroceryListModal] Checking: ${item.name}`);
+                          onToggleItem(catIndex, itemIndex);
+                        }
+                      } else {
+                        // Deselecting all: toggle only checked items
+                        if (item.checked) {
+                          console.log(`[GroceryListModal] Unchecking: ${item.name}`);
+                          onToggleItem(catIndex, itemIndex);
+                        }
+                      }
+                    });
+                  });
+                }, 0);
+              }}
+              style={[
+                styles.selectAllButton,
+                { backgroundColor: glassColors.checkboxChecked }
+              ]}
+              accessibilityLabel={checkedItems === totalItems ? "Deselect all items" : "Select all items"}
+              accessibilityRole="button"
+              accessibilityHint={checkedItems === totalItems ? "Unchecks all grocery items" : "Checks all grocery items"}
+            >
+              <Ionicons
+                name={checkedItems === totalItems ? 'checkbox' : 'checkbox-outline'}
+                size={20}
+                color="#FFFFFF"
+              />
+              <Text style={[styles.selectAllButtonText, { color: '#FFFFFF' }]}>
+                {checkedItems === totalItems ? 'Deselect All Items' : 'Select All Items'}
+              </Text>
+            </TouchableOpacity>
           </Animated.View>
         )}
 
@@ -1051,6 +1085,31 @@ const styles = StyleSheet.create({
   compactPillText: {
     fontSize: 12,
     fontFamily: Fonts.medium,
+  },
+  selectAllContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  selectAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    gap: 8,
+  },
+  selectAllButtonText: {
+    fontSize: 15,
+    fontFamily: Fonts.semiBold,
+  },
+  gradientPill: {
+    paddingVertical: 5,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 28,
   },
 });
 
