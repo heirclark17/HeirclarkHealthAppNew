@@ -315,28 +315,23 @@ export function DailyTimelineView() {
           </Text>
           <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Free Time</Text>
         </GlassCard>
+        {/* AI Coach Button - same format as stat cards with purple tint */}
+        {timeline && !isChatOpen && (
+          <TouchableOpacity
+            onPress={() => {
+              mediumImpact();
+              setIsChatOpen(true);
+              chatSheetRef.current?.present();
+            }}
+            activeOpacity={0.7}
+          >
+            <GlassCard style={[styles.statCard, styles.aiStatCard, { backgroundColor: isDark ? 'rgba(139, 92, 246, 0.12)' : 'rgba(139, 92, 246, 0.08)' }]}>
+              <Sparkles size={20} color="#a855f7" />
+              <Text style={[styles.statLabel, { color: '#a855f7' }]}>AI Coach</Text>
+            </GlassCard>
+          </TouchableOpacity>
+        )}
       </View>
-
-      {/* Floating AI Chat Button */}
-      {timeline && !isChatOpen && (
-        <TouchableOpacity
-          style={[
-            styles.chatFab,
-            {
-              bottom: bottomPadding + 60,
-              backgroundColor: isDark ? 'rgba(168, 85, 247, 0.15)' : 'rgba(139, 92, 246, 0.12)',
-            },
-          ]}
-          onPress={() => {
-            mediumImpact();
-            setIsChatOpen(true);
-            chatSheetRef.current?.present();
-          }}
-          activeOpacity={0.8}
-        >
-          <Sparkles size={22} color="#a855f7" />
-        </TouchableOpacity>
-      )}
 
       {/* Planner Chat Sheet */}
       <PlannerChatSheet ref={chatSheetRef} onDismiss={() => setIsChatOpen(false)} />
@@ -525,6 +520,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
+  aiStatCard: {
+    flex: undefined,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+  },
   statValue: {
     fontSize: 22,
     fontFamily: Fonts.numericLight,
@@ -587,17 +589,8 @@ const styles = StyleSheet.create({
     fontWeight: '200' as const,
   },
   chatFab: {
-    position: 'absolute',
-    right: 16,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    // Legacy - kept for reference, now using aiStatCard in footer
+    display: 'none',
     elevation: 4,
     zIndex: 10,
   },
