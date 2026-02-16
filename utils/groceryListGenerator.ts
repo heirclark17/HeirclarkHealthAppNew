@@ -139,36 +139,105 @@ function normalizeIngredientName(name: string): string {
 }
 
 /**
- * Add two amount strings together
- * Attempts numeric addition, falls back to concatenation
+ * Convert fraction string to decimal number
+ * Handles: "1/2", "1/4", "2 1/2" (mixed fractions), "0.5", "2"
  *
  * Examples:
+ * - "1/2" -> 0.5
+ * - "1/4" -> 0.25
+ * - "2 1/2" -> 2.5
+ * - "0.5" -> 0.5
+ * - "2" -> 2
+ */
+function fractionToDecimal(amount: string): number {
+  const trimmed = amount.trim();
+
+  // Check for mixed fraction (e.g., "2 1/2")
+  const mixedMatch = trimmed.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (mixedMatch) {
+    const whole = parseInt(mixedMatch[1]);
+    const numerator = parseInt(mixedMatch[2]);
+    const denominator = parseInt(mixedMatch[3]);
+    return whole + (numerator / denominator);
+  }
+
+  // Check for simple fraction (e.g., "1/2")
+  const fractionMatch = trimmed.match(/^(\d+)\/(\d+)$/);
+  if (fractionMatch) {
+    const numerator = parseInt(fractionMatch[1]);
+    const denominator = parseInt(fractionMatch[2]);
+    return numerator / denominator;
+  }
+
+  // Try parsing as regular number (handles "2", "0.5", "1.25")
+  const num = parseFloat(trimmed);
+  return isNaN(num) ? 0 : num;
+}
+
+/**
+ * Convert decimal to mixed fraction string for display
+ * Examples:
+ * - 0.5 -> "1/2"
+ * - 0.75 -> "3/4"
+ * - 2.5 -> "2 1/2"
+ * - 1.33 -> "1.33" (keeps decimal if no clean fraction)
+ */
+function decimalToFraction(decimal: number): string {
+  // Handle whole numbers
+  if (decimal % 1 === 0) {
+    return decimal.toString();
+  }
+
+  const whole = Math.floor(decimal);
+  const fractionalPart = decimal - whole;
+
+  // Common fraction conversions
+  const fractionMap: { [key: string]: string } = {
+    '0.125': '1/8',
+    '0.25': '1/4',
+    '0.333': '1/3',
+    '0.375': '3/8',
+    '0.5': '1/2',
+    '0.625': '5/8',
+    '0.667': '2/3',
+    '0.75': '3/4',
+    '0.875': '7/8',
+  };
+
+  // Round to 3 decimal places for comparison
+  const roundedFraction = fractionalPart.toFixed(3);
+  const fraction = fractionMap[roundedFraction];
+
+  if (fraction) {
+    return whole > 0 ? `${whole} ${fraction}` : fraction;
+  }
+
+  // If no clean fraction match, return decimal with 1-2 decimal places
+  return decimal % 0.1 === 0 ? decimal.toFixed(1) : decimal.toFixed(2);
+}
+
+/**
+ * Add two amount strings together with proper fraction handling
+ *
+ * Examples:
+ * - addAmounts("1/2", "1/4") -> "3/4"
  * - addAmounts("2", "1") -> "3"
  * - addAmounts("1.5", "0.5") -> "2"
- * - addAmounts("1/2", "1/4") -> "1/2, 1/4" (fallback)
+ * - addAmounts("2 1/2", "1/4") -> "2 3/4"
  */
 function addAmounts(amount1: string, amount2: string): string {
-  // Check if amounts contain fractions or other non-numeric characters (except decimal point)
-  const isFraction1 = /[\/]/.test(amount1);
-  const isFraction2 = /[\/]/.test(amount2);
+  const decimal1 = fractionToDecimal(amount1);
+  const decimal2 = fractionToDecimal(amount2);
 
-  // If either is a fraction, concatenate instead of adding
-  if (isFraction1 || isFraction2) {
+  // If both conversions failed (returned 0 for non-numeric strings), concatenate
+  if (decimal1 === 0 && decimal2 === 0 && amount1 !== '0' && amount2 !== '0') {
     return `${amount1}, ${amount2}`;
   }
 
-  const num1 = parseFloat(amount1);
-  const num2 = parseFloat(amount2);
+  const sum = decimal1 + decimal2;
 
-  // If both are valid numbers, add them
-  if (!isNaN(num1) && !isNaN(num2)) {
-    const sum = num1 + num2;
-    // Format to 1 decimal place if needed, otherwise integer
-    return sum % 1 === 0 ? sum.toString() : sum.toFixed(1);
-  }
-
-  // Fallback: concatenate (e.g., other non-numeric strings)
-  return `${amount1}, ${amount2}`;
+  // Convert back to fraction or decimal for clean display
+  return decimalToFraction(sum);
 }
 
 /**
