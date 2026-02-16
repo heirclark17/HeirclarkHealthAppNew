@@ -320,7 +320,13 @@ export function DailyTimelineView() {
       {/* Floating AI Chat Button */}
       {timeline && !isChatOpen && (
         <TouchableOpacity
-          style={[styles.chatFab, { bottom: bottomPadding + 60 }]}
+          style={[
+            styles.chatFab,
+            {
+              bottom: bottomPadding + 60,
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
+            },
+          ]}
           onPress={() => {
             mediumImpact();
             setIsChatOpen(true);
@@ -328,7 +334,7 @@ export function DailyTimelineView() {
           }}
           activeOpacity={0.8}
         >
-          <Sparkles size={22} color="#fff" />
+          <Sparkles size={22} color={themeColors.primary} />
         </TouchableOpacity>
       )}
 
@@ -586,14 +592,13 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: 'rgba(130, 87, 229, 0.9)',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
     zIndex: 10,
   },
 });
