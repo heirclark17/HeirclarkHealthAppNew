@@ -325,7 +325,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               </GlassCard>
               <GlassCard style={styles.profileDataItemCard} borderColor="transparent">
                 <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Sex</Text>
-                <Text style={[styles.profileDataValue, { color: colors.text }]}>
+                <Text style={[styles.profileDataValueText, { color: colors.text }]}>
                   {state.sex === 'male' ? 'Male' : 'Female'}
                 </Text>
               </GlassCard>
@@ -369,7 +369,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               </GlassCard>
               <GlassCard style={styles.profileDataItemCard} borderColor="transparent">
                 <Text style={[styles.profileDataLabel, { color: colors.textMuted }]}>Activity Level</Text>
-                <Text style={[styles.profileDataValue, { color: colors.text }]}>
+                <Text numberOfLines={2} style={[styles.profileDataValueSmall, { color: colors.text }]}>
                   {state.activityLevel === 'sedentary' ? 'Sedentary' :
                    state.activityLevel === 'light' ? 'Lightly Active' :
                    state.activityLevel === 'moderate' ? 'Moderately Active' :
@@ -423,16 +423,20 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 ) : (
                   <Minus size={18} color={Colors.primary} />
                 )}
-                <Text style={[styles.profileStatValue, { color: colors.text }]}>
+                <Text style={[styles.profileStatValue, { color: colors.text, fontFamily: Fonts.light }]}>
                   {state.primaryGoal === 'lose_weight' ? 'Fat Loss' :
                    state.primaryGoal === 'build_muscle' ? 'Muscle Gain' :
                    state.primaryGoal === 'maintain' ? 'Maintain' : 'Health'}
                 </Text>
                 <Text style={[styles.profileStatLabel, { color: colors.textMuted }]}>Primary Goal</Text>
                 <Text style={[styles.profileStatDesc, { color: colors.textSecondary }]}>
-                  {state.primaryGoal === 'lose_weight' ? `${Math.abs(state.currentWeight - state.targetWeight).toFixed(0)} lbs to lose` :
-                   state.primaryGoal === 'build_muscle' ? `${Math.abs(state.currentWeight - state.targetWeight).toFixed(0)} lbs to gain` :
-                   'Maintain current weight'}
+                  {state.primaryGoal === 'lose_weight' ? (
+                    <><NumberText weight="medium" style={[styles.profileStatDesc, { color: colors.textSecondary }]}>{Math.abs(state.currentWeight - state.targetWeight).toFixed(0)}</NumberText> lbs to lose</>
+                  ) : state.primaryGoal === 'build_muscle' ? (
+                    <><NumberText weight="medium" style={[styles.profileStatDesc, { color: colors.textSecondary }]}>{Math.abs(state.currentWeight - state.targetWeight).toFixed(0)}</NumberText> lbs to gain</>
+                  ) : (
+                    'Maintain current weight'
+                  )}
                 </Text>
               </View>
             </View>
@@ -511,7 +515,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       {state.dietStyle !== 'standard' && (
         <View>
           <GlassCard style={styles.dietCard} interactive>
-            <Apple size={18} color={colors.textMuted} />
+            <Apple size={18} color={Colors.success} />
             <Text style={[styles.dietText, { color: colors.textSecondary }]}>
               {state.dietStyle === 'keto' && 'Keto-optimized macros (70% fat, 25% protein, 5% carbs)'}
               {state.dietStyle === 'high_protein' && 'High protein for muscle support (40% protein)'}
@@ -571,14 +575,14 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 </Text>
               </View>
               <View style={[styles.programMetaBadge, { backgroundColor: colors.backgroundSecondary }]}>
-                <Calendar size={12} color={colors.textMuted} />
+                <Calendar size={12} color={colors.primary} />
                 <NumberText weight="regular" style={[styles.programMetaText, { color: colors.text }]}>
                   {selectedProgram.duration}
                 </NumberText>
                 <Text style={[styles.programMetaText, { color: colors.text }]}>weeks</Text>
               </View>
               <View style={[styles.programMetaBadge, { backgroundColor: colors.backgroundSecondary }]}>
-                <Dumbbell size={12} color={colors.textMuted} />
+                <Dumbbell size={12} color={colors.protein} />
                 <NumberText weight="regular" style={[styles.programMetaText, { color: colors.text }]}>
                   {selectedProgram.daysPerWeek}
                 </NumberText>
@@ -907,7 +911,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             {state.dietStyle && state.dietStyle !== 'standard' && (
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
-                  <Leaf size={16} color={colors.textMuted} />
+                  <Leaf size={16} color={Colors.success} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Dietary Style</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
@@ -941,14 +945,14 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
 
             {/* Meals Per Day */}
             {state.mealsPerDay && (
-              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
-                <View style={styles.prefRow}>
-                  <UtensilsCrossed size={16} color={colors.textMuted} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meals Per Day: </Text>
-                  <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
+              <GlassCard style={styles.mealsPerDayCard} borderColor="transparent">
+                <UtensilsCrossed size={16} color={Colors.success} />
+                <View style={[styles.mealsCircle, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+                  <NumberText weight="semiBold" style={[styles.mealsCircleNumber, { color: Colors.success }]}>
                     {state.mealsPerDay}
                   </NumberText>
                 </View>
+                <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Meals Per Day</Text>
               </GlassCard>
             )}
 
@@ -956,7 +960,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             {state.intermittentFasting && state.fastingWindow && (
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
-                  <Clock size={16} color={colors.textMuted} />
+                  <Clock size={16} color={Colors.warning} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Fasting Window: </Text>
                   <Text style={[styles.prefValue, { color: colors.text }]}>
                     {state.fastingWindow.start} - {state.fastingWindow.end}
@@ -969,7 +973,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             {foodPrefs?.preferences?.favoriteCuisines && foodPrefs.preferences.favoriteCuisines.length > 0 && (
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
-                  <UtensilsCrossed size={16} color={colors.textMuted} />
+                  <UtensilsCrossed size={16} color={colors.protein} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Cuisines</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
@@ -1045,7 +1049,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             {foodPrefs?.preferences?.favoriteSnacks && foodPrefs.preferences.favoriteSnacks.length > 0 && (
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
-                  <IceCream size={16} color={colors.textMuted} />
+                  <IceCream size={16} color={colors.carbs} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Snacks</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
@@ -1085,7 +1089,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 {/* Meal Diversity */}
                 {foodPrefs.preferences.mealDiversity && (
                   <View style={styles.prefRow}>
-                    <Settings size={16} color={colors.textMuted} />
+                    <Settings size={16} color={colors.primary} />
                     <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Variety: </Text>
                     <Text style={[styles.prefValue, { color: colors.text }]}>
                       {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily' : 'Diverse Meals'}
@@ -1096,7 +1100,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 {/* Meal Style */}
                 {foodPrefs.preferences.mealStyle && (
                   <View style={styles.prefRow}>
-                    <Clock size={16} color={colors.textMuted} />
+                    <Clock size={16} color={Colors.warning} />
                     <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style: </Text>
                     <Text style={[styles.prefValue, { color: colors.text }]}>
                       {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer Larger Meals'}
@@ -1107,7 +1111,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 {/* Cheat Days */}
                 {foodPrefs.preferences.cheatDays && foodPrefs.preferences.cheatDays.length > 0 && (
                   <View style={styles.prefRow}>
-                    <Calendar size={16} color={colors.textMuted} />
+                    <Calendar size={16} color={colors.primary} />
                     <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days: </Text>
                     <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
                       {foodPrefs.preferences.cheatDays.length}
@@ -1119,7 +1123,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 {/* Cooking Skill */}
                 {foodPrefs.preferences.cookingSkill && (
                   <View style={styles.prefRow}>
-                    <Flame size={16} color={colors.textMuted} />
+                    <Flame size={16} color={Colors.error} />
                     <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cooking Skill: </Text>
                     <Text style={[styles.prefValue, { color: colors.text }]}>
                       {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
@@ -1594,7 +1598,7 @@ const styles = StyleSheet.create({
   },
   prefSectionCard: {
     marginBottom: 12,
-    padding: 12,
+    padding: 14,
   },
   prefRow: {
     flexDirection: 'row',
@@ -1628,6 +1632,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.light,
     color: Colors.text,
+  },
+  mealsPerDayCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  mealsCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mealsCircleNumber: {
+    fontSize: 22,
   },
   mealPlanningSection: {
     gap: 12,
@@ -1691,7 +1712,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     letterSpacing: 2,
     color: Colors.textMuted,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   profileDataGrid: {
     flexDirection: 'row',
@@ -1706,18 +1727,28 @@ const styles = StyleSheet.create({
     width: '30%',
     minWidth: 90,
     padding: 12,
-    gap: 8,
+    gap: 6,
   },
   profileDataLabel: {
     fontSize: 10,
     fontFamily: Fonts.light,
     color: Colors.textMuted,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   profileDataValue: {
     fontSize: 16,
+    color: Colors.text,
+  },
+  profileDataValueText: {
+    fontSize: 16,
     fontFamily: Fonts.light,
     color: Colors.text,
+  },
+  profileDataValueSmall: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    color: Colors.text,
+    lineHeight: 18,
   },
   profileDataUnit: {
     fontSize: 12,
@@ -1732,10 +1763,10 @@ const styles = StyleSheet.create({
   profileStatBox: {
     flex: 1,
     alignItems: 'center',
-    padding: 12,
+    padding: 14,
     backgroundColor: 'rgba(150, 206, 180, 0.08)',
     borderRadius: 12,
-    gap: 8,
+    gap: 6,
   },
   profileStatValue: {
     fontSize: 18,
@@ -1767,7 +1798,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     letterSpacing: 2,
     color: Colors.textMuted,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   programDescription: {
     fontSize: 13,
