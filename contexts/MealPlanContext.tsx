@@ -695,40 +695,49 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
   // Toggle grocery item checked state
   const toggleGroceryItem = useCallback((categoryIndex: number, itemIndex: number) => {
-    if (!state.groceryList) return;
+    let updatedGroceryList: GroceryCategory[] | null = null;
 
-    const updatedGroceryList = [...state.groceryList];
-    const category = { ...updatedGroceryList[categoryIndex] };
-    const items = [...category.items];
+    setState(prev => {
+      if (!prev.groceryList) return prev;
 
-    items[itemIndex] = {
-      ...items[itemIndex],
-      checked: !items[itemIndex].checked,
-    };
+      const newGroceryList = [...prev.groceryList];
+      const category = { ...newGroceryList[categoryIndex] };
+      const items = [...category.items];
 
-    category.items = items;
-    updatedGroceryList[categoryIndex] = category;
+      items[itemIndex] = {
+        ...items[itemIndex],
+        checked: !items[itemIndex].checked,
+      };
 
-    setState(prev => ({ ...prev, groceryList: updatedGroceryList }));
+      category.items = items;
+      newGroceryList[categoryIndex] = category;
 
-    // Update cache
-    const cacheData = {
-      weeklyPlan: state.weeklyPlan,
-      groceryList: updatedGroceryList,
-      weekSummary: state.weekSummary,
-      lastGeneratedAt: state.lastGeneratedAt,
-    };
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+      // Capture for cache/sync
+      updatedGroceryList = newGroceryList;
 
-    // Sync to backend database
-    if (state.weeklyPlan && state.weeklyPlan.length > 0) {
-      const weekStart = state.weeklyPlan[0]?.date || new Date().toISOString().split('T')[0];
-      api.saveMealPlan(
-        { weeklyPlan: state.weeklyPlan, groceryList: updatedGroceryList, weekSummary: state.weekSummary },
-        weekStart
-      ).catch(err => console.error('[MealPlanContext] Backend sync error after toggle:', err));
+      return { ...prev, groceryList: newGroceryList };
+    });
+
+    // Update cache with the new grocery list
+    if (updatedGroceryList) {
+      const cacheData = {
+        weeklyPlan: state.weeklyPlan,
+        groceryList: updatedGroceryList,
+        weekSummary: state.weekSummary,
+        lastGeneratedAt: state.lastGeneratedAt,
+      };
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+
+      // Sync to backend database
+      if (state.weeklyPlan && state.weeklyPlan.length > 0) {
+        const weekStart = state.weeklyPlan[0]?.date || new Date().toISOString().split('T')[0];
+        api.saveMealPlan(
+          { weeklyPlan: state.weeklyPlan, groceryList: updatedGroceryList, weekSummary: state.weekSummary },
+          weekStart
+        ).catch(err => console.error('[MealPlanContext] Backend sync error after toggle:', err));
+      }
     }
-  }, [state.groceryList, state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
+  }, [state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
 
   // Delete a grocery item from the list
   const deleteGroceryItem = useCallback((categoryIndex: number, itemIndex: number) => {
