@@ -1744,12 +1744,12 @@ const styles = StyleSheet.create({
   },
   profileDataValueText: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.semiBold,
     color: Colors.text,
   },
   profileDataValueSmall: {
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.semiBold,
     color: Colors.text,
     lineHeight: 18,
   },
