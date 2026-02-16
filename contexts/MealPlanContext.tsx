@@ -756,11 +756,19 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
   // NEW: Fetch ALL recipes for entire week in ONE AI call (much faster!)
   const generateGroceryListOnDemand = useCallback(async (budgetTier?: 'low' | 'medium' | 'high') => {
+    console.log('[MealPlanContext] 🚀 generateGroceryListOnDemand called with budget:', budgetTier);
+    console.log('[MealPlanContext] 📊 Current state:', {
+      hasWeeklyPlan: !!state.weeklyPlan,
+      planLength: state.weeklyPlan?.length,
+      currentlyGenerating: state.isGeneratingGroceryList
+    });
+
     if (!state.weeklyPlan || state.weeklyPlan.length === 0) {
-      console.warn('[MealPlanContext] No meal plan available for grocery list generation');
+      console.warn('[MealPlanContext] ❌ No meal plan available for grocery list generation');
       return;
     }
 
+    console.log('[MealPlanContext] ✅ Setting isGeneratingGroceryList = true');
     setState(prev => ({ ...prev, isGeneratingGroceryList: true }));
 
     try {

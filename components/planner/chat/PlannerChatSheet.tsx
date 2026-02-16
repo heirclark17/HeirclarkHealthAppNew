@@ -25,7 +25,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import Animated, { FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Sparkles, Send, Check, X, ChevronDown } from 'lucide-react-native';
+import { Sparkles, Send, Check, X, ChevronDown, RotateCw, Plus, Trash2, Info } from 'lucide-react-native';
 import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { useSleepRecovery } from '../../../contexts/SleepRecoveryContext';
@@ -459,18 +459,21 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef, PlannerChatSheet
   // ============================================================================
 
   const renderActionCard = useCallback((action: ScheduleAction, messageId: string, applied: boolean) => {
-    const icon = action.type === 'reschedule' ? '\u{1F504}' :
-                 action.type === 'add' ? '\u{2795}' :
-                 action.type === 'remove' ? '\u{274C}' : '\u{2139}\u{FE0F}';
+    const IconComponent = action.type === 'reschedule' ? RotateCw :
+                          action.type === 'add' ? Plus :
+                          action.type === 'remove' ? Trash2 : Info;
 
     return (
       <View
         key={action.description}
         style={[styles.actionCard, { backgroundColor: glass.actionCard }]}
       >
-        <Text style={[styles.actionText, { color: glass.text }]}>
-          {icon} {action.description}
-        </Text>
+        <View style={styles.actionRow}>
+          <IconComponent size={16} color={glass.text} style={styles.actionIcon} />
+          <Text style={[styles.actionText, { color: glass.text }]}>
+            {action.description}
+          </Text>
+        </View>
         {action.type === 'reschedule' && action.newStartTime && (
           <Text style={[styles.actionDetail, { color: glass.textSecondary }]}>
             New time: {action.newStartTime}
@@ -718,10 +721,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionIcon: {
+    marginTop: 2,
+  },
   actionText: {
     fontSize: 14,
     fontFamily: Fonts.regular,
     lineHeight: 20,
+    flex: 1,
   },
   actionDetail: {
     fontSize: 12,
