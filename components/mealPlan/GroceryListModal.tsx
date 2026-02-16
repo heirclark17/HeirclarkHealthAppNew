@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -560,38 +561,46 @@ export function GroceryListModal({
           </ScrollView>
         )}
 
-        {/* Instacart button with Frosted Glass Effect - Orange-Green Tint */}
+        {/* Instacart button with Orange-Green Gradient */}
         {groceryList && groceryList.length > 0 && !isLoading && (
           <Animated.View
             entering={SlideInUp.delay(300).springify()}
-            style={[styles.instacartButtonContainer, { paddingBottom: insets.bottom + 16 }]}
+            style={[styles.instacartButtonContainer, { paddingBottom: insets.bottom + 8 }]}
           >
             <BlurView
-              intensity={isDark ? 50 : 70}
+              intensity={isDark ? 40 : 60}
               tint={isDark ? 'dark' : 'light'}
               style={styles.instacartButtonBlur}
             >
               <TouchableOpacity
-                style={[styles.instacartButton, buttonAnimatedStyle]}
                 onPress={handleInstacartPress}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
                 accessibilityLabel={`Order ${totalItems} grocery items with Instacart`}
                 accessibilityRole="button"
                 accessibilityHint="Opens Instacart with your grocery list pre-filled for delivery"
               >
-                <View style={[styles.instacartIconContainer, {
-                  backgroundColor: isDark ? 'rgba(255, 140, 0, 0.2)' : 'rgba(76, 175, 80, 0.15)',
-                  padding: 8,
-                  borderRadius: 12,
-                }]}>
-                  <Carrot size={22} color={isDark ? '#FF8C00' : '#4CAF50'} strokeWidth={2} />
-                </View>
-                <Text style={[styles.instacartButtonText, {
-                  color: isDark ? '#FF8C00' : '#4CAF50',
-                  fontFamily: Fonts.semiBold,
-                }]}>
-                  Order with Instacart
-                </Text>
+                <LinearGradient
+                  colors={isDark
+                    ? ['#FF8C00', '#FFB84D', '#4CAF50']
+                    : ['#FF9800', '#FFA726', '#66BB6A']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.instacartButton, buttonAnimatedStyle]}
+                >
+                  <View style={[styles.instacartIconContainer, {
+                    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                    padding: 8,
+                    borderRadius: 12,
+                  }]}>
+                    <Carrot size={22} color="#FFFFFF" strokeWidth={2.5} />
+                  </View>
+                  <Text style={[styles.instacartButtonText, {
+                    color: '#FFFFFF',
+                    fontFamily: Fonts.semiBold,
+                  }]}>
+                    Order with Instacart
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
             </BlurView>
           </Animated.View>
@@ -731,7 +740,7 @@ const styles = StyleSheet.create({
   },
   instacartButtonContainer: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 80,
     left: 16,
     right: 16,
     zIndex: 10,
@@ -740,7 +749,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   instacartButton: {
     flexDirection: 'row',
@@ -749,7 +758,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     gap: 12,
-    backgroundColor: 'rgba(255, 152, 0, 0.08)',
+    borderRadius: 20,
   },
   instacartIconContainer: {
     // Icon styling handled inline for dynamic colors
