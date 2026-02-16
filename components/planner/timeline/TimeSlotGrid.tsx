@@ -34,9 +34,11 @@ export function TimeSlotGrid({ wakeTime = '06:00' }: TimeSlotGridProps) {
             key={`hour-${index}`}
             style={[styles.gridLine, { top: yPosition }]}
           >
+            {/* Time label - positioned to align with the separator line */}
             <Text style={[styles.timeLabel, { color: themeColors.textSecondary }]}>
               {displayHour} {period}
             </Text>
+            {/* Horizontal separator line - at exact top where events start */}
             <View style={[styles.line, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]} />
           </View>
         );
@@ -57,18 +59,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
+    height: 1, // Exact height of separator line
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    alignItems: 'flex-start', // Align to top edge where events start
   },
   timeLabel: {
     fontSize: 12,
     fontFamily: Fonts.numericRegular,
     width: 50,
     textAlign: 'right',
+    marginTop: -6, // Offset label up slightly to center it on the line (like Outlook)
   },
   line: {
     flex: 1,
     height: 1,
+    marginLeft: 8,
   },
 });
