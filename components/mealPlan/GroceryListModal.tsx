@@ -451,9 +451,9 @@ export function GroceryListModal({
             entering={FadeIn.delay(150)}
             style={styles.budgetCard}
           >
-            <GlassCard intensity={isDark ? 40 : 60} style={styles.filtersCardInner}>
+            <GlassCard intensity={isDark ? 60 : 80} style={styles.filtersCardInner}>
               <View style={styles.filterSection}>
-                <Text style={[styles.compactFilterLabel, { color: glassColors.textSecondary }]}>
+                <Text style={[styles.compactFilterLabel, { color: glassColors.text }]}>
                   Budget
                 </Text>
                 <ScrollView
@@ -500,9 +500,9 @@ export function GroceryListModal({
             entering={FadeIn.delay(200)}
             style={styles.dietaryCard}
           >
-            <GlassCard intensity={isDark ? 40 : 60} style={styles.filtersCardInner}>
+            <GlassCard intensity={isDark ? 60 : 80} style={styles.filtersCardInner}>
               <View style={styles.filterSection}>
-                <Text style={[styles.compactFilterLabel, { color: glassColors.textSecondary }]}>
+                <Text style={[styles.compactFilterLabel, { color: glassColors.text }]}>
                   Dietary
                 </Text>
                 <ScrollView
@@ -976,11 +976,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   filtersCardInner: {
-    paddingVertical: 8,
+    paddingVertical: 14,
     paddingHorizontal: 16,
+    borderRadius: Spacing.borderRadius,
   },
   filterSection: {
-    marginVertical: 4,
+    marginVertical: 2,
   },
   compactFilterLabel: {
     fontSize: 11,
