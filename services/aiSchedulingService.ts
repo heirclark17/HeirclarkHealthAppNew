@@ -48,7 +48,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       messages: [
         {
           role: 'system',
-          content: 'You are an expert daily planner AI for a health and fitness app. Your job is to create optimal daily schedules that balance workouts, meals, meetings, and recovery. You understand intermittent fasting, workout recovery, meeting preparation, and work-life balance. Always provide specific times in HH:MM 24-hour format.',
+          content: 'You are an expert daily planner AI for a health and fitness app. Your job is to create optimal daily schedules that balance workouts, meals, meetings, and recovery. You understand intermittent fasting, workout recovery, meeting preparation, and work-life balance. Always provide specific times in HH:MM 24-hour format. CRITICAL: When intermittent fasting is active, you MUST schedule ALL meals within the specified eating window - this is a hard constraint that cannot be violated under any circumstances.',
         },
         {
           role: 'user',
@@ -129,9 +129,10 @@ function buildSchedulingPrompt(request: SchedulingRequest): string {
 - Energy peak: ${preferences.energyPeak || 'morning'}
 
 **Intermittent Fasting:**
-${isFasting ? `- Active (eating window: ${lifeContext.fastingEnd} to ${lifeContext.fastingStart})
-- ALL meals must be scheduled within this window
-- No eating outside this window` : '- Not active today'}
+${isFasting ? `- ⚠️ ACTIVE (eating window: ${lifeContext.fastingEnd} to ${lifeContext.fastingStart})
+- ⚠️ CRITICAL: ALL meal_eating blocks MUST be between ${lifeContext.fastingEnd} and ${lifeContext.fastingStart}
+- ⚠️ NEVER schedule meals outside this window
+- ⚠️ Fasting hours: ${preferences.sleepTime} to ${lifeContext.fastingEnd} (NO FOOD)` : '- Not active today'}
 ${isCheatDay ? '- **CHEAT DAY**: No fasting restrictions, normal meal times allowed' : ''}
 
 **Recovery Status:**
@@ -149,16 +150,17 @@ ${mealBlocks.length > 0 ? mealBlocks.map(m => `- ${m.title} (${m.duration} min)`
 ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- No meetings today'}
 
 **Instructions:**
-1. Schedule all meals within eating window (if IF active)
+1. ⚠️ CRITICAL: If IF active, EVERY meal_eating block MUST have startTime AND endTime within the eating window - ZERO EXCEPTIONS
 2. Leave 15-30 min gap BEFORE workouts (for prep/commute)
 3. Leave 15-20 min gap AFTER workouts (for shower/cooldown)
 4. Leave 15 min gap after calendar meetings (for transitions)
 5. Consider meeting prep time (10-15 min gap before important meetings)
 6. Balance work and rest - avoid over-scheduling
 7. Respect recovery status (low recovery = easier day)
-8. Meals should be evenly spaced (4-6 hours apart if possible)
+8. Meals should be evenly spaced (4-6 hours apart if possible) WITHIN eating window
 9. Don't schedule activities too close to sleep time
 10. **DO NOT create separate "buffer" blocks - just leave gaps between activities**
+11. ⚠️ VALIDATION: Before returning, verify EVERY meal_eating block is within eating window bounds
 
 **Output Format (JSON):**
 {
