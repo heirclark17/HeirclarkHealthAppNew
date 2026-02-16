@@ -628,64 +628,64 @@ export function GroceryListModal({
           </Animated.View>
         )}
 
-        {/* Select All Button - Above Ingredients */}
+        {/* Select All Button - Above Ingredients with Frosted Glass */}
         {groceryList && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(250)}
             style={styles.selectAllContainer}
           >
-            <TouchableOpacity
-              onPress={async () => {
-                await lightImpact();
+            <GlassCard intensity={isDark ? 60 : 80} style={styles.selectAllGlassCard} interactive>
+              <TouchableOpacity
+                onPress={async () => {
+                  await lightImpact();
 
-                // Determine if we're selecting all or deselecting all
-                const shouldSelectAll = checkedItems < totalItems;
+                  // Determine if we're selecting all or deselecting all
+                  const shouldSelectAll = checkedItems < totalItems;
 
-                console.log('[GroceryListModal] Select All clicked:', {
-                  shouldSelectAll,
-                  checkedItems,
-                  totalItems,
-                  action: shouldSelectAll ? 'SELECTING ALL' : 'DESELECTING ALL'
-                });
+                  // Collect all items that need to be toggled
+                  const itemsToToggle: Array<{ catIndex: number; itemIndex: number; name: string }> = [];
 
-                // Defer to next tick to avoid mutating frozen objects in Reanimated
-                setTimeout(() => {
                   groceryList.forEach((category, catIndex) => {
                     category.items.forEach((item, itemIndex) => {
-                      if (shouldSelectAll) {
-                        // Selecting all: toggle only unchecked items
-                        if (!item.checked) {
-                          console.log(`[GroceryListModal] Checking: ${item.name}`);
-                          onToggleItem(catIndex, itemIndex);
-                        }
-                      } else {
-                        // Deselecting all: toggle only checked items
-                        if (item.checked) {
-                          console.log(`[GroceryListModal] Unchecking: ${item.name}`);
-                          onToggleItem(catIndex, itemIndex);
-                        }
+                      if (shouldSelectAll && !item.checked) {
+                        itemsToToggle.push({ catIndex, itemIndex, name: item.name });
+                      } else if (!shouldSelectAll && item.checked) {
+                        itemsToToggle.push({ catIndex, itemIndex, name: item.name });
                       }
                     });
                   });
-                }, 0);
-              }}
-              style={[
-                styles.selectAllButton,
-                { backgroundColor: glassColors.checkboxChecked }
-              ]}
-              accessibilityLabel={checkedItems === totalItems ? "Deselect all items" : "Select all items"}
-              accessibilityRole="button"
-              accessibilityHint={checkedItems === totalItems ? "Unchecks all grocery items" : "Checks all grocery items"}
-            >
-              <Ionicons
-                name={checkedItems === totalItems ? 'checkbox' : 'checkbox-outline'}
-                size={20}
-                color="#FFFFFF"
-              />
-              <Text style={[styles.selectAllButtonText, { color: '#FFFFFF' }]}>
-                {checkedItems === totalItems ? 'Deselect All Items' : 'Select All Items'}
-              </Text>
-            </TouchableOpacity>
+
+                  console.log('[GroceryListModal] Select All clicked:', {
+                    shouldSelectAll,
+                    checkedItems,
+                    totalItems,
+                    itemsToToggleCount: itemsToToggle.length,
+                    action: shouldSelectAll ? 'SELECTING ALL' : 'DESELECTING ALL'
+                  });
+
+                  // Stagger toggles to prevent state collision - each toggle gets its own tick
+                  itemsToToggle.forEach(({ catIndex, itemIndex, name }, idx) => {
+                    setTimeout(() => {
+                      console.log(`[GroceryListModal] ${shouldSelectAll ? 'Checking' : 'Unchecking'} [${idx + 1}/${itemsToToggle.length}]: ${name}`);
+                      onToggleItem(catIndex, itemIndex);
+                    }, idx * 50); // 50ms between each toggle to avoid race conditions
+                  });
+                }}
+                style={styles.selectAllButton}
+                accessibilityLabel={checkedItems === totalItems ? "Deselect all items" : "Select all items"}
+                accessibilityRole="button"
+                accessibilityHint={checkedItems === totalItems ? "Unchecks all grocery items" : "Checks all grocery items"}
+              >
+                <Ionicons
+                  name={checkedItems === totalItems ? 'checkbox' : 'checkbox-outline'}
+                  size={20}
+                  color={glassColors.checkboxChecked}
+                />
+                <Text style={[styles.selectAllButtonText, { color: glassColors.text }]}>
+                  {checkedItems === totalItems ? 'Deselect All Items' : 'Select All Items'}
+                </Text>
+              </TouchableOpacity>
+            </GlassCard>
           </Animated.View>
         )}
 
@@ -1090,13 +1090,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  selectAllGlassCard: {
+    borderRadius: Spacing.borderRadius,
+    overflow: 'hidden',
+  },
   selectAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 20,
-    borderRadius: 12,
     gap: 8,
   },
   selectAllButtonText: {
