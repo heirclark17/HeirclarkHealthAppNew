@@ -2657,10 +2657,19 @@ Generate personalized, encouraging guidance for their cheat day that helps them 
 // Create favorite_exercises table for user favorites
 (async () => {
   try {
+    // Fix: user_id was INTEGER but user IDs are UUIDs - drop and recreate
+    const colCheck = await pool.query(`
+      SELECT data_type FROM information_schema.columns
+      WHERE table_name = 'favorite_exercises' AND column_name = 'user_id'
+    `);
+    if (colCheck.rows.length > 0 && colCheck.rows[0].data_type === 'integer') {
+      console.log('[Favorite Exercises] Fixing user_id column type from INTEGER to UUID...');
+      await pool.query('DROP TABLE IF EXISTS favorite_exercises');
+    }
     await pool.query(`
       CREATE TABLE IF NOT EXISTS favorite_exercises (
         id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         exercise_id TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
         UNIQUE(user_id, exercise_id)
