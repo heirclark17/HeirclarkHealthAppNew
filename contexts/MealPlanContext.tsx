@@ -835,37 +835,57 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      console.log(`[MealPlanContext] 📋 Fetching ingredients for ${mealsNeedingIngredients.length} meals in ONE batch call...`);
-
-      // Step 2: Call NEW batch endpoint to get ALL ingredients at once
-      const batchResponse = await api.getBatchRecipeDetails(mealsNeedingIngredients, budgetTier || 'medium');
-
-      if (!batchResponse || !batchResponse.recipes) {
-        throw new Error('Failed to fetch batch recipes');
+      // Step 2: Split meals into batches of 7 to avoid token limits
+      const BATCH_SIZE = 7;
+      const batches = [];
+      for (let i = 0; i < mealsNeedingIngredients.length; i += BATCH_SIZE) {
+        batches.push({
+          meals: mealsNeedingIngredients.slice(i, i + BATCH_SIZE),
+          indices: mealIndexMap.slice(i, i + BATCH_SIZE),
+        });
       }
 
-      // Step 3: Update meal plan with fetched ingredients
+      console.log(`[MealPlanContext] 📋 Fetching ingredients in ${batches.length} batches of ${BATCH_SIZE} meals each...`);
+
+      // Step 3: Fetch each batch sequentially
       const updatedWeeklyPlan = [...state.weeklyPlan];
       let totalIngredientsAdded = 0;
+      let totalRecipesFetched = 0;
 
-      batchResponse.recipes.forEach((recipe, index) => {
-        if (recipe && recipe.ingredients) {
-          const { dayIndex, mealIndex } = mealIndexMap[index];
-          const meal = updatedWeeklyPlan[dayIndex].meals[mealIndex];
+      for (let batchNum = 0; batchNum < batches.length; batchNum++) {
+        const batch = batches[batchNum];
+        console.log(`[MealPlanContext] 🔄 Fetching batch ${batchNum + 1}/${batches.length} (${batch.meals.length} meals)...`);
 
-          updatedWeeklyPlan[dayIndex].meals[mealIndex] = {
-            ...meal,
-            ingredients: recipe.ingredients,
-            instructions: recipe.instructions || meal.instructions,
-          };
+        const batchResponse = await api.getBatchRecipeDetails(batch.meals, budgetTier || 'medium');
 
-          totalIngredientsAdded += recipe.ingredients.length;
-          console.log(`[MealPlanContext] ✅ ${updatedWeeklyPlan[dayIndex].dayName} ${meal.mealType}: ${recipe.ingredients.length} ingredients`);
+        if (!batchResponse || !batchResponse.recipes) {
+          console.error(`[MealPlanContext] ❌ Batch ${batchNum + 1} failed`);
+          continue; // Skip failed batch but continue with others
         }
-      });
 
-      console.log('[MealPlanContext] 📦 Batch fetch complete:', {
-        totalMealsFetched: batchResponse.recipes.length,
+        // Update meal plan with this batch's recipes
+        batchResponse.recipes.forEach((recipe, index) => {
+          if (recipe && recipe.ingredients) {
+            const { dayIndex, mealIndex } = batch.indices[index];
+            const meal = updatedWeeklyPlan[dayIndex].meals[mealIndex];
+
+            updatedWeeklyPlan[dayIndex].meals[mealIndex] = {
+              ...meal,
+              ingredients: recipe.ingredients,
+              instructions: recipe.instructions || meal.instructions,
+            };
+
+            totalIngredientsAdded += recipe.ingredients.length;
+            totalRecipesFetched++;
+            console.log(`[MealPlanContext] ✅ ${updatedWeeklyPlan[dayIndex].dayName} ${meal.mealType}: ${recipe.ingredients.length} ingredients`);
+          }
+        });
+
+        console.log(`[MealPlanContext] ✅ Batch ${batchNum + 1}/${batches.length} complete: ${batchResponse.recipes.length} recipes`);
+      }
+
+      console.log('[MealPlanContext] 📦 All batches complete:', {
+        totalMealsFetched: totalRecipesFetched,
         totalIngredientsAdded,
         budgetTier: budgetTier || 'medium',
       });
