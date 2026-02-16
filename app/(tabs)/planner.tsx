@@ -109,7 +109,7 @@ export default function PlannerScreen() {
           weekStartDate={weekStartDate}
           onSyncCalendar={actions.syncCalendar}
           isSyncingCalendar={state.isSyncingCalendar}
-          onRefresh={actions.generateWeeklyPlan}
+          onRefresh={() => actions.regenerateSingleDay(new Date(selectedDate))}
           isRefreshing={state.isGeneratingPlan}
           allDayEventDots={allDayEventDots}
         />

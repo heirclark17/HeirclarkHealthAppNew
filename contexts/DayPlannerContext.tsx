@@ -103,6 +103,7 @@ interface DayPlannerActions {
   completeOnboarding: (preferences: PlannerPreferences) => Promise<void>;
   reopenOnboarding: () => void;
   generateWeeklyPlan: () => Promise<void>;
+  regenerateSingleDay: (date: Date) => Promise<void>;
   syncCalendar: () => Promise<boolean>;
   markBlockComplete: (blockId: string, date: string) => Promise<void>;
   skipBlock: (blockId: string, date: string) => Promise<void>;
@@ -581,6 +582,74 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       }));
     }
   }, [getWorkoutBlocksForDay, getMealBlocksForDay]);
+
+  /**
+   * Regenerate a single day without affecting the rest of the week
+   */
+  const regenerateSingleDay = useCallback(async (date: Date) => {
+    const currentPrefs = stateRef.current.preferences;
+    const currentWeeklyPlan = stateRef.current.weeklyPlan;
+
+    if (!currentPrefs) {
+      console.error('[Planner] Cannot regenerate day without preferences');
+      Alert.alert('Setup Required', 'Please complete the planner setup first.');
+      return;
+    }
+
+    if (!currentWeeklyPlan) {
+      console.error('[Planner] No weekly plan exists, generating full week instead');
+      await generateWeeklyPlan();
+      return;
+    }
+
+    setState((prev) => ({ ...prev, isGeneratingPlan: true, error: null }));
+
+    try {
+      const dateStr = formatLocalDate(date);
+      console.log('[Planner] Regenerating single day:', dateStr);
+
+      // Generate new timeline for this day
+      const newTimeline = await generateDailyTimeline(date, currentPrefs);
+
+      // Find the day in the weekly plan and replace it
+      const updatedDays = currentWeeklyPlan.days.map((day) =>
+        day.date === dateStr ? newTimeline : day
+      );
+
+      // Recalculate weekly stats
+      const weeklyStats = calculateWeeklyStats(updatedDays);
+
+      const updatedWeeklyPlan: WeeklyPlan = {
+        ...currentWeeklyPlan,
+        days: updatedDays,
+        weeklyStats,
+        generatedAt: new Date().toISOString(),
+      };
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updatedWeeklyPlan));
+
+      // Save to backend (fire-and-forget)
+      api.saveWeeklyPlan(updatedWeeklyPlan).catch((err: any) =>
+        console.warn('[Planner] Backend weekly plan save failed:', err)
+      );
+
+      setState((prev) => ({
+        ...prev,
+        weeklyPlan: updatedWeeklyPlan,
+        isGeneratingPlan: false,
+      }));
+
+      console.log('[Planner] ✅ Day regenerated with', newTimeline.blocks.length, 'blocks');
+    } catch (error: any) {
+      console.error('[Planner] Single day regeneration error:', error);
+      setState((prev) => ({
+        ...prev,
+        error: error.message || 'Failed to regenerate day',
+        isGeneratingPlan: false,
+      }));
+    }
+  }, [generateWeeklyPlan, getWorkoutBlocksForDay, getMealBlocksForDay]);
 
   /**
    * Generate daily timeline for a specific date using AI (with algorithmic fallback).
@@ -1296,6 +1365,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     completeOnboarding,
     reopenOnboarding,
     generateWeeklyPlan,
+    regenerateSingleDay,
     syncCalendar,
     markBlockComplete,
     skipBlock,
