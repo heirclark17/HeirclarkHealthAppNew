@@ -114,6 +114,9 @@ export function DailyTimelineView() {
     setBannerExpanded(false);
   }, [state.selectedDayIndex]);
 
+  // Chat modal state
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   // Bottom sheet for all-day event detail
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const [selectedAllDayBlock, setSelectedAllDayBlock] = useState<TimeBlock | null>(null);
@@ -315,11 +318,12 @@ export function DailyTimelineView() {
       </View>
 
       {/* Floating AI Chat Button */}
-      {timeline && (
+      {timeline && !isChatOpen && (
         <TouchableOpacity
           style={[styles.chatFab, { bottom: bottomPadding + 60 }]}
           onPress={() => {
             mediumImpact();
+            setIsChatOpen(true);
             chatSheetRef.current?.present();
           }}
           activeOpacity={0.8}
@@ -329,7 +333,7 @@ export function DailyTimelineView() {
       )}
 
       {/* Planner Chat Sheet */}
-      <PlannerChatSheet ref={chatSheetRef} />
+      <PlannerChatSheet ref={chatSheetRef} onDismiss={() => setIsChatOpen(false)} />
 
       {/* All-day event detail bottom sheet */}
       <BottomSheetModal

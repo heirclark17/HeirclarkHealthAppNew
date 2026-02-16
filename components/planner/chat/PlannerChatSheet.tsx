@@ -220,7 +220,12 @@ export interface PlannerChatSheetRef {
   dismiss: () => void;
 }
 
-export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) => {
+interface PlannerChatSheetProps {
+  onDismiss?: () => void;
+}
+
+export const PlannerChatSheet = forwardRef<PlannerChatSheetRef, PlannerChatSheetProps>((props, ref) => {
+  const { onDismiss } = props;
   const { state, actions } = useDayPlanner();
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
@@ -560,6 +565,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
       index={0}
       snapPoints={snapPoints}
       enablePanDownToClose
+      onDismiss={onDismiss}
       backdropComponent={renderBackdrop}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
