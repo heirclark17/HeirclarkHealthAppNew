@@ -11,7 +11,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
-import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink } from 'lucide-react-native';
+import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Sparkles } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomSheetModal,
@@ -28,6 +28,8 @@ import { GlassCard } from '../../GlassCard';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 import { BehaviorInsightCard } from '../insights/BehaviorInsightCard';
 import { WeeklyCoachCard } from '../coaching/WeeklyCoachCard';
+import { PlannerChatSheet, PlannerChatSheetRef } from '../chat/PlannerChatSheet';
+import { mediumImpact } from '../../../utils/haptics';
 
 // Must match _layout.tsx tab bar constants
 const TAB_BAR_HEIGHT = 64;
@@ -97,6 +99,7 @@ export function DailyTimelineView() {
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const scrollRef = useRef<ScrollView>(null);
+  const chatSheetRef = useRef<PlannerChatSheetRef>(null);
   const insets = useSafeAreaInsets();
 
   // Bottom padding: account for tab bar floating above safe area bottom
@@ -310,6 +313,23 @@ export function DailyTimelineView() {
           <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Free Time</Text>
         </GlassCard>
       </View>
+
+      {/* Floating AI Chat Button */}
+      {timeline && (
+        <TouchableOpacity
+          style={[styles.chatFab, { bottom: bottomPadding + 60 }]}
+          onPress={() => {
+            mediumImpact();
+            chatSheetRef.current?.present();
+          }}
+          activeOpacity={0.8}
+        >
+          <Sparkles size={22} color="#fff" />
+        </TouchableOpacity>
+      )}
+
+      {/* Planner Chat Sheet */}
+      <PlannerChatSheet ref={chatSheetRef} />
 
       {/* All-day event detail bottom sheet */}
       <BottomSheetModal
@@ -555,5 +575,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
+  },
+  chatFab: {
+    position: 'absolute',
+    right: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(130, 87, 229, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 10,
   },
 });

@@ -106,6 +106,8 @@ interface DayPlannerActions {
   markBlockComplete: (blockId: string, date: string) => Promise<void>;
   skipBlock: (blockId: string, date: string) => Promise<void>;
   updateBlockTime: (blockId: string, date: string, newStartTime: string) => Promise<void>;
+  addBlock: (block: Partial<TimeBlock>, date: string) => Promise<void>;
+  removeBlock: (blockId: string, date: string) => Promise<void>;
   requestWeeklyOptimization: () => Promise<void>;
   optimizeWeek: () => Promise<void>;
   setSelectedDay: (dayIndex: number) => void;
@@ -907,6 +909,92 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
+   * Add a new block to a day's timeline (used by planner chat)
+   */
+  const addBlock = useCallback(async (partialBlock: Partial<TimeBlock>, date: string) => {
+    const currentPlan = stateRef.current.weeklyPlan;
+    if (!currentPlan) return;
+
+    const updatedPlan = { ...currentPlan, days: [...currentPlan.days] };
+    const dayIndex = updatedPlan.days.findIndex((d) => d.date === date);
+    if (dayIndex === -1) return;
+
+    const blockType = partialBlock.type || 'personal';
+    const duration = partialBlock.duration || 30;
+    const startTime = partialBlock.startTime || '12:00';
+
+    const newBlock: TimeBlock = {
+      id: partialBlock.id || `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type: blockType,
+      title: partialBlock.title || 'New Block',
+      startTime,
+      endTime: addMinutesToTime(startTime, duration),
+      duration,
+      status: 'scheduled',
+      color: partialBlock.color || PLANNER_CONSTANTS.BLOCK_COLORS[blockType] || PLANNER_CONSTANTS.BLOCK_COLORS.personal,
+      icon: partialBlock.icon || PLANNER_CONSTANTS.BLOCK_ICONS[blockType] || PLANNER_CONSTANTS.BLOCK_ICONS.personal,
+      priority: partialBlock.priority || 3,
+      flexibility: partialBlock.flexibility || 0.5,
+      aiGenerated: true,
+    };
+
+    updatedPlan.days[dayIndex] = {
+      ...updatedPlan.days[dayIndex],
+      blocks: [...updatedPlan.days[dayIndex].blocks, newBlock].sort((a, b) => a.startTime.localeCompare(b.startTime)),
+    };
+
+    // Recalculate stats
+    const totalScheduled = updatedPlan.days[dayIndex].blocks
+      .filter((b) => !b.isAllDay)
+      .reduce((sum, b) => sum + b.duration, 0);
+    const prefs = stateRef.current.preferences;
+    const wakeMinutes = prefs ? parseInt(prefs.wakeTime.split(':')[0]) * 60 + parseInt(prefs.wakeTime.split(':')[1]) : 360;
+    const sleepMinutes = prefs ? parseInt(prefs.sleepTime.split(':')[0]) * 60 + parseInt(prefs.sleepTime.split(':')[1]) : 1320;
+    const awakeMinutes = sleepMinutes - wakeMinutes;
+    updatedPlan.days[dayIndex].totalScheduledMinutes = totalScheduled;
+    updatedPlan.days[dayIndex].totalFreeMinutes = Math.max(0, awakeMinutes - totalScheduled);
+
+    await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updatedPlan));
+    setState((prev) => ({ ...prev, weeklyPlan: updatedPlan }));
+
+    console.log(`[Planner] Block "${newBlock.title}" added at ${startTime} on ${date}`);
+  }, []);
+
+  /**
+   * Remove a block from a day's timeline (used by planner chat)
+   */
+  const removeBlock = useCallback(async (blockId: string, date: string) => {
+    const currentPlan = stateRef.current.weeklyPlan;
+    if (!currentPlan) return;
+
+    const updatedPlan = { ...currentPlan, days: [...currentPlan.days] };
+    const dayIndex = updatedPlan.days.findIndex((d) => d.date === date);
+    if (dayIndex === -1) return;
+
+    const blocks = updatedPlan.days[dayIndex].blocks.filter((b) => b.id !== blockId);
+    if (blocks.length === updatedPlan.days[dayIndex].blocks.length) return; // block not found
+
+    updatedPlan.days[dayIndex] = { ...updatedPlan.days[dayIndex], blocks };
+
+    // Recalculate stats
+    const totalScheduled = blocks
+      .filter((b) => !b.isAllDay)
+      .reduce((sum, b) => sum + b.duration, 0);
+    const prefs = stateRef.current.preferences;
+    const wakeMinutes = prefs ? parseInt(prefs.wakeTime.split(':')[0]) * 60 + parseInt(prefs.wakeTime.split(':')[1]) : 360;
+    const sleepMinutes = prefs ? parseInt(prefs.sleepTime.split(':')[0]) * 60 + parseInt(prefs.sleepTime.split(':')[1]) : 1320;
+    const awakeMinutes = sleepMinutes - wakeMinutes;
+    updatedPlan.days[dayIndex].totalScheduledMinutes = totalScheduled;
+    updatedPlan.days[dayIndex].totalFreeMinutes = Math.max(0, awakeMinutes - totalScheduled);
+    updatedPlan.days[dayIndex].completionRate = calculateCompletionRate(blocks);
+
+    await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updatedPlan));
+    setState((prev) => ({ ...prev, weeklyPlan: updatedPlan }));
+
+    console.log(`[Planner] Block ${blockId} removed from ${date}`);
+  }, []);
+
+  /**
    * Request AI weekly optimization
    */
   const requestWeeklyOptimization = useCallback(async () => {
@@ -1198,6 +1286,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     markBlockComplete,
     skipBlock,
     updateBlockTime,
+    addBlock,
+    removeBlock,
     requestWeeklyOptimization,
     optimizeWeek,
     setSelectedDay,

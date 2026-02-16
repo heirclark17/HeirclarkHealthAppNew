@@ -1846,6 +1846,27 @@ class HeirclarkAPI {
     }
   }
 
+  async sendPlannerChat(
+    message: string,
+    scheduleContext: any,
+    conversationHistory: Array<{ role: string; content: string }>
+  ): Promise<{ message: string } | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/chat`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ message, scheduleContext, conversationHistory }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? { message: data.message } : null;
+    } catch (error) {
+      console.error('[API] Planner chat error:', error);
+      return null;
+    }
+  }
+
   async getRecipeDetails(mealName: string, basicInfo?: any): Promise<any> {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/ai/recipe-details`, {

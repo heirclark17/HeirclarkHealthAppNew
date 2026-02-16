@@ -2397,6 +2397,123 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
 });
 
 // ============================================
+// AI PLANNER CHAT (Schedule Assistant)
+// ============================================
+
+app.post('/api/v1/planner/chat', authenticateToken, async (req, res) => {
+  try {
+    const { message, conversationHistory, scheduleContext } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    console.log(`[Planner Chat] User ${req.userId}: "${message.substring(0, 80)}"`);
+
+    // Build schedule description for the system prompt
+    let scheduleDescription = 'No schedule available.';
+    if (scheduleContext && scheduleContext.blocks && scheduleContext.blocks.length > 0) {
+      scheduleDescription = scheduleContext.blocks
+        .map(b => `- [${b.id}] ${b.startTime}-${b.endTime} | ${b.type} | "${b.title}" (${b.status})`)
+        .join('\n');
+    }
+
+    const ctx = scheduleContext || {};
+    const systemPrompt = `You are the Heirclark Day Planner AI assistant. You help users understand and modify their daily schedule.
+
+CURRENT SCHEDULE for ${ctx.dayOfWeek || 'today'}, ${ctx.date || 'unknown date'}:
+${scheduleDescription}
+
+Total scheduled: ${ctx.totalScheduledMinutes || 0} min | Free time: ${ctx.totalFreeMinutes || 0} min | Completion: ${ctx.completionRate || 0}%
+User preferences: Wake ${ctx.preferences?.wakeTime || '06:00'}, Sleep ${ctx.preferences?.sleepTime || '22:00'}, Energy peak: ${ctx.preferences?.energyPeak || 'morning'}
+Recovery score: ${ctx.recoveryScore ?? 'unknown'}/100
+${ctx.isCheatDay ? 'Today is a cheat day.' : ''}${ctx.isFasting ? ' User practices intermittent fasting.' : ''}
+
+RULES:
+1. Answer questions about the schedule with specific details (block names, times, durations).
+2. When the user asks to modify the schedule, respond with BOTH:
+   - A friendly conversational explanation
+   - A JSON action block in this exact format:
+     \`\`\`json
+     {"actions": [{"type": "reschedule", "blockId": "abc", "newStartTime": "16:00", "description": "Move Workout to 4:00 PM"}]}
+     \`\`\`
+3. Never schedule anything during sleep time (${ctx.preferences?.sleepTime || '22:00'}-${ctx.preferences?.wakeTime || '06:00'}).
+4. Check for conflicts before suggesting changes — don't overlap blocks.
+5. For "add" actions, include full block details in this format:
+   \`\`\`json
+   {"actions": [{"type": "add", "block": {"type": "personal", "title": "Yoga", "startTime": "15:00", "duration": 30}, "description": "Add 30-min Yoga at 3:00 PM"}]}
+   \`\`\`
+   Valid block types: workout, meal_prep, meal_eating, work, personal, commute.
+6. For "remove" actions: {"type": "remove", "blockId": "the_block_id", "description": "Remove the meeting"}
+7. If the request is impossible (no free slot, conflicts), explain why and suggest alternatives.
+8. Keep responses concise (2-4 sentences) unless the user asks for a detailed explanation.
+9. You can reference recovery score, completion patterns, and fasting status when relevant.
+10. Always use the exact block IDs from the schedule above when referencing existing blocks.`;
+
+    // Build messages array
+    const messages = [{ role: 'system', content: systemPrompt }];
+
+    // Add conversation history (last 10 messages)
+    if (conversationHistory && Array.isArray(conversationHistory)) {
+      const recent = conversationHistory.slice(-10);
+      for (const msg of recent) {
+        messages.push({ role: msg.role, content: msg.content });
+      }
+    }
+
+    // Add current user message
+    messages.push({ role: 'user', content: message });
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages,
+      temperature: 0.7,
+      max_tokens: 600,
+    });
+
+    const assistantMessage = completion.choices[0].message.content;
+
+    // Save conversation to DB (reuse coach_conversations table with type='planner')
+    try {
+      const dateKey = ctx.date || new Date().toISOString().split('T')[0];
+      const convType = `planner_${dateKey}`;
+
+      let conversation = await pool.query(
+        `SELECT * FROM coach_conversations WHERE user_id = $1 AND conversation_type = $2 ORDER BY updated_at DESC LIMIT 1`,
+        [req.userId, convType]
+      );
+
+      const allMessages = [
+        ...(conversationHistory || []),
+        { role: 'user', content: message },
+        { role: 'assistant', content: assistantMessage },
+      ].slice(-30);
+
+      if (conversation.rows.length > 0) {
+        await pool.query(
+          `UPDATE coach_conversations SET messages = $2, updated_at = NOW() WHERE id = $1`,
+          [conversation.rows[0].id, JSON.stringify(allMessages)]
+        );
+      } else {
+        await pool.query(
+          `INSERT INTO coach_conversations (user_id, conversation_type, messages)
+           VALUES ($1, $2, $3)`,
+          [req.userId, convType, JSON.stringify(allMessages)]
+        );
+      }
+    } catch (dbErr) {
+      console.warn('[Planner Chat] DB save failed (non-blocking):', dbErr.message);
+    }
+
+    console.log(`[Planner Chat] Response: "${assistantMessage.substring(0, 80)}..."`);
+    res.json({ success: true, message: assistantMessage });
+  } catch (error) {
+    console.error('[Planner Chat] Error:', error);
+    res.status(500).json({ error: 'Planner chat failed', message: error.message });
+  }
+});
+
+// ============================================
 // AI CHEAT DAY GUIDANCE
 // ============================================
 
@@ -4854,6 +4971,7 @@ runMigrations().then(() => {
   console.log(`   - AI Analysis: /api/v1/nutrition/ai/*`);
   console.log(`   - AI Generation: /api/v1/ai/generate-meal-plan, generate-workout-plan`);
   console.log(`   - AI Coach: /api/v1/ai/coach-message, recipe-details`);
+  console.log(`   - Planner Chat: /api/v1/planner/chat`);
   console.log(`   - Agents: /api/v1/agents/tdee/*, smart-meal-logger/*, accountability/*, etc.`);
   console.log(`   - Health: /api/v1/health/metrics, history, hydration, sleep`);
   console.log(`   - Habits: /api/v1/habits`);
