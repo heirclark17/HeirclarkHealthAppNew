@@ -56,8 +56,8 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
         },
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 2000,
+      temperature: 0.3,  // Lower = faster, more consistent (was 0.7)
+      max_tokens: 800,   // Reduced from 2000 - only need ~10-15 blocks
     });
 
     const responseText = completion.choices[0]?.message?.content;
@@ -150,15 +150,15 @@ ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endT
 
 **Instructions:**
 1. Schedule all meals within eating window (if IF active)
-2. Add 15-30 min prep time BEFORE workouts (change clothes, commute, warmup)
-3. Add 15-20 min recovery time AFTER workouts (shower, cooldown)
-4. Add 15 min transition time after calendar meetings
-5. Consider meeting prep time (10-15 min before important meetings)
+2. Leave 15-30 min gap BEFORE workouts (for prep/commute)
+3. Leave 15-20 min gap AFTER workouts (for shower/cooldown)
+4. Leave 15 min gap after calendar meetings (for transitions)
+5. Consider meeting prep time (10-15 min gap before important meetings)
 6. Balance work and rest - avoid over-scheduling
 7. Respect recovery status (low recovery = easier day)
 8. Meals should be evenly spaced (4-6 hours apart if possible)
 9. Don't schedule activities too close to sleep time
-10. Include buffer times between activities
+10. **DO NOT create separate "buffer" blocks - just leave gaps between activities**
 
 **Output Format (JSON):**
 {
@@ -166,7 +166,7 @@ ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endT
   "warnings": ["Any concerns or notes about the schedule"],
   "blocks": [
     {
-      "type": "sleep|workout|meal_eating|meal_prep|calendar_event|buffer",
+      "type": "sleep|workout|meal_eating|meal_prep|calendar_event",
       "title": "Activity name",
       "startTime": "HH:MM (24-hour format)",
       "endTime": "HH:MM",
