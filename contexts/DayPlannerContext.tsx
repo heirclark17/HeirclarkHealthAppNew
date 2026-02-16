@@ -727,6 +727,17 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       lifeContext,
     };
 
+    // DEBUG: Log what we're sending to AI scheduler
+    console.log('[Planner] 🔍 Scheduling request for', dateStr);
+    console.log('  📅 Calendar blocks:', calendarBlocks.length);
+    calendarBlocks.forEach(b => console.log(`    - ${b.startTime}-${b.endTime}: ${b.title}`));
+    console.log('  💪 Workout blocks:', workoutBlocks.length);
+    workoutBlocks.forEach(b => console.log(`    - ${b.title} (${b.duration} min)`));
+    console.log('  🍽️  Meal blocks:', mealBlocks.length);
+    mealBlocks.forEach(b => console.log(`    - ${b.title} (${b.duration} min)`));
+    console.log('  ⏰ Fasting:', isFasting ? `${lifeContext.fastingEnd}-${lifeContext.fastingStart}` : 'Not active');
+    console.log('  🎂 Cheat day:', isCheatDay);
+
     // Run AI scheduling (with fallback to algorithm)
     let timeline: DailyTimeline;
 
