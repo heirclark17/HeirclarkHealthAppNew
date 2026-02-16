@@ -12,9 +12,11 @@ import {
   SLEEP_TIPS,
   RECOVERY_TIPS,
 } from '../types/sleepRecovery';
+import { RecoveryContext as PlannerRecoveryContext } from '../types/planner';
 import * as SleepStorage from '../services/sleepRecoveryStorage';
 import { api } from '../services/api';
 import { useGoalWizard } from './GoalWizardContext';
+import { appleHealthService } from '../services/appleHealthService';
 
 interface SleepRecoveryContextType {
   state: SleepRecoveryState;
@@ -23,6 +25,7 @@ interface SleepRecoveryContextType {
   deleteSleepEntry: (entryId: string) => Promise<void>;
   updateSleepGoal: (goal: SleepGoal) => Promise<void>;
   calculateRecoveryScore: () => Promise<RecoveryScore>;
+  getRecoveryContext: () => Promise<PlannerRecoveryContext>;
   getSleepTip: () => string;
   getRecoveryTip: () => string;
   getWeeklyStats: () => Promise<{
@@ -187,23 +190,88 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
   const calculateRecoveryScore = useCallback(async (): Promise<RecoveryScore> => {
     const today = new Date().toISOString().split('T')[0];
     const todaySleep = state.sleepEntries.find((e) => e.date === today);
+    const goalSleepMinutes = state.sleepGoal.targetDuration; // in minutes
+    const goalSleepHours = goalSleepMinutes / 60;
 
-    // Calculate factors (0-100 each)
-    const sleepFactor = todaySleep
-      ? Math.min(100, Math.round((todaySleep.duration / state.sleepGoal.targetDuration) * 100))
+    // --- Factor 1: Sleep Duration (35%) ---
+    // Try Apple Health first, fall back to manual entry
+    let actualSleepHours = 0;
+    try {
+      const lastNightStart = new Date();
+      lastNightStart.setDate(lastNightStart.getDate() - 1);
+      lastNightStart.setHours(18, 0, 0, 0); // 6 PM yesterday
+      const thismorning = new Date();
+      thismorning.setHours(12, 0, 0, 0); // noon today
+      const sleepData = await appleHealthService.getSleepData(lastNightStart, thismorning);
+      if (sleepData.totalSleepMinutes > 0) {
+        actualSleepHours = sleepData.totalSleepMinutes / 60;
+      }
+    } catch (e) {
+      console.warn('[SleepRecovery] Apple Health sleep fetch failed:', e);
+    }
+    // Fall back to manual entry if no Apple Health data
+    if (actualSleepHours === 0 && todaySleep) {
+      actualSleepHours = todaySleep.duration / 60;
+    }
+    const sleepFactor = actualSleepHours > 0
+      ? Math.min(100, Math.round((actualSleepHours / goalSleepHours) * 100))
       : 50;
 
+    // --- Factor 2: Sleep Quality (25%) - manual rating ---
     const qualityFactor = todaySleep ? todaySleep.quality * 20 : 50;
 
-    // For now, use reasonable defaults for other factors
-    // In a real app, these would come from other contexts
-    const nutritionFactor = 70;
-    const activityFactor = 65;
-    const stressFactor = 60;
+    // --- Factor 3: HRV (15%) ---
+    let hrvMs: number | null = null;
+    let hrvFactor = 50; // default
+    try {
+      const hrvStart = new Date();
+      hrvStart.setHours(0, 0, 0, 0);
+      const hrvEnd = new Date();
+      hrvMs = await appleHealthService.getHRVData(hrvStart, hrvEnd);
+      if (hrvMs !== null) {
+        // 20ms = poor (0), 100ms = excellent (100), linear scale
+        hrvFactor = Math.max(0, Math.min(100, Math.round(((hrvMs - 20) / 80) * 100)));
+      }
+    } catch (e) {
+      console.warn('[SleepRecovery] Apple Health HRV fetch failed:', e);
+    }
 
-    // Weighted average
+    // --- Factor 4: Activity / Steps (15%) ---
+    let activityFactor = 65; // default
+    try {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+      const yesterdaySteps = await appleHealthService.getStepCount(yesterday);
+      const stepGoal = goalState.stepGoal || 10000;
+      if (yesterdaySteps > 0) {
+        activityFactor = Math.max(0, Math.min(100, Math.round((yesterdaySteps / stepGoal) * 100)));
+      }
+    } catch (e) {
+      console.warn('[SleepRecovery] Apple Health steps fetch failed:', e);
+    }
+
+    // --- Factor 5: Sleep Streak (10%) ---
+    // Count consecutive days with sleep >= 85% of goal
+    let consecutiveGoodDays = 0;
+    const sortedEntries = [...state.sleepEntries].sort((a, b) => b.date.localeCompare(a.date));
+    for (const entry of sortedEntries) {
+      const entryHours = entry.duration / 60;
+      if (entryHours >= goalSleepHours * 0.85) {
+        consecutiveGoodDays++;
+      } else {
+        break;
+      }
+    }
+    const streakFactor = Math.min(100, Math.round((consecutiveGoodDays / 7) * 100));
+
+    // --- Weighted composite score ---
     const score = Math.round(
-      sleepFactor * 0.35 + qualityFactor * 0.25 + nutritionFactor * 0.15 + activityFactor * 0.15 + stressFactor * 0.1
+      sleepFactor * 0.35 +
+      qualityFactor * 0.25 +
+      hrvFactor * 0.15 +
+      activityFactor * 0.15 +
+      streakFactor * 0.10
     );
 
     const recoveryScore: RecoveryScore = {
@@ -211,9 +279,10 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
       score,
       factors: {
         sleep: sleepFactor,
-        nutrition: nutritionFactor,
+        quality: qualityFactor,
+        hrv: hrvFactor,
         activity: activityFactor,
-        stress: stressFactor,
+        streak: streakFactor,
       },
     };
 
@@ -224,7 +293,7 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
       recoveryScores: [recoveryScore, ...prev.recoveryScores.filter((s) => s.date !== today)],
     }));
 
-    // Request AI sleep analysis from backend
+    // Request AI sleep analysis from backend (fire-and-forget)
     try {
       const recentSleep = state.sleepEntries.slice(0, 7);
       const goals = {
@@ -241,7 +310,53 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
     }
 
     return recoveryScore;
-  }, [state.sleepEntries, state.sleepGoal]);
+  }, [state.sleepEntries, state.sleepGoal, goalState.stepGoal]);
+
+  /**
+   * Get a full recovery context for the planner scheduling engine.
+   * Returns real Apple Health data where available.
+   */
+  const getRecoveryContext = useCallback(async (): Promise<PlannerRecoveryContext> => {
+    const recoveryScore = await calculateRecoveryScore();
+    const today = new Date().toISOString().split('T')[0];
+    const todaySleep = state.sleepEntries.find((e) => e.date === today);
+    const goalSleepHours = state.sleepGoal.targetDuration / 60;
+
+    // Get actual sleep hours from Apple Health
+    let sleepHours = todaySleep ? todaySleep.duration / 60 : 0;
+    try {
+      const lastNightStart = new Date();
+      lastNightStart.setDate(lastNightStart.getDate() - 1);
+      lastNightStart.setHours(18, 0, 0, 0);
+      const thismorning = new Date();
+      thismorning.setHours(12, 0, 0, 0);
+      const sleepData = await appleHealthService.getSleepData(lastNightStart, thismorning);
+      if (sleepData.totalSleepMinutes > 0) {
+        sleepHours = sleepData.totalSleepMinutes / 60;
+      }
+    } catch (e) {
+      // Use manual entry fallback
+    }
+
+    // Get HRV
+    let hrvMs: number | null = null;
+    try {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      hrvMs = await appleHealthService.getHRVData(start, new Date());
+    } catch (e) {
+      // HRV unavailable
+    }
+
+    return {
+      score: recoveryScore.score,
+      sleepHours,
+      hrvMs,
+      isLowRecovery: recoveryScore.score < 50,
+      isHighRecovery: recoveryScore.score >= 80,
+      factors: recoveryScore.factors as PlannerRecoveryContext['factors'],
+    };
+  }, [calculateRecoveryScore, state.sleepEntries, state.sleepGoal]);
 
   const getSleepTip = useCallback((): string => {
     const index = Math.floor(Math.random() * SLEEP_TIPS.length);
@@ -276,6 +391,7 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
     deleteSleepEntry,
     updateSleepGoal,
     calculateRecoveryScore,
+    getRecoveryContext,
     getSleepTip,
     getRecoveryTip,
     getWeeklyStats,
@@ -288,6 +404,7 @@ export function SleepRecoveryProvider({ children }: { children: ReactNode }) {
     deleteSleepEntry,
     updateSleepGoal,
     calculateRecoveryScore,
+    getRecoveryContext,
     getSleepTip,
     getRecoveryTip,
     getWeeklyStats,

@@ -11,6 +11,9 @@ import {
   SchedulingConflict,
   PlannerPreferences,
   EnergyPeak,
+  RecoveryContext,
+  CompletionPatterns,
+  LifeContext,
   PLANNER_CONSTANTS,
 } from '../types/planner';
 
@@ -31,11 +34,43 @@ export class SchedulingEngine {
       // Step 2: Add calendar events (CLIENT-SIDE ONLY - never sent to backend)
       this.addCalendarBlocks(blocks, request.calendarBlocks);
 
-      // Step 3: Add workout blocks (scheduled at energy peak time)
-      this.addWorkoutBlocks(blocks, request.workoutBlocks, request.preferences);
+      // Step 2.5: Meeting density detection (Tier 4c)
+      const meetingDensity = this.detectMeetingDensity(request.calendarBlocks);
+      if (request.lifeContext) {
+        request.lifeContext.meetingDensity = meetingDensity;
+      }
 
-      // Step 4: Add meal blocks (flexible timing within meal windows)
-      this.addMealBlocks(blocks, request.mealBlocks, request.preferences);
+      // Step 2.6: OOO day handling (Tier 4d)
+      const isOOODay = request.lifeContext?.isOOODay ?? false;
+      if (isOOODay) {
+        // OOO day: skip default work blocks, move workout to casual time
+        suggestions.push('OOO day detected — relaxed schedule applied.');
+      }
+
+      // Step 3: Add workout blocks (recovery-aware, learned preference)
+      this.addWorkoutBlocks(
+        blocks,
+        request.workoutBlocks,
+        request.preferences,
+        request.recoveryContext,
+        request.completionPatterns,
+        meetingDensity,
+        isOOODay,
+      );
+
+      // Step 4: Add meal blocks (IF-aware, cheat-day aware, learned preference)
+      this.addMealBlocks(
+        blocks,
+        request.mealBlocks,
+        request.preferences,
+        request.lifeContext,
+        request.completionPatterns,
+      );
+
+      // Step 4.5: Add fasting buffer block if IF active (Tier 4a)
+      if (request.lifeContext?.isFasting) {
+        this.addFastingBlock(blocks, request.lifeContext, request.preferences);
+      }
 
       // Step 5: Sort by start time
       blocks.sort((a, b) => this.timeToMinutes(a.startTime) - this.timeToMinutes(b.startTime));
@@ -140,27 +175,74 @@ export class SchedulingEngine {
   }
 
   /**
-   * Add workout blocks (scheduled at energy peak time)
+   * Add workout blocks (recovery-aware, learned preference, meeting-density aware)
    */
   private static addWorkoutBlocks(
     blocks: TimeBlock[],
     workouts: TimeBlock[],
-    preferences: PlannerPreferences
+    preferences: PlannerPreferences,
+    recovery?: RecoveryContext,
+    patterns?: CompletionPatterns,
+    meetingDensity: 'low' | 'medium' | 'high' = 'low',
+    isOOODay: boolean = false,
   ) {
     for (const workout of workouts) {
-      // Schedule at energy peak time
-      const preferredTime = this.getPreferredWorkoutTime(preferences.energyPeak);
+      let adjustedDuration = workout.duration;
+      let titleSuffix = '';
+      let mutedColor: string | undefined;
+
+      // Tier 1d: Recovery-aware adjustments
+      if (recovery?.isLowRecovery) {
+        // Reduce duration by 25%, round to nearest 15 min
+        adjustedDuration = Math.round((workout.duration * 0.75) / 15) * 15;
+        adjustedDuration = Math.max(PLANNER_CONSTANTS.MIN_BLOCK_DURATION, adjustedDuration);
+        titleSuffix = ' (Recovery)';
+        // Muted color: add transparency to workout color
+        mutedColor = PLANNER_CONSTANTS.BLOCK_COLORS.workout + '80'; // 50% alpha
+      }
+
+      // Determine preferred time
+      let preferredTime: string;
+
+      // Tier 2b: Use learned preferred window if reliable
+      const workoutPattern = patterns?.['workout'];
+      if (workoutPattern?.preferredWindow && workoutPattern.completionRate > 0.6) {
+        preferredTime = workoutPattern.preferredWindow;
+      } else if (recovery?.isLowRecovery) {
+        // Low recovery → prefer afternoon (body is more warmed up)
+        preferredTime = '14:00';
+      } else if (isOOODay) {
+        // OOO day → casual mid-morning
+        preferredTime = '10:00';
+      } else {
+        preferredTime = this.getPreferredWorkoutTime(preferences.energyPeak);
+      }
+
+      // Tier 4c: Meeting density avoidance
+      if (meetingDensity === 'high') {
+        // If high meeting density in morning, push workout to afternoon and vice versa
+        const prefMinutes = this.timeToMinutes(preferredTime);
+        if (prefMinutes < 720) { // before noon
+          preferredTime = '14:00'; // push to afternoon
+        } else {
+          preferredTime = '07:00'; // push to morning
+        }
+      }
+
       const startTime = this.findAvailableSlot(
         blocks,
         preferredTime,
-        workout.duration,
+        adjustedDuration,
         preferences
       );
 
       blocks.push({
         ...workout,
+        title: workout.title + titleSuffix,
+        duration: adjustedDuration,
         startTime,
-        endTime: this.addMinutesToTime(startTime, workout.duration),
+        endTime: this.addMinutesToTime(startTime, adjustedDuration),
+        color: mutedColor || workout.color,
         priority: 4,
         flexibility: this.flexibilityToNumber(preferences.flexibility),
         aiGenerated: true,
@@ -169,41 +251,83 @@ export class SchedulingEngine {
   }
 
   /**
-   * Add meal blocks (flexible timing within meal windows)
+   * Add meal blocks (IF-aware, cheat-day aware, learned preference)
    */
   private static addMealBlocks(
     blocks: TimeBlock[],
     meals: TimeBlock[],
-    preferences: PlannerPreferences
+    preferences: PlannerPreferences,
+    lifeContext?: LifeContext,
+    patterns?: CompletionPatterns,
   ) {
+    const isFasting = lifeContext?.isFasting ?? false;
+    const isCheatDay = lifeContext?.isCheatDay ?? false;
+
+    // Parse IF eating window (fastingEnd = eating starts, fastingStart = eating ends)
+    let eatingWindowStart = 0;   // minutes since midnight
+    let eatingWindowEnd = 1440;  // minutes since midnight
+    if (isFasting && lifeContext) {
+      eatingWindowStart = this.timeToMinutes(lifeContext.fastingEnd);   // e.g. 12:00 → 720
+      eatingWindowEnd = this.timeToMinutes(lifeContext.fastingStart);   // e.g. 20:00 → 1200
+    }
+
     for (const meal of meals) {
       let preferredTime: string;
+      let titleSuffix = '';
+      let adjustedDuration = meal.duration;
 
-      // Determine preferred time based on meal type
-      if (meal.title.toLowerCase().includes('breakfast')) {
+      // Tier 2b: Use learned preferred window for meal type
+      const mealType = meal.title.toLowerCase().includes('breakfast') ? 'meal_breakfast'
+        : meal.title.toLowerCase().includes('lunch') ? 'meal_lunch'
+        : meal.title.toLowerCase().includes('dinner') ? 'meal_dinner'
+        : 'meal_eating';
+      const mealPattern = patterns?.[mealType];
+
+      if (mealPattern?.preferredWindow && mealPattern.completionRate > 0.6) {
+        preferredTime = mealPattern.preferredWindow;
+      } else if (meal.title.toLowerCase().includes('breakfast')) {
         preferredTime = this.addMinutesToTime(preferences.wakeTime, 30);
       } else if (meal.title.toLowerCase().includes('lunch')) {
         preferredTime = '12:00';
       } else if (meal.title.toLowerCase().includes('dinner')) {
         preferredTime = '18:00';
       } else {
-        // Default meal time
         preferredTime = '12:00';
+      }
+
+      // Tier 4a: IF fasting window enforcement
+      if (isFasting && !isCheatDay) {
+        const prefMinutes = this.timeToMinutes(preferredTime);
+        if (prefMinutes < eatingWindowStart) {
+          // Shift to eating window start
+          preferredTime = this.minutesToTime(eatingWindowStart);
+        } else if (prefMinutes + meal.duration > eatingWindowEnd) {
+          // Shift backward to fit within eating window
+          preferredTime = this.minutesToTime(eatingWindowEnd - meal.duration);
+        }
+      }
+
+      // Tier 4b: Cheat day adjustments
+      if (isCheatDay) {
+        titleSuffix = ' (Flex Day)';
+        adjustedDuration = meal.duration + 15; // extra 15 min for special cooking
       }
 
       const startTime = this.findAvailableSlot(
         blocks,
         preferredTime,
-        meal.duration,
+        adjustedDuration,
         preferences
       );
 
       blocks.push({
         ...meal,
+        title: meal.title + titleSuffix,
+        duration: adjustedDuration,
         startTime,
-        endTime: this.addMinutesToTime(startTime, meal.duration),
+        endTime: this.addMinutesToTime(startTime, adjustedDuration),
         priority: 3,
-        flexibility: 0.5,
+        flexibility: isCheatDay ? 0.8 : 0.5,
         aiGenerated: true,
       });
     }
@@ -425,6 +549,58 @@ export class SchedulingEngine {
     // Truly no space - log warning and return preferred time
     console.warn('[SchedulingEngine] No conflict-free slot found for', duration, 'min block. Day may be over-scheduled.');
     return preferredTime;
+  }
+
+  /**
+   * Tier 4c: Detect meeting density from calendar blocks.
+   * Counts timed calendar_event blocks in 4-hour windows.
+   */
+  private static detectMeetingDensity(calendarBlocks: TimeBlock[]): 'low' | 'medium' | 'high' {
+    const timedEvents = calendarBlocks.filter(b => !b.isAllDay && b.type === 'calendar_event');
+    if (timedEvents.length === 0) return 'low';
+
+    // Count events in morning (before 12:00) and afternoon (12:00-17:00)
+    const morningCount = timedEvents.filter(b => this.timeToMinutes(b.startTime) < 720).length;
+    const afternoonCount = timedEvents.filter(b => {
+      const start = this.timeToMinutes(b.startTime);
+      return start >= 720 && start < 1020;
+    }).length;
+
+    const maxDensity = Math.max(morningCount, afternoonCount);
+    if (maxDensity >= 3) return 'high';
+    if (maxDensity >= 2) return 'medium';
+    return 'low';
+  }
+
+  /**
+   * Tier 4a: Add a fasting buffer block during fasting hours.
+   */
+  private static addFastingBlock(
+    blocks: TimeBlock[],
+    lifeContext: LifeContext,
+    preferences: PlannerPreferences
+  ) {
+    const fastingStart = this.timeToMinutes(lifeContext.fastingStart); // e.g. 20:00 → 1200
+    const sleepTime = this.timeToMinutes(preferences.sleepTime);
+
+    // Only add fasting block between fasting start and sleep
+    if (fastingStart < sleepTime) {
+      const duration = sleepTime - fastingStart;
+      blocks.push({
+        id: this.generateId('fasting'),
+        type: 'buffer',
+        title: 'Fasting Window',
+        startTime: lifeContext.fastingStart,
+        endTime: preferences.sleepTime,
+        duration,
+        status: 'scheduled',
+        color: '#E0E0E040', // very light gray with transparency
+        icon: 'timer',
+        priority: 1,
+        flexibility: 0,
+        aiGenerated: true,
+      });
+    }
   }
 
   /**

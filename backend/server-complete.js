@@ -4552,53 +4552,92 @@ app.post('/api/v1/planner/update-block-time', authenticateToken, async (req, res
 });
 
 // POST /api/v1/planner/optimize - AI weekly optimization (GPT-4.1-mini)
+// Enhanced with recovery context, completion patterns, and life context (Tier 5a)
 app.post('/api/v1/planner/optimize', authenticateToken, async (req, res) => {
-  const { currentWeekPlan, completionHistory } = req.body;
+  const { currentWeekPlan, completionHistory, recoveryContext, completionPatterns, lifeContext } = req.body;
 
   try {
     if (!currentWeekPlan || !completionHistory) {
       return res.status(400).json({ error: 'Missing currentWeekPlan or completionHistory' });
     }
 
-    const systemPrompt = `You are a time management and productivity coach specializing in health-focused daily scheduling.
-Analyze the user's weekly plan and provide actionable optimization suggestions.
-Focus on: completion rate improvement, energy alignment, buffer time recommendations, stress reduction.
-Be specific and actionable.`;
+    const systemPrompt = `You are an AI life coach and wellness optimizer for a health-focused scheduling app.
+You deeply understand the interplay between sleep, recovery, exercise, nutrition, and productivity.
 
-    const userPrompt = `Analyze this weekly schedule:
+Analyze the user's week considering:
+- Recovery: Sleep quality, HRV trends, recovery score
+- Behavior: Which scheduled items they complete vs skip, and when
+- Life context: Fasting windows, cheat days, meeting load, days off
+- Patterns: What time of day works best for workouts/meals
 
-Weekly Stats:
+Your tone should be warm, specific, and actionable — like a personal coach who knows this user well.
+Avoid generic advice. Reference their actual data.`;
+
+    // Build context sections
+    let contextSections = `Weekly Stats:
 ${JSON.stringify(currentWeekPlan.weeklyStats, null, 2)}
 
 Recent Completion History:
-${completionHistory.map(h => `${h.date}: ${h.completionRate}% completion, ${h.skippedBlocks.length} skipped`).join('\n')}
+${completionHistory.map(h => `${h.date}: ${h.completionRate}% completion, ${h.skippedBlocks.length} skipped`).join('\n')}`;
 
-Provide:
-1. Weekly insights summary (2-3 paragraphs analyzing patterns)
-2. Top 3-5 optimization suggestions (specific blocks to reschedule, buffers to add, etc.)
-3. Predicted impact on completion rate and stress
+    if (recoveryContext) {
+      contextSections += `
 
-Format as JSON: {
-  "weeklyInsights": "...",
-  "suggestions": [{"type": "reschedule", "recommendation": "...", "reason": "...", "priority": "high"}],
-  "predictedImprovements": {"completionRateIncrease": 15, "stressReduction": "moderate"}
+Recovery Context:
+- Recovery Score: ${recoveryContext.score}/100 (${recoveryContext.isLowRecovery ? 'LOW - needs rest' : recoveryContext.isHighRecovery ? 'HIGH - peak performance' : 'moderate'})
+- Sleep: ${recoveryContext.sleepHours ? recoveryContext.sleepHours.toFixed(1) + ' hours' : 'no data'}
+- HRV: ${recoveryContext.hrvMs ? recoveryContext.hrvMs + 'ms' : 'no data'}
+- Factors: sleep=${recoveryContext.factors?.sleep || '?'}, quality=${recoveryContext.factors?.quality || '?'}, hrv=${recoveryContext.factors?.hrv || '?'}, activity=${recoveryContext.factors?.activity || '?'}, streak=${recoveryContext.factors?.streak || '?'}`;
+    }
+
+    if (completionPatterns && Object.keys(completionPatterns).length > 0) {
+      contextSections += `
+
+Behavior Patterns:`;
+      for (const [type, pattern] of Object.entries(completionPatterns)) {
+        const p = pattern;
+        contextSections += `
+- ${type}: ${Math.round((p.completionRate || 0) * 100)}% completion rate, preferred time: ${p.preferredWindow || 'none'}, completed ${(p.completedAt || []).length} times, skipped ${(p.skippedAt || []).length} times`;
+      }
+    }
+
+    if (lifeContext) {
+      contextSections += `
+
+Life Context:
+- Fasting: ${lifeContext.isFasting ? `Yes (eating window: ${lifeContext.fastingWindow})` : 'No'}
+- Cheat Days: ${lifeContext.cheatDays?.length > 0 ? lifeContext.cheatDays.join(', ') : 'None'}
+- OOO This Week: ${lifeContext.oooThisWeek ? 'Yes' : 'No'}
+- Meeting Density: ${lifeContext.meetingDensity || 'unknown'}`;
+    }
+
+    const userPrompt = `Analyze this user's week and provide personalized coaching:
+
+${contextSections}
+
+Provide your response as JSON with these fields:
+{
+  "weeklyInsights": "2-3 paragraphs of personalized coaching analysis. Be specific about their patterns, reference their actual numbers, and explain WHY you're making each suggestion.",
+  "suggestions": [{"id": "unique_id", "type": "reschedule|add_buffer|consolidate|remove", "recommendation": "specific action", "reason": "why this helps", "priority": "high|medium|low"}],
+  "predictedImprovements": {"completionRateIncrease": number, "stressReduction": "low|moderate|significant"},
+  "habitTip": "One small, specific habit to build this week based on their data"
 }`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.7,
-      max_tokens: 800,
+      max_tokens: 1200,
       response_format: { type: 'json_object' }
     });
 
     const optimization = JSON.parse(completion.choices[0].message.content);
     optimization.generatedAt = new Date().toISOString();
 
-    console.log('[Planner] AI optimization generated');
+    console.log('[Planner] AI optimization generated with full context');
     res.json({ success: true, optimization });
   } catch (error) {
     console.error('[Planner] Optimization error:', error);

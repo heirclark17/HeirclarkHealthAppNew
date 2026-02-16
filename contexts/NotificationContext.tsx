@@ -15,6 +15,9 @@ interface NotificationContextType {
   permissionStatus: 'granted' | 'denied' | 'undetermined';
   requestPermission: () => Promise<boolean>;
   scheduleLocalNotification: (title: string, body: string, data?: any) => Promise<void>;
+  scheduleNotificationAtDate: (title: string, body: string, date: Date, data?: any) => Promise<string | null>;
+  cancelScheduledNotification: (identifier: string) => Promise<void>;
+  scheduleBlockReminders: (blocks: { id: string; title: string; startTime: string; type: string; icon: string; isAllDay?: boolean }[], dateStr: string) => Promise<void>;
   cancelAllNotifications: () => Promise<void>;
 }
 
@@ -174,6 +177,95 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   }, [permissionStatus]);
 
+  /**
+   * Tier 3a: Schedule a notification at a specific date/time.
+   * Returns the notification identifier for later cancellation.
+   */
+  const scheduleNotificationAtDate = useCallback(async (
+    title: string,
+    body: string,
+    date: Date,
+    data?: any
+  ): Promise<string | null> => {
+    if (permissionStatus !== 'granted') return null;
+
+    // Don't schedule notifications in the past
+    if (date.getTime() <= Date.now()) return null;
+
+    try {
+      const identifier = await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data,
+          sound: true,
+          priority: Notifications.AndroidNotificationPriority.HIGH,
+        },
+        trigger: { date },
+      });
+      return identifier;
+    } catch (error) {
+      console.error('[Notifications] Failed to schedule dated notification:', error);
+      return null;
+    }
+  }, [permissionStatus]);
+
+  /**
+   * Tier 3a: Cancel a specific scheduled notification by identifier.
+   */
+  const cancelScheduledNotification = useCallback(async (identifier: string) => {
+    try {
+      await Notifications.cancelScheduledNotificationAsync(identifier);
+    } catch (error) {
+      console.error('[Notifications] Failed to cancel notification:', error);
+    }
+  }, []);
+
+  /**
+   * Tier 3b: Schedule 15-minute-before reminders for all blocks in a day.
+   */
+  const scheduleBlockReminders = useCallback(async (
+    blocks: { id: string; title: string; startTime: string; type: string; icon: string; isAllDay?: boolean }[],
+    dateStr: string
+  ) => {
+    if (permissionStatus !== 'granted') return;
+
+    // Cancel all existing scheduled notifications first
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    const BLOCK_EMOJI: Record<string, string> = {
+      workout: '\uD83C\uDFCB\uFE0F',      // weight lifter
+      meal_eating: '\uD83C\uDF7D\uFE0F',   // plate
+      meal_prep: '\uD83D\uDC68\u200D\uD83C\uDF73',     // cooking
+      sleep: '\uD83C\uDF19',               // moon
+      personal: '\uD83D\uDE4F',            // folded hands
+      calendar_event: '\uD83D\uDCC5',       // calendar
+    };
+
+    const [year, month, day] = dateStr.split('-').map(Number);
+
+    for (const block of blocks) {
+      // Skip buffers, sleep blocks, and all-day events
+      if (block.type === 'buffer' || block.type === 'sleep' || block.isAllDay) continue;
+
+      const [hours, minutes] = block.startTime.split(':').map(Number);
+      const blockDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+
+      // Schedule 15 minutes before
+      const reminderDate = new Date(blockDate.getTime() - 15 * 60 * 1000);
+
+      const emoji = BLOCK_EMOJI[block.type] || '\u23F0';
+      await scheduleNotificationAtDate(
+        `${emoji} ${block.title}`,
+        'Starting in 15 minutes',
+        reminderDate,
+        { blockId: block.id, screen: 'planner' }
+      );
+    }
+
+    console.log(`[Notifications] Scheduled reminders for ${blocks.length} blocks on ${dateStr}`);
+  }, [permissionStatus, scheduleNotificationAtDate]);
+
   // Cancel all scheduled notifications
   const cancelAllNotifications = useCallback(async () => {
     try {
@@ -250,6 +342,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     permissionStatus,
     requestPermission,
     scheduleLocalNotification,
+    scheduleNotificationAtDate,
+    cancelScheduledNotification,
+    scheduleBlockReminders,
     cancelAllNotifications,
   }), [
     expoPushToken,
@@ -257,6 +352,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     permissionStatus,
     requestPermission,
     scheduleLocalNotification,
+    scheduleNotificationAtDate,
+    cancelScheduledNotification,
+    scheduleBlockReminders,
     cancelAllNotifications,
   ]);
 

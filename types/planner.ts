@@ -92,6 +92,7 @@ export interface AIOptimization {
     completionRateIncrease: number;
     stressReduction: string;
   };
+  habitTip?: string;          // One small habit to build this week
   generatedAt: string;
 }
 
@@ -115,12 +116,49 @@ export interface DeviceCalendarEvent {
   calendarName?: string; // e.g. "Work", "Personal", "Teams"
 }
 
+export interface RecoveryContext {
+  score: number;           // 0-100
+  sleepHours: number;
+  hrvMs: number | null;
+  isLowRecovery: boolean;  // score < 50
+  isHighRecovery: boolean;  // score >= 80
+  factors: {
+    sleep: number;
+    quality: number;
+    hrv: number;
+    activity: number;
+    streak: number;
+  };
+}
+
+export interface CompletionPatterns {
+  [blockType: string]: {
+    completedAt: string[];   // array of "HH:MM" times when completed
+    skippedAt: string[];     // array of "HH:MM" times when skipped
+    preferredWindow: string | null; // computed "HH:MM" best time
+    completionRate: number;  // 0-1
+  };
+}
+
+export interface LifeContext {
+  isFasting: boolean;
+  fastingStart: string;    // "20:00"
+  fastingEnd: string;      // "12:00"
+  cheatDays: string[];     // ["Saturday", "Sunday"]
+  isCheatDay: boolean;
+  isOOODay: boolean;
+  meetingDensity: 'low' | 'medium' | 'high';
+}
+
 export interface SchedulingRequest {
   date: string;
   preferences: PlannerPreferences;
   workoutBlocks: TimeBlock[];
   mealBlocks: TimeBlock[];
   calendarBlocks: TimeBlock[];  // CLIENT-SIDE ONLY
+  recoveryContext?: RecoveryContext;
+  completionPatterns?: CompletionPatterns;
+  lifeContext?: LifeContext;
 }
 
 export interface SchedulingResult {

@@ -17,9 +17,13 @@ export interface RecoveryScore {
   score: number; // 0-100
   factors: {
     sleep: number;
-    nutrition: number;
+    quality: number;
+    hrv: number;
     activity: number;
-    stress: number;
+    streak: number;
+    // Legacy fields kept for backwards compat
+    nutrition?: number;
+    stress?: number;
   };
 }
 

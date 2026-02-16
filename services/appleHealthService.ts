@@ -53,11 +53,19 @@ const getPermissions = () => {
         AppleHealthKit.Constants.Permissions.Workout,
         AppleHealthKit.Constants.Permissions.BloodPressureSystolic,
         AppleHealthKit.Constants.Permissions.BloodPressureDiastolic,
+        AppleHealthKit.Constants.Permissions.SleepAnalysis,
+        AppleHealthKit.Constants.Permissions.HeartRateVariability,
       ],
       write: [],
     },
   };
 };
+
+export interface SleepSample {
+  startDate: string;
+  endDate: string;
+  value: 'ASLEEP' | 'INBED' | 'AWAKE';
+}
 
 export interface Workout {
   activityName: string;
@@ -620,6 +628,102 @@ class AppleHealthService {
         }
       });
     });
+  }
+
+  /**
+   * Get sleep samples for a date range.
+   * Returns array of sleep segments with ASLEEP/INBED/AWAKE values
+   * and computed totalSleepMinutes (sum of ASLEEP segments).
+   */
+  async getSleepData(startDate: Date, endDate: Date): Promise<{ samples: SleepSample[]; totalSleepMinutes: number }> {
+    if (!this.isModuleAvailable()) {
+      return { samples: [], totalSleepMinutes: 0 };
+    }
+
+    if (!this.initialized) {
+      const success = await this.initialize();
+      if (!success) return { samples: [], totalSleepMinutes: 0 };
+    }
+
+    return new Promise((resolve) => {
+      const options = {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      };
+
+      AppleHealthKit.getSleepSamples(options, (error: Object, results: any[]) => {
+        if (error || !Array.isArray(results)) {
+          console.error('[AppleHealth] Error getting sleep data:', error);
+          resolve({ samples: [], totalSleepMinutes: 0 });
+          return;
+        }
+
+        const samples: SleepSample[] = results.map((s: any) => ({
+          startDate: s.startDate,
+          endDate: s.endDate,
+          value: s.value === 'ASLEEP' ? 'ASLEEP' : s.value === 'INBED' ? 'INBED' : 'AWAKE',
+        }));
+
+        // Sum ASLEEP segments in minutes
+        const totalSleepMinutes = samples
+          .filter((s) => s.value === 'ASLEEP')
+          .reduce((sum, s) => {
+            const start = new Date(s.startDate).getTime();
+            const end = new Date(s.endDate).getTime();
+            return sum + (end - start) / (1000 * 60);
+          }, 0);
+
+        resolve({ samples, totalSleepMinutes });
+      });
+    });
+  }
+
+  /**
+   * Get Heart Rate Variability (HRV) data for a date range.
+   * Returns the latest HRV value in ms (SDNN).
+   */
+  async getHRVData(startDate: Date, endDate: Date): Promise<number | null> {
+    if (!this.isModuleAvailable()) {
+      return null;
+    }
+
+    if (!this.initialized) {
+      const success = await this.initialize();
+      if (!success) return null;
+    }
+
+    return new Promise((resolve) => {
+      const options = {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        ascending: false,
+        limit: 1,
+      };
+
+      AppleHealthKit.getHeartRateVariabilitySamples(options, (error: Object, results: any[]) => {
+        if (error || !Array.isArray(results) || results.length === 0) {
+          if (error) console.error('[AppleHealth] Error getting HRV data:', error);
+          resolve(null);
+          return;
+        }
+
+        // HRV value in ms (SDNN)
+        const latestHRV = results[0]?.value;
+        resolve(typeof latestHRV === 'number' ? latestHRV : null);
+      });
+    });
+  }
+
+  /**
+   * Get step count for a specific date (public wrapper for recovery scoring).
+   */
+  async getStepCount(date: Date): Promise<number> {
+    if (!this.isModuleAvailable()) return 0;
+    if (!this.initialized) {
+      const success = await this.initialize();
+      if (!success) return 0;
+    }
+    return this.getSteps(date);
   }
 
   // Get latest weight

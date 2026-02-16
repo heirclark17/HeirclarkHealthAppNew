@@ -26,6 +26,8 @@ import { CurrentTimeIndicator } from './CurrentTimeIndicator';
 import { TimeBlockCard } from './TimeBlockCard';
 import { GlassCard } from '../../GlassCard';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
+import { BehaviorInsightCard } from '../insights/BehaviorInsightCard';
+import { WeeklyCoachCard } from '../coaching/WeeklyCoachCard';
 
 // Must match _layout.tsx tab bar constants
 const TAB_BAR_HEIGHT = 64;
@@ -258,6 +260,10 @@ export function DailyTimelineView() {
           </ScrollView>
         </View>
       )}
+
+      {/* AI Coaching & Behavior Insights — above the timeline */}
+      <WeeklyCoachCard optimization={state.aiOptimization ?? null} />
+      <BehaviorInsightCard completionPatterns={state.completionPatterns ?? {}} />
 
       {/* Timeline */}
       <ScrollView

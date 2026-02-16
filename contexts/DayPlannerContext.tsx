@@ -43,6 +43,8 @@ import { api } from '../services/api';
 import { SchedulingEngine } from '../services/schedulingEngine';
 import { useTraining } from './TrainingContext';
 import { useMealPlan } from './MealPlanContext';
+import { useSleepRecovery } from './SleepRecoveryContext';
+import { useGoalWizard } from './GoalWizardContext';
 import {
   PlannerPreferences,
   WeeklyPlan,
@@ -52,6 +54,9 @@ import {
   DeviceCalendarEvent,
   SchedulingRequest,
   CompletionHistory,
+  CompletionPatterns,
+  RecoveryContext,
+  LifeContext,
   PLANNER_CONSTANTS,
 } from '../types/planner';
 
@@ -61,6 +66,7 @@ const STORAGE_KEYS = {
   WEEKLY_PLAN: 'hc_planner_weekly_plan',
   CALENDAR_PERMISSION: 'hc_planner_calendar_permission',
   AI_OPTIMIZATION: 'hc_planner_ai_optimization',
+  COMPLETION_PATTERNS: 'hc_planner_completion_patterns',
 };
 
 interface DayPlannerState {
@@ -80,6 +86,9 @@ interface DayPlannerState {
   // AI optimization
   aiOptimization: AIOptimization | null;
 
+  // Tier 2: Completion patterns (learned behavior)
+  completionPatterns: CompletionPatterns;
+
   // Loading states
   isGeneratingPlan: boolean;
   isSyncingCalendar: boolean;
@@ -98,6 +107,7 @@ interface DayPlannerActions {
   skipBlock: (blockId: string, date: string) => Promise<void>;
   updateBlockTime: (blockId: string, date: string, newStartTime: string) => Promise<void>;
   requestWeeklyOptimization: () => Promise<void>;
+  optimizeWeek: () => Promise<void>;
   setSelectedDay: (dayIndex: number) => void;
   setSelectedDate: (dateStr: string) => void;
   clearError: () => void;
@@ -186,6 +196,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     deviceCalendarEvents: [],
     lastCalendarSync: null,
     aiOptimization: null,
+    completionPatterns: {},
     isGeneratingPlan: false,
     isSyncingCalendar: false,
     isOptimizing: false,
@@ -209,11 +220,40 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     // MealPlanContext not available
   }
 
+  let sleepRecoveryCtx: any = null;
+  try {
+    sleepRecoveryCtx = useSleepRecovery();
+  } catch {
+    // SleepRecoveryContext not available
+  }
+
+  let goalWizardCtx: any = null;
+  try {
+    goalWizardCtx = useGoalWizard();
+  } catch {
+    // GoalWizardContext not available
+  }
+
+  // Note: FoodPreferencesContext is accessed lazily to avoid circular deps
+  let foodPrefsCtx: any = null;
+  try {
+    const { useFoodPreferences } = require('./FoodPreferencesContext');
+    foodPrefsCtx = useFoodPreferences();
+  } catch {
+    // FoodPreferencesContext not available
+  }
+
   // Store refs so async callbacks can access latest values without stale closures.
   const trainingRef = useRef(trainingCtx);
   trainingRef.current = trainingCtx;
   const mealPlanRef = useRef(mealPlanCtx);
   mealPlanRef.current = mealPlanCtx;
+  const sleepRecoveryRef = useRef(sleepRecoveryCtx);
+  sleepRecoveryRef.current = sleepRecoveryCtx;
+  const goalWizardRef = useRef(goalWizardCtx);
+  goalWizardRef.current = goalWizardCtx;
+  const foodPrefsRef = useRef(foodPrefsCtx);
+  foodPrefsRef.current = foodPrefsCtx;
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -274,6 +314,13 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       if (aiOptData) {
         const aiOptimization = JSON.parse(aiOptData);
         setState((prev) => ({ ...prev, aiOptimization }));
+      }
+
+      // Load completion patterns (Tier 2)
+      const patternsData = await AsyncStorage.getItem(STORAGE_KEYS.COMPLETION_PATTERNS);
+      if (patternsData) {
+        const completionPatterns = JSON.parse(patternsData);
+        setState((prev) => ({ ...prev, completionPatterns }));
       }
 
       console.log('[Planner] Cached data loaded');
@@ -469,6 +516,18 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, isGeneratingPlan: true, error: null }));
 
     try {
+      // Tier 1: Fetch recovery context before generating
+      try {
+        if (sleepRecoveryRef.current?.getRecoveryContext) {
+          const recovery = await sleepRecoveryRef.current.getRecoveryContext();
+          // Store on state ref so generateDailyTimeline can access it
+          (stateRef.current as any)._latestRecovery = recovery;
+          console.log('[Planner] Recovery score:', recovery.score, recovery.isLowRecovery ? '(low)' : '');
+        }
+      } catch (e) {
+        console.warn('[Planner] Recovery context fetch failed:', e);
+      }
+
       // Calculate Sunday of current week
       const today = new Date();
       const sunday = new Date(today);
@@ -554,6 +613,27 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       })
       .map((event) => convertCalendarEventToBlock(event));
 
+    // Build life context (Tier 4)
+    const goalState = goalWizardRef.current?.state;
+    const foodPrefs = foodPrefsRef.current?.preferences;
+    const dayName = DAY_NAMES[date.getDay()];
+    const isCheatDay = (foodPrefs?.cheatDays || []).includes(dayName);
+    const isFasting = goalState?.intermittentFasting ?? false;
+
+    const lifeContext: LifeContext = {
+      isFasting,
+      fastingStart: goalState?.fastingStart || '20:00',
+      fastingEnd: goalState?.fastingEnd || '12:00',
+      cheatDays: foodPrefs?.cheatDays || [],
+      isCheatDay,
+      isOOODay: false, // computed after calendar blocks are processed
+      meetingDensity: 'low', // computed by scheduling engine
+    };
+
+    // Check if any calendar block is OOO
+    const hasOOOBlock = calendarBlocks.some((b) => b.isAllDay && b.isOOO);
+    lifeContext.isOOODay = hasOOOBlock;
+
     // Build scheduling request
     const request: SchedulingRequest = {
       date: dateStr,
@@ -561,6 +641,9 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       workoutBlocks,
       mealBlocks,
       calendarBlocks,
+      recoveryContext: (stateRef.current as any)._latestRecovery || undefined,
+      completionPatterns: stateRef.current.completionPatterns,
+      lifeContext,
     };
 
     // Run scheduling engine
@@ -689,7 +772,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     const blockIndex = updatedPlan.days[dayIndex].blocks.findIndex((b) => b.id === blockId);
     if (blockIndex === -1) return;
 
-    updatedPlan.days[dayIndex].blocks[blockIndex] = { ...updatedPlan.days[dayIndex].blocks[blockIndex], status: 'completed' };
+    const block = updatedPlan.days[dayIndex].blocks[blockIndex];
+    updatedPlan.days[dayIndex].blocks[blockIndex] = { ...block, status: 'completed' };
     updatedPlan.days[dayIndex].completionRate = calculateCompletionRate(updatedPlan.days[dayIndex].blocks);
 
     // Save
@@ -697,8 +781,12 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     api.updateBlockStatus(blockId, 'completed', date).catch(() => {});
 
     setState((prev) => ({ ...prev, weeklyPlan: updatedPlan }));
+
+    // Tier 2a: Record completion pattern
+    recordBlockCompletion(block, 'completed');
+
     console.log(`[Planner] Block ${blockId} marked complete`);
-  }, []);
+  }, [recordBlockCompletion]);
 
   /**
    * Skip a time block
@@ -715,7 +803,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     const blockIndex = updatedPlan.days[dayIndex].blocks.findIndex((b) => b.id === blockId);
     if (blockIndex === -1) return;
 
-    updatedPlan.days[dayIndex].blocks[blockIndex] = { ...updatedPlan.days[dayIndex].blocks[blockIndex], status: 'skipped' };
+    const block = updatedPlan.days[dayIndex].blocks[blockIndex];
+    updatedPlan.days[dayIndex].blocks[blockIndex] = { ...block, status: 'skipped' };
     updatedPlan.days[dayIndex].completionRate = calculateCompletionRate(updatedPlan.days[dayIndex].blocks);
 
     // Save
@@ -723,8 +812,12 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     api.updateBlockStatus(blockId, 'skipped', date).catch(() => {});
 
     setState((prev) => ({ ...prev, weeklyPlan: updatedPlan }));
+
+    // Tier 2a: Record skip pattern
+    recordBlockCompletion(block, 'skipped');
+
     console.log(`[Planner] Block ${blockId} skipped`);
-  }, []);
+  }, [recordBlockCompletion]);
 
   /**
    * Update block start time (drag-and-drop)
@@ -832,6 +925,148 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
   const reopenOnboarding = useCallback(() => {
     setState((prev) => ({ ...prev, hasCompletedOnboarding: false }));
+  }, []);
+
+  /**
+   * Tier 2a: Record block completion or skip for adaptive learning.
+   */
+  const recordBlockCompletion = useCallback(async (
+    block: TimeBlock,
+    status: 'completed' | 'skipped'
+  ) => {
+    const blockType = block.type; // 'workout', 'meal_eating', etc.
+    const timeStr = block.startTime; // "HH:MM"
+
+    setState((prev) => {
+      const patterns = { ...prev.completionPatterns };
+      if (!patterns[blockType]) {
+        patterns[blockType] = {
+          completedAt: [],
+          skippedAt: [],
+          preferredWindow: null,
+          completionRate: 0,
+        };
+      }
+
+      const entry = { ...patterns[blockType] };
+      if (status === 'completed') {
+        entry.completedAt = [...entry.completedAt, timeStr].slice(-50); // keep last 50
+      } else {
+        entry.skippedAt = [...entry.skippedAt, timeStr].slice(-50);
+      }
+
+      // Recompute preferred window (mode of completedAt, rounded to nearest hour)
+      if (entry.completedAt.length > 0) {
+        const hourCounts: Record<string, number> = {};
+        for (const t of entry.completedAt) {
+          const hour = t.split(':')[0] + ':00';
+          hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+        }
+        let bestHour = entry.completedAt[0]?.split(':')[0] + ':00';
+        let bestCount = 0;
+        for (const [hour, count] of Object.entries(hourCounts)) {
+          if (count > bestCount) {
+            bestCount = count;
+            bestHour = hour;
+          }
+        }
+        entry.preferredWindow = bestHour;
+      }
+
+      // Recompute completion rate
+      const total = entry.completedAt.length + entry.skippedAt.length;
+      entry.completionRate = total > 0 ? entry.completedAt.length / total : 0;
+
+      patterns[blockType] = entry;
+
+      // Persist asynchronously
+      AsyncStorage.setItem(STORAGE_KEYS.COMPLETION_PATTERNS, JSON.stringify(patterns)).catch(() => {});
+
+      return { ...prev, completionPatterns: patterns };
+    });
+  }, []);
+
+  /**
+   * Tier 5c: Full-context weekly optimization with recovery, patterns, and life context.
+   */
+  const optimizeWeek = useCallback(async () => {
+    const currentPlan = stateRef.current.weeklyPlan;
+    if (!currentPlan) {
+      console.error('[Planner] Cannot optimize without weekly plan');
+      return;
+    }
+
+    setState((prev) => ({ ...prev, isOptimizing: true }));
+
+    try {
+      // Collect recovery context
+      let recoveryContext: RecoveryContext | undefined;
+      try {
+        if (sleepRecoveryRef.current?.getRecoveryContext) {
+          recoveryContext = await sleepRecoveryRef.current.getRecoveryContext();
+        }
+      } catch (e) {
+        console.warn('[Planner] Recovery context unavailable:', e);
+      }
+
+      // Collect completion patterns
+      const completionPatterns = stateRef.current.completionPatterns;
+
+      // Collect life context
+      const goalState = goalWizardRef.current?.state;
+      const foodPrefs = foodPrefsRef.current?.preferences;
+      const hasOOOThisWeek = currentPlan.days.some((d) => d.isOOODay);
+
+      // Count average meeting density
+      let totalMeetings = 0;
+      for (const day of currentPlan.days) {
+        totalMeetings += day.blocks.filter((b) => b.type === 'calendar_event' && !b.isAllDay).length;
+      }
+      const avgMeetings = totalMeetings / 7;
+      const meetingDensity: 'low' | 'medium' | 'high' =
+        avgMeetings >= 3 ? 'high' : avgMeetings >= 2 ? 'medium' : 'low';
+
+      const lifeContext = {
+        isFasting: goalState?.intermittentFasting ?? false,
+        fastingWindow: goalState?.intermittentFasting
+          ? `${goalState.fastingEnd || '12:00'} - ${goalState.fastingStart || '20:00'}`
+          : 'none',
+        cheatDays: foodPrefs?.cheatDays || [],
+        oooThisWeek: hasOOOThisWeek,
+        meetingDensity,
+      };
+
+      const completionHistory = buildCompletionHistory(currentPlan);
+
+      const optimization = await api.getWeeklyOptimization({
+        currentWeekPlan: currentPlan,
+        completionHistory,
+        recoveryContext,
+        completionPatterns,
+        lifeContext,
+      });
+
+      if (!optimization) {
+        throw new Error('No optimization data returned');
+      }
+
+      await AsyncStorage.setItem(STORAGE_KEYS.AI_OPTIMIZATION, JSON.stringify(optimization));
+
+      setState((prev) => ({
+        ...prev,
+        aiOptimization: optimization,
+        isOptimizing: false,
+      }));
+
+      console.log('[Planner] AI optimization completed with full context');
+    } catch (error: any) {
+      console.error('[Planner] Optimization error:', error);
+      setState((prev) => ({
+        ...prev,
+        isOptimizing: false,
+        error: error.message,
+      }));
+    }
   }, []);
 
   // ========================================================================
@@ -964,6 +1199,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     skipBlock,
     updateBlockTime,
     requestWeeklyOptimization,
+    optimizeWeek,
     setSelectedDay,
     setSelectedDate,
     clearError,
