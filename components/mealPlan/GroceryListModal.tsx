@@ -569,48 +569,31 @@ export function GroceryListModal({
           </ScrollView>
         )}
 
-        {/* Sticky Instacart button with Orange-Green Gradient */}
+        {/* Sticky Instacart button - Carrot Icon Only */}
         {groceryList && groceryList.length > 0 && !isLoading && (
           <Animated.View
             entering={SlideInUp.delay(300).springify()}
             style={[styles.instacartButtonContainer, { paddingBottom: insets.bottom + 8 }]}
           >
-            <BlurView
-              intensity={isDark ? 50 : 70}
-              tint={isDark ? 'dark' : 'light'}
-              style={styles.instacartButtonBlur}
+            <TouchableOpacity
+              onPress={handleInstacartPress}
+              activeOpacity={0.7}
+              style={[styles.instacartCircleButton, buttonAnimatedStyle]}
+              accessibilityLabel={`Order ${totalItems} grocery items with Instacart`}
+              accessibilityRole="button"
+              accessibilityHint="Opens Instacart with your grocery list pre-filled for delivery"
             >
-              <TouchableOpacity
-                onPress={handleInstacartPress}
-                activeOpacity={0.8}
-                accessibilityLabel={`Order ${totalItems} grocery items with Instacart`}
-                accessibilityRole="button"
-                accessibilityHint="Opens Instacart with your grocery list pre-filled for delivery"
+              <LinearGradient
+                colors={isDark
+                  ? ['rgba(255, 140, 0, 0.15)', 'rgba(255, 184, 77, 0.12)', 'rgba(76, 175, 80, 0.15)']
+                  : ['rgba(255, 152, 0, 0.12)', 'rgba(255, 167, 38, 0.10)', 'rgba(102, 187, 106, 0.12)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.circleGradient}
               >
-                <LinearGradient
-                  colors={isDark
-                    ? ['rgba(255, 140, 0, 0.15)', 'rgba(255, 184, 77, 0.12)', 'rgba(76, 175, 80, 0.15)']
-                    : ['rgba(255, 152, 0, 0.12)', 'rgba(255, 167, 38, 0.10)', 'rgba(102, 187, 106, 0.12)']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={[styles.instacartButton, buttonAnimatedStyle]}
-                >
-                  <View style={[styles.instacartIconContainer, {
-                    backgroundColor: isDark ? 'rgba(255, 140, 0, 0.2)' : 'rgba(255, 152, 0, 0.15)',
-                    padding: 8,
-                    borderRadius: 12,
-                  }]}>
-                    <Carrot size={20} color={isDark ? '#FF8C00' : '#FF9800'} strokeWidth={2} />
-                  </View>
-                  <Text style={[styles.instacartButtonText, {
-                    color: isDark ? '#FFB84D' : '#FF9800',
-                    fontFamily: Fonts.semiBold,
-                  }]}>
-                    Order with Instacart
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </BlurView>
+                <Carrot size={24} color={isDark ? '#FF8C00' : '#FF9800'} strokeWidth={2} />
+              </LinearGradient>
+            </TouchableOpacity>
           </Animated.View>
         )}
       </View>
@@ -749,33 +732,22 @@ const styles = StyleSheet.create({
   instacartButtonContainer: {
     position: 'absolute',
     bottom: 100,
-    left: '15%',
-    right: '15%',
+    alignSelf: 'center',
     zIndex: 999,
     elevation: 10,
   },
-  instacartButtonBlur: {
-    borderRadius: 20,
+  instacartCircleButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
-  instacartButton: {
-    flexDirection: 'row',
+  circleGradient: {
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    gap: 12,
-    borderRadius: 20,
-  },
-  instacartIconContainer: {
-    // Icon styling handled inline for dynamic colors
-  },
-  instacartButtonText: {
-    fontSize: 16,
-    color: Colors.text,
-    fontFamily: Fonts.semiBold,
+    borderRadius: 30,
   },
   emptyState: {
     padding: 32,
