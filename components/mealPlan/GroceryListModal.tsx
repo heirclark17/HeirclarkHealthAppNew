@@ -568,7 +568,7 @@ export function GroceryListModal({
             style={[styles.instacartButtonContainer, { paddingBottom: insets.bottom + 8 }]}
           >
             <BlurView
-              intensity={isDark ? 40 : 60}
+              intensity={isDark ? 50 : 70}
               tint={isDark ? 'dark' : 'light'}
               style={styles.instacartButtonBlur}
             >
@@ -581,21 +581,21 @@ export function GroceryListModal({
               >
                 <LinearGradient
                   colors={isDark
-                    ? ['#FF8C00', '#FFB84D', '#4CAF50']
-                    : ['#FF9800', '#FFA726', '#66BB6A']}
+                    ? ['rgba(255, 140, 0, 0.15)', 'rgba(255, 184, 77, 0.12)', 'rgba(76, 175, 80, 0.15)']
+                    : ['rgba(255, 152, 0, 0.12)', 'rgba(255, 167, 38, 0.10)', 'rgba(102, 187, 106, 0.12)']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={[styles.instacartButton, buttonAnimatedStyle]}
                 >
                   <View style={[styles.instacartIconContainer, {
-                    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                    backgroundColor: isDark ? 'rgba(255, 140, 0, 0.2)' : 'rgba(255, 152, 0, 0.15)',
                     padding: 8,
                     borderRadius: 12,
                   }]}>
-                    <Carrot size={22} color="#FFFFFF" strokeWidth={2.5} />
+                    <Carrot size={20} color={isDark ? '#FF8C00' : '#FF9800'} strokeWidth={2} />
                   </View>
                   <Text style={[styles.instacartButtonText, {
-                    color: '#FFFFFF',
+                    color: isDark ? '#FFB84D' : '#FF9800',
                     fontFamily: Fonts.semiBold,
                   }]}>
                     Order with Instacart
@@ -740,9 +740,9 @@ const styles = StyleSheet.create({
   },
   instacartButtonContainer: {
     position: 'absolute',
-    bottom: 200,
-    left: 16,
-    right: 16,
+    bottom: 160,
+    left: '15%',
+    right: '15%',
     zIndex: 999,
     elevation: 10,
   },
