@@ -288,6 +288,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
+    paddingTop: 20,
     paddingBottom: 16,
   },
   headerLeft: {
@@ -385,9 +386,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 32,
     color: Colors.text,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 0.5,
   },
   sectionDesc: {
     fontSize: 14,

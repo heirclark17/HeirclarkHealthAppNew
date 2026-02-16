@@ -339,12 +339,14 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
   },
   header: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
     marginBottom: Spacing.xl,
   },
   title: {
-    fontSize: 24,
-    fontFamily: Fonts.bold,
-    letterSpacing: 1,
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 0.5,
     marginBottom: Spacing.xs,
   },
   subtitle: {

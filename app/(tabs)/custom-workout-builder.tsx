@@ -719,8 +719,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
@@ -734,8 +735,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   headerTitle: {
-    fontSize: 18,
-    fontFamily: Fonts.semiBold,
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 0.5,
   },
   scrollView: {
     flex: 1,

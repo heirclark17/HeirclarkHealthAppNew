@@ -393,7 +393,7 @@ export default function ProgressiveOverloadPage() {
         style={styles.scroll}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 100 },
+          { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 100 },
         ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -650,9 +650,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   pageTitle: {
-    fontSize: 28,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 0.5,
     marginBottom: 16,
   },
 

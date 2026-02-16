@@ -443,11 +443,13 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   pageTitle: {
-    fontSize: 34,
-    fontFamily: Fonts.bold,
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 0.5,
   },
   header: {
     paddingHorizontal: 16,
+    paddingTop: 20,
     paddingBottom: 20,
   },
   userSection: {

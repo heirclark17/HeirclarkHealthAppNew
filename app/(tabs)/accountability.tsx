@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   headerCard: {
     marginHorizontal: 16,
-    marginTop: 8,
+    marginTop: 20,
     marginBottom: 24,
     padding: 20,
   },
@@ -210,9 +210,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
-    fontSize: 22,
-    fontFamily: Fonts.regular,
-    letterSpacing: 1,
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 0.5,
     marginBottom: 4,
   },
   headerSubtitle: {

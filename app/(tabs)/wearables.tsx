@@ -377,11 +377,12 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
+    paddingTop: 20,
     paddingBottom: 16,
   },
   title: {
     fontSize: 32,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0.5,
   },
   subtitle: {

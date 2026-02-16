@@ -480,14 +480,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
   header: {
-    alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: Spacing.md,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   title: {
-    fontSize: 28,
-    fontFamily: Fonts.light,
-    letterSpacing: 4,
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 13,
