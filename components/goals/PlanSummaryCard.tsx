@@ -239,7 +239,6 @@ export function PlanSummaryCard({
               ))}
             </View>
           </View>
-        </View>
       </View>
 
       {/* Action Buttons */}
