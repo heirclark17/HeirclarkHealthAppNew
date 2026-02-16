@@ -135,7 +135,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
 
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const flatListRef = useRef<FlatList>(null);
-  const snapPoints = useMemo(() => ['45%', '75%', '92%'], []);
+  const snapPoints = useMemo(() => ['70%', '88%', '96%'], []);
 
   // Expose present/dismiss to parent
   useImperativeHandle(ref, () => ({
