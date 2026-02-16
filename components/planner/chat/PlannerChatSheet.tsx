@@ -73,13 +73,120 @@ const GLASS_COLORS = {
 
 const genId = () => `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-const SUGGESTION_CHIPS = [
-  "Move my workout to afternoon",
-  "Add a yoga session",
-  "Free up my morning",
-  "Why is my day so packed?",
-  "What's my recovery status?",
-];
+// ============================================================================
+// Smart Suggestion Generator - Analyzes user behavior and schedule context
+// ============================================================================
+
+interface ScheduleAnalysis {
+  hasWorkout: boolean;
+  hasMeal: boolean;
+  hasWork: boolean;
+  freeTimePercent: number;
+  completionRate: number;
+  timeOfDay: 'morning' | 'afternoon' | 'evening';
+  incompleteBlocks: number;
+  recoveryScore: number | null;
+  hasEarlyMorningBlock: boolean;
+  hasLateEveningBlock: boolean;
+}
+
+function analyzeSchedule(
+  blocks: any[],
+  totalFreeMinutes: number,
+  completionRate: number,
+  recoveryScore: number | null
+): ScheduleAnalysis {
+  const now = new Date();
+  const currentHour = now.getHours();
+
+  let timeOfDay: 'morning' | 'afternoon' | 'evening' = 'morning';
+  if (currentHour >= 12 && currentHour < 17) timeOfDay = 'afternoon';
+  else if (currentHour >= 17) timeOfDay = 'evening';
+
+  const hasWorkout = blocks.some((b) => b.type === 'workout');
+  const hasMeal = blocks.some((b) => b.type === 'meal_prep' || b.type === 'meal_eating');
+  const hasWork = blocks.some((b) => b.type === 'work');
+  const incompleteBlocks = blocks.filter((b) => b.status === 'scheduled' || b.status === 'in_progress').length;
+
+  const totalScheduledMinutes = blocks.reduce((sum, b) => sum + b.duration, 0);
+  const totalMinutes = totalScheduledMinutes + totalFreeMinutes;
+  const freeTimePercent = totalMinutes > 0 ? (totalFreeMinutes / totalMinutes) * 100 : 0;
+
+  const hasEarlyMorningBlock = blocks.some((b) => {
+    const hour = parseInt(b.startTime.split(':')[0]);
+    return hour >= 5 && hour < 8;
+  });
+
+  const hasLateEveningBlock = blocks.some((b) => {
+    const hour = parseInt(b.startTime.split(':')[0]);
+    return hour >= 20;
+  });
+
+  return {
+    hasWorkout,
+    hasMeal,
+    hasWork,
+    freeTimePercent,
+    completionRate,
+    timeOfDay,
+    incompleteBlocks,
+    recoveryScore,
+    hasEarlyMorningBlock,
+    hasLateEveningBlock,
+  };
+}
+
+function generateSmartSuggestions(analysis: ScheduleAnalysis): string[] {
+  const suggestions: string[] = [];
+
+  // Recovery-based suggestions
+  if (analysis.recoveryScore !== null) {
+    if (analysis.recoveryScore < 60) {
+      suggestions.push("Add a rest block");
+      suggestions.push("Move workout to later");
+    } else if (analysis.recoveryScore > 80) {
+      suggestions.push("Add an extra workout");
+    }
+  }
+
+  // Time-based suggestions
+  if (analysis.timeOfDay === 'morning' && !analysis.hasWorkout) {
+    suggestions.push("Schedule morning workout");
+  } else if (analysis.timeOfDay === 'afternoon' && analysis.hasEarlyMorningBlock) {
+    suggestions.push("Move morning block to afternoon");
+  }
+
+  // Completion-based suggestions
+  if (analysis.completionRate < 50 && analysis.incompleteBlocks > 3) {
+    suggestions.push("Simplify my schedule");
+    suggestions.push("What can I skip today?");
+  }
+
+  // Free time suggestions
+  if (analysis.freeTimePercent > 50) {
+    suggestions.push("Add a yoga session");
+    suggestions.push("Schedule meal prep time");
+  } else if (analysis.freeTimePercent < 20) {
+    suggestions.push("Free up my morning");
+    suggestions.push("Remove buffer blocks");
+  }
+
+  // Work/Life balance suggestions
+  if (analysis.hasWork && !analysis.hasMeal) {
+    suggestions.push("Add lunch break");
+  }
+
+  if (analysis.hasLateEveningBlock) {
+    suggestions.push("Move evening tasks earlier");
+  }
+
+  // General questions (always available)
+  suggestions.push("What's on my schedule?");
+  suggestions.push("Why is my day packed?");
+
+  // Return top 5 most relevant suggestions
+  return suggestions.slice(0, 5);
+}
 
 // ============================================================================
 // AI response parser
@@ -138,6 +245,21 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const flatListRef = useRef<FlatList>(null);
   const snapPoints = useMemo(() => ['70%', '88%', '96%'], []);
+
+  // Generate smart suggestions based on current schedule
+  const smartSuggestions = useMemo(() => {
+    const timeline = state.weeklyPlan?.days[state.selectedDayIndex];
+    if (!timeline) return ["What's on my schedule?", "Add a workout", "Schedule meal prep"];
+
+    const analysis = analyzeSchedule(
+      timeline.blocks.filter((b) => !b.isAllDay),
+      timeline.totalFreeMinutes,
+      timeline.completionRate,
+      recoveryScore
+    );
+
+    return generateSmartSuggestions(analysis);
+  }, [state.weeklyPlan, state.selectedDayIndex, recoveryScore]);
 
   // Expose present/dismiss to parent
   useImperativeHandle(ref, () => ({
@@ -418,10 +540,10 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
         </Text>
       </View>
       <View style={styles.chipsWrap}>
-        {SUGGESTION_CHIPS.map((chip) => (
+        {smartSuggestions.map((chip) => (
           <TouchableOpacity
             key={chip}
-            style={[styles.chip, { backgroundColor: glass.chipBg, borderColor: glass.border }]}
+            style={[styles.chip, { backgroundColor: glass.chipBg }]}
             onPress={() => handleSend(chip)}
             activeOpacity={0.7}
           >
@@ -430,7 +552,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
         ))}
       </View>
     </View>
-  ), [glass, handleSend]);
+  ), [glass, handleSend, smartSuggestions]);
 
   return (
     <BottomSheetModal
@@ -482,13 +604,12 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
         )}
 
         {/* Input bar */}
-        <View style={[styles.inputBar, { borderTopColor: glass.border, backgroundColor: isDark ? 'rgba(28, 28, 30, 0.98)' : 'rgba(248, 248, 250, 0.98)', paddingBottom: Math.max(insets.bottom, 8) }]}>
+        <View style={[styles.inputBar, { backgroundColor: isDark ? 'rgba(28, 28, 30, 0.98)' : 'rgba(248, 248, 250, 0.98)', paddingBottom: insets.bottom + 60 }]}>
           <TextInput
             style={[
               styles.textInput,
               {
                 backgroundColor: glass.inputBg,
-                borderColor: glass.inputBorder,
                 color: glass.text,
               },
             ]}
@@ -670,11 +791,11 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 18,
     maxWidth: 280,
   },
   chipsWrap: {
@@ -685,7 +806,6 @@ const styles = StyleSheet.create({
   },
   chip: {
     borderRadius: 16,
-    borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 8,
   },
@@ -700,12 +820,10 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
   textInput: {
     flex: 1,
     borderRadius: 20,
-    borderWidth: 1,
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 10 : 8,
     paddingBottom: Platform.OS === 'ios' ? 10 : 8,
