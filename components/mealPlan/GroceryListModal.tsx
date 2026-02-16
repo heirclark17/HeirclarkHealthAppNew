@@ -319,13 +319,17 @@ export function GroceryListModal({
                 onPress={() => {
                   // Toggle select all/deselect all
                   const allChecked = checkedItems === totalItems;
-                  groceryList.forEach((category, catIndex) => {
-                    category.items.forEach((item, itemIndex) => {
-                      if (item.checked === allChecked) {
-                        onToggleItem(catIndex, itemIndex);
-                      }
+
+                  // Defer to next tick to avoid mutating frozen objects in Reanimated
+                  setTimeout(() => {
+                    groceryList.forEach((category, catIndex) => {
+                      category.items.forEach((item, itemIndex) => {
+                        if (item.checked === allChecked) {
+                          onToggleItem(catIndex, itemIndex);
+                        }
+                      });
                     });
-                  });
+                  }, 0);
                 }}
                 style={styles.closeButton}
                 accessibilityLabel={checkedItems === totalItems ? "Deselect all items" : "Select all items"}
