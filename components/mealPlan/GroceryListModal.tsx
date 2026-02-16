@@ -156,7 +156,7 @@ const CheckboxItem = ({
             accessibilityRole="button"
             accessibilityHint="Removes this item from your grocery list"
           >
-            <Ionicons name="trash-outline" size={18} color={glassColors.textMuted} />
+            <Ionicons name="trash-outline" size={18} color={isDark ? '#FF8A80' : '#FF6B6B'} />
           </TouchableOpacity>
         </Pressable>
       </GlassCard>
