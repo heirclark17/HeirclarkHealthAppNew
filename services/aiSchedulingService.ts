@@ -44,7 +44,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
 
     // Call OpenAI
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
