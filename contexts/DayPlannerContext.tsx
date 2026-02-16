@@ -887,8 +887,13 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         isSyncingCalendar: false,
       }));
 
-      Alert.alert('Calendar Synced', `${events.length} events imported. Your schedule is being optimized to avoid conflicts.`);
       console.log(`[Planner] ✅ Synced ${events.length} calendar events (client-side only)`);
+
+      // CRITICAL: Regenerate weekly plan with new calendar events
+      console.log('[Planner] 🔄 Regenerating weekly plan with calendar events...');
+      await generateWeeklyPlan();
+
+      Alert.alert('Calendar Synced', `${events.length} events imported and schedule optimized to avoid conflicts.`);
       return true;
     } catch (error: any) {
       console.error('[Planner] Calendar sync error:', error);
