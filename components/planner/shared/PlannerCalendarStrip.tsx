@@ -206,22 +206,20 @@ export function PlannerCalendarStrip({
         })}
       </ScrollView>
 
-      {/* Day stats row */}
+      {/* Day stats cards */}
       {dayStats && (
-        <View style={[styles.statsRow, { borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
-          <View style={styles.statItem}>
+        <View style={styles.statsRow}>
+          <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
             <Text style={[styles.statValue, { color: themeColors.primary }]}>{dayStats.completionRate}%</Text>
             <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Completed</Text>
           </View>
-          <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
-          <View style={styles.statItem}>
+          <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
             <Text style={[styles.statValue, { color: themeColors.primary }]}>
               {Math.round(dayStats.totalScheduledMinutes / 60)}h
             </Text>
             <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Scheduled</Text>
           </View>
-          <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
-          <View style={styles.statItem}>
+          <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
             <Text style={[styles.statValue, { color: themeColors.primary }]}>
               {Math.round(dayStats.totalFreeMinutes / 60)}h
             </Text>
@@ -313,15 +311,14 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: 8,
     marginTop: 10,
-    paddingTop: 10,
   },
-  statItem: {
+  statCard: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: 8,
+    borderRadius: 10,
     gap: 2,
   },
   statValue: {
@@ -333,9 +330,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
-  },
-  statDivider: {
-    width: StyleSheet.hairlineWidth,
-    height: 28,
   },
 });
