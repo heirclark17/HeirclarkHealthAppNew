@@ -21,6 +21,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Leaf, Beef, Milk, Wheat, Package, Flame, Box, ShoppingCart, Carrot } from 'lucide-react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../NumberText';
 import { GroceryCategory, GroceryItem } from '../../types/mealPlan';
@@ -519,26 +520,74 @@ export function GroceryListModal({
           </Animated.View>
         )}
 
-        {/* Progress Section */}
+        {/* Progress Section - iOS 26 Design */}
         {groceryList && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(200)}
             style={styles.progressSection}
           >
-            <GlassCard style={styles.progressCard} intensity={isDark ? 40 : 60}>
-              <View style={[styles.progressBar, { backgroundColor: glassColors.progressBg }]}>
-                <Animated.View
-                  style={[
-                    styles.progressFill,
-                    { width: `${progress}%`, backgroundColor: glassColors.progressFill },
-                  ]}
-                />
-                {/* Glass highlight */}
-                <View style={styles.progressHighlight} />
+            <GlassCard style={styles.progressCard} intensity={isDark ? 35 : 55}>
+              <View style={styles.progressContent}>
+                {/* Circular Progress Ring */}
+                <View style={styles.circularProgressContainer}>
+                  <Svg width={72} height={72}>
+                    {/* Background Circle */}
+                    <Circle
+                      cx={36}
+                      cy={36}
+                      r={32}
+                      stroke={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'}
+                      strokeWidth={6}
+                      fill="none"
+                    />
+                    {/* Progress Circle */}
+                    <Circle
+                      cx={36}
+                      cy={36}
+                      r={32}
+                      stroke={progress === 100 ? (isDark ? '#4CAF50' : '#66BB6A') : (isDark ? '#0A84FF' : '#007AFF')}
+                      strokeWidth={6}
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 32}`}
+                      strokeDashoffset={`${2 * Math.PI * 32 * (1 - progress / 100)}`}
+                      strokeLinecap="round"
+                      rotation="-90"
+                      origin="36, 36"
+                    />
+                  </Svg>
+                  {/* Center Content */}
+                  <View style={styles.circularProgressCenter}>
+                    {progress === 100 ? (
+                      <Ionicons name="checkmark-circle" size={32} color={isDark ? '#4CAF50' : '#66BB6A'} />
+                    ) : (
+                      <NumberText weight="semibold" style={[styles.progressPercentage, { color: glassColors.text }]}>
+                        {Math.round(progress)}%
+                      </NumberText>
+                    )}
+                  </View>
+                </View>
+
+                {/* Text Content */}
+                <View style={styles.progressTextContainer}>
+                  <Text style={[styles.progressTitle, { color: glassColors.text }]}>
+                    {progress === 100 ? 'All Done!' : 'Shopping Progress'}
+                  </Text>
+                  <View style={styles.progressStats}>
+                    <NumberText weight="semibold" style={[styles.progressNumbers, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
+                      {checkedItems}
+                    </NumberText>
+                    <Text style={[styles.progressSeparator, { color: glassColors.textMuted }]}>
+                      {' / '}
+                    </Text>
+                    <NumberText weight="regular" style={[styles.progressNumbers, { color: glassColors.textMuted }]}>
+                      {totalItems}
+                    </NumberText>
+                    <Text style={[styles.progressLabel, { color: glassColors.textMuted }]}>
+                      {' items'}
+                    </Text>
+                  </View>
+                </View>
               </View>
-              <NumberText weight="regular" style={[styles.progressText, { color: glassColors.textMuted }]}>
-                {checkedItems} of {totalItems} items checked
-              </NumberText>
             </GlassCard>
           </Animated.View>
         )}
@@ -632,36 +681,60 @@ const styles = StyleSheet.create({
   },
   progressSection: {
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
   },
   progressCard: {
-    padding: 16,
+    padding: 20,
     borderRadius: Spacing.borderRadius,
   },
-  progressBar: {
-    height: 8,
-    borderRadius: 4,
-    marginBottom: 8,
-    overflow: 'hidden',
+  progressContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  circularProgressContainer: {
     position: 'relative',
+    width: 72,
+    height: 72,
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  progressHighlight: {
+  circularProgressCenter: {
     position: 'absolute',
-    top: 1,
-    left: 4,
-    right: 4,
-    height: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  progressText: {
-    fontSize: 13,
+  progressPercentage: {
+    fontSize: 18,
+    fontFamily: Fonts.numericSemiBold,
+  },
+  progressTextContainer: {
+    flex: 1,
+    gap: 4,
+  },
+  progressTitle: {
+    fontSize: 17,
+    fontFamily: Fonts.semibold,
+    marginBottom: 2,
+  },
+  progressStats: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  progressNumbers: {
+    fontSize: 15,
+    fontFamily: Fonts.numericSemiBold,
+  },
+  progressSeparator: {
+    fontSize: 15,
+    fontFamily: Fonts.numericRegular,
+  },
+  progressLabel: {
+    fontSize: 15,
     fontFamily: Fonts.regular,
-    textAlign: 'center',
   },
   listContainer: {
     flex: 1,
