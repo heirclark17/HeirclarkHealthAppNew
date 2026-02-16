@@ -68,7 +68,8 @@ export class SchedulingEngine {
       );
 
       // Step 4.5: Add fasting buffer block if IF active (Tier 4a)
-      if (request.lifeContext?.isFasting) {
+      // Skip fasting block on cheat days - allow normal eating schedule
+      if (request.lifeContext?.isFasting && !request.lifeContext?.isCheatDay) {
         this.addFastingBlock(blocks, request.lifeContext, request.preferences);
       }
 
