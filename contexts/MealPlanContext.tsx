@@ -30,6 +30,7 @@ export interface MealPlanState {
   isGenerating: boolean;
   isSwapping: boolean;
   isGeneratingGroceryList: boolean; // NEW: Loading state for grocery list generation
+  groceryListProgress: { current: number; total: number } | null; // NEW: Batch progress tracking
   error: string | null;
   selectedDayIndex: number; // 0-6
   lastGeneratedAt: string | null;
@@ -59,6 +60,7 @@ const initialState: MealPlanState = {
   isGenerating: false,
   isSwapping: false,
   isGeneratingGroceryList: false,
+  groceryListProgress: null,
   error: null,
   selectedDayIndex: 0,
   lastGeneratedAt: null,
@@ -847,13 +849,20 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
       console.log(`[MealPlanContext] 📋 Fetching ingredients in ${batches.length} batches of ${BATCH_SIZE} meals each...`);
 
-      // Step 3: Fetch each batch sequentially
+      // Step 3: Fetch each batch sequentially with progress tracking
       const updatedWeeklyPlan = [...state.weeklyPlan];
       let totalIngredientsAdded = 0;
       let totalRecipesFetched = 0;
 
       for (let batchNum = 0; batchNum < batches.length; batchNum++) {
         const batch = batches[batchNum];
+
+        // Update progress state
+        setState(prev => ({
+          ...prev,
+          groceryListProgress: { current: batchNum + 1, total: batches.length }
+        }));
+
         console.log(`[MealPlanContext] 🔄 Fetching batch ${batchNum + 1}/${batches.length} (${batch.meals.length} meals)...`);
 
         const batchResponse = await api.getBatchRecipeDetails(batch.meals, budgetTier || 'medium');
@@ -898,6 +907,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         weeklyPlan: updatedWeeklyPlan,
         groceryList,
         isGeneratingGroceryList: false,
+        groceryListProgress: null, // Clear progress when complete
       }));
 
       console.log('[MealPlanContext] ✅ Generated grocery list:', {
@@ -937,6 +947,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         ...prev,
         error: 'Failed to generate grocery list',
         isGeneratingGroceryList: false,
+        groceryListProgress: null, // Clear progress on error
       }));
     }
   }, [state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);

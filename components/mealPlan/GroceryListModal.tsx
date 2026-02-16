@@ -61,6 +61,7 @@ interface GroceryListModalProps {
   onOrderInstacart: (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => void;
   isLoading?: boolean;
   onGenerateList?: (budgetTier?: 'low' | 'medium' | 'high') => void;
+  progress?: { current: number; total: number } | null; // NEW: Batch progress tracking
 }
 
 const getCategoryIcon = (category: string, size: number = 18) => {
@@ -220,6 +221,7 @@ export function GroceryListModal({
   onOrderInstacart,
   isLoading = false,
   onGenerateList,
+  progress = null,
 }: GroceryListModalProps) {
   const { settings } = useSettings();
   const insets = useSafeAreaInsets();
@@ -428,12 +430,35 @@ export function GroceryListModal({
 
               {/* Loading Title */}
               <Text style={[styles.loadingTitle, { color: glassColors.text }]}>
-                Fetching Recipes for Entire Week
+                {progress ? `Fetching Batch ${progress.current} of ${progress.total}` : 'Fetching Recipes for Entire Week'}
               </Text>
+
+              {/* Progress Bar */}
+              {progress && (
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBarBackground, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
+                    <Animated.View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          backgroundColor: glassColors.checkboxChecked,
+                          width: `${(progress.current / progress.total) * 100}%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                  <Text style={[styles.progressText, { color: glassColors.textSecondary }]}>
+                    {Math.round((progress.current / progress.total) * 100)}% Complete
+                  </Text>
+                </View>
+              )}
 
               {/* Loading Description */}
               <Text style={[styles.loadingDescription, { color: glassColors.textMuted }]}>
-                AI is generating detailed ingredient lists for all 7 days with {budgetTier} budget ingredients...
+                {progress
+                  ? `Processing ${progress.current * 7} of ${progress.total * 7} meals with ${budgetTier} budget ingredients...`
+                  : `AI is generating detailed ingredient lists for all 7 days with ${budgetTier} budget ingredients...`
+                }
               </Text>
 
               {/* Animated Steps */}
@@ -1015,6 +1040,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 20,
+  },
+  progressBarContainer: {
+    width: '100%',
+    marginVertical: 16,
+    alignItems: 'center',
+  },
+  progressBarBackground: {
+    width: '100%',
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 4,
+    transition: 'width 0.3s ease',
+  },
+  progressText: {
+    fontSize: 12,
+    fontFamily: Fonts.medium,
   },
   loadingSteps: {
     width: '100%',

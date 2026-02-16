@@ -76,6 +76,7 @@ export default function MealsScreen() {
     isGenerating,
     isSwapping,
     isGeneratingGroceryList,
+    groceryListProgress,
     error,
     selectedDayIndex,
   } = mealPlanState;
@@ -766,6 +767,7 @@ export default function MealsScreen() {
         onOrderInstacart={handleOrderInstacart}
         isLoading={isGeneratingGroceryList}
         onGenerateList={weeklyPlan ? generateGroceryListOnDemand : undefined}
+        progress={groceryListProgress}
       />
 
       {/* AI Coaching Modal */}
