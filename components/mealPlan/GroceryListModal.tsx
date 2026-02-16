@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -250,15 +250,20 @@ export function GroceryListModal({
     } else {
       console.log('[GroceryListModal] ⚠️ Conditions not met for auto-generation');
     }
-  }, [visible]);
+  }, [visible, groceryList, isLoading, onGenerateList, budgetTier]);
+
+  // Track previous budget tier to prevent infinite loop
+  const prevBudgetTierRef = useRef(budgetTier);
 
   // Regenerate grocery list when budget tier changes (after initial generation)
   React.useEffect(() => {
-    if (groceryList && onGenerateList && !isLoading) {
-      console.log('[GroceryListModal] Budget tier changed to:', budgetTier, '- Regenerating grocery list...');
+    // Only regenerate if budget tier ACTUALLY changed (not just on mount or other renders)
+    if (groceryList && onGenerateList && !isLoading && prevBudgetTierRef.current !== budgetTier) {
+      console.log('[GroceryListModal] Budget tier changed from', prevBudgetTierRef.current, 'to', budgetTier, '- Regenerating grocery list...');
       onGenerateList(budgetTier);
+      prevBudgetTierRef.current = budgetTier;
     }
-  }, [budgetTier]);
+  }, [budgetTier, groceryList, onGenerateList, isLoading]);
 
   // Button animation
   const buttonScale = useSharedValue(1);
@@ -286,14 +291,65 @@ export function GroceryListModal({
     );
   };
 
-  const totalItems = groceryList ? groceryList.reduce((acc, cat) => acc + cat.items.length, 0) : 0;
-  const checkedItems = groceryList ? groceryList.reduce(
-    (acc, cat) => acc + cat.items.filter(item => item.checked).length,
-    0
-  ) : 0;
-  const progress = totalItems > 0 ? (checkedItems / totalItems) * 100 : 0;
+  // Memoize expensive calculations to prevent unnecessary re-renders
+  const totalItems = useMemo(
+    () => groceryList ? groceryList.reduce((acc, cat) => acc + cat.items.length, 0) : 0,
+    [groceryList]
+  );
+
+  const checkedItems = useMemo(
+    () => groceryList ? groceryList.reduce(
+      (acc, cat) => acc + cat.items.filter(item => item.checked).length,
+      0
+    ) : 0,
+    [groceryList]
+  );
+
+  const progress = useMemo(
+    () => totalItems > 0 ? (checkedItems / totalItems) * 100 : 0,
+    [checkedItems, totalItems]
+  );
 
   const availableDietaryFilters = ['organic', 'gluten-free', 'vegan', 'vegetarian'];
+
+  // Memoize Select All handler to prevent stale closures
+  const handleSelectAll = useCallback(async () => {
+    await lightImpact();
+
+    if (!groceryList) return;
+
+    // Determine if we're selecting all or deselecting all
+    const shouldSelectAll = checkedItems < totalItems;
+
+    // Collect all items that need to be toggled
+    const itemsToToggle: Array<{ catIndex: number; itemIndex: number; name: string }> = [];
+
+    groceryList.forEach((category, catIndex) => {
+      category.items.forEach((item, itemIndex) => {
+        if (shouldSelectAll && !item.checked) {
+          itemsToToggle.push({ catIndex, itemIndex, name: item.name });
+        } else if (!shouldSelectAll && item.checked) {
+          itemsToToggle.push({ catIndex, itemIndex, name: item.name });
+        }
+      });
+    });
+
+    console.log('[GroceryListModal] Select All clicked:', {
+      shouldSelectAll,
+      checkedItems,
+      totalItems,
+      itemsToToggleCount: itemsToToggle.length,
+      action: shouldSelectAll ? 'SELECTING ALL' : 'DESELECTING ALL'
+    });
+
+    // Stagger toggles to prevent state collision - each toggle gets its own tick
+    itemsToToggle.forEach(({ catIndex, itemIndex, name }, idx) => {
+      setTimeout(() => {
+        console.log(`[GroceryListModal] ${shouldSelectAll ? 'Checking' : 'Unchecking'} [${idx + 1}/${itemsToToggle.length}]: ${name}`);
+        onToggleItem(catIndex, itemIndex);
+      }, idx * 50); // 50ms between each toggle to avoid race conditions
+    });
+  }, [groceryList, checkedItems, totalItems, onToggleItem]);
 
   return (
     <Modal
@@ -650,41 +706,7 @@ export function GroceryListModal({
           >
             <GlassCard intensity={isDark ? 60 : 80} style={styles.selectAllGlassCard} interactive>
               <TouchableOpacity
-                onPress={async () => {
-                  await lightImpact();
-
-                  // Determine if we're selecting all or deselecting all
-                  const shouldSelectAll = checkedItems < totalItems;
-
-                  // Collect all items that need to be toggled
-                  const itemsToToggle: Array<{ catIndex: number; itemIndex: number; name: string }> = [];
-
-                  groceryList.forEach((category, catIndex) => {
-                    category.items.forEach((item, itemIndex) => {
-                      if (shouldSelectAll && !item.checked) {
-                        itemsToToggle.push({ catIndex, itemIndex, name: item.name });
-                      } else if (!shouldSelectAll && item.checked) {
-                        itemsToToggle.push({ catIndex, itemIndex, name: item.name });
-                      }
-                    });
-                  });
-
-                  console.log('[GroceryListModal] Select All clicked:', {
-                    shouldSelectAll,
-                    checkedItems,
-                    totalItems,
-                    itemsToToggleCount: itemsToToggle.length,
-                    action: shouldSelectAll ? 'SELECTING ALL' : 'DESELECTING ALL'
-                  });
-
-                  // Stagger toggles to prevent state collision - each toggle gets its own tick
-                  itemsToToggle.forEach(({ catIndex, itemIndex, name }, idx) => {
-                    setTimeout(() => {
-                      console.log(`[GroceryListModal] ${shouldSelectAll ? 'Checking' : 'Unchecking'} [${idx + 1}/${itemsToToggle.length}]: ${name}`);
-                      onToggleItem(catIndex, itemIndex);
-                    }, idx * 50); // 50ms between each toggle to avoid race conditions
-                  });
-                }}
+                onPress={handleSelectAll}
                 style={styles.selectAllButton}
                 accessibilityLabel={checkedItems === totalItems ? "Deselect all items" : "Select all items"}
                 accessibilityRole="button"
