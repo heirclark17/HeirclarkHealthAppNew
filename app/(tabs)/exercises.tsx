@@ -66,6 +66,7 @@ const EQUIPMENT_TYPES: { key: EquipmentFilter; label: string }[] = [
   { key: 'dumbbell', label: 'Dumbbells' },
   { key: 'barbell', label: 'Barbell' },
   { key: 'cable', label: 'Cable' },
+  { key: 'kettlebell', label: 'Kettlebell' },
   { key: 'resistance band', label: 'Bands' },
   { key: 'machine', label: 'Machine' },
 ];
