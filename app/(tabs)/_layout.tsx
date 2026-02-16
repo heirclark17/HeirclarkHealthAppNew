@@ -157,12 +157,6 @@ interface TabConfig {
 
 const TAB_CONFIG: TabConfig[] = [
   {
-    name: 'index',
-    href: '/',
-    Icon: Home,
-    label: 'Home'
-  },
-  {
     name: 'goals',
     href: '/goals',
     Icon: Flag,
@@ -409,6 +403,111 @@ function FloatingActionButton({
 }
 
 // ============================================================================
+// Floating Home Button
+// Separate glass button to the left of the tab bar for the dashboard
+// ============================================================================
+
+function FloatingHomeButton({
+  style,
+  isDark,
+  isActive,
+}: {
+  style?: any;
+  isDark: boolean;
+  isActive: boolean;
+}) {
+  const router = useRouter();
+  const colors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
+
+  const scale = useSharedValue(1);
+
+  const handlePressIn = useCallback(() => {
+    if (withSpring) {
+      scale.value = withSpring(0.9, PRESS_SPRING);
+    }
+    rigidImpact();
+  }, []);
+
+  const handlePressOut = useCallback(() => {
+    if (withSpring) {
+      scale.value = withSpring(1, GLASS_SPRING);
+    }
+  }, []);
+
+  const handlePress = useCallback(() => {
+    if (!isActive) {
+      selectionFeedback();
+    }
+    router.push('/(tabs)/');
+  }, [isActive, router]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const glassStyle = {
+    borderRadius: FAB_SIZE / 2,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+  };
+
+  const shadowStyle = Platform.select({
+    ios: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+    },
+    android: {
+      elevation: 0,
+    },
+    default: {
+      boxShadow: 'none',
+    },
+  });
+
+  const AnimatedViewComponent = Animated !== View ? Animated.View : View;
+
+  return (
+    <AnimatedViewComponent style={[styles.fabContainer, style, animatedStyle]}>
+      <Pressable
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={styles.fab}
+        accessibilityLabel="Home dashboard"
+        accessibilityRole="button"
+      >
+        {LiquidGlassView && isLiquidGlassSupported ? (
+          <LiquidGlassView
+            interactive
+            effect="regular"
+            colorScheme={isDark ? 'dark' : 'light'}
+            style={[StyleSheet.absoluteFill, glassStyle, shadowStyle]}
+          />
+        ) : (
+          <BlurView
+            intensity={isDark ? 60 : 80}
+            tint={isDark ? 'dark' : 'light'}
+            style={[
+              StyleSheet.absoluteFill,
+              glassStyle,
+              shadowStyle,
+              { backgroundColor: colors.fabBackground },
+            ]}
+          />
+        )}
+
+        <Home
+          size={26}
+          color={isActive ? colors.iconActive : colors.iconInactive}
+        />
+      </Pressable>
+    </AnimatedViewComponent>
+  );
+}
+
+// ============================================================================
 // Liquid Glass Active Indicator
 // Animated pill that slides between tabs with liquid glass effect
 // ============================================================================
@@ -572,20 +671,25 @@ function LiquidGlassTabBar({
   const pathname = usePathname();
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Determine active tab index from pathname
+  // Determine active tab index from pathname (-1 means Home is active)
   const activeTabIndex = useMemo(() => {
     const path = pathname.replace('/(tabs)', '').replace(/^\//, '');
+    if (path === '' || path === 'index') return -1; // Home is separate
     const index = TAB_CONFIG.findIndex(tab => {
-      if (tab.name === 'index' && (path === '' || path === 'index')) return true;
       return path === tab.name || path.startsWith(tab.name + '/');
     });
-    return index >= 0 ? index : 0;
+    return index >= 0 ? index : -1;
   }, [pathname]);
 
   // Calculate dimensions - iOS 26 capsule layout
-  const tabBarWidth = screenWidth - (HORIZONTAL_MARGIN * 2) - FAB_SIZE - FAB_GAP;
-  const tabBarLeft = HORIZONTAL_MARGIN;
+  // [Home FAB] [Tab Bar] [+ FAB]
+  const homeLeft = HORIZONTAL_MARGIN;
+  const tabBarLeft = homeLeft + FAB_SIZE + FAB_GAP;
+  const tabBarWidth = screenWidth - (HORIZONTAL_MARGIN * 2) - (FAB_SIZE * 2) - (FAB_GAP * 2);
   const fabLeft = tabBarLeft + tabBarWidth + FAB_GAP;
+
+  // Check if Home is the active tab
+  const isHomeActive = activeTabIndex < 0 || pathname === '/' || pathname === '/(tabs)' || pathname === '/(tabs)/index';
 
   // Calculate total content width for scrollable tabs
   const totalTabsWidth = (TAB_ITEM_WIDTH + TAB_ITEM_SPACING) * TAB_CONFIG.length + (INDICATOR_PADDING * 2);
@@ -644,6 +748,19 @@ function LiquidGlassTabBar({
         }
       ]}
     >
+      {/* Floating Home Button - left of tab bar */}
+      <FloatingHomeButton
+        isDark={isDark}
+        isActive={isHomeActive}
+        style={{
+          position: 'absolute',
+          left: homeLeft,
+          width: FAB_SIZE,
+          height: FAB_SIZE,
+          top: (TAB_BAR_HEIGHT - FAB_SIZE) / 2,
+        }}
+      />
+
       {/* Tab Bar Capsule */}
       <View
         style={[
@@ -708,12 +825,14 @@ function LiquidGlassTabBar({
           snapToInterval={TAB_ITEM_WIDTH + TAB_ITEM_SPACING}
           snapToAlignment="center"
         >
-          {/* Liquid Glass Active Indicator - renders behind tabs */}
-          <LiquidGlassIndicator
-            activeIndex={activeTabIndex}
-            tabCount={TAB_CONFIG.length}
-            isDark={isDark}
-          />
+          {/* Liquid Glass Active Indicator - renders behind tabs (hidden when Home is active) */}
+          {activeTabIndex >= 0 && (
+            <LiquidGlassIndicator
+              activeIndex={activeTabIndex}
+              tabCount={TAB_CONFIG.length}
+              isDark={isDark}
+            />
+          )}
 
           {/* Tab Buttons */}
           {TAB_CONFIG.map((tab) => (
@@ -766,6 +885,7 @@ export default function TabLayout() {
 
       {/* Hidden TabList for route definitions */}
       <TabList style={styles.hiddenTabList}>
+        <TabTrigger name="index" href="/" />
         {TAB_CONFIG.map((tab) => (
           <TabTrigger key={tab.name} name={tab.name} href={tab.href} />
         ))}
