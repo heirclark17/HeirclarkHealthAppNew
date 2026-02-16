@@ -287,7 +287,7 @@ export class SchedulingEngine {
       if (mealPattern?.preferredWindow && mealPattern.completionRate > 0.6) {
         preferredTime = mealPattern.preferredWindow;
       } else if (meal.title.toLowerCase().includes('breakfast')) {
-        preferredTime = this.addMinutesToTime(preferences.wakeTime, 30);
+        preferredTime = this.addMinutesToTime(preferences.wakeTime, 15);
       } else if (meal.title.toLowerCase().includes('lunch')) {
         preferredTime = '12:00';
       } else if (meal.title.toLowerCase().includes('dinner')) {
@@ -493,16 +493,16 @@ export class SchedulingEngine {
 
     // Buffer needed AFTER a block type
     const getBufferAfter = (blockType: string): number => {
-      if (blockType === 'sleep') return 60; // Morning routine
-      if (blockType === 'calendar_event') return 45; // Transition from meetings
-      if (blockType === 'workout') return 20; // Cooldown/shower
+      if (blockType === 'sleep') return 15; // Quick morning routine
+      if (blockType === 'calendar_event') return 15; // Quick break after meetings
+      if (blockType === 'workout') return 15; // Quick shower/cooldown
       return PLANNER_CONSTANTS.DEFAULT_BUFFER; // 10 min default
     };
 
     // Buffer needed BEFORE a block type
     const getBufferBefore = (blockType?: string): number => {
-      if (blockType === 'workout') return 30; // Prep/commute
-      if (blockType === 'meal_eating' || blockType === 'meal_prep') return 15; // Transition to meal
+      if (blockType === 'workout') return 15; // Quick prep/change
+      if (blockType === 'meal_eating' || blockType === 'meal_prep') return 5; // Minimal transition
       return PLANNER_CONSTANTS.DEFAULT_BUFFER; // 10 min default
     };
 
