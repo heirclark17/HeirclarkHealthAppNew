@@ -98,7 +98,7 @@ export function DailyTimelineView() {
           <TimeSlotGrid />
           <CurrentTimeIndicator />
 
-          {timeline.blocks.map((block) => (
+          {timeline.blocks.filter((block) => block.type !== 'buffer').map((block) => (
             <TimeBlockCard
               key={block.id}
               block={block}
