@@ -180,19 +180,22 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       console.error('[AI Scheduler] ⚠️  AI generated conflicting blocks - this should not happen!');
     }
 
+    // MERGE: Add calendar blocks to final timeline
+    const allBlocks = [...blocks, ...request.calendarBlocks];
+
     // Log final blocks after all validation
-    console.log('[AI Scheduler] Final blocks AFTER validation:');
-    blocks.forEach(block => {
+    console.log('[AI Scheduler] Final blocks AFTER validation (with calendar events):');
+    allBlocks.forEach(block => {
       console.log(`  ${block.type}: ${block.title} | ${block.startTime}-${block.endTime}`);
     });
 
-    // Calculate stats
+    // Calculate stats (exclude calendar blocks from stats)
     const stats = calculateStats(blocks, request.preferences);
 
     // Build timeline
     const timeline: DailyTimeline = {
       date: request.date,
-      blocks,
+      blocks: allBlocks,
       completionRate: 0,
       totalScheduledMinutes: stats.totalScheduledMinutes,
       totalFreeMinutes: stats.totalFreeMinutes,
@@ -223,13 +226,23 @@ function buildSchedulingPrompt(request: SchedulingRequest): string {
 - Sleep: ${preferences.sleepTime} to ${preferences.wakeTime}
 
 **Intermittent Fasting:**
-${isFasting ? `- 🚨 FASTING ACTIVE - STRICT RULES:
-  - YOU CAN ONLY SCHEDULE MEALS BETWEEN ${lifeContext.fastingEnd} AND ${lifeContext.fastingStart}
-  - BEFORE ${lifeContext.fastingEnd} = FASTING (NO MEALS ALLOWED)
-  - AFTER ${lifeContext.fastingStart} = FASTING (NO MEALS ALLOWED)
-  - Example: If window is 12:00-20:00, you can schedule meals at 12:30, 15:00, 19:00
-  - Example: If window is 12:00-20:00, you CANNOT schedule meals at 08:00, 10:00, 21:00, 22:00` : '- Not active'}
-${isCheatDay ? '- CHEAT DAY: No fasting restrictions' : ''}
+${isFasting ? `- 🚨 FASTING ACTIVE - EATING WINDOW: ${lifeContext.fastingEnd} TO ${lifeContext.fastingStart}
+
+  STRICT MEAL SCHEDULING RULES:
+  - Fasting ENDS at ${lifeContext.fastingEnd} → Eating window OPENS
+  - Fasting STARTS at ${lifeContext.fastingStart} → Eating window CLOSES
+  - ALL meals must have BOTH start AND end times within ${lifeContext.fastingEnd}-${lifeContext.fastingStart}
+
+  EXAMPLES (for ${lifeContext.fastingEnd}-${lifeContext.fastingStart} window):
+  ✅ VALID: Meal at ${lifeContext.fastingEnd === '12:00' ? '12:30-13:00' : '13:00-13:30'} (inside window)
+  ✅ VALID: Meal at ${lifeContext.fastingEnd === '12:00' ? '15:00-15:45' : '16:00-16:45'} (inside window)
+  ✅ VALID: Meal at ${lifeContext.fastingEnd === '12:00' ? '19:00-19:45' : '18:00-18:45'} (ends before ${lifeContext.fastingStart})
+  ❌ INVALID: Meal at 08:00-08:30 (BEFORE ${lifeContext.fastingEnd} - still fasting!)
+  ❌ INVALID: Meal at 11:00-11:30 (BEFORE ${lifeContext.fastingEnd} - still fasting!)
+  ❌ INVALID: Meal at 11:30-12:30 (STARTS before ${lifeContext.fastingEnd} - WRONG!)
+  ❌ INVALID: Meal at 19:30-20:30 (ENDS after ${lifeContext.fastingStart} - WRONG!)
+  ❌ INVALID: Meal at 20:00-20:30 (STARTS at/after ${lifeContext.fastingStart} - window closed!)` : '- Not active'}
+${isCheatDay ? '- 🎂 CHEAT DAY: No fasting restrictions today - schedule meals anytime' : ''}
 
 **Workouts to Schedule:**
 ${workoutBlocks.length > 0 ? workoutBlocks.map(w => `- ${w.title} (${w.duration} min)`).join('\n') : '- None'}
