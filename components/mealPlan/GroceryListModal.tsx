@@ -792,11 +792,11 @@ const styles = StyleSheet.create({
   },
   progressSection: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 6,
+    paddingTop: 4,
+    paddingBottom: 3,
   },
   progressCard: {
-    padding: 14,
+    padding: 10,
     borderRadius: Spacing.borderRadius,
   },
   progressContent: {
@@ -1057,14 +1057,14 @@ const styles = StyleSheet.create({
   // Compact Filters Card Styles
   budgetCard: {
     paddingHorizontal: 16,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   dietaryCard: {
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 2,
   },
   filtersCardInner: {
-    paddingVertical: 14,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: Spacing.borderRadius,
   },
@@ -1102,7 +1102,7 @@ const styles = StyleSheet.create({
   },
   selectAllContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 4,
   },
   selectAllGlassCard: {
     borderRadius: Spacing.borderRadius,
@@ -1112,7 +1112,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 10,
     paddingHorizontal: 20,
     gap: 8,
   },
