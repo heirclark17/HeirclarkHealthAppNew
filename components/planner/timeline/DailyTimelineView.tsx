@@ -546,9 +546,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   allDayChipOOO: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#D97706', // amber
+    // Border removed - OOO chips now have same style as other all-day events
   },
   allDayChipAccent: {
     width: 4,
