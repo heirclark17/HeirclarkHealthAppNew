@@ -43,16 +43,6 @@ export default function PlannerScreen() {
 
   const weekStartDate = state.weeklyPlan?.weekStartDate;
 
-  // Day stats for calendar card
-  const dayStats = useMemo(() => {
-    const timeline = state.weeklyPlan?.days?.[state.selectedDayIndex];
-    if (!timeline) return null;
-    return {
-      completionRate: timeline.completionRate,
-      totalScheduledMinutes: timeline.totalScheduledMinutes,
-      totalFreeMinutes: timeline.totalFreeMinutes,
-    };
-  }, [state.weeklyPlan, state.selectedDayIndex]);
 
   // Compute colored dots for calendar strip (up to 3 per day from all-day events)
   const allDayEventDots = useMemo(() => {
@@ -124,7 +114,6 @@ export default function PlannerScreen() {
           isRefreshing={state.isGeneratingPlan}
           onClear={actions.clearCalendar}
           allDayEventDots={allDayEventDots}
-          dayStats={dayStats}
         />
       )}
 

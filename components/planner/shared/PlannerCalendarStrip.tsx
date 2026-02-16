@@ -45,7 +45,6 @@ export function PlannerCalendarStrip({
   isRefreshing,
   onClear,
   allDayEventDots,
-  dayStats,
 }: Props) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
@@ -279,27 +278,5 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 10,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 16,
-    gap: 2,
-  },
-  statValue: {
-    fontSize: 18,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '200' as const,
-  },
-  statLabel: {
-    fontSize: 11,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
   },
 });
