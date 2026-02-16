@@ -390,7 +390,7 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              <View style={styles.overlayLabelRow}>
+              <View style={[styles.overlayLabelRow, { justifyContent: 'flex-end', paddingRight: 8, paddingLeft: 0 }]}>
                 <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
                 <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
                   Fasting
@@ -412,7 +412,7 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              <View style={styles.overlayLabelRow}>
+              <View style={[styles.overlayLabelRow, { justifyContent: 'flex-end', paddingRight: 8, paddingLeft: 0 }]}>
                 <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
                 <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
                   Fasting
