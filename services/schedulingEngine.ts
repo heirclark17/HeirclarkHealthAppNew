@@ -491,24 +491,18 @@ export class SchedulingEngine {
     // Ignore all-day blocks — they don't occupy timed slots
     existingBlocks = existingBlocks.filter(b => !b.isAllDay);
 
-    // Use intelligent buffer based on block type
-    const getRequiredBuffer = (prevBlock: TimeBlock, nextBlockType?: string): number => {
-      // After sleep → 60 min before meals
-      if (prevBlock.type === 'sleep' && (nextBlockType === 'meal_eating' || nextBlockType === 'meal_prep')) {
-        return 60;
-      }
-      // After meetings → 45 min before meals
-      if (prevBlock.type === 'calendar_event' && (nextBlockType === 'meal_eating' || nextBlockType === 'meal_prep')) {
-        return 45;
-      }
-      // Before workouts → 30 min for prep
-      if (nextBlockType === 'workout') {
-        return 30;
-      }
-      // After workouts → 20 min for cooldown
-      if (prevBlock.type === 'workout') {
-        return 20;
-      }
+    // Buffer needed AFTER a block type
+    const getBufferAfter = (blockType: string): number => {
+      if (blockType === 'sleep') return 60; // Morning routine
+      if (blockType === 'calendar_event') return 45; // Transition from meetings
+      if (blockType === 'workout') return 20; // Cooldown/shower
+      return PLANNER_CONSTANTS.DEFAULT_BUFFER; // 10 min default
+    };
+
+    // Buffer needed BEFORE a block type
+    const getBufferBefore = (blockType?: string): number => {
+      if (blockType === 'workout') return 30; // Prep/commute
+      if (blockType === 'meal_eating' || blockType === 'meal_prep') return 15; // Transition to meal
       return PLANNER_CONSTANTS.DEFAULT_BUFFER; // 10 min default
     };
 
@@ -531,11 +525,26 @@ export class SchedulingEngine {
           const blockStart = this.timeToMinutes(block.startTime);
           const blockEnd = this.timeToMinutes(block.endTime);
 
-          // Determine required buffer after this existing block
-          const bufferAfter = getRequiredBuffer(block, blockType);
+          // Get required buffers
+          const bufferAfter = getBufferAfter(block.type);
+          const bufferBefore = getBufferBefore(blockType);
 
-          // Conflict if candidate overlaps OR is too close to an existing block
-          return (candStart < blockEnd + bufferAfter && candEnd > blockStart);
+          // Check if candidate violates buffer after existing block
+          if (candStart >= blockEnd && candStart < blockEnd + bufferAfter) {
+            return true; // Too soon after existing block
+          }
+
+          // Check if candidate violates buffer before existing block
+          if (candEnd > blockStart - bufferBefore && candEnd <= blockStart) {
+            return true; // Too close to start of existing block
+          }
+
+          // Check for direct overlap
+          if (candStart < blockEnd && candEnd > blockStart) {
+            return true; // Overlaps existing block
+          }
+
+          return false;
         });
 
         if (!hasConflict) {
@@ -563,8 +572,16 @@ export class SchedulingEngine {
         const hasConflict = existingBlocks.some(block => {
           const blockStart = this.timeToMinutes(block.startTime);
           const blockEnd = this.timeToMinutes(block.endTime);
-          const bufferAfter = getRequiredBuffer(block, blockType);
-          return (candStart < blockEnd + bufferAfter && candEnd > blockStart);
+
+          const bufferAfter = getBufferAfter(block.type);
+          const bufferBefore = getBufferBefore(blockType);
+
+          // Check all buffer violations and overlaps
+          if (candStart >= blockEnd && candStart < blockEnd + bufferAfter) return true;
+          if (candEnd > blockStart - bufferBefore && candEnd <= blockStart) return true;
+          if (candStart < blockEnd && candEnd > blockStart) return true;
+
+          return false;
         });
 
         if (!hasConflict) {
@@ -586,16 +603,17 @@ export class SchedulingEngine {
     if (sorted.length > 0) {
       const firstStart = this.timeToMinutes(sorted[0].startTime);
       const sleepBlock = sorted.find(b => b.type === 'sleep');
-      const bufferAfterWake = sleepBlock ? getRequiredBuffer(sleepBlock, blockType) : 30;
-      if (wakeMinutes + duration + bufferAfterWake <= firstStart) {
+      const bufferAfterWake = sleepBlock ? getBufferAfter(sleepBlock.type) : 30;
+      const bufferBefore = getBufferBefore(blockType);
+      if (wakeMinutes + bufferAfterWake + duration + bufferBefore <= firstStart) {
         return this.minutesToTime(wakeMinutes + bufferAfterWake);
       }
     }
 
     // Check gaps between blocks
     for (let i = 0; i < sorted.length - 1; i++) {
-      const bufferAfter = getRequiredBuffer(sorted[i], blockType);
-      const bufferBefore = blockType === 'workout' ? 30 : PLANNER_CONSTANTS.DEFAULT_BUFFER;
+      const bufferAfter = getBufferAfter(sorted[i].type);
+      const bufferBefore = getBufferBefore(blockType);
       const gapStart = this.timeToMinutes(sorted[i].endTime) + bufferAfter;
       const gapEnd = this.timeToMinutes(sorted[i + 1].startTime) - bufferBefore;
       if (gapEnd - gapStart >= duration) {
@@ -605,7 +623,7 @@ export class SchedulingEngine {
 
     // Check gap after last block
     if (sorted.length > 0) {
-      const bufferAfter = getRequiredBuffer(sorted[sorted.length - 1], blockType);
+      const bufferAfter = getBufferAfter(sorted[sorted.length - 1].type);
       const lastEnd = this.timeToMinutes(sorted[sorted.length - 1].endTime) + bufferAfter;
       if (lastEnd + duration <= sleepMinutes) {
         return this.minutesToTime(lastEnd);
