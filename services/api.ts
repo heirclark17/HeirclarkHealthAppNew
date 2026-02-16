@@ -2744,25 +2744,57 @@ class HeirclarkAPI {
    */
   async saveWeeklyPlan(weeklyPlan: any): Promise<boolean> {
     try {
+      // Slim the payload: keep only essential fields per block to avoid
+      // Railway timeouts on large JSON inserts.
+      const slimPlan = {
+        weekStartDate: weeklyPlan.weekStartDate,
+        generatedAt: weeklyPlan.generatedAt,
+        weeklyStats: weeklyPlan.weeklyStats,
+        days: (weeklyPlan.days || []).map((day: any) => ({
+          date: day.date,
+          dayOfWeek: day.dayOfWeek,
+          completionRate: day.completionRate,
+          totalScheduledMinutes: day.totalScheduledMinutes,
+          totalFreeMinutes: day.totalFreeMinutes,
+          blocks: (day.blocks || [])
+            .filter((b: any) => b.type !== 'calendar_event' && b.type !== 'buffer')
+            .map((b: any) => ({
+              id: b.id, type: b.type, title: b.title,
+              startTime: b.startTime, endTime: b.endTime,
+              duration: b.duration, status: b.status, color: b.color,
+            })),
+        })),
+      };
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch(`${this.baseUrl}/api/v1/planner/weekly-plan`, {
         method: 'POST',
         headers: this.getHeaders(true),
-        body: JSON.stringify({ weeklyPlan }),
+        body: JSON.stringify({ weeklyPlan: slimPlan }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
 
       if (!response.ok) {
-        console.error('[API] Save weekly plan failed:', response.status);
+        console.warn('[API] Save weekly plan failed:', response.status);
         return false;
       }
 
       const data = await response.json();
       if (data.success) {
-        console.log('[API] ✅ Weekly plan saved (calendar events filtered)');
+        console.log('[API] ✅ Weekly plan saved');
         return true;
       }
       return false;
-    } catch (error) {
-      console.error('[API] Save weekly plan error:', error);
+    } catch (error: any) {
+      // Silently handle — this is fire-and-forget
+      if (error.name === 'AbortError') {
+        console.warn('[API] Save weekly plan timed out (non-blocking)');
+      } else {
+        console.warn('[API] Save weekly plan error:', error.message);
+      }
       return false;
     }
   }
