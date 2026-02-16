@@ -604,7 +604,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
         )}
 
         {/* Input bar */}
-        <View style={[styles.inputBar, { backgroundColor: isDark ? 'rgba(28, 28, 30, 0.98)' : 'rgba(248, 248, 250, 0.98)', paddingBottom: insets.bottom + 60 }]}>
+        <View style={[styles.inputBar, { backgroundColor: isDark ? 'rgba(28, 28, 30, 0.98)' : 'rgba(248, 248, 250, 0.98)', paddingBottom: insets.bottom + 110 }]}>
           <TextInput
             style={[
               styles.textInput,
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
   messageList: {
     paddingHorizontal: 16,
     paddingTop: 12,
-    paddingBottom: 8,
+    paddingBottom: 160,
   },
   messageBubble: {
     maxWidth: '82%',
@@ -815,11 +815,15 @@ const styles = StyleSheet.create({
   },
   // Input bar
   inputBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 8,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingTop: 12,
   },
   textInput: {
     flex: 1,
