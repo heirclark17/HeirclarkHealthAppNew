@@ -11,6 +11,12 @@ import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
+interface DayStats {
+  completionRate: number;
+  totalScheduledMinutes: number;
+  totalFreeMinutes: number;
+}
+
 interface Props {
   selectedDate: string; // YYYY-MM-DD
   onDateChange: (date: string) => void;
@@ -21,6 +27,7 @@ interface Props {
   isRefreshing?: boolean;
   onClear?: () => void;
   allDayEventDots?: Record<string, string[]>; // dateStr -> array of up to 3 event colors
+  dayStats?: DayStats | null;
 }
 
 function parseLocalDate(dateStr: string): Date {
@@ -45,6 +52,7 @@ export function PlannerCalendarStrip({
   isRefreshing,
   onClear,
   allDayEventDots,
+  dayStats,
 }: Props) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
@@ -197,6 +205,30 @@ export function PlannerCalendarStrip({
           );
         })}
       </ScrollView>
+
+      {/* Day stats row */}
+      {dayStats && (
+        <View style={[styles.statsRow, { borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }]}>
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, { color: themeColors.primary }]}>{dayStats.completionRate}%</Text>
+            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Completed</Text>
+          </View>
+          <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, { color: themeColors.primary }]}>
+              {Math.round(dayStats.totalScheduledMinutes / 60)}h
+            </Text>
+            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Scheduled</Text>
+          </View>
+          <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, { color: themeColors.primary }]}>
+              {Math.round(dayStats.totalFreeMinutes / 60)}h
+            </Text>
+            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Free Time</Text>
+          </View>
+        </View>
+      )}
     </GlassCard>
   );
 }
@@ -278,5 +310,32 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: 10,
+    paddingTop: 10,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+  },
+  statValue: {
+    fontSize: 18,
+    fontFamily: Fonts.numericLight,
+    fontWeight: '200' as const,
+  },
+  statLabel: {
+    fontSize: 11,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+  },
+  statDivider: {
+    width: StyleSheet.hairlineWidth,
+    height: 28,
   },
 });
