@@ -21,55 +21,6 @@ interface Props {
   isRefreshing?: boolean;
 }
 
-/**
- * Returns US holiday name for a date string, or null if not a holiday.
- * Covers fixed-date and floating federal holidays.
- */
-function getHolidayName(dateStr: string): string | null {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  const dow = date.getDay(); // 0=Sun
-
-  // Fixed-date holidays
-  if (month === 1 && day === 1) return "New Year's";
-  if (month === 6 && day === 19) return 'Juneteenth';
-  if (month === 7 && day === 4) return 'July 4th';
-  if (month === 11 && day === 11) return "Veterans Day";
-  if (month === 12 && day === 25) return 'Christmas';
-  if (month === 12 && day === 31) return "New Year's Eve";
-  if (month === 2 && day === 14) return "Valentine's";
-  if (month === 10 && day === 31) return 'Halloween';
-
-  // Floating holidays (Nth weekday of month)
-  const weekOfMonth = Math.ceil(day / 7);
-
-  // MLK Day: 3rd Monday of January
-  if (month === 1 && dow === 1 && weekOfMonth === 3) return 'MLK Day';
-
-  // Presidents' Day: 3rd Monday of February
-  if (month === 2 && dow === 1 && weekOfMonth === 3) return "Presidents'";
-
-  // Memorial Day: last Monday of May
-  if (month === 5 && dow === 1 && day > 24) return 'Memorial Day';
-
-  // Labor Day: 1st Monday of September
-  if (month === 9 && dow === 1 && weekOfMonth === 1) return 'Labor Day';
-
-  // Columbus Day: 2nd Monday of October
-  if (month === 10 && dow === 1 && weekOfMonth === 2) return 'Columbus Day';
-
-  // Thanksgiving: 4th Thursday of November
-  if (month === 11 && dow === 4 && weekOfMonth === 4) return 'Thanksgiving';
-
-  // Mother's Day: 2nd Sunday of May
-  if (month === 5 && dow === 0 && weekOfMonth === 2) return "Mother's Day";
-
-  // Father's Day: 3rd Sunday of June
-  if (month === 6 && dow === 0 && weekOfMonth === 3) return "Father's Day";
-
-  return null;
-}
-
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
   return new Date(year, month - 1, day);
@@ -128,7 +79,6 @@ export function PlannerCalendarStrip({
         date: date.getDate(),
         dateStr,
         isToday: dateStr === todayStr,
-        holiday: getHolidayName(dateStr),
       });
     }
 
@@ -230,18 +180,7 @@ export function PlannerCalendarStrip({
               >
                 {item.date}
               </Text>
-              {item.holiday && (
-                <Text
-                  style={[
-                    styles.holidayLabel,
-                    { color: isSelected ? (isDark ? '#000' : '#fff') : themeColors.text },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {item.holiday}
-                </Text>
-              )}
-              {item.isToday && !isSelected && !item.holiday && (
+              {item.isToday && !isSelected && (
                 <View style={[styles.todayDot, { backgroundColor: themeColors.primary }]} />
               )}
             </TouchableOpacity>
@@ -314,12 +253,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
-  },
-  holidayLabel: {
-    fontSize: 7,
-    fontFamily: Fonts.semiBold,
-    textAlign: 'center',
-    maxWidth: 46,
   },
   todayDot: {
     width: 4,
