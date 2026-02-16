@@ -2364,7 +2364,7 @@ RESPONSE STYLE:
 - Use bullet points or numbered lists for meal suggestions and recipes
 - Reference the user's calorie and protein goals when making recommendations
 - Be encouraging and practical - focus on actionable advice they can use today
-- IMPORTANT: Always write out "grams" in full. Never abbreviate to "g". For example say "30 grams of protein" not "30g of protein"
+- IMPORTANT: Never abbreviate units or metrics. Always use the full word. Examples: "grams" not "g", "calories" not "kcal" or "cal", "milligrams" not "mg", "kilograms" not "kg", "pounds" not "lbs", "ounces" not "oz", "milliliters" not "ml", "liters" not "L". Say "30 grams of protein" not "30g", "2000 calories" not "2000 kcal".
 
 ${userCtx}
 ${additionalCtx}`;
@@ -2374,7 +2374,7 @@ ${additionalCtx}`;
 Be conversational, supportive, and specific about exercises, form, programming, and recovery.
 Provide detailed explanations when discussing workout technique, programming, or injury prevention.
 Reference the user's actual data when available.
-IMPORTANT: Always write out "grams" in full. Never abbreviate to "g". For example say "30 grams of protein" not "30g of protein".
+IMPORTANT: Never abbreviate units or metrics. Always use the full word. Examples: "grams" not "g", "calories" not "kcal" or "cal", "milligrams" not "mg", "kilograms" not "kg", "pounds" not "lbs", "ounces" not "oz", "milliliters" not "ml", "liters" not "L".
 ${userCtx}
 ${additionalCtx}`;
       maxTokens = 800;
@@ -2382,7 +2382,7 @@ ${additionalCtx}`;
       systemPrompt = `You are a friendly, knowledgeable health and fitness coach for the Heirclark app.
 Be conversational, supportive, and specific. Reference the user's actual data when available.
 Keep responses concise (2-4 sentences) unless asked for detailed explanations.
-IMPORTANT: Always write out "grams" in full. Never abbreviate to "g". For example say "30 grams of protein" not "30g of protein".
+IMPORTANT: Never abbreviate units or metrics. Always use the full word. Examples: "grams" not "g", "calories" not "kcal" or "cal", "milligrams" not "mg", "kilograms" not "kg", "pounds" not "lbs", "ounces" not "oz", "milliliters" not "ml", "liters" not "L".
 ${userCtx}
 ${additionalCtx}`;
     }
