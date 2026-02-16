@@ -7,7 +7,6 @@ import {
   User,
   Activity,
   Weight,
-  Ruler,
   Calendar,
   Utensils,
   Heart,
@@ -16,34 +15,22 @@ import {
   Beef,
   Wheat,
   Nut,
-  Leaf,
   Lightbulb,
-  Sparkles,
-  AlertTriangle,
-  UtensilsCrossed,
-  Fish,
-  Pizza,
-  IceCream,
-  XCircle,
   Settings as SettingsIcon,
   Timer,
-  ChefHat,
   Play,
-  BookOpen,
   ChevronRight
 } from 'lucide-react-native';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { NumberText } from '../NumberText';
 import { useSettings } from '../../contexts/SettingsContext';
-import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { useTraining } from '../../contexts/TrainingContext';
 import { successNotification, lightImpact } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 import {
   generateWorkoutGuidance,
   generateDailyGuidance,
-  generateNutritionGuidance
 } from '../../services/openaiService';
 import { GoalAlignmentCard } from '../training/GoalAlignmentCard';
 import { PlanSummaryCard } from './PlanSummaryCard';
@@ -62,7 +49,6 @@ interface SuccessScreenProps {
 export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvatar, onStartMealPlan, onStartTrainingPlan, isGeneratingMealPlan, isGeneratingTrainingPlan }: SuccessScreenProps) {
   const { state, resetWizard, calculateResults } = useGoalWizard();
   const { settings } = useSettings();
-  const foodPrefs = useFoodPreferencesSafe();
   const { state: trainingState, getEnhancedPrograms } = useTraining();
   const { goalAlignment, preferences, planSummary } = trainingState;
   const hasPlayedHaptic = useRef(false);
@@ -71,10 +57,8 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   // AI-generated content state
   const [workoutGuidance, setWorkoutGuidance] = useState<string>('');
   const [dailyGuidance, setDailyGuidance] = useState<string>('');
-  const [nutritionGuidance, setNutritionGuidance] = useState<string>('');
   const [isLoadingWorkout, setIsLoadingWorkout] = useState(false);
   const [isLoadingDaily, setIsLoadingDaily] = useState(false);
-  const [isLoadingNutrition, setIsLoadingNutrition] = useState(false);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -175,36 +159,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
     generateDaily();
   }, [state.results, state.primaryGoal, state.currentWeight, state.targetWeight]);
-
-  // Generate AI nutrition guidance
-  useEffect(() => {
-    async function generateNutrition() {
-      if (nutritionGuidance || isLoadingNutrition) return;
-
-      setIsLoadingNutrition(true);
-      try {
-        const guidance = await generateNutritionGuidance({
-          dietStyle: state.dietStyle,
-          allergies: state.allergies,
-          favoriteCuisines: foodPrefs?.preferences?.favoriteCuisines,
-          cookingTime: foodPrefs?.preferences?.cookingTime,
-          budgetLevel: foodPrefs?.preferences?.budgetLevel,
-          mealsPerDay: state.mealsPerDay,
-          intermittentFasting: state.intermittentFasting,
-          fastingWindow: state.fastingWindow,
-          dislikedIngredients: foodPrefs?.preferences?.hatedFoods?.split(',').map((f: string) => f.trim()),
-        });
-        setNutritionGuidance(guidance);
-      } catch (error) {
-        console.error('[SuccessScreen] Error generating nutrition guidance:', error);
-        setNutritionGuidance('Your personalized nutrition guidance is being prepared. Focus on whole foods and consistent meal timing.');
-      } finally {
-        setIsLoadingNutrition(false);
-      }
-    }
-
-    generateNutrition();
-  }, [state.dietStyle, state.allergies, state.mealsPerDay, foodPrefs?.preferences]);
 
   const handleLogMeal = () => {
     lightImpact();
@@ -594,265 +548,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           )}
         </GlassCard>
       </View>
-
-      {/* Food Preferences Section */}
-      {foodPrefs && (
-        <View>
-          <GlassCard style={styles.foodPreferencesCard} interactive>
-            <View style={styles.foodPrefsHeader}>
-              <View style={styles.foodPrefsIconContainer}>
-                <Utensils size={24} color={Colors.success} />
-              </View>
-              <View style={styles.foodPrefsHeaderText}>
-                <Text style={[styles.foodPrefsTitle, { fontFamily: Fonts.light }]}>YOUR NUTRITION PREFERENCES</Text>
-                <Text style={[styles.foodPrefsSubtitle, { color: colors.text, fontFamily: Fonts.light }]}>
-                  Your personalized meal preferences
-                </Text>
-              </View>
-            </View>
-
-            {/* Dietary Preferences */}
-            {foodPrefs?.preferences?.dietaryPreferences && foodPrefs.preferences.dietaryPreferences.length > 0 && (
-              <GlassCard style={styles.prefCard} interactive>
-                <View style={styles.prefSection}>
-                  <View style={styles.prefRow}>
-                    <Leaf size={16} color={colors.textMuted} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Dietary Style</Text>
-                  </View>
-                  <View style={styles.prefTagsRow}>
-                    {foodPrefs.preferences.dietaryPreferences.map((pref, index) => (
-                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                        <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
-                          {pref.charAt(0).toUpperCase() + pref.slice(1).replace('_', ' ')}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </GlassCard>
-            )}
-
-            {/* Allergens */}
-            {foodPrefs?.preferences?.allergens && foodPrefs.preferences.allergens.length > 0 && (
-              <GlassCard style={styles.prefCard} interactive>
-                <View style={styles.prefSection}>
-                  <View style={styles.prefRow}>
-                    <AlertTriangle size={16} color={Colors.error} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Allergens to Avoid</Text>
-                  </View>
-                  <View style={styles.prefTagsRow}>
-                    {foodPrefs.preferences.allergens.map((allergen, index) => (
-                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
-                        <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
-                          {allergen.charAt(0).toUpperCase() + allergen.slice(1)}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </GlassCard>
-            )}
-
-            {/* Favorite Cuisines */}
-            {foodPrefs?.preferences?.favoriteCuisines && foodPrefs.preferences.favoriteCuisines.length > 0 && (
-              <GlassCard style={styles.prefCard} interactive>
-                <View style={styles.prefSection}>
-                  <View style={styles.prefRow}>
-                    <UtensilsCrossed size={16} color={colors.textMuted} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Cuisines</Text>
-                  </View>
-                  <View style={styles.prefTagsRow}>
-                    {foodPrefs.preferences.favoriteCuisines.map((cuisine, index) => (
-                      <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
-                        <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
-                          {cuisine.charAt(0).toUpperCase() + cuisine.slice(1).replace('_', ' ')}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </GlassCard>
-            )}
-
-            {/* Favorite Proteins */}
-            {foodPrefs?.preferences?.favoriteProteins && foodPrefs.preferences.favoriteProteins.length > 0 && (
-              <GlassCard style={styles.prefCard} interactive>
-                <View style={styles.prefSection}>
-                  <View style={styles.prefRow}>
-                    <Fish size={16} color={colors.protein} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Proteins</Text>
-                  </View>
-                  <View style={styles.prefTagsRow}>
-                    {foodPrefs.preferences.favoriteProteins.map((protein, index) => (
-                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
-                        <Text style={[styles.prefTagText, { color: colors.protein, fontFamily: Fonts.light }]}>
-                          {protein.charAt(0).toUpperCase() + protein.slice(1).replace('_', ' ')}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </GlassCard>
-            )}
-
-            {/* Favorite Vegetables */}
-            {foodPrefs?.preferences?.favoriteVegetables && foodPrefs.preferences.favoriteVegetables.length > 0 && (
-              <GlassCard style={styles.prefCard} interactive>
-                <View style={styles.prefSection}>
-                  <View style={styles.prefRow}>
-                    <Leaf size={16} color={Colors.success} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Vegetables</Text>
-                  </View>
-                  <View style={styles.prefTagsRow}>
-                    {foodPrefs.preferences.favoriteVegetables.map((veggie, index) => (
-                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                        <Text style={[styles.prefTagText, { color: Colors.success, fontFamily: Fonts.light }]}>
-                          {veggie.charAt(0).toUpperCase() + veggie.slice(1).replace('_', ' ')}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </GlassCard>
-            )}
-
-            {/* Favorite Starches */}
-            {foodPrefs?.preferences?.favoriteStarches && foodPrefs.preferences.favoriteStarches.length > 0 && (
-              <GlassCard style={styles.prefCard} interactive>
-                <View style={styles.prefSection}>
-                  <View style={styles.prefRow}>
-                    <Pizza size={16} color={colors.carbs} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Starches</Text>
-                  </View>
-                  <View style={styles.prefTagsRow}>
-                    {foodPrefs.preferences.favoriteStarches.map((starch, index) => (
-                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
-                        <Text style={[styles.prefTagText, { color: colors.carbs, fontFamily: Fonts.light }]}>
-                          {starch.charAt(0).toUpperCase() + starch.slice(1).replace('_', ' ')}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </GlassCard>
-            )}
-
-            {/* Favorite Snacks */}
-            {foodPrefs?.preferences?.favoriteSnacks && foodPrefs.preferences.favoriteSnacks.length > 0 && (
-              <GlassCard style={styles.prefCard} interactive>
-                <View style={styles.prefSection}>
-                  <View style={styles.prefRow}>
-                    <IceCream size={16} color={colors.textMuted} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Favorite Snacks</Text>
-                  </View>
-                  <View style={styles.prefTagsRow}>
-                    {foodPrefs.preferences.favoriteSnacks.map((snack, index) => (
-                      <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
-                        <Text style={[styles.prefTagText, { color: colors.text, fontFamily: Fonts.light }]}>
-                          {snack.charAt(0).toUpperCase() + snack.slice(1).replace('_', ' ')}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </GlassCard>
-            )}
-
-            {/* Hated Foods */}
-            {foodPrefs?.preferences?.hatedFoods && foodPrefs.preferences.hatedFoods.trim().length > 0 && (
-              <GlassCard style={styles.prefCard} interactive>
-                <View style={styles.prefSection}>
-                  <View style={styles.prefRow}>
-                    <XCircle size={16} color={Colors.error} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Foods to Avoid</Text>
-                  </View>
-                  <View style={styles.prefTagsRow}>
-                    {foodPrefs.preferences.hatedFoods.split(',').map((food, index) => (
-                      <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
-                        <Text style={[styles.prefTagText, { color: Colors.error, fontFamily: Fonts.light }]}>
-                          {food.trim().charAt(0).toUpperCase() + food.trim().slice(1).replace('_', ' ')}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              </GlassCard>
-            )}
-
-            {/* Meal Planning Preferences */}
-            <GlassCard style={styles.prefCard} interactive>
-              <View style={styles.mealPlanningSection}>
-                {/* Meal Diversity */}
-                {foodPrefs?.preferences?.mealDiversity && (
-                  <View style={styles.prefRow}>
-                    <SettingsIcon size={16} color={colors.textMuted} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Variety: </Text>
-                    <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                      {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily (Meal Prep)' : 'Diverse Meals'}
-                    </Text>
-                  </View>
-                )}
-
-                {/* Meal Style */}
-                {foodPrefs?.preferences?.mealStyle && (
-                  <View style={styles.prefRow}>
-                    <Timer size={16} color={colors.textMuted} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Meal Style: </Text>
-                    <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                      {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer, Larger Meals'}
-                    </Text>
-                  </View>
-                )}
-
-                {/* Cheat Days */}
-                {foodPrefs?.preferences?.cheatDays !== undefined && (
-                  <View style={styles.prefRow}>
-                    <Calendar size={16} color={colors.textMuted} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cheat Days: </Text>
-                    <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                      <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
-                        {foodPrefs.preferences.cheatDays.length}
-                      </NumberText> per week
-                    </Text>
-                  </View>
-                )}
-
-                {/* Cooking Skill */}
-                {foodPrefs?.preferences?.cookingSkill && (
-                  <View style={styles.prefRow}>
-                    <ChefHat size={16} color={colors.textMuted} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Cooking Skill: </Text>
-                    <Text style={[styles.prefValue, { color: colors.text, fontFamily: Fonts.light }]}>
-                      {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
-                       foodPrefs.preferences.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </GlassCard>
-
-            {/* AI-Generated Nutrition Guidance */}
-            <View style={styles.nutritionGuidanceSection}>
-              <View style={styles.guidanceHeader}>
-                <Sparkles size={18} color={Colors.success} />
-                <Text style={[styles.guidanceSectionTitle, { color: colors.text }]}>PERSONALIZED NUTRITION GUIDANCE</Text>
-              </View>
-              {isLoadingNutrition ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="small" color={Colors.success} />
-                  <Text style={[styles.loadingText, { color: colors.textMuted }]}>
-                    Generating your personalized nutrition guidance...
-                  </Text>
-                </View>
-              ) : (
-                <Text style={[styles.nutritionGuidanceText, { color: colors.textSecondary }]}>
-                  {nutritionGuidance}
-                </Text>
-              )}
-            </View>
-          </GlassCard>
-        </View>
-      )}
 
       {/* Action Cards Container */}
       <View style={styles.actionCardsContainer}>
@@ -1429,84 +1124,6 @@ const styles = StyleSheet.create({
     fontWeight: '200',
     letterSpacing: 1,
   },
-  foodPreferencesCard: {
-    width: '100%',
-    padding: 16,
-    marginBottom: 16,
-  },
-  foodPrefsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 20,
-  },
-  foodPrefsIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(78, 205, 196, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  foodPrefsHeaderText: {
-    flex: 1,
-  },
-  foodPrefsTitle: {
-    fontSize: 10,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    letterSpacing: 1.5,
-    color: Colors.success,
-  },
-  foodPrefsSubtitle: {
-    fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.text,
-  },
-  prefCard: {
-    width: '100%',
-    padding: 12,
-    marginBottom: 12,
-  },
-  prefSection: {
-    marginBottom: 0,
-  },
-  prefRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  prefLabel: {
-    fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
-    color: Colors.textMuted,
-  },
-  prefValue: {
-    fontSize: 12,
-    color: Colors.text,
-  },
-  prefTagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  prefTag: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: Colors.backgroundSecondary,
-  },
-  prefTagText: {
-    fontSize: 12,
-    color: Colors.text,
-  },
-  mealPlanningSection: {
-    gap: 12,
-    marginTop: 4,
-  },
   loadingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1517,23 +1134,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.light,
     color: Colors.textMuted,
-  },
-  nutritionGuidanceSection: {
-    marginTop: 20,
-    paddingTop: 20,
-  },
-  guidanceSectionTitle: {
-    fontSize: 11,
-    fontFamily: Fonts.medium,
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    color: Colors.text,
-  },
-  nutritionGuidanceText: {
-    fontSize: 13,
-    fontFamily: Fonts.light,
-    color: Colors.textSecondary,
-    lineHeight: 20,
-    marginTop: 12,
   },
 });
