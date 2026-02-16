@@ -214,7 +214,9 @@ export function DailyTimelineView() {
 
   // Split blocks into all-day (banner chips) vs timed (hourly grid)
   const allDayBlocks = timeline.blocks.filter((b) => b.isAllDay);
-  const timedBlocks = timeline.blocks.filter((b) => !b.isAllDay && b.type !== 'buffer');
+  const timedBlocks = timeline.blocks.filter((b) =>
+    !b.isAllDay && !['buffer', 'workout', 'meal_prep'].includes(b.type)
+  );
 
   // Collapsible logic
   const hasOverflow = allDayBlocks.length > MAX_VISIBLE_CHIPS;
