@@ -420,77 +420,93 @@ export function GroceryListModal({
           </Animated.View>
         )}
 
-        {/* Budget Tier Selector */}
+        {/* Compact Filters Card - Budget Tier & Dietary Preferences */}
         {groceryList && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(150)}
-            style={styles.filtersSection}
+            style={styles.filtersCard}
           >
-            <Text style={[styles.filterLabel, { color: glassColors.text }]}>Budget Tier</Text>
-            <View style={styles.budgetTierRow}>
-              {['low', 'medium', 'high'].map((tier) => (
-                <TouchableOpacity
-                  key={tier}
-                  style={[
-                    styles.pillButton,
-                    {
-                      backgroundColor: budgetTier === tier
-                        ? glassColors.checkboxChecked
-                        : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-                    },
-                  ]}
-                  onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
-                  accessibilityLabel={`${tier.charAt(0).toUpperCase() + tier.slice(1)} budget tier${budgetTier === tier ? ', currently selected' : ''}`}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: budgetTier === tier }}
-                  accessibilityHint={`Selects ${tier} budget tier for grocery shopping recommendations`}
+            <GlassCard intensity={isDark ? 40 : 60} style={styles.filtersCardInner}>
+              {/* Budget Tier - Horizontal Scroll */}
+              <View style={styles.filterSection}>
+                <Text style={[styles.compactFilterLabel, { color: glassColors.textSecondary }]}>
+                  Budget
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.pillScrollContainer}
                 >
-                  <Text
-                    style={[
-                      styles.pillText,
-                      { color: budgetTier === tier ? glassColors.buttonText : glassColors.text },
-                      budgetTier === tier && { fontFamily: Fonts.semiBold },
-                    ]}
-                  >
-                    {tier.charAt(0).toUpperCase() + tier.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                  {['low', 'medium', 'high'].map((tier) => (
+                    <TouchableOpacity
+                      key={tier}
+                      style={[
+                        styles.compactPillButton,
+                        {
+                          backgroundColor: budgetTier === tier
+                            ? glassColors.checkboxChecked
+                            : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                        },
+                      ]}
+                      onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
+                      accessibilityLabel={`${tier.charAt(0).toUpperCase() + tier.slice(1)} budget tier`}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: budgetTier === tier }}
+                    >
+                      <Text
+                        style={[
+                          styles.compactPillText,
+                          { color: budgetTier === tier ? glassColors.buttonText : glassColors.text },
+                          budgetTier === tier && { fontFamily: Fonts.semiBold },
+                        ]}
+                      >
+                        {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
 
-            <Text style={[styles.filterLabel, { color: glassColors.text, marginTop: 12 }]}>
-              Dietary Preferences
-            </Text>
-            <View style={styles.dietaryFiltersRow}>
-              {availableDietaryFilters.map((filter) => (
-                <TouchableOpacity
-                  key={filter}
-                  style={[
-                    styles.pillButton,
-                    {
-                      backgroundColor: dietaryFilters.includes(filter)
-                        ? glassColors.checkboxChecked
-                        : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-                    },
-                  ]}
-                  onPress={() => toggleDietaryFilter(filter)}
-                  accessibilityLabel={`${filter.charAt(0).toUpperCase() + filter.slice(1)}${dietaryFilters.includes(filter) ? ', selected' : ''}`}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: dietaryFilters.includes(filter) }}
-                  accessibilityHint={`${dietaryFilters.includes(filter) ? 'Removes' : 'Adds'} ${filter} dietary preference filter for grocery shopping`}
+              {/* Dietary Preferences - Horizontal Scroll */}
+              <View style={styles.filterSection}>
+                <Text style={[styles.compactFilterLabel, { color: glassColors.textSecondary }]}>
+                  Dietary
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.pillScrollContainer}
                 >
-                  <Text
-                    style={[
-                      styles.pillText,
-                      { color: dietaryFilters.includes(filter) ? glassColors.buttonText : glassColors.text },
-                      dietaryFilters.includes(filter) && { fontFamily: Fonts.semiBold },
-                    ]}
-                  >
-                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                  {availableDietaryFilters.map((filter) => (
+                    <TouchableOpacity
+                      key={filter}
+                      style={[
+                        styles.compactPillButton,
+                        {
+                          backgroundColor: dietaryFilters.includes(filter)
+                            ? glassColors.checkboxChecked
+                            : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+                        },
+                      ]}
+                      onPress={() => toggleDietaryFilter(filter)}
+                      accessibilityLabel={`${filter.charAt(0).toUpperCase() + filter.slice(1)}`}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: dietaryFilters.includes(filter) }}
+                    >
+                      <Text
+                        style={[
+                          styles.compactPillText,
+                          { color: dietaryFilters.includes(filter) ? glassColors.buttonText : glassColors.text },
+                          dietaryFilters.includes(filter) && { fontFamily: Fonts.semiBold },
+                        ]}
+                      >
+                        {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </GlassCard>
           </Animated.View>
         )}
 
@@ -862,6 +878,41 @@ const styles = StyleSheet.create({
   },
   pillText: {
     fontSize: 13,
+    fontFamily: Fonts.medium,
+  },
+  // Compact Filters Card Styles
+  filtersCard: {
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  filtersCardInner: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  filterSection: {
+    marginVertical: 6,
+  },
+  compactFilterLabel: {
+    fontSize: 11,
+    fontFamily: Fonts.semiBold,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  pillScrollContainer: {
+    gap: 8,
+    paddingRight: 16,
+  },
+  compactPillButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 32,
+  },
+  compactPillText: {
+    fontSize: 12,
     fontFamily: Fonts.medium,
   },
 });
