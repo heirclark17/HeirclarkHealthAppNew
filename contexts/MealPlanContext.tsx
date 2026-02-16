@@ -719,6 +719,15 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
       lastGeneratedAt: state.lastGeneratedAt,
     };
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+
+    // Sync to backend database
+    if (state.weeklyPlan && state.weeklyPlan.length > 0) {
+      const weekStart = state.weeklyPlan[0]?.date || new Date().toISOString().split('T')[0];
+      api.saveMealPlan(
+        { weeklyPlan: state.weeklyPlan, groceryList: updatedGroceryList, weekSummary: state.weekSummary },
+        weekStart
+      ).catch(err => console.error('[MealPlanContext] Backend sync error after toggle:', err));
+    }
   }, [state.groceryList, state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
 
   // Delete a grocery item from the list
@@ -751,7 +760,16 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     };
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
 
-    console.log('[MealPlanContext] 🗑️ Deleted grocery item');
+    // Sync to backend database
+    if (state.weeklyPlan && state.weeklyPlan.length > 0) {
+      const weekStart = state.weeklyPlan[0]?.date || new Date().toISOString().split('T')[0];
+      api.saveMealPlan(
+        { weeklyPlan: state.weeklyPlan, groceryList: updatedGroceryList, weekSummary: state.weekSummary },
+        weekStart
+      ).catch(err => console.error('[MealPlanContext] Backend sync error after delete:', err));
+    }
+
+    console.log('[MealPlanContext] 🗑️ Deleted grocery item and synced to database');
   }, [state.groceryList, state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
 
   // NEW: Fetch ALL recipes for entire week in ONE AI call (much faster!)
@@ -870,6 +888,24 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         lastGeneratedAt: state.lastGeneratedAt,
       };
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+
+      // Step 6: Sync grocery list to backend database for persistence
+      try {
+        console.log('[MealPlanContext] 🔄 Syncing grocery list to backend database...');
+        const weekStart = updatedWeeklyPlan[0]?.date || new Date().toISOString().split('T')[0];
+        const syncSuccess = await api.saveMealPlan(
+          { weeklyPlan: updatedWeeklyPlan, groceryList, weekSummary: state.weekSummary },
+          weekStart
+        );
+        if (syncSuccess) {
+          console.log('[MealPlanContext] ✅ Grocery list synced to database');
+        } else {
+          console.warn('[MealPlanContext] ⚠️ Failed to sync grocery list to database');
+        }
+      } catch (syncError) {
+        console.error('[MealPlanContext] ❌ Backend sync error:', syncError);
+        // Don't fail the entire operation if sync fails
+      }
     } catch (error) {
       console.error('[MealPlanContext] Grocery list generation error:', error);
       setState(prev => ({
