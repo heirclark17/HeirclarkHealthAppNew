@@ -19,6 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Leaf, Beef, Milk, Wheat, Package, Pepper, Box, ShoppingCart } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../NumberText';
 import { GroceryCategory, GroceryItem } from '../../types/mealPlan';
@@ -60,14 +61,25 @@ interface GroceryListModalProps {
   onGenerateList?: (budgetTier?: 'low' | 'medium' | 'high') => void;
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  Produce: '🥬',
-  Protein: '🥩',
-  Dairy: '🥛',
-  Grains: '🌾',
-  Pantry: '🥫',
-  Spices: '🧂',
-  Other: '📦',
+const getCategoryIcon = (category: string, color: string, size: number = 18) => {
+  const iconProps = { size, color, strokeWidth: 2 };
+
+  switch (category) {
+    case 'Produce':
+      return <Leaf {...iconProps} color="#4CAF50" />;
+    case 'Protein':
+      return <Beef {...iconProps} color="#E91E63" />;
+    case 'Dairy':
+      return <Milk {...iconProps} color="#2196F3" />;
+    case 'Grains':
+      return <Wheat {...iconProps} color="#FF9800" />;
+    case 'Pantry':
+      return <Package {...iconProps} color="#795548" />;
+    case 'Spices':
+      return <Pepper {...iconProps} color="#FF5722" />;
+    default:
+      return <Box {...iconProps} color="#9E9E9E" />;
+  }
 };
 
 const CheckboxItem = ({
@@ -172,9 +184,9 @@ const CategorySection = ({
   return (
     <View style={styles.categorySection}>
       <View style={styles.categoryHeader}>
-        <Text style={styles.categoryIcon}>
-          {CATEGORY_ICONS[category.category] || '📦'}
-        </Text>
+        <View style={styles.categoryIconContainer}>
+          {getCategoryIcon(category.category, glassColors.text)}
+        </View>
         <Text style={[styles.categoryTitle, { color: glassColors.text }]}>{category.category}</Text>
         <NumberText weight="regular" style={[styles.categoryCount, { color: glassColors.textMuted }]}>
           {checkedCount}/{totalCount}
@@ -417,36 +429,32 @@ export function GroceryListModal({
             <Text style={[styles.filterLabel, { color: glassColors.text }]}>Budget Tier</Text>
             <View style={styles.budgetTierRow}>
               {['low', 'medium', 'high'].map((tier) => (
-                <GlassCard
+                <TouchableOpacity
                   key={tier}
                   style={[
-                    styles.budgetTierButton,
-                    budgetTier === tier && {
-                      backgroundColor: glassColors.checkboxChecked,
+                    styles.pillButton,
+                    {
+                      backgroundColor: budgetTier === tier
+                        ? glassColors.checkboxChecked
+                        : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
                     },
                   ]}
-                  intensity={budgetTier === tier ? 80 : (isDark ? 40 : 60)}
-                  interactive
+                  onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
+                  accessibilityLabel={`${tier.charAt(0).toUpperCase() + tier.slice(1)} budget tier${budgetTier === tier ? ', currently selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: budgetTier === tier }}
+                  accessibilityHint={`Selects ${tier} budget tier for grocery shopping recommendations`}
                 >
-                  <TouchableOpacity
-                    style={styles.budgetTierInner}
-                    onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
-                    accessibilityLabel={`${tier.charAt(0).toUpperCase() + tier.slice(1)} budget tier${budgetTier === tier ? ', currently selected' : ''}`}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: budgetTier === tier }}
-                    accessibilityHint={`Selects ${tier} budget tier for grocery shopping recommendations`}
+                  <Text
+                    style={[
+                      styles.pillText,
+                      { color: budgetTier === tier ? glassColors.buttonText : glassColors.text },
+                      budgetTier === tier && { fontFamily: Fonts.semiBold },
+                    ]}
                   >
-                    <Text
-                      style={[
-                        styles.budgetTierText,
-                        { color: budgetTier === tier ? glassColors.buttonText : glassColors.text },
-                        budgetTier === tier && { fontFamily: Fonts.semiBold },
-                      ]}
-                    >
-                      {tier.charAt(0).toUpperCase() + tier.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                </GlassCard>
+                    {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                  </Text>
+                </TouchableOpacity>
               ))}
             </View>
 
@@ -455,36 +463,32 @@ export function GroceryListModal({
             </Text>
             <View style={styles.dietaryFiltersRow}>
               {availableDietaryFilters.map((filter) => (
-                <GlassCard
+                <TouchableOpacity
                   key={filter}
                   style={[
-                    styles.dietaryFilterChip,
-                    dietaryFilters.includes(filter) && {
-                      backgroundColor: glassColors.checkboxChecked,
+                    styles.pillButton,
+                    {
+                      backgroundColor: dietaryFilters.includes(filter)
+                        ? glassColors.checkboxChecked
+                        : isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
                     },
                   ]}
-                  intensity={dietaryFilters.includes(filter) ? 80 : (isDark ? 40 : 60)}
-                  interactive
+                  onPress={() => toggleDietaryFilter(filter)}
+                  accessibilityLabel={`${filter.charAt(0).toUpperCase() + filter.slice(1)}${dietaryFilters.includes(filter) ? ', selected' : ''}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: dietaryFilters.includes(filter) }}
+                  accessibilityHint={`${dietaryFilters.includes(filter) ? 'Removes' : 'Adds'} ${filter} dietary preference filter for grocery shopping`}
                 >
-                  <TouchableOpacity
-                    style={styles.dietaryFilterInner}
-                    onPress={() => toggleDietaryFilter(filter)}
-                    accessibilityLabel={`${filter.charAt(0).toUpperCase() + filter.slice(1)}${dietaryFilters.includes(filter) ? ', selected' : ''}`}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: dietaryFilters.includes(filter) }}
-                    accessibilityHint={`${dietaryFilters.includes(filter) ? 'Removes' : 'Adds'} ${filter} dietary preference filter for grocery shopping`}
+                  <Text
+                    style={[
+                      styles.pillText,
+                      { color: dietaryFilters.includes(filter) ? glassColors.buttonText : glassColors.text },
+                      dietaryFilters.includes(filter) && { fontFamily: Fonts.semiBold },
+                    ]}
                   >
-                    <Text
-                      style={[
-                        styles.dietaryFilterText,
-                        { color: dietaryFilters.includes(filter) ? glassColors.buttonText : glassColors.text },
-                        dietaryFilters.includes(filter) && { fontFamily: Fonts.semiBold },
-                      ]}
-                    >
-                      {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                </GlassCard>
+                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                  </Text>
+                </TouchableOpacity>
               ))}
             </View>
           </Animated.View>
@@ -558,7 +562,9 @@ export function GroceryListModal({
                 accessibilityRole="button"
                 accessibilityHint="Opens Instacart with your grocery list pre-filled for delivery"
               >
-                <Text style={styles.instacartIcon}>🛒</Text>
+                <View style={styles.instacartIconContainer}>
+                  <ShoppingCart size={20} color={glassColors.buttonText} strokeWidth={2} />
+                </View>
                 <Text style={[styles.instacartButtonText, { color: glassColors.buttonText }]}>
                   Order with Instacart
                 </Text>
@@ -647,9 +653,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  categoryIcon: {
-    fontSize: 18,
+  categoryIconContainer: {
     marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   categoryTitle: {
     fontSize: 16,
@@ -713,8 +720,8 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.borderRadius,
     gap: 8,
   },
-  instacartIcon: {
-    fontSize: 20,
+  instacartIconContainer: {
+    marginRight: 8,
   },
   instacartButtonText: {
     fontSize: 16,
@@ -824,35 +831,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  budgetTierButton: {
-    flex: 1,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  budgetTierInner: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-  },
-  budgetTierText: {
-    fontSize: 14,
-    fontFamily: Fonts.medium,
-  },
   dietaryFiltersRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
-  dietaryFilterChip: {
-    borderRadius: 16,
-    overflow: 'hidden',
+  pillButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 40,
   },
-  dietaryFilterInner: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  dietaryFilterText: {
-    fontSize: 12,
+  pillText: {
+    fontSize: 13,
     fontFamily: Fonts.medium,
   },
 });
