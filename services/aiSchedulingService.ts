@@ -48,7 +48,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       messages: [
         {
           role: 'system',
-          content: 'You are a scheduling AI for a health and fitness app. Your job is to schedule the user\'s workouts and meals around their imported calendar events. Always provide specific times in HH:MM 24-hour format. CRITICAL: When intermittent fasting is active, you MUST schedule ALL meals within the specified eating window.',
+          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. If fasting is active, meals must be within the eating window.',
         },
         {
           role: 'user',
@@ -184,31 +184,22 @@ ${mealBlocks.length > 0 ? mealBlocks.map(m => `- ${m.title} (${m.duration} min)`
 **Calendar Events (DO NOT SCHEDULE OVER THESE):**
 ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- None'}
 
-**CRITICAL RULES:**
-1. 🚨 IF FASTING ACTIVE: Every meal startTime must be >= ${isFasting ? lifeContext.fastingEnd : 'N/A'} AND every meal endTime must be <= ${isFasting ? lifeContext.fastingStart : 'N/A'}
-2. Schedule workouts in free time slots (not during calendar events)
-3. Schedule meals in free time slots (not during calendar events)
-4. Spread meals evenly within allowed time period
-5. VALIDATION: Before returning, check EVERY meal is within bounds
+**RULES:**
+1. 🚨 IF FASTING: Meals must be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
+2. Don't overlap with calendar events
 
-**Output Format (JSON):**
+**Output (JSON):**
 {
-  "reasoning": "Brief explanation",
   "blocks": [
     {
       "type": "workout|meal_eating",
       "title": "Activity name",
-      "startTime": "HH:MM (24-hour format)",
+      "startTime": "HH:MM",
       "endTime": "HH:MM",
-      "duration": minutes (number)
+      "duration": minutes
     }
   ]
 }
-
-**Important:**
-- Only return workout and meal_eating blocks
-- Use 24-hour format (e.g., "14:00", "20:00")
-- Do not overlap with calendar events
 `;
 
   return prompt;
