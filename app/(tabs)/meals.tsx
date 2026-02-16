@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
-import { Leaf, Settings, Zap, Sparkles, ShoppingCart, User } from 'lucide-react-native';
+import { Leaf, Settings, Zap, Sparkles, ShoppingCart } from 'lucide-react-native';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
@@ -20,11 +20,11 @@ import {
   DaySelector,
   MealCard,
   GroceryListModal,
-  MealPlanCoachingModal,
   CheatDayGuidanceCard,
   BudgetTierSelector,
   BudgetTierType,
 } from '../../components/mealPlan';
+import { CoachChatModal } from '../../components/agents/aiCoach';
 import { FoodPreferencesModal } from '../../components/FoodPreferences';
 
 export default function MealsScreen() {
@@ -747,10 +747,10 @@ export default function MealsScreen() {
                 accessibilityRole="button"
                 accessibilityHint="Opens AI coaching to get personalized guidance on your meal plan and nutrition goals"
               >
-                <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                  <User size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
+                <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
+                  <Sparkles size={20} color={colors.textMuted} strokeWidth={1.5} />
                 </View>
-                <Text style={[styles.actionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)', fontFamily: Fonts.light }]}>AI Coach</Text>
+                <Text style={[styles.actionText, { color: colors.textSecondary }]}>AI Coach</Text>
               </TouchableOpacity>
             </GlassCard>
           </View>
@@ -770,21 +770,26 @@ export default function MealsScreen() {
         progress={groceryListProgress}
       />
 
-      {/* AI Coaching Modal */}
-      {weeklyPlan && (
-        <MealPlanCoachingModal
-          visible={showCoachingModal}
-          onClose={() => setShowCoachingModal(false)}
-          weeklyPlan={weeklyPlan}
-          selectedDayIndex={selectedDayIndex}
-          userGoals={{
+      {/* AI Coach Chat Modal with LiveAvatar */}
+      <CoachChatModal
+        visible={showCoachingModal}
+        onClose={() => setShowCoachingModal(false)}
+        mode="meal"
+        context={{
+          userGoals: {
+            fitnessGoal: 'nutrition',
+            activityLevel: 'active',
             dailyCalories: dailyTargets.calories,
             dailyProtein: dailyTargets.protein,
-            dailyCarbs: dailyTargets.carbs,
-            dailyFat: dailyTargets.fat,
-          }}
-        />
-      )}
+          },
+          recentMeals: currentDayMeals.map(m => ({
+            name: m.name,
+            calories: m.calories,
+            protein: m.protein,
+            mealType: m.mealType,
+          })),
+        }}
+      />
 
       {/* Food Preferences Modal */}
       <FoodPreferencesModal

@@ -2346,11 +2346,43 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
       [req.userId]
     );
 
-    const systemPrompt = `You are a friendly, knowledgeable health and fitness coach for the Heirclark app.
-    Be conversational, supportive, and specific. Reference the user's actual data when available.
-    Keep responses concise (2-4 sentences) unless asked for detailed explanations.
-    ${userData.rows.length > 0 ? `User context: Calorie goal: ${userData.rows[0].daily_calories}, Protein goal: ${userData.rows[0].daily_protein}g` : ''}
-    ${context ? `Additional context: ${JSON.stringify(context)}` : ''}`;
+    const userCtx = userData.rows.length > 0 ? `User context: Calorie goal: ${userData.rows[0].daily_calories}, Protein goal: ${userData.rows[0].daily_protein}g` : '';
+    const additionalCtx = context ? `Additional context: ${JSON.stringify(context)}` : '';
+
+    let systemPrompt;
+    let maxTokens = 500;
+
+    if (conversationType === 'meal') {
+      systemPrompt = `You are an expert nutrition coach and meal planning specialist for the Heirclark health app.
+You provide detailed, comprehensive answers about nutrition, meal planning, recipes, macronutrients, and dietary guidance.
+
+RESPONSE STYLE:
+- Give thorough, detailed responses (4-8 sentences minimum)
+- Include specific nutritional data, portion sizes, and macro breakdowns when relevant
+- Suggest specific foods, meals, and recipes with preparation tips
+- Explain the "why" behind nutrition recommendations (e.g., why protein timing matters)
+- Use bullet points or numbered lists for meal suggestions and recipes
+- Reference the user's calorie and protein goals when making recommendations
+- Be encouraging and practical - focus on actionable advice they can use today
+
+${userCtx}
+${additionalCtx}`;
+      maxTokens = 1000;
+    } else if (conversationType === 'training') {
+      systemPrompt = `You are a friendly, knowledgeable fitness and workout coach for the Heirclark app.
+Be conversational, supportive, and specific about exercises, form, programming, and recovery.
+Provide detailed explanations when discussing workout technique, programming, or injury prevention.
+Reference the user's actual data when available.
+${userCtx}
+${additionalCtx}`;
+      maxTokens = 800;
+    } else {
+      systemPrompt = `You are a friendly, knowledgeable health and fitness coach for the Heirclark app.
+Be conversational, supportive, and specific. Reference the user's actual data when available.
+Keep responses concise (2-4 sentences) unless asked for detailed explanations.
+${userCtx}
+${additionalCtx}`;
+    }
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4.1-mini',
@@ -2359,7 +2391,7 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
         ...messages.slice(-10), // Last 10 messages for context
       ],
       temperature: 0.8,
-      max_tokens: 500,
+      max_tokens: maxTokens,
     });
 
     const assistantMessage = completion.choices[0].message.content;
