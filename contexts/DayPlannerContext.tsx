@@ -653,12 +653,40 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   }, [generateWeeklyPlan, getWorkoutBlocksForDay, getMealBlocksForDay]);
 
   /**
-   * Clear the entire calendar and regenerate the weekly plan.
+   * Clear the entire calendar - removes all scheduled blocks and calendar events.
+   * User can manually regenerate if desired.
    */
   const clearCalendar = useCallback(async () => {
-    console.log('[Planner] Clearing calendar and regenerating week');
-    await generateWeeklyPlan();
-  }, [generateWeeklyPlan]);
+    console.log('[Planner] 🗑️  Clearing calendar - removing all scheduled blocks');
+
+    try {
+      // Clear weekly plan from storage
+      await AsyncStorage.removeItem(STORAGE_KEYS.WEEKLY_PLAN);
+
+      // Clear device calendar events
+      setState(prev => ({
+        ...prev,
+        weeklyPlan: null,
+        deviceCalendarEvents: [],
+        lastCalendarSync: null,
+        error: null,
+      }));
+
+      console.log('[Planner] ✅ Calendar cleared successfully');
+
+      Alert.alert(
+        'Calendar Cleared',
+        'All scheduled blocks have been removed. Tap "Sync Calendar" to import your events, or wait for automatic regeneration.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('[Planner] Error clearing calendar:', error);
+      setState(prev => ({
+        ...prev,
+        error: 'Failed to clear calendar',
+      }));
+    }
+  }, []);
 
   /**
    * Generate daily timeline for a specific date using AI (with algorithmic fallback).
