@@ -138,10 +138,12 @@ function buildSchedulingPrompt(request: SchedulingRequest): string {
 - Energy peak: ${preferences.energyPeak || 'morning'}
 
 **Intermittent Fasting:**
-${isFasting ? `- ⚠️ ACTIVE (eating window: ${lifeContext.fastingEnd} to ${lifeContext.fastingStart})
-- ⚠️ CRITICAL: ALL meal_eating blocks MUST be between ${lifeContext.fastingEnd} and ${lifeContext.fastingStart}
-- ⚠️ NEVER schedule meals outside this window
-- ⚠️ Fasting hours: ${preferences.sleepTime} to ${lifeContext.fastingEnd} (NO FOOD)` : '- Not active today'}
+${isFasting ? `- ⚠️ ACTIVE FASTING SCHEDULE:
+  - YOU CAN EAT: ${lifeContext.fastingEnd} to ${lifeContext.fastingStart} (eating window)
+  - YOU CANNOT EAT: ${lifeContext.fastingStart} to ${lifeContext.fastingEnd} next day (fasting period)
+- ⚠️ CRITICAL: ALL meal_eating blocks MUST have startTime >= ${lifeContext.fastingEnd} AND endTime <= ${lifeContext.fastingStart}
+- ⚠️ Example: If eating window is 12:00 to 20:00, meals can be at 12:30, 16:00, 19:30 but NOT at 08:00, 10:00, or 21:00
+- ⚠️ Fasting = NO FOOD from ${lifeContext.fastingStart} until ${lifeContext.fastingEnd} next day` : '- Not active today'}
 ${isCheatDay ? '- **CHEAT DAY**: No fasting restrictions, normal meal times allowed' : ''}
 
 **Recovery Status:**
