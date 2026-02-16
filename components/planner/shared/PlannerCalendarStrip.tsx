@@ -146,7 +146,7 @@ export function PlannerCalendarStrip({
                 onPress={onClear}
                 activeOpacity={0.7}
               >
-                <Trash2 size={18} color={themeColors.text} />
+                <Trash2 size={18} color="rgba(239, 68, 68, 0.8)" />
               </TouchableOpacity>
             )}
           </View>
