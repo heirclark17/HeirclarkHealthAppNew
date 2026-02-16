@@ -1886,17 +1886,38 @@ class HeirclarkAPI {
   // Batch Recipe Details - Fetch ALL recipes for entire week in ONE API call
   async getBatchRecipeDetails(meals: any[], budgetTier: 'low' | 'medium' | 'high'): Promise<any> {
     try {
+      console.log(`[API] 🚀 Batch fetch request: ${meals.length} meals, budget: ${budgetTier}`);
+      console.log('[API] 📡 Endpoint:', `${this.baseUrl}/api/v1/ai/recipe-details-batch`);
+
       const response = await fetch(`${this.baseUrl}/api/v1/ai/recipe-details-batch`, {
         method: 'POST',
         headers: this.getHeaders(true),
         body: JSON.stringify({ meals, budgetTier }),
       });
 
-      if (!response.ok) return null;
+      console.log('[API] 📥 Response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unable to read error');
+        console.error('[API] ❌ Batch fetch failed:', response.status, errorText);
+        return null;
+      }
+
       const data = await response.json();
-      return data.success ? data : null;
+      console.log('[API] 📦 Response data:', {
+        success: data.success,
+        recipesCount: data.recipes?.length,
+        budgetTier: data.budgetTier
+      });
+
+      if (!data.success) {
+        console.error('[API] ❌ Backend returned success=false:', data);
+        return null;
+      }
+
+      return data;
     } catch (error) {
-      console.error('[API] Batch recipe fetch error:', error);
+      console.error('[API] ❌ Batch recipe fetch error:', error);
       return null;
     }
   }
