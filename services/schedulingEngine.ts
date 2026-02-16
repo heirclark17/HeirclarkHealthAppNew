@@ -81,10 +81,12 @@ export class SchedulingEngine {
       conflicts.push(...detectedConflicts);
 
       // Step 7: Add buffer times between blocks
-      this.addBufferTimes(blocks, request.preferences);
+      // DISABLED: User doesn't want visible buffer blocks - gaps between activities are sufficient
+      // this.addBufferTimes(blocks, request.preferences);
 
       // Step 8: Re-sort after adding buffers
-      blocks.sort((a, b) => this.timeToMinutes(a.startTime) - this.timeToMinutes(b.startTime));
+      // No longer needed since we're not adding buffer blocks
+      // blocks.sort((a, b) => this.timeToMinutes(a.startTime) - this.timeToMinutes(b.startTime));
 
       // Step 9: Calculate stats
       const stats = this.calculateStats(blocks, request.preferences);
