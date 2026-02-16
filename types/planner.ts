@@ -208,6 +208,27 @@ export const PLANNER_CONSTANTS = {
   }
 };
 
+// ============================================================================
+// Planner Chat Types
+// ============================================================================
+
+export interface ScheduleAction {
+  type: 'add' | 'remove' | 'reschedule' | 'info';
+  blockId?: string;          // For reschedule/remove
+  block?: Partial<TimeBlock>; // For add
+  newStartTime?: string;     // For reschedule
+  description: string;       // Human-readable "Move Workout to 4:00 PM"
+}
+
+export interface PlannerChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  actions?: ScheduleAction[];  // Structured changes from AI
+  actionsApplied?: boolean;    // True after user applies
+}
+
 // Helper types
 export interface CompletionHistory {
   date: string;
