@@ -2371,15 +2371,12 @@ class HeirclarkAPI {
       const data = await response.json();
       console.log('[API] Instacart response:', data);
 
-      if (data.ok && data.products_link_url) {
-        console.log('[API] ✅ Instacart cart created:', data.products_link_url);
-        return { cart_url: data.products_link_url };
-      } else if (data.success && data.cart_url) {
-        console.log('[API] ✅ Instacart cart created:', data.cart_url);
-        return { cart_url: data.cart_url };
+      if (data.ok && data.data && data.data.link_url) {
+        console.log('[API] ✅ Instacart cart created:', data.data.link_url);
+        return { cart_url: data.data.link_url };
       }
 
-      console.warn('[API] Instacart response missing cart URL');
+      console.warn('[API] Instacart response missing cart URL:', data);
       return null;
     } catch (error) {
       console.error('[API] Create Instacart cart error:', error);
