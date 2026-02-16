@@ -236,19 +236,9 @@ export function GroceryListModal({
 
   // Auto-generate grocery list when modal opens (if not already generated)
   React.useEffect(() => {
-    console.log('[GroceryListModal] 🔍 useEffect triggered:', {
-      visible,
-      hasGroceryList: !!groceryList,
-      isLoading,
-      hasGenerateFunction: !!onGenerateList,
-      budgetTier
-    });
-
     if (visible && !groceryList && !isLoading && onGenerateList) {
       console.log('[GroceryListModal] ✅ Auto-generating grocery list with budget:', budgetTier);
       onGenerateList(budgetTier);
-    } else {
-      console.log('[GroceryListModal] ⚠️ Conditions not met for auto-generation');
     }
   }, [visible, groceryList, isLoading, onGenerateList, budgetTier]);
 
