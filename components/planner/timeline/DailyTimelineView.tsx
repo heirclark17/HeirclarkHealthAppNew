@@ -161,15 +161,25 @@ export function DailyTimelineView() {
 
   // Auto-scroll to current time on mount
   useEffect(() => {
+    if (!state.preferences?.wakeTime) return;
+
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    // Calculate position relative to wake time
+    const [wakeHour, wakeMin] = state.preferences.wakeTime.split(':').map(Number);
+    const wakeMinutes = wakeHour * 60 + wakeMin;
+
+    let relativeMinutes = currentMinutes - wakeMinutes;
+    if (relativeMinutes < 0) relativeMinutes += 24 * 60; // Wrap around
+
     // Scroll to current time minus 1 hour for context (60px per hour)
-    const scrollY = ((currentMinutes - 60) / 60) * 60;
+    const scrollY = ((relativeMinutes - 60) / 60) * 60;
     const timer = setTimeout(() => {
       scrollRef.current?.scrollTo({ y: Math.max(0, scrollY), animated: true });
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [state.preferences?.wakeTime]);
 
   if (!timeline) {
     return (
@@ -300,7 +310,7 @@ export function DailyTimelineView() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.timeline}>
-          <TimeSlotGrid />
+          <TimeSlotGrid wakeTime={state.preferences?.wakeTime} />
 
           {/* Fasting overlay zones */}
           {fastingZones && fastingZones.morning.height > 0 && (
@@ -338,12 +348,13 @@ export function DailyTimelineView() {
             </View>
           )}
 
-          <CurrentTimeIndicator />
+          <CurrentTimeIndicator wakeTime={state.preferences?.wakeTime} />
 
           {timedBlocks.map((block) => (
             <TimeBlockCard
               key={block.id}
               block={block}
+              wakeTime={state.preferences?.wakeTime}
               onPress={() => {
                 // TODO: Open block detail modal
                 console.log('[Timeline] Block pressed:', block.title);

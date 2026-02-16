@@ -26,17 +26,24 @@ interface Props {
   onPress: () => void;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
+  wakeTime?: string; // Format: "HH:MM"
 }
 
-export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Props) {
+export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeTime = '06:00' }: Props) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
   const translateX = useSharedValue(0);
 
-  // Calculate position (absolute positioning in timeline)
+  // Calculate position (absolute positioning in timeline, relative to wake time)
   const startMinutes = timeToMinutes(block.startTime);
-  const top = (startMinutes / 60) * 60; // Position from 12 AM
+  const wakeMinutes = timeToMinutes(wakeTime);
+
+  // Calculate position relative to wake time (handle wraparound for late night blocks)
+  let relativeMinutes = startMinutes - wakeMinutes;
+  if (relativeMinutes < 0) relativeMinutes += 24 * 60; // Wrap around for blocks after midnight
+
+  const top = (relativeMinutes / 60) * 60; // Position from wake time
   const height = Math.max((block.duration / 60) * 60, 56); // 60px per hour, min 56px
 
   // Gesture handler

@@ -7,7 +7,11 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
-export function CurrentTimeIndicator() {
+interface CurrentTimeIndicatorProps {
+  wakeTime?: string; // Format: "HH:MM"
+}
+
+export function CurrentTimeIndicator({ wakeTime = '06:00' }: CurrentTimeIndicatorProps) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
@@ -27,10 +31,17 @@ export function CurrentTimeIndicator() {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate position from 12 AM
-  const yPosition = (currentMinutes / 60) * 60;
+  // Calculate position relative to wake time
+  const [wakeHour, wakeMin] = wakeTime.split(':').map(Number);
+  const wakeMinutes = wakeHour * 60 + wakeMin;
 
-  // Don't show if outside visible range (12 AM - 11:59 PM)
+  // Calculate relative position (handle wraparound for late night)
+  let relativeMinutes = currentMinutes - wakeMinutes;
+  if (relativeMinutes < 0) relativeMinutes += 24 * 60; // Wrap around
+
+  const yPosition = (relativeMinutes / 60) * 60;
+
+  // Don't show if outside visible range (24 hours from wake time)
   if (yPosition < 0 || yPosition > 1440) {
     return null;
   }

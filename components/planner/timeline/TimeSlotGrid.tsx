@@ -7,13 +7,20 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
-export function TimeSlotGrid() {
+interface TimeSlotGridProps {
+  wakeTime?: string; // Format: "HH:MM"
+}
+
+export function TimeSlotGrid({ wakeTime = '06:00' }: TimeSlotGridProps) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
 
-  // Generate 24 hours (12 AM to 11 PM)
-  const hours = Array.from({ length: 24 }, (_, i) => i);
+  // Parse wake time to get starting hour
+  const wakeHour = parseInt(wakeTime.split(':')[0], 10);
+
+  // Generate 24 hours starting from wake time
+  const hours = Array.from({ length: 24 }, (_, i) => (wakeHour + i) % 24);
 
   return (
     <View style={styles.container}>
