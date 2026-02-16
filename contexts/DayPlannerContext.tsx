@@ -776,8 +776,10 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
    * Shows user-facing Alert on failure instead of silently swallowing.
    */
   const syncCalendar = useCallback(async (): Promise<boolean> => {
+    console.log('[Planner] 📅 Calendar sync started...');
     const Cal = getCalendar();
     if (!Cal) {
+      console.error('[Planner] ❌ expo-calendar not available');
       Alert.alert(
         'Calendar Unavailable',
         'Calendar sync requires a native build with expo-calendar. It is not available in this development build.',
@@ -788,13 +790,17 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     // Check/request permission
     const currentState = stateRef.current;
+    console.log('[Planner] Current calendar permission:', currentState.calendarPermission);
     if (!currentState.calendarPermission) {
+      console.log('[Planner] Requesting calendar permission...');
       const { status } = await Cal.requestCalendarPermissionsAsync();
       const granted = status === 'granted';
+      console.log('[Planner] Permission result:', status, 'granted:', granted);
       setState((prev) => ({ ...prev, calendarPermission: granted }));
       await AsyncStorage.setItem(STORAGE_KEYS.CALENDAR_PERMISSION, granted.toString());
 
       if (!granted) {
+        console.error('[Planner] ❌ Calendar permission denied');
         Alert.alert(
           'Permission Denied',
           'Calendar access was denied. You can enable it in Settings.',
@@ -808,20 +814,25 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     try {
       // Get all calendars
+      console.log('[Planner] Fetching calendars...');
       const calendars = await Cal.getCalendarsAsync(Cal.EntityTypes.EVENT);
+      console.log('[Planner] Found', calendars.length, 'calendars:', calendars.map((c: any) => c.title));
 
       // Get events for next 7 days
       const startDate = new Date();
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 7);
+      console.log('[Planner] Fetching events from', startDate.toLocaleDateString(), 'to', endDate.toLocaleDateString());
 
       const events: DeviceCalendarEvent[] = [];
       for (const calendar of calendars) {
+        console.log('[Planner] Fetching events from calendar:', (calendar as any).title);
         const calendarEvents = await Cal.getEventsAsync(
           [calendar.id],
           startDate,
           endDate
         );
+        console.log('[Planner]   Found', calendarEvents.length, 'events');
         events.push(
           ...calendarEvents.map((e: any) => ({
             id: e.id,
@@ -835,6 +846,11 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         );
       }
 
+      console.log('[Planner] ✅ Total events fetched:', events.length);
+      events.forEach((e, idx) => {
+        console.log(`  ${idx + 1}. ${e.title} (${e.startDate.toLocaleString()} - ${e.endDate.toLocaleString()}) ${e.isAllDay ? '[ALL DAY]' : ''}`);
+      });
+
       // Store CLIENT-SIDE ONLY (never sent to backend)
       setState((prev) => ({
         ...prev,
@@ -844,7 +860,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       }));
 
       Alert.alert('Calendar Synced', `${events.length} events imported. Your schedule is being optimized to avoid conflicts.`);
-      console.log(`[Planner] Synced ${events.length} calendar events (client-side only)`);
+      console.log(`[Planner] ✅ Synced ${events.length} calendar events (client-side only)`);
       return true;
     } catch (error: any) {
       console.error('[Planner] Calendar sync error:', error);

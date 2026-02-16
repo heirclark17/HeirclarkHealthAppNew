@@ -11,12 +11,6 @@ import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
-interface DayStats {
-  completionRate: number;
-  totalScheduledMinutes: number;
-  totalFreeMinutes: number;
-}
-
 interface Props {
   selectedDate: string; // YYYY-MM-DD
   onDateChange: (date: string) => void;
@@ -27,7 +21,6 @@ interface Props {
   isRefreshing?: boolean;
   onClear?: () => void;
   allDayEventDots?: Record<string, string[]>; // dateStr -> array of up to 3 event colors
-  dayStats?: DayStats | null;
 }
 
 function parseLocalDate(dateStr: string): Date {
@@ -205,28 +198,6 @@ export function PlannerCalendarStrip({
           );
         })}
       </ScrollView>
-
-      {/* Day stats cards */}
-      {dayStats && (
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-            <Text style={[styles.statValue, { color: themeColors.primary }]}>{dayStats.completionRate}%</Text>
-            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Completed</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-            <Text style={[styles.statValue, { color: themeColors.primary }]}>
-              {Math.round(dayStats.totalScheduledMinutes / 60)}h
-            </Text>
-            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Scheduled</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-            <Text style={[styles.statValue, { color: themeColors.primary }]}>
-              {Math.round(dayStats.totalFreeMinutes / 60)}h
-            </Text>
-            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Free Time</Text>
-          </View>
-        </View>
-      )}
     </GlassCard>
   );
 }
