@@ -56,7 +56,7 @@ interface GroceryListModalProps {
   onDeleteItem: (categoryIndex: number, itemIndex: number) => void;
   onOrderInstacart: (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => void;
   isLoading?: boolean;
-  onGenerateList?: () => void;
+  onGenerateList?: (budgetTier?: 'low' | 'medium' | 'high') => void;
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -216,6 +216,22 @@ export function GroceryListModal({
   // Dietary filters selection
   const [dietaryFilters, setDietaryFilters] = React.useState<string[]>([]);
 
+  // Auto-generate grocery list when modal opens (if not already generated)
+  React.useEffect(() => {
+    if (visible && !groceryList && !isLoading && onGenerateList) {
+      console.log('[GroceryListModal] Auto-generating grocery list with budget:', budgetTier);
+      onGenerateList(budgetTier);
+    }
+  }, [visible]);
+
+  // Regenerate grocery list when budget tier changes (after initial generation)
+  React.useEffect(() => {
+    if (groceryList && onGenerateList && !isLoading) {
+      console.log('[GroceryListModal] Budget tier changed to:', budgetTier, '- Regenerating grocery list...');
+      onGenerateList(budgetTier);
+    }
+  }, [budgetTier]);
+
   // Button animation
   const buttonScale = useSharedValue(1);
   const buttonAnimatedStyle = useAnimatedStyle(() => ({
@@ -286,7 +302,7 @@ export function GroceryListModal({
             <GlassCard style={styles.generateButtonGlass} intensity={isDark ? 60 : 80} interactive>
               <TouchableOpacity
                 style={[styles.generateButton, { backgroundColor: glassColors.buttonBg }]}
-                onPress={onGenerateList}
+                onPress={() => onGenerateList(budgetTier)}
                 accessibilityLabel="Generate grocery list from meal plan"
                 accessibilityRole="button"
                 accessibilityHint="Creates a categorized grocery list with all ingredients from your 7-day meal plan"

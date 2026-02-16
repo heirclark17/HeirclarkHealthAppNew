@@ -48,7 +48,7 @@ interface MealPlanContextType {
   deleteGroceryItem: (categoryIndex: number, itemIndex: number) => void;
   openInstacart: () => Promise<boolean>;
   loadCachedPlan: () => Promise<void>;
-  generateGroceryListOnDemand: () => Promise<void>; // NEW
+  generateGroceryListOnDemand: (budgetTier?: 'low' | 'medium' | 'high') => Promise<void>; // NEW - with budget awareness
   orderWithInstacart: (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => Promise<void>; // UPDATED
 }
 
@@ -754,8 +754,8 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     console.log('[MealPlanContext] 🗑️ Deleted grocery item');
   }, [state.groceryList, state.weeklyPlan, state.weekSummary, state.lastGeneratedAt]);
 
-  // NEW: Generate grocery list on demand from weekly meal plan
-  const generateGroceryListOnDemand = useCallback(async () => {
+  // NEW: Fetch ALL recipes for entire week and generate grocery list with budget awareness
+  const generateGroceryListOnDemand = useCallback(async (budgetTier?: 'low' | 'medium' | 'high') => {
     if (!state.weeklyPlan || state.weeklyPlan.length === 0) {
       console.warn('[MealPlanContext] No meal plan available for grocery list generation');
       return;
@@ -764,13 +764,61 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, isGeneratingGroceryList: true }));
 
     try {
-      console.log('[MealPlanContext] 🛒 Generating grocery list from meal plan...');
+      console.log('[MealPlanContext] 🛒 Fetching ALL recipes for 7-day meal plan with budget:', budgetTier || 'none');
 
-      // Use the grocery list generator utility
-      const groceryList = generateGroceryList(state.weeklyPlan);
+      // Step 1: Fetch recipe details for ALL meals across all 7 days
+      const updatedWeeklyPlan = [...state.weeklyPlan];
+      let totalMealsFetched = 0;
+      let totalIngredientsAdded = 0;
+
+      for (let dayIndex = 0; dayIndex < updatedWeeklyPlan.length; dayIndex++) {
+        const day = updatedWeeklyPlan[dayIndex];
+        if (!day.meals || day.meals.length === 0) continue;
+
+        for (let mealIndex = 0; mealIndex < day.meals.length; mealIndex++) {
+          const meal = day.meals[mealIndex];
+
+          // Skip if meal already has ingredients
+          if (meal.ingredients && meal.ingredients.length > 0) {
+            console.log(`[MealPlanContext] ✓ ${day.dayName} ${meal.mealType}: Already has ${meal.ingredients.length} ingredients`);
+            totalIngredientsAdded += meal.ingredients.length;
+            continue;
+          }
+
+          // Fetch recipe details from AI with budget tier
+          console.log(`[MealPlanContext] 🔄 Fetching recipe for: ${day.dayName} ${meal.mealType} - ${meal.name}`);
+          const recipeDetails = await api.getRecipeDetails(meal.name, {
+            ...meal,
+            budgetTier: budgetTier || 'medium',
+          });
+
+          if (recipeDetails && recipeDetails.ingredients) {
+            updatedWeeklyPlan[dayIndex].meals[mealIndex] = {
+              ...meal,
+              ingredients: recipeDetails.ingredients,
+              instructions: recipeDetails.instructions || meal.instructions,
+            };
+            totalMealsFetched++;
+            totalIngredientsAdded += recipeDetails.ingredients.length;
+            console.log(`[MealPlanContext] ✅ Fetched ${recipeDetails.ingredients.length} ingredients for ${meal.name}`);
+          } else {
+            console.warn(`[MealPlanContext] ⚠️ Failed to fetch recipe for ${meal.name}`);
+          }
+        }
+      }
+
+      console.log('[MealPlanContext] 📦 Recipe fetch complete:', {
+        totalMealsFetched,
+        totalIngredientsAdded,
+        budgetTier: budgetTier || 'medium',
+      });
+
+      // Step 2: Generate grocery list from updated meal plan
+      const groceryList = generateGroceryList(updatedWeeklyPlan);
 
       setState(prev => ({
         ...prev,
+        weeklyPlan: updatedWeeklyPlan,
         groceryList,
         isGeneratingGroceryList: false,
       }));
@@ -780,9 +828,9 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         totalItems: groceryList.reduce((sum, cat) => sum + cat.items.length, 0),
       });
 
-      // Update cache with new grocery list
+      // Step 3: Update cache with new grocery list and updated meal plan
       const cacheData = {
-        weeklyPlan: state.weeklyPlan,
+        weeklyPlan: updatedWeeklyPlan,
         groceryList,
         weekSummary: state.weekSummary,
         lastGeneratedAt: state.lastGeneratedAt,

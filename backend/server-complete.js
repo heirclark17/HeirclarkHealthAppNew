@@ -2697,8 +2697,8 @@ app.get('/api/v1/food-photo', async (req, res) => {
 
 app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
   try {
-    // Accept both old format (mealName, basicInfo) and new format (dishName, mealType, calories, macros)
-    const { mealName, dishName, basicInfo, mealType, calories, macros } = req.body;
+    // Accept both old format (mealName, basicInfo) and new format (dishName, mealType, calories, macros, budgetTier)
+    const { mealName, dishName, basicInfo, mealType, calories, macros, budgetTier } = req.body;
 
     const name = dishName || mealName;
     if (!name) {
@@ -2712,7 +2712,17 @@ app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
     if (macros) context += `Macros - Protein: ${macros.protein}g, Carbs: ${macros.carbs}g, Fat: ${macros.fat}g. `;
     if (basicInfo) context += `Additional info: ${JSON.stringify(basicInfo)}`;
 
-    console.log(`[Recipe Details] Generating recipe for: ${name}`, context ? `with context: ${context}` : '');
+    // Budget tier context
+    let budgetGuidance = '';
+    if (budgetTier === 'low') {
+      budgetGuidance = 'Use budget-friendly ingredients: store brands, frozen vegetables, canned beans, rice, pasta, eggs, ground meat, seasonal produce. Avoid expensive cuts of meat, specialty items, organic products.';
+    } else if (budgetTier === 'high') {
+      budgetGuidance = 'Use premium ingredients: organic produce, grass-fed meat, wild-caught fish, artisanal products, specialty ingredients. Focus on quality and freshness.';
+    } else {
+      budgetGuidance = 'Use moderate-priced ingredients: mix of fresh and frozen produce, standard cuts of meat, conventional products. Balance between quality and cost.';
+    }
+
+    console.log(`[Recipe Details] Generating recipe for: ${name} (Budget: ${budgetTier || 'medium'})`, context ? `with context: ${context}` : '');
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4.1-mini',
@@ -2721,18 +2731,22 @@ app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
           role: 'system',
           content: `You are a professional chef providing detailed recipes. Return JSON with:
           {
-            "ingredients": [{"name": "ingredient", "quantity": 1, "unit": "cup"}],
+            "ingredients": [{"name": "ingredient", "amount": "1", "unit": "cup", "category": "Produce"}],
             "instructions": ["Step 1", "Step 2", "Step 3"],
-            "prepMinutes": 15,
-            "cookMinutes": 30,
+            "prepTime": 15,
+            "cookTime": 30,
             "tips": "Optional cooking tips"
           }
 
           IMPORTANT FORMAT REQUIREMENTS:
-          - ingredients array must have objects with: name (string), quantity (number), unit (string)
+          - ingredients array must have objects with: name (string), amount (string), unit (string), category (string)
+          - category must be one of: Produce, Protein, Dairy, Grains, Pantry, Spices, Other
+          - amount should be a string (e.g., "1", "2.5", "1/4")
           - instructions array must be array of strings (each step as a string)
-          - prepMinutes and cookMinutes must be numbers
-          - Match the provided calorie and macro targets if given`
+          - prepTime and cookTime must be numbers (minutes)
+          - Match the provided calorie and macro targets if given
+
+          BUDGET GUIDANCE: ${budgetGuidance}`
         },
         {
           role: 'user',
@@ -2745,7 +2759,7 @@ app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
     });
 
     const recipe = JSON.parse(completion.choices[0].message.content);
-    console.log('[Recipe Details] Generated recipe with', recipe.ingredients?.length || 0, 'ingredients and', recipe.instructions?.length || 0, 'steps');
+    console.log('[Recipe Details] Generated recipe with', recipe.ingredients?.length || 0, 'ingredients and', recipe.instructions?.length || 0, 'steps (Budget:', budgetTier || 'medium', ')');
     res.json({ success: true, recipe });
   } catch (error) {
     console.error('[Recipe Details] Error:', error);
