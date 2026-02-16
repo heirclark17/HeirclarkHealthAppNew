@@ -423,7 +423,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 ) : (
                   <Minus size={18} color={Colors.primary} />
                 )}
-                <Text style={[styles.profileStatValue, { color: colors.text, fontFamily: Fonts.light }]}>
+                <Text style={[styles.profileStatValue, { color: colors.text, fontFamily: Fonts.semiBold }]}>
                   {state.primaryGoal === 'lose_weight' ? 'Fat Loss' :
                    state.primaryGoal === 'build_muscle' ? 'Muscle Gain' :
                    state.primaryGoal === 'maintain' ? 'Maintain' : 'Health'}
