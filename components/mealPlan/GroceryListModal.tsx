@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
-  useColorScheme,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Animated, {
@@ -19,10 +18,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Fonts, Spacing } from '../../constants/Theme';
+import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../NumberText';
 import { GroceryCategory, GroceryItem } from '../../types/mealPlan';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
+import { useSettings } from '../../contexts/SettingsContext';
+import { GlassCard } from '../GlassCard';
 
 // iOS 26 Liquid Glass spring configuration
 const GLASS_SPRING = {
@@ -31,39 +32,21 @@ const GLASS_SPRING = {
   mass: 0.8,
 };
 
-// iOS 26 Liquid Glass colors
-const GLASS_COLORS = {
-  light: {
-    background: '#F8F8F8',
-    card: 'rgba(255, 255, 255, 0.75)',
-    cardBorder: 'rgba(255, 255, 255, 0.5)',
-    header: 'rgba(255, 255, 255, 0.85)',
-    text: Colors.text,
-    textMuted: 'rgba(60, 60, 67, 0.6)',
-    textSecondary: 'rgba(60, 60, 67, 0.4)',
-    border: 'rgba(0, 0, 0, 0.08)',
-    checkbox: 'rgba(0, 0, 0, 0.1)',
-    checkboxChecked: 'rgba(0, 122, 255, 0.9)',
-    progressBg: 'rgba(0, 0, 0, 0.06)',
-    progressFill: 'rgba(0, 122, 255, 0.9)',
-    buttonBg: 'rgba(0, 122, 255, 0.9)',
-  },
-  dark: {
-    background: '#0A0A0A',
-    card: 'rgba(255, 255, 255, 0.08)',
-    cardBorder: 'rgba(255, 255, 255, 0.12)',
-    header: 'rgba(44, 44, 46, 0.85)',
-    text: Colors.text,
-    textMuted: 'rgba(235, 235, 245, 0.6)',
-    textSecondary: 'rgba(235, 235, 245, 0.4)',
-    border: 'rgba(255, 255, 255, 0.1)',
-    checkbox: 'rgba(255, 255, 255, 0.15)',
-    checkboxChecked: 'rgba(10, 132, 255, 0.9)',
-    progressBg: 'rgba(255, 255, 255, 0.1)',
-    progressFill: 'rgba(10, 132, 255, 0.9)',
-    buttonBg: 'rgba(10, 132, 255, 0.9)',
-  },
-};
+// iOS 26 Liquid Glass spring configuration - removed shaded borders
+const getGlassColors = (isDark: boolean) => ({
+  background: isDark ? DarkColors.background : LightColors.background,
+  card: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.75)',
+  text: isDark ? DarkColors.text : LightColors.text,
+  textMuted: isDark ? DarkColors.textMuted : LightColors.textMuted,
+  textSecondary: isDark ? 'rgba(235, 235, 245, 0.4)' : 'rgba(60, 60, 67, 0.5)',
+  checkbox: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)',
+  checkboxChecked: isDark ? 'rgba(10, 132, 255, 0.9)' : 'rgba(0, 122, 255, 0.9)',
+  checkboxText: '#FFFFFF',
+  progressBg: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+  progressFill: isDark ? 'rgba(10, 132, 255, 0.9)' : 'rgba(0, 122, 255, 0.9)',
+  buttonBg: isDark ? 'rgba(10, 132, 255, 0.9)' : 'rgba(0, 122, 255, 0.9)',
+  buttonText: '#FFFFFF',
+});
 
 interface GroceryListModalProps {
   visible: boolean;
@@ -89,10 +72,12 @@ const CheckboxItem = ({
   item,
   onToggle,
   glassColors,
+  isDark,
 }: {
   item: GroceryItem;
   onToggle: () => void;
-  glassColors: typeof GLASS_COLORS.dark;
+  glassColors: ReturnType<typeof getGlassColors>;
+  isDark: boolean;
 }) => {
   const scale = useSharedValue(1);
 
@@ -111,34 +96,39 @@ const CheckboxItem = ({
 
   return (
     <Animated.View style={animatedStyle}>
-      <Pressable
-        onPress={handlePress}
-        style={[
-          styles.itemRow,
-          { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder },
-          item.checked && styles.itemRowChecked,
-        ]}
+      <GlassCard
+        style={styles.itemRow}
+        intensity={isDark ? 40 : 60}
+        interactive
       >
-        <View style={[
-          styles.checkbox,
-          { borderColor: glassColors.textMuted },
-          item.checked && { backgroundColor: glassColors.checkboxChecked, borderColor: glassColors.checkboxChecked },
-        ]}>
-          {item.checked && <Ionicons name="checkmark" size={14} color={Colors.text} />}
-        </View>
-        <View style={styles.itemInfo}>
-          <Text style={[
-            styles.itemName,
-            { color: glassColors.text },
-            item.checked && { color: glassColors.textMuted, textDecorationLine: 'line-through' },
+        <Pressable
+          onPress={handlePress}
+          style={styles.itemRowInner}
+        >
+          <View style={[
+            styles.checkbox,
+            { borderColor: glassColors.checkbox },
+            item.checked && {
+              backgroundColor: glassColors.checkboxChecked,
+              borderColor: glassColors.checkboxChecked
+            },
           ]}>
-            {item.name}
-          </Text>
-          <Text style={[styles.itemAmount, { color: glassColors.textSecondary }]}>
-            {item.totalAmount} {item.unit}
-          </Text>
-        </View>
-      </Pressable>
+            {item.checked && <Ionicons name="checkmark" size={14} color={glassColors.checkboxText} />}
+          </View>
+          <View style={styles.itemInfo}>
+            <Text style={[
+              styles.itemName,
+              { color: glassColors.text },
+              item.checked && { color: glassColors.textMuted, textDecorationLine: 'line-through' },
+            ]}>
+              {item.name}
+            </Text>
+            <Text style={[styles.itemAmount, { color: glassColors.textSecondary }]}>
+              {item.totalAmount} {item.unit}
+            </Text>
+          </View>
+        </Pressable>
+      </GlassCard>
     </Animated.View>
   );
 };
@@ -148,11 +138,13 @@ const CategorySection = ({
   categoryIndex,
   onToggleItem,
   glassColors,
+  isDark,
 }: {
   category: GroceryCategory;
   categoryIndex: number;
   onToggleItem: (categoryIndex: number, itemIndex: number) => void;
-  glassColors: typeof GLASS_COLORS.dark;
+  glassColors: ReturnType<typeof getGlassColors>;
+  isDark: boolean;
 }) => {
   const checkedCount = category.items.filter(item => item.checked).length;
   const totalCount = category.items.length;
@@ -174,6 +166,7 @@ const CategorySection = ({
           item={item}
           onToggle={() => onToggleItem(categoryIndex, itemIndex)}
           glassColors={glassColors}
+          isDark={isDark}
         />
       ))}
     </View>
@@ -189,10 +182,12 @@ export function GroceryListModal({
   isLoading = false,
   onGenerateList,
 }: GroceryListModalProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
+  const { settings } = useSettings();
   const insets = useSafeAreaInsets();
+
+  // Dynamic theme colors
+  const isDark = useMemo(() => settings.themeMode === 'dark', [settings.themeMode]);
+  const glassColors = useMemo(() => getGlassColors(isDark), [isDark]);
 
   // Budget tier selection
   const [budgetTier, setBudgetTier] = React.useState<'low' | 'medium' | 'high'>('medium');
@@ -244,7 +239,7 @@ export function GroceryListModal({
         <BlurView
           intensity={isDark ? 60 : 80}
           tint={isDark ? 'dark' : 'light'}
-          style={[styles.header, { borderBottomColor: glassColors.border }]}
+          style={styles.header}
         >
           <Animated.View entering={FadeIn.delay(100)} style={styles.headerContent}>
             <TouchableOpacity
@@ -267,15 +262,19 @@ export function GroceryListModal({
             <Text style={[styles.emptyText, { color: glassColors.textMuted }]}>
               No grocery list yet
             </Text>
-            <TouchableOpacity
-              style={[styles.generateButton, { backgroundColor: glassColors.buttonBg }]}
-              onPress={onGenerateList}
-              accessibilityLabel="Generate grocery list from meal plan"
-              accessibilityRole="button"
-              accessibilityHint="Creates a categorized grocery list with all ingredients from your 7-day meal plan"
-            >
-              <Text style={styles.generateButtonText}>Generate Grocery List</Text>
-            </TouchableOpacity>
+            <GlassCard style={styles.generateButtonGlass} intensity={isDark ? 60 : 80} interactive>
+              <TouchableOpacity
+                style={[styles.generateButton, { backgroundColor: glassColors.buttonBg }]}
+                onPress={onGenerateList}
+                accessibilityLabel="Generate grocery list from meal plan"
+                accessibilityRole="button"
+                accessibilityHint="Creates a categorized grocery list with all ingredients from your 7-day meal plan"
+              >
+                <Text style={[styles.generateButtonText, { color: glassColors.buttonText }]}>
+                  Generate Grocery List
+                </Text>
+              </TouchableOpacity>
+            </GlassCard>
           </View>
         )}
 
@@ -292,37 +291,41 @@ export function GroceryListModal({
         {groceryList && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(150)}
-            style={[styles.filtersSection, { borderBottomColor: glassColors.border }]}
+            style={styles.filtersSection}
           >
             <Text style={[styles.filterLabel, { color: glassColors.text }]}>Budget Tier</Text>
             <View style={styles.budgetTierRow}>
               {['low', 'medium', 'high'].map((tier) => (
-                <TouchableOpacity
+                <GlassCard
                   key={tier}
                   style={[
                     styles.budgetTierButton,
-                    { borderColor: glassColors.border },
                     budgetTier === tier && {
                       backgroundColor: glassColors.checkboxChecked,
-                      borderColor: glassColors.checkboxChecked,
                     },
                   ]}
-                  onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
-                  accessibilityLabel={`${tier.charAt(0).toUpperCase() + tier.slice(1)} budget tier${budgetTier === tier ? ', currently selected' : ''}`}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: budgetTier === tier }}
-                  accessibilityHint={`Selects ${tier} budget tier for grocery shopping recommendations`}
+                  intensity={budgetTier === tier ? 80 : (isDark ? 40 : 60)}
+                  interactive
                 >
-                  <Text
-                    style={[
-                      styles.budgetTierText,
-                      { color: glassColors.text },
-                      budgetTier === tier && { color: Colors.text, fontFamily: Fonts.semiBold },
-                    ]}
+                  <TouchableOpacity
+                    style={styles.budgetTierInner}
+                    onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
+                    accessibilityLabel={`${tier.charAt(0).toUpperCase() + tier.slice(1)} budget tier${budgetTier === tier ? ', currently selected' : ''}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: budgetTier === tier }}
+                    accessibilityHint={`Selects ${tier} budget tier for grocery shopping recommendations`}
                   >
-                    {tier.charAt(0).toUpperCase() + tier.slice(1)}
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={[
+                        styles.budgetTierText,
+                        { color: budgetTier === tier ? glassColors.buttonText : glassColors.text },
+                        budgetTier === tier && { fontFamily: Fonts.semiBold },
+                      ]}
+                    >
+                      {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                </GlassCard>
               ))}
             </View>
 
@@ -331,32 +334,36 @@ export function GroceryListModal({
             </Text>
             <View style={styles.dietaryFiltersRow}>
               {availableDietaryFilters.map((filter) => (
-                <TouchableOpacity
+                <GlassCard
                   key={filter}
                   style={[
                     styles.dietaryFilterChip,
-                    { borderColor: glassColors.border },
                     dietaryFilters.includes(filter) && {
                       backgroundColor: glassColors.checkboxChecked,
-                      borderColor: glassColors.checkboxChecked,
                     },
                   ]}
-                  onPress={() => toggleDietaryFilter(filter)}
-                  accessibilityLabel={`${filter.charAt(0).toUpperCase() + filter.slice(1)}${dietaryFilters.includes(filter) ? ', selected' : ''}`}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: dietaryFilters.includes(filter) }}
-                  accessibilityHint={`${dietaryFilters.includes(filter) ? 'Removes' : 'Adds'} ${filter} dietary preference filter for grocery shopping`}
+                  intensity={dietaryFilters.includes(filter) ? 80 : (isDark ? 40 : 60)}
+                  interactive
                 >
-                  <Text
-                    style={[
-                      styles.dietaryFilterText,
-                      { color: glassColors.text },
-                      dietaryFilters.includes(filter) && { color: Colors.text, fontFamily: Fonts.semiBold },
-                    ]}
+                  <TouchableOpacity
+                    style={styles.dietaryFilterInner}
+                    onPress={() => toggleDietaryFilter(filter)}
+                    accessibilityLabel={`${filter.charAt(0).toUpperCase() + filter.slice(1)}${dietaryFilters.includes(filter) ? ', selected' : ''}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: dietaryFilters.includes(filter) }}
+                    accessibilityHint={`${dietaryFilters.includes(filter) ? 'Removes' : 'Adds'} ${filter} dietary preference filter for grocery shopping`}
                   >
-                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={[
+                        styles.dietaryFilterText,
+                        { color: dietaryFilters.includes(filter) ? glassColors.buttonText : glassColors.text },
+                        dietaryFilters.includes(filter) && { fontFamily: Fonts.semiBold },
+                      ]}
+                    >
+                      {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                </GlassCard>
               ))}
             </View>
           </Animated.View>
@@ -366,21 +373,23 @@ export function GroceryListModal({
         {groceryList && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(200)}
-            style={[styles.progressSection, { borderBottomColor: glassColors.border }]}
+            style={styles.progressSection}
           >
-            <View style={[styles.progressBar, { backgroundColor: glassColors.progressBg }]}>
-              <Animated.View
-                style={[
-                  styles.progressFill,
-                  { width: `${progress}%`, backgroundColor: glassColors.progressFill },
-                ]}
-              />
-              {/* Glass highlight */}
-              <View style={styles.progressHighlight} />
-            </View>
-            <NumberText weight="regular" style={[styles.progressText, { color: glassColors.textMuted }]}>
-              {checkedItems} of {totalItems} items checked
-            </NumberText>
+            <GlassCard style={styles.progressCard} intensity={isDark ? 40 : 60}>
+              <View style={[styles.progressBar, { backgroundColor: glassColors.progressBg }]}>
+                <Animated.View
+                  style={[
+                    styles.progressFill,
+                    { width: `${progress}%`, backgroundColor: glassColors.progressFill },
+                  ]}
+                />
+                {/* Glass highlight */}
+                <View style={styles.progressHighlight} />
+              </View>
+              <NumberText weight="regular" style={[styles.progressText, { color: glassColors.textMuted }]}>
+                {checkedItems} of {totalItems} items checked
+              </NumberText>
+            </GlassCard>
           </Animated.View>
         )}
 
@@ -401,6 +410,7 @@ export function GroceryListModal({
                   categoryIndex={categoryIndex}
                   onToggleItem={onToggleItem}
                   glassColors={glassColors}
+                  isDark={isDark}
                 />
               </Animated.View>
             ))}
@@ -413,13 +423,12 @@ export function GroceryListModal({
           <BlurView
             intensity={isDark ? 60 : 80}
             tint={isDark ? 'dark' : 'light'}
-            style={[styles.bottomSection, { paddingBottom: insets.bottom + 16, borderTopColor: glassColors.border }]}
+            style={[styles.bottomSection, { paddingBottom: insets.bottom + 16 }]}
           >
             <Animated.View entering={SlideInUp.delay(500).springify()} style={buttonAnimatedStyle}>
               <TouchableOpacity
                 style={[styles.instacartButton, {
                   backgroundColor: glassColors.buttonBg,
-                  shadowColor: glassColors.buttonBg,
                 }]}
                 onPress={handleInstacartPress}
                 activeOpacity={1}
@@ -428,7 +437,9 @@ export function GroceryListModal({
                 accessibilityHint="Opens Instacart with your grocery list pre-filled for delivery"
               >
                 <Text style={styles.instacartIcon}>🛒</Text>
-                <Text style={styles.instacartButtonText}>Order with Instacart</Text>
+                <Text style={[styles.instacartButtonText, { color: glassColors.buttonText }]}>
+                  Order with Instacart
+                </Text>
               </TouchableOpacity>
             </Animated.View>
           </BlurView>
@@ -443,7 +454,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    borderBottomWidth: 1,
+    // No border - frosted glass only
   },
   headerContent: {
     flexDirection: 'row',
@@ -470,7 +481,10 @@ const styles = StyleSheet.create({
   progressSection: {
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderBottomWidth: 1,
+  },
+  progressCard: {
+    padding: 16,
+    borderRadius: Spacing.borderRadius,
   },
   progressBar: {
     height: 8,
@@ -525,13 +539,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
   },
   itemRow: {
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  itemRowInner: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 12,
-    borderRadius: 16,
-    marginBottom: 8,
-    borderWidth: 1,
   },
   itemRowChecked: {
     opacity: 0.6,
@@ -563,7 +578,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 16,
-    borderTopWidth: 1,
   },
   instacartButton: {
     flexDirection: 'row',
@@ -572,11 +586,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: Spacing.borderRadius,
     gap: 8,
-    // Glow shadow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 6,
   },
   instacartIcon: {
     fontSize: 20,
@@ -597,6 +606,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'center',
   },
+  generateButtonGlass: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
   generateButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -604,7 +617,6 @@ const styles = StyleSheet.create({
   },
   generateButtonText: {
     fontSize: 14,
-    color: Colors.text,
     fontFamily: Fonts.semiBold,
   },
   loadingState: {
@@ -618,7 +630,6 @@ const styles = StyleSheet.create({
   filtersSection: {
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderBottomWidth: 1,
   },
   filterLabel: {
     fontSize: 13,
@@ -633,10 +644,12 @@ const styles = StyleSheet.create({
   },
   budgetTierButton: {
     flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  budgetTierInner: {
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1.5,
     alignItems: 'center',
   },
   budgetTierText: {
@@ -649,10 +662,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dietaryFilterChip: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  dietaryFilterInner: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1.5,
   },
   dietaryFilterText: {
     fontSize: 12,
