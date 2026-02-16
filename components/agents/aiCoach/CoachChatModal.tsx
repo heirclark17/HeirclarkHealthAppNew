@@ -153,7 +153,7 @@ const MODE_CONFIG: Record<CoachMode, {
   meal: {
     title: 'Meal Coach',
     icon: 'nutrition',
-    accentColor: Colors.successStrong,
+    accentColor: '#6366F1',
     placeholder: 'Ask about meals, nutrition, recipes...',
   },
   training: {
