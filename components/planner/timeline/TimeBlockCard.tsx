@@ -36,7 +36,7 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
 
   // Calculate position (absolute positioning in timeline)
   const startMinutes = timeToMinutes(block.startTime);
-  const top = ((startMinutes - 6 * 60) / 60) * 60; // Offset from 6 AM
+  const top = (startMinutes / 60) * 60; // Position from 12 AM
   const height = Math.max((block.duration / 60) * 60, 56); // 60px per hour, min 56px
 
   // Gesture handler

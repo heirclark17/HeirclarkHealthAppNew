@@ -27,10 +27,10 @@ export function CurrentTimeIndicator() {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate position from 6 AM
-  const yPosition = ((currentMinutes - 6 * 60) / 60) * 60;
+  // Calculate position from 12 AM
+  const yPosition = (currentMinutes / 60) * 60;
 
-  // Don't show if outside visible range (6 AM - 6 AM next day)
+  // Don't show if outside visible range (12 AM - 11:59 PM)
   if (yPosition < 0 || yPosition > 1440) {
     return null;
   }

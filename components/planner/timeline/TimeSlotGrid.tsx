@@ -12,8 +12,8 @@ export function TimeSlotGrid() {
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
 
-  // Generate 24 hours (6 AM to 6 AM next day)
-  const hours = Array.from({ length: 24 }, (_, i) => (i + 6) % 24);
+  // Generate 24 hours (12 AM to 11 PM)
+  const hours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
     <View style={styles.container}>
