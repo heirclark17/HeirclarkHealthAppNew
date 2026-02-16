@@ -308,12 +308,12 @@ export function DailyTimelineView() {
                 {
                   top: fastingZones.morning.top,
                   height: fastingZones.morning.height,
-                  backgroundColor: isDark ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.06)',
+                  backgroundColor: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.06)',
                 },
               ]}
               pointerEvents="none"
             >
-              <Text style={[styles.fastingLabel, { color: isDark ? 'rgba(139, 92, 246, 0.5)' : 'rgba(139, 92, 246, 0.45)' }]}>
+              <Text style={[styles.fastingLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
                 Fasting
               </Text>
             </View>
@@ -325,12 +325,12 @@ export function DailyTimelineView() {
                 {
                   top: fastingZones.evening.top,
                   height: fastingZones.evening.height,
-                  backgroundColor: isDark ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.06)',
+                  backgroundColor: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.06)',
                 },
               ]}
               pointerEvents="none"
             >
-              <Text style={[styles.fastingLabel, { color: isDark ? 'rgba(139, 92, 246, 0.5)' : 'rgba(139, 92, 246, 0.45)' }]}>
+              <Text style={[styles.fastingLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
                 Fasting
               </Text>
             </View>
