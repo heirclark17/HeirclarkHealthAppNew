@@ -2026,9 +2026,9 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: Colors.text,
     marginBottom: 8,
-    fontFamily: 'Urbanist_200ExtraLight',
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
-    letterSpacing: 4,
+    letterSpacing: 0,
   },
   signInButton: {
     flexDirection: 'row',
