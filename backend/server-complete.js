@@ -1650,16 +1650,10 @@ app.get('/api/v1/exercise-gif/:id', async (req, res) => {
     console.log(`[Exercise GIF] Cache miss - fetching from API (exercise ${id})`);
     const apiKey = process.env.EXERCISEDB_API_KEY || 'b3c3790038mshcfc571cd8cae3ccp13abefjsn6fb2f32a654d';
 
-    // Try the v2 API endpoint with proper format
-    const numericId = parseInt(id, 10); // Remove leading zeros
-    const gifUrl = `https://v2.exercisedb.io/image/${numericId}`;
+    // Use the correct ExerciseDB image endpoint (query params, not path)
+    const gifUrl = `https://exercisedb.p.rapidapi.com/image?exerciseId=${id}&resolution=${resolution}&rapidapi-key=${apiKey}`;
 
-    const response = await fetch(gifUrl, {
-      headers: {
-        'X-RapidAPI-Key': apiKey,
-        'X-RapidAPI-Host': 'v2.exercisedb.io'
-      }
-    });
+    const response = await fetch(gifUrl);
 
     if (!response.ok) {
       console.error(`[Exercise GIF] API error for ${id}:`, response.status);
