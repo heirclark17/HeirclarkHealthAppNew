@@ -483,7 +483,7 @@ export function GroceryListModal({
                     >
                       {budgetTier === tier ? (
                         <LinearGradient
-                          colors={['#FFB347', '#4ECDC4']}
+                          colors={['rgba(135, 206, 250, 0.5)', 'rgba(100, 149, 237, 0.5)']}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 0 }}
                           style={styles.gradientPill}
@@ -550,7 +550,7 @@ export function GroceryListModal({
                     >
                       {dietaryFilters.includes(filter) ? (
                         <LinearGradient
-                          colors={['#FFB347', '#4ECDC4']}
+                          colors={['rgba(135, 206, 250, 0.5)', 'rgba(100, 149, 237, 0.5)']}
                           start={{ x: 0, y: 0 }}
                           end={{ x: 1, y: 0 }}
                           style={styles.gradientPill}
