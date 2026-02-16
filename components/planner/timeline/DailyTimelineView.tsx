@@ -13,6 +13,7 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
 import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Sparkles } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   BottomSheetModal,
   BottomSheetBackdrop,
@@ -320,13 +321,7 @@ export function DailyTimelineView() {
       {/* Floating AI Chat Button */}
       {timeline && !isChatOpen && (
         <TouchableOpacity
-          style={[
-            styles.chatFab,
-            {
-              bottom: bottomPadding + 60,
-              backgroundColor: isDark ? 'rgba(168, 85, 247, 0.15)' : 'rgba(139, 92, 246, 0.12)',
-            },
-          ]}
+          style={[styles.chatFab, { bottom: bottomPadding + 60 }]}
           onPress={() => {
             mediumImpact();
             setIsChatOpen(true);
@@ -334,7 +329,14 @@ export function DailyTimelineView() {
           }}
           activeOpacity={0.8}
         >
-          <Sparkles size={22} color="#a855f7" />
+          <LinearGradient
+            colors={['#60a5fa', '#a855f7']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.chatFabGradient}
+          >
+            <Sparkles size={22} color="#fff" />
+          </LinearGradient>
         </TouchableOpacity>
       )}
 
@@ -592,13 +594,19 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 4,
     zIndex: 10,
+    overflow: 'hidden',
+  },
+  chatFabGradient: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
