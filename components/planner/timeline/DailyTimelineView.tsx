@@ -39,9 +39,10 @@ export function DailyTimelineView() {
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     // Scroll to current time minus 1 hour for context (60px per hour)
     const scrollY = ((currentMinutes - 6 * 60 - 60) / 60) * 60;
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       scrollRef.current?.scrollTo({ y: Math.max(0, scrollY), animated: true });
     }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!timeline) {

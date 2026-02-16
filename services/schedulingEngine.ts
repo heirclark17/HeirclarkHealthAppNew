@@ -216,8 +216,8 @@ export class SchedulingEngine {
       const nextStart = this.timeToMinutes(next.startTime);
       const gap = nextStart - currentEnd;
 
-      // Only add buffer if gap is small (5-15 minutes)
-      if (gap >= 5 && gap <= 15) {
+      // Add buffer when blocks are too close together (gap < buffer threshold)
+      if (gap > 0 && gap < bufferMinutes) {
         blocks.push({
           id: this.generateId('buffer'),
           type: 'buffer',
@@ -356,6 +356,10 @@ export class SchedulingEngine {
     attempts = 0;
     while (attempts < maxAttempts) {
       const candStart = this.timeToMinutes(candidateTime);
+
+      // Stop searching if we've gone before wake time
+      if (candStart < wakeMinutes) break;
+
       const candEnd = candStart + duration;
 
       if (candStart >= wakeMinutes && candEnd <= sleepMinutes) {
@@ -458,19 +462,25 @@ export class SchedulingEngine {
   }
 
   /**
-   * Convert time string to minutes since midnight
+   * Convert time string to minutes since midnight.
+   * Returns 0 for invalid input instead of NaN.
    */
   private static timeToMinutes(time: string): number {
+    if (!time || !time.includes(':')) return 0;
     const [hours, minutes] = time.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return 0;
     return hours * 60 + minutes;
   }
 
   /**
-   * Convert minutes since midnight to time string
+   * Convert minutes since midnight to time string.
+   * Handles negative values by wrapping within 0–1439.
    */
   private static minutesToTime(minutes: number): string {
-    const hours = Math.floor(minutes / 60) % 24;
-    const mins = minutes % 60;
+    // Wrap negative and > 24h values into valid range
+    const wrapped = ((minutes % 1440) + 1440) % 1440;
+    const hours = Math.floor(wrapped / 60);
+    const mins = wrapped % 60;
     return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
   }
 

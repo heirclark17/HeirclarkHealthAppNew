@@ -192,12 +192,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -218,13 +220,15 @@ const styles = StyleSheet.create({
   },
   reviewLabel: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   reviewValue: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   editButton: {
     width: 32,
@@ -235,7 +239,8 @@ const styles = StyleSheet.create({
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     textAlign: 'center',
   },
   actions: {
@@ -249,7 +254,8 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
     fontSize: 16,
   },
 });

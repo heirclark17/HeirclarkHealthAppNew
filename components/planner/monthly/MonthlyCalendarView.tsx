@@ -52,6 +52,17 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+type CellData =
+  | { empty: true }
+  | {
+      empty: false;
+      day: number;
+      dateStr: string;
+      isToday: boolean;
+      isSelected: boolean;
+      hasBlocks: boolean;
+    };
+
 interface Props {
   selectedDate: string;
   onDateChange: (date: string) => void;
@@ -223,15 +234,6 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
     const firstDayOfWeek = new Date(year, monthIndex, 1).getDay(); // 0=Sun, 6=Sat
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
-    type CellData = { empty: true } | {
-      empty?: false;
-      day: number;
-      dateStr: string;
-      isToday: boolean;
-      isSelected: boolean;
-      hasBlocks: boolean;
-    };
-
     const allCells: CellData[] = [];
 
     // Leading empty cells for days before month starts
@@ -243,6 +245,7 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       allCells.push({
+        empty: false,
         day,
         dateStr,
         isToday: dateStr === todayStr,

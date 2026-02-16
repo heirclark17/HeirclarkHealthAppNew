@@ -4,7 +4,7 @@
  * Includes action buttons (calendar sync + refresh) below the date strip
  */
 
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { CalendarClock, RefreshCw } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
@@ -45,8 +45,6 @@ export function PlannerCalendarStrip({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const scrollRef = useRef<ScrollView>(null);
-
   const dayItemBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
   const dayNameColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
   const actionBtnBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
@@ -91,15 +89,7 @@ export function PlannerCalendarStrip({
     return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   }, [selectedDate]);
 
-  // Scroll to selected date on mount
-  useEffect(() => {
-    const selectedIdx = weekDays.findIndex((d) => d.dateStr === selectedDate);
-    if (selectedIdx > 0 && scrollRef.current) {
-      setTimeout(() => {
-        scrollRef.current?.scrollTo({ x: Math.max(0, selectedIdx * 56 - 40), animated: false });
-      }, 50);
-    }
-  }, [selectedDate, weekDays]);
+  // No horizontal scroll needed — 7 day items fit on screen via flex: 1
 
   const hasActions = onSyncCalendar || onRefresh;
 
@@ -144,7 +134,6 @@ export function PlannerCalendarStrip({
 
       {/* Week strip */}
       <ScrollView
-        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.weekStrip}

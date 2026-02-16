@@ -24,7 +24,7 @@ export function TimeSlotGrid() {
 
         return (
           <View
-            key={hour}
+            key={`hour-${index}`}
             style={[styles.gridLine, { top: yPosition }]}
           >
             <Text style={[styles.timeLabel, { color: themeColors.textSecondary }]}>

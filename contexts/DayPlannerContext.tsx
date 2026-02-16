@@ -218,14 +218,17 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
   // Auto-regenerate plan when calendar events are synced so meals/workouts
   // get rescheduled around imported calendar events (no overlaps).
+  const lastSyncHandled = useRef<string | null>(null);
   useEffect(() => {
     if (
       state.lastCalendarSync &&
+      state.lastCalendarSync !== lastSyncHandled.current &&
       state.deviceCalendarEvents.length > 0 &&
       state.hasCompletedOnboarding &&
       state.preferences &&
       !state.isGeneratingPlan
     ) {
+      lastSyncHandled.current = state.lastCalendarSync;
       console.log('[Planner] Calendar synced – optimizing schedule around', state.deviceCalendarEvents.length, 'events');
       generateWeeklyPlan();
     }

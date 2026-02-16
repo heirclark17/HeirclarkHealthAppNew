@@ -65,9 +65,10 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
 
   // Calendar events get stronger backgrounds for visual clarity
   const isCalendarEvent = block.type === 'calendar_event';
+  const blockColor = block.color || '#888888';
   const cardBg = isDark
-    ? (block.color + (isCalendarEvent ? '35' : '25'))
-    : (block.color + (isCalendarEvent ? '22' : '15'));
+    ? (blockColor + (isCalendarEvent ? '35' : '25'))
+    : (blockColor + (isCalendarEvent ? '22' : '15'));
   const cardBorder = isDark
     ? 'rgba(255,255,255,0.08)'
     : 'rgba(0,0,0,0.06)';
@@ -91,7 +92,7 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
               styles.card,
               {
                 backgroundColor: cardBg,
-                borderLeftColor: block.color,
+                borderLeftColor: blockColor,
                 borderLeftWidth: isCalendarEvent ? 4 : 3,
                 borderColor: cardBorder,
               },
@@ -99,7 +100,7 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft }: Pro
           >
             <View style={styles.header}>
               <View style={styles.titleRow}>
-                <ActivityIcon type={block.type} size={14} color={block.color} />
+                <ActivityIcon type={block.type} size={14} color={blockColor} />
                 <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
                   {block.title}
                 </Text>
