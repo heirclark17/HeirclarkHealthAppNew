@@ -557,11 +557,11 @@ export function GroceryListModal({
                 />
               </Animated.View>
             ))}
-            <View style={{ height: 120 }} />
+            <View style={{ height: 280 }} />
           </ScrollView>
         )}
 
-        {/* Instacart button with Orange-Green Gradient */}
+        {/* Sticky Instacart button with Orange-Green Gradient */}
         {groceryList && groceryList.length > 0 && !isLoading && (
           <Animated.View
             entering={SlideInUp.delay(300).springify()}
@@ -740,10 +740,11 @@ const styles = StyleSheet.create({
   },
   instacartButtonContainer: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 200,
     left: 16,
     right: 16,
-    zIndex: 10,
+    zIndex: 999,
+    elevation: 10,
   },
   instacartButtonBlur: {
     borderRadius: 20,
