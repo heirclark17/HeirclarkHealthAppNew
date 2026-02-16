@@ -218,7 +218,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         isDark={isDark}
       />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Spacer for sticky header */}
         <View style={{ height: Platform.OS === 'ios' ? 260 : 210 }} />
 
@@ -1202,6 +1202,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingHorizontal: 12,
+  },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
@@ -1214,7 +1217,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   subtitle: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 8,
     marginBottom: 24,
   },
   subtitleText: {

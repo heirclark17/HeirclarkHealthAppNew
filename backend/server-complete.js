@@ -2695,6 +2695,87 @@ app.get('/api/v1/food-photo', async (req, res) => {
 // AI RECIPE DETAILS
 // ============================================
 
+// AI BATCH RECIPE DETAILS - Fetch ALL recipes for entire week in ONE call
+app.post('/api/v1/ai/recipe-details-batch', authenticateToken, async (req, res) => {
+  try {
+    const { meals, budgetTier } = req.body;
+
+    if (!meals || !Array.isArray(meals) || meals.length === 0) {
+      return res.status(400).json({ error: 'Missing meals array' });
+    }
+
+    console.log(`[Batch Recipe Details] Fetching ${meals.length} recipes in ONE AI call with budget: ${budgetTier || 'medium'}`);
+
+    // Budget tier guidance
+    let budgetGuidance = '';
+    if (budgetTier === 'low') {
+      budgetGuidance = 'Use BUDGET-FRIENDLY ingredients: store brands, frozen vegetables, canned beans, rice, pasta, eggs, ground meat, seasonal produce. Avoid expensive cuts, specialty items, organic products.';
+    } else if (budgetTier === 'high') {
+      budgetGuidance = 'Use PREMIUM ingredients: organic produce, grass-fed meat, wild-caught fish, artisanal products, specialty ingredients. Focus on quality and freshness.';
+    } else {
+      budgetGuidance = 'Use MODERATE-PRICED ingredients: mix of fresh and frozen produce, standard cuts of meat, conventional products. Balance between quality and cost.';
+    }
+
+    // Build meal list for prompt
+    const mealList = meals.map((meal, index) =>
+      `${index + 1}. ${meal.dayName} ${meal.mealType}: ${meal.name} (${meal.calories} cal, P:${meal.protein}g C:${meal.carbs}g F:${meal.fat}g)`
+    ).join('\n');
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a professional chef providing detailed recipes for an entire week of meals. Return JSON with:
+          {
+            "recipes": [
+              {
+                "ingredients": [{"name": "ingredient", "amount": "1", "unit": "cup", "category": "Produce"}],
+                "instructions": ["Step 1", "Step 2"],
+                "prepTime": 15,
+                "cookTime": 30
+              }
+            ]
+          }
+
+          CRITICAL REQUIREMENTS:
+          - Return recipes array with EXACTLY ${meals.length} recipe objects (one per meal)
+          - Each recipe MUST have ingredients array with objects containing: name, amount, unit, category
+          - category must be one of: Produce, Protein, Dairy, Grains, Pantry, Spices, Other
+          - amount should be a string (e.g., "1", "2.5", "1/4")
+          - instructions array must be array of strings
+          - prepTime and cookTime must be numbers (minutes)
+          - Match the provided calorie and macro targets
+
+          BUDGET GUIDANCE: ${budgetGuidance}`
+        },
+        {
+          role: 'user',
+          content: `Provide detailed recipes with ingredients for these ${meals.length} meals:\n\n${mealList}`
+        }
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.5,
+      max_tokens: 8000, // Increased for batch response
+    });
+
+    const result = JSON.parse(completion.choices[0].message.content);
+
+    if (!result.recipes || result.recipes.length !== meals.length) {
+      console.error('[Batch Recipe Details] AI returned wrong number of recipes:', result.recipes?.length, 'expected:', meals.length);
+      return res.status(500).json({ error: 'AI returned incomplete recipe data' });
+    }
+
+    const totalIngredients = result.recipes.reduce((sum, recipe) => sum + (recipe.ingredients?.length || 0), 0);
+    console.log(`[Batch Recipe Details] ✅ Generated ${result.recipes.length} recipes with ${totalIngredients} total ingredients (Budget: ${budgetTier || 'medium'})`);
+
+    res.json({ success: true, recipes: result.recipes, budgetTier: budgetTier || 'medium' });
+  } catch (error) {
+    console.error('[Batch Recipe Details] Error:', error);
+    res.status(500).json({ error: 'Failed to fetch batch recipe details' });
+  }
+});
+
 app.post('/api/v1/ai/recipe-details', authenticateToken, async (req, res) => {
   try {
     // Accept both old format (mealName, basicInfo) and new format (dishName, mealType, calories, macros, budgetTier)

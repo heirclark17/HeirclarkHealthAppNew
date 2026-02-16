@@ -1862,6 +1862,24 @@ class HeirclarkAPI {
     }
   }
 
+  // Batch Recipe Details - Fetch ALL recipes for entire week in ONE API call
+  async getBatchRecipeDetails(meals: any[], budgetTier: 'low' | 'medium' | 'high'): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/ai/recipe-details-batch`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ meals, budgetTier }),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data : null;
+    } catch (error) {
+      console.error('[API] Batch recipe fetch error:', error);
+      return null;
+    }
+  }
+
   // Smart Meal Logger Agent
   async getSmartMealSuggestions(timeOfDay?: string, recentMeals?: any[]): Promise<any> {
     try {
