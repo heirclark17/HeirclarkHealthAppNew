@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Animated, {
@@ -315,13 +316,86 @@ export function GroceryListModal({
           </View>
         )}
 
-        {/* Loading State */}
+        {/* Loading State - AI Fetching Recipes */}
         {isLoading && (
-          <View style={styles.loadingState}>
-            <Text style={[styles.loadingText, { color: glassColors.textMuted }]}>
-              Generating grocery list...
-            </Text>
-          </View>
+          <Animated.View
+            entering={FadeIn.duration(300)}
+            style={styles.loadingContainer}
+          >
+            <GlassCard
+              style={styles.loadingCard}
+              intensity={isDark ? 60 : 80}
+            >
+              {/* Animated Activity Indicator */}
+              <View style={styles.loadingIconContainer}>
+                <ActivityIndicator
+                  size="large"
+                  color={glassColors.checkboxChecked}
+                />
+              </View>
+
+              {/* Loading Title */}
+              <Text style={[styles.loadingTitle, { color: glassColors.text }]}>
+                Fetching Recipes for Entire Week
+              </Text>
+
+              {/* Loading Description */}
+              <Text style={[styles.loadingDescription, { color: glassColors.textMuted }]}>
+                AI is generating detailed ingredient lists for all 7 days with {budgetTier} budget ingredients...
+              </Text>
+
+              {/* Animated Steps */}
+              <View style={styles.loadingSteps}>
+                <Animated.View
+                  entering={FadeIn.delay(300)}
+                  style={styles.loadingStep}
+                >
+                  <View style={[styles.loadingStepDot, { backgroundColor: glassColors.checkboxChecked }]} />
+                  <Text style={[styles.loadingStepText, { color: glassColors.textSecondary }]}>
+                    Analyzing meal plan structure
+                  </Text>
+                </Animated.View>
+
+                <Animated.View
+                  entering={FadeIn.delay(600)}
+                  style={styles.loadingStep}
+                >
+                  <View style={[styles.loadingStepDot, { backgroundColor: glassColors.checkboxChecked }]} />
+                  <Text style={[styles.loadingStepText, { color: glassColors.textSecondary }]}>
+                    Fetching recipes from AI
+                  </Text>
+                </Animated.View>
+
+                <Animated.View
+                  entering={FadeIn.delay(900)}
+                  style={styles.loadingStep}
+                >
+                  <View style={[styles.loadingStepDot, { backgroundColor: glassColors.checkboxChecked }]} />
+                  <Text style={[styles.loadingStepText, { color: glassColors.textSecondary }]}>
+                    Aggregating ingredients
+                  </Text>
+                </Animated.View>
+
+                <Animated.View
+                  entering={FadeIn.delay(1200)}
+                  style={styles.loadingStep}
+                >
+                  <View style={[styles.loadingStepDot, { backgroundColor: glassColors.checkboxChecked }]} />
+                  <Text style={[styles.loadingStepText, { color: glassColors.textSecondary }]}>
+                    Categorizing grocery items
+                  </Text>
+                </Animated.View>
+              </View>
+
+              {/* Tip */}
+              <View style={[styles.loadingTip, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.1)' : 'rgba(99, 102, 241, 0.08)' }]}>
+                <Ionicons name="bulb-outline" size={16} color={glassColors.checkboxChecked} />
+                <Text style={[styles.loadingTipText, { color: glassColors.textMuted }]}>
+                  This usually takes 10-20 seconds. Check your console for detailed progress!
+                </Text>
+              </View>
+            </GlassCard>
+          </Animated.View>
         )}
 
         {/* Budget Tier Selector */}
@@ -661,13 +735,69 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.semiBold,
   },
-  loadingState: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingCard: {
+    width: '100%',
+    maxWidth: 400,
     padding: 32,
+    borderRadius: Spacing.borderRadius * 1.5,
     alignItems: 'center',
   },
-  loadingText: {
-    fontSize: 15,
-    fontFamily: Fonts.medium,
+  loadingIconContainer: {
+    marginBottom: 20,
+  },
+  loadingTitle: {
+    fontSize: 20,
+    fontFamily: Fonts.semiBold,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  loadingDescription: {
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  loadingSteps: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  loadingStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingLeft: 8,
+  },
+  loadingStepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  loadingStepText: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    flex: 1,
+  },
+  loadingTip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    gap: 8,
+    width: '100%',
+  },
+  loadingTipText: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    flex: 1,
+    lineHeight: 16,
   },
   filtersSection: {
     paddingHorizontal: 16,
