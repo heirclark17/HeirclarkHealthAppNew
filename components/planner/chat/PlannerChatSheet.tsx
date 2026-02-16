@@ -250,7 +250,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef, PlannerChatSheet
 
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const flatListRef = useRef<FlatList>(null);
-  const snapPoints = useMemo(() => ['70%', '88%', '96%'], []);
+  const snapPoints = useMemo(() => ['95%'], []);
 
   // Generate smart suggestions based on current schedule
   const smartSuggestions = useMemo(() => {
