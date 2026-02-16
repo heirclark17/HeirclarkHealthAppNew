@@ -99,9 +99,12 @@ const CheckboxItem = ({
 }) => {
   const scale = useSharedValue(1);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    'worklet';
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
 
   const handlePress = async () => {
     await lightImpact();
@@ -259,9 +262,12 @@ export function GroceryListModal({
 
   // Button animation
   const buttonScale = useSharedValue(1);
-  const buttonAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: buttonScale.value }],
-  }));
+  const buttonAnimatedStyle = useAnimatedStyle(() => {
+    'worklet';
+    return {
+      transform: [{ scale: buttonScale.value }],
+    };
+  });
 
   const handleInstacartPress = async () => {
     await mediumImpact();
