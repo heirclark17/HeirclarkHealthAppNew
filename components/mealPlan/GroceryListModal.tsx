@@ -521,6 +521,7 @@ export function GroceryListModal({
                     >
                       {budgetTier === tier ? (
                         <View
+                          key={`${tier}-selected`}
                           style={[
                             styles.gradientPill,
                             { backgroundColor: '#007AFF' }
@@ -538,6 +539,7 @@ export function GroceryListModal({
                         </View>
                       ) : (
                         <Text
+                          key={`${tier}-unselected`}
                           style={[
                             styles.compactPillText,
                             { color: glassColors.text },
@@ -589,6 +591,7 @@ export function GroceryListModal({
                     >
                       {dietaryFilters.includes(filter) ? (
                         <View
+                          key={`${filter}-selected`}
                           style={[
                             styles.gradientPill,
                             { backgroundColor: '#007AFF' }
@@ -606,6 +609,7 @@ export function GroceryListModal({
                         </View>
                       ) : (
                         <Text
+                          key={`${filter}-unselected`}
                           style={[
                             styles.compactPillText,
                             { color: glassColors.text },
