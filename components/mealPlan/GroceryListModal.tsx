@@ -63,8 +63,8 @@ interface GroceryListModalProps {
   onGenerateList?: (budgetTier?: 'low' | 'medium' | 'high') => void;
 }
 
-const getCategoryIcon = (category: string, color: string, size: number = 18) => {
-  const iconProps = { size, color, strokeWidth: 2 };
+const getCategoryIcon = (category: string, size: number = 18) => {
+  const iconProps = { size, strokeWidth: 2 };
 
   switch (category) {
     case 'Produce':
@@ -190,7 +190,7 @@ const CategorySection = ({
     <View style={styles.categorySection}>
       <View style={styles.categoryHeader}>
         <View style={styles.categoryIconContainer}>
-          {getCategoryIcon(category.category, glassColors.text)}
+          {getCategoryIcon(category.category)}
         </View>
         <Text style={[styles.categoryTitle, { color: glassColors.text }]}>{category.category}</Text>
         <NumberText weight="regular" style={[styles.categoryCount, { color: glassColors.textMuted }]}>
@@ -511,6 +511,11 @@ export function GroceryListModal({
                       ]}
                       onPress={() => setBudgetTier(tier as 'low' | 'medium' | 'high')}
                       accessibilityLabel={`${tier.charAt(0).toUpperCase() + tier.slice(1)} budget tier`}
+                      accessibilityHint={`Selects ${tier} budget ingredients for your grocery list. ${
+                        tier === 'low' ? 'Most affordable options' :
+                        tier === 'medium' ? 'Balanced quality and price' :
+                        'Premium quality ingredients'
+                      }`}
                       accessibilityRole="button"
                       accessibilityState={{ selected: budgetTier === tier }}
                     >
@@ -578,6 +583,7 @@ export function GroceryListModal({
                       ]}
                       onPress={() => toggleDietaryFilter(filter)}
                       accessibilityLabel={`${filter.charAt(0).toUpperCase() + filter.slice(1)}`}
+                      accessibilityHint={`Filters ingredients to only include ${filter} options when ordering from Instacart`}
                       accessibilityRole="button"
                       accessibilityState={{ selected: dietaryFilters.includes(filter) }}
                     >
