@@ -421,14 +421,13 @@ export function GroceryListModal({
           </Animated.View>
         )}
 
-        {/* Compact Filters Card - Budget Tier & Dietary Preferences */}
+        {/* Budget Tier Card */}
         {groceryList && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(150)}
-            style={styles.filtersCard}
+            style={styles.budgetCard}
           >
             <GlassCard intensity={isDark ? 40 : 60} style={styles.filtersCardInner}>
-              {/* Budget Tier - Horizontal Scroll */}
               <View style={styles.filterSection}>
                 <Text style={[styles.compactFilterLabel, { color: glassColors.textSecondary }]}>
                   Budget
@@ -467,8 +466,17 @@ export function GroceryListModal({
                   ))}
                 </ScrollView>
               </View>
+            </GlassCard>
+          </Animated.View>
+        )}
 
-              {/* Dietary Preferences - Horizontal Scroll */}
+        {/* Dietary Preferences Card */}
+        {groceryList && !isLoading && (
+          <Animated.View
+            entering={FadeIn.delay(200)}
+            style={styles.dietaryCard}
+          >
+            <GlassCard intensity={isDark ? 40 : 60} style={styles.filtersCardInner}>
               <View style={styles.filterSection}>
                 <Text style={[styles.compactFilterLabel, { color: glassColors.textSecondary }]}>
                   Dietary
@@ -891,7 +899,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.medium,
   },
   // Compact Filters Card Styles
-  filtersCard: {
+  budgetCard: {
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+  dietaryCard: {
     paddingHorizontal: 16,
     marginBottom: 12,
   },
