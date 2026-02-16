@@ -391,15 +391,16 @@ export default function SavedMealsScreen() {
       <Animated.View entering={statsAnimation}>
         <GlassCard style={styles.statsCard}>
           <View style={styles.statsRow}>
-            <View style={styles.statItem}>
+            <GlassCard style={styles.statItemCard} borderColor="transparent">
+              <Bookmark size={20} color={colors.primary} strokeWidth={1.5} />
               <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{stats.total}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Meals</Text>
-            </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
-            <View style={styles.statItem}>
+            </GlassCard>
+            <GlassCard style={styles.statItemCard} borderColor="transparent">
+              <Heart size={20} color="#ff6b6b" strokeWidth={1.5} />
               <NumberText weight="semiBold" style={[styles.statValue, { color: '#ff6b6b' }]}>{stats.favorites}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Favorites</Text>
-            </View>
+            </GlassCard>
           </View>
         </GlassCard>
       </Animated.View>
@@ -501,25 +502,21 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: 12,
   },
-  statItem: {
+  statItemCard: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: Spacing.sm,
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 28,
   },
   statLabel: {
     fontSize: 11,
     fontFamily: Fonts.regular,
-    marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    height: 40,
   },
   searchWrapper: {
     marginHorizontal: Spacing.lg,
