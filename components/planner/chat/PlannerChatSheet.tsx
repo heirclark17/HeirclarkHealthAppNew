@@ -75,6 +75,17 @@ const GLASS_COLORS = {
 const genId = () => `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
 // ============================================================================
+// Time Formatting Helper
+// ============================================================================
+
+function formatTo12Hour(time24: string): string {
+  const [hours, minutes] = time24.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hours12 = hours % 12 || 12;
+  return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+}
+
+// ============================================================================
 // Smart Suggestion Generator - Analyzes user behavior and schedule context
 // ============================================================================
 
@@ -300,8 +311,8 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef, PlannerChatSheet
           id: b.id,
           type: b.type,
           title: b.title,
-          startTime: b.startTime,
-          endTime: b.endTime,
+          startTime: formatTo12Hour(b.startTime),
+          endTime: formatTo12Hour(b.endTime),
           duration: b.duration,
           status: b.status,
         })),
@@ -309,8 +320,8 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef, PlannerChatSheet
       totalFreeMinutes: timeline.totalFreeMinutes,
       completionRate: timeline.completionRate,
       preferences: state.preferences ? {
-        wakeTime: state.preferences.wakeTime,
-        sleepTime: state.preferences.sleepTime,
+        wakeTime: formatTo12Hour(state.preferences.wakeTime),
+        sleepTime: formatTo12Hour(state.preferences.sleepTime),
         energyPeak: state.preferences.energyPeak,
       } : undefined,
       recoveryScore,

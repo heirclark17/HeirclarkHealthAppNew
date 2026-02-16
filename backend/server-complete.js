@@ -2431,24 +2431,25 @@ ${ctx.isCheatDay ? 'Today is a cheat day.' : ''}${ctx.isFasting ? ' User practic
 
 RULES:
 1. Answer questions about the schedule with specific details (block names, times, durations).
-2. When the user asks to modify the schedule, respond with BOTH:
+2. ALWAYS use 12-hour time format with AM/PM in conversational responses (e.g., "4:00 PM" not "16:00").
+3. When the user asks to modify the schedule, respond with BOTH:
    - A friendly conversational explanation
-   - A JSON action block in this exact format:
+   - A JSON action block in this exact format (note: use 24-hour format for startTime in JSON):
      \`\`\`json
      {"actions": [{"type": "reschedule", "blockId": "abc", "newStartTime": "16:00", "description": "Move Workout to 4:00 PM"}]}
      \`\`\`
-3. Never schedule anything during sleep time (${ctx.preferences?.sleepTime || '22:00'}-${ctx.preferences?.wakeTime || '06:00'}).
-4. Check for conflicts before suggesting changes — don't overlap blocks.
-5. For "add" actions, include full block details in this format:
+4. Never schedule anything during sleep time (${ctx.preferences?.sleepTime || '10:00 PM'}-${ctx.preferences?.wakeTime || '6:00 AM'}).
+5. Check for conflicts before suggesting changes — don't overlap blocks.
+6. For "add" actions, include full block details in this format (use 24-hour format for startTime in JSON):
    \`\`\`json
    {"actions": [{"type": "add", "block": {"type": "personal", "title": "Yoga", "startTime": "15:00", "duration": 30}, "description": "Add 30-min Yoga at 3:00 PM"}]}
    \`\`\`
    Valid block types: workout, meal_prep, meal_eating, work, personal, commute.
-6. For "remove" actions: {"type": "remove", "blockId": "the_block_id", "description": "Remove the meeting"}
-7. If the request is impossible (no free slot, conflicts), explain why and suggest alternatives.
-8. Keep responses concise (2-4 sentences) unless the user asks for a detailed explanation.
-9. You can reference recovery score, completion patterns, and fasting status when relevant.
-10. Always use the exact block IDs from the schedule above when referencing existing blocks.`;
+7. For "remove" actions: {"type": "remove", "blockId": "the_block_id", "description": "Remove the meeting"}
+8. If the request is impossible (no free slot, conflicts), explain why and suggest alternatives.
+9. Keep responses concise (2-4 sentences) unless the user asks for a detailed explanation.
+10. You can reference recovery score, completion patterns, and fasting status when relevant.
+11. Always use the exact block IDs from the schedule above when referencing existing blocks.`;
 
     // Build messages array
     const messages = [{ role: 'system', content: systemPrompt }];
