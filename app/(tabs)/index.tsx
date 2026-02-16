@@ -1312,6 +1312,9 @@ export default function DashboardScreen() {
         >
         {/* Header with Greeting */}
         <GlassCard style={styles.greetingCard} interactive>
+          <View style={styles.profileImageWrapper}>
+            <LiquidGlassProfileImage size={70} showEditButton={false} />
+          </View>
           <Text style={[styles.greetingTime, { color: colors.textMuted }]}>{greeting}</Text>
           <Text style={[styles.greetingName, { color: colors.text }]}>
             {isAuthenticated && user?.firstName ? user.firstName.toUpperCase() : 'THERE'}
@@ -1982,6 +1985,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     alignItems: 'center',
   },
+  profileImageWrapper: {
+    marginBottom: 12,
+  },
   macroCardsRow: {
     flexDirection: 'row',
     paddingHorizontal: 12,
@@ -2164,7 +2170,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 16,
     marginLeft: 20,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
   },
   calorieCardsRow: {
     flexDirection: 'row',
@@ -2184,7 +2190,7 @@ const styles = StyleSheet.create({
   calorieSubCardTitle: {
     fontSize: 9,
     color: Colors.textMuted,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     marginBottom: 12,
     fontFamily: Fonts.regular,
     textAlign: 'center',
@@ -2194,11 +2200,13 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 6,
     textAlign: 'center',
+    letterSpacing: 0,
   },
   calorieSubCardUnit: {
     fontSize: 12,
     color: Colors.textSecondary,
     textAlign: 'center',
+    letterSpacing: 0,
   },
   semiGaugeContainer: {
     alignItems: 'center',
