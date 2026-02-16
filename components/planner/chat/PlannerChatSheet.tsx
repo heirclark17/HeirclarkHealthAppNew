@@ -533,7 +533,6 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
   const renderSuggestionChips = useCallback(() => (
     <View style={styles.suggestionsContainer}>
       <View style={styles.emptyStateHeader}>
-        <Sparkles size={32} color={glass.accent} style={{ opacity: 0.7 }} />
         <Text style={[styles.emptyTitle, { color: glass.text }]}>Schedule Assistant</Text>
         <Text style={[styles.emptySubtitle, { color: glass.textSecondary }]}>
           Ask me to modify your schedule or answer questions about your day.
