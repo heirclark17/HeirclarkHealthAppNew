@@ -798,12 +798,35 @@ function ExerciseDetailModal({
   onToggleFavorite,
 }: ExerciseDetailModalProps) {
   const colors = isDark ? DarkColors : LightColors;
+  const [gifLoading, setGifLoading] = useState(true);
+
+  // Title case helper
+  const toTitleCase = (str: string) =>
+    str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
+  // Derive difficulty from equipment
+  const getDifficulty = (equipment: string) => {
+    const eq = equipment.toLowerCase();
+    if (eq.includes('body') || eq === 'assisted' || eq === 'stability ball') return 'Beginner';
+    if (eq.includes('dumbbell') || eq.includes('kettlebell') || eq.includes('band') || eq === 'ez barbell') return 'Intermediate';
+    return 'Advanced';
+  };
+
+  const difficulty = getDifficulty(exercise.equipment);
+  const difficultyColor =
+    difficulty === 'Beginner' ? colors.successStrong :
+    difficulty === 'Intermediate' ? colors.warningOrange :
+    colors.errorStrong;
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <BlurView intensity={100} style={styles.modalContainer}>
-        <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+      <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+          <ScrollView
+            style={styles.modalContent}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
+          >
             {/* Header */}
             <View style={styles.modalHeader}>
               <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -819,15 +842,34 @@ function ExerciseDetailModal({
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.modalTitle, { color: colors.text }]}>{exercise.name}</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {toTitleCase(exercise.name)}
+            </Text>
+
+            {/* Difficulty Badge */}
+            <View style={[styles.modalDifficultyBadge, {
+              backgroundColor: difficultyColor + '20',
+              borderColor: difficultyColor + '40',
+            }]}>
+              <Text style={[styles.modalDifficultyText, { color: difficultyColor }]}>
+                {difficulty}
+              </Text>
+            </View>
 
             {/* Exercise GIF - use higher resolution for detail view */}
             {exercise.gifUrl && (
               <View style={styles.gifContainer}>
+                {gifLoading && (
+                  <View style={styles.gifLoadingOverlay}>
+                    <ActivityIndicator size="small" color={colors.textMuted} />
+                  </View>
+                )}
                 <Image
                   source={{ uri: exercise.gifUrl.replace('resolution=180', 'resolution=360') }}
                   style={styles.exerciseGif}
                   resizeMode="contain"
+                  onLoadStart={() => setGifLoading(true)}
+                  onLoadEnd={() => setGifLoading(false)}
                 />
                 <Text style={[styles.gifCaption, { color: colors.textMuted }]}>
                   Proper Form Demo
@@ -841,21 +883,21 @@ function ExerciseDetailModal({
                 <Target size={20} color={colors.text} strokeWidth={1.5} />
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>Target</Text>
                 <Text style={[styles.statValue, { color: colors.text }]}>
-                  {exercise.target}
+                  {toTitleCase(exercise.target)}
                 </Text>
               </View>
               <View style={[styles.statBox, { backgroundColor: colors.backgroundSecondary }]}>
                 <Dumbbell size={20} color={colors.text} strokeWidth={1.5} />
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>Equipment</Text>
                 <Text style={[styles.statValue, { color: colors.text }]}>
-                  {exercise.equipment}
+                  {exercise.equipment === 'body weight' ? 'Bodyweight' : toTitleCase(exercise.equipment)}
                 </Text>
               </View>
               <View style={[styles.statBox, { backgroundColor: colors.backgroundSecondary }]}>
                 <Zap size={20} color={colors.text} strokeWidth={1.5} />
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>Muscle</Text>
                 <Text style={[styles.statValue, { color: colors.text }]}>
-                  {exercise.bodyPart}
+                  {toTitleCase(exercise.bodyPart)}
                 </Text>
               </View>
             </View>
@@ -893,7 +935,7 @@ function ExerciseDetailModal({
                       ]}
                     >
                       <Text style={[styles.muscleGroupText, { color: colors.text }]}>
-                        {muscle}
+                        {toTitleCase(muscle)}
                       </Text>
                     </View>
                   ))}
@@ -902,7 +944,7 @@ function ExerciseDetailModal({
             )}
           </ScrollView>
         </SafeAreaView>
-      </BlurView>
+      </View>
     </Modal>
   );
 }
@@ -1181,11 +1223,33 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontFamily: Fonts.bold,
+    marginBottom: Spacing.sm,
+  },
+  modalDifficultyBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
     marginBottom: Spacing.lg,
+  },
+  modalDifficultyText: {
+    fontSize: 13,
+    fontFamily: Fonts.semiBold,
   },
   gifContainer: {
     alignItems: 'center',
     marginBottom: Spacing.lg,
+  },
+  gifLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   exerciseGif: {
     width: '100%',
@@ -1218,7 +1282,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 13,
     fontFamily: Fonts.semiBold,
-    textTransform: 'capitalize',
     textAlign: 'center',
   },
   section: {
@@ -1227,7 +1290,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontFamily: Fonts.semiBold,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   instructionRow: {
     flexDirection: 'row',
