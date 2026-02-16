@@ -302,7 +302,15 @@ export function GroceryListModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={[styles.container, { backgroundColor: glassColors.background }]}>
+      <LinearGradient
+        colors={
+          isDark
+            ? ['#000000', '#0A0A0A', '#1A1A1A']
+            : ['#F5F5F7', '#FAFAFA', '#FFFFFF']
+        }
+        locations={[0, 0.5, 1]}
+        style={styles.container}
+      >
         {/* Header with Glass Effect */}
         <BlurView
           intensity={isDark ? 60 : 80}
@@ -461,11 +469,11 @@ export function GroceryListModal({
                       accessibilityState={{ selected: budgetTier === tier }}
                     >
                       {budgetTier === tier ? (
-                        <LinearGradient
-                          colors={['rgba(135, 206, 250, 0.5)', 'rgba(100, 149, 237, 0.5)']}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                          style={styles.gradientPill}
+                        <View
+                          style={[
+                            styles.gradientPill,
+                            { backgroundColor: '#007AFF' }
+                          ]}
                         >
                           <Text
                             style={[
@@ -476,7 +484,7 @@ export function GroceryListModal({
                           >
                             {tier.charAt(0).toUpperCase() + tier.slice(1)}
                           </Text>
-                        </LinearGradient>
+                        </View>
                       ) : (
                         <Text
                           style={[
@@ -528,11 +536,11 @@ export function GroceryListModal({
                       accessibilityState={{ selected: dietaryFilters.includes(filter) }}
                     >
                       {dietaryFilters.includes(filter) ? (
-                        <LinearGradient
-                          colors={['rgba(135, 206, 250, 0.5)', 'rgba(100, 149, 237, 0.5)']}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                          style={styles.gradientPill}
+                        <View
+                          style={[
+                            styles.gradientPill,
+                            { backgroundColor: '#007AFF' }
+                          ]}
                         >
                           <Text
                             style={[
@@ -543,7 +551,7 @@ export function GroceryListModal({
                           >
                             {filter.charAt(0).toUpperCase() + filter.slice(1)}
                           </Text>
-                        </LinearGradient>
+                        </View>
                       ) : (
                         <Text
                           style={[
@@ -748,7 +756,7 @@ export function GroceryListModal({
             </TouchableOpacity>
           </Animated.View>
         )}
-      </View>
+      </LinearGradient>
     </Modal>
   );
 }
