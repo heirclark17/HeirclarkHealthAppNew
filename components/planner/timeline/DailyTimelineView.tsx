@@ -20,6 +20,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { useSettings } from '../../../contexts/SettingsContext';
+import { useSafeGoalWizard } from '../../../hooks/useSafeGoalWizard';
 import { TimeBlock } from '../../../types/planner';
 import { TimeSlotGrid } from './TimeSlotGrid';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
@@ -101,6 +102,24 @@ export function DailyTimelineView() {
   const scrollRef = useRef<ScrollView>(null);
   const chatSheetRef = useRef<PlannerChatSheetRef>(null);
   const insets = useSafeAreaInsets();
+
+  // Fasting overlay zones
+  const { state: goalWizardState } = useSafeGoalWizard();
+  const fastingZones = useMemo(() => {
+    if (!goalWizardState?.intermittentFasting) return null;
+    const parseTime = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return h + (m || 0) / 60;
+    };
+    // fastingStart = eating window START, fastingEnd = eating window END
+    const eatStart = parseTime(goalWizardState.fastingStart || '12:00');
+    const eatEnd = parseTime(goalWizardState.fastingEnd || '20:00');
+    const PX_PER_HOUR = 60;
+    return {
+      morning: { top: 0, height: eatStart * PX_PER_HOUR },
+      evening: { top: eatEnd * PX_PER_HOUR, height: (24 - eatEnd) * PX_PER_HOUR },
+    };
+  }, [goalWizardState?.intermittentFasting, goalWizardState?.fastingStart, goalWizardState?.fastingEnd]);
 
   // Bottom padding: account for tab bar floating above safe area bottom
   const bottomPadding = TAB_BAR_HEIGHT + TAB_BAR_BOTTOM_MARGIN + (insets.bottom || 0) + 20;
@@ -280,6 +299,43 @@ export function DailyTimelineView() {
       >
         <View style={styles.timeline}>
           <TimeSlotGrid />
+
+          {/* Fasting overlay zones */}
+          {fastingZones && fastingZones.morning.height > 0 && (
+            <View
+              style={[
+                styles.fastingZone,
+                {
+                  top: fastingZones.morning.top,
+                  height: fastingZones.morning.height,
+                  backgroundColor: isDark ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.06)',
+                },
+              ]}
+              pointerEvents="none"
+            >
+              <Text style={[styles.fastingLabel, { color: isDark ? 'rgba(139, 92, 246, 0.5)' : 'rgba(139, 92, 246, 0.45)' }]}>
+                Fasting
+              </Text>
+            </View>
+          )}
+          {fastingZones && fastingZones.evening.height > 0 && (
+            <View
+              style={[
+                styles.fastingZone,
+                {
+                  top: fastingZones.evening.top,
+                  height: fastingZones.evening.height,
+                  backgroundColor: isDark ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.06)',
+                },
+              ]}
+              pointerEvents="none"
+            >
+              <Text style={[styles.fastingLabel, { color: isDark ? 'rgba(139, 92, 246, 0.5)' : 'rgba(139, 92, 246, 0.45)' }]}>
+                Fasting
+              </Text>
+            </View>
+          )}
+
           <CurrentTimeIndicator />
 
           {timedBlocks.map((block) => (
@@ -607,5 +663,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: 4,
     zIndex: 10,
+  },
+  fastingZone: {
+    position: 'absolute',
+    left: 58, // after time labels (50px) + gap (8px)
+    right: 0,
+    borderRadius: 8,
+    zIndex: 0, // behind time blocks
+  },
+  fastingLabel: {
+    fontSize: 11,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+    paddingTop: 6,
+    paddingLeft: 8,
   },
 });
