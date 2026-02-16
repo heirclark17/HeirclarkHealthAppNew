@@ -16,6 +16,7 @@ import { MonthlyCalendarView } from '../../components/planner/monthly/MonthlyCal
 import { PlannerCalendarStrip } from '../../components/planner/shared/PlannerCalendarStrip';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { DarkColors, LightColors } from '../../constants/Theme';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 function formatDateStr(date: Date): string {
   const year = date.getFullYear();
@@ -42,6 +43,22 @@ export default function PlannerScreen() {
 
   const weekStartDate = state.weeklyPlan?.weekStartDate;
 
+  // Compute colored dots for calendar strip (up to 3 per day from all-day events)
+  const allDayEventDots = useMemo(() => {
+    const dots: Record<string, string[]> = {};
+    if (!state.weeklyPlan?.days) return dots;
+    for (const day of state.weeklyPlan.days) {
+      const allDayColors = day.blocks
+        .filter((b) => b.isAllDay)
+        .slice(0, 3)
+        .map((b) => b.color);
+      if (allDayColors.length > 0) {
+        dots[day.date] = allDayColors;
+      }
+    }
+    return dots;
+  }, [state.weeklyPlan]);
+
   const handleDateChange = (dateStr: string) => {
     actions.setSelectedDate(dateStr);
   };
@@ -58,6 +75,7 @@ export default function PlannerScreen() {
   }
 
   return (
+    <BottomSheetModalProvider>
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* Header with view toggle + preferences button */}
       <View style={[styles.header, { backgroundColor: themeColors.background, paddingTop: insets.top + 8 }]}>
@@ -92,6 +110,7 @@ export default function PlannerScreen() {
           isSyncingCalendar={state.isSyncingCalendar}
           onRefresh={actions.generateWeeklyPlan}
           isRefreshing={state.isGeneratingPlan}
+          allDayEventDots={allDayEventDots}
         />
       )}
 
@@ -105,6 +124,7 @@ export default function PlannerScreen() {
         />
       )}
     </View>
+    </BottomSheetModalProvider>
   );
 }
 

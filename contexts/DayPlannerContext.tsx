@@ -153,6 +153,12 @@ const addMinutesToTime = (time: string, minutes: number): string => {
   return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`;
 };
 
+/**
+ * Detect if an event title indicates Out-of-Office / time-off.
+ */
+const OOO_REGEX = /\b(ooo|out of office|pto|vacation|day off|holiday|time off|personal day|sick day|sick leave|leave)\b/i;
+const isOOOEvent = (title: string): boolean => OOO_REGEX.test(title);
+
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
@@ -528,10 +534,24 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     // Get calendar events (CLIENT-SIDE ONLY)
     // Filter out canceled events (Outlook/Teams prefix "Canceled:" or "Cancelled:")
+    // All-day events use range-overlap so multi-day events appear on each spanned day.
+    // Apple/Google Calendar sets all-day endDate to midnight of the day AFTER the last day,
+    // so we use strict > for endDate comparison.
     const currentEvents = stateRef.current.deviceCalendarEvents;
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+
     const calendarBlocks = currentEvents
-      .filter((event) => isSameDay(event.startDate, date))
-      .filter((event) => !/^cancell?ed:/i.test(event.title))
+      .filter((event) => {
+        if (/^cancell?ed:/i.test(event.title)) return false;
+        if (event.isAllDay) {
+          // Range-overlap: event.startDate <= dayEnd && event.endDate > dayStart
+          return event.startDate <= dayEnd && event.endDate > dayStart;
+        }
+        return isSameDay(event.startDate, date);
+      })
       .map((event) => convertCalendarEventToBlock(event));
 
     // Build scheduling request
@@ -548,6 +568,12 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     if (!result.success) {
       console.warn(`[Planner] Timeline for ${dateStr} has conflicts:`, result.conflicts);
+    }
+
+    // Mark day as OOO if any all-day block is an out-of-office event
+    const hasOOO = result.timeline.blocks.some((b) => b.isAllDay && b.isOOO);
+    if (hasOOO) {
+      result.timeline.isOOODay = true;
     }
 
     return result.timeline;
@@ -884,6 +910,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     if (event.isAllDay) {
       // All-day events (holidays, birthdays, OOO) — banner chip only,
       // excluded from scheduling engine, conflict detection, and stats.
+      const ooo = isOOOEvent(event.title);
       return {
         id: `calendar_${event.id}`,
         type: 'calendar_event',
@@ -899,6 +926,10 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         aiGenerated: false,
         deviceEventId: event.id,
         isAllDay: true,
+        isOOO: ooo,
+        calendarName: event.calendarName,
+        originalStartDate: event.startDate.toISOString(),
+        originalEndDate: event.endDate.toISOString(),
       };
     }
 

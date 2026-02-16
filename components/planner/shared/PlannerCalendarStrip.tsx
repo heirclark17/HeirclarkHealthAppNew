@@ -19,6 +19,7 @@ interface Props {
   isSyncingCalendar?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  allDayEventDots?: Record<string, string[]>; // dateStr -> array of up to 3 event colors
 }
 
 function parseLocalDate(dateStr: string): Date {
@@ -41,6 +42,7 @@ export function PlannerCalendarStrip({
   isSyncingCalendar,
   onRefresh,
   isRefreshing,
+  allDayEventDots,
 }: Props) {
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
@@ -172,6 +174,14 @@ export function PlannerCalendarStrip({
               {item.isToday && !isSelected && (
                 <View style={[styles.todayDot, { backgroundColor: themeColors.primary }]} />
               )}
+              {/* All-day event color dots (hidden on selected day) */}
+              {!isSelected && allDayEventDots?.[item.dateStr]?.length ? (
+                <View style={styles.eventDotsRow}>
+                  {allDayEventDots[item.dateStr].map((dotColor, idx) => (
+                    <View key={idx} style={[styles.eventDot, { backgroundColor: dotColor }]} />
+                  ))}
+                </View>
+              ) : null}
             </TouchableOpacity>
           );
         })}
@@ -244,6 +254,16 @@ const styles = StyleSheet.create({
     fontWeight: '200' as const,
   },
   todayDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+  },
+  eventDotsRow: {
+    flexDirection: 'row',
+    gap: 3,
+    marginTop: 2,
+  },
+  eventDot: {
     width: 4,
     height: 4,
     borderRadius: 2,

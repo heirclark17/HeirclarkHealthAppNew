@@ -1,14 +1,26 @@
 /**
  * DailyTimelineView - Main daily timeline with hourly grid and time blocks
  * Header date/actions moved to PlannerCalendarStrip in planner.tsx
+ *
+ * Enhancements:
+ * - Contextual icons on all-day chips (birthday, holiday, OOO, etc.)
+ * - Collapsible banner with "+N more" overflow pill
+ * - OOO chips get dashed amber border
+ * - Tap-to-detail bottom sheet with calendar info + "Open in Calendar"
  */
 
-import React, { useRef, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Calendar, RefreshCw, Sparkles } from 'lucide-react-native';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
+import { Calendar, RefreshCw, Sparkles, Cake, Star, TreePalm, CalendarDays, ExternalLink } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  BottomSheetModal,
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
 import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { useSettings } from '../../../contexts/SettingsContext';
+import { TimeBlock } from '../../../types/planner';
 import { TimeSlotGrid } from './TimeSlotGrid';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
 import { TimeBlockCard } from './TimeBlockCard';
@@ -18,6 +30,64 @@ import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme
 // Must match _layout.tsx tab bar constants
 const TAB_BAR_HEIGHT = 64;
 const TAB_BAR_BOTTOM_MARGIN = 12;
+
+const MAX_VISIBLE_CHIPS = 3;
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+/** Choose a contextual icon for an all-day event based on its title. */
+const BIRTHDAY_RE = /\b(birthday|bday)\b/i;
+const HOLIDAY_RE = /\b(holiday|christmas|thanksgiving|new year|memorial|independence|labor day|easter|hanukkah|diwali)\b/i;
+const OOO_RE = /\b(ooo|out of office|pto|vacation|day off|time off|personal day|sick day|sick leave|leave)\b/i;
+
+function getAllDayIcon(title: string) {
+  if (BIRTHDAY_RE.test(title)) return Cake;
+  if (HOLIDAY_RE.test(title)) return Star;
+  if (OOO_RE.test(title)) return TreePalm;
+  return CalendarDays;
+}
+
+/**
+ * Format a date range for display.
+ * All-day endDate from Apple/Google is midnight of the next day, so we
+ * subtract 1 day from endDate for user-facing display.
+ */
+function formatAllDayRange(startISO?: string, endISO?: string): string {
+  if (!startISO) return '';
+  const start = new Date(startISO);
+  const startStr = start.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+  if (!endISO) return startStr;
+  const end = new Date(endISO);
+  // Subtract 1 day for midnight-next-day convention
+  end.setDate(end.getDate() - 1);
+
+  // If same day after adjustment, just show single date
+  if (
+    start.getFullYear() === end.getFullYear() &&
+    start.getMonth() === end.getMonth() &&
+    start.getDate() === end.getDate()
+  ) {
+    return startStr;
+  }
+
+  const endStr = end.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return `${startStr} \u2013 ${endStr}`;
+}
+
+function openNativeCalendar() {
+  if (Platform.OS === 'ios') {
+    Linking.openURL('calshow:');
+  } else {
+    Linking.openURL('content://com.android.calendar/time/');
+  }
+}
+
+// ============================================================================
+// Component
+// ============================================================================
 
 export function DailyTimelineView() {
   const { state, actions } = useDayPlanner();
@@ -32,6 +102,35 @@ export function DailyTimelineView() {
 
   // Get current day's timeline
   const timeline = state.weeklyPlan?.days[state.selectedDayIndex];
+
+  // Collapsible banner state — reset when day changes
+  const [bannerExpanded, setBannerExpanded] = useState(false);
+  useEffect(() => {
+    setBannerExpanded(false);
+  }, [state.selectedDayIndex]);
+
+  // Bottom sheet for all-day event detail
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const [selectedAllDayBlock, setSelectedAllDayBlock] = useState<TimeBlock | null>(null);
+  const sheetSnapPoints = useMemo(() => ['30%'], []);
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        pressBehavior="close"
+      />
+    ),
+    []
+  );
+
+  const handleChipPress = useCallback((block: TimeBlock) => {
+    setSelectedAllDayBlock(block);
+    bottomSheetRef.current?.present();
+  }, []);
 
   // Auto-scroll to current time on mount
   useEffect(() => {
@@ -90,34 +189,74 @@ export function DailyTimelineView() {
   const allDayBlocks = timeline.blocks.filter((b) => b.isAllDay);
   const timedBlocks = timeline.blocks.filter((b) => !b.isAllDay && b.type !== 'buffer');
 
+  // Collapsible logic
+  const hasOverflow = allDayBlocks.length > MAX_VISIBLE_CHIPS;
+  const visibleChips = bannerExpanded ? allDayBlocks : allDayBlocks.slice(0, MAX_VISIBLE_CHIPS);
+  const overflowCount = allDayBlocks.length - MAX_VISIBLE_CHIPS;
+
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* All-day event banner (holidays, birthdays, OOO) */}
       {allDayBlocks.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={[styles.allDayBanner, { borderBottomColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}
-          contentContainerStyle={styles.allDayBannerContent}
+        <View
+          style={[
+            styles.allDayBanner,
+            { borderBottomColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
+            bannerExpanded && styles.allDayBannerExpanded,
+          ]}
         >
-          {allDayBlocks.map((block) => (
-            <View
-              key={block.id}
-              style={[
-                styles.allDayChip,
-                { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' },
-              ]}
-            >
-              <View style={[styles.allDayChipAccent, { backgroundColor: block.color }]} />
-              <Text
-                style={[styles.allDayChipText, { color: themeColors.text }]}
-                numberOfLines={1}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.allDayBannerContent}
+          >
+            {visibleChips.map((block) => {
+              const IconComponent = getAllDayIcon(block.title);
+              const isOOO = block.isOOO;
+              return (
+                <TouchableOpacity
+                  key={block.id}
+                  style={[
+                    styles.allDayChip,
+                    { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' },
+                    isOOO && styles.allDayChipOOO,
+                  ]}
+                  onPress={() => handleChipPress(block)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.allDayChipAccent, { backgroundColor: block.color }]} />
+                  <IconComponent
+                    size={14}
+                    color={isOOO ? '#D97706' : themeColors.textSecondary}
+                    style={styles.allDayChipIcon}
+                  />
+                  <Text
+                    style={[styles.allDayChipText, { color: themeColors.text }]}
+                    numberOfLines={1}
+                  >
+                    {block.title}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+
+            {/* Overflow pill */}
+            {hasOverflow && !bannerExpanded && (
+              <TouchableOpacity
+                style={[
+                  styles.overflowPill,
+                  { backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)' },
+                ]}
+                onPress={() => setBannerExpanded(true)}
+                activeOpacity={0.7}
               >
-                {block.title}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
+                <Text style={[styles.overflowPillText, { color: themeColors.textSecondary }]}>
+                  +{overflowCount} more
+                </Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
+        </View>
       )}
 
       {/* Timeline */}
@@ -185,6 +324,58 @@ export function DailyTimelineView() {
           <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Free Time</Text>
         </GlassCard>
       </View>
+
+      {/* All-day event detail bottom sheet */}
+      <BottomSheetModal
+        ref={bottomSheetRef}
+        index={0}
+        snapPoints={sheetSnapPoints}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+        backgroundStyle={{
+          backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+        }}
+        handleIndicatorStyle={{ backgroundColor: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)' }}
+        enableDynamicSizing={false}
+      >
+        {selectedAllDayBlock && (
+          <View style={styles.sheetContent}>
+            {/* Title row with color dot */}
+            <View style={styles.sheetTitleRow}>
+              <View style={[styles.sheetColorDot, { backgroundColor: selectedAllDayBlock.color }]} />
+              <Text style={[styles.sheetTitle, { color: themeColors.text }]} numberOfLines={2}>
+                {selectedAllDayBlock.title}
+              </Text>
+            </View>
+
+            {/* Calendar source */}
+            {selectedAllDayBlock.calendarName && (
+              <Text style={[styles.sheetMeta, { color: themeColors.textSecondary }]}>
+                {selectedAllDayBlock.calendarName}
+              </Text>
+            )}
+
+            {/* Date range */}
+            <Text style={[styles.sheetDateRange, { color: themeColors.textSecondary }]}>
+              {formatAllDayRange(selectedAllDayBlock.originalStartDate, selectedAllDayBlock.originalEndDate)}
+            </Text>
+
+            {/* Open in Calendar button */}
+            <TouchableOpacity
+              style={[styles.openCalendarBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}
+              onPress={openNativeCalendar}
+              activeOpacity={0.7}
+            >
+              <ExternalLink size={16} color={themeColors.primary} />
+              <Text style={[styles.openCalendarBtnText, { color: themeColors.primary }]}>
+                Open in Calendar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </BottomSheetModal>
     </View>
   );
 }
@@ -197,12 +388,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     maxHeight: 44,
   },
+  allDayBannerExpanded: {
+    maxHeight: undefined,
+  },
   allDayBannerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 6,
+    flexWrap: 'wrap',
   },
   allDayChip: {
     flexDirection: 'row',
@@ -211,19 +406,39 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     overflow: 'hidden',
   },
+  allDayChipOOO: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#D97706', // amber
+  },
   allDayChipAccent: {
     width: 4,
     alignSelf: 'stretch',
     borderTopLeftRadius: 8,
     borderBottomLeftRadius: 8,
   },
+  allDayChipIcon: {
+    marginLeft: 6,
+  },
   allDayChipText: {
     fontSize: 13,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingVertical: 6,
-    maxWidth: 180,
+    maxWidth: 160,
+  },
+  overflowPill: {
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overflowPillText: {
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
   },
   scrollView: {
     flex: 1,
@@ -316,6 +531,57 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+  },
+  // Bottom sheet styles
+  sheetContent: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 24,
+    gap: 12,
+  },
+  sheetTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  sheetColorDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontFamily: Fonts.semiBold,
+    fontWeight: '600' as const,
+    flex: 1,
+  },
+  sheetMeta: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+    marginLeft: 22,
+  },
+  sheetDateRange: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+    marginLeft: 22,
+  },
+  openCalendarBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginLeft: 22,
+    marginTop: 4,
+  },
+  openCalendarBtnText: {
+    fontSize: 14,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
   },

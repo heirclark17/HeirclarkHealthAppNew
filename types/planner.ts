@@ -28,6 +28,10 @@ export interface TimeBlock {
   relatedId?: string;         // workout_logs.id, meal_plans.id
   deviceEventId?: string;     // expo-calendar event ID (client-only)
   isAllDay?: boolean;         // true for holidays/birthdays/OOO — renders as banner chip, excluded from scheduling
+  isOOO?: boolean;            // true for out-of-office events (PTO, vacation, sick day, etc.)
+  calendarName?: string;      // source calendar name (e.g. "Work", "Personal")
+  originalStartDate?: string; // ISO 8601 string of the original event start
+  originalEndDate?: string;   // ISO 8601 string of the original event end
 }
 
 export type BlockType =
@@ -62,6 +66,7 @@ export interface DailyTimeline {
   totalScheduledMinutes: number;
   totalFreeMinutes: number;
   completionRate: number;     // 0-100
+  isOOODay?: boolean;         // true if any all-day block is an OOO event
 }
 
 export interface WeeklyPlan {
