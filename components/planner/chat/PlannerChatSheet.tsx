@@ -820,10 +820,6 @@ const styles = StyleSheet.create({
   },
   // Input bar
   inputBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 8,
