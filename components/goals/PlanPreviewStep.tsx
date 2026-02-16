@@ -951,8 +951,8 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meals Per Day</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
-                  <View style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                    <NumberText weight="semiBold" style={[styles.prefTagText, { color: Colors.success }]}>
+                  <View style={[styles.mealsCircle, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+                    <NumberText weight="semiBold" style={[styles.mealsCircleNumber, { color: Colors.success }]}>
                       {state.mealsPerDay}
                     </NumberText>
                   </View>
@@ -1639,6 +1639,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.light,
     color: Colors.text,
+  },
+  mealsCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mealsCircleNumber: {
+    fontSize: 18,
   },
   mealPlanningSection: {
     gap: 12,
