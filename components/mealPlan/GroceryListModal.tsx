@@ -1111,13 +1111,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 28,
   },
-  gradientPill: {
-    paddingVertical: 5,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 28,
-  },
   compactPillText: {
     fontSize: 12,
     fontFamily: Fonts.medium,
