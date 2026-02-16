@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
   },
   instacartButtonContainer: {
     position: 'absolute',
-    bottom: 160,
+    bottom: 100,
     left: '15%',
     right: '15%',
     zIndex: 999,
