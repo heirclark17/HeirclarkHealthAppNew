@@ -889,7 +889,7 @@ export function CoachChatModal({
           <BlurView
             intensity={isDark ? 60 : 80}
             tint={isDark ? 'dark' : 'light'}
-            style={[styles.inputContainer, { paddingBottom: insets.bottom + 8, borderTopColor: glassColors.border }]}
+            style={[styles.inputContainer, { paddingBottom: insets.bottom + 8 }]}
           >
             <View style={styles.inputRow}>
               <TextInput
@@ -1100,7 +1100,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     paddingTop: 12,
     paddingHorizontal: 16,
-    borderTopWidth: 1,
   },
   inputRow: {
     flexDirection: 'row',
