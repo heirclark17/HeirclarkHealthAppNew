@@ -865,10 +865,32 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
         console.log(`[MealPlanContext] 🔄 Fetching batch ${batchNum + 1}/${batches.length} (${batch.meals.length} meals)...`);
 
-        const batchResponse = await api.getBatchRecipeDetails(batch.meals, budgetTier || 'medium');
+        // Retry logic: try up to 3 times with exponential backoff
+        let batchResponse = null;
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        while (attempts < maxAttempts && !batchResponse) {
+          attempts++;
+
+          if (attempts > 1) {
+            const waitTime = Math.pow(2, attempts - 1) * 1000; // 2s, 4s
+            console.log(`[MealPlanContext] ⏳ Retry attempt ${attempts}/${maxAttempts} for batch ${batchNum + 1} (waiting ${waitTime}ms)...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          }
+
+          batchResponse = await api.getBatchRecipeDetails(batch.meals, budgetTier || 'medium');
+
+          if (!batchResponse || !batchResponse.recipes) {
+            if (attempts < maxAttempts) {
+              console.warn(`[MealPlanContext] ⚠️ Batch ${batchNum + 1} attempt ${attempts} failed, retrying...`);
+            } else {
+              console.error(`[MealPlanContext] ❌ Batch ${batchNum + 1} failed after ${maxAttempts} attempts`);
+            }
+          }
+        }
 
         if (!batchResponse || !batchResponse.recipes) {
-          console.error(`[MealPlanContext] ❌ Batch ${batchNum + 1} failed`);
           continue; // Skip failed batch but continue with others
         }
 
