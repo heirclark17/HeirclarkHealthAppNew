@@ -21,6 +21,7 @@ import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
   BottomSheetView,
+  BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import Animated, { FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -604,7 +605,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef>((_props, ref) =>
 
         {/* Input bar */}
         <View style={[styles.inputBar, { backgroundColor: isDark ? 'rgba(28, 28, 30, 0.98)' : 'rgba(248, 248, 250, 0.98)', paddingBottom: insets.bottom + 110 }]}>
-          <TextInput
+          <BottomSheetTextInput
             style={[
               styles.textInput,
               {
