@@ -2346,7 +2346,7 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
       [req.userId]
     );
 
-    const userCtx = userData.rows.length > 0 ? `User context: Calorie goal: ${userData.rows[0].daily_calories}, Protein goal: ${userData.rows[0].daily_protein}g` : '';
+    const userCtx = userData.rows.length > 0 ? `User context: Calorie goal: ${userData.rows[0].daily_calories}, Protein goal: ${userData.rows[0].daily_protein} grams` : '';
     const additionalCtx = context ? `Additional context: ${JSON.stringify(context)}` : '';
 
     let systemPrompt;
@@ -2364,6 +2364,7 @@ RESPONSE STYLE:
 - Use bullet points or numbered lists for meal suggestions and recipes
 - Reference the user's calorie and protein goals when making recommendations
 - Be encouraging and practical - focus on actionable advice they can use today
+- IMPORTANT: Always write out "grams" in full. Never abbreviate to "g". For example say "30 grams of protein" not "30g of protein"
 
 ${userCtx}
 ${additionalCtx}`;
@@ -2373,6 +2374,7 @@ ${additionalCtx}`;
 Be conversational, supportive, and specific about exercises, form, programming, and recovery.
 Provide detailed explanations when discussing workout technique, programming, or injury prevention.
 Reference the user's actual data when available.
+IMPORTANT: Always write out "grams" in full. Never abbreviate to "g". For example say "30 grams of protein" not "30g of protein".
 ${userCtx}
 ${additionalCtx}`;
       maxTokens = 800;
@@ -2380,6 +2382,7 @@ ${additionalCtx}`;
       systemPrompt = `You are a friendly, knowledgeable health and fitness coach for the Heirclark app.
 Be conversational, supportive, and specific. Reference the user's actual data when available.
 Keep responses concise (2-4 sentences) unless asked for detailed explanations.
+IMPORTANT: Always write out "grams" in full. Never abbreviate to "g". For example say "30 grams of protein" not "30g of protein".
 ${userCtx}
 ${additionalCtx}`;
     }
