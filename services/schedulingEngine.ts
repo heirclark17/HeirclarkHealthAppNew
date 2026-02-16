@@ -315,12 +315,18 @@ export class SchedulingEngine {
         adjustedDuration = meal.duration + 15; // extra 15 min for special cooking
       }
 
+      // Pass eating window to findAvailableSlot for IF enforcement
+      const eatingWindow = (isFasting && !isCheatDay)
+        ? { start: eatingWindowStart, end: eatingWindowEnd }
+        : undefined;
+
       const startTime = this.findAvailableSlot(
         blocks,
         preferredTime,
         adjustedDuration,
         preferences,
-        meal.type // Pass meal type (meal_eating or meal_prep)
+        meal.type, // Pass meal type (meal_eating or meal_prep)
+        eatingWindow // Pass eating window for IF days
       );
 
       blocks.push({
@@ -487,7 +493,8 @@ export class SchedulingEngine {
     preferredTime: string,
     duration: number,
     preferences: PlannerPreferences,
-    blockType?: string
+    blockType?: string,
+    eatingWindow?: { start: number; end: number }
   ): string {
     // Ignore all-day blocks — they don't occupy timed slots
     existingBlocks = existingBlocks.filter(b => !b.isAllDay);
@@ -520,7 +527,14 @@ export class SchedulingEngine {
       const candEnd = candStart + duration;
 
       // Stay within waking hours
-      if (candStart >= wakeMinutes && candEnd <= sleepMinutes) {
+      let withinBounds = candStart >= wakeMinutes && candEnd <= sleepMinutes;
+
+      // For meals during IF: also check eating window boundaries
+      if (withinBounds && eatingWindow && (blockType === 'meal_eating' || blockType === 'meal_prep')) {
+        withinBounds = candStart >= eatingWindow.start && candEnd <= eatingWindow.end;
+      }
+
+      if (withinBounds) {
         // Check overlap with intelligent buffer: require appropriate gap based on block types
         const hasConflict = existingBlocks.some(block => {
           const blockStart = this.timeToMinutes(block.startTime);
@@ -564,12 +578,20 @@ export class SchedulingEngine {
     while (attempts < maxAttempts) {
       const candStart = this.timeToMinutes(candidateTime);
 
-      // Stop searching if we've gone before wake time
-      if (candStart < wakeMinutes) break;
+      // Stop searching if we've gone before wake time (or eating window start for IF meals)
+      const lowerBound = eatingWindow && (blockType === 'meal_eating' || blockType === 'meal_prep')
+        ? eatingWindow.start
+        : wakeMinutes;
+      if (candStart < lowerBound) break;
 
       const candEnd = candStart + duration;
 
-      if (candStart >= wakeMinutes && candEnd <= sleepMinutes) {
+      let withinBounds = candStart >= wakeMinutes && candEnd <= sleepMinutes;
+      if (withinBounds && eatingWindow && (blockType === 'meal_eating' || blockType === 'meal_prep')) {
+        withinBounds = candStart >= eatingWindow.start && candEnd <= eatingWindow.end;
+      }
+
+      if (withinBounds) {
         const hasConflict = existingBlocks.some(block => {
           const blockStart = this.timeToMinutes(block.startTime);
           const blockEnd = this.timeToMinutes(block.endTime);
