@@ -11,7 +11,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
-import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Sparkles } from 'lucide-react-native';
+import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Sparkles, Moon, UtensilsCrossed } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomSheetModal,
@@ -105,12 +105,13 @@ export function DailyTimelineView() {
 
   // Fasting overlay zones
   const { state: goalWizardState } = useSafeGoalWizard();
+  const parseTime = useCallback((t: string) => {
+    const [h, m] = t.split(':').map(Number);
+    return h + (m || 0) / 60;
+  }, []);
+
   const fastingZones = useMemo(() => {
     if (!goalWizardState?.intermittentFasting) return null;
-    const parseTime = (t: string) => {
-      const [h, m] = t.split(':').map(Number);
-      return h + (m || 0) / 60;
-    };
     // fastingStart = eating window START, fastingEnd = eating window END
     const eatStart = parseTime(goalWizardState.fastingStart || '12:00');
     const eatEnd = parseTime(goalWizardState.fastingEnd || '20:00');
@@ -119,7 +120,23 @@ export function DailyTimelineView() {
       morning: { top: 0, height: eatStart * PX_PER_HOUR },
       evening: { top: eatEnd * PX_PER_HOUR, height: (24 - eatEnd) * PX_PER_HOUR },
     };
-  }, [goalWizardState?.intermittentFasting, goalWizardState?.fastingStart, goalWizardState?.fastingEnd]);
+  }, [goalWizardState?.intermittentFasting, goalWizardState?.fastingStart, goalWizardState?.fastingEnd, parseTime]);
+
+  // Sleep overlay zone
+  const sleepZone = useMemo(() => {
+    const sleepTime = state.preferences?.sleepTime;
+    const wakeTime = state.preferences?.wakeTime;
+    if (!sleepTime || !wakeTime) return null;
+    const sleepHour = parseTime(sleepTime);
+    const wakeHour = parseTime(wakeTime);
+    const PX_PER_HOUR = 60;
+    // Sleep zone: sleepTime → midnight (evening portion)
+    // Wake zone: midnight → wakeTime (morning portion)
+    return {
+      evening: { top: sleepHour * PX_PER_HOUR, height: (24 - sleepHour) * PX_PER_HOUR },
+      morning: { top: 0, height: wakeHour * PX_PER_HOUR },
+    };
+  }, [state.preferences?.sleepTime, state.preferences?.wakeTime, parseTime]);
 
   // Bottom padding: account for tab bar floating above safe area bottom
   const bottomPadding = TAB_BAR_HEIGHT + TAB_BAR_BOTTOM_MARGIN + (insets.bottom || 0) + 20;
@@ -312,11 +329,53 @@ export function DailyTimelineView() {
         <View style={styles.timeline}>
           <TimeSlotGrid wakeTime={state.preferences?.wakeTime} />
 
+          {/* Sleep overlay zones */}
+          {sleepZone && sleepZone.evening.height > 0 && (
+            <View
+              style={[
+                styles.overlayZone,
+                {
+                  top: sleepZone.evening.top,
+                  height: sleepZone.evening.height,
+                  backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
+                },
+              ]}
+              pointerEvents="none"
+            >
+              <View style={styles.overlayLabelRow}>
+                <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
+                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
+                  Sleep
+                </Text>
+              </View>
+            </View>
+          )}
+          {sleepZone && sleepZone.morning.height > 0 && (
+            <View
+              style={[
+                styles.overlayZone,
+                {
+                  top: sleepZone.morning.top,
+                  height: sleepZone.morning.height,
+                  backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
+                },
+              ]}
+              pointerEvents="none"
+            >
+              <View style={styles.overlayLabelRow}>
+                <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
+                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
+                  Sleep
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* Fasting overlay zones */}
           {fastingZones && fastingZones.morning.height > 0 && (
             <View
               style={[
-                styles.fastingZone,
+                styles.overlayZone,
                 {
                   top: fastingZones.morning.top,
                   height: fastingZones.morning.height,
@@ -325,15 +384,18 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              <Text style={[styles.fastingLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
-                Fasting
-              </Text>
+              <View style={styles.overlayLabelRow}>
+                <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
+                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
+                  Fasting
+                </Text>
+              </View>
             </View>
           )}
           {fastingZones && fastingZones.evening.height > 0 && (
             <View
               style={[
-                styles.fastingZone,
+                styles.overlayZone,
                 {
                   top: fastingZones.evening.top,
                   height: fastingZones.evening.height,
@@ -342,9 +404,12 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              <Text style={[styles.fastingLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
-                Fasting
-              </Text>
+              <View style={styles.overlayLabelRow}>
+                <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
+                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
+                  Fasting
+                </Text>
+              </View>
             </View>
           )}
 
@@ -635,18 +700,23 @@ const styles = StyleSheet.create({
     elevation: 4,
     zIndex: 10,
   },
-  fastingZone: {
+  overlayZone: {
     position: 'absolute',
     left: 58, // after time labels (50px) + gap (8px)
     right: 0,
     borderRadius: 8,
     zIndex: 0, // behind time blocks
   },
-  fastingLabel: {
+  overlayLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingTop: 6,
+    paddingLeft: 8,
+  },
+  overlayLabel: {
     fontSize: 11,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
-    paddingTop: 6,
-    paddingLeft: 8,
   },
 });
