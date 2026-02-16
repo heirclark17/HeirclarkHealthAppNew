@@ -945,14 +945,18 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
 
             {/* Meals Per Day */}
             {state.mealsPerDay && (
-              <GlassCard style={styles.mealsPerDayCard} borderColor="transparent">
-                <UtensilsCrossed size={16} color={Colors.success} />
-                <View style={[styles.mealsCircle, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                  <NumberText weight="semiBold" style={[styles.mealsCircleNumber, { color: Colors.success }]}>
-                    {state.mealsPerDay}
-                  </NumberText>
+              <GlassCard style={styles.prefSectionCard} borderColor="transparent">
+                <View style={styles.prefRow}>
+                  <UtensilsCrossed size={16} color={Colors.success} />
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meals Per Day</Text>
                 </View>
-                <Text style={[styles.scheduleLabel, { color: colors.textMuted }]}>Meals Per Day</Text>
+                <View style={styles.prefTagsRow}>
+                  <View style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+                    <NumberText weight="semiBold" style={[styles.prefTagText, { color: Colors.success }]}>
+                      {state.mealsPerDay}
+                    </NumberText>
+                  </View>
+                </View>
               </GlassCard>
             )}
 
@@ -1635,23 +1639,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.light,
     color: Colors.text,
-  },
-  mealsPerDayCard: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    padding: 16,
-    marginBottom: 12,
-  },
-  mealsCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mealsCircleNumber: {
-    fontSize: 22,
   },
   mealPlanningSection: {
     gap: 12,
