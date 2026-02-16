@@ -466,7 +466,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef, PlannerChatSheet
     return (
       <View
         key={action.description}
-        style={[styles.actionCard, { backgroundColor: glass.actionCard, borderColor: glass.actionCardBorder }]}
+        style={[styles.actionCard, { backgroundColor: glass.actionCard }]}
       >
         <Text style={[styles.actionText, { color: glass.text }]}>
           {icon} {action.description}
@@ -715,7 +715,6 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     borderRadius: 12,
-    borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
