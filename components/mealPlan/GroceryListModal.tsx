@@ -314,7 +314,30 @@ export function GroceryListModal({
               <Text style={[styles.closeButtonText, { color: glassColors.checkboxChecked }]}>Close</Text>
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: glassColors.text }]}>Grocery List</Text>
-            <View style={styles.placeholder} />
+            {groceryList && groceryList.length > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  // Toggle select all/deselect all
+                  const allChecked = checkedItems === totalItems;
+                  groceryList.forEach((category, catIndex) => {
+                    category.items.forEach((item, itemIndex) => {
+                      if (item.checked === allChecked) {
+                        onToggleItem(catIndex, itemIndex);
+                      }
+                    });
+                  });
+                }}
+                style={styles.closeButton}
+                accessibilityLabel={checkedItems === totalItems ? "Deselect all items" : "Select all items"}
+                accessibilityRole="button"
+                accessibilityHint={checkedItems === totalItems ? "Unchecks all grocery items" : "Checks all grocery items"}
+              >
+                <Text style={[styles.closeButtonText, { color: glassColors.checkboxChecked }]}>
+                  {checkedItems === totalItems ? 'Deselect All' : 'Select All'}
+                </Text>
+              </TouchableOpacity>
+            )}
+            {(!groceryList || groceryList.length === 0) && <View style={styles.placeholder} />}
           </Animated.View>
         </BlurView>
 
