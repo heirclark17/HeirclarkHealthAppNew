@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 16,
     gap: 2,
   },
   statValue: {
