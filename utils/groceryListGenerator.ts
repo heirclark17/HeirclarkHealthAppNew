@@ -90,7 +90,9 @@ function extractIngredientsFromMealPlan(weeklyPlan: DayPlan[]): Ingredient[] {
 function aggregateByName(ingredients: Ingredient[]): AggregatedIngredient[] {
   const ingredientMap = new Map<string, AggregatedIngredient>();
 
-  ingredients.forEach((ingredient) => {
+  console.log('[GroceryListGenerator] 🔄 Starting aggregation for', ingredients.length, 'ingredients');
+
+  ingredients.forEach((ingredient, index) => {
     // Normalize name: lowercase, trim whitespace
     const normalizedName = normalizeIngredientName(ingredient.name);
     const unit = ingredient.unit?.toLowerCase().trim() || 'each';
@@ -101,7 +103,9 @@ function aggregateByName(ingredients: Ingredient[]): AggregatedIngredient[] {
     if (ingredientMap.has(key)) {
       // Ingredient exists - add to quantity
       const existing = ingredientMap.get(key)!;
+      const oldAmount = existing.totalAmount;
       existing.totalAmount = addAmounts(existing.totalAmount, ingredient.amount);
+      console.log(`[GroceryListGenerator] ➕ Aggregating: "${normalizedName}" ${oldAmount} ${unit} + ${ingredient.amount} ${unit} = ${existing.totalAmount} ${unit}`);
     } else {
       // New ingredient - add to map
       ingredientMap.set(key, {
@@ -110,10 +114,19 @@ function aggregateByName(ingredients: Ingredient[]): AggregatedIngredient[] {
         unit: unit,
         category: ingredient.category || '',
       });
+      console.log(`[GroceryListGenerator] 🆕 New ingredient: "${normalizedName}" ${ingredient.amount} ${unit}`);
     }
   });
 
-  return Array.from(ingredientMap.values());
+  const aggregatedList = Array.from(ingredientMap.values());
+
+  console.log('[GroceryListGenerator] ✅ Aggregation complete:', ingredientMap.size, 'unique items');
+  console.log('[GroceryListGenerator] 📋 Final aggregated list:');
+  aggregatedList.forEach((item, index) => {
+    console.log(`  ${index + 1}. ${item.name}: ${item.totalAmount} ${item.unit}`);
+  });
+
+  return aggregatedList;
 }
 
 /**
