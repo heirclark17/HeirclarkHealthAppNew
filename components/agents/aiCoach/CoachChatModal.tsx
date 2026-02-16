@@ -746,7 +746,7 @@ export function CoachChatModal({
         <BlurView
           intensity={isDark ? 60 : 80}
           tint={isDark ? 'dark' : 'light'}
-          style={[styles.header, { paddingTop: insets.top, borderBottomColor: glassColors.border }]}
+          style={[styles.header, { paddingTop: insets.top }]}
         >
           <TouchableOpacity
             onPress={handleClose}
@@ -956,7 +956,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 12,
-    borderBottomWidth: 1,
   },
   headerButton: {
     width: 44,
