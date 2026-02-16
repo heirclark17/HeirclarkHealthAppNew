@@ -37,6 +37,7 @@ import { useTraining } from '../../contexts/TrainingContext';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { usePostHog } from '../../contexts/PostHogContext';
 import { NumberText } from '../../components/NumberText';
+import { LiquidGlassProfileImage } from '../../components/LiquidGlassProfileImage';
 
 const AnimatedPressable = ReanimatedModule.createAnimatedComponent(Pressable);
 

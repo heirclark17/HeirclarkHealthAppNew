@@ -324,7 +324,7 @@ export function DailyTimelineView() {
             styles.chatFab,
             {
               bottom: bottomPadding + 60,
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
+              backgroundColor: isDark ? 'rgba(168, 85, 247, 0.15)' : 'rgba(139, 92, 246, 0.12)',
             },
           ]}
           onPress={() => {
@@ -334,7 +334,7 @@ export function DailyTimelineView() {
           }}
           activeOpacity={0.8}
         >
-          <Sparkles size={22} color={themeColors.primary} />
+          <Sparkles size={22} color="#a855f7" />
         </TouchableOpacity>
       )}
 
