@@ -530,35 +530,35 @@ export function GroceryListModal({
               <View style={styles.progressContent}>
                 {/* Circular Progress Ring */}
                 <View style={styles.circularProgressContainer}>
-                  <Svg width={72} height={72}>
+                  <Svg width={56} height={56}>
                     {/* Background Circle */}
                     <Circle
-                      cx={36}
-                      cy={36}
-                      r={32}
+                      cx={28}
+                      cy={28}
+                      r={24}
                       stroke={isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'}
-                      strokeWidth={6}
+                      strokeWidth={5}
                       fill="none"
                     />
                     {/* Progress Circle */}
                     <Circle
-                      cx={36}
-                      cy={36}
-                      r={32}
+                      cx={28}
+                      cy={28}
+                      r={24}
                       stroke={progress === 100 ? (isDark ? '#4CAF50' : '#66BB6A') : (isDark ? '#0A84FF' : '#007AFF')}
-                      strokeWidth={6}
+                      strokeWidth={5}
                       fill="none"
-                      strokeDasharray={`${2 * Math.PI * 32}`}
-                      strokeDashoffset={`${2 * Math.PI * 32 * (1 - progress / 100)}`}
+                      strokeDasharray={`${2 * Math.PI * 24}`}
+                      strokeDashoffset={`${2 * Math.PI * 24 * (1 - progress / 100)}`}
                       strokeLinecap="round"
                       rotation="-90"
-                      origin="36, 36"
+                      origin="28, 28"
                     />
                   </Svg>
                   {/* Center Content */}
                   <View style={styles.circularProgressCenter}>
                     {progress === 100 ? (
-                      <Ionicons name="checkmark-circle" size={32} color={isDark ? '#4CAF50' : '#66BB6A'} />
+                      <Ionicons name="checkmark-circle" size={26} color={isDark ? '#4CAF50' : '#66BB6A'} />
                     ) : (
                       <NumberText weight="semibold" style={[styles.progressPercentage, { color: glassColors.text }]}>
                         {Math.round(progress)}%
@@ -681,22 +681,22 @@ const styles = StyleSheet.create({
   },
   progressSection: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 8,
+    paddingBottom: 6,
   },
   progressCard: {
-    padding: 20,
+    padding: 14,
     borderRadius: Spacing.borderRadius,
   },
   progressContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    gap: 14,
   },
   circularProgressContainer: {
     position: 'relative',
-    width: 72,
-    height: 72,
+    width: 56,
+    height: 56,
   },
   circularProgressCenter: {
     position: 'absolute',
@@ -708,24 +708,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   progressPercentage: {
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: Fonts.numericSemiBold,
   },
   progressTextContainer: {
     flex: 1,
-    gap: 4,
+    gap: 2,
   },
   progressTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontFamily: Fonts.semibold,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   progressStats: {
     flexDirection: 'row',
     alignItems: 'baseline',
   },
   progressNumbers: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: Fonts.numericSemiBold,
   },
   progressSeparator: {
