@@ -342,15 +342,12 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              {/* Only show label if morning zone doesn't exist (avoid duplicates) */}
-              {!(sleepZone.morning.height > 0) && (
-                <View style={styles.overlayLabelRow}>
-                  <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
-                  <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
-                    Sleep
-                  </Text>
-                </View>
-              )}
+              <View style={styles.overlayLabelRow}>
+                <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
+                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
+                  Sleep
+                </Text>
+              </View>
             </View>
           )}
           {sleepZone && sleepZone.morning.height > 0 && (
@@ -365,7 +362,6 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              {/* Show label on morning zone (appears first at top of timeline) */}
               <View style={styles.overlayLabelRow}>
                 <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
                 <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
@@ -388,7 +384,6 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              {/* Show label on morning zone (appears first at top of timeline) */}
               <View style={styles.overlayLabelRow}>
                 <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
                 <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
@@ -409,15 +404,12 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              {/* Only show label if morning zone doesn't exist (avoid duplicates) */}
-              {!(fastingZones.morning.height > 0) && (
-                <View style={styles.overlayLabelRow}>
-                  <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
-                  <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
-                    Fasting
-                  </Text>
-                </View>
-              )}
+              <View style={styles.overlayLabelRow}>
+                <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
+                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
+                  Fasting
+                </Text>
+              </View>
             </View>
           )}
 
@@ -546,9 +538,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   allDayChipOOO: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#D97706', // amber
+    // No border - OOO chips use same style as other all-day events
   },
   allDayChipAccent: {
     width: 4,
