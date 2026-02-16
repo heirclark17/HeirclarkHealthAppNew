@@ -56,8 +56,8 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
         },
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.3,  // Lower = faster, more consistent (was 0.7)
-      max_tokens: 800,   // Reduced from 2000 - only need ~10-15 blocks
+      temperature: 0.3,  // Lower = faster, more consistent
+      max_tokens: 1200,  // Increased from 800 - need room for full schedule + reasoning
     });
 
     const responseText = completion.choices[0]?.message?.content;
@@ -65,8 +65,17 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       throw new Error('No response from AI');
     }
 
-    // Parse AI response
-    const aiResponse: AIScheduleResponse = JSON.parse(responseText);
+    console.log('[AI Scheduler] Response length:', responseText.length, 'chars');
+
+    // Parse AI response with better error handling
+    let aiResponse: AIScheduleResponse;
+    try {
+      aiResponse = JSON.parse(responseText);
+    } catch (parseError: any) {
+      console.error('[AI Scheduler] JSON parse error:', parseError.message);
+      console.error('[AI Scheduler] Partial response:', responseText.substring(0, 500));
+      throw new Error(`Failed to parse AI response: ${parseError.message}`);
+    }
     console.log('[AI Scheduler] AI reasoning:', aiResponse.reasoning);
 
     if (aiResponse.warnings && aiResponse.warnings.length > 0) {
