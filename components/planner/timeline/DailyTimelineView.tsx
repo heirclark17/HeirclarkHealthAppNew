@@ -112,17 +112,32 @@ export function DailyTimelineView() {
 
   const fastingZones = useMemo(() => {
     if (!goalWizardState?.intermittentFasting) return null;
+    const wakeTime = state.preferences?.wakeTime;
+    if (!wakeTime) return null;
+
     // fastingStart = eating window START, fastingEnd = eating window END
     const eatStart = parseTime(goalWizardState.fastingStart || '12:00');
     const eatEnd = parseTime(goalWizardState.fastingEnd || '20:00');
+    const wakeHour = parseTime(wakeTime);
     const PX_PER_HOUR = 60;
-    return {
-      morning: { top: 0, height: eatStart * PX_PER_HOUR },
-      evening: { top: eatEnd * PX_PER_HOUR, height: (24 - eatEnd) * PX_PER_HOUR },
-    };
-  }, [goalWizardState?.intermittentFasting, goalWizardState?.fastingStart, goalWizardState?.fastingEnd, parseTime]);
 
-  // Sleep overlay zone
+    // Calculate positions relative to wake time (timeline position 0 = wake time)
+    // Morning fasting: from midnight to eating window start
+    let morningStart = (24 - wakeHour); // Hours from wake time to midnight
+    const morningHeight = eatStart * PX_PER_HOUR;
+
+    // Evening fasting: from eating window end to midnight
+    let eveningStart = eatEnd - wakeHour;
+    if (eveningStart < 0) eveningStart += 24; // Wrap around
+    const eveningHeight = (24 - eatEnd) * PX_PER_HOUR;
+
+    return {
+      morning: { top: morningStart * PX_PER_HOUR, height: morningHeight },
+      evening: { top: eveningStart * PX_PER_HOUR, height: eveningHeight },
+    };
+  }, [goalWizardState?.intermittentFasting, goalWizardState?.fastingStart, goalWizardState?.fastingEnd, state.preferences?.wakeTime, parseTime]);
+
+  // Sleep overlay zone (calculated relative to wake time since timeline starts at wake time)
   const sleepZone = useMemo(() => {
     const sleepTime = state.preferences?.sleepTime;
     const wakeTime = state.preferences?.wakeTime;
@@ -130,11 +145,20 @@ export function DailyTimelineView() {
     const sleepHour = parseTime(sleepTime);
     const wakeHour = parseTime(wakeTime);
     const PX_PER_HOUR = 60;
-    // Sleep zone: sleepTime → midnight (evening portion)
-    // Wake zone: midnight → wakeTime (morning portion)
+
+    // Calculate positions relative to wake time (timeline position 0 = wake time)
+    // Evening sleep: from sleepTime to midnight
+    let eveningStart = sleepHour - wakeHour;
+    if (eveningStart < 0) eveningStart += 24; // Wrap around if sleep time is before wake time
+    const eveningHeight = (24 - sleepHour) * PX_PER_HOUR;
+
+    // Morning sleep: from midnight to wakeTime
+    let morningStart = (24 - wakeHour); // Hours from wake time to midnight
+    const morningHeight = wakeHour * PX_PER_HOUR;
+
     return {
-      evening: { top: sleepHour * PX_PER_HOUR, height: (24 - sleepHour) * PX_PER_HOUR },
-      morning: { top: 0, height: wakeHour * PX_PER_HOUR },
+      evening: { top: eveningStart * PX_PER_HOUR, height: eveningHeight },
+      morning: { top: morningStart * PX_PER_HOUR, height: morningHeight },
     };
   }, [state.preferences?.sleepTime, state.preferences?.wakeTime, parseTime]);
 
