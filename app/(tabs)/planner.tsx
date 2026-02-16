@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Settings } from 'lucide-react-native';
@@ -15,7 +15,7 @@ import { DailyTimelineView } from '../../components/planner/timeline/DailyTimeli
 import { MonthlyCalendarView } from '../../components/planner/monthly/MonthlyCalendarView';
 import { PlannerCalendarStrip } from '../../components/planner/shared/PlannerCalendarStrip';
 import { SegmentedControl } from '../../components/SegmentedControl';
-import { DarkColors, LightColors } from '../../constants/Theme';
+import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 function formatDateStr(date: Date): string {
@@ -78,7 +78,8 @@ export default function PlannerScreen() {
     <BottomSheetModalProvider>
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {/* Header with view toggle + preferences button */}
-      <View style={[styles.header, { backgroundColor: themeColors.background, paddingTop: insets.top + 8 }]}>
+      <View style={[styles.header, { backgroundColor: themeColors.background, paddingTop: insets.top + 20 }]}>
+        <Text style={[styles.title, { color: themeColors.text }]}>Planner</Text>
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <SegmentedControl
@@ -134,7 +135,13 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 12,
+  },
+  title: {
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 0.5,
+    marginBottom: 16,
   },
   headerRow: {
     flexDirection: 'row',

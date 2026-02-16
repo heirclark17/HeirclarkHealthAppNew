@@ -383,7 +383,7 @@ export default function SavedMealsScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top']}>
       {/* Header */}
       <Animated.View entering={headerAnimation} style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>SAVED MEALS</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Saved Meals</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Your meal collection</Text>
       </Animated.View>
 
