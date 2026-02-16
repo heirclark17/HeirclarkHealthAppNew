@@ -715,7 +715,6 @@ export function CoachChatModal({
                 styles.suggestionChip,
                 {
                   backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-                  borderColor: glassColors.border,
                 }
               ]}
               onPress={() => handleSuggestionTap(suggestion)}
@@ -790,7 +789,7 @@ export function CoachChatModal({
           <BlurView
             intensity={isDark ? 70 : 90}
             tint={isDark ? 'dark' : 'light'}
-            style={[styles.modeSwitcher, { borderColor: glassColors.border }]}
+            style={[styles.modeSwitcher]}
           >
             {(['meal', 'training', 'general'] as CoachMode[]).map((modeOption) => {
               const modeConfig = MODE_CONFIG[modeOption];
@@ -835,7 +834,7 @@ export function CoachChatModal({
                 mixedContentMode="always"
               />
             </View>
-            <View style={[styles.statusBadge, { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder }]}>
+            <View style={[styles.statusBadge, { backgroundColor: glassColors.card }]}>
               <View style={[styles.statusDot, { backgroundColor: glassColors.textSecondary }, isSpeaking && { backgroundColor: glassColors.accent }, avatarReady && !isSpeaking && { backgroundColor: Colors.success }]} />
               <Text style={[styles.statusText, { color: glassColors.text }]}>
                 {!avatarReady ? 'Connecting...' : isSpeaking ? 'Speaking...' : 'Ready'}
@@ -1002,7 +1001,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    borderWidth: 1,
   },
   statusDot: {
     width: 8,
@@ -1135,7 +1133,6 @@ const styles = StyleSheet.create({
     marginLeft: -100,
     width: 200,
     borderRadius: 16,
-    borderWidth: 1,
     overflow: 'hidden',
     zIndex: 100,
     ...Platform.select({
@@ -1183,7 +1180,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    borderWidth: 1,
   },
   suggestionText: {
     fontSize: 13,
