@@ -83,7 +83,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
     }
 
     // Convert AI response to TimeBlock format
-    const blocks: TimeBlock[] = aiResponse.blocks.map((block, index) => ({
+    let blocks: TimeBlock[] = aiResponse.blocks.map((block, index) => ({
       id: `ai-block-${Date.now()}-${index}`,
       type: block.type as any,
       title: block.title,
@@ -98,6 +98,40 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       aiGenerated: true,
       ...(block.notes && { notes: block.notes }),
     }));
+
+    // VALIDATION: Filter out meals outside eating window if fasting active
+    if (request.lifeContext?.isFasting && !request.lifeContext?.isCheatDay) {
+      const fastingEnd = request.lifeContext.fastingEnd;
+      const fastingStart = request.lifeContext.fastingStart;
+
+      const timeToMinutes = (time: string) => {
+        const [hours, minutes] = time.split(':').map(Number);
+        return hours * 60 + minutes;
+      };
+
+      const eatingWindowStart = timeToMinutes(fastingEnd);
+      const eatingWindowEnd = timeToMinutes(fastingStart);
+
+      const originalCount = blocks.length;
+      blocks = blocks.filter(block => {
+        if (block.type !== 'meal_eating') return true; // Keep non-meal blocks
+
+        const blockStart = timeToMinutes(block.startTime);
+        const blockEnd = timeToMinutes(block.endTime);
+
+        const isValid = blockStart >= eatingWindowStart && blockEnd <= eatingWindowEnd;
+
+        if (!isValid) {
+          console.warn(`[AI Scheduler] ❌ REMOVED meal outside eating window: ${block.title} at ${block.startTime}-${block.endTime} (window: ${fastingEnd}-${fastingStart})`);
+        }
+
+        return isValid;
+      });
+
+      if (blocks.length < originalCount) {
+        console.warn(`[AI Scheduler] Filtered out ${originalCount - blocks.length} meals outside eating window`);
+      }
+    }
 
     // Calculate stats
     const stats = calculateStats(blocks, request.preferences);
@@ -133,8 +167,12 @@ function buildSchedulingPrompt(request: SchedulingRequest): string {
   let prompt = `Schedule workouts and meals for ${dayOfWeek}, ${date}.
 
 **Intermittent Fasting:**
-${isFasting ? `- ⚠️ EATING WINDOW: ${lifeContext.fastingEnd} to ${lifeContext.fastingStart}
-- ⚠️ ALL meals MUST be between ${lifeContext.fastingEnd} and ${lifeContext.fastingStart}` : '- Not active'}
+${isFasting ? `- 🚨 FASTING ACTIVE - STRICT RULES:
+  - YOU CAN ONLY SCHEDULE MEALS BETWEEN ${lifeContext.fastingEnd} AND ${lifeContext.fastingStart}
+  - BEFORE ${lifeContext.fastingEnd} = FASTING (NO MEALS ALLOWED)
+  - AFTER ${lifeContext.fastingStart} = FASTING (NO MEALS ALLOWED)
+  - Example: If window is 12:00-20:00, you can schedule meals at 12:30, 15:00, 19:00
+  - Example: If window is 12:00-20:00, you CANNOT schedule meals at 08:00, 10:00, 21:00, 22:00` : '- Not active'}
 ${isCheatDay ? '- CHEAT DAY: No fasting restrictions' : ''}
 
 **Workouts to Schedule:**
@@ -146,12 +184,12 @@ ${mealBlocks.length > 0 ? mealBlocks.map(m => `- ${m.title} (${m.duration} min)`
 **Calendar Events (DO NOT SCHEDULE OVER THESE):**
 ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- None'}
 
-**Instructions:**
-1. Schedule all workouts in free time slots (not during calendar events)
-2. Schedule all meals in free time slots (not during calendar events)
-3. If fasting active, meals MUST be within eating window
-4. Spread meals evenly throughout the day (within eating window if applicable)
-5. Keep gaps between activities for transitions
+**CRITICAL RULES:**
+1. 🚨 IF FASTING ACTIVE: Every meal startTime must be >= ${isFasting ? lifeContext.fastingEnd : 'N/A'} AND every meal endTime must be <= ${isFasting ? lifeContext.fastingStart : 'N/A'}
+2. Schedule workouts in free time slots (not during calendar events)
+3. Schedule meals in free time slots (not during calendar events)
+4. Spread meals evenly within allowed time period
+5. VALIDATION: Before returning, check EVERY meal is within bounds
 
 **Output Format (JSON):**
 {
