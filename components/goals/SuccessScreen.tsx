@@ -619,12 +619,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 28,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
     marginBottom: 8,
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 13,

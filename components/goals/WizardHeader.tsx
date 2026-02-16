@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     paddingTop: Platform.OS === 'ios' ? 60 : 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingBottom: 20,
   },
   topRow: {
@@ -154,11 +154,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   title: {
-    fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '300',
+    fontSize: 32,
+    fontFamily: Fonts.numericSemiBold,
     marginBottom: 20,
-    letterSpacing: -0.5,
+    letterSpacing: 0.5,
   },
   progressContainer: {
     gap: 12,
