@@ -104,6 +104,7 @@ interface DayPlannerActions {
   reopenOnboarding: () => void;
   generateWeeklyPlan: () => Promise<void>;
   regenerateSingleDay: (date: Date) => Promise<void>;
+  clearCalendar: () => Promise<void>;
   syncCalendar: () => Promise<boolean>;
   markBlockComplete: (blockId: string, date: string) => Promise<void>;
   skipBlock: (blockId: string, date: string) => Promise<void>;
@@ -650,6 +651,14 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       }));
     }
   }, [generateWeeklyPlan, getWorkoutBlocksForDay, getMealBlocksForDay]);
+
+  /**
+   * Clear the entire calendar and regenerate the weekly plan.
+   */
+  const clearCalendar = useCallback(async () => {
+    console.log('[Planner] Clearing calendar and regenerating week');
+    await generateWeeklyPlan();
+  }, [generateWeeklyPlan]);
 
   /**
    * Generate daily timeline for a specific date using AI (with algorithmic fallback).
@@ -1366,6 +1375,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     reopenOnboarding,
     generateWeeklyPlan,
     regenerateSingleDay,
+    clearCalendar,
     syncCalendar,
     markBlockComplete,
     skipBlock,

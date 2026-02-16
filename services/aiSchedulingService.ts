@@ -82,6 +82,12 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       console.warn('[AI Scheduler] AI warnings:', aiResponse.warnings);
     }
 
+    // Log all generated blocks before validation
+    console.log('[AI Scheduler] Generated blocks BEFORE validation:');
+    aiResponse.blocks.forEach(block => {
+      console.log(`  ${block.type}: ${block.title} | ${block.startTime}-${block.endTime}`);
+    });
+
     // Convert AI response to TimeBlock format
     let blocks: TimeBlock[] = aiResponse.blocks.map((block, index) => ({
       id: `ai-block-${Date.now()}-${index}`,
@@ -132,6 +138,53 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
         console.warn(`[AI Scheduler] Filtered out ${originalCount - blocks.length} meals outside eating window`);
       }
     }
+
+    // VALIDATION: Detect conflicts between blocks
+    const timeToMinutes = (time: string) => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const detectConflicts = (blocks: TimeBlock[]) => {
+      const conflicts: string[] = [];
+      for (let i = 0; i < blocks.length; i++) {
+        for (let j = i + 1; j < blocks.length; j++) {
+          const block1 = blocks[i];
+          const block2 = blocks[j];
+
+          // Skip all-day events
+          if (block1.isAllDay || block2.isAllDay) continue;
+
+          const start1 = timeToMinutes(block1.startTime);
+          const end1 = timeToMinutes(block1.endTime);
+          const start2 = timeToMinutes(block2.startTime);
+          const end2 = timeToMinutes(block2.endTime);
+
+          // Check for overlap
+          const overlap = (start1 < end2 && end1 > start2) || (start2 < end1 && end2 > start1);
+
+          if (overlap) {
+            conflicts.push(
+              `❌ CONFLICT: "${block1.title}" (${block1.startTime}-${block1.endTime}) overlaps with "${block2.title}" (${block2.startTime}-${block2.endTime})`
+            );
+          }
+        }
+      }
+      return conflicts;
+    };
+
+    const conflicts = detectConflicts(blocks);
+    if (conflicts.length > 0) {
+      console.error('[AI Scheduler] 🚨 CONFLICTS DETECTED:');
+      conflicts.forEach(conflict => console.error(`  ${conflict}`));
+      console.error('[AI Scheduler] ⚠️  AI generated conflicting blocks - this should not happen!');
+    }
+
+    // Log final blocks after all validation
+    console.log('[AI Scheduler] Final blocks AFTER validation:');
+    blocks.forEach(block => {
+      console.log(`  ${block.type}: ${block.title} | ${block.startTime}-${block.endTime}`);
+    });
 
     // Calculate stats
     const stats = calculateStats(blocks, request.preferences);
@@ -187,10 +240,21 @@ ${mealBlocks.length > 0 ? mealBlocks.map(m => `- ${m.title} (${m.duration} min)`
 **Calendar Events (DO NOT SCHEDULE OVER THESE):**
 ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- None'}
 
-**RULES:**
+**CRITICAL SCHEDULING RULES:**
 1. Include sleep block from ${preferences.sleepTime} to ${preferences.wakeTime}
-2. 🚨 IF FASTING: Meals must be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
-3. Don't overlap workouts/meals with calendar events
+2. 🚨 IF FASTING: ALL meals MUST be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
+3. 🚨 NEVER overlap workouts with meals - they must be completely separate time blocks
+4. 🚨 NEVER overlap workouts/meals with calendar events
+5. 🚨 Leave at least 15 minutes between consecutive blocks (workout→meal, meal→workout, etc.)
+6. Schedule workouts BEFORE or AFTER meals, never during
+7. If fasting is active, schedule workouts outside eating window when possible
+
+**Scheduling Strategy:**
+- Find all occupied time slots (calendar events + sleep)
+- Identify free time windows
+- Place workouts in free windows (avoiding fasting eating time if possible)
+- Place meals in free windows that are within eating window (if fasting)
+- Ensure no overlaps between any blocks
 
 **Output (JSON):**
 {

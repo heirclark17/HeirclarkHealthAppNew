@@ -111,6 +111,7 @@ export default function PlannerScreen() {
           isSyncingCalendar={state.isSyncingCalendar}
           onRefresh={() => actions.regenerateSingleDay(new Date(selectedDate))}
           isRefreshing={state.isGeneratingPlan}
+          onClear={actions.clearCalendar}
           allDayEventDots={allDayEventDots}
         />
       )}

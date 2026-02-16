@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-import { CalendarClock, RefreshCw } from 'lucide-react-native';
+import { CalendarClock, RefreshCw, Trash2 } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -19,6 +19,7 @@ interface Props {
   isSyncingCalendar?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  onClear?: () => void;
   allDayEventDots?: Record<string, string[]>; // dateStr -> array of up to 3 event colors
 }
 
@@ -42,6 +43,7 @@ export function PlannerCalendarStrip({
   isSyncingCalendar,
   onRefresh,
   isRefreshing,
+  onClear,
   allDayEventDots,
 }: Props) {
   const { settings } = useSettings();
@@ -128,6 +130,15 @@ export function PlannerCalendarStrip({
                 ) : (
                   <RefreshCw size={18} color={themeColors.primary} />
                 )}
+              </TouchableOpacity>
+            )}
+            {onClear && (
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: actionBtnBg }]}
+                onPress={onClear}
+                activeOpacity={0.7}
+              >
+                <Trash2 size={18} color={themeColors.text} />
               </TouchableOpacity>
             )}
           </View>
