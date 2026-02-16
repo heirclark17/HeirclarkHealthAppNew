@@ -1,5 +1,5 @@
 // Plan Summary Card - Displays training plan overview on Goals page
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,11 @@ import {
 } from 'react-native';
 // Animations removed
 import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
 import { PlanSummary, ExpectedOutcome } from '../../types/training';
-import { lightImpact, mediumImpact } from '../../utils/haptics';
+import { mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
 
 interface PlanSummaryCardProps {
@@ -82,8 +81,8 @@ function OutcomeCard({ outcome, index, colors, isDark }: { outcome: ExpectedOutc
           </Text>
         </View>
       </View>
-      <Text style={[styles.outcomeValue, { color: colors.text }]}>{outcome.targetValue}</Text>
-      <Text style={[styles.outcomeTimeframe, { color: colors.textMuted }]}>{outcome.timeframe}</Text>
+      <NumberText weight="semiBold" style={[styles.outcomeValue, { color: colors.text }]}>{outcome.targetValue}</NumberText>
+      <NumberText weight="light" style={[styles.outcomeTimeframe, { color: colors.textMuted }]}>{outcome.timeframe}</NumberText>
     </View>
   );
 }
@@ -115,7 +114,6 @@ export function PlanSummaryCard({
   containerStyle,
 }: PlanSummaryCardProps) {
   const { settings } = useSettings();
-  const [expanded, setExpanded] = useState(isExpanded);
   // Dynamic theme colors
   const colors = useMemo(() => {
     return settings.themeMode === 'light' ? LightColors : DarkColors;
@@ -125,11 +123,6 @@ export function PlanSummaryCard({
   // Theme-aware backgrounds for inner elements
   const secondaryBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
 
-  const handleToggleExpand = () => {
-    lightImpact();
-    setExpanded(!expanded);
-  };
-
   const handleStartTraining = () => {
     mediumImpact();
     onStartTraining?.();
@@ -137,42 +130,30 @@ export function PlanSummaryCard({
 
   return (
     <GlassCard style={[styles.container, containerStyle]} interactive>
-      {/* Header Section - Always Visible */}
-      <TouchableOpacity
-          style={styles.headerTouchable}
-          onPress={handleToggleExpand}
-          activeOpacity={0.8}
-          accessibilityLabel={`Your training plan with ${summary.expectedOutcomes.length} goals${expanded ? ', expanded' : ', collapsed'}`}
-          accessibilityRole="button"
-          accessibilityState={{ expanded }}
-          accessibilityHint={`${expanded ? 'Collapses' : 'Expands'} the training plan details to ${expanded ? 'hide' : 'show'} weekly structure, progression, and nutrition tips`}
-        >
+      {/* Header Section */}
+      <View style={styles.headerTouchable}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Ionicons name="fitness" size={24} color={colors.protein} />
             <View style={styles.headerTextContainer}>
               <Text style={[styles.headerTitle, { color: colors.text }]}>Your Training Plan</Text>
               <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-                {summary.expectedOutcomes.length} goals • Tap to {expanded ? 'collapse' : 'expand'}
+                <NumberText weight="medium" style={[styles.headerSubtitle, { color: colors.textMuted }]}>
+                  {summary.expectedOutcomes.length}
+                </NumberText> goals
               </Text>
             </View>
           </View>
-          <Ionicons
-            name={expanded ? 'chevron-up' : 'chevron-down'}
-            size={20}
-            color={colors.textMuted}
-          />
         </View>
-      </TouchableOpacity>
+      </View>
 
-      {/* Overview - Always Visible */}
+      {/* Overview */}
       <View style={styles.overviewSection}>
         <Text style={[styles.overviewText, { color: colors.textSecondary }]}>{summary.overview}</Text>
       </View>
 
-      {/* Expanded Content */}
-      {expanded && (
-        <View>
+      {/* Full Content - Always Visible */}
+      <View>
           {/* Weekly Structure */}
           <View style={styles.section}>
             <SectionHeader title="Weekly Structure" icon="calendar-outline" colors={colors} />
@@ -259,7 +240,7 @@ export function PlanSummaryCard({
             </View>
           </View>
         </View>
-      )}
+      </View>
 
       {/* Action Buttons */}
       {showStartButton && (
@@ -402,13 +383,13 @@ const styles = StyleSheet.create({
   },
   outcomeValue: {
     fontSize: 16,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
     marginTop: 4,
   },
   outcomeTimeframe: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericLight,
     color: Colors.textMuted,
     marginTop: 2,
   },
@@ -431,7 +412,7 @@ const styles = StyleSheet.create({
   },
   stepNumberText: {
     fontSize: 12,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.numericBold,
     color: Colors.background,
   },
   stepText: {
