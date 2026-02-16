@@ -353,50 +353,49 @@ export function DailyTimelineView() {
         <View style={styles.timeline}>
           <TimeSlotGrid wakeTime={state.preferences?.wakeTime} />
 
-          {/* Sleep overlay zones */}
-          {sleepZone && sleepZone.evening.height > 0 && (
-            <View
-              style={[
-                styles.overlayZone,
-                {
-                  top: sleepZone.evening.top,
-                  height: sleepZone.evening.height,
-                  backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
-                  borderLeftColor: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)',
-                  borderLeftWidth: 3,
-                },
-              ]}
-              pointerEvents="none"
-            >
-              <View style={styles.overlayLabelRow}>
-                <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
-                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
-                  Sleep
-                </Text>
-              </View>
-            </View>
-          )}
-          {sleepZone && sleepZone.morning.height > 0 && (
-            <View
-              style={[
-                styles.overlayZone,
-                {
-                  top: sleepZone.morning.top,
-                  height: sleepZone.morning.height,
-                  backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
-                  borderLeftColor: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)',
-                  borderLeftWidth: 3,
-                },
-              ]}
-              pointerEvents="none"
-            >
-              <View style={styles.overlayLabelRow}>
-                <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
-                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
-                  Sleep
-                </Text>
-              </View>
-            </View>
+          {/* Sleep overlay zones - combined with single label */}
+          {sleepZone && (sleepZone.evening.height > 0 || sleepZone.morning.height > 0) && (
+            <>
+              {/* Evening sleep zone (no label) */}
+              {sleepZone.evening.height > 0 && (
+                <View
+                  style={[
+                    styles.overlayZone,
+                    {
+                      top: sleepZone.evening.top,
+                      height: sleepZone.evening.height,
+                      backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
+                      borderLeftColor: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)',
+                      borderLeftWidth: 3,
+                    },
+                  ]}
+                  pointerEvents="none"
+                />
+              )}
+              {/* Morning sleep zone (with label) */}
+              {sleepZone.morning.height > 0 && (
+                <View
+                  style={[
+                    styles.overlayZone,
+                    {
+                      top: sleepZone.morning.top,
+                      height: sleepZone.morning.height,
+                      backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
+                      borderLeftColor: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)',
+                      borderLeftWidth: 3,
+                    },
+                  ]}
+                  pointerEvents="none"
+                >
+                  <View style={styles.overlayLabelRow}>
+                    <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
+                    <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
+                      Sleep
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </>
           )}
 
           {/* Fasting overlay zones */}
@@ -414,7 +413,7 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              <View style={[styles.overlayLabelRow, { justifyContent: 'flex-end', paddingRight: 8, paddingLeft: 0 }]}>
+              <View style={styles.overlayLabelRow}>
                 <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
                 <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
                   Fasting
@@ -436,7 +435,7 @@ export function DailyTimelineView() {
               ]}
               pointerEvents="none"
             >
-              <View style={[styles.overlayLabelRow, { justifyContent: 'flex-end', paddingRight: 8, paddingLeft: 0 }]}>
+              <View style={styles.overlayLabelRow}>
                 <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
                 <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
                   Fasting
