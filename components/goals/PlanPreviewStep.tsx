@@ -373,7 +373,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   {state.activityLevel === 'sedentary' ? 'Sedentary' :
                    state.activityLevel === 'light' ? 'Lightly Active' :
                    state.activityLevel === 'moderate' ? 'Moderately Active' :
-                   state.activityLevel === 'active' ? 'Very Active' : 'Extremely Active'}
+                   state.activityLevel === 'active' ? 'Very Active' : 'Extra Active'}
                 </Text>
               </GlassCard>
             </View>
