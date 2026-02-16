@@ -109,15 +109,15 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
             {isCompact ? (
               // Compact single-line layout for short events (like Outlook/Teams)
               <View style={styles.compactRow}>
-                <ActivityIcon type={block.type} size={12} color={blockColor} />
+                <ActivityIcon type={block.type} size={11} color={blockColor} />
                 <Text style={[styles.compactText, { color: themeColors.text }]} numberOfLines={1}>
                   {block.title} · {to12h(block.startTime)}
                 </Text>
                 {block.status === 'completed' && (
-                  <CheckCircle2 size={12} color={Colors.protein} />
+                  <CheckCircle2 size={11} color={Colors.protein} />
                 )}
                 {block.status === 'skipped' && (
-                  <X size={12} color={themeColors.textSecondary} />
+                  <X size={11} color={themeColors.textSecondary} />
                 )}
               </View>
             ) : (
@@ -125,16 +125,16 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
               <>
                 <View style={styles.header}>
                   <View style={styles.titleRow}>
-                    <ActivityIcon type={block.type} size={14} color={blockColor} />
+                    <ActivityIcon type={block.type} size={12} color={blockColor} />
                     <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
                       {block.title}
                     </Text>
                   </View>
                   {block.status === 'completed' && (
-                    <CheckCircle2 size={14} color={Colors.protein} />
+                    <CheckCircle2 size={12} color={Colors.protein} />
                   )}
                   {block.status === 'skipped' && (
-                    <X size={14} color={themeColors.textSecondary} />
+                    <X size={12} color={themeColors.textSecondary} />
                   )}
                 </View>
 
@@ -202,13 +202,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
     flex: 1,
   },
   time: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
   },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   compactText: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
     flex: 1,
