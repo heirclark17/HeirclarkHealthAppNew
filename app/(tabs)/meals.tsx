@@ -663,7 +663,6 @@ export default function MealsScreen() {
 
                 {/* Regenerate buttons - Only show on non-cheat days */}
                 <View style={styles.regenerateSection}>
-                  <Text style={[styles.regenerateLabel, { color: colors.textMuted }]}>Regenerate Plan</Text>
                   <View style={styles.generateButtonsRow}>
                     <GlassCard
                       style={styles.halfButtonGlass}
