@@ -2877,7 +2877,7 @@ app.post('/api/v1/ai/recipe-details-batch', authenticateToken, async (req, res) 
       ],
       response_format: { type: 'json_object' },
       temperature: 0.5,
-      max_tokens: 8000, // Increased for batch response
+      max_tokens: 16000, // Increased to 16K for 21 recipes (GPT-4.1-mini max output: 16,385)
     });
 
     const result = JSON.parse(completion.choices[0].message.content);
