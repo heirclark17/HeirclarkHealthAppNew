@@ -27,6 +27,7 @@ export interface TimeBlock {
   aiGenerated: boolean;
   relatedId?: string;         // workout_logs.id, meal_plans.id
   deviceEventId?: string;     // expo-calendar event ID (client-only)
+  isAllDay?: boolean;         // true for holidays/birthdays/OOO — renders as banner chip, excluded from scheduling
 }
 
 export type BlockType =

@@ -86,8 +86,40 @@ export function DailyTimelineView() {
     );
   }
 
+  // Split blocks into all-day (banner chips) vs timed (hourly grid)
+  const allDayBlocks = timeline.blocks.filter((b) => b.isAllDay);
+  const timedBlocks = timeline.blocks.filter((b) => !b.isAllDay && b.type !== 'buffer');
+
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      {/* All-day event banner (holidays, birthdays, OOO) */}
+      {allDayBlocks.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={[styles.allDayBanner, { borderBottomColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}
+          contentContainerStyle={styles.allDayBannerContent}
+        >
+          {allDayBlocks.map((block) => (
+            <View
+              key={block.id}
+              style={[
+                styles.allDayChip,
+                { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)' },
+              ]}
+            >
+              <View style={[styles.allDayChipAccent, { backgroundColor: block.color }]} />
+              <Text
+                style={[styles.allDayChipText, { color: themeColors.text }]}
+                numberOfLines={1}
+              >
+                {block.title}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      )}
+
       {/* Timeline */}
       <ScrollView
         ref={scrollRef}
@@ -99,7 +131,7 @@ export function DailyTimelineView() {
           <TimeSlotGrid />
           <CurrentTimeIndicator />
 
-          {timeline.blocks.filter((block) => block.type !== 'buffer').map((block) => (
+          {timedBlocks.map((block) => (
             <TimeBlockCard
               key={block.id}
               block={block}
@@ -160,6 +192,38 @@ export function DailyTimelineView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  allDayBanner: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    maxHeight: 44,
+  },
+  allDayBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+  },
+  allDayChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 8,
+    paddingRight: 10,
+    overflow: 'hidden',
+  },
+  allDayChipAccent: {
+    width: 4,
+    alignSelf: 'stretch',
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+  },
+  allDayChipText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    maxWidth: 180,
   },
   scrollView: {
     flex: 1,

@@ -118,10 +118,18 @@ export class SchedulingEngine {
   }
 
   /**
-   * Add calendar events (CLIENT-SIDE ONLY)
+   * Add calendar events (CLIENT-SIDE ONLY).
+   * All-day events (holidays, birthdays, OOO) are kept in the blocks array
+   * for UI rendering as banner chips but are NOT treated as timed blocks.
    */
   private static addCalendarBlocks(blocks: TimeBlock[], calendarBlocks: TimeBlock[]) {
     for (const event of calendarBlocks) {
+      if (event.isAllDay) {
+        // Preserve in the block list so the UI can render a banner chip,
+        // but don't give it a real time range that would cause conflicts.
+        blocks.push({ ...event });
+        continue;
+      }
       blocks.push({
         ...event,
         priority: 4, // High priority (can't be moved)
@@ -237,14 +245,17 @@ export class SchedulingEngine {
   }
 
   /**
-   * Detect conflicts between blocks
+   * Detect conflicts between blocks.
+   * All-day events are excluded — they render as banner chips and cannot overlap timed blocks.
    */
   private static detectConflicts(blocks: TimeBlock[]): SchedulingConflict[] {
     const conflicts: SchedulingConflict[] = [];
+    // Only check timed blocks for overlaps
+    const timedBlocks = blocks.filter(b => !b.isAllDay);
 
-    for (let i = 0; i < blocks.length - 1; i++) {
-      const current = blocks[i];
-      const next = blocks[i + 1];
+    for (let i = 0; i < timedBlocks.length - 1; i++) {
+      const current = timedBlocks[i];
+      const next = timedBlocks[i + 1];
 
       const currentEnd = this.timeToMinutes(current.endTime);
       const nextStart = this.timeToMinutes(next.startTime);
@@ -289,7 +300,7 @@ export class SchedulingEngine {
       : (24 * 60) - wakeMinutes + sleepMinutes;
 
     const totalScheduledMinutes = blocks
-      .filter(b => b.type !== 'sleep')
+      .filter(b => b.type !== 'sleep' && !b.isAllDay)
       .reduce((sum, b) => sum + b.duration, 0);
 
     const totalFreeMinutes = awakeMinutes - totalScheduledMinutes;
@@ -317,6 +328,8 @@ export class SchedulingEngine {
     duration: number,
     preferences: PlannerPreferences
   ): string {
+    // Ignore all-day blocks — they don't occupy timed slots
+    existingBlocks = existingBlocks.filter(b => !b.isAllDay);
     const buffer = PLANNER_CONSTANTS.DEFAULT_BUFFER; // min gap between blocks
     const wakeMinutes = this.timeToMinutes(preferences.wakeTime);
     const sleepMinutes = this.timeToMinutes(preferences.sleepTime);

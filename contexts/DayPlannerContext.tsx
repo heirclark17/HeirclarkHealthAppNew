@@ -527,9 +527,11 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     const mealBlocks = getMealBlocksForDay(date, preferences);
 
     // Get calendar events (CLIENT-SIDE ONLY)
+    // Filter out canceled events (Outlook/Teams prefix "Canceled:" or "Cancelled:")
     const currentEvents = stateRef.current.deviceCalendarEvents;
     const calendarBlocks = currentEvents
       .filter((event) => isSameDay(event.startDate, date))
+      .filter((event) => !/^cancell?ed:/i.test(event.title))
       .map((event) => convertCalendarEventToBlock(event));
 
     // Build scheduling request
@@ -876,12 +878,33 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   let calendarColorIndex = 0;
 
   const convertCalendarEventToBlock = (event: DeviceCalendarEvent): TimeBlock => {
+    // Use source calendar color if available, otherwise rotate through palette
+    const eventColor = event.color || CALENDAR_PALETTE[calendarColorIndex++ % CALENDAR_PALETTE.length];
+
+    if (event.isAllDay) {
+      // All-day events (holidays, birthdays, OOO) — banner chip only,
+      // excluded from scheduling engine, conflict detection, and stats.
+      return {
+        id: `calendar_${event.id}`,
+        type: 'calendar_event',
+        title: event.title,
+        startTime: '00:00',
+        endTime: '23:59',
+        duration: 0,
+        status: 'scheduled',
+        color: eventColor,
+        icon: PLANNER_CONSTANTS.BLOCK_ICONS.calendar_event,
+        priority: 1,
+        flexibility: 0,
+        aiGenerated: false,
+        deviceEventId: event.id,
+        isAllDay: true,
+      };
+    }
+
     const duration = Math.round(
       (event.endDate.getTime() - event.startDate.getTime()) / (1000 * 60)
     );
-
-    // Use source calendar color if available, otherwise rotate through palette
-    const eventColor = event.color || CALENDAR_PALETTE[calendarColorIndex++ % CALENDAR_PALETTE.length];
 
     return {
       id: `calendar_${event.id}`,
@@ -897,6 +920,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       flexibility: 0,
       aiGenerated: false,
       deviceEventId: event.id,
+      isAllDay: false,
     };
   };
 
