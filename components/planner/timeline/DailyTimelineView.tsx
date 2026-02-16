@@ -11,7 +11,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
-import { Calendar, RefreshCw, Sparkles, Cake, Star, TreePalm, CalendarDays, ExternalLink } from 'lucide-react-native';
+import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomSheetModal,
@@ -285,26 +285,6 @@ export function DailyTimelineView() {
         </View>
       </ScrollView>
 
-      {/* Floating AI Optimize Button */}
-      <TouchableOpacity
-        style={[
-          styles.aiOptimizeButton,
-          {
-            bottom: bottomPadding + 56,
-            backgroundColor: themeColors.primary,
-          },
-        ]}
-        onPress={actions.generateWeeklyPlan}
-        disabled={state.isGeneratingPlan}
-        activeOpacity={0.7}
-      >
-        {state.isGeneratingPlan ? (
-          <ActivityIndicator size="small" color="#fff" />
-        ) : (
-          <Sparkles size={20} color="#fff" />
-        )}
-      </TouchableOpacity>
-
       {/* Floating Stats */}
       <View style={[styles.floatingFooter, { bottom: bottomPadding }]}>
         <GlassCard style={styles.statCard}>
@@ -496,21 +476,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
-  },
-  aiOptimizeButton: {
-    position: 'absolute',
-    right: 20,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
-    zIndex: 10,
   },
   floatingFooter: {
     position: 'absolute',
