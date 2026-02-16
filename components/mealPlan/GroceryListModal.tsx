@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
   // Compact Filters Card Styles
   budgetCard: {
     paddingHorizontal: 16,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   dietaryCard: {
     paddingHorizontal: 16,
