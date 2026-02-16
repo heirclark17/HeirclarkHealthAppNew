@@ -338,6 +338,8 @@ export function DailyTimelineView() {
                   top: sleepZone.evening.top,
                   height: sleepZone.evening.height,
                   backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
+                  borderLeftColor: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)',
+                  borderLeftWidth: 3,
                 },
               ]}
               pointerEvents="none"
@@ -358,6 +360,8 @@ export function DailyTimelineView() {
                   top: sleepZone.morning.top,
                   height: sleepZone.morning.height,
                   backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
+                  borderLeftColor: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)',
+                  borderLeftWidth: 3,
                 },
               ]}
               pointerEvents="none"
@@ -380,6 +384,8 @@ export function DailyTimelineView() {
                   top: fastingZones.morning.top,
                   height: fastingZones.morning.height,
                   backgroundColor: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.06)',
+                  borderLeftColor: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)',
+                  borderLeftWidth: 3,
                 },
               ]}
               pointerEvents="none"
@@ -400,6 +406,8 @@ export function DailyTimelineView() {
                   top: fastingZones.evening.top,
                   height: fastingZones.evening.height,
                   backgroundColor: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.06)',
+                  borderLeftColor: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)',
+                  borderLeftWidth: 3,
                 },
               ]}
               pointerEvents="none"
