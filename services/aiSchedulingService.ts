@@ -166,6 +166,9 @@ function buildSchedulingPrompt(request: SchedulingRequest): string {
 
   let prompt = `Schedule workouts and meals for ${dayOfWeek}, ${date}.
 
+**Sleep Schedule:**
+- Sleep: ${preferences.sleepTime} to ${preferences.wakeTime}
+
 **Intermittent Fasting:**
 ${isFasting ? `- 🚨 FASTING ACTIVE - STRICT RULES:
   - YOU CAN ONLY SCHEDULE MEALS BETWEEN ${lifeContext.fastingEnd} AND ${lifeContext.fastingStart}
@@ -185,15 +188,16 @@ ${mealBlocks.length > 0 ? mealBlocks.map(m => `- ${m.title} (${m.duration} min)`
 ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- None'}
 
 **RULES:**
-1. 🚨 IF FASTING: Meals must be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
-2. Don't overlap with calendar events
+1. Include sleep block from ${preferences.sleepTime} to ${preferences.wakeTime}
+2. 🚨 IF FASTING: Meals must be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
+3. Don't overlap workouts/meals with calendar events
 
 **Output (JSON):**
 {
   "blocks": [
     {
-      "type": "workout|meal_eating",
-      "title": "Activity name",
+      "type": "sleep|workout|meal_eating",
+      "title": "Sleep|Activity name",
       "startTime": "HH:MM",
       "endTime": "HH:MM",
       "duration": minutes
@@ -243,7 +247,7 @@ function timeToMinutes(time: string): number {
 
 function getDefaultColor(type: string): string {
   const colors: Record<string, string> = {
-    sleep: '#6B7280',
+    sleep: '#9333EA40', // Transparent purple
     workout: '#EF4444',
     meal_eating: '#10B981',
     meal_prep: '#059669',

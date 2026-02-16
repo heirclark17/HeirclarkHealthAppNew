@@ -188,7 +188,7 @@ export const PLANNER_CONSTANTS = {
     meal_prep: '#4ECDC4',      // teal
     meal_eating: '#F39C12',    // protein
     work: '#3D5A80',           // navy
-    sleep: '#8860D0',          // purple
+    sleep: '#9333EA40',        // transparent purple
     personal: '#FFD93D',       // yellow
     commute: '#A8DADC',        // light blue
     calendar_event: '#457B9D', // blue
