@@ -233,7 +233,8 @@ export class SchedulingEngine {
         blocks,
         preferredTime,
         adjustedDuration,
-        preferences
+        preferences,
+        'workout'
       );
 
       blocks.push({
@@ -317,7 +318,8 @@ export class SchedulingEngine {
         blocks,
         preferredTime,
         adjustedDuration,
-        preferences
+        preferences,
+        meal.type // Pass meal type (meal_eating or meal_prep)
       );
 
       blocks.push({
@@ -334,11 +336,13 @@ export class SchedulingEngine {
   }
 
   /**
-   * Add buffer times between blocks
+   * Add buffer times between blocks with intelligent spacing:
+   * - 60 min after sleep before breakfast
+   * - 45 min after meetings before meals
+   * - 30 min before workouts for prep/commute
+   * - 15 min default between other blocks
    */
   private static addBufferTimes(blocks: TimeBlock[], preferences: PlannerPreferences) {
-    const bufferMinutes = PLANNER_CONSTANTS.DEFAULT_BUFFER;
-
     // Add buffers between adjacent blocks
     for (let i = 0; i < blocks.length - 1; i++) {
       const current = blocks[i];
@@ -348,15 +352,46 @@ export class SchedulingEngine {
       const nextStart = this.timeToMinutes(next.startTime);
       const gap = nextStart - currentEnd;
 
-      // Add buffer when blocks are too close together (gap < buffer threshold)
-      if (gap > 0 && gap < bufferMinutes) {
+      // Determine required buffer based on block transition types
+      let requiredBuffer = PLANNER_CONSTANTS.DEFAULT_BUFFER; // 10 min default
+      let bufferTitle = 'Buffer Time';
+
+      // After sleep (wake up) → 60 min before breakfast
+      if (current.type === 'sleep' && (next.type === 'meal_eating' || next.type === 'meal_prep')) {
+        requiredBuffer = 60;
+        bufferTitle = 'Morning Routine';
+      }
+      // After meetings/calendar events → 45 min before meals
+      else if (current.type === 'calendar_event' && (next.type === 'meal_eating' || next.type === 'meal_prep')) {
+        requiredBuffer = 45;
+        bufferTitle = 'Transition Time';
+      }
+      // Before workouts → 30 min for getting dressed, driving, prep
+      else if (next.type === 'workout') {
+        requiredBuffer = 30;
+        bufferTitle = 'Workout Prep';
+      }
+      // After workouts → 20 min for cooldown, shower
+      else if (current.type === 'workout') {
+        requiredBuffer = 20;
+        bufferTitle = 'Cooldown';
+      }
+      // Between meals and meetings → 15 min
+      else if ((current.type === 'meal_eating' || current.type === 'meal_prep') && next.type === 'calendar_event') {
+        requiredBuffer = 15;
+        bufferTitle = 'Buffer Time';
+      }
+
+      // Add buffer when blocks are too close together (gap < required buffer)
+      if (gap > 0 && gap < requiredBuffer) {
+        const bufferDuration = Math.min(requiredBuffer, gap);
         blocks.push({
           id: this.generateId('buffer'),
           type: 'buffer',
-          title: 'Buffer Time',
+          title: bufferTitle,
           startTime: current.endTime,
-          endTime: this.minutesToTime(currentEnd + bufferMinutes),
-          duration: bufferMinutes,
+          endTime: this.minutesToTime(currentEnd + bufferDuration),
+          duration: bufferDuration,
           status: 'scheduled',
           color: PLANNER_CONSTANTS.BLOCK_COLORS.buffer,
           icon: PLANNER_CONSTANTS.BLOCK_ICONS.buffer,
@@ -444,17 +479,39 @@ export class SchedulingEngine {
   /**
    * Find available time slot for a block.
    * Guarantees no overlap with existing blocks (calendar events, sleep, etc.)
-   * by requiring a minimum buffer between adjacent blocks.
+   * by requiring intelligent buffer times between adjacent blocks.
    */
   private static findAvailableSlot(
     existingBlocks: TimeBlock[],
     preferredTime: string,
     duration: number,
-    preferences: PlannerPreferences
+    preferences: PlannerPreferences,
+    blockType?: string
   ): string {
     // Ignore all-day blocks — they don't occupy timed slots
     existingBlocks = existingBlocks.filter(b => !b.isAllDay);
-    const buffer = PLANNER_CONSTANTS.DEFAULT_BUFFER; // min gap between blocks
+
+    // Use intelligent buffer based on block type
+    const getRequiredBuffer = (prevBlock: TimeBlock, nextBlockType?: string): number => {
+      // After sleep → 60 min before meals
+      if (prevBlock.type === 'sleep' && (nextBlockType === 'meal_eating' || nextBlockType === 'meal_prep')) {
+        return 60;
+      }
+      // After meetings → 45 min before meals
+      if (prevBlock.type === 'calendar_event' && (nextBlockType === 'meal_eating' || nextBlockType === 'meal_prep')) {
+        return 45;
+      }
+      // Before workouts → 30 min for prep
+      if (nextBlockType === 'workout') {
+        return 30;
+      }
+      // After workouts → 20 min for cooldown
+      if (prevBlock.type === 'workout') {
+        return 20;
+      }
+      return PLANNER_CONSTANTS.DEFAULT_BUFFER; // 10 min default
+    };
+
     const wakeMinutes = this.timeToMinutes(preferences.wakeTime);
     const sleepMinutes = this.timeToMinutes(preferences.sleepTime);
 
@@ -469,13 +526,16 @@ export class SchedulingEngine {
 
       // Stay within waking hours
       if (candStart >= wakeMinutes && candEnd <= sleepMinutes) {
-        // Check overlap with buffer: require `buffer` minutes gap on each side
+        // Check overlap with intelligent buffer: require appropriate gap based on block types
         const hasConflict = existingBlocks.some(block => {
           const blockStart = this.timeToMinutes(block.startTime);
           const blockEnd = this.timeToMinutes(block.endTime);
 
+          // Determine required buffer after this existing block
+          const bufferAfter = getRequiredBuffer(block, blockType);
+
           // Conflict if candidate overlaps OR is too close to an existing block
-          return (candStart < blockEnd + buffer && candEnd + buffer > blockStart);
+          return (candStart < blockEnd + bufferAfter && candEnd > blockStart);
         });
 
         if (!hasConflict) {
@@ -503,7 +563,8 @@ export class SchedulingEngine {
         const hasConflict = existingBlocks.some(block => {
           const blockStart = this.timeToMinutes(block.startTime);
           const blockEnd = this.timeToMinutes(block.endTime);
-          return (candStart < blockEnd + buffer && candEnd + buffer > blockStart);
+          const bufferAfter = getRequiredBuffer(block, blockType);
+          return (candStart < blockEnd + bufferAfter && candEnd > blockStart);
         });
 
         if (!hasConflict) {
@@ -524,15 +585,19 @@ export class SchedulingEngine {
     // Check gap before first block
     if (sorted.length > 0) {
       const firstStart = this.timeToMinutes(sorted[0].startTime);
-      if (wakeMinutes + duration + buffer <= firstStart) {
-        return this.minutesToTime(wakeMinutes);
+      const sleepBlock = sorted.find(b => b.type === 'sleep');
+      const bufferAfterWake = sleepBlock ? getRequiredBuffer(sleepBlock, blockType) : 30;
+      if (wakeMinutes + duration + bufferAfterWake <= firstStart) {
+        return this.minutesToTime(wakeMinutes + bufferAfterWake);
       }
     }
 
     // Check gaps between blocks
     for (let i = 0; i < sorted.length - 1; i++) {
-      const gapStart = this.timeToMinutes(sorted[i].endTime) + buffer;
-      const gapEnd = this.timeToMinutes(sorted[i + 1].startTime) - buffer;
+      const bufferAfter = getRequiredBuffer(sorted[i], blockType);
+      const bufferBefore = blockType === 'workout' ? 30 : PLANNER_CONSTANTS.DEFAULT_BUFFER;
+      const gapStart = this.timeToMinutes(sorted[i].endTime) + bufferAfter;
+      const gapEnd = this.timeToMinutes(sorted[i + 1].startTime) - bufferBefore;
       if (gapEnd - gapStart >= duration) {
         return this.minutesToTime(gapStart);
       }
@@ -540,7 +605,8 @@ export class SchedulingEngine {
 
     // Check gap after last block
     if (sorted.length > 0) {
-      const lastEnd = this.timeToMinutes(sorted[sorted.length - 1].endTime) + buffer;
+      const bufferAfter = getRequiredBuffer(sorted[sorted.length - 1], blockType);
+      const lastEnd = this.timeToMinutes(sorted[sorted.length - 1].endTime) + bufferAfter;
       if (lastEnd + duration <= sleepMinutes) {
         return this.minutesToTime(lastEnd);
       }
