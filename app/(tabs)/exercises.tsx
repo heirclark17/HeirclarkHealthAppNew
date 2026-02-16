@@ -30,6 +30,12 @@ import {
   Target,
   Zap,
   Info,
+  PersonStanding,
+  ArrowUpFromLine,
+  Footprints,
+  StretchHorizontal,
+  Activity,
+  Hand,
 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { GlassCard } from '../../components/GlassCard';
@@ -346,8 +352,27 @@ export default function ExercisesScreen() {
         return toTitleCase(equipment);
       };
 
+      // Helper: Get icon and color for body part
+      const getBodyPartIcon = (bodyPart: string) => {
+        const bp = bodyPart.toLowerCase();
+        const size = 28;
+        const strokeWidth = 1.5;
+        if (bp === 'chest') return { Icon: StretchHorizontal, color: '#FF6B6B', bg: '#FF6B6B18' };
+        if (bp === 'back') return { Icon: ArrowUpFromLine, color: '#4ECDC4', bg: '#4ECDC418' };
+        if (bp === 'shoulders') return { Icon: PersonStanding, color: '#45B7D1', bg: '#45B7D118' };
+        if (bp === 'upper arms') return { Icon: Dumbbell, color: '#F7DC6F', bg: '#F7DC6F18' };
+        if (bp === 'lower arms') return { Icon: Hand, color: '#BB8FCE', bg: '#BB8FCE18' };
+        if (bp === 'upper legs') return { Icon: PersonStanding, color: '#82E0AA', bg: '#82E0AA18' };
+        if (bp === 'lower legs') return { Icon: Footprints, color: '#73C6B6', bg: '#73C6B618' };
+        if (bp === 'waist') return { Icon: Activity, color: '#F0B27A', bg: '#F0B27A18' };
+        if (bp === 'cardio') return { Icon: Activity, color: '#EC7063', bg: '#EC706318' };
+        if (bp === 'neck') return { Icon: PersonStanding, color: '#85C1E9', bg: '#85C1E918' };
+        return { Icon: Dumbbell, color: colors.accentCyan, bg: colors.accentCyan + '18' };
+      };
+
       const difficulty = getDifficultyFromEquipment(item.equipment);
       const difficultyColor = getDifficultyColor(difficulty);
+      const { Icon: BodyPartIcon, color: iconColor, bg: iconBg } = getBodyPartIcon(item.bodyPart);
 
       return (
         <TouchableOpacity
@@ -356,19 +381,10 @@ export default function ExercisesScreen() {
         >
           <GlassCard style={styles.exerciseCard}>
             <View style={styles.cardContent}>
-              {/* GIF Thumbnail */}
-              {item.gifUrl && (
-                <Image
-                  key={`gif-${item.id}`}
-                  source={{
-                    uri: item.gifUrl,
-                    cache: 'force-cache', // Use cached version if available
-                  }}
-                  style={styles.gifThumbnail}
-                  resizeMode="cover"
-                  defaultSource={require('../../assets/icon.png')} // Fallback while loading
-                />
-              )}
+              {/* Body Part Icon (no GIF in list - saves API calls) */}
+              <View style={[styles.bodyPartIcon, { backgroundColor: iconBg }]}>
+                <BodyPartIcon size={28} color={iconColor} strokeWidth={1.5} />
+              </View>
 
               {/* Exercise Info */}
               <View style={styles.exerciseInfo}>
@@ -1082,8 +1098,16 @@ const styles = StyleSheet.create({
   gifThumbnail: {
     width: 80,
     height: 80,
-    borderRadius: 12, // LiquidGlass.borderRadius.sm
+    borderRadius: 12,
     marginRight: Spacing.md,
+  },
+  bodyPartIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+    marginRight: Spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   exerciseInfo: {
     flex: 1,
