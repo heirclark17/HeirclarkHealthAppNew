@@ -19,7 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Leaf, Beef, Milk, Wheat, Package, Flame, Box, ShoppingCart } from 'lucide-react-native';
+import { Leaf, Beef, Milk, Wheat, Package, Flame, Box, ShoppingCart, Carrot } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../NumberText';
 import { GroceryCategory, GroceryItem } from '../../types/mealPlan';
@@ -544,33 +544,41 @@ export function GroceryListModal({
           </ScrollView>
         )}
 
-        {/* Instacart button with Glass Effect */}
+        {/* Instacart button with Frosted Glass Effect - Orange-Green Tint */}
         {groceryList && groceryList.length > 0 && !isLoading && (
-          <BlurView
-            intensity={isDark ? 60 : 80}
-            tint={isDark ? 'dark' : 'light'}
-            style={[styles.bottomSection, { paddingBottom: insets.bottom + 16 }]}
+          <Animated.View
+            entering={SlideInUp.delay(300).springify()}
+            style={[styles.instacartButtonContainer, { paddingBottom: insets.bottom + 16 }]}
           >
-            <Animated.View entering={SlideInUp.delay(500).springify()} style={buttonAnimatedStyle}>
+            <BlurView
+              intensity={isDark ? 50 : 70}
+              tint={isDark ? 'dark' : 'light'}
+              style={styles.instacartButtonBlur}
+            >
               <TouchableOpacity
-                style={[styles.instacartButton, {
-                  backgroundColor: glassColors.buttonBg,
-                }]}
+                style={[styles.instacartButton, buttonAnimatedStyle]}
                 onPress={handleInstacartPress}
-                activeOpacity={1}
+                activeOpacity={0.7}
                 accessibilityLabel={`Order ${totalItems} grocery items with Instacart`}
                 accessibilityRole="button"
                 accessibilityHint="Opens Instacart with your grocery list pre-filled for delivery"
               >
-                <View style={styles.instacartIconContainer}>
-                  <ShoppingCart size={20} color={glassColors.buttonText} strokeWidth={2} />
+                <View style={[styles.instacartIconContainer, {
+                  backgroundColor: isDark ? 'rgba(255, 140, 0, 0.2)' : 'rgba(76, 175, 80, 0.15)',
+                  padding: 8,
+                  borderRadius: 12,
+                }]}>
+                  <Carrot size={22} color={isDark ? '#FF8C00' : '#4CAF50'} strokeWidth={2} />
                 </View>
-                <Text style={[styles.instacartButtonText, { color: glassColors.buttonText }]}>
+                <Text style={[styles.instacartButtonText, {
+                  color: isDark ? '#FF8C00' : '#4CAF50',
+                  fontFamily: Fonts.semiBold,
+                }]}>
                   Order with Instacart
                 </Text>
               </TouchableOpacity>
-            </Animated.View>
-          </BlurView>
+            </BlurView>
+          </Animated.View>
         )}
       </View>
     </Modal>
@@ -705,23 +713,30 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: 8,
   },
-  bottomSection: {
+  instacartButtonContainer: {
     position: 'absolute',
     bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 16,
+    left: 16,
+    right: 16,
+    zIndex: 10,
+  },
+  instacartButtonBlur: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   instacartButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
-    borderRadius: Spacing.borderRadius,
-    gap: 8,
+    paddingHorizontal: 24,
+    gap: 12,
+    backgroundColor: 'rgba(255, 152, 0, 0.08)',
   },
   instacartIconContainer: {
-    marginRight: 8,
+    // Icon styling handled inline for dynamic colors
   },
   instacartButtonText: {
     fontSize: 16,
