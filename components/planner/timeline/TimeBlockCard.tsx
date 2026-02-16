@@ -43,8 +43,13 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
   let relativeMinutes = startMinutes - wakeMinutes;
   if (relativeMinutes < 0) relativeMinutes += 24 * 60; // Wrap around for blocks after midnight
 
-  const top = (relativeMinutes / 60) * 60; // Position from wake time
-  const height = Math.max((block.duration / 60) * 60, 56); // 60px per hour, min 56px
+  // With 60px per hour scale, 1 minute = 1 pixel
+  const top = relativeMinutes; // Position from wake time in pixels
+  // Use actual duration without minimum (like Outlook/Teams calendars)
+  const height = block.duration; // 1 minute = 1 pixel, no minimum
+
+  // For very short events (<30min), use compact single-line layout like Outlook
+  const isCompact = block.duration < 30;
 
   // Gesture handler
   const panGesture = Gesture.Pan()
@@ -101,24 +106,43 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
               },
             ]}
           >
-            <View style={styles.header}>
-              <View style={styles.titleRow}>
-                <ActivityIcon type={block.type} size={14} color={blockColor} />
-                <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
-                  {block.title}
+            {isCompact ? (
+              // Compact single-line layout for short events (like Outlook/Teams)
+              <View style={styles.compactRow}>
+                <ActivityIcon type={block.type} size={12} color={blockColor} />
+                <Text style={[styles.compactText, { color: themeColors.text }]} numberOfLines={1}>
+                  {block.title} · {to12h(block.startTime)}
                 </Text>
+                {block.status === 'completed' && (
+                  <CheckCircle2 size={12} color={Colors.protein} />
+                )}
+                {block.status === 'skipped' && (
+                  <X size={12} color={themeColors.textSecondary} />
+                )}
               </View>
-              {block.status === 'completed' && (
-                <CheckCircle2 size={14} color={Colors.protein} />
-              )}
-              {block.status === 'skipped' && (
-                <X size={14} color={themeColors.textSecondary} />
-              )}
-            </View>
+            ) : (
+              // Standard two-line layout for normal events
+              <>
+                <View style={styles.header}>
+                  <View style={styles.titleRow}>
+                    <ActivityIcon type={block.type} size={14} color={blockColor} />
+                    <Text style={[styles.title, { color: themeColors.text }]} numberOfLines={1}>
+                      {block.title}
+                    </Text>
+                  </View>
+                  {block.status === 'completed' && (
+                    <CheckCircle2 size={14} color={Colors.protein} />
+                  )}
+                  {block.status === 'skipped' && (
+                    <X size={14} color={themeColors.textSecondary} />
+                  )}
+                </View>
 
-            <Text style={[styles.time, { color: themeColors.textSecondary }]} numberOfLines={1}>
-              {to12h(block.startTime)} – {to12h(block.endTime)}  ·  {block.duration}m
-            </Text>
+                <Text style={[styles.time, { color: themeColors.textSecondary }]} numberOfLines={1}>
+                  {to12h(block.startTime)} – {to12h(block.endTime)}  ·  {block.duration}m
+                </Text>
+              </>
+            )}
           </View>
         </TouchableOpacity>
       </GestureDetector>
@@ -142,19 +166,20 @@ function to12h(time: string): string {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 60,
+    left: 58, // Align with grid lines: 50px time label + 8px gap
     right: 0,
     paddingRight: 16,
     zIndex: 1,
   },
   card: {
     flex: 1,
-    paddingVertical: 8,
+    // Use minimal padding for short events (like Outlook/Teams)
+    paddingVertical: 4,
     paddingHorizontal: 10,
     borderLeftWidth: 3,
-    borderRadius: 12,
+    borderRadius: 8,
     justifyContent: 'center',
-    gap: 3,
+    gap: 2,
     ...Platform.select({
       ios: {
         shadowColor: 'rgba(0,0,0,0.08)',
@@ -186,5 +211,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
+  },
+  compactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+  },
+  compactText: {
+    fontSize: 11,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as const,
+    flex: 1,
   },
 });
