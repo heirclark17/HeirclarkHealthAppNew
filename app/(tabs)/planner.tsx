@@ -80,9 +80,6 @@ export default function PlannerScreen() {
       {/* Header with view toggle + preferences button */}
       <View style={[styles.header, { backgroundColor: themeColors.background, paddingTop: insets.top + 20 }]}>
         <Text style={[styles.title, { color: themeColors.text }]}>Plan Meals & Workouts</Text>
-        <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
-          Plan your meals and workout around your life.
-        </Text>
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <SegmentedControl
@@ -144,12 +141,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: Fonts.regular,
-    letterSpacing: 0.2,
     marginBottom: 16,
   },
   headerRow: {
