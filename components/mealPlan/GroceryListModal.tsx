@@ -236,7 +236,8 @@ export function GroceryListModal({
 
   // Auto-generate grocery list when modal opens (if not already generated)
   React.useEffect(() => {
-    if (visible && !groceryList && !isLoading && onGenerateList) {
+    const hasNoGroceryList = !groceryList || groceryList.length === 0;
+    if (visible && hasNoGroceryList && !isLoading && onGenerateList) {
       console.log('[GroceryListModal] ✅ Auto-generating grocery list with budget:', budgetTier);
       onGenerateList(budgetTier);
     }
@@ -247,8 +248,9 @@ export function GroceryListModal({
 
   // Regenerate grocery list when budget tier changes (after initial generation)
   React.useEffect(() => {
+    const hasGroceryList = groceryList && groceryList.length > 0;
     // Only regenerate if budget tier ACTUALLY changed (not just on mount or other renders)
-    if (groceryList && onGenerateList && !isLoading && prevBudgetTierRef.current !== budgetTier) {
+    if (hasGroceryList && onGenerateList && !isLoading && prevBudgetTierRef.current !== budgetTier) {
       console.log('[GroceryListModal] Budget tier changed from', prevBudgetTierRef.current, 'to', budgetTier, '- Regenerating grocery list...');
       onGenerateList(budgetTier);
       prevBudgetTierRef.current = budgetTier;
@@ -298,6 +300,12 @@ export function GroceryListModal({
   const progress = useMemo(
     () => totalItems > 0 ? (checkedItems / totalItems) * 100 : 0,
     [checkedItems, totalItems]
+  );
+
+  // Helper to check if grocery list has items (handles null, undefined, and empty arrays)
+  const hasGroceryItems = useMemo(
+    () => groceryList && groceryList.length > 0,
+    [groceryList]
   );
 
   const availableDietaryFilters = ['organic', 'gluten-free', 'vegan', 'vegetarian'];
@@ -379,7 +387,7 @@ export function GroceryListModal({
         </BlurView>
 
         {/* Empty State or Generate Button */}
-        {!groceryList && !isLoading && onGenerateList && (
+        {(!groceryList || groceryList.length === 0) && !isLoading && onGenerateList && (
           <View style={styles.emptyState}>
             <Text style={[styles.emptyText, { color: glassColors.textMuted }]}>
               No grocery list yet
@@ -483,7 +491,7 @@ export function GroceryListModal({
         )}
 
         {/* Budget Tier Card */}
-        {groceryList && !isLoading && (
+        {hasGroceryItems && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(150)}
             style={styles.budgetCard}
@@ -557,7 +565,7 @@ export function GroceryListModal({
         )}
 
         {/* Dietary Preferences Card */}
-        {groceryList && !isLoading && (
+        {hasGroceryItems && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(200)}
             style={styles.dietaryCard}
@@ -627,7 +635,7 @@ export function GroceryListModal({
         )}
 
         {/* Progress Section - iOS 26 Design */}
-        {groceryList && !isLoading && (
+        {hasGroceryItems && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(200)}
             style={styles.progressSection}
@@ -699,7 +707,7 @@ export function GroceryListModal({
         )}
 
         {/* Select All Button - Above Ingredients with Frosted Glass */}
-        {groceryList && !isLoading && (
+        {hasGroceryItems && !isLoading && (
           <Animated.View
             entering={FadeIn.delay(250)}
             style={styles.selectAllContainer}
@@ -726,7 +734,7 @@ export function GroceryListModal({
         )}
 
         {/* Grocery list */}
-        {groceryList && !isLoading && (
+        {hasGroceryItems && !isLoading && (
           <ScrollView
             style={styles.listContainer}
             showsVerticalScrollIndicator={false}
