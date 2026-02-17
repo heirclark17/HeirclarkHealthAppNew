@@ -82,9 +82,9 @@ export default function PlannerScreen() {
 
   return (
     <BottomSheetModalProvider>
-    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top', 'bottom']}>
       {/* Header with view toggle + preferences button */}
-      <View style={[styles.header, { backgroundColor: themeColors.background, paddingTop: insets.top + 20 }]}>
+      <View style={[styles.header, { backgroundColor: 'transparent', paddingTop: insets.top + 20 }]}>
         <Text style={[styles.title, { color: themeColors.text }]}>Plan Meals & Workouts</Text>
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>

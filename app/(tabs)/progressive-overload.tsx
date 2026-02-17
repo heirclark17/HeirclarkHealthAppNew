@@ -385,14 +385,14 @@ export default function ProgressiveOverloadPage() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+      <SafeAreaView style={[styles.centered, { backgroundColor: 'transparent' }]} edges={['top', 'bottom']}>
         <ActivityIndicator size="large" color={colors.success} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top', 'bottom']}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[

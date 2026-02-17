@@ -509,7 +509,7 @@ export default function ExercisesScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <View>
