@@ -171,7 +171,11 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
             </Text>
 
             {/* Timer Display */}
-            <Animated.Text style={[styles.value, { color: colors.text }, animatedStyle]}>
+            <Animated.Text
+              style={[styles.value, { color: colors.text }, animatedStyle]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               {state.isActive
                 ? formatTime(timeRemaining.hours, timeRemaining.minutes, timeRemaining.seconds)
                 : selectedPreset?.label || '16:8'
