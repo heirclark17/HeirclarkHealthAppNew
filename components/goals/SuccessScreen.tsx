@@ -112,7 +112,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           workoutsPerWeek: state.workoutsPerWeek || 3,
           workoutDuration: state.workoutDuration || 30,
           activityLevel: state.activityLevel || 'moderate',
-          equipmentAccess: state.equipmentAccess || [],
+          equipmentAccess: state.availableEquipment || [],
           injuries: state.injuries,
           selectedProgram: selectedProgramInfo,
         });

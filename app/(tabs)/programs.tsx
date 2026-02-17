@@ -497,6 +497,17 @@ export default function ProgramsScreen() {
                 <ChevronRight size={20} color={colors.text} strokeWidth={1.5} />
               </TouchableOpacity>
             </View>
+
+            {/* Current Day Workout */}
+            {currentWorkout && (
+              <WorkoutCard
+                workout={currentWorkout}
+                onSelectExercise={showExerciseAlternatives}
+                onLogWeight={handleLogWeight}
+                onLogForm={handleLogForm}
+                onCompleteWorkout={markWorkoutComplete}
+              />
+            )}
           </View>
         )}
 

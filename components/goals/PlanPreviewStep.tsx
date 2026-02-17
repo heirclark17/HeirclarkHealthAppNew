@@ -961,13 +961,13 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             )}
 
             {/* Intermittent Fasting */}
-            {state.intermittentFasting && state.fastingWindow && (
+            {state.intermittentFasting && state.fastingStart && state.fastingEnd && (
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <Clock size={16} color={Colors.warning} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Fasting Window: </Text>
                   <Text style={[styles.prefValue, { color: colors.text }]}>
-                    {state.fastingWindow.start} - {state.fastingWindow.end}
+                    {state.fastingStart} - {state.fastingEnd}
                   </Text>
                 </View>
               </GlassCard>
