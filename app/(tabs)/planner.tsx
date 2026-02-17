@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Settings } from 'lucide-react-native';
@@ -77,7 +78,7 @@ export default function PlannerScreen() {
 
   return (
     <BottomSheetModalProvider>
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
       {/* Header with view toggle + preferences button */}
       <View style={[styles.header, { backgroundColor: themeColors.background, paddingTop: insets.top + 20 }]}>
         <Text style={[styles.title, { color: themeColors.text }]}>Plan Meals & Workouts</Text>
@@ -126,7 +127,7 @@ export default function PlannerScreen() {
           onDateChange={handleDateChange}
         />
       )}
-    </View>
+    </SafeAreaView>
     </BottomSheetModalProvider>
   );
 }

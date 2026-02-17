@@ -12,7 +12,7 @@ import {
   RefreshControl,
   FlatList,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronLeft,
   ChevronRight,
@@ -381,14 +381,14 @@ export default function ProgressiveOverloadPage() {
 
   if (isLoading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={[styles.centered, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
         <ActivityIndicator size="large" color={colors.success} />
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[
@@ -627,7 +627,7 @@ export default function ProgressiveOverloadPage() {
           loadData();
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
