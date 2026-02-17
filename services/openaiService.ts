@@ -360,3 +360,105 @@ Be HONEST, DIRECT, and PRACTICAL. Use actual dish names from ${params.cuisine} c
     return `When dining at ${params.cuisine} restaurants, focus on grilled proteins, vegetables, and requesting sauces on the side. Ask your server about portion sizes and consider sharing dishes. You have ${params.remainingCalories} calories remaining today, so choose mindfully.`;
   }
 }
+
+// ============================================================
+// Accountability Coach AI Functions
+// ============================================================
+
+import { DailySnapshot, ChatMessage, formatSnapshotForAI } from './accountabilityCoachService';
+
+const ACCOUNTABILITY_SYSTEM_PROMPT = `You are Coach — an AI accountability coach inside the Heirclark health app.
+Your job is to review the user's ENTIRE day of data and give them an honest, detailed accountability report. You are like a real-life coach who sees everything.
+
+RULES:
+1. Be BRUTALLY HONEST about what you see. If they only logged 1 meal, call it out.
+2. Reference SPECIFIC NUMBERS — "You consumed 1,847 calories against your 2,200 target"
+3. Call out DISCREPANCIES — "Your meal plan had 4 meals but you only logged 2"
+4. Acknowledge WINS — "Your 14-day workout streak is impressive, keep it going"
+5. Connect everything to their GOAL — "You said you want to lose weight, but..."
+6. Give 2-3 SPECIFIC action items for tomorrow
+7. End with genuine encouragement tied to their progress
+8. Use second person ("you") and be conversational
+9. If data is missing, point it out — "I don't see any water logged today"
+10. Keep under 300 words. Be concise but thorough.
+
+FORMAT:
+Start with a greeting and overall day grade (A-F).
+Then cover: Nutrition → Training → Hydration → Sleep → Overall adherence.
+End with tomorrow's action items and encouragement.`;
+
+/**
+ * Generate the daily accountability summary from the user's full snapshot
+ */
+export async function generateAccountabilitySummary(
+  snapshot: DailySnapshot
+): Promise<string> {
+  try {
+    const snapshotText = formatSnapshotForAI(snapshot);
+
+    const completion = await getOpenAI().chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: [
+        { role: 'system', content: ACCOUNTABILITY_SYSTEM_PROMPT },
+        {
+          role: 'user',
+          content: `Here is my complete daily data. Give me my accountability review.\n\n${snapshotText}`,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 1000,
+    });
+
+    return completion.choices[0]?.message?.content || 'Unable to generate your daily review right now.';
+  } catch (error) {
+    console.error('[OpenAI Service] Error generating accountability summary:', error);
+
+    if (error instanceof Error && error.message.includes('API key not configured')) {
+      return 'AI accountability review is not available. Please configure your OpenAI API key.';
+    }
+
+    return 'Unable to generate your daily accountability review right now. Keep tracking your progress and check back soon.';
+  }
+}
+
+/**
+ * Send a follow-up chat message with full daily context
+ */
+export async function sendAccountabilityChat(
+  message: string,
+  snapshot: DailySnapshot,
+  history: ChatMessage[]
+): Promise<string> {
+  try {
+    const snapshotText = formatSnapshotForAI(snapshot);
+
+    // Build conversation history for context
+    const conversationMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+      { role: 'system', content: ACCOUNTABILITY_SYSTEM_PROMPT + `\n\nYou have access to the user's full daily data:\n${snapshotText}\n\nUse this data to answer follow-up questions with specific numbers and honest assessment.` },
+    ];
+
+    // Add recent conversation history (last 10 messages)
+    const recentHistory = history.slice(-10);
+    for (const msg of recentHistory) {
+      conversationMessages.push({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+      });
+    }
+
+    // Add the new user message
+    conversationMessages.push({ role: 'user', content: message });
+
+    const completion = await getOpenAI().chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: conversationMessages,
+      temperature: 0.7,
+      max_tokens: 600,
+    });
+
+    return completion.choices[0]?.message?.content || "I'm having trouble responding right now. Try again in a moment.";
+  } catch (error) {
+    console.error('[OpenAI Service] Error in accountability chat:', error);
+    return "I'm having trouble connecting right now. Please try again in a moment.";
+  }
+}
