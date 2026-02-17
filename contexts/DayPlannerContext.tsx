@@ -93,6 +93,8 @@ interface DayPlannerState {
   // Loading states
   isGeneratingPlan: boolean;
   isSyncingCalendar: boolean;
+  isSyncingMeals: boolean;
+  isSyncingWorkouts: boolean;
   isOptimizing: boolean;
 
   // Errors
@@ -113,6 +115,8 @@ interface DayPlannerActions {
   removeBlock: (blockId: string, date: string) => Promise<void>;
   requestWeeklyOptimization: () => Promise<void>;
   optimizeWeek: () => Promise<void>;
+  resyncMeals: () => Promise<void>;
+  resyncWorkouts: () => Promise<void>;
   setSelectedDay: (dayIndex: number) => void;
   setSelectedDate: (dateStr: string) => void;
   clearError: () => void;
@@ -204,6 +208,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     completionPatterns: {},
     isGeneratingPlan: false,
     isSyncingCalendar: false,
+    isSyncingMeals: false,
+    isSyncingWorkouts: false,
     isOptimizing: false,
     error: null,
   });
@@ -1268,6 +1274,30 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
+   * Resync meals: re-reads fresh meal data from MealPlanContext and regenerates the weekly plan.
+   */
+  const resyncMeals = useCallback(async () => {
+    setState(prev => ({ ...prev, isSyncingMeals: true }));
+    try {
+      await generateWeeklyPlan();
+    } finally {
+      setState(prev => ({ ...prev, isSyncingMeals: false }));
+    }
+  }, [generateWeeklyPlan]);
+
+  /**
+   * Resync workouts: re-reads fresh workout data from TrainingContext and regenerates the weekly plan.
+   */
+  const resyncWorkouts = useCallback(async () => {
+    setState(prev => ({ ...prev, isSyncingWorkouts: true }));
+    try {
+      await generateWeeklyPlan();
+    } finally {
+      setState(prev => ({ ...prev, isSyncingWorkouts: false }));
+    }
+  }, [generateWeeklyPlan]);
+
+  /**
    * Set selected day index
    */
   const setSelectedDay = useCallback((dayIndex: number) => {
@@ -1521,6 +1551,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     removeBlock,
     requestWeeklyOptimization,
     optimizeWeek,
+    resyncMeals,
+    resyncWorkouts,
     setSelectedDay,
     setSelectedDate,
     clearError,

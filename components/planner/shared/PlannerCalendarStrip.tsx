@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-import { CalendarClock, RefreshCw, Trash2 } from 'lucide-react-native';
+import { CalendarClock, RefreshCw, Trash2, UtensilsCrossed, Dumbbell } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -17,6 +17,10 @@ interface Props {
   weekStartDate?: string; // YYYY-MM-DD of the week's Sunday
   onSyncCalendar?: () => void;
   isSyncingCalendar?: boolean;
+  onResyncMeals?: () => void;
+  isSyncingMeals?: boolean;
+  onResyncWorkouts?: () => void;
+  isSyncingWorkouts?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
   onClear?: () => void;
@@ -41,6 +45,10 @@ export function PlannerCalendarStrip({
   weekStartDate,
   onSyncCalendar,
   isSyncingCalendar,
+  onResyncMeals,
+  isSyncingMeals,
+  onResyncWorkouts,
+  isSyncingWorkouts,
   onRefresh,
   isRefreshing,
   onClear,
@@ -119,6 +127,34 @@ export function PlannerCalendarStrip({
                   <ActivityIndicator size="small" color={themeColors.text} />
                 ) : (
                   <CalendarClock size={18} color={themeColors.text} />
+                )}
+              </TouchableOpacity>
+            )}
+            {onResyncMeals && (
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: actionBtnBg }]}
+                onPress={onResyncMeals}
+                disabled={isSyncingMeals}
+                activeOpacity={0.7}
+              >
+                {isSyncingMeals ? (
+                  <ActivityIndicator size="small" color="#22C55E" />
+                ) : (
+                  <UtensilsCrossed size={18} color="#22C55E" />
+                )}
+              </TouchableOpacity>
+            )}
+            {onResyncWorkouts && (
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: actionBtnBg }]}
+                onPress={onResyncWorkouts}
+                disabled={isSyncingWorkouts}
+                activeOpacity={0.7}
+              >
+                {isSyncingWorkouts ? (
+                  <ActivityIndicator size="small" color="#F97316" />
+                ) : (
+                  <Dumbbell size={18} color="#F97316" />
                 )}
               </TouchableOpacity>
             )}

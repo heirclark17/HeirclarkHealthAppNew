@@ -115,6 +115,10 @@ export default function PlannerScreen() {
           weekStartDate={weekStartDate}
           onSyncCalendar={actions.syncCalendar}
           isSyncingCalendar={state.isSyncingCalendar}
+          onResyncMeals={actions.resyncMeals}
+          isSyncingMeals={state.isSyncingMeals}
+          onResyncWorkouts={actions.resyncWorkouts}
+          isSyncingWorkouts={state.isSyncingWorkouts}
           onRefresh={() => actions.regenerateSingleDay(new Date(selectedDate))}
           isRefreshing={state.isGeneratingPlan}
           onClear={actions.clearCalendar}
