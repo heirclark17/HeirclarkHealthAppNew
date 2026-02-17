@@ -364,50 +364,32 @@ export default function ProgramsScreen() {
     showExerciseAlternatives(workoutExercise.exercise);
   }, [showExerciseAlternatives]);
 
-  // Handle switch equipment - memoized
-  const handleSwitchEquipment = useCallback(() => {
+  // Handle switch equipment - accepts specific equipment key
+  const handleSwitchEquipment = useCallback((equipmentKey: string) => {
     if (!currentDay) return;
-    const available = getAvailableEquipmentForDay(currentDay);
-    if (available.length === 0) {
-      Alert.alert('No Alternatives', 'No equipment alternatives available for today\'s exercises.');
-      return;
-    }
-    const options = available.map(eq => EQUIPMENT_LABELS[eq] || eq);
-    Alert.alert(
-      'Switch Equipment',
-      'Swap all exercises to use a different equipment type for today.',
-      [
-        ...available.map((eq, idx) => ({
-          text: options[idx],
-          onPress: () => {
-            const result = swapDayEquipment(currentDay, eq);
-            if (result.swaps.length > 0) {
-              const updatedExercises = result.updatedDay.workout?.exercises;
-              if (updatedExercises) {
-                updatedExercises.forEach((ex, i) => {
-                  const original = currentDay.workout?.exercises[i];
-                  if (original && ex.exercise.name !== original.exercise.name) {
-                    const alt = original.exercise.alternatives?.find(a => a.name === ex.exercise.name);
-                    if (alt) {
-                      swapExerciseWithAlternative(selectedDayIndex, original.id, alt);
-                    }
-                  }
-                });
-              }
-              lightImpact();
-              Alert.alert(
-                'Equipment Switched',
-                `Swapped ${result.swaps.length} exercise${result.swaps.length > 1 ? 's' : ''} to ${EQUIPMENT_LABELS[eq] || eq}.${result.warnings.length > 0 ? '\n\n' + result.warnings.join('\n') : ''}`
-              );
-            } else {
-              Alert.alert('No Changes', result.warnings.join('\n') || 'All exercises already use this equipment.');
+    const result = swapDayEquipment(currentDay, equipmentKey);
+    if (result.swaps.length > 0) {
+      const updatedExercises = result.updatedDay.workout?.exercises;
+      if (updatedExercises) {
+        updatedExercises.forEach((ex, i) => {
+          const original = currentDay.workout?.exercises[i];
+          if (original && ex.exercise.name !== original.exercise.name) {
+            const alt = original.exercise.alternatives?.find(a => a.name === ex.exercise.name);
+            if (alt) {
+              swapExerciseWithAlternative(selectedDayIndex, original.id, alt);
             }
-          },
-        })),
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+          }
+        });
+      }
+    }
   }, [currentDay, selectedDayIndex, swapExerciseWithAlternative]);
+
+  // Available equipment options for current day
+  const availableEquipmentOptions = useMemo(() => {
+    if (!currentDay?.workout) return [];
+    const available = getAvailableEquipmentForDay(currentDay);
+    return available.map(eq => ({ key: eq, label: EQUIPMENT_LABELS[eq] || eq }));
+  }, [currentDay]);
 
   // Handle viewing exercise form with GIF demonstration - memoized
   const handleViewForm = useCallback((exercise: WorkoutExercise) => {
@@ -613,6 +595,7 @@ export default function ProgramsScreen() {
                   onViewForm={handleViewForm}
                   onSwitchEquipment={currentDay && !currentDay.isRestDay ? handleSwitchEquipment : undefined}
                   currentEquipmentLabel={currentEquipment ? (EQUIPMENT_LABELS[currentEquipment] || currentEquipment) : null}
+                  availableEquipment={availableEquipmentOptions}
                 />
               </View>
             )}

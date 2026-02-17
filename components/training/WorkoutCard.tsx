@@ -27,8 +27,9 @@ interface WorkoutCardProps {
   onShowAlternatives?: (exercise: WorkoutExercise) => void;
   onLogWeight?: (exercise: WorkoutExercise) => void;
   onViewForm?: (exercise: WorkoutExercise) => void;
-  onSwitchEquipment?: () => void;
+  onSwitchEquipment?: (equipmentKey: string) => void;
   currentEquipmentLabel?: string | null;
+  availableEquipment?: { key: string; label: string }[];
 }
 
 function ExerciseGifThumbnail({
@@ -293,6 +294,7 @@ export function WorkoutCard({
   onViewForm,
   onSwitchEquipment,
   currentEquipmentLabel,
+  availableEquipment,
 }: WorkoutCardProps) {
   const { settings } = useSettings();
   const [lastWeights, setLastWeights] = useState<Record<string, { weight: number; unit: string } | null>>({});
@@ -451,22 +453,45 @@ export function WorkoutCard({
           </View>
 
           {/* Switch Equipment Card */}
-          {onSwitchEquipment && (
-            <TouchableOpacity
-              onPress={() => {
-                lightImpact();
-                onSwitchEquipment();
-              }}
-              activeOpacity={0.7}
-              style={styles.equipmentCardWrapper}
-            >
-              <GlassCard style={styles.equipmentCard} interactive>
-                <Settings size={16} color={colors.text} />
-                <Text style={[styles.equipmentCardText, { color: colors.text }]}>
-                  {currentEquipmentLabel ? `Equipment: ${currentEquipmentLabel}` : 'Switch Equipment'}
-                </Text>
-              </GlassCard>
-            </TouchableOpacity>
+          {onSwitchEquipment && availableEquipment && availableEquipment.length > 0 && (
+            <GlassCard style={styles.equipmentCard}>
+              <View style={styles.equipmentCardHeader}>
+                <Settings size={14} color={colors.text} />
+                <Text style={[styles.equipmentCardText, { color: colors.text }]}>Equipment</Text>
+              </View>
+              <View style={styles.equipmentChipRow}>
+                {availableEquipment.map((eq) => {
+                  const isActive = currentEquipmentLabel === eq.label;
+                  return (
+                    <TouchableOpacity
+                      key={eq.key}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        if (!isActive) {
+                          lightImpact();
+                          onSwitchEquipment(eq.key);
+                        }
+                      }}
+                      style={[
+                        styles.equipmentChip,
+                        {
+                          backgroundColor: isActive
+                            ? (isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)')
+                            : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'),
+                        },
+                      ]}
+                    >
+                      <Text style={[
+                        styles.equipmentChipText,
+                        { color: isActive ? colors.primary : colors.textMuted },
+                      ]}>
+                        {eq.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </GlassCard>
           )}
 
           {/* Exercise List */}
@@ -783,20 +808,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.numericMedium,
   },
-  equipmentCardWrapper: {
-    marginBottom: 16,
-  },
   equipmentCard: {
+    marginBottom: 16,
+    borderRadius: 12,
+  },
+  equipmentCardHeader: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    gap: 8,
-    borderRadius: 12,
+    gap: 6,
+    marginBottom: 10,
   },
   equipmentCardText: {
     fontSize: 13,
     fontFamily: Fonts.numericRegular,
     letterSpacing: 0.5,
+  },
+  equipmentChipRow: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 8,
+  },
+  equipmentChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  equipmentChipText: {
+    fontSize: 13,
+    fontFamily: Fonts.numericRegular,
   },
   completeButtonWrapper: {
     marginTop: 8,
