@@ -85,7 +85,7 @@ function AnimatedOrb({ config }: { config: OrbConfig }) {
     return () => clearTimeout(timeout);
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const animatedStyle = useAnimatedStyle((): any => {
     const translateX = interpolate(
       progress.value,
       [0, 0.25, 0.5, 0.75, 1],

@@ -141,7 +141,7 @@ export const SemiCircularGauge: React.FC<SemiCircularGaugeProps> = ({
               <RoundedNumeral
                 value={Math.round(value)}
                 size={isSmall ? 'small' : 'large'}
-                style={[styles.valueText, { fontSize: valueFontSize, color: colors.text }]}
+                style={{ ...styles.valueText, fontSize: valueFontSize, color: colors.text }}
                 showCommas={false}
                 decimals={0}
               />

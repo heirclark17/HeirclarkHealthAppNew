@@ -113,7 +113,7 @@ export const WeeklyProgressCard: React.FC<WeeklyProgressCardProps> = ({
           value={value}
           unit={unit}
           size="small"
-          style={[styles.macroValueNew, { color: colors.text }]}
+          style={{ ...styles.macroValueNew, color: colors.text }}
           showCommas={true}
           decimals={0}
         />

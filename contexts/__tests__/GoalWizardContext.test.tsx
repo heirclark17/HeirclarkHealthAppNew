@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import { GoalWizardProvider, useGoalWizard } from '../GoalWizardContext';

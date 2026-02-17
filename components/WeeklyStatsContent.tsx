@@ -61,9 +61,9 @@ export function WeeklyStatsContent() {
       const goals = await api.getGoals();
       if (goals) {
         setCaloriesGoal(goals.dailyCalories || goalWizardState?.results?.tdee || 2200);
-        setProteinGoal(goals.proteinGoal || 150);
-        setCarbsGoal(goals.carbsGoal || 250);
-        setFatGoal(goals.fatGoal || 65);
+        setProteinGoal(goals.dailyProtein || 150);
+        setCarbsGoal(goals.dailyCarbs || 250);
+        setFatGoal(goals.dailyFat || 65);
       }
 
       // Get last 7 days of meal data
@@ -182,7 +182,7 @@ export function WeeklyStatsContent() {
           value={value}
           unit={unit}
           size="small"
-          style={[styles.macroValueNew, { color: colors.text }]}
+          style={{ ...styles.macroValueNew, color: colors.text }}
           showCommas={true}
           decimals={label === 'FAT LOSS' ? 1 : 0}
         />

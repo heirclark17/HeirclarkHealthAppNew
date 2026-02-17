@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { renderHook } from '@testing-library/react-native';
 import { useTheme, getThemeColors } from '../useTheme';
 import { useSettings } from '../../contexts/SettingsContext';

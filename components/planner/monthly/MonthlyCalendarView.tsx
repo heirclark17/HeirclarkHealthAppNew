@@ -322,39 +322,41 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
         {/* Date Rows */}
         {calendarRows.map((row, rowIndex) => (
           <View key={`row-${rowIndex}`} style={styles.calendarRow}>
-            {row.map((item, colIndex) =>
-              item.empty ? (
-                <View key={`empty-${rowIndex}-${colIndex}`} style={styles.calendarCell} />
-              ) : (
+            {row.map((item, colIndex) => {
+              if (item.empty) {
+                return <View key={`empty-${rowIndex}-${colIndex}`} style={styles.calendarCell} />;
+              }
+              const cell = item as { empty: false; day: number; dateStr: string; isToday: boolean; isSelected: boolean; hasBlocks: boolean; };
+              return (
                 <TouchableOpacity
-                  key={item.dateStr}
+                  key={cell.dateStr}
                   style={styles.calendarCell}
-                  onPress={() => onDateChange(item.dateStr)}
+                  onPress={() => onDateChange(cell.dateStr)}
                   activeOpacity={0.7}
                 >
                   <View
                     style={[
                       styles.dayCircle,
-                      item.isToday && !item.isSelected && [styles.dayCircleToday, { borderColor: themeColors.primary }],
-                      item.isSelected && { backgroundColor: themeColors.primary },
+                      cell.isToday && !cell.isSelected && [styles.dayCircleToday, { borderColor: themeColors.primary }],
+                      cell.isSelected && { backgroundColor: themeColors.primary },
                     ]}
                   >
                     <Text
                       style={[
                         styles.calendarDayText,
                         { color: themeColors.text },
-                        item.isSelected && { color: isDark ? Colors.background : '#fff' },
+                        cell.isSelected && { color: isDark ? Colors.background : '#fff' },
                       ]}
                     >
-                      {item.day}
+                      {cell.day}
                     </Text>
                   </View>
-                  {item.hasBlocks && (
+                  {cell.hasBlocks && (
                     <View
                       style={[
                         styles.blockDot,
                         {
-                          backgroundColor: item.isSelected
+                          backgroundColor: cell.isSelected
                             ? (isDark ? Colors.background : '#fff')
                             : themeColors.primary,
                         },
@@ -362,8 +364,8 @@ export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
                     />
                   )}
                 </TouchableOpacity>
-              )
-            )}
+              );
+            })}
           </View>
         ))}
       </GlassCard>

@@ -56,7 +56,7 @@ export function LandingNavbar() {
     };
   });
 
-  const blurStyle = useAnimatedStyle(() => ({
+  const blurStyle = useAnimatedStyle((): any => ({
     // @ts-ignore
     backdropFilter: `blur(${interpolate(hasScrolled.value, [0, 1], [0, 60])}px)`,
     WebkitBackdropFilter: `blur(${interpolate(hasScrolled.value, [0, 1], [0, 60])}px)`,

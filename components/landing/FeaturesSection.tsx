@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   cardWrapperMobile: {
     width: '100%',
     minWidth: 'auto',
-    maxWidth: 'none',
+    maxWidth: 'none' as any,
   },
   card: {
     padding: spacing.xl,

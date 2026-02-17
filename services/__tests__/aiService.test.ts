@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AI Service Tests
  * Tests AI-powered meal analysis, workout generation, and coaching

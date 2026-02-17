@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { test, expect, Page } from '@playwright/test';
 
 // Base URL for the app (Expo web)

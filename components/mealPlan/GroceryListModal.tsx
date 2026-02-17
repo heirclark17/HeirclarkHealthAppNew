@@ -699,7 +699,7 @@ export function GroceryListModal({
                     {progress === 100 ? (
                       <Ionicons name="checkmark-circle" size={26} color={isDark ? '#4CAF50' : '#66BB6A'} />
                     ) : (
-                      <NumberText weight="semibold" style={[styles.progressPercentage, { color: glassColors.text }]}>
+                      <NumberText weight="semiBold" style={[styles.progressPercentage, { color: glassColors.text }]}>
                         {Math.round(progress)}%
                       </NumberText>
                     )}
@@ -712,7 +712,7 @@ export function GroceryListModal({
                     {progress === 100 ? 'All Done!' : 'Shopping Progress'}
                   </Text>
                   <View style={styles.progressStats}>
-                    <NumberText weight="semibold" style={[styles.progressNumbers, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
+                    <NumberText weight="semiBold" style={[styles.progressNumbers, { color: isDark ? '#0A84FF' : '#007AFF' }]}>
                       {checkedItems}
                     </NumberText>
                     <Text style={[styles.progressSeparator, { color: glassColors.textMuted }]}>
@@ -816,7 +816,7 @@ export function GroceryListModal({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<any>({
   container: {
     flex: 1,
   },

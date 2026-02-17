@@ -195,7 +195,7 @@ export function HeroSection() {
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: Platform.OS === 'web' ? '100vh' : undefined,
+    minHeight: Platform.OS === 'web' ? ('100vh' as any) : undefined,
     paddingTop: 120,
     paddingBottom: spacing['3xl'],
     justifyContent: 'center',

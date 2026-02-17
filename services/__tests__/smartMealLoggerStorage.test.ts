@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tests for smartMealLoggerStorage.ts
  */

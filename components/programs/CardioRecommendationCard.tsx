@@ -24,7 +24,8 @@ import { Activity, TrendingDown, CheckCircle, AlertCircle } from 'lucide-react-n
 
 export function CardioRecommendationCard() {
   const { recommendation, isLoading, completedToday, markCardioComplete } = useCardioRecommendation();
-  const { isDark } = useSettings();
+  const { settings } = useSettings();
+  const isDark = settings.themeMode === 'dark';
   const colors = isDark ? DarkColors : LightColors;
 
   // ===== LOADING STATE =====
@@ -82,7 +83,7 @@ export function CardioRecommendationCard() {
     return (
       <GlassCard style={styles.card}>
         <View style={styles.header}>
-          <Activity size={24} color={colors.info} />
+          <Activity size={24} color={colors.primary} />
           <Text style={[styles.title, { color: colors.text }]}>Cardio Recommendation</Text>
         </View>
         <Text style={[styles.message, { color: colors.textSecondary }]}>

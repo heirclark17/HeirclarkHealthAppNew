@@ -305,7 +305,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
       );
       if (details) {
         console.log('[MealCard] AI recipe generated:', details.ingredients?.length, 'ingredients');
-        setRecipeDetails(details);
+        setRecipeDetails({ ...details, ingredients: (details.ingredients || []).map((i: any) => ({ name: i.name, amount: String(i.quantity ?? i.amount ?? ""), unit: i.unit, quantity: i.quantity })) });
         hasFetchedRef.current = true;
       } else {
         console.log('[MealCard] No recipe details returned from AI');

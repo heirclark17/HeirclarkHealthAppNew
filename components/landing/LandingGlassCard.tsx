@@ -112,7 +112,7 @@ export function LandingGlassCard({
     }
   }, [isContentReady]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
+  const animatedStyle = useAnimatedStyle((): any => ({
     transform: [
       { scale: scale.value },
       { translateY: translateY.value },

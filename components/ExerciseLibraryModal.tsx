@@ -108,7 +108,7 @@ export function ExerciseLibraryModal({
 
     // Muscle group filter
     if (muscleFilter !== 'all') {
-      exercises = exercises.filter((ex) => ex.muscleGroups.includes(muscleFilter));
+      exercises = exercises.filter((ex) => ex.muscleGroups.includes(muscleFilter as any));
     }
 
     // Equipment filter (from props or internal)

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Fonts, Spacing } from '../constants/Theme';
-import { CameraView, BarcodeScanningResult } from 'expo-camera';
+import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import type { CameraType } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -92,7 +92,7 @@ export function MealLoggingModal({
   };
 
   const requestPermissions = async () => {
-    const { status: cameraStatus } = await CameraView.requestCameraPermissionsAsync();
+    const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
     setHasCameraPerm(cameraStatus === 'granted');
   };
 
@@ -129,7 +129,7 @@ export function MealLoggingModal({
     onClose();
   };
 
-  const handleBarcodeScanned = async ({ data }: BarCodeScanningResult) => {
+  const handleBarcodeScanned = async ({ data }: BarcodeScanningResult) => {
     if (scannedBarcode === data || barcodeLoading) return;
 
     setScannedBarcode(data);
@@ -471,12 +471,12 @@ export function MealLoggingModal({
                 </View>
               ) : (
                 <View style={styles.scannerContainer}>
-                  <Camera
+                  <CameraView
                     style={StyleSheet.absoluteFillObject}
-                    barCodeScannerSettings={{
-                      barCodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39'],
+                    barcodeScannerSettings={{
+                      barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39'],
                     }}
-                    onBarCodeScanned={scannedBarcode ? undefined : handleBarcodeScanned}
+                    onBarcodeScanned={scannedBarcode ? undefined : handleBarcodeScanned}
                   />
                   <View style={styles.scannerOverlay}>
                     <View style={styles.scannerFrame} />

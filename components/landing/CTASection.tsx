@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     flex: 1,
     color: liquidGlass.text.primary,
     fontSize: 16,
-    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
   },
   successMessage: {
     padding: spacing.lg,

@@ -352,7 +352,7 @@ export const adaptiveTDEEStorage = {
     const completeDays = calorieHistory.filter((log) => log.isComplete).length;
 
     // Calculate data span
-    const allDates: string[] = [...Array.from(weightDates), ...Array.from(calorieDates)].sort();
+    const allDates: string[] = [...Array.from(weightDates) as string[], ...Array.from(calorieDates) as string[]].sort();
     const oldestDate: string | null = allDates.length > 0 ? allDates[0] : null;
     const dataSpanDays = oldestDate
       ? Math.ceil(
