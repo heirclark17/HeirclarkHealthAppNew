@@ -342,6 +342,7 @@ export default function MealsScreen() {
         ingredients: meal.ingredients || [],
         instructions: meal.instructions || [],
         tags: [],
+        servings: 1,
       };
 
       const savedMeal = await aiService.saveMeal(aiMeal, 'ai');
@@ -767,7 +768,7 @@ export default function MealsScreen() {
         onOrderInstacart={handleOrderInstacart}
         isLoading={isGeneratingGroceryList}
         onGenerateList={weeklyPlan ? generateGroceryListOnDemand : undefined}
-        progress={groceryListProgress}
+        batchProgress={groceryListProgress}
       />
 
       {/* AI Coach Chat Modal with LiveAvatar */}

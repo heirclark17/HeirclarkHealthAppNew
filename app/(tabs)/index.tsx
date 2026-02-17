@@ -602,7 +602,7 @@ export default function DashboardScreen() {
           });
 
           // Initialize with zeros
-          let historyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+          let historyTotals = { calories: 0, protein: 0, carbs: 0, fat: 0, fatLoss: 0 };
 
           if (history && history.length > 0) {
             const sunday = new Date(now);
@@ -1048,7 +1048,7 @@ export default function DashboardScreen() {
             key={cardId}
             activeOpacity={0.7}
             onPress={() => setShowDailyBalanceInfoModal(true)}
-            accessibilityLabel={`Daily balance: ${Math.round(caloriesIn)} calories in, ${Math.round(caloriesOut)} calories out, ${isDeficit ? 'deficit' : 'surplus'} of ${Math.abs(displayFatValue)} pounds per day`}
+            accessibilityLabel={`Daily balance: ${Math.round(caloriesIn)} calories in, ${Math.round(caloriesOut)} calories out, ${isDeficit ? 'deficit' : 'surplus'} of ${displayFatValue} pounds per day`}
             accessibilityRole="button"
             accessibilityHint="Opens detailed daily balance modal with calorie breakdown and fat change analysis"
           >
@@ -1325,7 +1325,7 @@ export default function DashboardScreen() {
           {!isAuthenticated && !authLoading && isAppleSignInAvailable && (
             <TouchableOpacity
               onPress={signInWithApple}
-              style={[styles.signInButton, { backgroundColor: colors.cardGlass }]}
+              style={[styles.signInButton, { backgroundColor: colors.card }]}
               accessibilityLabel="Sign in with Apple"
               accessibilityRole="button"
             >

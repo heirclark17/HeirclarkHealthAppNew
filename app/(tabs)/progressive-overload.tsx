@@ -207,7 +207,7 @@ export default function ProgressiveOverloadPage() {
   // Program-aware context
   const currentProgramName = trainingState.selectedProgram?.name || null;
   const currentWeekIndex = (trainingState.currentWeekIndex || 0) + 1;
-  const totalWeeks = trainingState.multiWeekPlan?.weeks?.length || 0;
+  const totalWeeks = trainingState.multiWeekPlan?.totalWeeks || trainingState.multiWeekPlan?.weeklyPlans?.length || 0;
 
   // State
   const [currentWeekStart, setCurrentWeekStart] = useState(getCurrentWeekStart());

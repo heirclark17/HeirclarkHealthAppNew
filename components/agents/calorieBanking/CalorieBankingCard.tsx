@@ -173,8 +173,8 @@ export default function CalorieBankingCard({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.titleContainer}>
-              <View style={[styles.iconContainer, { backgroundColor: colors.accentPurple + '20' }]}>
-                <Ionicons name="wallet" size={20} color={colors.accentPurple} />
+              <View style={[styles.iconContainer, { backgroundColor: Colors.accentPurple + '20' }]}>
+                <Ionicons name="wallet" size={20} color={Colors.accentPurple} />
               </View>
               <View>
                 <Text style={[styles.title, { color: textColor }]}>Calorie Bank</Text>

@@ -73,6 +73,9 @@ interface GlassCardProps extends ViewProps {
   tintColor?: string;
   children?: React.ReactNode;
   interactive?: boolean; // iOS 26 Liquid Glass interactive prop
+  variant?: 'standard' | 'elevated' | 'compact' | 'flat'; // Accepted for compatibility with liquidGlass GlassCard
+  borderColor?: string; // Custom border color override
+  material?: string; // Glass material type (for compatibility)
 }
 
 // iOS-specific GlassCard with animations and BlurView
@@ -85,6 +88,9 @@ const IOSGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLayoutSt
   interactive = false,
   isDark,
   contentLayoutStyle,
+  borderColor: customBorderColor,
+  variant: _variant,
+  material: _material,
   ...rest
 }) => {
   const effectiveIntensity = intensity ?? (isDark ? 40 : 35);  // Dark mode needs MORE blur for definition
@@ -139,7 +145,7 @@ const IOSGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLayoutSt
   // BlurView fallback with iOS 26 Liquid Glass styling
   const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
   const blurTintColor = tintColor || glassColors.background;
-  const borderColor = glassColors.border;
+  const borderColor = customBorderColor || glassColors.border;
 
   // Determine if we should use Animated.View or regular View
   const AnimatedViewComponent = Animated !== View ? Animated.View : View;
@@ -203,11 +209,14 @@ const FallbackGlassCard: React.FC<GlassCardProps & { isDark: boolean; contentLay
   style,
   isDark,
   contentLayoutStyle,
+  borderColor: customBorderColor,
+  variant: _variant,
+  material: _material,
   ...rest
 }) => {
   const glassColors = isDark ? GLASS_COLORS.dark : GLASS_COLORS.light;
   const fallbackBg = tintColor || glassColors.background;
-  const fallbackBorder = glassColors.border;
+  const fallbackBorder = customBorderColor || glassColors.border;
 
   return (
     <View

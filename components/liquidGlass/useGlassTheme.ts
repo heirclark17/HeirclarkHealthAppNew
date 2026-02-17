@@ -45,10 +45,20 @@ export interface GlassThemeColors {
   warning: string;
   danger: string;  // Added missing property (alias for error)
 
+  // Accent & variant colors (from Theme.ts)
+  warningOrange: string;
+  accentCyan: string;
+  accentPurple: string;
+  accentGold: string;
+  border: string;
+
   // Glass-specific properties
   cardGlass: string;  // Added missing property
   glassBorder: string;  // Added missing property
   surface: string;  // Added missing property
+
+  // Macro colors
+  fat: string;
 }
 
 export interface GlassTheme {
@@ -110,10 +120,20 @@ export function useGlassTheme(): GlassTheme {
       warning: colorSystem.semantic.warning,
       danger: colorSystem.semantic.error,  // Alias for error
 
+      // Accent & variant colors
+      warningOrange: isDark ? '#CD8B4A' : '#FB923C',
+      accentCyan: isDark ? '#5B9E9E' : '#00D9F5',
+      accentPurple: isDark ? '#8B7399' : '#7B61FF',
+      accentGold: isDark ? '#C9A227' : '#FFD700',
+      border: colorSystem.glass.border,
+
       // Glass-specific properties
-      cardGlass: colorSystem.glass.card,  // Added missing property
-      glassBorder: colorSystem.glass.border,  // Added missing property
-      surface: colorSystem.background,  // Added missing property (same as background)
+      cardGlass: colorSystem.glass.background,
+      glassBorder: colorSystem.glass.border,
+      surface: colorSystem.background,
+
+      // Macro colors
+      fat: colorSystem.semantic.fat,
     };
 
     return {

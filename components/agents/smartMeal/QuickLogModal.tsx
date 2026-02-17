@@ -34,10 +34,10 @@ const MealTypeIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 const MealTypeColors: Record<string, string> = {
-  breakfast: colors.warningOrange,
-  lunch: colors.accentCyan,
-  dinner: colors.accentPurple,
-  snack: colors.success,
+  breakfast: Colors.warningOrange,
+  lunch: Colors.accentCyan,
+  dinner: Colors.accentPurple,
+  snack: Colors.successStrong,
 };
 
 export default function QuickLogModal({

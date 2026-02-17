@@ -60,7 +60,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
   const progressWidth = useSharedValue(0);
 
   // Get unit from settings (default to lb)
-  const weightUnit = settings.weightUnit || 'lb';
+  const weightUnit = settings.unitSystem === 'metric' ? 'kg' : 'lb';
 
   // Text colors for theme
   const textColor = isDark ? Colors.text : Colors.card;
@@ -151,13 +151,16 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
     }
   };
 
+  // Helper to get weight in desired unit
+  const getWeightInUnit = (log: BodyWeightLog, unit: string): number => {
+    if (log.unit === unit) return log.weight;
+    // Convert between units
+    return unit === 'kg' ? log.weight / 2.20462 : log.weight * 2.20462;
+  };
+
   // Format weight display
   const formatWeight = (log: BodyWeightLog) => {
-    const displayWeight = weightUnit === log.unit
-      ? log.weight
-      : weightUnit === 'kg'
-        ? log.weightKg
-        : log.weightLbs;
+    const displayWeight = getWeightInUnit(log, weightUnit);
     return `${displayWeight.toFixed(1)} ${weightUnit}`;
   };
 
@@ -167,9 +170,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
 
     const current = recentWeights[0];
     const previous = recentWeights[1];
-    const change = current.weightLbs - previous.weightLbs;
-    const changeKg = current.weightKg - previous.weightKg;
-    const displayChange = weightUnit === 'kg' ? changeKg : change;
+    const displayChange = getWeightInUnit(current, weightUnit) - getWeightInUnit(previous, weightUnit);
 
     if (Math.abs(displayChange) < 0.1) {
       return { icon: 'remove-outline' as const, color: Colors.restingEnergy, text: 'Stable' };
@@ -186,7 +187,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
   const getMiniChartData = () => {
     if (recentWeights.length === 0) return [];
 
-    const weights = recentWeights.map(w => weightUnit === 'kg' ? w.weightKg : w.weightLbs);
+    const weights = recentWeights.map(w => getWeightInUnit(w, weightUnit));
     const min = Math.min(...weights);
     const max = Math.max(...weights);
     const range = max - min || 1;
@@ -397,7 +398,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
                       style={[styles.adjustButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}
                       onPress={() => {
                         const current = parseFloat(weightInput) || (latestWeight ?
-                          (weightUnit === 'kg' ? latestWeight.weightKg : latestWeight.weightLbs) : 150);
+                          getWeightInUnit(latestWeight, weightUnit) : 150);
                         setWeightInput((current + delta).toFixed(1));
                       }}
                       accessibilityLabel={`${delta > 0 ? 'Add' : 'Subtract'} ${Math.abs(delta)} ${weightUnit}`}
