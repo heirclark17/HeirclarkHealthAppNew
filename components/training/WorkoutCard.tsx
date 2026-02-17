@@ -6,6 +6,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeftRight } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { Workout, WorkoutExercise, WeightLog } from '../../types/training';
@@ -271,7 +272,7 @@ function ExerciseRow({
         accessibilityRole="button"
         accessibilityHint="Replaces this exercise with a different one targeting the same muscle groups"
       >
-        <Ionicons name="swap-horizontal" size={18} color={colors.textMuted} />
+        <ArrowLeftRight size={16} color={colors.textMuted} strokeWidth={1.5} />
       </TouchableOpacity>
     </View>
   );
