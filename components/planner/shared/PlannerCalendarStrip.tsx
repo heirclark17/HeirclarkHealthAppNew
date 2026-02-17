@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   dayName: {
     fontSize: 11,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
   },
   dayNumber: {
