@@ -13,6 +13,7 @@ import {
   FlatList,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,7 +32,7 @@ import ExerciseOverloadCard from '../../components/training/ExerciseOverloadCard
 import MuscleVolumeChart from '../../components/training/MuscleVolumeChart';
 import WeeklyAnalysisModal from '../../components/training/WeeklyAnalysisModal';
 import PlateauBreakerModal from '../../components/training/PlateauBreakerModal';
-import WorkoutLoggerModal from '../../components/training/WorkoutLoggerModal';
+import { useTraining } from '../../contexts/TrainingContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DarkColors, LightColors, Fonts } from '../../constants/Theme';
 import { weightTrackingStorage } from '../../services/weightTrackingStorage';
@@ -193,13 +194,20 @@ function TrendLineChart({ data, color, height = 140, isDark }: TrendChartProps) 
 // ============================================================================
 export default function ProgressiveOverloadPage() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { settings } = useSettings();
+  const { state: trainingState } = useTraining();
 
   // Dynamic theme colors
   const colors = useMemo(() => {
     return settings.themeMode === 'light' ? LightColors : DarkColors;
   }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
+
+  // Program-aware context
+  const currentProgramName = trainingState.selectedProgram?.name || null;
+  const currentWeekIndex = (trainingState.currentWeekIndex || 0) + 1;
+  const totalWeeks = trainingState.multiWeekPlan?.weeks?.length || 0;
 
   // State
   const [currentWeekStart, setCurrentWeekStart] = useState(getCurrentWeekStart());
@@ -215,14 +223,11 @@ export default function ProgressiveOverloadPage() {
   // Modal states
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [showPlateauModal, setShowPlateauModal] = useState(false);
-  const [showLoggerModal, setShowLoggerModal] = useState(false);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
   const [isPlateauLoading, setIsPlateauLoading] = useState(false);
   const [plateauExercise, setPlateauExercise] = useState('');
   const [plateauDiagnosis, setPlateauDiagnosis] = useState('');
   const [plateauStrategies, setPlateauStrategies] = useState<any[]>([]);
-  const [loggerExerciseId, setLoggerExerciseId] = useState('');
-  const [loggerExerciseName, setLoggerExerciseName] = useState('');
 
   // Load data
   const loadData = useCallback(async () => {
@@ -366,12 +371,10 @@ export default function ProgressiveOverloadPage() {
     }
   };
 
-  // Log workout
-  const handleLogWorkout = (exerciseId: string, exerciseName: string) => {
+  // Navigate to programs page to log workout
+  const handleGoToPrograms = () => {
     lightImpact();
-    setLoggerExerciseId(exerciseId);
-    setLoggerExerciseName(exerciseName);
-    setShowLoggerModal(true);
+    router.push('/(tabs)/programs');
   };
 
   // Trend chart data (first compound exercise or most logged)
@@ -410,6 +413,27 @@ export default function ProgressiveOverloadPage() {
       >
         {/* Page Title */}
         <Text style={[styles.pageTitle, { color: colors.text }]}>Progressive Overload</Text>
+
+        {/* Program Context Banner */}
+        {currentProgramName && totalWeeks > 0 && (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={handleGoToPrograms}
+            style={styles.programBanner}
+          >
+            <GlassCard style={styles.programBannerCard}>
+              <View style={styles.programBannerRow}>
+                <Dumbbell size={14} color={colors.primary} />
+                <Text style={[styles.programBannerText, { color: colors.text }]}>
+                  Week {currentWeekIndex} of {totalWeeks}
+                </Text>
+                <Text style={[styles.programBannerName, { color: colors.textMuted }]}>
+                  {currentProgramName}
+                </Text>
+              </View>
+            </GlassCard>
+          </TouchableOpacity>
+        )}
 
         {/* ============================================================ */}
         {/* SECTION 1: Weekly Dashboard Hero */}
@@ -508,13 +532,13 @@ export default function ProgressiveOverloadPage() {
               trendData={
                 trendDataMap[entry.exerciseId]?.dataPoints || []
               }
-              onViewHistory={() => handleLogWorkout(entry.exerciseId, entry.exerciseName)}
+              onViewHistory={() => handleGoToPrograms()}
               onBreakPlateau={
                 entry.overloadStatus === 'stalling' || entry.overloadStatus === 'regressing'
                   ? () => handleBreakPlateau(entry.exerciseName, entry.exerciseId)
                   : undefined
               }
-              onGetAIPlan={() => handleLogWorkout(entry.exerciseId, entry.exerciseName)}
+              onGetAIPlan={() => handleGoToPrograms()}
             />
           ))
         )}
@@ -579,15 +603,13 @@ export default function ProgressiveOverloadPage() {
         )}
 
         {/* ============================================================ */}
-        {/* Floating Log Workout Button (inline) */}
+        {/* Go to Programs Button */}
         {/* ============================================================ */}
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => {
             mediumImpact();
-            // Open logger with first exercise or empty
-            const first = exerciseEntries[0];
-            handleLogWorkout(first?.exerciseId || '', first?.exerciseName || 'New Exercise');
+            handleGoToPrograms();
           }}
         >
           <GlassCard
@@ -597,6 +619,7 @@ export default function ProgressiveOverloadPage() {
             ]}
             interactive
           >
+            <Dumbbell size={16} color={colors.primary} />
             <Text style={[styles.logButtonText, { color: colors.primary }]}>LOG WORKOUT</Text>
           </GlassCard>
         </TouchableOpacity>
@@ -619,17 +642,6 @@ export default function ProgressiveOverloadPage() {
         diagnosis={plateauDiagnosis}
         strategies={plateauStrategies}
         isLoading={isPlateauLoading}
-      />
-
-      <WorkoutLoggerModal
-        visible={showLoggerModal}
-        onClose={() => setShowLoggerModal(false)}
-        exerciseId={loggerExerciseId}
-        exerciseName={loggerExerciseName}
-        onSave={() => {
-          setShowLoggerModal(false);
-          loadData();
-        }}
       />
     </SafeAreaView>
   );
@@ -658,6 +670,29 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0.5,
     marginBottom: 16,
+  },
+
+  // Program banner
+  programBanner: {
+    marginBottom: 12,
+  },
+  programBannerCard: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  programBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  programBannerText: {
+    fontSize: 14,
+    fontFamily: Fonts.numericSemiBold,
+  },
+  programBannerName: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    flex: 1,
   },
 
   // Hero Card

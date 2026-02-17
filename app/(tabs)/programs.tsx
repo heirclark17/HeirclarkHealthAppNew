@@ -602,6 +602,7 @@ export default function ProgramsScreen() {
                   onShowAlternatives={handleShowAlternatives}
                   onLogWeight={handleLogWeight}
                   onViewForm={handleViewForm}
+                  onViewProgress={() => router.push('/(tabs)/progressive-overload')}
                   onSwitchEquipment={currentDay && !currentDay.isRestDay ? handleSwitchEquipment : undefined}
                   currentEquipmentLabel={currentEquipment ? (EQUIPMENT_LABELS[currentEquipment] || currentEquipment) : null}
                   availableEquipment={availableEquipmentOptions}

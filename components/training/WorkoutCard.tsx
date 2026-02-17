@@ -27,6 +27,7 @@ interface WorkoutCardProps {
   onShowAlternatives?: (exercise: WorkoutExercise) => void;
   onLogWeight?: (exercise: WorkoutExercise) => void;
   onViewForm?: (exercise: WorkoutExercise) => void;
+  onViewProgress?: () => void;
   onSwitchEquipment?: (equipmentKey: string) => void;
   currentEquipmentLabel?: string | null;
   availableEquipment?: { key: string; label: string }[];
@@ -292,6 +293,7 @@ export function WorkoutCard({
   onShowAlternatives,
   onLogWeight,
   onViewForm,
+  onViewProgress,
   onSwitchEquipment,
   currentEquipmentLabel,
   availableEquipment,
@@ -514,6 +516,25 @@ export function WorkoutCard({
               />
             ))}
           </View>
+
+          {/* View Progress Button */}
+          {onViewProgress && (
+            <TouchableOpacity
+              onPress={() => {
+                lightImpact();
+                onViewProgress();
+              }}
+              activeOpacity={0.7}
+              style={styles.viewProgressWrapper}
+            >
+              <GlassCard style={styles.viewProgressButton} interactive>
+                <Ionicons name="analytics-outline" size={18} color={colors.textSecondary} />
+                <Text style={[styles.viewProgressText, { color: colors.textSecondary }]}>
+                  VIEW PROGRESS
+                </Text>
+              </GlassCard>
+            </TouchableOpacity>
+          )}
 
           {/* Complete Workout Button - Frosted Glass */}
           <TouchableOpacity
@@ -836,6 +857,22 @@ const styles = StyleSheet.create({
   equipmentChipText: {
     fontSize: 13,
     fontFamily: Fonts.numericRegular,
+  },
+  viewProgressWrapper: {
+    marginTop: 4,
+  },
+  viewProgressButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    gap: 8,
+  },
+  viewProgressText: {
+    fontSize: 12,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as any,
+    letterSpacing: 1,
   },
   completeButtonWrapper: {
     marginTop: 8,

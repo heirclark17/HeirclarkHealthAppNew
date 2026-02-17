@@ -101,6 +101,71 @@ export const weightTrackingStorage = {
     }
   },
 
+  // Sync ALL weight logs from backend into local storage
+  async syncWeightLogsFromBackend(): Promise<void> {
+    try {
+      console.log('[WeightTracking] 🔄 Syncing weight logs from backend...');
+      const backendLogs = await api.getWeightLogs();
+
+      if (!backendLogs || backendLogs.length === 0) {
+        console.log('[WeightTracking] No backend weight logs to sync');
+        return;
+      }
+
+      const localLogs = await this.getAllWeightLogs();
+      const localKeys = new Set(
+        localLogs.map(l => `${l.exerciseName}|${l.date.split('T')[0]}`)
+      );
+
+      let newCount = 0;
+      for (const bLog of backendLogs) {
+        const key = `${bLog.exerciseName}|${bLog.date.split('T')[0]}`;
+        if (!localKeys.has(key)) {
+          // Backend has a log we don't have locally - add it
+          const sets = (bLog.sets || []).map((s: any) => ({
+            setNumber: s.setNumber || 1,
+            weight: s.weight || 0,
+            unit: (s.unit || 'lb') as 'lb' | 'kg',
+            reps: s.reps || 0,
+            isWarmup: false,
+          }));
+
+          const totalVolume = sets.reduce((sum: number, s: any) => sum + s.weight * s.reps, 0);
+          const maxWeight = sets.length > 0 ? Math.max(...sets.map((s: any) => s.weight)) : 0;
+          const averageWeight = sets.length > 0
+            ? Math.round(sets.reduce((sum: number, s: any) => sum + s.weight, 0) / sets.length * 10) / 10
+            : 0;
+
+          const newLog: WeightLog = {
+            id: generateUUID(),
+            exerciseId: `backend-sync-${bLog.exerciseName.toLowerCase().replace(/\s+/g, '-')}`,
+            exerciseName: bLog.exerciseName,
+            date: bLog.date,
+            weekNumber: 0,
+            sets,
+            totalVolume,
+            maxWeight,
+            averageWeight,
+            personalRecord: bLog.personalRecord || false,
+            notes: bLog.notes,
+          };
+
+          localLogs.push(newLog);
+          newCount++;
+        }
+      }
+
+      if (newCount > 0) {
+        await AsyncStorage.setItem(STORAGE_KEYS.WEIGHT_LOGS, JSON.stringify(localLogs));
+        console.log(`[WeightTracking] ✅ Synced ${newCount} new weight logs from backend`);
+      } else {
+        console.log('[WeightTracking] Local storage already up to date');
+      }
+    } catch (error) {
+      console.error('[WeightTracking] Error syncing weight logs from backend:', error);
+    }
+  },
+
   // Sync PRs from backend and merge with local data
   async syncPersonalRecordsFromBackend(): Promise<void> {
     try {

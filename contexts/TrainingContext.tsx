@@ -1802,7 +1802,12 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadCachedPlan();
 
-    // Sync personal records from backend (in case user logged weights on another device)
+    // Sync ALL weight logs from backend (in case user logged weights on another device)
+    weightTrackingStorage.syncWeightLogsFromBackend().catch(err => {
+      console.log('[Training] Weight log sync from backend failed (non-critical):', err);
+    });
+
+    // Sync personal records from backend
     weightTrackingStorage.syncPersonalRecordsFromBackend().catch(err => {
       console.log('[Training] PR sync from backend failed (non-critical):', err);
     });
