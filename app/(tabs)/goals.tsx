@@ -59,7 +59,7 @@ function GoalWizardContent() {
   const router = useRouter();
   const { state, nextStep, prevStep, loadSavedProgress, resetWizard, startEditing, setSelectedProgram } = useGoalWizard();
   const { generateAIMealPlan, state: mealPlanState } = useMealPlan();
-  const { generateAIWorkoutPlan, state: trainingState, selectProgram, getEnhancedPrograms } = useTraining();
+  const { generateAIWorkoutPlan, state: trainingState, selectProgram, selectProgramAndGenerate, getEnhancedPrograms } = useTraining();
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showCoachingModal, setShowCoachingModal] = useState(false);
