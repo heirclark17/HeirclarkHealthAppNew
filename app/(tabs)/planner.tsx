@@ -29,10 +29,14 @@ function formatDateStr(date: Date): string {
 export default function PlannerScreen() {
   const { state, actions } = useDayPlanner();
   const { settings } = useSettings();
-  const isDark = settings.themeMode === 'dark';
-  const themeColors = isDark ? DarkColors : LightColors;
-  const [viewMode, setViewMode] = useState<'daily' | 'monthly'>('daily');
   const insets = useSafeAreaInsets();
+
+  // Dynamic theme colors
+  const themeColors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
+  const isDark = settings.themeMode === 'dark';
+  const [viewMode, setViewMode] = useState<'daily' | 'monthly'>('daily');
 
   // Derive selected date from weekly plan + selectedDayIndex
   const selectedDate = useMemo(() => {

@@ -1,7 +1,7 @@
 // Progressive Overload Tracking Page
 // AI-powered strength progression tracking, weekly analysis, and plateau detection
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -194,8 +194,12 @@ function TrendLineChart({ data, color, height = 140, isDark }: TrendChartProps) 
 export default function ProgressiveOverloadPage() {
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
+
+  // Dynamic theme colors
+  const colors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : LightColors;
 
   // State
   const [currentWeekStart, setCurrentWeekStart] = useState(getCurrentWeekStart());

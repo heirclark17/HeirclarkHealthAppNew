@@ -86,8 +86,12 @@ const DIFFICULTY_LEVELS: { key: DifficultyFilter; label: string }[] = [
 
 export default function ExercisesScreen() {
   const { settings } = useSettings();
+
+  // Dynamic theme colors
+  const colors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
-  const colors = isDark ? DarkColors : LightColors;
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
