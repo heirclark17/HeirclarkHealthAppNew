@@ -6,7 +6,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { ArrowLeftRight } from 'lucide-react-native';
+import { ArrowLeftRight, Settings } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { Workout, WorkoutExercise, WeightLog } from '../../types/training';
@@ -27,6 +27,8 @@ interface WorkoutCardProps {
   onShowAlternatives?: (exercise: WorkoutExercise) => void;
   onLogWeight?: (exercise: WorkoutExercise) => void;
   onViewForm?: (exercise: WorkoutExercise) => void;
+  onSwitchEquipment?: () => void;
+  currentEquipmentLabel?: string | null;
 }
 
 function ExerciseGifThumbnail({
@@ -289,6 +291,8 @@ export function WorkoutCard({
   onShowAlternatives,
   onLogWeight,
   onViewForm,
+  onSwitchEquipment,
+  currentEquipmentLabel,
 }: WorkoutCardProps) {
   const { settings } = useSettings();
   const [lastWeights, setLastWeights] = useState<Record<string, { weight: number; unit: string } | null>>({});
@@ -445,6 +449,25 @@ export function WorkoutCard({
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exercises</Text>
             </GlassCard>
           </View>
+
+          {/* Switch Equipment Card */}
+          {onSwitchEquipment && (
+            <TouchableOpacity
+              onPress={() => {
+                lightImpact();
+                onSwitchEquipment();
+              }}
+              activeOpacity={0.7}
+              style={styles.equipmentCardWrapper}
+            >
+              <GlassCard style={styles.equipmentCard} interactive>
+                <Settings size={16} color={colors.textMuted} />
+                <Text style={[styles.equipmentCardText, { color: colors.textMuted }]}>
+                  {currentEquipmentLabel ? `Equipment: ${currentEquipmentLabel}` : 'Switch Equipment'}
+                </Text>
+              </GlassCard>
+            </TouchableOpacity>
+          )}
 
           {/* Exercise List */}
           <View style={styles.exerciseListInline}>
@@ -759,6 +782,21 @@ const styles = StyleSheet.create({
   swapText: {
     fontSize: 12,
     fontFamily: Fonts.numericMedium,
+  },
+  equipmentCardWrapper: {
+    marginBottom: 16,
+  },
+  equipmentCard: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+  },
+  equipmentCardText: {
+    fontSize: 13,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as any,
+    letterSpacing: 0.5,
   },
   completeButtonWrapper: {
     marginTop: 8,
