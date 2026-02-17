@@ -112,7 +112,7 @@ function ExerciseRow({
   const hasGif = !!exercise.exercise.gifUrl;
 
   return (
-    <View style={[styles.exerciseRow, { backgroundColor: exerciseBg, borderColor, borderWidth: 1 }]}>
+    <View style={[styles.exerciseRow, { backgroundColor: exerciseBg }]}>
       {/* GIF Thumbnail - shows animated form demo */}
       {hasGif && onViewForm ? (
         <ExerciseGifThumbnail
@@ -397,22 +397,24 @@ export function WorkoutCard({
           </View>
 
           {/* Workout Stats */}
-          <View style={[styles.statsRowInline, { backgroundColor: secondaryBg }]}>
+          <BlurView
+            intensity={isDark ? 25 : 40}
+            tint={isDark ? 'dark' : 'light'}
+            style={styles.statsRowInline}
+          >
             <View style={styles.statItem}>
               <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.duration}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Minutes</Text>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
             <View style={styles.statItem}>
               <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.estimatedCaloriesBurned}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Calories</Text>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
             <View style={styles.statItem}>
               <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{totalExercises}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exercises</Text>
             </View>
-          </View>
+          </BlurView>
 
           {/* Exercise List */}
           <View style={styles.exerciseListInline}>
@@ -436,7 +438,7 @@ export function WorkoutCard({
 
           {/* Complete Workout Button */}
           <TouchableOpacity
-            style={[styles.completeButtonInline, { backgroundColor: colors.primary }, workout.completed && [styles.completeButtonDone, { backgroundColor: cardBg, borderColor }]]}
+            style={[styles.completeButtonInline, { backgroundColor: colors.primary }, workout.completed && [styles.completeButtonDone, { backgroundColor: cardBg }]]}
             onPress={() => {
               mediumImpact();
               onMarkComplete();
@@ -555,6 +557,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 12,
     marginBottom: 16,
+    overflow: 'hidden',
   },
   statItem: {
     alignItems: 'center',
@@ -570,10 +573,6 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     fontFamily: Fonts.regular,
     marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: Colors.border,
   },
   exerciseListInline: {
     marginBottom: 16,
@@ -703,8 +702,6 @@ const styles = StyleSheet.create({
   },
   completeButtonDone: {
     backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
   completeButtonText: {
     fontSize: 16,
