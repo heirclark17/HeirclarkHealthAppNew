@@ -121,20 +121,38 @@ export function DailyTimelineView() {
     const eatEnd = parseTime(goalWizardState.fastingEnd || '20:00');
     const wakeHour = parseTime(wakeTime);
     const PX_PER_HOUR = 60;
+    const TIMELINE_MAX = 1440; // 24 hours * 60px - timeline boundary
 
     // Calculate positions relative to wake time (timeline position 0 = wake time)
     // Morning fasting: from midnight to eating window start
-    let morningStart = (24 - wakeHour); // Hours from wake time to midnight
-    const morningHeight = eatStart * PX_PER_HOUR;
+    let morningStart = (24 - wakeHour) * PX_PER_HOUR; // Position from wake time to midnight
+    let morningHeight = eatStart * PX_PER_HOUR;
+
+    // Clamp morning zone to timeline bounds
+    if (morningStart >= TIMELINE_MAX) {
+      morningStart = 0;
+      morningHeight = 0;
+    } else if (morningStart + morningHeight > TIMELINE_MAX) {
+      morningHeight = TIMELINE_MAX - morningStart;
+    }
 
     // Evening fasting: from eating window end to midnight
     let eveningStart = eatEnd - wakeHour;
     if (eveningStart < 0) eveningStart += 24; // Wrap around
-    const eveningHeight = (24 - eatEnd) * PX_PER_HOUR;
+    eveningStart = eveningStart * PX_PER_HOUR;
+    let eveningHeight = (24 - eatEnd) * PX_PER_HOUR;
+
+    // Clamp evening zone to timeline bounds
+    if (eveningStart >= TIMELINE_MAX) {
+      eveningStart = 0;
+      eveningHeight = 0;
+    } else if (eveningStart + eveningHeight > TIMELINE_MAX) {
+      eveningHeight = TIMELINE_MAX - eveningStart;
+    }
 
     return {
-      morning: { top: morningStart * PX_PER_HOUR, height: morningHeight },
-      evening: { top: eveningStart * PX_PER_HOUR, height: eveningHeight },
+      morning: { top: morningStart, height: morningHeight },
+      evening: { top: eveningStart, height: eveningHeight },
     };
   }, [goalWizardState?.intermittentFasting, goalWizardState?.fastingStart, goalWizardState?.fastingEnd, state.preferences?.wakeTime, parseTime]);
 
@@ -146,20 +164,38 @@ export function DailyTimelineView() {
     const sleepHour = parseTime(sleepTime);
     const wakeHour = parseTime(wakeTime);
     const PX_PER_HOUR = 60;
+    const TIMELINE_MAX = 1440; // 24 hours * 60px - timeline boundary
 
     // Calculate positions relative to wake time (timeline position 0 = wake time)
     // Evening sleep: from sleepTime to midnight
     let eveningStart = sleepHour - wakeHour;
     if (eveningStart < 0) eveningStart += 24; // Wrap around if sleep time is before wake time
-    const eveningHeight = (24 - sleepHour) * PX_PER_HOUR;
+    eveningStart = eveningStart * PX_PER_HOUR;
+    let eveningHeight = (24 - sleepHour) * PX_PER_HOUR;
+
+    // Clamp evening zone to timeline bounds
+    if (eveningStart >= TIMELINE_MAX) {
+      eveningStart = 0;
+      eveningHeight = 0;
+    } else if (eveningStart + eveningHeight > TIMELINE_MAX) {
+      eveningHeight = TIMELINE_MAX - eveningStart;
+    }
 
     // Morning sleep: from midnight to wakeTime
-    let morningStart = (24 - wakeHour); // Hours from wake time to midnight
-    const morningHeight = wakeHour * PX_PER_HOUR;
+    let morningStart = (24 - wakeHour) * PX_PER_HOUR; // Hours from wake time to midnight
+    let morningHeight = wakeHour * PX_PER_HOUR;
+
+    // Clamp morning zone to timeline bounds
+    if (morningStart >= TIMELINE_MAX) {
+      morningStart = 0;
+      morningHeight = 0;
+    } else if (morningStart + morningHeight > TIMELINE_MAX) {
+      morningHeight = TIMELINE_MAX - morningStart;
+    }
 
     return {
-      evening: { top: eveningStart * PX_PER_HOUR, height: eveningHeight },
-      morning: { top: morningStart * PX_PER_HOUR, height: morningHeight },
+      evening: { top: eveningStart, height: eveningHeight },
+      morning: { top: morningStart, height: morningHeight },
     };
   }, [state.preferences?.sleepTime, state.preferences?.wakeTime, parseTime]);
 
@@ -640,6 +676,7 @@ const styles = StyleSheet.create({
   timeline: {
     position: 'relative',
     minHeight: 1440, // 24 hours * 60px per hour
+    overflow: 'hidden', // Prevent overlays from extending beyond timeline bounds
   },
   emptyContainer: {
     flex: 1,
