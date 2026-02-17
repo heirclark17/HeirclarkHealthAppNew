@@ -791,6 +791,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     gap: 8,
+    borderRadius: 12,
   },
   equipmentCardText: {
     fontSize: 13,
