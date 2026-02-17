@@ -7,6 +7,7 @@ import { trainingStorage } from '../services/trainingStorage';
 import { weightTrackingStorage } from '../services/weightTrackingStorage';
 import { aiService } from '../services/aiService';
 import { api } from '../services/api';
+import { generateMultiWeekProgram } from '../services/programGenerator';
 import {
   WeeklyTrainingPlan,
   TrainingDay,
@@ -23,6 +24,7 @@ import {
   CardioRecommendations,
   DailyCardioRecommendation,
   NutritionGuidance,
+  CompleteTrainingPlan,
 } from '../types/training';
 
 const STORAGE_KEY = 'hc_training_plan_cache';
@@ -219,6 +221,9 @@ interface TrainingState {
   // Separate cardio and nutrition guidance (not mixed with strength training)
   cardioRecommendations: CardioRecommendations | null;
   nutritionGuidance: NutritionGuidance | null;
+  // Multi-week program support
+  multiWeekPlan: CompleteTrainingPlan | null;
+  currentWeekIndex: number;
 }
 
 interface TrainingContextType {
@@ -259,12 +264,27 @@ const initialState: TrainingState = {
   showAlternativesModal: false,
   cardioRecommendations: null,
   nutritionGuidance: null,
+  multiWeekPlan: null,
+  currentWeekIndex: 0,
 };
 
 const TrainingContext = createContext<TrainingContextType | undefined>(undefined);
 
 export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<TrainingState>(initialState);
+
+  // Sync weeklyPlan with current week from multi-week program (backward compatibility)
+  useEffect(() => {
+    if (state.multiWeekPlan && state.multiWeekPlan.weeklyPlans.length > 0) {
+      const weekIndex = Math.min(state.currentWeekIndex, state.multiWeekPlan.weeklyPlans.length - 1);
+      const currentWeek = state.multiWeekPlan.weeklyPlans[weekIndex];
+
+      // Only update if different to avoid infinite loops
+      if (state.weeklyPlan?.id !== currentWeek.id) {
+        setState(prev => ({ ...prev, weeklyPlan: currentWeek }));
+      }
+    }
+  }, [state.multiWeekPlan, state.currentWeekIndex]);
 
   // Get goal wizard context for user preferences
   let goalWizardContext: any = null;
@@ -1078,11 +1098,30 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
   // Navigate weeks
   const goToNextWeek = useCallback(() => {
-    setState(prev => ({ ...prev, currentWeek: prev.currentWeek + 1 }));
+    setState(prev => {
+      const maxWeek = prev.multiWeekPlan?.totalWeeks || prev.currentWeek;
+      const newWeek = Math.min(prev.currentWeek + 1, maxWeek);
+      const newWeekIndex = newWeek - 1; // 0-based index
+
+      return {
+        ...prev,
+        currentWeek: newWeek,
+        currentWeekIndex: newWeekIndex,
+      };
+    });
   }, []);
 
   const goToPreviousWeek = useCallback(() => {
-    setState(prev => ({ ...prev, currentWeek: Math.max(1, prev.currentWeek - 1) }));
+    setState(prev => {
+      const newWeek = Math.max(1, prev.currentWeek - 1);
+      const newWeekIndex = newWeek - 1; // 0-based index
+
+      return {
+        ...prev,
+        currentWeek: newWeek,
+        currentWeekIndex: newWeekIndex,
+      };
+    });
   }, []);
 
   // Swap exercise for a random alternative
