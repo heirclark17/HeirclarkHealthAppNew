@@ -692,8 +692,13 @@ export default function ProgramsScreen() {
           </GlassCard>
         </TouchableOpacity>
 
-        {/* Action Buttons - Continue/Back Pattern */}
-        {weeklyPlan && (
+        {/* Bottom spacing for sticky buttons */}
+        <View style={{ height: weeklyPlan ? 180 : 100 }} />
+      </ScrollView>
+
+      {/* Sticky Action Buttons - positioned outside ScrollView */}
+      {weeklyPlan && (
+        <View style={styles.stickyBottomContainer}>
           <View style={styles.actionRow}>
             <TouchableOpacity
               onPress={handleOpenProgramModal}
@@ -723,10 +728,8 @@ export default function ProgramsScreen() {
               </GlassCard>
             </TouchableOpacity>
           </View>
-        )}
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
+        </View>
+      )}
 
       {/* Floating AI Coach FAB */}
       {weeklyPlan && (
@@ -1096,11 +1099,17 @@ const styles = StyleSheet.create({
   weekButtonDisabled: {
     color: Colors.border,
   },
+  stickyBottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   actionRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
     gap: 12,
-    marginTop: 8,
   },
   actionButtonGlass: {
     flexDirection: 'row',
