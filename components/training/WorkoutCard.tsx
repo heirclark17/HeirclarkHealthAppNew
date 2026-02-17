@@ -563,7 +563,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     color: Colors.text,
-    fontFamily: Fonts.thin,
   },
   statLabel: {
     fontSize: 12,
