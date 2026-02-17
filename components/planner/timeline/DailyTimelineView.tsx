@@ -403,7 +403,7 @@ export function DailyTimelineView() {
             style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.35)',
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : `${themeColors.background}88`,
                 borderRadius: 24,
               },
             ]}
