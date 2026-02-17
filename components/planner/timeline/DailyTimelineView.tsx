@@ -676,7 +676,6 @@ const styles = StyleSheet.create({
   timeline: {
     position: 'relative',
     minHeight: 1440, // 24 hours * 60px per hour
-    overflow: 'hidden', // Prevent overlays from extending beyond timeline bounds
   },
   emptyContainer: {
     flex: 1,
