@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 24,
-    fontFamily: Fonts.numericSemiBold,
+    fontFamily: Fonts.numericRegular,
     textAlign: 'center',
     marginBottom: 4,
   },

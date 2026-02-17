@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 18,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.semiBold,
     textAlign: 'center',
     marginBottom: 4,
   },
