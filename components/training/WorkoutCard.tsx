@@ -272,7 +272,7 @@ function ExerciseRow({
         accessibilityRole="button"
         accessibilityHint="Replaces this exercise with a different one targeting the same muscle groups"
       >
-        <ArrowLeftRight size={16} color={colors.textMuted} strokeWidth={1.5} />
+        <Text style={[styles.swapText, { color: colors.textMuted }]}>Swap</Text>
       </TouchableOpacity>
     </View>
   );
@@ -745,6 +745,10 @@ const styles = StyleSheet.create({
   },
   swapButton: {
     padding: 8,
+  },
+  swapText: {
+    fontSize: 12,
+    fontFamily: Fonts.numericMedium,
   },
   completeButtonInline: {
     flexDirection: 'row',
