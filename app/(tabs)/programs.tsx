@@ -100,6 +100,7 @@ export default function ProgramsScreen() {
     cardioRecommendations,
     nutritionGuidance,
     multiWeekPlan,
+    isSwappingEquipment,
   } = trainingState;
 
   // Goal wizard context - use safe wrapper hook
@@ -372,14 +373,15 @@ export default function ProgramsScreen() {
     showExerciseAlternatives(workoutExercise.exercise);
   }, [showExerciseAlternatives]);
 
-  // Handle switch equipment - accepts specific equipment key
-  const handleSwitchEquipment = useCallback((equipmentKey: string) => {
-    if (!currentDay) return;
+  // Handle switch equipment - AI generates new exercises for target equipment
+  const handleSwitchEquipment = useCallback(async (equipmentKey: string) => {
+    if (!currentDay || isSwappingEquipment) return;
     // Track user's explicit selection so the chip stays highlighted
     setSelectedEquipmentKey(equipmentKey);
-    // Single atomic batch swap in TrainingContext (one state update, one cache write, one API sync)
-    batchSwapDayEquipment(selectedDayIndex, equipmentKey);
-  }, [currentDay, selectedDayIndex, batchSwapDayEquipment]);
+    mediumImpact();
+    // AI-powered equipment swap in TrainingContext (generates new exercises, persists to DB)
+    await batchSwapDayEquipment(selectedDayIndex, equipmentKey);
+  }, [currentDay, selectedDayIndex, batchSwapDayEquipment, isSwappingEquipment]);
 
   // Available equipment options for current day
   const availableEquipmentOptions = useMemo(() => {
@@ -594,6 +596,7 @@ export default function ProgramsScreen() {
                   onSwitchEquipment={currentDay && !currentDay.isRestDay ? handleSwitchEquipment : undefined}
                   currentEquipmentLabel={currentEquipment ? (EQUIPMENT_LABELS[currentEquipment] || currentEquipment) : null}
                   availableEquipment={availableEquipmentOptions}
+                  isSwappingEquipment={isSwappingEquipment}
                 />
               </View>
             )}

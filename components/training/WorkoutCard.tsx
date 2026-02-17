@@ -31,6 +31,7 @@ interface WorkoutCardProps {
   onSwitchEquipment?: (equipmentKey: string) => void;
   currentEquipmentLabel?: string | null;
   availableEquipment?: { key: string; label: string }[];
+  isSwappingEquipment?: boolean;
 }
 
 function ExerciseGifThumbnail({
@@ -297,6 +298,7 @@ export function WorkoutCard({
   onSwitchEquipment,
   currentEquipmentLabel,
   availableEquipment,
+  isSwappingEquipment,
 }: WorkoutCardProps) {
   const { settings } = useSettings();
   const [lastWeights, setLastWeights] = useState<Record<string, { weight: number; unit: string } | null>>({});
@@ -460,6 +462,9 @@ export function WorkoutCard({
               <View style={styles.equipmentCardHeader}>
                 <Dumbbell size={14} color={colors.text} />
                 <Text style={[styles.equipmentCardText, { color: colors.text }]}>Equipment</Text>
+                {isSwappingEquipment && (
+                  <ActivityIndicator size="small" color={colors.primary} style={{ marginLeft: 8 }} />
+                )}
               </View>
               <View style={styles.equipmentChipRow}>
                 {availableEquipment.map((eq) => {
@@ -468,6 +473,7 @@ export function WorkoutCard({
                     <TouchableOpacity
                       key={eq.key}
                       activeOpacity={0.7}
+                      disabled={isSwappingEquipment}
                       onPress={() => {
                         if (!isActive) {
                           lightImpact();
@@ -480,6 +486,7 @@ export function WorkoutCard({
                           backgroundColor: isActive
                             ? (isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)')
                             : (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)'),
+                          opacity: isSwappingEquipment && !isActive ? 0.5 : 1,
                         },
                       ]}
                     >

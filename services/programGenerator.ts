@@ -1135,3 +1135,154 @@ function generateFallbackProgram(
     totalWeeks: weeks,
   };
 }
+
+// ============================================================================
+// AI Equipment Swap - Generate new exercises for a target equipment type
+// ============================================================================
+
+export interface AIEquipmentSwapResult {
+  exercises: WorkoutExercise[];
+  swapCount: number;
+}
+
+/**
+ * Generate AI-powered equipment-specific exercises for a workout day.
+ * Calls GPT-4.1-mini to replace all exercises with versions using the target equipment.
+ * Each exercise maintains the same muscle targets, sets, and rep scheme.
+ */
+export async function generateEquipmentSwapExercises(
+  currentExercises: WorkoutExercise[],
+  targetEquipment: string,
+  weekIndex: number,
+  dayNum: number,
+): Promise<AIEquipmentSwapResult> {
+  const openai = getOpenAI();
+
+  const targetLabel = targetEquipment.replace(/_/g, ' ');
+
+  const exerciseList = currentExercises.map((ex, i) => ({
+    index: i,
+    name: ex.exercise.name,
+    equipment: ex.exercise.equipment,
+    primaryMuscles: ex.exercise.muscleGroups,
+    sets: ex.sets,
+    reps: ex.reps,
+    weight: ex.weight || '',
+  }));
+
+  const prompt = `You are an expert strength coach. Replace the exercises below with the best ${targetLabel} alternatives that target the SAME muscle groups with the same sets and rep scheme.
+
+Current exercises:
+${exerciseList.map(e => `  ${e.index + 1}. ${e.name} (${e.equipment}) - ${e.sets} sets x ${e.reps} - muscles: ${e.primaryMuscles.join(', ')}${e.weight ? ` - weight: ${e.weight}` : ''}`).join('\n')}
+
+Target equipment: ${targetLabel}
+
+Rules:
+- Replace EVERY exercise with a ${targetLabel} version targeting the same muscles
+- If an exercise already uses ${targetLabel}, keep it exactly as-is
+- Use real, well-known exercise names (e.g., "Dumbbell Bench Press", "Barbell Squat")
+- Maintain the same sets and rep scheme for each exercise
+- Provide a specific weight recommendation in lbs (or "bodyweight" if applicable)
+- Include 3 alternatives per exercise using different equipment types
+- For each alternative, specify equipment and difficulty (easier/same/harder)
+
+Return JSON:
+{
+  "exercises": [
+    {
+      "name": "Exercise Name",
+      "equipment": "${targetLabel}",
+      "primaryMuscles": ["chest", "triceps"],
+      "secondaryMuscles": ["shoulders"],
+      "sets": 3,
+      "reps": "8-12",
+      "restSeconds": 90,
+      "weight": "135 lbs",
+      "notes": "Brief form cue",
+      "alternatives": [
+        { "name": "Alt Exercise", "equipment": "barbell", "difficulty": "same", "notes": "brief note" }
+      ]
+    }
+  ]
+}`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: [
+        { role: 'system', content: 'You are a certified strength & conditioning specialist. Respond with valid JSON only. Use real exercise names.' },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 2000,
+      response_format: { type: 'json_object' },
+    });
+
+    const output = response.choices[0].message.content || '{}';
+    const parsed = JSON.parse(output) as { exercises: AIExercise[] };
+
+    if (!parsed.exercises || !Array.isArray(parsed.exercises)) {
+      throw new Error('AI response missing exercises array');
+    }
+
+    console.log(`[ProgramGenerator] AI equipment swap: ${parsed.exercises.length} exercises for ${targetLabel}`);
+
+    // Map AI exercises to WorkoutExercise format
+    const mappedExercises: WorkoutExercise[] = parsed.exercises.map((aiEx, idx) => {
+      const mapped = mapAIExerciseToWorkoutExercise(aiEx, weekIndex, dayNum, idx);
+
+      // Preserve GIF URL if original exercise had one with the same name
+      const original = currentExercises[idx];
+      if (original?.exercise.gifUrl && original.exercise.name.toLowerCase() === aiEx.name.toLowerCase()) {
+        mapped.exercise.gifUrl = original.exercise.gifUrl;
+        mapped.exercise.exerciseDbId = original.exercise.exerciseDbId;
+        mapped.exercise.exerciseDbInstructions = original.exercise.exerciseDbInstructions;
+      }
+
+      return mapped;
+    });
+
+    // Enrich new exercises with ExerciseDB GIFs (non-blocking)
+    enrichWithExerciseDb([{
+      id: 'temp',
+      weekNumber: weekIndex + 1,
+      startDate: '',
+      endDate: '',
+      days: [{
+        id: 'temp',
+        dayOfWeek: 'Monday',
+        dayNumber: dayNum,
+        date: '',
+        workout: {
+          id: 'temp',
+          name: 'temp',
+          type: 'strength',
+          duration: 0,
+          estimatedCaloriesBurned: 0,
+          muscleGroupsFocused: [],
+          difficulty: 'intermediate',
+          exercises: mappedExercises,
+          completed: false,
+        },
+        isRestDay: false,
+        completed: false,
+        calendarDate: '',
+        weekNumber: weekIndex + 1,
+      }],
+      totalWorkouts: 1,
+      completedWorkouts: 0,
+      totalCaloriesBurned: 0,
+      focusAreas: [],
+    }]).catch(() => {
+      // Non-critical - GIFs will load later
+    });
+
+    return {
+      exercises: mappedExercises,
+      swapCount: mappedExercises.length,
+    };
+  } catch (error) {
+    console.error('[ProgramGenerator] AI equipment swap failed:', error);
+    throw error;
+  }
+}
