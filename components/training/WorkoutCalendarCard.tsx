@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   weekTitle: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 11,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
   },
   weekStrip: {
     flexDirection: 'row',
@@ -492,13 +492,13 @@ const styles = StyleSheet.create({
   dayName: {
     fontSize: 11,
     marginBottom: 4,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   dayNumber: {
     fontSize: 18,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericThin,
     fontWeight: '100',
   },
   indicatorContainer: {
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   },
   monthTitle: {
     fontSize: 16,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
   },
   weekdayHeaders: {
     flexDirection: 'row',
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
     width: DAY_SIZE,
     textAlign: 'center',
     fontSize: 10,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
   },
   monthDayNumber: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
   },
   monthIndicatorContainer: {
     position: 'absolute',
@@ -615,6 +615,6 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
   },
 });
