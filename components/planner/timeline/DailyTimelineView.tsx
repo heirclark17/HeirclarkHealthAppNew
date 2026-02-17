@@ -668,6 +668,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    marginTop: 8, // Add gap between all-day banner/cards and timeline
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -676,6 +677,7 @@ const styles = StyleSheet.create({
   timeline: {
     position: 'relative',
     minHeight: 1440, // 24 hours * 60px per hour
+    paddingTop: 8, // Make room for first time label (positioned at top: -8)
   },
   emptyContainer: {
     flex: 1,
