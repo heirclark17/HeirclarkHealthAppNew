@@ -36,6 +36,7 @@ import {
   saveDailySummaryCache,
 } from '../../../services/accountabilityCoachService';
 import { generateAccountabilitySummary } from '../../../services/openaiService';
+import { api } from '../../../services/api';
 
 // Modal
 import AccountabilityCoachModal from './AccountabilityCoachModal';
@@ -66,8 +67,8 @@ export default function AccountabilityPartnerCard() {
 
   const consistencyScore = useMemo(() => getConsistencyScore(), [getConsistencyScore]);
 
-  // Build snapshot from all contexts
-  const buildSnapshot = useCallback((): DailySnapshot => {
+  // Build snapshot from all contexts + actual logged meals from API
+  const buildSnapshot = useCallback(async (): Promise<DailySnapshot> => {
     const todayStr = new Date().toISOString().split('T')[0];
     const todayTrainingDay = getTrainingDayForDate(todayStr);
     const todayMealPlan = mealState.weeklyPlan?.[mealState.selectedDayIndex];
@@ -77,6 +78,32 @@ export default function AccountabilityPartnerCard() {
 
     const todayBlocks = todayTimeline?.blocks ?? [];
     const actionableBlocks = todayBlocks.filter(b => b.type !== 'buffer' && b.type !== 'sleep');
+
+    // Fetch ACTUALLY LOGGED meals from the backend API (same source as dashboard)
+    let loggedMeals: { name: string; calories: number; mealType: string; protein: number; carbs: number; fat: number }[] = [];
+    try {
+      const apiMeals = await api.getMeals(todayStr);
+      loggedMeals = apiMeals.map(m => ({
+        name: m.name || 'Unknown',
+        calories: m.calories || 0,
+        mealType: m.mealType || 'snack',
+        protein: m.protein || 0,
+        carbs: m.carbs || 0,
+        fat: m.fat || 0,
+      }));
+    } catch (error) {
+      console.error('[AccountabilityCoach] Error fetching logged meals:', error);
+    }
+
+    const loggedTotals = loggedMeals.reduce(
+      (acc, m) => ({
+        calories: acc.calories + m.calories,
+        protein: acc.protein + m.protein,
+        carbs: acc.carbs + m.carbs,
+        fat: acc.fat + m.fat,
+      }),
+      { calories: 0, protein: 0, carbs: 0, fat: 0 }
+    );
 
     return buildDailySnapshot({
       goals: {
@@ -92,14 +119,20 @@ export default function AccountabilityPartnerCard() {
         fastingStart: goalState.fastingStart,
         fastingEnd: goalState.fastingEnd,
       },
-      meals: {
-        todayMeals: (todayMealPlan?.meals ?? []).map(m => ({
+      loggedMeals: {
+        meals: loggedMeals,
+        totalCalories: loggedTotals.calories,
+        totalProtein: loggedTotals.protein,
+        totalCarbs: loggedTotals.carbs,
+        totalFat: loggedTotals.fat,
+      },
+      plannedMeals: {
+        meals: (todayMealPlan?.meals ?? []).map(m => ({
           name: m.name,
           calories: m.calories,
           mealType: m.mealType,
         })),
-        plannedCount: todayMealPlan?.meals?.length ?? 0,
-        dailyTotals: todayMealPlan?.dailyTotals ?? null,
+        count: todayMealPlan?.meals?.length ?? 0,
       },
       training: {
         workoutCompleted: todayTrainingDay?.completed ?? false,
@@ -153,14 +186,16 @@ export default function AccountabilityPartnerCard() {
       if (cached && !cancelled) {
         setSummary(cached.summary);
         setChatMessages(cached.messages);
-        setSnapshot(buildSnapshot());
+        const snap = await buildSnapshot();
+        if (!cancelled) setSnapshot(snap);
         return;
       }
 
       // Generate fresh
       if (cancelled) return;
       setIsGenerating(true);
-      const snap = buildSnapshot();
+      const snap = await buildSnapshot();
+      if (cancelled) return;
       setSnapshot(snap);
 
       try {
@@ -184,17 +219,21 @@ export default function AccountabilityPartnerCard() {
   }, []); // Run once on mount
 
   // Keep snapshot fresh when modal opens
-  const handleOpenModal = useCallback(() => {
-    setSnapshot(buildSnapshot());
+  const handleOpenModal = useCallback(async () => {
+    const snap = await buildSnapshot();
+    setSnapshot(snap);
     setShowModal(true);
   }, [buildSnapshot]);
 
-  // Compute quick stats
+  // Compute quick stats from snapshot (uses actual logged meals, not planned)
   const caloriePercent = useMemo(() => {
-    const target = goalState.results?.calories ?? 2000;
-    const consumed = mealState.weeklyPlan?.[mealState.selectedDayIndex]?.dailyTotals?.calories ?? 0;
-    return target > 0 ? Math.round((consumed / target) * 100) : 0;
-  }, [goalState.results, mealState.weeklyPlan, mealState.selectedDayIndex]);
+    if (snapshot) {
+      return snapshot.calorieTarget > 0
+        ? Math.round((snapshot.caloriesConsumed / snapshot.calorieTarget) * 100)
+        : 0;
+    }
+    return 0;
+  }, [snapshot]);
 
   const hydrationPercent = useMemo(() => getProgressPercent(), [getProgressPercent]);
 

@@ -20,14 +20,15 @@ export interface DailySnapshot {
   sleepGoalHours: number;
   stepGoal: number;
 
-  // Today's actuals
+  // Today's actuals (from logged meals via API)
   caloriesConsumed: number;
   proteinConsumed: number;
   carbsConsumed: number;
   fatConsumed: number;
   mealsLogged: number;
   mealsPlanned: number;
-  mealDetails: { name: string; calories: number; mealType: string }[];
+  loggedMealDetails: { name: string; calories: number; mealType: string }[];
+  plannedMealDetails: { name: string; calories: number; mealType: string }[];
 
   // Fitness
   workoutCompleted: boolean;
@@ -149,11 +150,18 @@ export function buildDailySnapshot(params: {
     fastingStart: string;
     fastingEnd: string;
   };
-  // MealPlan
-  meals: {
-    todayMeals: { name: string; calories: number; mealType: string }[];
-    plannedCount: number;
-    dailyTotals: { calories: number; protein: number; carbs: number; fat: number } | null;
+  // Logged meals (actually eaten, from API)
+  loggedMeals: {
+    meals: { name: string; calories: number; mealType: string; protein: number; carbs: number; fat: number }[];
+    totalCalories: number;
+    totalProtein: number;
+    totalCarbs: number;
+    totalFat: number;
+  };
+  // Planned meals (from meal plan generator)
+  plannedMeals: {
+    meals: { name: string; calories: number; mealType: string }[];
+    count: number;
   };
   // Training
   training: {
@@ -198,7 +206,7 @@ export function buildDailySnapshot(params: {
   consistencyScore: number;
 }): DailySnapshot {
   const today = new Date().toISOString().split('T')[0];
-  const { goals, meals, training, hydration, sleep, banking, planner, streaks } = params;
+  const { goals, loggedMeals, plannedMeals, training, hydration, sleep, banking, planner, streaks } = params;
 
   return {
     date: today,
@@ -211,13 +219,14 @@ export function buildDailySnapshot(params: {
     sleepGoalHours: goals.sleepGoalHours,
     stepGoal: goals.stepGoal,
 
-    caloriesConsumed: meals.dailyTotals?.calories ?? 0,
-    proteinConsumed: meals.dailyTotals?.protein ?? 0,
-    carbsConsumed: meals.dailyTotals?.carbs ?? 0,
-    fatConsumed: meals.dailyTotals?.fat ?? 0,
-    mealsLogged: meals.todayMeals.length,
-    mealsPlanned: meals.plannedCount,
-    mealDetails: meals.todayMeals,
+    caloriesConsumed: loggedMeals.totalCalories,
+    proteinConsumed: loggedMeals.totalProtein,
+    carbsConsumed: loggedMeals.totalCarbs,
+    fatConsumed: loggedMeals.totalFat,
+    mealsLogged: loggedMeals.meals.length,
+    mealsPlanned: plannedMeals.count,
+    loggedMealDetails: loggedMeals.meals.map(m => ({ name: m.name, calories: m.calories, mealType: m.mealType })),
+    plannedMealDetails: plannedMeals.meals,
 
     workoutCompleted: training.workoutCompleted,
     workoutName: training.workoutName,
@@ -265,17 +274,32 @@ export function formatSnapshotForAI(snapshot: DailySnapshot): string {
 
 GOAL: ${snapshot.primaryGoal}
 
-NUTRITION:
-- Calories: ${snapshot.caloriesConsumed} / ${snapshot.calorieTarget} target (${calPct}%)
-- Protein: ${Math.round(snapshot.proteinConsumed)}g / ${snapshot.proteinTarget}g target (${protPct}%)
-- Carbs: ${Math.round(snapshot.carbsConsumed)}g / ${snapshot.carbsTarget}g target
-- Fat: ${Math.round(snapshot.fatConsumed)}g / ${snapshot.fatTarget}g target
-- Meals logged: ${snapshot.mealsLogged} of ${snapshot.mealsPlanned} planned`;
+NUTRITION (from actually logged meals):
+- Calories consumed: ${snapshot.caloriesConsumed} / ${snapshot.calorieTarget} target (${calPct}%)
+- Protein consumed: ${Math.round(snapshot.proteinConsumed)}g / ${snapshot.proteinTarget}g target (${protPct}%)
+- Carbs consumed: ${Math.round(snapshot.carbsConsumed)}g / ${snapshot.carbsTarget}g target
+- Fat consumed: ${Math.round(snapshot.fatConsumed)}g / ${snapshot.fatTarget}g target
+- Meals ACTUALLY LOGGED today: ${snapshot.mealsLogged}
+- Meals PLANNED in meal plan: ${snapshot.mealsPlanned}`;
 
-  if (snapshot.mealDetails.length > 0) {
-    text += '\n- Meal breakdown:';
-    snapshot.mealDetails.forEach(m => {
+  if (snapshot.mealsLogged === 0) {
+    text += '\n- ⚠️ NO MEALS HAVE BEEN LOGGED TODAY. The user has not tracked any food yet.';
+  }
+
+  if (snapshot.loggedMealDetails.length > 0) {
+    text += '\n- Logged meals:';
+    snapshot.loggedMealDetails.forEach(m => {
       text += `\n  * ${m.mealType}: ${m.name} (${m.calories} cal)`;
+    });
+  }
+
+  if (snapshot.plannedMealDetails.length > 0 && snapshot.mealsLogged < snapshot.mealsPlanned) {
+    text += `\n- Planned meals (not yet logged):`;
+    snapshot.plannedMealDetails.forEach(m => {
+      const wasLogged = snapshot.loggedMealDetails.some(l => l.mealType === m.mealType);
+      if (!wasLogged) {
+        text += `\n  * ${m.mealType}: ${m.name} (${m.calories} cal) — NOT LOGGED`;
+      }
     });
   }
 
