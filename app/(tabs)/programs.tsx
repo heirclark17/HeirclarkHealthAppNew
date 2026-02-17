@@ -1080,7 +1080,7 @@ const styles = StyleSheet.create({
   },
   weekHeaderSection: {
     paddingHorizontal: 16,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   weekHeaderTop: {
     flexDirection: 'row',
@@ -1110,7 +1110,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 4,
   },
   weekButton: {
     flexDirection: 'row',
