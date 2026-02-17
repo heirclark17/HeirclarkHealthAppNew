@@ -155,11 +155,14 @@ function ExerciseRow({
           accessibilityState={{ checked: exercise.completed }}
           accessibilityHint={exercise.completed ? 'Marks exercise as incomplete' : 'Marks exercise as complete'}
         >
-          <Ionicons
-            name={exercise.completed ? 'checkbox' : 'square-outline'}
-            size={22}
-            color={exercise.completed ? Colors.protein : colors.textMuted}
-          />
+          <View style={[
+            styles.circleCheckbox,
+            { backgroundColor: exercise.completed ? Colors.protein : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
+          ]}>
+            {exercise.completed && (
+              <Ionicons name="checkmark" size={14} color="#fff" />
+            )}
+          </View>
         </TouchableOpacity>
       )}
       <TouchableOpacity
@@ -248,11 +251,14 @@ function ExerciseRow({
           accessibilityState={{ checked: exercise.completed }}
           accessibilityHint={exercise.completed ? 'Marks exercise as incomplete' : 'Marks exercise as complete'}
         >
-          <Ionicons
-            name={exercise.completed ? 'checkbox' : 'square-outline'}
-            size={20}
-            color={exercise.completed ? Colors.protein : colors.textMuted}
-          />
+          <View style={[
+            styles.circleCheckbox,
+            { backgroundColor: exercise.completed ? Colors.protein : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
+          ]}>
+            {exercise.completed && (
+              <Ionicons name="checkmark" size={14} color="#fff" />
+            )}
+          </View>
         </TouchableOpacity>
       )}
       {/* Weight Log Button */}
@@ -633,6 +639,13 @@ const styles = StyleSheet.create({
   },
   exerciseCheckbox: {
     marginRight: 12,
+  },
+  circleCheckbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   checkboxButton: {
     padding: 4,
