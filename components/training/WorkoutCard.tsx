@@ -397,24 +397,20 @@ export function WorkoutCard({
           </View>
 
           {/* Workout Stats */}
-          <BlurView
-            intensity={isDark ? 25 : 40}
-            tint={isDark ? 'dark' : 'light'}
-            style={styles.statsRowInline}
-          >
-            <View style={styles.statItem}>
+          <View style={styles.statsRowInline}>
+            <GlassCard style={styles.statCard}>
               <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.duration}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Minutes</Text>
-            </View>
-            <View style={styles.statItem}>
+            </GlassCard>
+            <GlassCard style={styles.statCard}>
               <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.estimatedCaloriesBurned}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Calories</Text>
-            </View>
-            <View style={styles.statItem}>
+            </GlassCard>
+            <GlassCard style={styles.statCard}>
               <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{totalExercises}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exercises</Text>
-            </View>
-          </BlurView>
+            </GlassCard>
+          </View>
 
           {/* Exercise List */}
           <View style={styles.exerciseListInline}>
@@ -552,12 +548,13 @@ const styles = StyleSheet.create({
   // Inline expanded styles (always visible)
   statsRowInline: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    gap: 8,
     marginBottom: 16,
-    overflow: 'hidden',
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
   },
   statItem: {
     alignItems: 'center',
