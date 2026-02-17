@@ -138,9 +138,9 @@ export function PlannerCalendarStrip({
                 activeOpacity={0.7}
               >
                 {isSyncingMeals ? (
-                  <ActivityIndicator size="small" color="#22C55E" />
+                  <ActivityIndicator size="small" color={themeColors.text} />
                 ) : (
-                  <UtensilsCrossed size={18} color="#22C55E" />
+                  <UtensilsCrossed size={18} color={themeColors.text} />
                 )}
               </TouchableOpacity>
             )}
@@ -152,9 +152,9 @@ export function PlannerCalendarStrip({
                 activeOpacity={0.7}
               >
                 {isSyncingWorkouts ? (
-                  <ActivityIndicator size="small" color="#F97316" />
+                  <ActivityIndicator size="small" color={themeColors.text} />
                 ) : (
-                  <Dumbbell size={18} color="#F97316" />
+                  <Dumbbell size={18} color={themeColors.text} />
                 )}
               </TouchableOpacity>
             )}

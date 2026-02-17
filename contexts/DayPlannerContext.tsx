@@ -1274,28 +1274,120 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
-   * Resync meals: re-reads fresh meal data from MealPlanContext and regenerates the weekly plan.
+   * Fast algorithmic-only regeneration of the weekly plan.
+   * Skips AI entirely so it completes in <1 second total (vs 14-21s with AI).
+   * Used by resyncMeals/resyncWorkouts to quickly repopulate after edits.
+   */
+  const regenerateWeekFast = useCallback(async () => {
+    const currentPrefs = stateRef.current.preferences;
+    if (!currentPrefs) return;
+
+    const today = new Date();
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - today.getDay());
+    sunday.setHours(0, 0, 0, 0);
+
+    const days: DailyTimeline[] = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(sunday);
+      date.setDate(sunday.getDate() + i);
+      const dateStr = formatLocalDate(date);
+
+      const workoutBlocks = getWorkoutBlocksForDay(date, currentPrefs);
+      const mealBlocks = getMealBlocksForDay(date, currentPrefs);
+
+      // Calendar events
+      const currentEvents = stateRef.current.deviceCalendarEvents;
+      const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(date); dayEnd.setHours(23, 59, 59, 999);
+      const calendarBlocks = currentEvents
+        .filter(event => {
+          if (/^cancell?ed:/i.test(event.title)) return false;
+          if (event.isAllDay) return event.startDate <= dayEnd && event.endDate > dayStart;
+          return isSameDay(event.startDate, date);
+        })
+        .map(event => convertCalendarEventToBlock(event));
+
+      // Life context
+      const goalState = goalWizardRef.current?.state;
+      const foodPrefs = foodPrefsRef.current?.preferences;
+      const dayName = DAY_NAMES[date.getDay()];
+      const isCheatDay = (foodPrefs?.cheatDays || []).includes(dayName);
+      const isFasting = goalState?.intermittentFasting ?? false;
+      const hasOOOBlock = calendarBlocks.some(b => b.isAllDay && b.isOOO);
+
+      const lifeContext: LifeContext = {
+        isFasting,
+        fastingStart: goalState?.fastingStart || '20:00',
+        fastingEnd: goalState?.fastingEnd || '12:00',
+        cheatDays: foodPrefs?.cheatDays || [],
+        isCheatDay,
+        isOOODay: hasOOOBlock,
+        meetingDensity: 'low',
+      };
+
+      const request: SchedulingRequest = {
+        date: dateStr,
+        preferences: currentPrefs,
+        workoutBlocks,
+        mealBlocks,
+        calendarBlocks,
+        recoveryContext: (stateRef.current as any)._latestRecovery || undefined,
+        completionPatterns: stateRef.current.completionPatterns,
+        lifeContext,
+      };
+
+      // Algorithmic only - no AI call
+      const result = SchedulingEngine.generateTimeline(request);
+      const timeline = result.timeline;
+      if (timeline.blocks.some(b => b.isAllDay && b.isOOO)) {
+        timeline.isOOODay = true;
+      }
+      days.push(timeline);
+    }
+
+    const weeklyStats = calculateWeeklyStats(days);
+    const weeklyPlan: WeeklyPlan = {
+      weekStartDate: formatLocalDate(sunday),
+      days,
+      weeklyStats,
+      generatedAt: new Date().toISOString(),
+    };
+
+    await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(weeklyPlan));
+    api.saveWeeklyPlan(weeklyPlan).catch((err: any) =>
+      console.warn('[Planner] Backend weekly plan save failed:', err)
+    );
+
+    setState(prev => ({ ...prev, weeklyPlan }));
+    console.log('[Planner] Fast resync complete -', days.reduce((s, d) => s + d.blocks.length, 0), 'total blocks');
+  }, [getWorkoutBlocksForDay, getMealBlocksForDay]);
+
+  /**
+   * Resync meals: re-reads fresh meal data from MealPlanContext and regenerates
+   * the weekly plan using fast algorithmic scheduling (no AI, <1s).
    */
   const resyncMeals = useCallback(async () => {
     setState(prev => ({ ...prev, isSyncingMeals: true }));
     try {
-      await generateWeeklyPlan();
+      await regenerateWeekFast();
     } finally {
       setState(prev => ({ ...prev, isSyncingMeals: false }));
     }
-  }, [generateWeeklyPlan]);
+  }, [regenerateWeekFast]);
 
   /**
-   * Resync workouts: re-reads fresh workout data from TrainingContext and regenerates the weekly plan.
+   * Resync workouts: re-reads fresh workout data from TrainingContext and regenerates
+   * the weekly plan using fast algorithmic scheduling (no AI, <1s).
    */
   const resyncWorkouts = useCallback(async () => {
     setState(prev => ({ ...prev, isSyncingWorkouts: true }));
     try {
-      await generateWeeklyPlan();
+      await regenerateWeekFast();
     } finally {
       setState(prev => ({ ...prev, isSyncingWorkouts: false }));
     }
-  }, [generateWeeklyPlan]);
+  }, [regenerateWeekFast]);
 
   /**
    * Set selected day index
