@@ -100,18 +100,24 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
         const backendHabits = await api.getHabits();
         if (backendHabits && backendHabits.length > 0) {
           console.log('[HabitFormation] Loaded habits from backend:', backendHabits.length);
-          habits = backendHabits.map((h: any) => ({
-            ...h,
-            id: h.id || `habit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            name: h.habitName || h.name || 'Untitled Habit',
-            description: h.description || '',
-            category: h.habitType || h.category || 'custom',
-            icon: h.icon || CATEGORY_ICONS[h.habitType as HabitCategory] || CATEGORY_ICONS[h.category as HabitCategory] || 'star',
-            frequency: h.frequency || 'daily',
-            reminderEnabled: h.reminderEnabled ?? false,
-            isActive: h.isActive ?? true,
-            createdAt: h.createdAt || Date.now(),
-          }));
+          habits = backendHabits
+            .map((h: any) => {
+              // Backend returns snake_case (habit_name, habit_type, is_active, etc.)
+              const name = h.habit_name || h.habitName || h.name || '';
+              const category = h.habit_type || h.habitType || h.category || 'custom';
+              return {
+                id: h.id || `habit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                name,
+                description: h.description || '',
+                category,
+                icon: h.icon || CATEGORY_ICONS[category as HabitCategory] || 'star',
+                frequency: h.frequency || 'daily',
+                reminderEnabled: h.reminder_time != null || h.reminderEnabled || false,
+                isActive: h.is_active ?? h.isActive ?? true,
+                createdAt: h.created_at ? new Date(h.created_at).getTime() : (h.createdAt || Date.now()),
+              };
+            })
+            .filter((h: any) => h.name.length > 0); // Skip rows with no name
         } else {
           habits = await getHabits();
         }

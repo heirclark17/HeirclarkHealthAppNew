@@ -4026,10 +4026,16 @@ app.get('/api/v1/health/sleep', authenticateToken, async (req, res) => {
 
 app.get('/api/v1/habits', authenticateToken, async (req, res) => {
   try {
+    // Clean up any rows with empty/null habit_name (created by earlier bug)
+    await pool.query(
+      `UPDATE habits SET is_active = false WHERE user_id = $1 AND (habit_name IS NULL OR habit_name = '')`,
+      [req.userId]
+    );
+
     const habits = await pool.query(
       `SELECT h.*,
               (SELECT COUNT(*) FROM habit_completions hc WHERE hc.habit_id = h.id AND hc.date >= CURRENT_DATE - INTERVAL '7 days') as week_completions
-       FROM habits h WHERE h.user_id = $1 AND h.is_active = true`,
+       FROM habits h WHERE h.user_id = $1 AND h.is_active = true AND habit_name IS NOT NULL AND habit_name != ''`,
       [req.userId]
     );
     res.json({ success: true, habits: habits.rows });
@@ -4070,6 +4076,19 @@ app.post('/api/v1/habits/:habitId/complete', authenticateToken, async (req, res)
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to complete habit' });
+  }
+});
+
+app.delete('/api/v1/habits/:habitId', authenticateToken, async (req, res) => {
+  try {
+    const { habitId } = req.params;
+    await pool.query(
+      `UPDATE habits SET is_active = false WHERE id = $1 AND user_id = $2`,
+      [habitId, req.userId]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete habit' });
   }
 });
 
