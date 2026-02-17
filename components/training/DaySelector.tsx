@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -111,6 +111,7 @@ function DayPill({
 
 export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySelectorProps) {
   const { settings } = useSettings();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -118,29 +119,48 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
 
+  // Reverse the days so latest is on the right
+  const reversedDays = useMemo(() => [...weeklyPlan.days].reverse(), [weeklyPlan.days]);
+
+  // Auto-scroll to the end (latest day) after mount
+  useEffect(() => {
+    if (reversedDays.length > 0 && scrollViewRef.current) {
+      setTimeout(() => {
+        const dayWidth = 68; // 60px snap interval + gap
+        const maxScroll = reversedDays.length * dayWidth;
+        scrollViewRef.current?.scrollTo({ x: maxScroll, y: 0, animated: false });
+      }, 100);
+    }
+  }, [reversedDays.length]);
+
   // Theme-aware day pill background
   const dayItemBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
 
   return (
     <GlassCard style={styles.container} interactive>
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         snapToInterval={60}
         decelerationRate="fast"
       >
-        {weeklyPlan.days.map((day, index) => (
-          <DayPill
-            key={day.id}
-            day={day}
-            index={index}
-            isSelected={index === selectedDayIndex}
-            onPress={() => onSelectDay(index)}
-            colors={colors}
-            isDark={isDark}
-          />
-        ))}
+        {reversedDays.map((day, reverseIndex) => {
+          // Map back to original index for selection
+          const originalIndex = weeklyPlan.days.length - 1 - reverseIndex;
+          return (
+            <DayPill
+              key={day.id}
+              day={day}
+              index={originalIndex}
+              isSelected={originalIndex === selectedDayIndex}
+              onPress={() => onSelectDay(originalIndex)}
+              colors={colors}
+              isDark={isDark}
+            />
+          );
+        })}
       </ScrollView>
     </GlassCard>
   );

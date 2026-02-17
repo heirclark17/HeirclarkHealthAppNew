@@ -4,7 +4,7 @@
  * Includes action buttons (calendar sync + refresh) below the date strip
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { CalendarClock, RefreshCw, Trash2, UtensilsCrossed, Dumbbell } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
@@ -66,38 +66,60 @@ export function PlannerCalendarStrip({
   const actionBtnBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
 
   const todayStr = useMemo(() => formatDateStr(new Date()), []);
+  const scrollViewRef = useRef<ScrollView>(null);
 
-  // Generate current week's 7 days
+  // Generate multiple weeks: 52 past + current + 12 future (oldest to newest)
   const weekDays = useMemo(() => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const now = new Date();
 
-    // Use provided weekStartDate or calculate current week's Sunday
-    let sunday: Date;
-    if (weekStartDate) {
-      sunday = parseLocalDate(weekStartDate);
-    } else {
-      sunday = new Date(now);
-      sunday.setDate(now.getDate() - now.getDay());
-    }
+    // Calculate current week's Sunday
+    const sunday = new Date(now);
+    sunday.setDate(now.getDate() - now.getDay());
     sunday.setHours(0, 0, 0, 0);
 
     const dateList = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(sunday);
-      date.setDate(sunday.getDate() + i);
-      const dateStr = formatDateStr(date);
 
-      dateList.push({
-        day: days[date.getDay()],
-        date: date.getDate(),
-        dateStr,
-        isToday: dateStr === todayStr,
-      });
+    // Generate 52 past weeks + current week + 12 future weeks (65 weeks total)
+    // Loop from oldest (52 weeks ago) to newest (12 weeks in future)
+    for (let weekOffset = -52; weekOffset <= 12; weekOffset++) {
+      const weekStart = new Date(sunday);
+      weekStart.setDate(sunday.getDate() + (weekOffset * 7));
+
+      // Generate all 7 days for this week
+      for (let dayInWeek = 0; dayInWeek < 7; dayInWeek++) {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + dayInWeek);
+        const dateStr = formatDateStr(date);
+
+        dateList.push({
+          day: days[date.getDay()],
+          date: date.getDate(),
+          dateStr,
+          isToday: dateStr === todayStr,
+          isFuture: date > now,
+        });
+      }
     }
 
     return dateList;
-  }, [weekStartDate, todayStr]);
+  }, [todayStr]);
+
+  // Auto-scroll to current week after mount
+  useEffect(() => {
+    if (weekDays.length > 0 && scrollViewRef.current) {
+      setTimeout(() => {
+        // Find the index of today's date
+        const todayIndex = weekDays.findIndex(d => d.isToday);
+        if (todayIndex >= 0) {
+          // Each day is ~50px wide (42px min + 8px gap)
+          const dayWidth = 50;
+          const scrollToX = Math.max(0, (todayIndex - 3) * dayWidth); // Center today with 3 days visible before
+          scrollViewRef.current?.scrollTo({ x: scrollToX, y: 0, animated: false });
+        }
+      }, 100);
+    }
+  }, [weekDays]);
 
   // Selected date display label
   const selectedLabel = useMemo(() => {
@@ -187,19 +209,21 @@ export function PlannerCalendarStrip({
 
       {/* Week strip */}
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.weekStrip}
       >
         {weekDays.map((item) => {
           const isSelected = selectedDate === item.dateStr;
+          const opacity = item.isFuture ? 0.6 : 1; // Dim future dates slightly
           return (
             <TouchableOpacity
               key={item.dateStr}
               style={[
                 styles.dayItem,
-                { backgroundColor: dayItemBg },
-                isSelected && [styles.dayItemActive, { backgroundColor: themeColors.primary }],
+                { backgroundColor: dayItemBg, opacity },
+                isSelected && [styles.dayItemActive, { backgroundColor: themeColors.primary, opacity: 1 }],
               ]}
               onPress={() => onDateChange(item.dateStr)}
               activeOpacity={0.7}

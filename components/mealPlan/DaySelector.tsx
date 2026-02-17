@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Modal, Platform } from 'react-native';
 // Removed FadeInRight import - entrance animations removed
 import { Ionicons } from '@expo/vector-icons';
@@ -158,11 +158,27 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
     return null;
   }
 
+  // Reverse the weekly plan so latest day is on the right
+  const reversedPlan = useMemo(() => [...weeklyPlan].reverse(), [weeklyPlan]);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  // Auto-scroll to the end (latest day) after mount
+  useEffect(() => {
+    if (reversedPlan.length > 0 && scrollViewRef.current) {
+      setTimeout(() => {
+        const dayWidth = 56; // 48px width + 8px gap
+        const maxScroll = reversedPlan.length * dayWidth;
+        scrollViewRef.current?.scrollTo({ x: maxScroll, y: 0, animated: false });
+      }, 100);
+    }
+  }, [reversedPlan.length]);
+
   return (
     <>
       {/* Week Strip - Glass Morphism matching CalendarCard exactly */}
       <GlassCard style={styles.container} interactive>
         <ScrollView
+          ref={scrollViewRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.weekStrip}
@@ -171,8 +187,10 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
           decelerationRate="fast"
           accessibilityRole="tablist"
         >
-          {weeklyPlan.map((day, index) => {
-            const isSelected = index === selectedDayIndex;
+          {reversedPlan.map((day, reverseIndex) => {
+            // Map back to original index for selection
+            const originalIndex = weeklyPlan.length - 1 - reverseIndex;
+            const isSelected = originalIndex === selectedDayIndex;
             const shortDayName = getShortDayName(day.dayName, day.date);
             const isCheat = isCheatDay(day.dayName, day.date);
             const accessibilityLabel = `${shortDayName} ${getDayNumber(day.date)}${isSelected ? ', Selected' : ''}${isCheat ? ', Cheat Day' : ''}`;
@@ -186,7 +204,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     isCheat && !isSelected && styles.cheatDayItem,
                     isSelected && [styles.dayItemActive, { backgroundColor: isCheat ? Colors.warning : colors.primary }],
                   ]}
-                  onPress={() => onSelectDay(index)}
+                  onPress={() => onSelectDay(originalIndex)}
                   accessible={true}
                   accessibilityLabel={accessibilityLabel}
                   accessibilityRole="tab"
