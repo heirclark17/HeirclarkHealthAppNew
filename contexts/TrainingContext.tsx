@@ -491,9 +491,75 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     goalStepGoal,
   ]);
 
+  // Build UserTrainingProfile from goal wizard context for multi-week program generation
+  const buildUserProfileFromGoals = useCallback((): any => {
+    // Map primary goal to training profile goal types
+    let primaryGoal: 'strength' | 'hypertrophy' | 'fat_loss' | 'endurance' | 'general_fitness' | 'athletic_performance' = 'general_fitness';
+    if (goalPrimaryGoal === 'build_muscle') primaryGoal = 'hypertrophy';
+    else if (goalPrimaryGoal === 'lose_weight') primaryGoal = 'fat_loss';
+    else if (goalPrimaryGoal === 'improve_health') primaryGoal = 'general_fitness';
+    else if (goalPrimaryGoal === 'maintain') primaryGoal = 'general_fitness';
+
+    // Map fitness level
+    let fitnessLevel: 'beginner' | 'intermediate' | 'advanced' = 'intermediate';
+    if (goalFitnessLevel === 'beginner') fitnessLevel = 'beginner';
+    else if (goalFitnessLevel === 'intermediate') fitnessLevel = 'intermediate';
+    else if (goalFitnessLevel === 'advanced') fitnessLevel = 'advanced';
+
+    // Map equipment access
+    const hasGymAccess = goalAvailableEquipment?.some((eq: string) =>
+      ['barbell', 'dumbbells', 'machine', 'cable'].includes(eq)
+    );
+    const equipmentAccess = hasGymAccess ? 'full_gym' : 'home_gym';
+
+    // Calculate years training from strength level
+    let yearsTraining = 0;
+    if (goalStrengthLevel === 'beginner') yearsTraining = 0.5;
+    else if (goalStrengthLevel === 'intermediate') yearsTraining = 2;
+    else if (goalStrengthLevel === 'advanced') yearsTraining = 5;
+
+    return {
+      fitnessLevel,
+      primaryGoal,
+      daysPerWeek: (goalWorkoutsPerWeek || 3) as 2 | 3 | 4 | 5 | 6,
+      sessionDuration: (goalWorkoutDuration || 45) as 30 | 45 | 60 | 75 | 90,
+      equipmentAccess,
+      availableEquipment: goalAvailableEquipment || ['bodyweight'],
+      injuries: goalInjuries ? [goalInjuries] : [],
+      preferences: {
+        cardioPreference: goalCardioPreference || 'walking',
+        preferredExercises: [],
+        dislikedExercises: [],
+        morningOrEvening: 'no_preference' as const,
+      },
+      experience: {
+        yearsTraining,
+        familiarWithCompounds: goalHasLiftingExperience || false,
+        maxLifts: {
+          squat: goalSquat1RM || undefined,
+          bench: goalBenchPress1RM || undefined,
+          deadlift: goalDeadlift1RM || undefined,
+        },
+      },
+    };
+  }, [
+    goalPrimaryGoal,
+    goalFitnessLevel,
+    goalAvailableEquipment,
+    goalWorkoutsPerWeek,
+    goalWorkoutDuration,
+    goalInjuries,
+    goalCardioPreference,
+    goalStrengthLevel,
+    goalHasLiftingExperience,
+    goalSquat1RM,
+    goalBenchPress1RM,
+    goalDeadlift1RM,
+  ]);
+
   // Generate weekly training plan with enhanced plan generator
   // If programId is provided, use that specific program
-  const generateWeeklyPlan = useCallback(async (programId?: string): Promise<boolean> => {
+  const generateWeeklyPlan = useCallback(async (programId?: string, multiWeek: boolean = false): Promise<boolean> => {
     console.log('[Training] generateWeeklyPlan called', programId ? `with program: ${programId}` : '');
     setState(prev => ({ ...prev, isGenerating: true, error: null }));
 
@@ -503,8 +569,79 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       console.log('[Training] Preferences:', JSON.stringify(preferences, null, 2));
       console.log('[Training] Cardio preference:', preferences.cardioPreference);
 
-      // Use the enhanced plan generator to get plan with summary
-      // Pass programId to use specific program if provided
+      // Check if multi-week program generation is requested
+      if (multiWeek) {
+        console.log('[Training] 🚀 Generating multi-week program with AI...');
+        const userProfile = buildUserProfileFromGoals();
+        const { weeklyPlan, program, summary } = planGenerator.generateCompletePlan(preferences, undefined, programId);
+
+        // Determine program duration from preferences or default to 4 weeks
+        const programWeeks = preferences.programDurationWeeks || 4;
+        console.log('[Training] Generating', programWeeks, 'week program');
+
+        try {
+          const multiWeekPlan = await generateMultiWeekProgram(
+            preferences,
+            program,
+            userProfile,
+            programWeeks
+          );
+
+          console.log('[Training] ✅ Multi-week plan generated:', multiWeekPlan.totalWeeks, 'weeks');
+
+          // Calculate goal alignment using first week
+          const alignment = trainingService.calculateGoalAlignment(preferences, multiWeekPlan.weeklyPlans[0]);
+
+          // Determine selected day (today or first workout day)
+          const today = new Date().getDay();
+          const todayIndex = today === 0 ? 6 : today - 1;
+
+          // Generate cardio and nutrition guidance
+          const templateCardio = buildTemplateCardioRecommendations(preferences, multiWeekPlan.weeklyPlans[0]);
+          const templateNutrition = buildTemplateNutritionGuidance(preferences);
+
+          const lastGeneratedAt = new Date().toISOString();
+
+          setState(prev => ({
+            ...prev,
+            multiWeekPlan,
+            weeklyPlan: multiWeekPlan.weeklyPlans[0], // Set first week
+            currentWeekIndex: 0,
+            currentWeek: 1,
+            selectedProgram: program,
+            goalAlignment: alignment,
+            isGenerating: false,
+            selectedDayIndex: todayIndex,
+            lastGeneratedAt,
+            preferences,
+            planSummary: multiWeekPlan.summary,
+            cardioRecommendations: templateCardio,
+            nutritionGuidance: templateNutrition,
+          }));
+
+          // Cache the multi-week plan
+          await trainingStorage.savePlanCache({
+            weeklyPlan: multiWeekPlan.weeklyPlans[0],
+            selectedProgram: program,
+            goalAlignment: alignment,
+            currentWeek: 1,
+            lastGeneratedAt,
+            preferences,
+            planSummary: multiWeekPlan.summary,
+            cardioRecommendations: templateCardio,
+            nutritionGuidance: templateNutrition,
+          });
+
+          console.log('[Training] ✅ Multi-week program generation complete');
+          return true;
+
+        } catch (error) {
+          console.error('[Training] ❌ Multi-week generation failed, falling back to single week:', error);
+          // Fall through to single-week generation
+        }
+      }
+
+      // Single-week generation (original flow or fallback)
       console.log('[Training] Using planGenerator for enhanced plan...');
       const { weeklyPlan, program, summary } = planGenerator.generateCompletePlan(preferences, undefined, programId);
       console.log('[Training] Plan generated with program:', program.name);
@@ -914,8 +1051,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const selectProgramAndGenerate = useCallback(async (program: TrainingProgram | ProgramTemplate): Promise<boolean> => {
     console.log('[Training] selectProgramAndGenerate called with:', program.name);
     setState(prev => ({ ...prev, selectedProgram: program }));
-    // Generate plan with the specific program
-    return generateWeeklyPlan(program.id);
+    // Generate multi-week plan with the specific program
+    return generateWeeklyPlan(program.id, true); // Enable multi-week generation
   }, [generateWeeklyPlan]);
 
   // Set selected day
