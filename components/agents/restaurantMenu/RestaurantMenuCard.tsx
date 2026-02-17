@@ -37,8 +37,8 @@ export default function RestaurantMenuCard() {
   const [error, setError] = useState<string | null>(null);
 
   // Calculate remaining macros for the day
-  const dailyTargets = goalState.dailyTargets || { calories: 2000, protein: 150, carbs: 200, fat: 60 };
-  const todayTotals = mealState.weeklyPlan?.[mealState.selectedDayIndex]?.totals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  const dailyTargets = goalState.results || { calories: 2000, protein: 150, carbs: 200, fat: 60 };
+  const todayTotals = mealState.weeklyPlan?.[mealState.selectedDayIndex]?.dailyTotals || { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
   const remainingCalories = Math.max(0, dailyTargets.calories - todayTotals.calories);
   const remainingProtein = Math.max(0, dailyTargets.protein - todayTotals.protein);
@@ -128,7 +128,7 @@ export default function RestaurantMenuCard() {
           {CUISINE_TYPES.map((cuisine) => (
             <TouchableOpacity
               key={cuisine}
-              style={[styles.cuisineChip, { backgroundColor: colors.cardGlass, borderColor: colors.glassBorder }]}
+              style={[styles.cuisineChip, { backgroundColor: colors.cardGlass }]}
               onPress={() => {
                 handleCuisineSelect(cuisine);
                 setShowModal(true);
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   budgetValue: { fontSize: 18, fontFamily: Fonts.semiBold },
   budgetHint: { fontSize: 11, fontFamily: Fonts.regular },
   cuisineScroll: { marginTop: 4 },
-  cuisineChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 16, borderWidth: 1, marginRight: 8 },
+  cuisineChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 16, marginRight: 8 },
   cuisineText: { fontSize: 12, fontFamily: Fonts.medium },
   modalContainer: { flex: 1 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' },
