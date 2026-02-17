@@ -158,6 +158,51 @@ export const SUGGESTED_HABITS: Omit<Habit, 'id' | 'createdAt' | 'isActive'>[] = 
   },
 ];
 
+// AI-suggested habit
+export interface SuggestedHabit {
+  name: string;
+  description: string;
+  category: HabitCategory;
+  icon: string; // Ionicons name
+  frequency: HabitFrequency;
+  reason: string; // "Your hydration avg is 40oz vs 64oz goal"
+  priority: 'high' | 'medium' | 'low';
+}
+
+// Aggregated user data for AI habit suggestions
+export interface UserHabitContext {
+  // Goals
+  primaryGoal: string;
+  currentWeight: number;
+  targetWeight: number;
+  activityLevel: string;
+  dietStyle: string;
+  isFasting: boolean;
+  fastingWindow?: { start: string; end: string };
+  // Hydration
+  hydrationGoalOz: number;
+  hydrationAvgOz: number;
+  hydrationStreak: number;
+  // Sleep
+  sleepGoalHours: number;
+  sleepAvgHours: number;
+  sleepDebtMinutes: number;
+  sleepAvgQuality: number; // 1-5
+  // Training
+  hasTrainingPlan: boolean;
+  workoutsPerWeek: number;
+  trainingWeekIndex: number;
+  // Meals
+  hasMealPlan: boolean;
+  mealsPerDay: number;
+  calorieTarget: number;
+  // Existing habits
+  existingHabitNames: string[];
+  habitCompletionRate: number; // 0-100
+  // Weight
+  weightTrend: 'losing' | 'gaining' | 'stable' | 'unknown';
+}
+
 // Category icons
 export const CATEGORY_ICONS: Record<HabitCategory, string> = {
   nutrition: 'nutrition',

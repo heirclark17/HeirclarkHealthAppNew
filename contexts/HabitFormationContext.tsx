@@ -12,8 +12,12 @@ import {
   HabitInsight,
   HabitCategory,
   HabitFrequency,
+  SuggestedHabit,
+  UserHabitContext,
   HABIT_CONSTANTS,
+  CATEGORY_ICONS,
 } from '../types/habitFormation';
+import { generatePersonalizedHabits } from '../services/aiHabitService';
 import {
   getHabits,
   addHabit as addHabitStorage,
@@ -29,6 +33,8 @@ import { api } from '../services/api';
 
 interface HabitFormationContextType {
   state: HabitFormationState;
+  aiSuggestions: SuggestedHabit[];
+  isGeneratingSuggestions: boolean;
   addHabit: (habit: Omit<Habit, 'id' | 'createdAt' | 'isActive'>) => Promise<void>;
   updateHabit: (habitId: string, updates: Partial<Habit>) => Promise<void>;
   deleteHabit: (habitId: string) => Promise<void>;
@@ -36,6 +42,7 @@ interface HabitFormationContextType {
   skipHabit: (habitId: string) => Promise<void>;
   getHabitStreak: (habitId: string) => HabitStreak | undefined;
   getTodayHabits: () => { habit: Habit; completion: HabitCompletion | null }[];
+  generateAISuggestions: (userData: UserHabitContext) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -54,6 +61,8 @@ const defaultState: HabitFormationState = {
 
 export function HabitFormationProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<HabitFormationState>(defaultState);
+  const [aiSuggestions, setAiSuggestions] = useState<SuggestedHabit[]>([]);
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
 
   const calculateTodaySummary = useCallback((habits: Habit[], completions: HabitCompletion[]): DailyHabitSummary => {
     const today = new Date().toISOString().split('T')[0];
@@ -92,16 +101,16 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
         if (backendHabits && backendHabits.length > 0) {
           console.log('[HabitFormation] Loaded habits from backend:', backendHabits.length);
           habits = backendHabits.map((h: any) => ({
-            id: h.id,
-            name: h.habitName || h.name,
-            category: h.habitType || h.category || 'health',
-            frequency: h.frequency || 'daily',
-            targetValue: h.targetValue || 1,
-            unit: h.unit || 'times',
-            reminderTime: h.reminderTime,
-            isActive: true,
-            createdAt: Date.now(),
             ...h,
+            id: h.id || `habit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: h.habitName || h.name || 'Untitled Habit',
+            description: h.description || '',
+            category: h.habitType || h.category || 'custom',
+            icon: h.icon || CATEGORY_ICONS[h.habitType as HabitCategory] || CATEGORY_ICONS[h.category as HabitCategory] || 'star',
+            frequency: h.frequency || 'daily',
+            reminderEnabled: h.reminderEnabled ?? false,
+            isActive: h.isActive ?? true,
+            createdAt: h.createdAt || Date.now(),
           }));
         } else {
           habits = await getHabits();
@@ -276,12 +285,27 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
       }));
   }, [state.habits, state.completions]);
 
+  const generateAISuggestions = useCallback(async (userData: UserHabitContext) => {
+    setIsGeneratingSuggestions(true);
+    try {
+      const suggestions = await generatePersonalizedHabits(userData);
+      setAiSuggestions(suggestions);
+      console.log('[HabitFormation] AI generated', suggestions.length, 'suggestions');
+    } catch (error) {
+      console.error('[HabitFormation] AI suggestion error:', error);
+    } finally {
+      setIsGeneratingSuggestions(false);
+    }
+  }, []);
+
   const refresh = useCallback(async () => {
     await loadData();
   }, [loadData]);
 
   const value = useMemo<HabitFormationContextType>(() => ({
     state,
+    aiSuggestions,
+    isGeneratingSuggestions,
     addHabit,
     updateHabit: updateHabitHandler,
     deleteHabit: deleteHabitHandler,
@@ -289,9 +313,12 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
     skipHabit,
     getHabitStreak,
     getTodayHabits,
+    generateAISuggestions,
     refresh,
   }), [
     state,
+    aiSuggestions,
+    isGeneratingSuggestions,
     addHabit,
     updateHabitHandler,
     deleteHabitHandler,
@@ -299,6 +326,7 @@ export function HabitFormationProvider({ children }: { children: ReactNode }) {
     skipHabit,
     getHabitStreak,
     getTodayHabits,
+    generateAISuggestions,
     refresh,
   ]);
 

@@ -2,7 +2,7 @@
  * Habit Formation Card
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Colors } from '../../../constants/Theme';
 import {
   View,
@@ -12,26 +12,124 @@ import {
   Modal,
   ScrollView,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GlassCard } from '../../GlassCard';
 import { useGlassTheme } from '../../liquidGlass';
 import { useHabitFormation } from '../../../contexts/HabitFormationContext';
-import { Habit, HabitCategory, SUGGESTED_HABITS, CATEGORY_ICONS } from '../../../types/habitFormation';
+import { useGoalWizard } from '../../../contexts/GoalWizardContext';
+import { useHydration } from '../../../contexts/HydrationContext';
+import { useSleepRecovery } from '../../../contexts/SleepRecoveryContext';
+import { useTraining } from '../../../contexts/TrainingContext';
+import { useMealPlan } from '../../../contexts/MealPlanContext';
+import { useAdaptiveTDEE } from '../../../contexts/AdaptiveTDEEContext';
+import {
+  Habit,
+  HabitCategory,
+  SuggestedHabit,
+  UserHabitContext,
+  SUGGESTED_HABITS,
+  CATEGORY_ICONS,
+} from '../../../types/habitFormation';
 import { Fonts } from '../../../constants/Theme';
 import { NumberText } from '../../../components/NumberText';
 
+const PRIORITY_COLORS: Record<string, string> = {
+  high: '#EF4444',
+  medium: '#F59E0B',
+  low: '#10B981',
+};
+
 export default function HabitFormationCard() {
   const { colors } = useGlassTheme();
-  const { state, addHabit, completeHabit, skipHabit, getTodayHabits, getHabitStreak } = useHabitFormation();
+  const {
+    state, aiSuggestions, isGeneratingSuggestions,
+    addHabit, completeHabit, skipHabit, getTodayHabits, getHabitStreak, generateAISuggestions,
+  } = useHabitFormation();
+
+  // External context hooks for building UserHabitContext
+  const { state: goalState } = useGoalWizard();
+  const { state: hydrationState, getAverageIntake } = useHydration();
+  const { state: sleepState } = useSleepRecovery();
+  const { state: trainingState } = useTraining();
+  const { state: mealState } = useMealPlan();
+  const { state: tdeeState, getRecommendedCalories } = useAdaptiveTDEE();
 
   const [showHabitsModal, setShowHabitsModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newHabitName, setNewHabitName] = useState('');
   const [newHabitCategory, setNewHabitCategory] = useState<HabitCategory>('custom');
+  const hasRequestedAI = useRef(false);
 
   const todayHabits = useMemo(() => getTodayHabits(), [getTodayHabits]);
   const summary = state.todaySummary;
+
+  // Build UserHabitContext from all contexts
+  const userHabitContext = useMemo((): UserHabitContext => {
+    // Compute weight trend from TDEE weight history
+    let weightTrend: 'losing' | 'gaining' | 'stable' | 'unknown' = 'unknown';
+    const history = tdeeState.weightHistory;
+    if (history && history.length >= 3) {
+      const recent = history.slice(-3);
+      const first = recent[0]?.weight ?? 0;
+      const last = recent[recent.length - 1]?.weight ?? 0;
+      const diff = last - first;
+      if (diff < -0.5) weightTrend = 'losing';
+      else if (diff > 0.5) weightTrend = 'gaining';
+      else weightTrend = 'stable';
+    }
+
+    // Compute sleep averages from entries
+    let sleepAvgHours = 0;
+    let sleepAvgQuality = 3;
+    const sleepEntries = sleepState.sleepEntries || [];
+    if (sleepEntries.length > 0) {
+      const totalMin = sleepEntries.reduce((sum: number, e: any) => sum + (e.duration || 0), 0);
+      sleepAvgHours = Math.round((totalMin / sleepEntries.length / 60) * 10) / 10;
+      const totalQuality = sleepEntries.reduce((sum: number, e: any) => sum + (e.quality || 3), 0);
+      sleepAvgQuality = Math.round((totalQuality / sleepEntries.length) * 10) / 10;
+    }
+
+    return {
+      primaryGoal: goalState.primaryGoal || 'not_set',
+      currentWeight: goalState.currentWeight || 0,
+      targetWeight: goalState.targetWeight || 0,
+      activityLevel: goalState.activityLevel || 'moderate',
+      dietStyle: goalState.dietStyle || 'standard',
+      isFasting: goalState.intermittentFasting || false,
+      fastingWindow: goalState.intermittentFasting
+        ? { start: goalState.fastingStart || '20:00', end: goalState.fastingEnd || '12:00' }
+        : undefined,
+      hydrationGoalOz: hydrationState.todayGoal || 64,
+      hydrationAvgOz: Math.round(getAverageIntake()),
+      hydrationStreak: hydrationState.streak?.currentStreak || 0,
+      sleepGoalHours: (sleepState.sleepGoal?.targetDuration || 480) / 60,
+      sleepAvgHours,
+      sleepDebtMinutes: sleepState.sleepDebt || 0,
+      sleepAvgQuality,
+      hasTrainingPlan: trainingState.weeklyPlan !== null,
+      workoutsPerWeek: trainingState.preferences?.workoutsPerWeek || 0,
+      trainingWeekIndex: trainingState.currentWeekIndex || 0,
+      hasMealPlan: mealState.weeklyPlan !== null,
+      mealsPerDay: goalState.mealsPerDay || 3,
+      calorieTarget: getRecommendedCalories(),
+      existingHabitNames: state.habits.map((h) => h.name),
+      habitCompletionRate: summary?.completionRate || 0,
+      weightTrend,
+    };
+  }, [
+    goalState, hydrationState, sleepState, trainingState, mealState, tdeeState,
+    state.habits, summary, getAverageIntake, getRecommendedCalories,
+  ]);
+
+  // Trigger AI suggestions when Add modal opens
+  useEffect(() => {
+    if (showAddModal && !hasRequestedAI.current && aiSuggestions.length === 0 && !isGeneratingSuggestions) {
+      hasRequestedAI.current = true;
+      generateAISuggestions(userHabitContext);
+    }
+  }, [showAddModal, aiSuggestions.length, isGeneratingSuggestions, generateAISuggestions, userHabitContext]);
 
   const handleAddHabit = useCallback(async () => {
     if (!newHabitName.trim()) return;
@@ -52,6 +150,24 @@ export default function HabitFormationCard() {
   const handleAddSuggested = useCallback(async (habit: typeof SUGGESTED_HABITS[0]) => {
     await addHabit(habit);
   }, [addHabit]);
+
+  const handleAddAISuggestion = useCallback(async (suggestion: SuggestedHabit) => {
+    await addHabit({
+      name: suggestion.name,
+      description: suggestion.description,
+      category: suggestion.category,
+      icon: suggestion.icon,
+      frequency: suggestion.frequency,
+      reminderEnabled: false,
+    });
+  }, [addHabit]);
+
+  // Filter AI suggestions to exclude already-added habits
+  const filteredAISuggestions = useMemo(() => {
+    return aiSuggestions.filter(
+      (s) => !state.habits.some((h) => h.name.toLowerCase() === s.name.toLowerCase())
+    );
+  }, [aiSuggestions, state.habits]);
 
   const renderHabitItem = ({ habit, completion }: { habit: Habit; completion: any }) => {
     const streak = getHabitStreak(habit.id);
@@ -109,6 +225,40 @@ export default function HabitFormationCard() {
       </View>
     );
   };
+
+  const renderSkeletonRow = (index: number) => (
+    <View key={`skeleton-${index}`} style={[styles.suggestedItem, { borderBottomColor: colors.glassBorder }]}>
+      <View style={[styles.habitIcon, { backgroundColor: colors.cardGlass }]} />
+      <View style={styles.suggestedInfo}>
+        <View style={[styles.skeletonLine, { backgroundColor: colors.cardGlass, width: 120 }]} />
+        <View style={[styles.skeletonLine, { backgroundColor: colors.cardGlass, width: 200, marginTop: 6 }]} />
+      </View>
+    </View>
+  );
+
+  const renderAISuggestion = (suggestion: SuggestedHabit, index: number) => (
+    <TouchableOpacity
+      key={`ai-${index}`}
+      style={[styles.suggestedItem, { borderBottomColor: colors.glassBorder }]}
+      onPress={() => handleAddAISuggestion(suggestion)}
+      accessibilityLabel={`Add ${suggestion.name} habit`}
+      accessibilityRole="button"
+      accessibilityHint={`Adds ${suggestion.name} to your daily habits: ${suggestion.reason}`}
+    >
+      <View style={styles.aiSuggestionLeft}>
+        <View style={[styles.priorityDot, { backgroundColor: PRIORITY_COLORS[suggestion.priority] }]} />
+        <View style={[styles.habitIcon, { backgroundColor: colors.primary + '20' }]}>
+          <Ionicons name={suggestion.icon as any} size={18} color={colors.primary} />
+        </View>
+      </View>
+      <View style={styles.suggestedInfo}>
+        <Text style={[styles.suggestedName, { color: colors.text }]}>{suggestion.name}</Text>
+        <Text style={[styles.suggestedDesc, { color: colors.textMuted }]}>{suggestion.description}</Text>
+        <Text style={[styles.aiReason, { color: colors.primary }]}>{suggestion.reason}</Text>
+      </View>
+      <Ionicons name="add-circle" size={24} color={colors.primary} />
+    </TouchableOpacity>
+  );
 
   return (
     <>
@@ -275,8 +425,35 @@ export default function HabitFormationCard() {
               </TouchableOpacity>
             </GlassCard>
 
-            {/* Suggested Habits */}
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Suggested Habits</Text>
+            {/* AI Personalized Suggestions */}
+            <View style={styles.aiSectionHeader}>
+              <Ionicons name="sparkles" size={16} color={colors.primary} />
+              <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 0, marginLeft: 6 }]}>
+                Personalized For You
+              </Text>
+            </View>
+            {isGeneratingSuggestions ? (
+              <View style={styles.aiLoadingSection}>
+                {[0, 1, 2].map(renderSkeletonRow)}
+                <View style={styles.aiLoadingIndicator}>
+                  <ActivityIndicator size="small" color={colors.primary} />
+                  <Text style={[styles.aiLoadingText, { color: colors.textMuted }]}>
+                    Analyzing your data...
+                  </Text>
+                </View>
+              </View>
+            ) : filteredAISuggestions.length > 0 ? (
+              <View style={styles.aiSuggestionsSection}>
+                {filteredAISuggestions.map(renderAISuggestion)}
+              </View>
+            ) : aiSuggestions.length > 0 ? (
+              <Text style={[styles.emptyAIText, { color: colors.textMuted }]}>
+                All personalized suggestions have been added!
+              </Text>
+            ) : null}
+
+            {/* General Suggested Habits */}
+            <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 20 }]}>General Suggestions</Text>
             {SUGGESTED_HABITS.filter((sh) => !state.habits.some((h) => h.name === sh.name)).map((habit, index) => (
               <TouchableOpacity
                 key={index}
@@ -346,4 +523,15 @@ const styles = StyleSheet.create({
   suggestedInfo: { flex: 1, marginLeft: 12 },
   suggestedName: { fontSize: 14, fontFamily: Fonts.medium },
   suggestedDesc: { fontSize: 12, fontFamily: Fonts.regular, marginTop: 2 },
+  // AI suggestion styles
+  aiSectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  aiSuggestionsSection: { marginBottom: 8 },
+  aiLoadingSection: { marginBottom: 8 },
+  aiLoadingIndicator: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 8 },
+  aiLoadingText: { fontSize: 12, fontFamily: Fonts.regular },
+  aiSuggestionLeft: { flexDirection: 'row', alignItems: 'center' },
+  priorityDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
+  aiReason: { fontSize: 11, fontFamily: Fonts.regular, fontStyle: 'italic', marginTop: 4 },
+  skeletonLine: { height: 12, borderRadius: 6 },
+  emptyAIText: { fontSize: 12, fontFamily: Fonts.regular, textAlign: 'center', paddingVertical: 12 },
 });
