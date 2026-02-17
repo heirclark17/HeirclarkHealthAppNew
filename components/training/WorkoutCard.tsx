@@ -432,15 +432,15 @@ export function WorkoutCard({
           {/* Workout Stats */}
           <View style={styles.statsRowInline}>
             <GlassCard style={styles.statCard}>
-              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.duration}</NumberText>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{workout.duration}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Minutes</Text>
             </GlassCard>
             <GlassCard style={styles.statCard}>
-              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.estimatedCaloriesBurned}</NumberText>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{workout.estimatedCaloriesBurned}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Calories</Text>
             </GlassCard>
             <GlassCard style={styles.statCard}>
-              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{totalExercises}</NumberText>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{totalExercises}</NumberText>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exercises</Text>
             </GlassCard>
           </View>
