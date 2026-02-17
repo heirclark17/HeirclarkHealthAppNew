@@ -1162,7 +1162,7 @@ export default function DashboardScreen() {
         const fastingEnabled = goalWizardState?.intermittentFasting ?? false;
 
         return (
-          <View key={cardId} style={{ flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 }}>
+          <View key={cardId} style={{ flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8, alignItems: 'flex-end' }}>
             {/* Today's Workout Card */}
             <TodaysWorkoutCard
               workoutType={workoutType}
