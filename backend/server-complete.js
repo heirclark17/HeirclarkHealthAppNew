@@ -1121,6 +1121,65 @@ app.get('/api/v1/workouts/state', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/v1/workouts/exercise-completions - Save individual exercise completion
+app.post('/api/v1/workouts/exercise-completions', authenticateToken, async (req, res) => {
+  try {
+    const { date, dayIndex, exerciseId, exerciseName, completed, completedAt } = req.body;
+
+    console.log('[Workout] Saving exercise completion:', exerciseName, completed);
+
+    // Store in workout_plans table's training_state JSONB
+    // Get current training_state
+    const currentState = await pool.query(
+      `SELECT training_state FROM workout_plans WHERE user_id = $1`,
+      [req.userId]
+    );
+
+    let trainingState = currentState.rows[0]?.training_state || {};
+
+    // Initialize exercise_completions array if doesn't exist
+    if (!trainingState.exercise_completions) {
+      trainingState.exercise_completions = [];
+    }
+
+    // Remove existing entry for this exercise on this date (if any)
+    trainingState.exercise_completions = trainingState.exercise_completions.filter(
+      ec => !(ec.date === date && ec.exerciseId === exerciseId)
+    );
+
+    // Add new completion record
+    trainingState.exercise_completions.push({
+      date,
+      dayIndex,
+      exerciseId,
+      exerciseName,
+      completed,
+      completedAt: completedAt || new Date().toISOString()
+    });
+
+    // Update training_state
+    await pool.query(
+      `INSERT INTO workout_plans (user_id, plan_name, weekly_schedule, plan_data, training_state)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (user_id) DO UPDATE
+       SET training_state = $5, updated_at = NOW()`,
+      [
+        req.userId,
+        'Default Plan',
+        JSON.stringify([]),
+        JSON.stringify({}),
+        JSON.stringify(trainingState)
+      ]
+    );
+
+    console.log('[Workout] ✅ Exercise completion saved');
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Workout] Save exercise completion error:', error.message);
+    res.status(500).json({ error: 'Failed to save exercise completion', message: error.message });
+  }
+});
+
 // ============================================
 // CUSTOM WORKOUTS ENDPOINTS
 // ============================================
