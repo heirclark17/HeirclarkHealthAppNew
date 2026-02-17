@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.env
+.env.*
+playwright-report
+*.test.js
+playwright.config.ts
+tests
+scripts
+migrations
+database
+*.py
+*.md
