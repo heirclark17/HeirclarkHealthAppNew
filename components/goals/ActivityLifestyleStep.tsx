@@ -903,11 +903,13 @@ const styles = StyleSheet.create({
   },
   glassSection: {
     marginBottom: 24,
+    marginHorizontal: 16,
     padding: 16,
   },
   activityList: {
     gap: 8,
     marginBottom: 24,
+    marginHorizontal: 16,
   },
   activityCard: {
     flexDirection: 'row',
@@ -1016,6 +1018,7 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     marginBottom: 24,
+    marginHorizontal: 16,
   },
   summaryCardInner: {
     flexDirection: 'row',
@@ -1071,6 +1074,7 @@ const styles = StyleSheet.create({
   // Cardio preference styles
   cardioSection: {
     marginBottom: 24,
+    marginHorizontal: 16,
   },
   cardioSectionTitle: {
     fontSize: 12,

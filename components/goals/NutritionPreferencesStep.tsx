@@ -1058,6 +1058,7 @@ const styles = StyleSheet.create({
   },
   glassSection: {
     marginBottom: 24,
+    marginHorizontal: 16,
     padding: 16,
   },
   sectionTitle: {

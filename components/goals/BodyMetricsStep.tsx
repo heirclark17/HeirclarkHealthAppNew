@@ -935,6 +935,7 @@ const styles = StyleSheet.create({
   },
   glassSection: {
     marginBottom: 24,
+    marginHorizontal: 16,
   },
   glassSectionInner: {
     padding: 16,
