@@ -1177,6 +1177,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           durationMinutes: day.workout.duration || 0,
           caloriesBurned: day.workout.estimatedCaloriesBurned || 0,
           exercises: updatedExercises.map(ex => ({
+            exerciseId: ex.exerciseId,
             name: ex.exercise?.name || 'Unknown',
             sets: ex.sets,
             reps: ex.reps,
@@ -1218,6 +1219,47 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           console.log('[Training] ✅ Workout synced to backend successfully!');
         } else {
           console.warn('[Training] ⚠️ Backend sync failed - workout saved locally only');
+        }
+
+        // *** Auto-log weights for progressive overload tracking ***
+        try {
+          console.log('[Training] 📊 Auto-logging weights for overload tracking...');
+          const today = new Date().toISOString().split('T')[0];
+          for (const ex of workoutToSync.exercises) {
+            if (!ex.exerciseId) continue;
+            const exerciseId = ex.exerciseId;
+            // Check if user already manually logged weights today for this exercise
+            const existingLogs = await weightTrackingStorage.getLogsForExercise(exerciseId);
+            const alreadyLoggedToday = existingLogs.some(
+              (l: any) => l.date.startsWith(today)
+            );
+            if (alreadyLoggedToday) continue;
+
+            // Get last known weight for this exercise
+            const lastLog = await weightTrackingStorage.getLastLogForExercise(exerciseId);
+            if (lastLog && lastLog.maxWeight > 0) {
+              // Auto-create a weight log using last known weight
+              const sets = lastLog.sets.filter((s: any) => !s.isWarmup);
+              if (sets.length > 0) {
+                await weightTrackingStorage.saveWeightLog({
+                  exerciseId,
+                  exerciseName: ex.name,
+                  date: new Date().toISOString(),
+                  weekNumber: state.currentWeek || 1,
+                  sets: sets.map((s: any) => ({
+                    setNumber: s.setNumber,
+                    weight: s.weight,
+                    unit: s.unit,
+                    reps: s.reps,
+                    isWarmup: false,
+                  })),
+                });
+              }
+            }
+          }
+          console.log('[Training] ✅ Overload weight logs saved');
+        } catch (overloadErr) {
+          console.warn('[Training] ⚠️ Overload auto-log failed:', overloadErr);
         }
 
         // *** Also sync weekly stats after workout completion ***

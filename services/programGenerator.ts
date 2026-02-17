@@ -18,6 +18,7 @@ import {
   Equipment,
 } from '../types/training';
 import { trainingService } from './trainingService';
+import { weightTrackingStorage } from './weightTrackingStorage';
 import { exerciseDbService } from './exerciseDbService';
 
 /**
@@ -275,8 +276,32 @@ export async function generateMultiWeekProgram(
   const startDate = getMostRecentMonday();
   const calendarStartDate = startDate.toISOString().split('T')[0];
 
+  // Fetch historical weight data for AI prompt enrichment
+  let weightHistoryContext = '';
+  try {
+    const exerciseIds = await weightTrackingStorage.getExercisesWithHistory();
+    if (exerciseIds.length > 0) {
+      const progressData = await Promise.all(
+        exerciseIds.slice(0, 15).map(async (id) => {
+          const logs = await weightTrackingStorage.getLogsForExercise(id);
+          if (logs.length === 0) return null;
+          const name = logs[0].exerciseName;
+          const maxWeight = Math.max(...logs.map(l => l.maxWeight));
+          const unit = logs[0].sets[0]?.unit || 'lb';
+          return `  - ${name}: ${maxWeight} ${unit} (${logs.length} sessions)`;
+        })
+      );
+      const validEntries = progressData.filter(Boolean);
+      if (validEntries.length > 0) {
+        weightHistoryContext = `\nUSER'S EXERCISE HISTORY (use these to prescribe appropriate starting weights):\n${validEntries.join('\n')}\n`;
+      }
+    }
+  } catch (histErr) {
+    console.warn('[ProgramGenerator] Could not load weight history:', histErr);
+  }
+
   // Build AI prompt
-  const prompt = buildProgramPrompt(preferences, programTemplate, userProfile, weeks, researchContext);
+  const prompt = buildProgramPrompt(preferences, programTemplate, userProfile, weeks, researchContext, weightHistoryContext);
 
   try {
     const openai = getOpenAI();
@@ -304,6 +329,24 @@ export async function generateMultiWeekProgram(
 
     // Parse structured JSON output
     const weeklyPlans = parseAIProgramOutput(aiOutput, startDate, weeks, programTemplate.daysPerWeek);
+
+    // Pre-populate exercise weights from overload history
+    try {
+      for (const week of weeklyPlans) {
+        for (const day of week.days) {
+          if (!day.workout) continue;
+          for (const ex of day.workout.exercises) {
+            const progress = await weightTrackingStorage.getExerciseProgress(ex.exerciseId, ex.exercise.name);
+            if (progress && progress.suggestedNextWeight > 0) {
+              ex.weight = `${progress.suggestedNextWeight} ${progress.currentMaxUnit}`;
+            }
+          }
+        }
+      }
+      console.log('[ProgramGenerator] ✅ Exercise weights pre-populated from overload history');
+    } catch (weightErr) {
+      console.warn('[ProgramGenerator] Weight pre-population failed:', weightErr);
+    }
 
     // Enrich exercises with ExerciseDB GIF URLs (fire-and-forget, don't block)
     enrichWithExerciseDb(weeklyPlans).catch(err =>
@@ -346,7 +389,8 @@ function buildProgramPrompt(
   template: ProgramTemplate,
   profile: UserTrainingProfile,
   weeks: number,
-  researchContext?: string
+  researchContext?: string,
+  weightHistoryContext?: string
 ): string {
   // Build strength baseline section
   const strengthSection = [];
@@ -402,6 +446,7 @@ PERIODIZATION:
 ${phases.join('\n')}
 
 ${researchContext ? `RESEARCH CONTEXT (use this to inform exercise selection and volume):\n${researchContext}\n` : ''}
+${weightHistoryContext || ''}
 
 CRITICAL REQUIREMENTS:
 1. Each exercise MUST have 3-5 alternatives covering different equipment types (barbell, dumbbell, machine/cable, bodyweight)

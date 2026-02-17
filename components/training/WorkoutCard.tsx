@@ -92,6 +92,7 @@ function ExerciseRow({
   onLogWeight,
   onViewForm,
   lastWeight,
+  overloadTrend,
   colors,
   isDark,
 }: {
@@ -102,6 +103,7 @@ function ExerciseRow({
   onLogWeight?: () => void;
   onViewForm?: () => void;
   lastWeight?: { weight: number; unit: string } | null;
+  overloadTrend?: 'increasing' | 'stable' | 'decreasing' | null;
   colors: any;
   isDark: boolean;
 }) {
@@ -167,6 +169,27 @@ function ExerciseRow({
                 <NumberText weight="regular">{lastWeight.weight}</NumberText>{lastWeight.unit}
               </Text>
             </View>
+          )}
+          {overloadTrend && (
+            <View style={[
+              styles.trendBadge,
+              {
+                backgroundColor: overloadTrend === 'increasing'
+                  ? (isDark ? 'rgba(76, 217, 100, 0.25)' : 'rgba(76, 217, 100, 0.2)')
+                  : overloadTrend === 'decreasing'
+                    ? (isDark ? 'rgba(255, 69, 58, 0.25)' : 'rgba(255, 69, 58, 0.2)')
+                    : (isDark ? 'rgba(255, 204, 0, 0.25)' : 'rgba(255, 204, 0, 0.2)'),
+              },
+            ]}>
+              <Ionicons
+                name={overloadTrend === 'increasing' ? 'trending-up' : overloadTrend === 'decreasing' ? 'trending-down' : 'remove'}
+                size={12}
+                color={overloadTrend === 'increasing' ? '#4CD964' : overloadTrend === 'decreasing' ? '#FF453A' : '#FFCC00'}
+              />
+            </View>
+          )}
+          {!overloadTrend && lastWeight === null && (
+            <Text style={[styles.newExerciseText, { color: colors.textMuted }]}>NEW</Text>
           )}
         </View>
         {hasGif ? (
@@ -241,37 +264,43 @@ export function WorkoutCard({
   const { settings } = useSettings();
   const [showDetails, setShowDetails] = useState(false);
   const [lastWeights, setLastWeights] = useState<Record<string, { weight: number; unit: string } | null>>({});
+  const [exerciseTrends, setExerciseTrends] = useState<Record<string, 'increasing' | 'stable' | 'decreasing' | null>>({});
   const scale = useSharedValue(1);
 
-  // Load last logged weights for all exercises - parallelized for performance
+  // Load last logged weights and overload trends for all exercises - parallelized
   useEffect(() => {
-    const loadLastWeights = async () => {
-      // Use Promise.all for parallel loading instead of sequential loop
+    const loadExerciseData = async () => {
       const results = await Promise.all(
         workout.exercises.map(async (exercise) => {
           try {
-            const lastLog = await weightTrackingStorage.getLastLogForExercise(exercise.exerciseId);
+            const [lastLog, progress] = await Promise.all([
+              weightTrackingStorage.getLastLogForExercise(exercise.exerciseId),
+              weightTrackingStorage.getExerciseProgress(exercise.exerciseId, exercise.exercise.name),
+            ]);
             return {
               exerciseId: exercise.exerciseId,
-              data: lastLog && lastLog.maxWeight > 0
+              lastWeight: lastLog && lastLog.maxWeight > 0
                 ? { weight: lastLog.maxWeight, unit: lastLog.sets[0]?.unit || 'lb' }
                 : null,
+              trend: progress?.trend || null,
             };
           } catch (error) {
-            return { exerciseId: exercise.exerciseId, data: null };
+            return { exerciseId: exercise.exerciseId, lastWeight: null, trend: null };
           }
         })
       );
 
-      // Build weights object from parallel results
       const weights: Record<string, { weight: number; unit: string } | null> = {};
+      const trends: Record<string, 'increasing' | 'stable' | 'decreasing' | null> = {};
       for (const result of results) {
-        weights[result.exerciseId] = result.data;
+        weights[result.exerciseId] = result.lastWeight;
+        trends[result.exerciseId] = result.trend;
       }
       setLastWeights(weights);
+      setExerciseTrends(trends);
     };
 
-    loadLastWeights();
+    loadExerciseData();
   }, [workout.exercises]);
 
   // Dynamic theme colors
@@ -461,6 +490,7 @@ export function WorkoutCard({
                   onLogWeight={onLogWeight ? () => onLogWeight(exercise) : undefined}
                   onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
                   lastWeight={lastWeights[exercise.exerciseId]}
+                  overloadTrend={exerciseTrends[exercise.exerciseId]}
                   colors={colors}
                   isDark={isDark}
                 />
@@ -737,6 +767,18 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Fonts.semiBold,
     color: Colors.success,
+  },
+  trendBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  newExerciseText: {
+    fontSize: 9,
+    fontFamily: Fonts.semiBold,
+    letterSpacing: 0.5,
   },
   weightButton: {
     width: 32,
