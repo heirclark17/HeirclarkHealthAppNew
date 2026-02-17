@@ -708,8 +708,7 @@ const styles = StyleSheet.create({
   },
   weekLabel: {
     fontSize: 15,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
   },
   quickStats: {
     flexDirection: 'row',
@@ -740,8 +739,7 @@ const styles = StyleSheet.create({
   },
   aiButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
   },
 
   // Sections
