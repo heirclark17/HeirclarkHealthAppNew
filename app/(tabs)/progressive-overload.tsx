@@ -747,8 +747,7 @@ const styles = StyleSheet.create({
   // Sections
   sectionTitle: {
     fontSize: 20,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     marginTop: 12,
     marginBottom: 16,
   },
