@@ -262,7 +262,6 @@ export function WorkoutCard({
   onViewForm,
 }: WorkoutCardProps) {
   const { settings } = useSettings();
-  const [showDetails, setShowDetails] = useState(false);
   const [lastWeights, setLastWeights] = useState<Record<string, { weight: number; unit: string } | null>>({});
   const [exerciseTrends, setExerciseTrends] = useState<Record<string, 'increasing' | 'stable' | 'decreasing' | null>>({});
   const scale = useSharedValue(1);
@@ -366,167 +365,100 @@ export function WorkoutCard({
   const typeColor = getWorkoutTypeColor(workout.type);
 
   return (
-    <>
-      <Animated.View style={animatedStyle}>
-        <TouchableOpacity
-            style={[styles.cardWrapper, workout.completed && styles.cardCompleted]}
-            onPress={() => {
-              lightImpact();
-              setShowDetails(true);
-            }}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            activeOpacity={0.8}
-            accessibilityLabel={`${workout.name}, ${workout.duration} minutes, ${workout.estimatedCaloriesBurned} calories, ${completedExercises} of ${totalExercises} exercises completed${workout.completed ? ', workout completed' : ''}`}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: false }}
-            accessibilityHint="Opens workout details to view and track exercises"
-          >
-          <GlassCard style={styles.card} interactive>
-            {/* Header */}
-            <View style={styles.header}>
-              <View style={[styles.iconContainer, { backgroundColor: `${typeColor}20` }]}>
-                <Ionicons name={getWorkoutTypeIcon(workout.type)} size={24} color={typeColor} />
-              </View>
-              <View style={styles.headerText}>
-                <Text style={[styles.workoutName, { color: colors.text }]}>{workout.name}</Text>
-                <Text style={[styles.workoutMeta, { color: colors.textMuted }]}>
-                  <NumberText weight="regular">{workout.duration}</NumberText> min • <NumberText weight="regular">{workout.estimatedCaloriesBurned}</NumberText> cal
-                </Text>
-              </View>
-              {workout.completed ? (
-                <View style={[styles.completedBadge, { backgroundColor: colors.primary }]}>
-                  <Ionicons name="checkmark" size={16} color={colors.primaryText} />
-                </View>
-              ) : (
-                <View style={styles.viewButton}>
-                  <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-                </View>
-              )}
+    <Animated.View style={animatedStyle}>
+      <View style={[styles.cardWrapper, workout.completed && styles.cardCompleted]}>
+        <GlassCard style={styles.card}>
+          {/* Header */}
+          <View style={styles.header}>
+            <View style={[styles.iconContainer, { backgroundColor: `${typeColor}20` }]}>
+              <Ionicons name={getWorkoutTypeIcon(workout.type)} size={24} color={typeColor} />
             </View>
-
-            {/* Progress Bar */}
-            <View style={styles.progressContainer}>
-              <View style={[styles.progressBar, { backgroundColor: secondaryBg }]}>
-                <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: typeColor }]} />
-              </View>
-              <Text style={[styles.progressText, { color: colors.textMuted }]}>
-                <NumberText weight="regular">{completedExercises}</NumberText>/<NumberText weight="regular">{totalExercises}</NumberText> exercises
+            <View style={styles.headerText}>
+              <Text style={[styles.workoutName, { color: colors.text }]}>{workout.name}</Text>
+              <Text style={[styles.workoutMeta, { color: colors.textMuted }]}>
+                <NumberText weight="regular">{workout.duration}</NumberText> min • <NumberText weight="regular">{workout.estimatedCaloriesBurned}</NumberText> cal
               </Text>
             </View>
-
-            {/* Exercise Preview */}
-            <View style={styles.exercisePreview}>
-              {workout.exercises.slice(0, 3).map((ex, i) => (
-                <Text key={ex.id || `preview-${i}`} style={[styles.exercisePreviewText, { color: colors.textSecondary }]} numberOfLines={1}>
-                  • {ex.exercise.name}
-                </Text>
-              ))}
-              {workout.exercises.length > 3 && (
-                <Text style={[styles.moreExercises, { color: colors.textMuted }]}>
-                  +<NumberText weight="regular">{workout.exercises.length - 3}</NumberText> more
-                </Text>
-              )}
-            </View>
-          </GlassCard>
-        </TouchableOpacity>
-      </Animated.View>
-
-      {/* Workout Details Modal */}
-      <Modal
-        visible={showDetails}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowDetails(false)}
-      >
-        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-          <BlurView intensity={100} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
-          <View style={styles.modalContent}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <TouchableOpacity
-                style={[styles.modalCloseButton, { backgroundColor: cardBg }]}
-                onPress={() => setShowDetails(false)}
-                accessibilityLabel="Close workout details"
-                accessibilityRole="button"
-                accessibilityHint="Dismisses the workout details modal and returns to workout list"
-              >
-                <Ionicons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>{workout.name}</Text>
-              <View style={styles.modalHeaderSpacer} />
-            </View>
-
-            {/* Workout Stats - Frosted Liquid Glass */}
-            <GlassCard style={styles.statsRow} interactive>
-              <View style={styles.statsRowInner}>
-                <View style={styles.statItem}>
-                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.duration}</NumberText>
-                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Minutes</Text>
-                </View>
-                <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
-                <View style={styles.statItem}>
-                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.estimatedCaloriesBurned}</NumberText>
-                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Calories</Text>
-                </View>
-                <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
-                <View style={styles.statItem}>
-                  <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{totalExercises}</NumberText>
-                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exercises</Text>
-                </View>
+            {workout.completed && (
+              <View style={[styles.completedBadge, { backgroundColor: colors.primary }]}>
+                <Ionicons name="checkmark" size={16} color={colors.primaryText} />
               </View>
-            </GlassCard>
+            )}
+          </View>
 
-            {/* Exercise List */}
-            <ScrollView style={styles.exerciseList} showsVerticalScrollIndicator={false}>
-              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>EXERCISES</Text>
-              {workout.exercises.map((exercise, index) => (
-                <ExerciseRow
-                  key={exercise.id || `exercise-${index}`}
-                  exercise={exercise}
-                  onToggle={() => onExerciseToggle(exercise.id)}
-                  onSwap={() => onSwapExercise(exercise.id)}
-                  onShowAlternatives={onShowAlternatives ? () => onShowAlternatives(exercise) : undefined}
-                  onLogWeight={onLogWeight ? () => onLogWeight(exercise) : undefined}
-                  onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
-                  lastWeight={lastWeights[exercise.exerciseId]}
-                  overloadTrend={exerciseTrends[exercise.exerciseId]}
-                  colors={colors}
-                  isDark={isDark}
-                />
-              ))}
-              <View style={{ height: 100 }} />
-            </ScrollView>
+          {/* Progress Bar */}
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressBar, { backgroundColor: secondaryBg }]}>
+              <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: typeColor }]} />
+            </View>
+            <Text style={[styles.progressText, { color: colors.textMuted }]}>
+              <NumberText weight="regular">{completedExercises}</NumberText>/<NumberText weight="regular">{totalExercises}</NumberText> exercises
+            </Text>
+          </View>
 
-            {/* Complete Workout Button */}
-            <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={[styles.completeButton, { backgroundColor: colors.primary }, workout.completed && [styles.completeButtonDone, { backgroundColor: cardBg, borderColor }]]}
-                onPress={() => {
-                  mediumImpact();
-                  onMarkComplete();
-                  setShowDetails(false);
-                }}
-                disabled={workout.completed}
-                accessibilityLabel={workout.completed ? `${workout.name} completed` : `Mark ${workout.name} as complete`}
-                accessibilityRole="button"
-                accessibilityState={{ disabled: workout.completed }}
-                accessibilityHint={workout.completed ? 'Workout has been completed' : `Marks all ${totalExercises} exercises as complete and logs ${workout.estimatedCaloriesBurned} calories burned`}
-              >
-                <Ionicons
-                  name={workout.completed ? 'checkmark-circle' : 'checkmark-circle-outline'}
-                  size={22}
-                  color={workout.completed ? colors.text : colors.primaryText}
-                />
-                <Text style={[styles.completeButtonText, { color: colors.primaryText }, workout.completed && { color: colors.text }]}>
-                  {workout.completed ? 'Workout Completed' : 'Mark as Complete'}
-                </Text>
-              </TouchableOpacity>
+          {/* Workout Stats */}
+          <View style={[styles.statsRowInline, { backgroundColor: secondaryBg }]}>
+            <View style={styles.statItem}>
+              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.duration}</NumberText>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Minutes</Text>
+            </View>
+            <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
+            <View style={styles.statItem}>
+              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{workout.estimatedCaloriesBurned}</NumberText>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Calories</Text>
+            </View>
+            <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]} />
+            <View style={styles.statItem}>
+              <NumberText weight="light" style={[styles.statValue, { color: colors.text }]}>{totalExercises}</NumberText>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Exercises</Text>
             </View>
           </View>
-        </View>
-      </Modal>
-    </>
+
+          {/* Exercise List */}
+          <View style={styles.exerciseListInline}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>EXERCISES</Text>
+            {workout.exercises.map((exercise, index) => (
+              <ExerciseRow
+                key={exercise.id || `exercise-${index}`}
+                exercise={exercise}
+                onToggle={() => onExerciseToggle(exercise.id)}
+                onSwap={() => onSwapExercise(exercise.id)}
+                onShowAlternatives={onShowAlternatives ? () => onShowAlternatives(exercise) : undefined}
+                onLogWeight={onLogWeight ? () => onLogWeight(exercise) : undefined}
+                onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
+                lastWeight={lastWeights[exercise.exerciseId]}
+                overloadTrend={exerciseTrends[exercise.exerciseId]}
+                colors={colors}
+                isDark={isDark}
+              />
+            ))}
+          </View>
+
+          {/* Complete Workout Button */}
+          <TouchableOpacity
+            style={[styles.completeButtonInline, { backgroundColor: colors.primary }, workout.completed && [styles.completeButtonDone, { backgroundColor: cardBg, borderColor }]]}
+            onPress={() => {
+              mediumImpact();
+              onMarkComplete();
+            }}
+            disabled={workout.completed}
+            accessibilityLabel={workout.completed ? `${workout.name} completed` : `Mark ${workout.name} as complete`}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: workout.completed }}
+            accessibilityHint={workout.completed ? 'Workout has been completed' : `Marks all ${totalExercises} exercises as complete and logs ${workout.estimatedCaloriesBurned} calories burned`}
+          >
+            <Ionicons
+              name={workout.completed ? 'checkmark-circle' : 'checkmark-circle-outline'}
+              size={22}
+              color={workout.completed ? colors.text : colors.primaryText}
+            />
+            <Text style={[styles.completeButtonText, { color: colors.primaryText }, workout.completed && { color: colors.text }]}>
+              {workout.completed ? 'Workout Completed' : 'Mark as Complete'}
+            </Text>
+          </TouchableOpacity>
+        </GlassCard>
+      </View>
+    </Animated.View>
   );
 }
 
@@ -615,45 +547,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  modalContent: {
-    flex: 1,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-  },
-  modalCloseButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    color: Colors.text,
-    fontFamily: Fonts.semiBold,
-  },
-  modalHeaderSpacer: {
-    width: 40,
-  },
-  statsRow: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  statsRowInner: {
+  // Inline expanded styles (always visible)
+  statsRowInline: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    marginBottom: 16,
   },
   statItem: {
     alignItems: 'center',
@@ -674,9 +575,8 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: Colors.border,
   },
-  exerciseList: {
-    flex: 1,
-    paddingHorizontal: 16,
+  exerciseListInline: {
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 12,
@@ -791,11 +691,7 @@ const styles = StyleSheet.create({
   swapButton: {
     padding: 8,
   },
-  modalFooter: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  completeButton: {
+  completeButtonInline: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -803,6 +699,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: Spacing.borderRadius,
     gap: 8,
+    marginTop: 8,
   },
   completeButtonDone: {
     backgroundColor: 'transparent',
@@ -813,8 +710,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.primaryText,
     fontFamily: Fonts.semiBold,
-  },
-  completeButtonTextDone: {
-    color: Colors.text,
   },
 });
