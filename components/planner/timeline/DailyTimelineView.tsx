@@ -327,7 +327,6 @@ export function DailyTimelineView() {
         <View
           style={[
             styles.allDayBanner,
-            { borderBottomColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
             bannerExpanded && styles.allDayBannerExpanded,
           ]}
         >
@@ -391,7 +390,7 @@ export function DailyTimelineView() {
 
       {/* Timeline — Frosted Liquid Glass Card */}
       <View style={styles.timelineGlassWrapper}>
-        <View style={styles.timelineGlassOuter}>
+        <View style={[styles.timelineGlassOuter, { borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.08)' }]}>
           {/* Frosted glass backdrop */}
           <BlurView
             intensity={isDark ? 40 : 35}
@@ -640,7 +639,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   allDayBanner: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
     maxHeight: 44,
   },
   allDayBannerExpanded: {
@@ -703,6 +701,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 24,
     overflow: 'hidden' as const,
+    borderWidth: 0.5,
   },
   scrollView: {
     flex: 1,

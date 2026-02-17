@@ -8,6 +8,7 @@ import { weightTrackingStorage } from '../services/weightTrackingStorage';
 import { aiService } from '../services/aiService';
 import { api } from '../services/api';
 import { generateMultiWeekProgram } from '../services/programGenerator';
+import { swapDayEquipment } from '../services/equipmentSwapper';
 import { researchOptimalProgram } from '../services/perplexityResearch';
 import {
   WeeklyTrainingPlan,
@@ -240,6 +241,7 @@ interface TrainingContextType {
   goToPreviousWeek: () => void;
   swapExercise: (dayIndex: number, exerciseId: string) => void;
   swapExerciseWithAlternative: (dayIndex: number, exerciseId: string, alternative: ExerciseAlternative) => void;
+  batchSwapDayEquipment: (dayIndex: number, targetEquipment: string) => void;
   getAllPrograms: () => (TrainingProgram | ProgramTemplate)[];
   getEnhancedPrograms: () => ProgramTemplate[];
   clearPlan: () => void;
@@ -1557,6 +1559,121 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // Batch swap all exercises in a day to a target equipment type (single state update)
+  const batchSwapDayEquipment = useCallback((dayIndex: number, targetEquipment: string) => {
+    setState(prev => {
+      if (!prev.weeklyPlan) return prev;
+
+      const updatedDays = [...prev.weeklyPlan.days];
+      const day = updatedDays[dayIndex];
+      if (!day?.workout?.exercises) return prev;
+
+      // Use equipmentSwapper to compute all swaps
+      const result = swapDayEquipment(day, targetEquipment);
+      if (result.swaps.length === 0) {
+        console.log('[Training] No equipment swaps found for:', targetEquipment);
+        return prev;
+      }
+
+      console.log('[Training] Batch equipment swap:', result.swaps.length, 'exercises →', targetEquipment);
+
+      // Apply all swaps at once, properly rebuilding alternatives for each
+      const updatedExercises = [...day.workout.exercises];
+      for (const swap of result.swaps) {
+        const exerciseIndex = updatedExercises.findIndex(ex => ex.id === swap.exerciseId);
+        if (exerciseIndex === -1) continue;
+
+        const currentExercise = updatedExercises[exerciseIndex];
+        const oldExercise = currentExercise.exercise;
+
+        // Build reverse alternatives: original exercise + remaining alts
+        const originalAsAlternative: ExerciseAlternative = {
+          id: oldExercise.id,
+          name: oldExercise.name,
+          equipment: oldExercise.equipment,
+          difficultyModifier: 'same',
+          muscleActivationNotes: '',
+          whenToUse: ['Original exercise'],
+          formCues: oldExercise.instructions,
+        };
+        const remainingAlternatives = (oldExercise.alternatives || []).filter(
+          alt => alt.id !== swap.swappedTo.id && alt.name !== swap.swappedTo.name
+        );
+        const newAlternatives = [originalAsAlternative, ...remainingAlternatives];
+
+        const newExercise: Exercise = {
+          id: swap.swappedTo.id,
+          name: swap.swappedTo.name,
+          equipment: swap.swappedTo.equipment,
+          muscleGroups: oldExercise.muscleGroups,
+          category: oldExercise.category,
+          difficulty: oldExercise.difficulty,
+          caloriesPerMinute: oldExercise.caloriesPerMinute,
+          instructions: swap.swappedTo.formCues,
+          primaryMuscle: oldExercise.primaryMuscle,
+          secondaryMuscles: oldExercise.secondaryMuscles,
+          alternatives: newAlternatives,
+        };
+
+        updatedExercises[exerciseIndex] = {
+          ...currentExercise,
+          exerciseId: newExercise.id,
+          exercise: newExercise,
+          completed: false,
+        };
+      }
+
+      updatedDays[dayIndex] = {
+        ...day,
+        workout: { ...day.workout, exercises: updatedExercises },
+      };
+
+      const updatedPlan = { ...prev.weeklyPlan, days: updatedDays };
+
+      // Update multiWeekPlan so swaps persist
+      let updatedMultiWeek = prev.multiWeekPlan;
+      if (updatedMultiWeek?.weeklyPlans) {
+        const weekIdx = prev.currentWeekIndex;
+        if (weekIdx >= 0 && weekIdx < updatedMultiWeek.weeklyPlans.length) {
+          const updatedWeeklyPlans = [...updatedMultiWeek.weeklyPlans];
+          updatedWeeklyPlans[weekIdx] = updatedPlan;
+          updatedMultiWeek = { ...updatedMultiWeek, weeklyPlans: updatedWeeklyPlans };
+        }
+      }
+
+      // Save to local cache (single write)
+      trainingStorage.savePlanCache({
+        weeklyPlan: updatedPlan,
+        selectedProgram: prev.selectedProgram,
+        goalAlignment: prev.goalAlignment,
+        currentWeek: prev.currentWeek,
+        lastGeneratedAt: prev.lastGeneratedAt || new Date().toISOString(),
+        preferences: prev.preferences,
+        planSummary: prev.planSummary,
+      });
+
+      // Fire-and-forget sync to backend (single call)
+      if (updatedMultiWeek) {
+        api.saveWorkoutPlan(
+          { weeklyPlan: updatedPlan, preferences: prev.preferences, summary: updatedMultiWeek.summary, lastGeneratedAt: prev.lastGeneratedAt },
+          prev.selectedProgram?.id,
+          prev.selectedProgram?.name,
+          {
+            multiWeekPlan: updatedMultiWeek,
+            currentWeekIndex: prev.currentWeekIndex,
+            totalWeeks: updatedMultiWeek.totalWeeks,
+          }
+        ).then(() => {
+          console.log('[Training] ✅ Equipment batch swap synced to backend');
+        }).catch((err: any) => {
+          console.error('[Training] ❌ Equipment batch swap sync error:', err);
+        });
+      }
+
+      return { ...prev, weeklyPlan: updatedPlan, multiWeekPlan: updatedMultiWeek };
+    });
+  }, []);
+
   // Show exercise alternatives modal
   const showExerciseAlternatives = useCallback((exercise: Exercise) => {
     console.log('[Training] Opening alternatives for:', exercise.name, '| alternatives count:', exercise.alternatives?.length || 0);
@@ -1868,6 +1985,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     goToPreviousWeek,
     swapExercise,
     swapExerciseWithAlternative,
+    batchSwapDayEquipment,
     getAllPrograms,
     getEnhancedPrograms,
     clearPlan,
@@ -1891,6 +2009,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     goToPreviousWeek,
     swapExercise,
     swapExerciseWithAlternative,
+    batchSwapDayEquipment,
     getAllPrograms,
     getEnhancedPrograms,
     clearPlan,

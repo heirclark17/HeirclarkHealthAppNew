@@ -26,7 +26,7 @@ import { CardioRecommendationCard } from '../../components/programs/CardioRecomm
 import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { ExerciseAlternative, WorkoutExercise, WeightLog, Equipment } from '../../types/training';
-import { swapDayEquipment, getAvailableEquipmentForDay, EQUIPMENT_LABELS } from '../../services/equipmentSwapper';
+import { getAvailableEquipmentForDay, EQUIPMENT_LABELS } from '../../services/equipmentSwapper';
 import { CoachChatModal } from '../../components/agents/aiCoach';
 import { FormCoachModal } from '../../components/agents/workoutFormCoach';
 import { api } from '../../services/api';
@@ -62,6 +62,7 @@ export default function ProgramsScreen() {
     markWorkoutComplete,
     swapExercise,
     swapExerciseWithAlternative,
+    batchSwapDayEquipment,
     selectProgram,
     selectProgramAndGenerate,
     getAllPrograms,
@@ -376,22 +377,9 @@ export default function ProgramsScreen() {
     if (!currentDay) return;
     // Track user's explicit selection so the chip stays highlighted
     setSelectedEquipmentKey(equipmentKey);
-    const result = swapDayEquipment(currentDay, equipmentKey);
-    if (result.swaps.length > 0) {
-      const updatedExercises = result.updatedDay.workout?.exercises;
-      if (updatedExercises) {
-        updatedExercises.forEach((ex, i) => {
-          const original = currentDay.workout?.exercises[i];
-          if (original && ex.exercise.name !== original.exercise.name) {
-            const alt = original.exercise.alternatives?.find(a => a.name === ex.exercise.name);
-            if (alt) {
-              swapExerciseWithAlternative(selectedDayIndex, original.id, alt);
-            }
-          }
-        });
-      }
-    }
-  }, [currentDay, selectedDayIndex, swapExerciseWithAlternative]);
+    // Single atomic batch swap in TrainingContext (one state update, one cache write, one API sync)
+    batchSwapDayEquipment(selectedDayIndex, equipmentKey);
+  }, [currentDay, selectedDayIndex, batchSwapDayEquipment]);
 
   // Available equipment options for current day
   const availableEquipmentOptions = useMemo(() => {
