@@ -175,13 +175,17 @@ export function groupAlternativesByEquipment(
 }
 
 /**
- * Get available equipment types from a day's exercise alternatives.
+ * Get available equipment types from a day's exercises (current + alternatives).
+ * Includes equipment currently in use so chips never disappear after a swap.
  */
 export function getAvailableEquipmentForDay(day: TrainingDay): string[] {
   if (!day.workout) return [];
 
   const equipmentSet = new Set<string>();
   for (const ex of day.workout.exercises) {
+    // Include the equipment currently in use by this exercise
+    equipmentSet.add(normalizeEquipment(ex.exercise.equipment));
+    // Include all alternative equipment types
     if (ex.exercise.alternatives) {
       for (const alt of ex.exercise.alternatives) {
         equipmentSet.add(normalizeEquipment(alt.equipment));

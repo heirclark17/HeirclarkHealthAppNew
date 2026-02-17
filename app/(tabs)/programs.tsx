@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Modal, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -43,6 +43,7 @@ export default function ProgramsScreen() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [selectedExerciseForWeight, setSelectedExerciseForWeight] = useState<WorkoutExercise | null>(null);
   const [selectedExerciseForForm, setSelectedExerciseForForm] = useState<WorkoutExercise | null>(null);
+  const [selectedEquipmentKey, setSelectedEquipmentKey] = useState<string | null>(null);
   const { settings } = useSettings();
 
   // Dynamic theme colors
@@ -109,8 +110,14 @@ export default function ProgramsScreen() {
     return weeklyPlan.days || [];
   }, [weeklyPlan]);
 
-  // Derive current equipment from today's exercises (majority equipment type)
+  // Reset equipment selection when switching days
+  useEffect(() => {
+    setSelectedEquipmentKey(null);
+  }, [selectedDayIndex]);
+
+  // Derive current equipment: use explicit user selection, or fall back to majority equipment type
   const currentEquipment = useMemo(() => {
+    if (selectedEquipmentKey) return selectedEquipmentKey;
     const day = allDays.length > 0 ? allDays[Math.min(selectedDayIndex % 7, allDays.length - 1)] : undefined;
     if (!day?.workout?.exercises?.length) return null;
     const counts: Record<string, number> = {};
@@ -120,7 +127,7 @@ export default function ProgramsScreen() {
     });
     const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
     return top ? top[0] : null;
-  }, [allDays, selectedDayIndex]);
+  }, [allDays, selectedDayIndex, selectedEquipmentKey]);
 
   // Get current day's workout (clamp to valid range)
   const dayIndexInWeek = allDays.length > 0 ? Math.min(selectedDayIndex % 7, allDays.length - 1) : 0;
@@ -367,6 +374,8 @@ export default function ProgramsScreen() {
   // Handle switch equipment - accepts specific equipment key
   const handleSwitchEquipment = useCallback((equipmentKey: string) => {
     if (!currentDay) return;
+    // Track user's explicit selection so the chip stays highlighted
+    setSelectedEquipmentKey(equipmentKey);
     const result = swapDayEquipment(currentDay, equipmentKey);
     if (result.swaps.length > 0) {
       const updatedExercises = result.updatedDay.workout?.exercises;
