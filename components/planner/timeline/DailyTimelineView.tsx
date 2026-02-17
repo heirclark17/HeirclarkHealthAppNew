@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    marginTop: 8, // Add gap between all-day banner/cards and timeline
+    marginTop: 20, // Add gap between all-day banner/cards and timeline
   },
   scrollContent: {
     paddingHorizontal: 16,

@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 13, // Default for meals/workouts, overridden inline for calendar events
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
     flex: 1,
   },
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   compactText: {
     fontSize: 11, // Default for meals/workouts, overridden inline for calendar events
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
     flex: 1,
   },
