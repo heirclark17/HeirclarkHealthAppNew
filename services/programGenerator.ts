@@ -307,6 +307,8 @@ export async function generateMultiWeekProgram(
     const openai = getOpenAI();
 
     // Call GPT-4.1-mini with JSON response format
+    // Only generate Week 1 via AI, then programmatically create remaining weeks
+    // with progressive overload to avoid JSON truncation
     const response = await openai.chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
@@ -320,14 +322,20 @@ export async function generateMultiWeekProgram(
         }
       ],
       temperature: 0.7,
-      max_tokens: 8000,
+      max_tokens: 16000,
       response_format: { type: 'json_object' },
     });
 
     const aiOutput = response.choices[0].message.content || '';
     console.log('[ProgramGenerator] AI response length:', aiOutput.length);
 
-    // Parse structured JSON output
+    // Check for truncation (finish_reason !== 'stop')
+    const finishReason = response.choices[0].finish_reason;
+    if (finishReason === 'length') {
+      console.warn('[ProgramGenerator] AI response was truncated (finish_reason=length)');
+    }
+
+    // Parse structured JSON output - AI generates Week 1 only
     const weeklyPlans = parseAIProgramOutput(aiOutput, startDate, weeks, programTemplate.daysPerWeek);
 
     // Pre-populate exercise weights from overload history
@@ -414,7 +422,8 @@ function buildProgramPrompt(
     else phases.push(`Week ${w + 1}: Deload (reduce volume 40-50%, maintain intensity)`);
   }
 
-  return `Generate a ${weeks}-week ${template.name} training program as structured JSON.
+  return `Generate Week 1 of a ${weeks}-week ${template.name} training program as structured JSON.
+I will programmatically create weeks 2-${weeks} with progressive overload from your Week 1 template.
 
 USER PROFILE:
 - Primary Goal: ${profile.primaryGoal}
@@ -442,23 +451,18 @@ ${template.deloadProtocol ? `- Deload Protocol: ${template.deloadProtocol}` : ''
 WEEKLY STRUCTURE (follow this split):
 ${weeklyStructureStr}
 
-PERIODIZATION:
-${phases.join('\n')}
-
 ${researchContext ? `RESEARCH CONTEXT (use this to inform exercise selection and volume):\n${researchContext}\n` : ''}
 ${weightHistoryContext || ''}
 
 CRITICAL REQUIREMENTS:
-1. Each exercise MUST have 3-5 alternatives covering different equipment types (barbell, dumbbell, machine/cable, bodyweight)
+1. Each exercise MUST have 2-3 alternatives covering different equipment types (barbell, dumbbell, machine/cable, bodyweight)
 2. Use REAL exercise names (e.g., "Barbell Back Squat", "Dumbbell Romanian Deadlift", "Cable Lateral Raise")
 3. Prescribe specific sets, reps (as range like "8-12"), and rest periods
-4. Progressive overload across weeks: increase weight OR reps from week to week
-5. Each workout day must have 4-6 main exercises plus optional warmup/cooldown
-6. Rest days MUST have isRestDay: true and no workout
-7. Include estimated calories burned per workout (based on duration and intensity)
-8. Vary exercises slightly between weeks to prevent adaptation
+4. Each workout day must have 4-6 main exercises
+5. Rest days MUST have isRestDay: true and no workout
+6. Include estimated calories burned per workout (based on duration and intensity)
 
-RESPOND WITH THIS EXACT JSON STRUCTURE:
+RESPOND WITH THIS EXACT JSON STRUCTURE (Week 1 ONLY, all 7 days):
 {
   "programName": "string",
   "totalWeeks": ${weeks},
@@ -478,17 +482,6 @@ RESPOND WITH THIS EXACT JSON STRUCTURE:
             "difficulty": "intermediate",
             "musclesFocused": ["chest", "shoulders", "triceps"],
             "estimatedCalories": 350,
-            "warmup": [
-              {
-                "name": "Arm Circles",
-                "equipment": "bodyweight",
-                "primaryMuscles": ["shoulders"],
-                "sets": 2,
-                "reps": "15",
-                "restSeconds": 30,
-                "alternatives": []
-              }
-            ],
             "exercises": [
               {
                 "name": "Barbell Bench Press",
@@ -502,21 +495,8 @@ RESPOND WITH THIS EXACT JSON STRUCTURE:
                 "notes": "Focus on controlled eccentric",
                 "alternatives": [
                   { "name": "Dumbbell Bench Press", "equipment": "dumbbell", "difficulty": "same" },
-                  { "name": "Machine Chest Press", "equipment": "machine", "difficulty": "easier" },
-                  { "name": "Push-Ups", "equipment": "bodyweight", "difficulty": "easier" },
-                  { "name": "Cable Chest Press", "equipment": "cable", "difficulty": "same" }
+                  { "name": "Machine Chest Press", "equipment": "machine", "difficulty": "easier" }
                 ]
-              }
-            ],
-            "cooldown": [
-              {
-                "name": "Chest Stretch",
-                "equipment": "bodyweight",
-                "primaryMuscles": ["chest"],
-                "sets": 1,
-                "reps": "30 sec hold",
-                "restSeconds": 0,
-                "alternatives": []
               }
             ]
           }
@@ -531,7 +511,7 @@ RESPOND WITH THIS EXACT JSON STRUCTURE:
   ]
 }
 
-Generate ALL ${weeks} weeks with ALL 7 days each. Include ${template.daysPerWeek} workout days and ${7 - template.daysPerWeek} rest days per week.`.trim();
+Generate ONLY Week 1 with ALL 7 days. Include ${template.daysPerWeek} workout days and ${7 - template.daysPerWeek} rest days.`.trim();
 }
 
 // ============================================================================
@@ -564,65 +544,218 @@ function parseAIProgramOutput(
     }
   }
 
-  if (!parsed.weeks || !Array.isArray(parsed.weeks)) {
+  if (!parsed.weeks || !Array.isArray(parsed.weeks) || parsed.weeks.length === 0) {
     throw new Error('AI response missing weeks array');
   }
 
+  // AI generates only Week 1 - we'll create remaining weeks with progressive overload
+  const aiWeeksCount = parsed.weeks.length;
+  console.log('[ProgramGenerator] AI provided', aiWeeksCount, 'week(s), need', weeks, 'weeks total');
+
   const weeklyPlans: WeeklyTrainingPlan[] = [];
 
-  for (let weekIndex = 0; weekIndex < weeks; weekIndex++) {
+  // Parse Week 1 from AI
+  const week1 = buildWeekFromAI(parsed.weeks[0], startDate, 0);
+  weeklyPlans.push(week1);
+
+  // If AI provided more weeks, use them; otherwise generate from Week 1
+  for (let weekIndex = 1; weekIndex < weeks; weekIndex++) {
     const weekStartDate = new Date(startDate);
     weekStartDate.setDate(startDate.getDate() + weekIndex * 7);
 
-    const aiWeek = parsed.weeks[weekIndex];
-    const days: TrainingDay[] = [];
-    const focusAreas = new Set<MuscleGroup>();
-    let totalCalories = 0;
-    let workoutCount = 0;
+    if (weekIndex < aiWeeksCount && parsed.weeks[weekIndex]?.days?.length > 0) {
+      // Use AI-provided week
+      weeklyPlans.push(buildWeekFromAI(parsed.weeks[weekIndex], weekStartDate, weekIndex));
+    } else {
+      // Generate from Week 1 with progressive overload
+      weeklyPlans.push(buildProgressiveWeek(week1, weekStartDate, weekIndex, weeks));
+    }
+  }
 
-    for (let dayNum = 1; dayNum <= 7; dayNum++) {
-      const dayDate = addDays(weekStartDate, dayNum - 1);
+  return weeklyPlans;
+}
 
-      // Find matching AI day
-      const aiDay = aiWeek?.days?.find((d: AIDay) => d.dayNumber === dayNum);
+/**
+ * Build a single week from AI output
+ */
+function buildWeekFromAI(
+  aiWeek: any,
+  weekStartDate: Date,
+  weekIndex: number
+): WeeklyTrainingPlan {
+  const days: TrainingDay[] = [];
+  const focusAreas = new Set<MuscleGroup>();
+  let totalCalories = 0;
+  let workoutCount = 0;
 
-      let workout: Workout | null = null;
-      const isRestDay = aiDay?.isRestDay !== false || !aiDay?.workout;
+  for (let dayNum = 1; dayNum <= 7; dayNum++) {
+    const dayDate = addDays(weekStartDate, dayNum - 1);
+    const aiDay = aiWeek?.days?.find((d: AIDay) => d.dayNumber === dayNum);
 
-      if (!isRestDay && aiDay?.workout) {
-        workout = mapAIWorkoutToWorkout(aiDay.workout, weekIndex, dayNum);
-        totalCalories += workout.estimatedCaloriesBurned;
-        workout.muscleGroupsFocused.forEach(mg => focusAreas.add(mg));
-        workoutCount++;
-      }
+    let workout: Workout | null = null;
+    const isRestDay = aiDay?.isRestDay !== false || !aiDay?.workout;
 
-      days.push({
+    if (!isRestDay && aiDay?.workout) {
+      workout = mapAIWorkoutToWorkout(aiDay.workout, weekIndex, dayNum);
+      totalCalories += workout.estimatedCaloriesBurned;
+      workout.muscleGroupsFocused.forEach(mg => focusAreas.add(mg));
+      workoutCount++;
+    }
+
+    days.push({
+      id: `day-${weekIndex + 1}-${dayNum}`,
+      dayOfWeek: getDayOfWeek(dayNum),
+      dayNumber: dayNum,
+      date: dayDate,
+      workout,
+      isRestDay: !workout,
+      completed: false,
+      calendarDate: dayDate,
+      weekNumber: weekIndex + 1,
+    });
+  }
+
+  return {
+    id: `week-${weekIndex + 1}`,
+    weekNumber: weekIndex + 1,
+    startDate: addDays(weekStartDate, 0),
+    endDate: addDays(weekStartDate, 6),
+    days,
+    totalWorkouts: workoutCount,
+    completedWorkouts: 0,
+    totalCaloriesBurned: totalCalories,
+    focusAreas: Array.from(focusAreas),
+  };
+}
+
+/**
+ * Create a progressive overload week from Week 1 template.
+ * - Weeks 2-3 (Accumulation/Intensification): +1 set or +reps
+ * - Last week (Deload): -40% volume, maintain exercise selection
+ */
+function buildProgressiveWeek(
+  week1: WeeklyTrainingPlan,
+  weekStartDate: Date,
+  weekIndex: number,
+  totalWeeks: number
+): WeeklyTrainingPlan {
+  const isDeload = weekIndex >= totalWeeks - 1 && totalWeeks > 2;
+  const phase = isDeload ? 'Deload' : weekIndex < Math.floor(totalWeeks * 0.5) ? 'Accumulation' : 'Intensification';
+  console.log(`[ProgramGenerator] Building Week ${weekIndex + 1} (${phase}) from Week 1 template`);
+
+  const days: TrainingDay[] = week1.days.map((day, dayIdx) => {
+    const dayDate = addDays(weekStartDate, dayIdx);
+    const dayNum = dayIdx + 1;
+
+    if (!day.workout) {
+      return {
         id: `day-${weekIndex + 1}-${dayNum}`,
         dayOfWeek: getDayOfWeek(dayNum),
         dayNumber: dayNum,
         date: dayDate,
-        workout,
-        isRestDay: !workout,
+        workout: null,
+        isRestDay: true,
         completed: false,
         calendarDate: dayDate,
         weekNumber: weekIndex + 1,
-      });
+      };
     }
 
-    weeklyPlans.push({
-      id: `week-${weekIndex + 1}`,
-      weekNumber: weekIndex + 1,
-      startDate: addDays(weekStartDate, 0),
-      endDate: addDays(weekStartDate, 6),
-      days,
-      totalWorkouts: workoutCount,
-      completedWorkouts: 0,
-      totalCaloriesBurned: totalCalories,
-      focusAreas: Array.from(focusAreas),
-    });
-  }
+    // Clone workout with progressive overload
+    const clonedExercises: WorkoutExercise[] = day.workout.exercises.map((ex, exIdx) => {
+      const exerciseId = `ex-${weekIndex}-${dayNum}-${exIdx}`;
+      let sets = ex.sets;
+      let reps = ex.reps;
 
-  return weeklyPlans;
+      if (isDeload) {
+        // Deload: reduce sets by ~40%, keep same reps
+        sets = Math.max(2, Math.round(ex.sets * 0.6));
+      } else if (phase === 'Intensification') {
+        // Intensification: same sets, lower rep range (heavier weight implied)
+        const repMatch = reps.match(/(\d+)-(\d+)/);
+        if (repMatch) {
+          const low = Math.max(1, parseInt(repMatch[1]) - 2);
+          const high = Math.max(low + 1, parseInt(repMatch[2]) - 2);
+          reps = `${low}-${high}`;
+        }
+      } else {
+        // Accumulation: add a set every other week
+        if (weekIndex % 2 === 1) {
+          sets = Math.min(ex.sets + 1, 6);
+        }
+      }
+
+      return {
+        ...ex,
+        id: exerciseId,
+        exerciseId,
+        sets,
+        reps,
+        completed: false,
+        exercise: {
+          ...ex.exercise,
+          id: exerciseId,
+        },
+      };
+    });
+
+    const clonedWorkout: Workout = {
+      ...day.workout,
+      id: `workout-${weekIndex + 1}-${dayNum}`,
+      name: day.workout.name.replace(/Week \d+/, `Week ${weekIndex + 1}`),
+      exercises: clonedExercises,
+      warmup: day.workout.warmup?.map((w, i) => ({
+        ...w,
+        id: `warmup-${weekIndex}-${dayNum}-${i}`,
+        exerciseId: `warmup-${weekIndex}-${dayNum}-${i}`,
+        completed: false,
+        exercise: { ...w.exercise, id: `warmup-${weekIndex}-${dayNum}-${i}` },
+      })),
+      cooldown: day.workout.cooldown?.map((c, i) => ({
+        ...c,
+        id: `cooldown-${weekIndex}-${dayNum}-${i}`,
+        exerciseId: `cooldown-${weekIndex}-${dayNum}-${i}`,
+        completed: false,
+        exercise: { ...c.exercise, id: `cooldown-${weekIndex}-${dayNum}-${i}` },
+      })),
+      completed: false,
+    };
+
+    return {
+      id: `day-${weekIndex + 1}-${dayNum}`,
+      dayOfWeek: getDayOfWeek(dayNum),
+      dayNumber: dayNum,
+      date: dayDate,
+      workout: clonedWorkout,
+      isRestDay: false,
+      completed: false,
+      calendarDate: dayDate,
+      weekNumber: weekIndex + 1,
+    };
+  });
+
+  const focusAreas = new Set<MuscleGroup>();
+  let totalCalories = 0;
+  let workoutCount = 0;
+  days.forEach(d => {
+    if (d.workout) {
+      workoutCount++;
+      totalCalories += d.workout.estimatedCaloriesBurned;
+      d.workout.muscleGroupsFocused.forEach(mg => focusAreas.add(mg));
+    }
+  });
+
+  return {
+    id: `week-${weekIndex + 1}`,
+    weekNumber: weekIndex + 1,
+    startDate: addDays(weekStartDate, 0),
+    endDate: addDays(weekStartDate, 6),
+    days,
+    totalWorkouts: workoutCount,
+    completedWorkouts: 0,
+    totalCaloriesBurned: totalCalories,
+    focusAreas: Array.from(focusAreas),
+  };
 }
 
 // ============================================================================
