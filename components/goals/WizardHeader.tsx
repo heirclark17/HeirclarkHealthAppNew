@@ -24,7 +24,7 @@ export function WizardHeader({ currentStep, totalSteps, title, onBack, isDark = 
   const textSecondary = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)';
   const progressBg = isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)';
   const progressFill = isDark ? '#96CEB4' : '#4A9B7A';
-  const glassOverlay = isDark ? 'rgba(0, 0, 0, 0.35)' : 'rgba(255, 255, 255, 0.75)';
+  const glassOverlay = isDark ? 'rgba(0, 0, 0, 0.65)' : 'rgba(255, 255, 255, 0.90)';
 
 
   // Calculate progress percentage
