@@ -84,6 +84,24 @@ function ExerciseGifThumbnail({
   );
 }
 
+// Helper: check if weight string contains a numeric value (not just "bodyweight")
+function isNumericWeight(w?: string): boolean {
+  if (!w) return false;
+  return /\d/.test(w) && !w.toLowerCase().includes('bodyweight');
+}
+
+// Helper: extract numeric value from weight string like "135 lbs"
+function parseWeightValue(w: string): string {
+  const m = w.match(/(\d+(?:\.\d+)?)/);
+  return m ? m[1] : w;
+}
+
+// Helper: extract unit from weight string
+function parseWeightUnit(w: string): string {
+  const m = w.match(/\d+(?:\.\d+)?\s*(lbs?|kg)/i);
+  return m ? m[1] : 'lb';
+}
+
 function ExerciseRow({
   exercise,
   onToggle,
@@ -93,6 +111,7 @@ function ExerciseRow({
   onViewForm,
   lastWeight,
   overloadTrend,
+  suggestedNext,
   colors,
   isDark,
 }: {
@@ -104,6 +123,7 @@ function ExerciseRow({
   onViewForm?: () => void;
   lastWeight?: { weight: number; unit: string } | null;
   overloadTrend?: 'increasing' | 'stable' | 'decreasing' | null;
+  suggestedNext?: number | null;
   colors: any;
   isDark: boolean;
 }) {
@@ -163,12 +183,19 @@ function ExerciseRow({
           <Text style={[styles.exerciseDetails, { color: colors.textMuted }]}>
             <NumberText weight="regular">{exercise.sets}</NumberText> sets × <NumberText weight="regular">{exercise.reps}</NumberText> • <NumberText weight="regular">{exercise.restSeconds}</NumberText>s rest
           </Text>
+          {/* Priority 1: User has logged weight history */}
           {lastWeight && lastWeight.weight > 0 && (
             <View style={[styles.lastWeightBadge, { backgroundColor: isDark ? 'rgba(76, 217, 100, 0.2)' : 'rgba(76, 217, 100, 0.15)' }]}>
               <Text style={styles.lastWeightText}>
                 <NumberText weight="regular">{lastWeight.weight}</NumberText>{lastWeight.unit}
               </Text>
             </View>
+          )}
+          {/* Priority 1b: Next weight suggestion when history exists */}
+          {lastWeight && lastWeight.weight > 0 && suggestedNext && suggestedNext > lastWeight.weight && (
+            <Text style={styles.nextWeightHint}>
+              Next: <NumberText weight="regular">{suggestedNext}</NumberText>{lastWeight.unit}
+            </Text>
           )}
           {overloadTrend && (
             <View style={[
@@ -188,7 +215,17 @@ function ExerciseRow({
               />
             </View>
           )}
-          {!overloadTrend && lastWeight === null && (
+          {/* Priority 2: AI-generated target weight (no user history) */}
+          {!(lastWeight && lastWeight.weight > 0) && isNumericWeight(exercise.weight) && (
+            <View style={[styles.targetWeightBadge, { backgroundColor: isDark ? 'rgba(94, 169, 221, 0.2)' : 'rgba(94, 169, 221, 0.15)' }]}>
+              <Ionicons name="fitness-outline" size={10} color="#5EA9DD" style={{ marginRight: 3 }} />
+              <Text style={styles.targetWeightText}>
+                Target <NumberText weight="regular">{parseWeightValue(exercise.weight!)}</NumberText>{parseWeightUnit(exercise.weight!)}
+              </Text>
+            </View>
+          )}
+          {/* Priority 3: No data at all */}
+          {!overloadTrend && !(lastWeight && lastWeight.weight > 0) && !isNumericWeight(exercise.weight) && (
             <Text style={[styles.newExerciseText, { color: colors.textMuted }]}>NEW</Text>
           )}
         </View>
@@ -264,9 +301,10 @@ export function WorkoutCard({
   const { settings } = useSettings();
   const [lastWeights, setLastWeights] = useState<Record<string, { weight: number; unit: string } | null>>({});
   const [exerciseTrends, setExerciseTrends] = useState<Record<string, 'increasing' | 'stable' | 'decreasing' | null>>({});
+  const [suggestedWeights, setSuggestedWeights] = useState<Record<string, number | null>>({});
   const scale = useSharedValue(1);
 
-  // Load last logged weights and overload trends for all exercises - parallelized
+  // Load last logged weights, overload trends, and suggested next weights - parallelized
   useEffect(() => {
     const loadExerciseData = async () => {
       const results = await Promise.all(
@@ -282,21 +320,25 @@ export function WorkoutCard({
                 ? { weight: lastLog.maxWeight, unit: lastLog.sets[0]?.unit || 'lb' }
                 : null,
               trend: progress?.trend || null,
+              suggestedNext: progress?.suggestedNextWeight || null,
             };
           } catch (error) {
-            return { exerciseId: exercise.exerciseId, lastWeight: null, trend: null };
+            return { exerciseId: exercise.exerciseId, lastWeight: null, trend: null, suggestedNext: null };
           }
         })
       );
 
       const weights: Record<string, { weight: number; unit: string } | null> = {};
       const trends: Record<string, 'increasing' | 'stable' | 'decreasing' | null> = {};
+      const suggested: Record<string, number | null> = {};
       for (const result of results) {
         weights[result.exerciseId] = result.lastWeight;
         trends[result.exerciseId] = result.trend;
+        suggested[result.exerciseId] = result.suggestedNext;
       }
       setLastWeights(weights);
       setExerciseTrends(trends);
+      setSuggestedWeights(suggested);
     };
 
     loadExerciseData();
@@ -426,6 +468,7 @@ export function WorkoutCard({
                 onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
                 lastWeight={lastWeights[exercise.exerciseId]}
                 overloadTrend={exerciseTrends[exercise.exerciseId]}
+                suggestedNext={suggestedWeights[exercise.exerciseId]}
                 colors={colors}
                 isDark={isDark}
               />
@@ -674,6 +717,24 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: Fonts.semiBold,
     letterSpacing: 0.5,
+  },
+  targetWeightBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  targetWeightText: {
+    fontSize: 11,
+    fontFamily: Fonts.semiBold,
+    color: '#5EA9DD',
+  },
+  nextWeightHint: {
+    fontSize: 9,
+    fontFamily: Fonts.regular,
+    color: '#4CD964',
+    marginLeft: 4,
   },
   weightButton: {
     width: 32,

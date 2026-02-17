@@ -338,7 +338,49 @@ export async function generateMultiWeekProgram(
     // Parse structured JSON output - AI generates Week 1 only
     const weeklyPlans = parseAIProgramOutput(aiOutput, startDate, weeks, programTemplate.daysPerWeek);
 
-    // Pre-populate exercise weights from overload history
+    // AI-powered weight adjustment for weeks 2+ (progressive overload)
+    if (weeklyPlans.length > 1) {
+      try {
+        const week1Exercises = weeklyPlans[0].days
+          .filter(d => d.workout)
+          .flatMap(d => d.workout!.exercises.map(ex => ({
+            name: ex.exercise.name,
+            weight: ex.weight,
+            sets: ex.sets,
+            reps: ex.reps,
+          })));
+
+        // Generate weights for each subsequent week in parallel
+        const weightPromises = weeklyPlans.slice(1).map((_, idx) => {
+          const weekIndex = idx + 1;
+          const isDeload = weekIndex >= weeks - 1 && weeks > 2;
+          const phase = isDeload ? 'Deload' : weekIndex < Math.floor(weeks * 0.5) ? 'Accumulation' : 'Intensification';
+          return generateWeekWeights(week1Exercises, weekIndex, weeks, phase, preferences);
+        });
+
+        const weekWeightMaps = await Promise.all(weightPromises);
+
+        // Apply AI weights to weeks 2+
+        for (let i = 0; i < weekWeightMaps.length; i++) {
+          const weightMap = weekWeightMaps[i];
+          const week = weeklyPlans[i + 1];
+          for (const day of week.days) {
+            if (!day.workout) continue;
+            for (const ex of day.workout.exercises) {
+              const aiWeight = weightMap[ex.exercise.name];
+              if (aiWeight) {
+                ex.weight = aiWeight;
+              }
+            }
+          }
+        }
+        console.log('[ProgramGenerator] ✅ AI weight adjustments applied to weeks 2-' + weeks);
+      } catch (weightAdjErr) {
+        console.warn('[ProgramGenerator] AI weight adjustment failed, using Week 1 weights:', weightAdjErr);
+      }
+    }
+
+    // Pre-populate exercise weights from overload history (overrides AI if user has logged data)
     try {
       for (const week of weeklyPlans) {
         for (const day of week.days) {
@@ -461,6 +503,7 @@ CRITICAL REQUIREMENTS:
 4. Each workout day must have 4-6 main exercises
 5. Rest days MUST have isRestDay: true and no workout
 6. Include estimated calories burned per workout (based on duration and intensity)
+7. For EVERY exercise, provide a SPECIFIC weight in lbs based on the user's strength baselines. Use the user's 1RM values to calculate appropriate working weights (typically 60-85% of 1RM depending on rep range and exercise). For compound lifts related to bench/squat/deadlift, derive weights from the provided 1RMs. For accessory/isolation exercises, estimate proportionally based on strength level, sex, and bodyweight. For bodyweight exercises, use "bodyweight". NEVER use vague terms like "moderate", "heavy", or "light" - always use a specific number like "135 lbs".
 
 RESPOND WITH THIS EXACT JSON STRUCTURE (Week 1 ONLY, all 7 days):
 {
@@ -491,7 +534,7 @@ RESPOND WITH THIS EXACT JSON STRUCTURE (Week 1 ONLY, all 7 days):
                 "sets": 4,
                 "reps": "8-10",
                 "restSeconds": 120,
-                "weight": "moderate",
+                "weight": "135 lbs",
                 "notes": "Focus on controlled eccentric",
                 "alternatives": [
                   { "name": "Dumbbell Bench Press", "equipment": "dumbbell", "difficulty": "same" },
@@ -627,6 +670,96 @@ function buildWeekFromAI(
     focusAreas: Array.from(focusAreas),
   };
 }
+
+/**
+ * Generate AI-personalized weights for a progressive week.
+ * Uses a lightweight GPT-4.1-mini call to adjust Week 1 weights
+ * based on periodization phase and week number.
+ */
+async function generateWeekWeights(
+  week1Exercises: { name: string; weight?: string; sets: number; reps: string }[],
+  weekIndex: number,
+  totalWeeks: number,
+  phase: string,
+  preferences: TrainingPreferences | null
+): Promise<Record<string, string>> {
+  try {
+    const openai = getOpenAI();
+
+    const exerciseList = week1Exercises
+      .filter(e => e.weight && /\d/.test(e.weight))
+      .map(e => `  - ${e.name}: ${e.weight} (${e.sets} sets x ${e.reps})`)
+      .join('\n');
+
+    if (!exerciseList) return {};
+
+    const userContext = preferences ? [
+      preferences.benchPress1RM ? `Bench 1RM: ${preferences.benchPress1RM} lbs` : '',
+      preferences.squat1RM ? `Squat 1RM: ${preferences.squat1RM} lbs` : '',
+      preferences.deadlift1RM ? `Deadlift 1RM: ${preferences.deadlift1RM} lbs` : '',
+      preferences.sex ? `Sex: ${preferences.sex}` : '',
+      preferences.weight ? `Bodyweight: ${preferences.weight} lbs` : '',
+      preferences.strengthLevel ? `Level: ${preferences.strengthLevel}` : '',
+    ].filter(Boolean).join(', ') : 'Not available';
+
+    const prompt = `Given these Week 1 exercises with base weights, generate appropriate weights for Week ${weekIndex + 1} (${phase} phase) of a ${totalWeeks}-week program.
+
+User profile: ${userContext}
+
+Week 1 exercises:
+${exerciseList}
+
+This is Week ${weekIndex + 1} (${phase}):
+- Accumulation: maintain or slight increase (+2-5 lbs on compounds, +2.5 lbs on isolation)
+- Intensification: increase weight to match lower rep range (+5-10 lbs on compounds, +2.5-5 lbs on isolation)
+- Deload: reduce weight by ~20% for recovery
+
+Return JSON object mapping exercise names to new weights: { "Exercise Name": "X lbs", ... }`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: [
+        { role: 'system', content: 'You are a strength coach. Respond with valid JSON only.' },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.2,
+      max_tokens: 500,
+      response_format: { type: 'json_object' },
+    });
+
+    const output = response.choices[0].message.content || '{}';
+    const weightMap = JSON.parse(output) as Record<string, string>;
+    console.log(`[ProgramGenerator] AI weights for Week ${weekIndex + 1}:`, Object.keys(weightMap).length, 'exercises');
+    return weightMap;
+  } catch (error) {
+    console.warn(`[ProgramGenerator] AI weight generation failed for Week ${weekIndex + 1}, using fallback:`, error);
+    // Fallback: simple increment
+    const fallbackMap: Record<string, string> = {};
+    for (const ex of week1Exercises) {
+      if (!ex.weight || !/\d/.test(ex.weight)) continue;
+      const match = ex.weight.match(/(\d+(?:\.\d+)?)/);
+      if (!match) continue;
+      const baseWeight = parseFloat(match[1]);
+      const unit = ex.weight.match(/\d+(?:\.\d+)?\s*(lbs?|kg)/i)?.[1] || 'lbs';
+      const isDeload = phase === 'Deload';
+      const isIntensification = phase === 'Intensification';
+      let newWeight: number;
+      if (isDeload) {
+        newWeight = Math.round(baseWeight * 0.8);
+      } else if (isIntensification) {
+        newWeight = baseWeight + 5;
+      } else {
+        // Accumulation: small increment per week beyond week 1
+        newWeight = baseWeight + (weekIndex * 2.5);
+      }
+      fallbackMap[ex.name] = `${Math.round(newWeight)} ${unit}`;
+    }
+    return fallbackMap;
+  }
+}
+
+// Store preferences reference for weight generation in progressive weeks
+let _lastGenerationPreferences: TrainingPreferences | null = null;
 
 /**
  * Create a progressive overload week from Week 1 template.
@@ -823,6 +956,18 @@ function mapAIExerciseToWorkoutExercise(
     secondaryMuscles: (aiEx.secondaryMuscles || []).map(mapMuscleGroup),
   };
 
+  // Filter out vague weight terms - only keep specific numeric weights or "bodyweight"
+  let weight = aiEx.weight;
+  if (weight) {
+    const lower = weight.toLowerCase().trim();
+    const isBodyweight = lower === 'bodyweight' || lower === 'body weight' || lower === 'bw';
+    const hasNumber = /\d/.test(weight);
+    if (!isBodyweight && !hasNumber) {
+      // Vague term like "moderate", "heavy", "light" - discard
+      weight = undefined;
+    }
+  }
+
   return {
     id: exerciseId,
     exerciseId,
@@ -830,7 +975,7 @@ function mapAIExerciseToWorkoutExercise(
     sets: aiEx.sets || 3,
     reps: String(aiEx.reps || '10'),
     restSeconds: aiEx.restSeconds || 90,
-    weight: aiEx.weight,
+    weight,
     completed: false,
     notes: aiEx.notes,
   };

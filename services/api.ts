@@ -111,6 +111,12 @@ export interface UserPreferences {
   waterGoalOz?: number;
   sleepGoalHours?: number;
   stepGoal?: number;
+  // Strength baseline for weight recommendations
+  hasLiftingExperience?: boolean;
+  strengthLevel?: 'never_lifted' | 'beginner' | 'intermediate' | 'advanced';
+  benchPress1RM?: number | null;
+  squat1RM?: number | null;
+  deadlift1RM?: number | null;
 }
 
 export interface WorkoutStats {

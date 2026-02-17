@@ -589,6 +589,11 @@ app.get('/api/v1/user/preferences', authenticateToken, async (req, res) => {
           waterGoalOz: 64,
           sleepGoalHours: 8,
           stepGoal: 10000,
+          hasLiftingExperience: false,
+          strengthLevel: 'never_lifted',
+          benchPress1RM: null,
+          squat1RM: null,
+          deadlift1RM: null,
         }
       });
     }
@@ -612,6 +617,11 @@ app.get('/api/v1/user/preferences', authenticateToken, async (req, res) => {
         waterGoalOz: p.water_goal_oz,
         sleepGoalHours: parseFloat(p.sleep_goal_hours),
         stepGoal: p.step_goal,
+        hasLiftingExperience: p.has_lifting_experience || false,
+        strengthLevel: p.strength_level || 'never_lifted',
+        benchPress1RM: p.bench_press_1rm || null,
+        squat1RM: p.squat_1rm || null,
+        deadlift1RM: p.deadlift_1rm || null,
       }
     });
   } catch (error) {
@@ -639,6 +649,11 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
       waterGoalOz,
       sleepGoalHours,
       stepGoal,
+      hasLiftingExperience,
+      strengthLevel,
+      benchPress1RM,
+      squat1RM,
+      deadlift1RM,
     } = req.body;
 
     console.log('[Preferences] Saving for user:', req.userId, req.body);
@@ -648,9 +663,10 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
       `INSERT INTO user_preferences (
         user_id, cardio_preference, fitness_level, workout_duration, workouts_per_week,
         diet_style, meals_per_day, intermittent_fasting, fasting_start, fasting_end,
-        allergies, available_equipment, injuries, water_goal_oz, sleep_goal_hours, step_goal
+        allergies, available_equipment, injuries, water_goal_oz, sleep_goal_hours, step_goal,
+        has_lifting_experience, strength_level, bench_press_1rm, squat_1rm, deadlift_1rm
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       ON CONFLICT (user_id) DO UPDATE SET
         cardio_preference = COALESCE($2, user_preferences.cardio_preference),
         fitness_level = COALESCE($3, user_preferences.fitness_level),
@@ -667,6 +683,11 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
         water_goal_oz = COALESCE($14, user_preferences.water_goal_oz),
         sleep_goal_hours = COALESCE($15, user_preferences.sleep_goal_hours),
         step_goal = COALESCE($16, user_preferences.step_goal),
+        has_lifting_experience = COALESCE($17, user_preferences.has_lifting_experience),
+        strength_level = COALESCE($18, user_preferences.strength_level),
+        bench_press_1rm = COALESCE($19, user_preferences.bench_press_1rm),
+        squat_1rm = COALESCE($20, user_preferences.squat_1rm),
+        deadlift_1rm = COALESCE($21, user_preferences.deadlift_1rm),
         updated_at = NOW()
       RETURNING *`,
       [
@@ -686,6 +707,11 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
         waterGoalOz || 64,
         sleepGoalHours || 8,
         stepGoal || 10000,
+        hasLiftingExperience || false,
+        strengthLevel || 'never_lifted',
+        benchPress1RM || null,
+        squat1RM || null,
+        deadlift1RM || null,
       ]
     );
 
@@ -710,6 +736,11 @@ app.post('/api/v1/user/preferences', authenticateToken, async (req, res) => {
         waterGoalOz: p.water_goal_oz,
         sleepGoalHours: parseFloat(p.sleep_goal_hours),
         stepGoal: p.step_goal,
+        hasLiftingExperience: p.has_lifting_experience || false,
+        strengthLevel: p.strength_level || 'never_lifted',
+        benchPress1RM: p.bench_press_1rm || null,
+        squat1RM: p.squat_1rm || null,
+        deadlift1RM: p.deadlift_1rm || null,
       }
     });
   } catch (error) {
@@ -5116,6 +5147,13 @@ async function runMigrations() {
       CREATE INDEX IF NOT EXISTS idx_planner_weekly_plans_week
       ON planner_weekly_plans(week_start_date)
     `);
+
+    // Add strength baseline columns to user_preferences
+    await pool.query(`ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS has_lifting_experience BOOLEAN DEFAULT false`);
+    await pool.query(`ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS strength_level TEXT DEFAULT 'never_lifted'`);
+    await pool.query(`ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS bench_press_1rm INTEGER`);
+    await pool.query(`ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS squat_1rm INTEGER`);
+    await pool.query(`ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS deadlift_1rm INTEGER`);
 
     // Add multi-week plan columns to workout_plans
     await pool.query(`
