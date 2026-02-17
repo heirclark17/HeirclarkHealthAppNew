@@ -248,6 +248,7 @@ interface TrainingContextType {
   hideExerciseAlternatives: () => void;
   hasPlan: () => boolean;
   getPlanSummary: () => PlanSummary | null;
+  getTrainingDayForDate: (dateStr: string) => TrainingDay | null;
 }
 
 const initialState: TrainingState = {
@@ -1275,6 +1276,23 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // Get training day for a specific date (searches across all weeks in multiWeekPlan)
+  const getTrainingDayForDate = useCallback((dateStr: string): TrainingDay | null => {
+    // Search multi-week plan first
+    if (state.multiWeekPlan?.weeklyPlans) {
+      for (const week of state.multiWeekPlan.weeklyPlans) {
+        const match = week.days.find(d => d.calendarDate === dateStr);
+        if (match) return match;
+      }
+    }
+    // Fallback to current weekly plan
+    if (state.weeklyPlan?.days) {
+      const match = state.weeklyPlan.days.find(d => d.calendarDate === dateStr);
+      if (match) return match;
+    }
+    return null;
+  }, [state.multiWeekPlan, state.weeklyPlan]);
+
   // Swap exercise for a random alternative
   const swapExercise = useCallback((dayIndex: number, exerciseId: string) => {
     setState(prev => {
@@ -1676,6 +1694,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     hideExerciseAlternatives,
     hasPlan,
     getPlanSummary,
+    getTrainingDayForDate,
     generateAIWorkoutPlan,
   }), [
     state,
@@ -1698,6 +1717,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     hideExerciseAlternatives,
     hasPlan,
     getPlanSummary,
+    getTrainingDayForDate,
   ]);
 
   return (

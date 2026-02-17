@@ -9,7 +9,7 @@
  * - Liquid glass design
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,8 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import { X, CheckCircle2, Calendar, Dumbbell, Clock } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { X, CheckCircle2, Calendar, Dumbbell, Clock, ArrowRight } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { NumberText } from '../../NumberText';
 import { TimeBlock } from '../../../types/planner';
@@ -47,25 +48,40 @@ export function WorkoutDetailModal({
   onReschedule,
 }: Props) {
   const { settings } = useSettings();
-  const { state: trainingState } = useTraining();
+  const { state: trainingState, getTrainingDayForDate, setSelectedDay } = useTraining();
+  const router = useRouter();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
 
   if (!block || !visible) return null;
 
-  // Find workout details from training context
+  // Find real workout details from TrainingContext using relatedId or block date
   const getWorkoutDetails = () => {
-    // Extract workout ID from block's relatedId
-    // For now, show placeholder data - you'll wire to real workout data
+    // Try to find the actual workout from TrainingContext
+    if (block.relatedId && trainingState.weeklyPlan?.days) {
+      for (const day of trainingState.weeklyPlan.days) {
+        if (day.workout?.id === block.relatedId) {
+          return {
+            exercises: day.workout.exercises.map(ex => ({
+              name: ex.exercise.name,
+              sets: ex.sets,
+              reps: ex.reps,
+              weight: ex.weight ? `${ex.weight} lbs` : 'Bodyweight',
+            })),
+            estimatedCalories: day.workout.estimatedCaloriesBurned || 0,
+            totalDuration: day.workout.duration || block.duration,
+            realWorkout: day.workout,
+          };
+        }
+      }
+    }
+
+    // Fallback to basic block info
     return {
-      exercises: [
-        { name: 'Barbell Squat', sets: 4, reps: 8, weight: '185 lbs' },
-        { name: 'Romanian Deadlift', sets: 3, reps: 10, weight: '135 lbs' },
-        { name: 'Leg Press', sets: 3, reps: 12, weight: '270 lbs' },
-        { name: 'Walking Lunges', sets: 3, reps: '12 each leg', weight: 'Bodyweight' },
-      ],
-      estimatedCalories: 320,
+      exercises: [],
+      estimatedCalories: Math.round((block.duration || 45) * 7),
       totalDuration: block.duration,
+      realWorkout: null,
     };
   };
 
@@ -152,16 +168,22 @@ export function WorkoutDetailModal({
               <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
                 Exercises
               </Text>
-              {workout.exercises.map((exercise, index) => (
-                <View key={index} style={styles.exerciseRow}>
-                  <Text style={[styles.exerciseName, { color: themeColors.text }]}>
-                    {exercise.name}
-                  </Text>
-                  <Text style={[styles.exerciseDetails, { color: themeColors.textSecondary }]}>
-                    {exercise.sets} × {exercise.reps}  ·  {exercise.weight}
-                  </Text>
-                </View>
-              ))}
+              {workout.exercises.length > 0 ? (
+                workout.exercises.map((exercise, index) => (
+                  <View key={index} style={styles.exerciseRow}>
+                    <Text style={[styles.exerciseName, { color: themeColors.text }]}>
+                      {exercise.name}
+                    </Text>
+                    <Text style={[styles.exerciseDetails, { color: themeColors.textSecondary }]}>
+                      {exercise.sets} × {exercise.reps}  ·  {exercise.weight}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={[styles.exerciseDetails, { color: themeColors.textSecondary, textAlign: 'center', paddingVertical: 12 }]}>
+                  View full workout details in Programs tab
+                </Text>
+              )}
             </ScrollView>
 
             {/* Actions */}
@@ -219,6 +241,33 @@ export function WorkoutDetailModal({
                     Skipped
                   </Text>
                 </View>
+              )}
+
+              {/* View in Program */}
+              {workout.realWorkout && (
+                <TouchableOpacity
+                  style={[styles.viewInProgramButton, { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' }]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    // Find which day index this workout corresponds to
+                    if (trainingState.weeklyPlan?.days) {
+                      const dayIdx = trainingState.weeklyPlan.days.findIndex(
+                        d => d.workout?.id === block.relatedId
+                      );
+                      if (dayIdx >= 0) {
+                        setSelectedDay(dayIdx);
+                      }
+                    }
+                    onClose();
+                    router.push('/(tabs)/programs');
+                  }}
+                >
+                  <Dumbbell size={16} color={themeColors.text} />
+                  <Text style={[styles.viewInProgramText, { color: themeColors.text }]}>
+                    View in Program
+                  </Text>
+                  <ArrowRight size={14} color={themeColors.textSecondary} />
+                </TouchableOpacity>
               )}
             </View>
           </GlassCard>
@@ -360,5 +409,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.semiBold,
     fontWeight: '600',
+  },
+  viewInProgramButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  viewInProgramText: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    flex: 1,
+    textAlign: 'center',
   },
 });

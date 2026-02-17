@@ -373,11 +373,45 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   const getWorkoutBlocksForDay = useCallback((date: Date, preferences: PlannerPreferences): TimeBlock[] => {
     const training = trainingRef.current;
     const dayOfWeek = DAY_NAMES[date.getDay()]; // "Monday", etc.
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
     // Try to get real workout data from TrainingContext
+    // First: search ALL weeks in multiWeekPlan by calendarDate (exact match)
+    // Fallback: match by day name in current weeklyPlan
+    if (training?.state?.multiWeekPlan?.weeklyPlans) {
+      for (const week of training.state.multiWeekPlan.weeklyPlans) {
+        const match = week.days.find((d: any) => d.calendarDate === dateStr);
+        if (match && match.workout && !match.isRestDay) {
+          const workout = match.workout;
+          const durationMin = workout.duration || workout.estimatedDuration || 45;
+          return [{
+            id: `workout_${date.getTime()}_${workout.id || 'main'}`,
+            type: 'workout' as const,
+            title: workout.name || `${workout.type || 'Workout'} Day`,
+            startTime: '00:00',
+            endTime: '00:00',
+            duration: durationMin,
+            status: match.completed ? 'completed' as const : 'scheduled' as const,
+            color: PLANNER_CONSTANTS.BLOCK_COLORS.workout,
+            icon: PLANNER_CONSTANTS.BLOCK_ICONS.workout,
+            priority: 4,
+            flexibility: 0.5,
+            aiGenerated: true,
+            relatedId: workout.id,
+          }];
+        }
+        if (match?.isRestDay) {
+          return [];
+        }
+      }
+    }
+
+    // Fallback: match by day name in current weeklyPlan (single-week plans)
     if (training?.state?.weeklyPlan?.days) {
       const trainingDays = training.state.weeklyPlan.days;
       const trainingDay = trainingDays.find(
+        (d: any) => d.calendarDate === dateStr
+      ) || trainingDays.find(
         (d: any) => d.dayOfWeek === dayOfWeek
       );
 
@@ -1017,6 +1051,26 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     api.updateBlockStatus(blockId, 'completed', date).catch(() => {});
 
     setState((prev) => ({ ...prev, weeklyPlan: updatedPlan }));
+
+    // Bidirectional sync: if this is a workout block, also mark complete in TrainingContext
+    if (block.type === 'workout') {
+      try {
+        const training = trainingRef.current;
+        if (training?.markWorkoutComplete && training?.state?.weeklyPlan?.days) {
+          const trainingDays = training.state.weeklyPlan.days;
+          // Find matching training day by calendarDate or relatedId
+          const matchIndex = trainingDays.findIndex(
+            (d: any) => d.calendarDate === date || (block.relatedId && d.workout?.id === block.relatedId)
+          );
+          if (matchIndex >= 0 && !trainingDays[matchIndex].completed) {
+            training.markWorkoutComplete(matchIndex);
+            console.log(`[Planner] Synced workout completion to TrainingContext (day ${matchIndex})`);
+          }
+        }
+      } catch (syncErr) {
+        console.warn('[Planner] Failed to sync workout completion to TrainingContext:', syncErr);
+      }
+    }
 
     // Tier 2a: Record completion pattern
     recordBlockCompletion(block, 'completed');
