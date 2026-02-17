@@ -815,8 +815,7 @@ const styles = StyleSheet.create({
   },
   logButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
 });
