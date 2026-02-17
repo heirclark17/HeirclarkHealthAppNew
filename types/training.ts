@@ -151,6 +151,9 @@ export interface TrainingDay {
   workout: Workout | null; // null for rest days
   isRestDay: boolean;
   completed: boolean;
+  // Multi-week program extensions
+  calendarDate: string;  // ISO date (YYYY-MM-DD) - SINGLE SOURCE OF TRUTH for date alignment
+  weekNumber: number;    // Which week of program (1-12)
 }
 
 // Weekly training plan
@@ -350,6 +353,10 @@ export interface CompleteTrainingPlan {
   endDate: string;
   currentWeek: number;
   isActive: boolean;
+  // Multi-week program extensions
+  calendarStartDate: string;  // ISO date - Week 1 Day 1 anchor (most recent Monday)
+  currentWeekIndex: number;   // 0-based index (0 = week 1, 1 = week 2, etc.)
+  totalWeeks: number;         // 4, 8, or 12 weeks
 }
 
 // Cardio session with alternatives
