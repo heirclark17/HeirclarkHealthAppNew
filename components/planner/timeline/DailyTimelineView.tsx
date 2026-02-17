@@ -30,6 +30,7 @@ import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme
 import { BehaviorInsightCard } from '../insights/BehaviorInsightCard';
 import { WeeklyCoachCard } from '../coaching/WeeklyCoachCard';
 import { PlannerChatSheet, PlannerChatSheetRef } from '../chat/PlannerChatSheet';
+import { BlockDetailModal } from '../modals/BlockDetailModal';
 import { mediumImpact } from '../../../utils/haptics';
 
 // Must match _layout.tsx tab bar constants
@@ -176,6 +177,10 @@ export function DailyTimelineView() {
 
   // Chat modal state
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // Block detail modal state (for workout/meal/calendar event details)
+  const [selectedTimedBlock, setSelectedTimedBlock] = useState<TimeBlock | null>(null);
+  const [isBlockDetailVisible, setIsBlockDetailVisible] = useState(false);
 
   // Bottom sheet for all-day event detail
   const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -452,8 +457,9 @@ export function DailyTimelineView() {
               block={block}
               wakeTime={state.preferences?.wakeTime}
               onPress={() => {
-                // TODO: Open block detail modal
-                console.log('[Timeline] Block pressed:', block.title);
+                mediumImpact();
+                setSelectedTimedBlock(block);
+                setIsBlockDetailVisible(true);
               }}
               onSwipeRight={() => actions.markBlockComplete(block.id, timeline.date)}
               onSwipeLeft={() => actions.skipBlock(block.id, timeline.date)}
@@ -486,6 +492,30 @@ export function DailyTimelineView() {
 
       {/* Planner Chat Sheet */}
       <PlannerChatSheet ref={chatSheetRef} onDismiss={() => setIsChatOpen(false)} />
+
+      {/* Block Detail Modal (workouts, meals, calendar events) */}
+      <BlockDetailModal
+        visible={isBlockDetailVisible}
+        block={selectedTimedBlock}
+        onClose={() => {
+          setIsBlockDetailVisible(false);
+          setSelectedTimedBlock(null);
+        }}
+        onComplete={() => {
+          if (selectedTimedBlock && timeline) {
+            actions.markBlockComplete(selectedTimedBlock.id, timeline.date);
+          }
+        }}
+        onSkip={() => {
+          if (selectedTimedBlock && timeline) {
+            actions.skipBlock(selectedTimedBlock.id, timeline.date);
+          }
+        }}
+        onReschedule={() => {
+          // TODO: Implement drag-to-reschedule flow
+          console.log('[Timeline] Reschedule requested for:', selectedTimedBlock?.title);
+        }}
+      />
 
       {/* All-day event detail bottom sheet */}
       <BottomSheetModal

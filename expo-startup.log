@@ -6,3 +6,20 @@ Starting Metro Bundler
 warning: Bundler cache is empty, rebuilding (this may take a minute)
 Waiting on http://localhost:8081
 Logs for your project will appear below.
+C:\Users\derri\HeirclarkHealthAppNew\node_modules\expo\node_modules\@expo\cli\build\src\utils\errors.js:130
+    throw error;
+    ^
+
+Error: UNKNOWN: unknown error, lstat 'C:\Users\derri\HeirclarkHealthAppNew\node_modules\@gorhom\portal\lib\typescript\contexts'
+    at Object.lstat (node:internal/fs/promises:1031:18)
+    at FallbackWatcher._processChange (C:\Users\derri\HeirclarkHealthAppNew\node_modules\metro-file-map\src\watchers\FallbackWatcher.js:205:20)
+Emitted 'error' event at:
+    at FallbackWatcher.emitError (C:\Users\derri\HeirclarkHealthAppNew\node_modules\metro-file-map\src\watchers\AbstractWatcher.js:70:19)
+    at C:\Users\derri\HeirclarkHealthAppNew\node_modules\metro-file-map\src\watchers\FallbackWatcher.js:193:25 {
+  errno: -4094,
+  code: 'UNKNOWN',
+  syscall: 'lstat',
+  path: 'C:\\Users\\derri\\HeirclarkHealthAppNew\\node_modules\\@gorhom\\portal\\lib\\typescript\\contexts'
+}
+
+Node.js v24.12.0

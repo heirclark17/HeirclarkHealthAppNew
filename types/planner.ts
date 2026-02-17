@@ -32,6 +32,8 @@ export interface TimeBlock {
   calendarName?: string;      // source calendar name (e.g. "Work", "Personal")
   originalStartDate?: string; // ISO 8601 string of the original event start
   originalEndDate?: string;   // ISO 8601 string of the original event end
+  notes?: string;             // Event notes/description (for calendar events)
+  location?: string;          // Event location (for calendar events)
 }
 
 export type BlockType =
