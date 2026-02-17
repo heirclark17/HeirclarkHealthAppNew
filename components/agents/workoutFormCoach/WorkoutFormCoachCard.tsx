@@ -88,7 +88,7 @@ export default function WorkoutFormCoachCard() {
 
     return (
       <TouchableOpacity
-        style={[styles.exerciseItem, { borderBottomColor: colors.glassBorder }]}
+        style={styles.exerciseItem}
         onPress={() => handleExerciseTap(item)}
         accessibilityLabel={`${item.name}, ${item.musclesWorked.slice(0, 2).join(' and ')}${avgScore !== null ? `, ${avgScore}% average form score` : ''}${favorite ? ', favorited' : ''}`}
         accessibilityRole="button"
@@ -216,7 +216,7 @@ export default function WorkoutFormCoachCard() {
           {categories.map((category) => (
             <TouchableOpacity
               key={category}
-              style={[styles.categoryChip, { backgroundColor: colors.cardGlass, borderColor: colors.glassBorder }]}
+              style={[styles.categoryChip, { backgroundColor: colors.cardGlass }]}
               onPress={() => {
                 setSelectedCategory(category);
                 setShowExercisesModal(true);
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   tipExercise: { fontSize: 14, fontFamily: Fonts.semiBold, marginBottom: 4 },
   tipText: { fontSize: 12, fontFamily: Fonts.regular, lineHeight: 18 },
   categoriesScroll: { marginBottom: 12 },
-  categoryChip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1, marginRight: 8 },
+  categoryChip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, marginRight: 8 },
   categoryText: { fontSize: 12, fontFamily: Fonts.medium },
   recommendationsSection: { marginTop: 4 },
   sectionLabel: { fontSize: 10, fontFamily: Fonts.semiBold, letterSpacing: 0.5, marginBottom: 8 },
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   closeButton: { width: 36, height: 36, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   favoriteButton: { width: 36, height: 36, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   exercisesList: { padding: 16 },
-  exerciseItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },
+  exerciseItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
   exerciseIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   exerciseInfo: { flex: 1, marginLeft: 12 },
   exerciseName: { fontSize: 14, fontFamily: Fonts.semiBold },

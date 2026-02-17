@@ -304,7 +304,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
             </View>
 
             {/* Footer */}
-            <View style={[styles.footer, { borderTopColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+            <View style={styles.footer}>
               <TouchableOpacity
                 style={styles.logButton}
                 onPress={() => setShowModal(true)}
@@ -587,7 +587,6 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 16,
     paddingTop: 12,
-    borderTopWidth: 1,
     alignItems: 'center',
   },
   logButton: {

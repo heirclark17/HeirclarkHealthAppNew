@@ -158,7 +158,7 @@ export default function HydrationCard() {
           {QUICK_ADD_AMOUNTS.map((amount) => (
             <TouchableOpacity
               key={amount.value}
-              style={[styles.quickAddButton, { backgroundColor: colors.cardGlass, borderColor: colors.glassBorder }]}
+              style={[styles.quickAddButton, { backgroundColor: colors.cardGlass }]}
               onPress={() => handleQuickAdd(amount.value)}
               accessibilityLabel={`Add ${amount.label} of ${selectedSource.label.toLowerCase()}`}
               accessibilityRole="button"
@@ -416,9 +416,9 @@ const styles = StyleSheet.create({
   statItem: { alignItems: 'center', gap: 4 },
   statValue: { fontSize: 14 },
   statLabel: { fontSize: 10, fontFamily: Fonts.regular },
-  statDivider: { width: 1, height: 30 },
+  statDivider: { width: 0, height: 30 },
   quickAddScroll: { marginBottom: 12 },
-  quickAddButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16, borderWidth: 1, marginRight: 8 },
+  quickAddButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16, marginRight: 8 },
   customButton: { borderWidth: 0 },
   quickAddText: { fontSize: 12, fontFamily: Fonts.medium },
   tipContainer: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 10 },

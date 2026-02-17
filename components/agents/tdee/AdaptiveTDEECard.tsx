@@ -274,7 +274,7 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
                     </NumberText>
                   </View>
                 </View>
-                <View style={[styles.bmrRow, { borderTopColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+                <View style={styles.bmrRow}>
                   <View style={styles.bmrItem}>
                     <Text style={[styles.bmrLabel, { color: mutedColor }]}>BMR</Text>
                     <NumberText weight="medium" style={[styles.bmrValue, { color: textColor }]}>
@@ -292,7 +292,7 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
             )}
 
             {/* Footer */}
-            <View style={[styles.footer, { borderTopColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
+            <View style={styles.footer}>
               <Text style={[styles.footerText, { color: mutedColor }]}>
                 {isEnabled
                   ? 'Tap for insights and detailed breakdown'
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
     color: Colors.successStrong,
   },
   divider: {
-    width: 1,
+    width: 0,
     height: 30,
   },
   trendContainer: {
@@ -471,7 +471,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 16,
     paddingTop: 12,
-    borderTopWidth: 1,
   },
   footerText: {
     fontSize: 12,
@@ -511,7 +510,6 @@ const styles = StyleSheet.create({
   bmrRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    borderTopWidth: 1,
     paddingTop: 12,
     marginTop: 4,
   },

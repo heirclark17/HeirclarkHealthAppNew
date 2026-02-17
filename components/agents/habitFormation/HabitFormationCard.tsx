@@ -175,7 +175,7 @@ export default function HabitFormationCard() {
     const isSkipped = completion?.status === 'skipped';
 
     return (
-      <View key={habit.id} style={[styles.habitItem, { borderBottomColor: colors.glassBorder }]}>
+      <View key={habit.id} style={styles.habitItem}>
         <View style={[styles.habitIcon, { backgroundColor: colors.primary + '20' }]}>
           <Ionicons name={habit.icon as any} size={20} color={colors.primary} />
         </View>
@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
   progressFill: { height: '100%', borderRadius: 3 },
   progressText: { fontSize: 11, marginTop: 4 },
   habitsPreview: {},
-  habitItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1 },
+  habitItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
   habitIcon: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   habitInfo: { flex: 1, marginLeft: 12 },
   habitName: { fontSize: 13, fontFamily: Fonts.medium },
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   actionButton: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   skipButton: { width: 28, height: 28, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14 },
-  viewAllButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderTopWidth: 1, marginTop: 8 },
+  viewAllButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginTop: 8 },
   viewAllText: { fontSize: 13, fontFamily: Fonts.medium },
   emptyState: { paddingVertical: 20, alignItems: 'center' },
   emptyText: { fontSize: 13, fontFamily: Fonts.regular },
