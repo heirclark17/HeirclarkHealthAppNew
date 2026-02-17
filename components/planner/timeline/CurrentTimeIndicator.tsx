@@ -2,7 +2,7 @@
  * CurrentTimeIndicator - Red line showing current time
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -13,8 +13,12 @@ interface CurrentTimeIndicatorProps {
 
 export function CurrentTimeIndicator({ wakeTime = '06:00' }: CurrentTimeIndicatorProps) {
   const { settings } = useSettings();
+
+  // Dynamic theme colors
+  const themeColors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
-  const themeColors = isDark ? DarkColors : LightColors;
 
   const [currentMinutes, setCurrentMinutes] = useState(() => {
     const now = new Date();

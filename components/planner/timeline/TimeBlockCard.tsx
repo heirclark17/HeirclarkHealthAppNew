@@ -5,7 +5,7 @@
  * and overflow:hidden clipping that cut off text in short blocks.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -31,9 +31,13 @@ interface Props {
 
 export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeTime = '06:00' }: Props) {
   const { settings } = useSettings();
-  const isDark = settings.themeMode === 'dark';
-  const themeColors = isDark ? DarkColors : LightColors;
   const translateX = useSharedValue(0);
+
+  // Dynamic theme colors
+  const themeColors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
+  const isDark = settings.themeMode === 'dark';
 
   // Calculate position (absolute positioning in timeline, relative to wake time)
   const startMinutes = timeToMinutes(block.startTime);

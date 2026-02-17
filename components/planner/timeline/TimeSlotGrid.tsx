@@ -2,7 +2,7 @@
  * TimeSlotGrid - Hourly grid lines and labels for timeline
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -13,8 +13,12 @@ interface TimeSlotGridProps {
 
 export function TimeSlotGrid({ wakeTime = '06:00' }: TimeSlotGridProps) {
   const { settings } = useSettings();
+
+  // Dynamic theme colors
+  const themeColors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
-  const themeColors = isDark ? DarkColors : LightColors;
 
   // Parse wake time to get starting hour
   const wakeHour = parseInt(wakeTime.split(':')[0], 10);
