@@ -77,10 +77,11 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
     return () => clearInterval(interval);
   }, [getTimeRemaining, getProgress]);
 
-  const formatTime = (hours: number, minutes: number) => {
+  const formatTime = (hours: number, minutes: number, seconds: number) => {
     const h = hours.toString().padStart(2, '0');
     const m = minutes.toString().padStart(2, '0');
-    return `${h}:${m}`;
+    const s = seconds.toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
   };
 
   const handlePress = async () => {
@@ -172,7 +173,7 @@ export function FastingTimerCard({ onPress }: FastingTimerCardProps) {
             {/* Timer Display */}
             <Animated.Text style={[styles.value, { color: colors.text }, animatedStyle]}>
               {state.isActive
-                ? formatTime(timeRemaining.hours, timeRemaining.minutes)
+                ? formatTime(timeRemaining.hours, timeRemaining.minutes, timeRemaining.seconds)
                 : selectedPreset?.label || '16:8'
               }
             </Animated.Text>
