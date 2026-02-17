@@ -2906,7 +2906,7 @@ class HeirclarkAPI {
    */
   async getWeeklyPlan(weekStartDate: string): Promise<any | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v1/planner/weekly-plan?week=${weekStartDate}`, {
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/weekly-plan?weekStartDate=${weekStartDate}`, {
         headers: this.getHeaders(),
       });
 

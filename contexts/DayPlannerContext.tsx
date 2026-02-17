@@ -307,11 +307,28 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         }));
       }
 
-      // Load weekly plan
+      // Load weekly plan from AsyncStorage first (fast local cache)
       const weeklyPlanData = await AsyncStorage.getItem(STORAGE_KEYS.WEEKLY_PLAN);
       if (weeklyPlanData) {
         const weeklyPlan = JSON.parse(weeklyPlanData);
         setState((prev) => ({ ...prev, weeklyPlan }));
+      }
+
+      // Then try backend (source of truth) - overwrites local cache if newer
+      try {
+        const today = new Date();
+        const sunday = new Date(today);
+        sunday.setDate(today.getDate() - today.getDay());
+        const weekStart = formatLocalDate(sunday);
+
+        const backendPlan = await api.getWeeklyPlan(weekStart);
+        if (backendPlan) {
+          console.log('[Planner] Backend plan loaded, updating local cache');
+          setState((prev) => ({ ...prev, weeklyPlan: backendPlan }));
+          await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(backendPlan));
+        }
+      } catch (err) {
+        console.warn('[Planner] Backend plan fetch failed, using local cache');
       }
 
       // Load calendar permission
@@ -602,6 +619,9 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       sunday.setDate(today.getDate() - today.getDay());
       sunday.setHours(0, 0, 0, 0);
 
+      // Capture old plan so we can carry forward completion statuses
+      const oldWeeklyPlan = stateRef.current.weeklyPlan;
+
       // Generate 7 daily timelines with AI
       const days: DailyTimeline[] = [];
       for (let i = 0; i < 7; i++) {
@@ -609,6 +629,26 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         date.setDate(sunday.getDate() + i);
 
         const timeline = await generateDailyTimeline(date, currentPrefs);
+
+        // Carry forward completion statuses from old plan where blocks match
+        if (oldWeeklyPlan) {
+          const dateStr = formatLocalDate(date);
+          const oldDay = oldWeeklyPlan.days.find((d) => d.date === dateStr);
+          if (oldDay) {
+            timeline.blocks.forEach((newBlock) => {
+              const oldMatch = oldDay.blocks.find((ob) =>
+                ob.type === newBlock.type && (
+                  (ob.relatedId && ob.relatedId === newBlock.relatedId) ||
+                  ob.title === newBlock.title
+                )
+              );
+              if (oldMatch && oldMatch.status !== 'scheduled') {
+                newBlock.status = oldMatch.status;
+              }
+            });
+          }
+        }
+
         days.push(timeline);
       }
 
@@ -1273,121 +1313,189 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  /**
-   * Fast algorithmic-only regeneration of the weekly plan.
-   * Skips AI entirely so it completes in <1 second total (vs 14-21s with AI).
-   * Used by resyncMeals/resyncWorkouts to quickly repopulate after edits.
-   */
-  const regenerateWeekFast = useCallback(async () => {
-    const currentPrefs = stateRef.current.preferences;
-    if (!currentPrefs) return;
-
-    const today = new Date();
-    const sunday = new Date(today);
-    sunday.setDate(today.getDate() - today.getDay());
-    sunday.setHours(0, 0, 0, 0);
-
-    const days: DailyTimeline[] = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(sunday);
-      date.setDate(sunday.getDate() + i);
-      const dateStr = formatLocalDate(date);
-
-      const workoutBlocks = getWorkoutBlocksForDay(date, currentPrefs);
-      const mealBlocks = getMealBlocksForDay(date, currentPrefs);
-
-      // Calendar events
-      const currentEvents = stateRef.current.deviceCalendarEvents;
-      const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(date); dayEnd.setHours(23, 59, 59, 999);
-      const calendarBlocks = currentEvents
-        .filter(event => {
-          if (/^cancell?ed:/i.test(event.title)) return false;
-          if (event.isAllDay) return event.startDate <= dayEnd && event.endDate > dayStart;
-          return isSameDay(event.startDate, date);
-        })
-        .map(event => convertCalendarEventToBlock(event));
-
-      // Life context
-      const goalState = goalWizardRef.current?.state;
-      const foodPrefs = foodPrefsRef.current?.preferences;
-      const dayName = DAY_NAMES[date.getDay()];
-      const isCheatDay = (foodPrefs?.cheatDays || []).includes(dayName);
-      const isFasting = goalState?.intermittentFasting ?? false;
-      const hasOOOBlock = calendarBlocks.some(b => b.isAllDay && b.isOOO);
-
-      const lifeContext: LifeContext = {
-        isFasting,
-        fastingStart: goalState?.fastingStart || '20:00',
-        fastingEnd: goalState?.fastingEnd || '12:00',
-        cheatDays: foodPrefs?.cheatDays || [],
-        isCheatDay,
-        isOOODay: hasOOOBlock,
-        meetingDensity: 'low',
-      };
-
-      const request: SchedulingRequest = {
-        date: dateStr,
-        preferences: currentPrefs,
-        workoutBlocks,
-        mealBlocks,
-        calendarBlocks,
-        recoveryContext: (stateRef.current as any)._latestRecovery || undefined,
-        completionPatterns: stateRef.current.completionPatterns,
-        lifeContext,
-      };
-
-      // Algorithmic only - no AI call
-      const result = SchedulingEngine.generateTimeline(request);
-      const timeline = result.timeline;
-      if (timeline.blocks.some(b => b.isAllDay && b.isOOO)) {
-        timeline.isOOODay = true;
-      }
-      days.push(timeline);
-    }
-
-    const weeklyStats = calculateWeeklyStats(days);
-    const weeklyPlan: WeeklyPlan = {
-      weekStartDate: formatLocalDate(sunday),
-      days,
-      weeklyStats,
-      generatedAt: new Date().toISOString(),
-    };
-
-    await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(weeklyPlan));
-    api.saveWeeklyPlan(weeklyPlan).catch((err: any) =>
-      console.warn('[Planner] Backend weekly plan save failed:', err)
-    );
-
-    setState(prev => ({ ...prev, weeklyPlan }));
-    console.log('[Planner] Fast resync complete -', days.reduce((s, d) => s + d.blocks.length, 0), 'total blocks');
-  }, [getWorkoutBlocksForDay, getMealBlocksForDay]);
 
   /**
-   * Resync meals: re-reads fresh meal data from MealPlanContext and regenerates
-   * the weekly plan using fast algorithmic scheduling (no AI, <1s).
+   * Resync meals: surgically replaces ONLY meal blocks while preserving
+   * everything else (workout statuses, calendar events, sleep blocks, etc.).
+   * Uses algorithmic scheduling to assign times to new meal blocks.
    */
   const resyncMeals = useCallback(async () => {
+    const currentPrefs = stateRef.current.preferences;
+    const currentWeeklyPlan = stateRef.current.weeklyPlan;
+    if (!currentPrefs || !currentWeeklyPlan) {
+      console.warn('[Planner] Cannot resync meals without preferences/plan');
+      return;
+    }
+
     setState(prev => ({ ...prev, isSyncingMeals: true }));
+
     try {
-      await regenerateWeekFast();
+      const updatedDays = currentWeeklyPlan.days.map((day) => {
+        const date = parseLocalDate(day.date);
+
+        // 1. Separate: keep all non-meal blocks (preserves statuses, times)
+        const preservedBlocks = day.blocks.filter(
+          b => b.type !== 'meal_eating' && b.type !== 'meal_prep'
+        );
+
+        // 2. Get fresh meal blocks from MealPlanContext
+        const freshMealBlocks = getMealBlocksForDay(date, currentPrefs);
+        if (freshMealBlocks.length === 0) {
+          return { ...day, blocks: preservedBlocks };
+        }
+
+        // 3. Build scheduling request using preserved blocks as anchors
+        //    and fresh meals as the blocks to schedule
+        const goalState = goalWizardRef.current?.state;
+        const foodPrefs = foodPrefsRef.current?.preferences;
+        const dayName = DAY_NAMES[date.getDay()];
+        const isCheatDay = (foodPrefs?.cheatDays || []).includes(dayName);
+        const isFasting = goalState?.intermittentFasting ?? false;
+
+        const request: SchedulingRequest = {
+          date: day.date,
+          preferences: currentPrefs,
+          workoutBlocks: preservedBlocks.filter(b => b.type === 'workout'),
+          mealBlocks: freshMealBlocks,
+          calendarBlocks: preservedBlocks.filter(b => b.type === 'calendar_event'),
+          completionPatterns: stateRef.current.completionPatterns,
+          lifeContext: {
+            isFasting,
+            fastingStart: goalState?.fastingStart || '20:00',
+            fastingEnd: goalState?.fastingEnd || '12:00',
+            cheatDays: foodPrefs?.cheatDays || [],
+            isCheatDay,
+            isOOODay: day.isOOODay || false,
+            meetingDensity: 'low',
+          },
+        };
+
+        // 4. Run algorithmic scheduler to get timed meals
+        const result = SchedulingEngine.generateTimeline(request);
+
+        // 5. Extract only newly-timed meal blocks from the result
+        const timedMeals = result.timeline.blocks.filter(
+          b => b.type === 'meal_eating' || b.type === 'meal_prep'
+        );
+
+        // 6. Merge: preserved blocks + newly-timed meals, sorted by time
+        const mergedBlocks = [...preservedBlocks, ...timedMeals]
+          .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+        return { ...day, blocks: mergedBlocks };
+      });
+
+      const weeklyStats = calculateWeeklyStats(updatedDays);
+      const updatedPlan: WeeklyPlan = {
+        ...currentWeeklyPlan,
+        days: updatedDays,
+        weeklyStats,
+        generatedAt: new Date().toISOString(),
+      };
+
+      await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updatedPlan));
+      api.saveWeeklyPlan(updatedPlan).catch((err: any) =>
+        console.warn('[Planner] Backend weekly plan save failed:', err)
+      );
+
+      setState(prev => ({ ...prev, weeklyPlan: updatedPlan }));
+      console.log('[Planner] ✅ Meals resynced surgically - non-meal blocks preserved');
+    } catch (error: any) {
+      console.error('[Planner] Meal resync error:', error);
+      setState(prev => ({ ...prev, error: error.message }));
     } finally {
       setState(prev => ({ ...prev, isSyncingMeals: false }));
     }
-  }, [regenerateWeekFast]);
+  }, [getMealBlocksForDay]);
 
   /**
-   * Resync workouts: re-reads fresh workout data from TrainingContext and regenerates
-   * the weekly plan using fast algorithmic scheduling (no AI, <1s).
+   * Resync workouts: surgically replaces ONLY workout blocks while preserving
+   * everything else (meal statuses, calendar events, sleep blocks, etc.).
+   * Uses algorithmic scheduling to assign times to new workout blocks.
    */
   const resyncWorkouts = useCallback(async () => {
+    const currentPrefs = stateRef.current.preferences;
+    const currentWeeklyPlan = stateRef.current.weeklyPlan;
+    if (!currentPrefs || !currentWeeklyPlan) {
+      console.warn('[Planner] Cannot resync workouts without preferences/plan');
+      return;
+    }
+
     setState(prev => ({ ...prev, isSyncingWorkouts: true }));
+
     try {
-      await regenerateWeekFast();
+      const updatedDays = currentWeeklyPlan.days.map((day) => {
+        const date = parseLocalDate(day.date);
+
+        // 1. Separate: keep all non-workout blocks (preserves statuses, times)
+        const preservedBlocks = day.blocks.filter(b => b.type !== 'workout');
+
+        // 2. Get fresh workout blocks from TrainingContext
+        const freshWorkoutBlocks = getWorkoutBlocksForDay(date, currentPrefs);
+        if (freshWorkoutBlocks.length === 0) {
+          return { ...day, blocks: preservedBlocks };
+        }
+
+        // 3. Build scheduling request using preserved blocks as anchors
+        const goalState = goalWizardRef.current?.state;
+        const foodPrefs = foodPrefsRef.current?.preferences;
+        const dayName = DAY_NAMES[date.getDay()];
+        const isCheatDay = (foodPrefs?.cheatDays || []).includes(dayName);
+        const isFasting = goalState?.intermittentFasting ?? false;
+
+        const request: SchedulingRequest = {
+          date: day.date,
+          preferences: currentPrefs,
+          workoutBlocks: freshWorkoutBlocks,
+          mealBlocks: preservedBlocks.filter(b => b.type === 'meal_eating' || b.type === 'meal_prep'),
+          calendarBlocks: preservedBlocks.filter(b => b.type === 'calendar_event'),
+          completionPatterns: stateRef.current.completionPatterns,
+          lifeContext: {
+            isFasting,
+            fastingStart: goalState?.fastingStart || '20:00',
+            fastingEnd: goalState?.fastingEnd || '12:00',
+            cheatDays: foodPrefs?.cheatDays || [],
+            isCheatDay,
+            isOOODay: day.isOOODay || false,
+            meetingDensity: 'low',
+          },
+        };
+
+        // 4. Run algorithmic scheduler to get timed workouts
+        const result = SchedulingEngine.generateTimeline(request);
+
+        // 5. Extract only newly-timed workout blocks from the result
+        const timedWorkouts = result.timeline.blocks.filter(b => b.type === 'workout');
+
+        // 6. Merge: preserved blocks + newly-timed workouts, sorted by time
+        const mergedBlocks = [...preservedBlocks, ...timedWorkouts]
+          .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+        return { ...day, blocks: mergedBlocks };
+      });
+
+      const weeklyStats = calculateWeeklyStats(updatedDays);
+      const updatedPlan: WeeklyPlan = {
+        ...currentWeeklyPlan,
+        days: updatedDays,
+        weeklyStats,
+        generatedAt: new Date().toISOString(),
+      };
+
+      await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updatedPlan));
+      api.saveWeeklyPlan(updatedPlan).catch((err: any) =>
+        console.warn('[Planner] Backend weekly plan save failed:', err)
+      );
+
+      setState(prev => ({ ...prev, weeklyPlan: updatedPlan }));
+      console.log('[Planner] ✅ Workouts resynced surgically - non-workout blocks preserved');
+    } catch (error: any) {
+      console.error('[Planner] Workout resync error:', error);
+      setState(prev => ({ ...prev, error: error.message }));
     } finally {
       setState(prev => ({ ...prev, isSyncingWorkouts: false }));
     }
-  }, [regenerateWeekFast]);
+  }, [getWorkoutBlocksForDay]);
 
   /**
    * Set selected day index
