@@ -246,13 +246,13 @@ export function ExerciseAlternativesModal({
     onClose();
   };
 
-  if (!exercise) return null;
-
-  const alternatives = exercise.alternatives || [];
+  const alternatives = exercise?.alternatives || [];
   const groupedAlternatives = useMemo(
     () => groupAlternativesByEquipment(alternatives),
     [alternatives]
   );
+
+  if (!exercise) return null;
 
   return (
     <Modal
