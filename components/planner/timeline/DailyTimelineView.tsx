@@ -688,12 +688,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
+    paddingTop: 20, // Space for first time label (positioned at top: -8)
     // paddingBottom is set dynamically via style prop
   },
   timeline: {
     position: 'relative',
     minHeight: 1440, // 24 hours * 60px per hour
-    paddingTop: 20, // Make room for first time label to be fully visible
   },
   emptyContainer: {
     flex: 1,
