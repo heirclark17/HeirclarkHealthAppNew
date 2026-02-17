@@ -461,8 +461,8 @@ export function WorkoutCard({
               style={styles.equipmentCardWrapper}
             >
               <GlassCard style={styles.equipmentCard} interactive>
-                <Settings size={16} color={colors.textMuted} />
-                <Text style={[styles.equipmentCardText, { color: colors.textMuted }]}>
+                <Settings size={16} color={colors.text} />
+                <Text style={[styles.equipmentCardText, { color: colors.text }]}>
                   {currentEquipmentLabel ? `Equipment: ${currentEquipmentLabel}` : 'Switch Equipment'}
                 </Text>
               </GlassCard>
