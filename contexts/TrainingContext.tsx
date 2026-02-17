@@ -8,6 +8,7 @@ import { weightTrackingStorage } from '../services/weightTrackingStorage';
 import { aiService } from '../services/aiService';
 import { api } from '../services/api';
 import { generateMultiWeekProgram } from '../services/programGenerator';
+import { researchOptimalProgram } from '../services/perplexityResearch';
 import {
   WeeklyTrainingPlan,
   TrainingDay,
@@ -580,11 +581,24 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         console.log('[Training] Generating', programWeeks, 'week program');
 
         try {
+          // Research optimal program design via Perplexity (non-blocking fallback)
+          let researchContext: string | undefined;
+          try {
+            const research = await researchOptimalProgram(userProfile);
+            if (research) {
+              researchContext = research.summary;
+              console.log('[Training] Perplexity research complete');
+            }
+          } catch (researchErr) {
+            console.warn('[Training] Perplexity research failed, continuing without:', researchErr);
+          }
+
           const multiWeekPlan = await generateMultiWeekProgram(
             preferences,
             program,
             userProfile,
-            programWeeks
+            programWeeks,
+            researchContext
           );
 
           console.log('[Training] ✅ Multi-week plan generated:', multiWeekPlan.totalWeeks, 'weeks');

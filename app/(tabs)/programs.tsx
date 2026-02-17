@@ -96,6 +96,7 @@ export default function ProgramsScreen() {
     showAlternativesModal,
     cardioRecommendations,
     nutritionGuidance,
+    multiWeekPlan,
   } = trainingState;
 
   // Goal wizard context - use safe wrapper hook
@@ -465,6 +466,33 @@ export default function ProgramsScreen() {
         {/* Training Plan Content - show when plan exists */}
         {weeklyPlan && !isGenerating && (
           <View>
+            {/* Week X of Y Header */}
+            {multiWeekPlan && multiWeekPlan.totalWeeks > 1 && (
+              <View style={styles.weekHeaderSection}>
+                <View style={styles.weekHeaderTop}>
+                  <Text style={[styles.weekHeaderTitle, { color: colors.text }]}>
+                    Week <NumberText weight="semiBold">{currentWeek}</NumberText> of <NumberText weight="semiBold">{multiWeekPlan.totalWeeks}</NumberText>
+                  </Text>
+                  {selectedProgram && (
+                    <Text style={[styles.weekHeaderProgram, { color: colors.textMuted }]}>
+                      {selectedProgram.name}
+                    </Text>
+                  )}
+                </View>
+                <View style={[styles.weekProgressBar, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}>
+                  <View
+                    style={[
+                      styles.weekProgressFill,
+                      {
+                        width: `${(currentWeek / multiWeekPlan.totalWeeks) * 100}%`,
+                        backgroundColor: colors.primary,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+            )}
+
             {/* Week Navigation */}
             <View style={styles.weekNavigation}>
               <TouchableOpacity
@@ -489,24 +517,52 @@ export default function ProgramsScreen() {
               <TouchableOpacity
                 style={styles.weekButton}
                 onPress={handleNextWeek}
-                accessibilityLabel={`Next week, currently on week ${currentWeek}`}
+                disabled={currentWeek >= (multiWeekPlan?.totalWeeks || currentWeek)}
+                accessibilityLabel={`Next week, currently on week ${currentWeek}${multiWeekPlan ? ` of ${multiWeekPlan.totalWeeks}` : ''}`}
                 accessibilityRole="button"
+                accessibilityState={{ disabled: currentWeek >= (multiWeekPlan?.totalWeeks || currentWeek) }}
                 accessibilityHint="Navigates to the next week's training plan"
               >
-                <Text style={[styles.weekButtonText, { color: colors.text }]}>Next Week</Text>
-                <ChevronRight size={20} color={colors.text} strokeWidth={1.5} />
+                <Text style={[
+                  styles.weekButtonText,
+                  { color: colors.text },
+                  currentWeek >= (multiWeekPlan?.totalWeeks || currentWeek) && { color: colors.border },
+                ]}>Next Week</Text>
+                <ChevronRight
+                  size={20}
+                  color={currentWeek >= (multiWeekPlan?.totalWeeks || currentWeek) ? colors.border : colors.text}
+                  strokeWidth={1.5}
+                />
               </TouchableOpacity>
             </View>
 
             {/* Current Day Workout */}
             {currentWorkout && (
-              <WorkoutCard
-                workout={currentWorkout}
-                onSelectExercise={showExerciseAlternatives}
-                onLogWeight={handleLogWeight}
-                onLogForm={handleLogForm}
-                onCompleteWorkout={markWorkoutComplete}
-              />
+              <View style={styles.workoutsContainer}>
+                <WorkoutCard
+                  workout={currentWorkout}
+                  dayName={currentDay?.dayOfWeek || ''}
+                  index={dayIndexInWeek}
+                  weekNumber={currentWeek}
+                  onMarkComplete={handleMarkComplete}
+                  onExerciseToggle={handleExerciseToggle}
+                  onSwapExercise={handleSwapExercise}
+                  onShowAlternatives={handleShowAlternatives}
+                  onLogWeight={handleLogWeight}
+                  onViewForm={handleViewForm}
+                />
+              </View>
+            )}
+
+            {/* Rest Day Card */}
+            {currentDay?.isRestDay && !currentWorkout && (
+              <GlassCard style={styles.restDayCard}>
+                <Bed size={32} color={colors.textMuted} strokeWidth={1.5} />
+                <Text style={[styles.restDayTitle, { color: colors.text }]}>Rest Day</Text>
+                <Text style={[styles.restDayText, { color: colors.textMuted }]}>
+                  Recovery is essential for progress. Take it easy today.
+                </Text>
+              </GlassCard>
             )}
           </View>
         )}
@@ -947,6 +1003,33 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     fontFamily: Fonts.regular,
     textAlign: 'center',
+  },
+  weekHeaderSection: {
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+  weekHeaderTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 8,
+  },
+  weekHeaderTitle: {
+    fontSize: 16,
+    fontFamily: Fonts.medium,
+  },
+  weekHeaderProgram: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+  },
+  weekProgressBar: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  weekProgressFill: {
+    height: '100%',
+    borderRadius: 2,
   },
   weekNavigation: {
     flexDirection: 'row',

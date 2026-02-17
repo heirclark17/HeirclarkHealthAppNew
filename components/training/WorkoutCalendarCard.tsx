@@ -217,10 +217,12 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
             {(weeklyPlan?.days || []).map((day, index) => {
               const isSelected = selectedDayIndex === index;
               const dayShort = day.dayOfWeek.slice(0, 3);
-              const dayNumber = new Date(day.date).getDate();
+              const dayDate = day.calendarDate ? new Date(day.calendarDate + 'T00:00:00') : new Date(day.date);
+              const dayNumber = dayDate.getDate();
               const hasWorkout = !day.isRestDay && day.workout;
               const isCompleted = day.completed;
               const isRestDay = day.isRestDay;
+              const isToday = dayDate.toDateString() === new Date().toDateString();
 
               return (
                 <TouchableOpacity
@@ -228,11 +230,12 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                   style={[
                     styles.dayItem,
                     { backgroundColor: dayItemBg },
+                    isToday && !isSelected && [styles.dayItemToday, { borderColor: colors.primary }],
                     isSelected && [styles.dayItemActive, { backgroundColor: colors.primary }],
                   ]}
                   onPress={() => onSelectDay(index)}
                   accessible={true}
-                  accessibilityLabel={`${day.dayOfWeek} ${dayNumber}${isSelected ? ', Selected' : ''}${isRestDay ? ', Rest Day' : ''}${isCompleted ? ', Completed' : ''}`}
+                  accessibilityLabel={`${day.dayOfWeek} ${dayNumber}${isSelected ? ', Selected' : ''}${isToday ? ', Today' : ''}${isRestDay ? ', Rest Day' : ''}${isCompleted ? ', Completed' : ''}`}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: isSelected }}
                 >
@@ -468,6 +471,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     minHeight: Spacing.touchTarget + 10,
+  },
+  dayItemToday: {
+    borderWidth: 1.5,
   },
   dayItemActive: Platform.select({
     ios: {

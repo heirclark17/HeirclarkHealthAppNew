@@ -357,6 +357,7 @@ export interface CompleteTrainingPlan {
   calendarStartDate: string;  // ISO date - Week 1 Day 1 anchor (most recent Monday)
   currentWeekIndex: number;   // 0-based index (0 = week 1, 1 = week 2, etc.)
   totalWeeks: number;         // 4, 8, or 12 weeks
+  perplexityResearchSummary?: string; // Research context used to inform program design
 }
 
 // Cardio session with alternatives
@@ -641,6 +642,17 @@ export interface UserProgressionProfile {
     hypertrophy: [number, number]; // e.g. [8, 12]
     endurance: [number, number]; // e.g. [12, 20]
   };
+}
+
+/** Perplexity research result for evidence-based program design */
+export interface PerplexityResearchResult {
+  summary: string;
+  recommendedSplit: string;
+  volumeTargets: { muscleGroup: string; setsPerWeek: number }[];
+  periodizationApproach: string;
+  deloadFrequency: number;
+  specialConsiderations: string[];
+  researchedAt: string;
 }
 
 /** Long-term trend data for charts */
