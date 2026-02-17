@@ -14,6 +14,18 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true,
 });
 
+/**
+ * Convert 24-hour time to 12-hour format with AM/PM
+ * @param time24 - Time in 24-hour format (e.g., "13:30", "07:00")
+ * @returns Time in 12-hour format (e.g., "1:30 PM", "7:00 AM")
+ */
+function to12Hour(time24: string): string {
+  const [hours, minutes] = time24.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hours12 = hours % 12 || 12; // Convert 0 to 12 for midnight
+  return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+}
+
 interface AIScheduleResponse {
   blocks: Array<{
     type: string;
@@ -85,7 +97,8 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
     // Log all generated blocks before validation
     console.log('[AI Scheduler] Generated blocks BEFORE validation:');
     aiResponse.blocks.forEach(block => {
-      console.log(`  ${block.type}: ${block.title} | ${block.startTime}-${block.endTime}`);
+      const timeRange = `${to12Hour(block.startTime)}-${to12Hour(block.endTime)}`;
+      console.log(`  ${block.type}: ${block.title} | ${timeRange}`);
     });
 
     // Convert AI response to TimeBlock format
@@ -128,7 +141,9 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
         const isValid = blockStart >= eatingWindowStart && blockEnd <= eatingWindowEnd;
 
         if (!isValid) {
-          console.warn(`[AI Scheduler] ❌ REMOVED meal outside eating window: ${block.title} at ${block.startTime}-${block.endTime} (window: ${fastingEnd}-${fastingStart})`);
+          const blockTime = `${to12Hour(block.startTime)}-${to12Hour(block.endTime)}`;
+          const windowTime = `${to12Hour(fastingEnd)}-${to12Hour(fastingStart)}`;
+          console.warn(`[AI Scheduler] ❌ REMOVED meal outside eating window: ${block.title} at ${blockTime} (window: ${windowTime})`);
         }
 
         return isValid;
@@ -164,8 +179,10 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
           const overlap = (start1 < end2 && end1 > start2) || (start2 < end1 && end2 > start1);
 
           if (overlap) {
+            const time1 = `${to12Hour(block1.startTime)}-${to12Hour(block1.endTime)}`;
+            const time2 = `${to12Hour(block2.startTime)}-${to12Hour(block2.endTime)}`;
             conflicts.push(
-              `❌ CONFLICT: "${block1.title}" (${block1.startTime}-${block1.endTime}) overlaps with "${block2.title}" (${block2.startTime}-${block2.endTime})`
+              `❌ CONFLICT: "${block1.title}" (${time1}) overlaps with "${block2.title}" (${time2})`
             );
           }
         }
@@ -186,7 +203,8 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
     // Log final blocks after all validation
     console.log('[AI Scheduler] Final blocks AFTER validation (with calendar events):');
     allBlocks.forEach(block => {
-      console.log(`  ${block.type}: ${block.title} | ${block.startTime}-${block.endTime}`);
+      const timeRange = `${to12Hour(block.startTime)}-${to12Hour(block.endTime)}`;
+      console.log(`  ${block.type}: ${block.title} | ${timeRange}`);
     });
 
     // Calculate stats (exclude calendar blocks from stats)
