@@ -391,27 +391,7 @@ export function DailyTimelineView() {
 
       {/* Timeline — Frosted Glass Card */}
       <View style={styles.timelineGlassWrapper}>
-        <View style={[
-          styles.timelineGlassOuter,
-          {
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.08)',
-            shadowColor: isDark ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.08)',
-          },
-        ]}>
-          {/* Blur backdrop */}
-          <BlurView
-            intensity={isDark ? 40 : 35}
-            tint={isDark ? 'dark' : 'light'}
-            style={StyleSheet.absoluteFill}
-          />
-          {/* Glass tint overlay */}
-          <View
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.40)' },
-            ]}
-            pointerEvents="none"
-          />
+        <View style={styles.timelineGlassOuter}>
 
           <ScrollView
             ref={scrollRef}
@@ -698,25 +678,10 @@ const styles = StyleSheet.create({
   },
   timelineGlassWrapper: {
     flex: 1,
-    marginHorizontal: 12,
-    marginTop: 12,
-    marginBottom: 4,
   },
   timelineGlassOuter: {
     flex: 1,
-    borderRadius: 24,
-    overflow: 'hidden',
-    borderWidth: 1,
-    ...Platform.select({
-      ios: {
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    overflow: 'hidden' as const,
   },
   scrollView: {
     flex: 1,
