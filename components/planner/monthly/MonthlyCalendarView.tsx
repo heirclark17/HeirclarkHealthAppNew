@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   },
   dayLabelText: {
     fontSize: 12,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
   },
   calendarRow: {
