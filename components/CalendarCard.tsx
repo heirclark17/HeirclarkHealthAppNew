@@ -38,10 +38,14 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
   }, []);
 
   useEffect(() => {
-    // Scroll to the beginning (current week) after data is loaded
+    // Scroll to the end (current week) after data is loaded
     if (weekDays.length > 0 && scrollViewRef.current) {
       setTimeout(() => {
-        scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: false });
+        // Calculate scroll position to show current week (at the end)
+        // Each day item is ~56px wide (48px + 8px gap)
+        const dayWidth = 56;
+        const maxScroll = weekDays.length * dayWidth;
+        scrollViewRef.current?.scrollTo({ x: maxScroll, y: 0, animated: false });
       }, 100);
     }
   }, [weekDays]);
@@ -64,9 +68,9 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
 
     const dateList = [];
 
-    // Generate weeks: current week (Sunday-Saturday) + past 52 weeks
-    // User can scroll right to see previous weeks
-    for (let weekOffset = 0; weekOffset < 52; weekOffset++) {
+    // Generate weeks: past 52 weeks + current week (oldest to newest)
+    // User can swipe right to see previous weeks (they're on the left)
+    for (let weekOffset = 51; weekOffset >= 0; weekOffset--) {
       const weekStart = new Date(sunday);
       weekStart.setDate(sunday.getDate() - (weekOffset * 7));
 
