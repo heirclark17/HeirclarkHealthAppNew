@@ -441,14 +441,25 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   const getMealBlocksForDay = useCallback((date: Date, preferences: PlannerPreferences): TimeBlock[] => {
     const mealPlan = mealPlanRef.current;
     const dayOfWeek = date.getDay(); // 0=Sun
+    const targetDayName = DAY_NAMES[dayOfWeek];
+    const dateStr = formatLocalDate(date);
+
+    console.log(`[getMealBlocksForDay] 🍽️ Looking for meals for ${dateStr} (${targetDayName})`);
+    console.log(`[getMealBlocksForDay] mealPlan exists: ${!!mealPlan}`);
+    console.log(`[getMealBlocksForDay] mealPlan.state exists: ${!!mealPlan?.state}`);
+    console.log(`[getMealBlocksForDay] weeklyPlan exists: ${!!mealPlan?.state?.weeklyPlan}`);
 
     // Try to get real meal data from MealPlanContext
     if (mealPlan?.state?.weeklyPlan) {
       const weeklyMealPlan = mealPlan.state.weeklyPlan;
+      console.log(`[getMealBlocksForDay] weeklyPlan has ${weeklyMealPlan.length} days`);
+      weeklyMealPlan.forEach((d: any, i: number) => {
+        console.log(`[getMealBlocksForDay]   Day ${i}: dayName="${d.dayName}", dayNumber=${d.dayNumber}, meals=${d.meals?.length || 0}`);
+      });
+
       // MealPlan uses dayNumber 1-7 (Mon=1, Sun=7) or may index 0-6
       // The DayPlan has a dayNumber field and a date field.
       // Try to match by day name or by day-of-week number.
-      const targetDayName = DAY_NAMES[dayOfWeek];
       const mealDay = weeklyMealPlan.find((d: any) => {
         if (d.dayName === targetDayName) return true;
         // Also match by dayNumber: 1=Monday .. 7=Sunday convention
@@ -456,7 +467,14 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         return d.dayNumber === mappedDayNum;
       });
 
+      console.log(`[getMealBlocksForDay] Found mealDay: ${!!mealDay}`);
+      if (mealDay) {
+        console.log(`[getMealBlocksForDay]   mealDay.dayName: ${mealDay.dayName}`);
+        console.log(`[getMealBlocksForDay]   mealDay.meals.length: ${mealDay.meals?.length || 0}`);
+      }
+
       if (mealDay?.meals?.length > 0) {
+        console.log(`[getMealBlocksForDay] ✅ Returning ${mealDay.meals.length} real meals for ${targetDayName}`);
         return mealDay.meals.map((meal: any) => {
           const totalTime = (meal.prepTime || 15) + (meal.cookTime || 15);
           const eatingTime = 30; // eating duration
@@ -477,10 +495,15 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
             relatedId: meal.id,
           };
         });
+      } else {
+        console.log(`[getMealBlocksForDay] ⚠️ mealDay found but has no meals, using fallback`);
       }
+    } else {
+      console.log(`[getMealBlocksForDay] ⚠️ No weeklyPlan in MealPlanContext, using fallback`);
     }
 
     // Fallback: generate default meal blocks
+    console.log(`[getMealBlocksForDay] ⬇️ Returning default meal blocks for ${targetDayName}`);
     const defaultMeals = [
       { type: 'breakfast', title: 'Breakfast', duration: 30 },
       { type: 'lunch', title: 'Lunch', duration: 30 },
