@@ -199,6 +199,16 @@ export default function AccountabilityCoachModal({
     transform: [{ scale: sendButtonScale.value }],
   }));
 
+  // Track whether the avatar has spoken the initial summary
+  const hasSpokenSummaryRef = useRef(false);
+
+  // Reset spoken flag when modal closes
+  useEffect(() => {
+    if (!visible) {
+      hasSpokenSummaryRef.current = false;
+    }
+  }, [visible]);
+
   // Inject initial summary as first message if messages are empty
   useEffect(() => {
     if (visible && initialSummary && messages.length === 0) {
@@ -211,16 +221,19 @@ export default function AccountabilityCoachModal({
       const updated = [summaryMessage];
       onMessagesChange(updated);
       saveDailySummaryCache(initialSummary, updated);
-
-      // Have avatar speak a brief version
-      setTimeout(() => {
-        if (showAvatar && avatarReady) {
-          const brief = initialSummary.substring(0, 500);
-          speakText(brief);
-        }
-      }, 1000);
     }
   }, [visible, initialSummary]);
+
+  // When avatar becomes ready, speak the initial summary
+  useEffect(() => {
+    if (avatarReady && visible && initialSummary && !hasSpokenSummaryRef.current) {
+      hasSpokenSummaryRef.current = true;
+      // Small delay to let avatar fully stabilize after 'ready' event
+      setTimeout(() => {
+        speakText(initialSummary);
+      }, 500);
+    }
+  }, [avatarReady, visible, initialSummary]);
 
   // Avatar initialization
   useEffect(() => {
