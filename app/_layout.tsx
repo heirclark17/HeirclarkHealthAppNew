@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Slot, SplashScreen } from 'expo-router';
 import { useFonts } from 'expo-font';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, Linking, Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -96,6 +96,32 @@ export default function RootLayout() {
       }
     };
     initBackgroundSync();
+  }, []);
+
+  // Handle deep links for OAuth callbacks (e.g., heirclark://oura/connected)
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      const { url } = event;
+      if (!url) return;
+
+      if (url.startsWith('heirclark://oura/connected')) {
+        Alert.alert('Oura Ring Connected', 'Your Oura Ring has been successfully connected. Tap Sync to import your data.');
+      } else if (url.startsWith('heirclark://oura/error')) {
+        const match = url.match(/message=([^&]+)/);
+        const message = match ? decodeURIComponent(match[1]) : 'An error occurred during connection.';
+        Alert.alert('Connection Failed', message);
+      }
+    };
+
+    // Handle deep links when app is already open
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+
+    // Handle deep link that opened the app from cold start
+    Linking.getInitialURL().then(url => {
+      if (url) handleDeepLink({ url });
+    });
+
+    return () => subscription.remove();
   }, []);
 
   // Proceed if fonts loaded, timed out, or errored

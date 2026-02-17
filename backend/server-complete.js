@@ -5078,6 +5078,371 @@ Provide your response as JSON with these fields:
 });
 
 // ============================================
+// OURA RING OAUTH + WEARABLE ENDPOINTS
+// ============================================
+
+const OURA_CLIENT_ID = process.env.OURA_CLIENT_ID;
+const OURA_CLIENT_SECRET = process.env.OURA_CLIENT_SECRET;
+const BASE_URL = process.env.BASE_URL || 'https://heirclarkinstacartbackend-production.up.railway.app';
+const OURA_REDIRECT_URI = `${BASE_URL}/api/v1/wearables/callback/oura`;
+
+// Helper: Refresh Oura access token (refresh tokens are single-use)
+async function refreshOuraToken(userId, refreshToken) {
+  try {
+    const params = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: OURA_CLIENT_ID,
+      client_secret: OURA_CLIENT_SECRET,
+    });
+
+    const response = await fetch('https://api.ouraring.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+
+    if (!response.ok) {
+      console.error('[Oura] Token refresh failed:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    const expiresAt = new Date(Date.now() + data.expires_in * 1000);
+
+    // Store new tokens (refresh token is single-use, must save new one)
+    await pool.query(
+      `UPDATE connected_devices
+       SET access_token = $1, refresh_token = $2, token_expires_at = $3
+       WHERE user_id = $4 AND provider = 'oura'`,
+      [data.access_token, data.refresh_token, expiresAt, userId]
+    );
+
+    console.log('[Oura] Token refreshed for user', userId);
+    return data.access_token;
+  } catch (error) {
+    console.error('[Oura] Token refresh error:', error.message);
+    return null;
+  }
+}
+
+// 3a. GET /api/v1/wearables/providers - List providers with connection status
+app.get('/api/v1/wearables/providers', authenticateToken, async (req, res) => {
+  try {
+    const connected = await pool.query(
+      `SELECT provider, last_sync_at FROM connected_devices WHERE user_id = $1`,
+      [req.userId]
+    );
+
+    const connectedMap = {};
+    for (const row of connected.rows) {
+      connectedMap[row.provider] = row.last_sync_at;
+    }
+
+    const providers = [
+      { id: 'apple_health', name: 'Apple Health', icon: 'heart', description: 'Steps, workouts, heart rate' },
+      { id: 'oura', name: 'Oura Ring', icon: 'ellipse', description: 'Sleep, readiness, HRV, temperature' },
+      { id: 'fitbit', name: 'Fitbit', icon: 'watch', description: 'Activity, sleep, heart rate' },
+      { id: 'garmin', name: 'Garmin', icon: 'fitness', description: 'Training, GPS, recovery' },
+      { id: 'strava', name: 'Strava', icon: 'bicycle', description: 'Running, cycling, swimming' },
+      { id: 'whoop', name: 'Whoop', icon: 'pulse', description: 'Recovery, strain, sleep' },
+      { id: 'withings', name: 'Withings', icon: 'scale', description: 'Weight, body composition' },
+    ].map(p => ({
+      ...p,
+      connected: !!connectedMap[p.id],
+      lastSync: connectedMap[p.id] || null,
+    }));
+
+    res.json({ success: true, providers });
+  } catch (error) {
+    console.error('[Wearables] Providers error:', error.message);
+    res.status(500).json({ error: 'Failed to get providers' });
+  }
+});
+
+// 3b. POST /api/v1/wearables/connect/:providerId - Start OAuth flow
+app.post('/api/v1/wearables/connect/:providerId', authenticateToken, async (req, res) => {
+  try {
+    const { providerId } = req.params;
+
+    if (providerId !== 'oura') {
+      return res.status(501).json({ error: `${providerId} integration not yet implemented` });
+    }
+
+    if (!OURA_CLIENT_ID || !OURA_CLIENT_SECRET) {
+      return res.status(500).json({ error: 'Oura OAuth not configured on server' });
+    }
+
+    // Generate CSRF state token
+    const state = crypto.randomBytes(32).toString('hex');
+
+    // Store state with user_id for callback validation
+    await pool.query(
+      `INSERT INTO oauth_states (user_id, provider, state) VALUES ($1, $2, $3)`,
+      [req.userId, 'oura', state]
+    );
+
+    const authUrl = `https://cloud.ouraring.com/oauth/authorize?` +
+      `response_type=code` +
+      `&client_id=${OURA_CLIENT_ID}` +
+      `&redirect_uri=${encodeURIComponent(OURA_REDIRECT_URI)}` +
+      `&scope=daily+heartrate+personal` +
+      `&state=${state}`;
+
+    console.log('[Oura] OAuth initiated for user', req.userId);
+    res.json({ success: true, authUrl });
+  } catch (error) {
+    console.error('[Oura] Connect error:', error.message);
+    res.status(500).json({ error: 'Failed to initiate OAuth' });
+  }
+});
+
+// 3c. GET /api/v1/wearables/callback/oura - OAuth callback (PUBLIC - no auth)
+app.get('/api/v1/wearables/callback/oura', async (req, res) => {
+  try {
+    const { code, state, error: oauthError } = req.query;
+
+    if (oauthError) {
+      console.error('[Oura] OAuth error from Oura:', oauthError);
+      return res.redirect(`heirclark://oura/error?message=${encodeURIComponent(oauthError)}`);
+    }
+
+    if (!code || !state) {
+      return res.redirect('heirclark://oura/error?message=Missing+code+or+state');
+    }
+
+    // Validate state token (10 minute expiry for CSRF protection)
+    const stateResult = await pool.query(
+      `DELETE FROM oauth_states
+       WHERE state = $1 AND created_at > NOW() - INTERVAL '10 minutes'
+       RETURNING user_id`,
+      [state]
+    );
+
+    if (stateResult.rows.length === 0) {
+      console.error('[Oura] Invalid or expired state token');
+      return res.redirect('heirclark://oura/error?message=Invalid+or+expired+state');
+    }
+
+    const userId = stateResult.rows[0].user_id;
+
+    // Exchange authorization code for tokens
+    const params = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      client_id: OURA_CLIENT_ID,
+      client_secret: OURA_CLIENT_SECRET,
+      redirect_uri: OURA_REDIRECT_URI,
+    });
+
+    const tokenResponse = await fetch('https://api.ouraring.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+
+    if (!tokenResponse.ok) {
+      const errBody = await tokenResponse.text();
+      console.error('[Oura] Token exchange failed:', tokenResponse.status, errBody);
+      return res.redirect('heirclark://oura/error?message=Token+exchange+failed');
+    }
+
+    const tokenData = await tokenResponse.json();
+    const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
+
+    // Store tokens in connected_devices
+    await pool.query(
+      `INSERT INTO connected_devices (user_id, provider, access_token, refresh_token, token_expires_at, last_sync_at, sync_status, scopes)
+       VALUES ($1, 'oura', $2, $3, $4, NOW(), 'active', $5)
+       ON CONFLICT (user_id, provider)
+       DO UPDATE SET access_token = $2, refresh_token = $3, token_expires_at = $4, last_sync_at = NOW(), sync_status = 'active', scopes = $5`,
+      [userId, tokenData.access_token, tokenData.refresh_token, expiresAt, 'daily heartrate personal']
+    );
+
+    // Clean up old oauth_states for this user
+    await pool.query(`DELETE FROM oauth_states WHERE user_id = $1`, [userId]);
+
+    console.log('[Oura] ✅ Connected for user', userId);
+    res.redirect('heirclark://oura/connected');
+  } catch (error) {
+    console.error('[Oura] Callback error:', error.message);
+    res.redirect(`heirclark://oura/error?message=${encodeURIComponent('Server error during connection')}`);
+  }
+});
+
+// 3d. POST /api/v1/wearables/sync/:providerId - Sync data from provider
+app.post('/api/v1/wearables/sync/:providerId', authenticateToken, async (req, res) => {
+  try {
+    const { providerId } = req.params;
+
+    if (providerId !== 'oura') {
+      return res.status(501).json({ error: `${providerId} sync not yet implemented` });
+    }
+
+    // Load tokens
+    const deviceResult = await pool.query(
+      `SELECT access_token, refresh_token, token_expires_at FROM connected_devices
+       WHERE user_id = $1 AND provider = 'oura'`,
+      [req.userId]
+    );
+
+    if (deviceResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Oura Ring not connected. Please connect first.' });
+    }
+
+    let { access_token, refresh_token, token_expires_at } = deviceResult.rows[0];
+
+    // Refresh token if expired or expiring within 5 minutes
+    if (!token_expires_at || new Date(token_expires_at) < new Date(Date.now() + 5 * 60 * 1000)) {
+      console.log('[Oura] Token expired/expiring, refreshing...');
+      const newToken = await refreshOuraToken(req.userId, refresh_token);
+      if (!newToken) {
+        // Mark device as needing re-auth
+        await pool.query(
+          `UPDATE connected_devices SET sync_status = 'auth_expired' WHERE user_id = $1 AND provider = 'oura'`,
+          [req.userId]
+        );
+        return res.status(401).json({ error: 'Oura authorization expired. Please reconnect.' });
+      }
+      access_token = newToken;
+    }
+
+    // Fetch last 7 days of data from 3 Oura API v2 endpoints in parallel
+    const endDate = new Date().toISOString().split('T')[0];
+    const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const ouraHeaders = { Authorization: `Bearer ${access_token}` };
+
+    const [sleepRes, activityRes, readinessRes] = await Promise.all([
+      fetch(`https://api.ouraring.com/v2/usercollection/daily_sleep?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
+      fetch(`https://api.ouraring.com/v2/usercollection/daily_activity?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
+      fetch(`https://api.ouraring.com/v2/usercollection/daily_readiness?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
+    ]);
+
+    let sleepCount = 0, activityCount = 0, readinessCount = 0;
+
+    // Process sleep data
+    if (sleepRes.ok) {
+      const sleepData = await sleepRes.json();
+      for (const day of (sleepData.data || [])) {
+        const totalHours = day.contributors?.total_sleep ? (day.contributors.total_sleep / 3600) : null;
+        const deepHours = day.contributors?.deep_sleep ? (day.contributors.deep_sleep / 3600) : null;
+        const remHours = day.contributors?.rem_sleep ? (day.contributors.rem_sleep / 3600) : null;
+
+        await pool.query(
+          `INSERT INTO sleep_logs (user_id, date, total_hours, deep_sleep_hours, rem_sleep_hours, sleep_score, source)
+           VALUES ($1, $2, $3, $4, $5, $6, 'oura')
+           ON CONFLICT (user_id, date) DO UPDATE SET
+             total_hours = COALESCE($3, sleep_logs.total_hours),
+             deep_sleep_hours = COALESCE($4, sleep_logs.deep_sleep_hours),
+             rem_sleep_hours = COALESCE($5, sleep_logs.rem_sleep_hours),
+             sleep_score = COALESCE($6, sleep_logs.sleep_score)`,
+          [req.userId, day.day, totalHours, deepHours, remHours, day.score || null]
+        );
+        sleepCount++;
+      }
+    } else {
+      console.warn('[Oura] Sleep fetch failed:', sleepRes.status);
+    }
+
+    // Process activity data (steps + calories)
+    if (activityRes.ok) {
+      const activityData = await activityRes.json();
+      for (const day of (activityData.data || [])) {
+        if (day.steps) {
+          await pool.query(
+            `INSERT INTO step_logs (user_id, date, steps, source) VALUES ($1, $2, $3, 'oura')
+             ON CONFLICT (user_id, date) DO UPDATE SET steps = $3`,
+            [req.userId, day.day, Math.floor(day.steps)]
+          );
+        }
+        if (day.total_calories) {
+          await pool.query(
+            `INSERT INTO calorie_logs (user_id, date, calories_burned) VALUES ($1, $2, $3)
+             ON CONFLICT (user_id, date) DO UPDATE SET calories_burned = $3`,
+            [req.userId, day.day, Math.round(day.total_calories)]
+          );
+        }
+        activityCount++;
+      }
+    } else {
+      console.warn('[Oura] Activity fetch failed:', activityRes.status);
+    }
+
+    // Process readiness data (Oura-exclusive premium data)
+    if (readinessRes.ok) {
+      const readinessData = await readinessRes.json();
+      for (const day of (readinessData.data || [])) {
+        await pool.query(
+          `INSERT INTO oura_readiness (user_id, date, readiness_score, temperature_deviation, resting_heart_rate)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (user_id, date) DO UPDATE SET
+             readiness_score = COALESCE($3, oura_readiness.readiness_score),
+             temperature_deviation = COALESCE($4, oura_readiness.temperature_deviation),
+             resting_heart_rate = COALESCE($5, oura_readiness.resting_heart_rate)`,
+          [req.userId, day.day, day.score || null, day.temperature_deviation || null, day.contributors?.resting_heart_rate || null]
+        );
+        readinessCount++;
+      }
+    } else {
+      console.warn('[Oura] Readiness fetch failed:', readinessRes.status);
+    }
+
+    // Update last_sync_at
+    await pool.query(
+      `UPDATE connected_devices SET last_sync_at = NOW(), sync_status = 'active' WHERE user_id = $1 AND provider = 'oura'`,
+      [req.userId]
+    );
+
+    const message = `Synced ${sleepCount} sleep, ${activityCount} activity, ${readinessCount} readiness records`;
+    console.log(`[Oura] ✅ ${message} for user ${req.userId}`);
+    res.json({ success: true, message });
+  } catch (error) {
+    console.error('[Oura] Sync error:', error.message);
+    res.status(500).json({ error: 'Sync failed', message: error.message });
+  }
+});
+
+// 3e. POST /api/v1/wearables/disconnect/:providerId - Disconnect provider
+app.post('/api/v1/wearables/disconnect/:providerId', authenticateToken, async (req, res) => {
+  try {
+    const { providerId } = req.params;
+
+    if (providerId !== 'oura') {
+      return res.status(501).json({ error: `${providerId} disconnect not yet implemented` });
+    }
+
+    // Load token to revoke
+    const deviceResult = await pool.query(
+      `SELECT access_token FROM connected_devices WHERE user_id = $1 AND provider = 'oura'`,
+      [req.userId]
+    );
+
+    if (deviceResult.rows.length > 0 && deviceResult.rows[0].access_token) {
+      // Revoke token at Oura (best-effort, don't fail if this errors)
+      try {
+        await fetch(`https://api.ouraring.com/oauth/revoke?access_token=${deviceResult.rows[0].access_token}`, {
+          method: 'POST',
+        });
+      } catch (revokeErr) {
+        console.warn('[Oura] Token revocation failed (non-critical):', revokeErr.message);
+      }
+    }
+
+    // Delete from connected_devices
+    await pool.query(
+      `DELETE FROM connected_devices WHERE user_id = $1 AND provider = 'oura'`,
+      [req.userId]
+    );
+
+    console.log('[Oura] ✅ Disconnected for user', req.userId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Oura] Disconnect error:', error.message);
+    res.status(500).json({ error: 'Failed to disconnect' });
+  }
+});
+
+// ============================================
 // ERROR HANDLING
 // ============================================
 
@@ -5194,6 +5559,49 @@ async function runMigrations() {
       ALTER TABLE workout_plans
       ADD COLUMN IF NOT EXISTS perplexity_research JSONB
     `);
+
+    // Unique constraint on connected_devices for ON CONFLICT upserts
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_devices_user_provider
+      ON connected_devices(user_id, provider)
+    `);
+
+    // OAuth state table for CSRF protection during OAuth flows
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS oauth_states (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        provider VARCHAR(50) NOT NULL,
+        state VARCHAR(128) NOT NULL UNIQUE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `);
+
+    // Oura readiness table (premium data NOT available through Apple HealthKit)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS oura_readiness (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        date DATE NOT NULL,
+        readiness_score INTEGER,
+        hrv_balance_score INTEGER,
+        temperature_deviation DECIMAL(4,2),
+        resting_heart_rate INTEGER,
+        source VARCHAR(20) DEFAULT 'oura',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id, date)
+      )
+    `);
+
+    // Add scopes column to connected_devices
+    await pool.query(`ALTER TABLE connected_devices ADD COLUMN IF NOT EXISTS scopes TEXT`);
+    // Add access_token / refresh_token columns for OAuth providers
+    await pool.query(`ALTER TABLE connected_devices ADD COLUMN IF NOT EXISTS access_token TEXT`);
+    await pool.query(`ALTER TABLE connected_devices ADD COLUMN IF NOT EXISTS refresh_token TEXT`);
+    await pool.query(`ALTER TABLE connected_devices ADD COLUMN IF NOT EXISTS token_expires_at TIMESTAMP WITH TIME ZONE`);
+
+    // Add sleep_score column to sleep_logs
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS sleep_score INTEGER`);
 
     console.log('[Migrations] ✅ Completed successfully');
   } catch (error) {
