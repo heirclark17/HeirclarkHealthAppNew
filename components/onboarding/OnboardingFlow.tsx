@@ -61,7 +61,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     },
     {
       id: 1,
-      icon: 'target',
+      icon: 'flag',
       title: 'Set Your Goals',
       description: 'Define your fitness objectives - fat loss, muscle gain, or maintenance. Our AI adapts to your unique metabolism and lifestyle.',
       action: {

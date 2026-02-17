@@ -49,7 +49,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [isGeneratingAIRecipe, setIsGeneratingAIRecipe] = useState(false);
   const [recipeDetails, setRecipeDetails] = useState<{
-    ingredients: Array<{ name: string; quantity: number; unit: string }>;
+    ingredients: Array<{ name: string; amount: string; unit: string; quantity?: number }>;
     instructions: string[];
     prepMinutes?: number;
     cookMinutes?: number;
@@ -104,7 +104,16 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
           console.log('[MealCard] Recipe details response:', details);
           if (details) {
             console.log('[MealCard] Recipe details fetched:', details.ingredients?.length, 'ingredients');
-            setRecipeDetails(details);
+            // Map API response ingredients to match Ingredient type (amount: string instead of quantity: number)
+            const mappedDetails = {
+              ...details,
+              ingredients: (details.ingredients || []).map((ing: any) => ({
+                name: ing.name,
+                amount: ing.amount || String(ing.quantity || ''),
+                unit: ing.unit,
+              })),
+            };
+            setRecipeDetails(mappedDetails);
             hasFetchedRef.current = true;
           } else {
             console.log('[MealCard] No recipe details returned from API');
@@ -331,7 +340,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
             intensity={80}
             tintColor={isDark ? 'rgba(18, 18, 18, 0.85)' : 'rgba(255, 255, 255, 0.9)'}
           >
-            <View style={[styles.mealImage, { backgroundColor: colors.cardBackground, justifyContent: 'center', alignItems: 'center' }]}>
+            <View style={[styles.mealImage, { backgroundColor: colors.card, justifyContent: 'center', alignItems: 'center' }]}>
               <ActivityIndicator size="small" color={colors.primary} />
             </View>
             <View style={[styles.cardContent, { alignItems: 'center', paddingVertical: 24 }]}>
@@ -450,7 +459,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
         transparent={true}
         onRequestClose={handleCloseModal}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)' }]}>
           <View style={[styles.modalContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             {/* Modal Background */}
             <BlurView
@@ -468,7 +477,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
               </View>
               <Pressable
                 onPress={handleCloseModal}
-                style={[styles.closeButton, { backgroundColor: colors.cardBackground }]}
+                style={[styles.closeButton, { backgroundColor: colors.card }]}
                 hitSlop={12}
               >
                 <X size={24} color={colors.text} strokeWidth={1.5} />
@@ -570,7 +579,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     <View style={styles.instructionsList}>
                       {displayInstructions.map((instruction: string, idx: number) => (
                         <View key={idx} style={styles.instructionRow}>
-                          <View style={[styles.instructionNumberBadge, { backgroundColor: colors.cardBackground }]}>
+                          <View style={[styles.instructionNumberBadge, { backgroundColor: colors.card }]}>
                             <NumberText weight="light" style={[styles.instructionNumber, { color: colors.textMuted }]}>{idx + 1}</NumberText>
                           </View>
                           <Text style={[styles.instructionText, { color: colors.text }]}>{instruction}</Text>

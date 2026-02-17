@@ -36,7 +36,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { aiService } from '../../../services/aiService';
 import { avatarService, StreamingSession } from '../../../services/avatarService';
-import { CoachMode, CoachMessage, CoachContext, CoachResponse } from '../../../types/ai';
+import { CoachMode, CoachMessage, CoachContext, CoachResponse, AIMeal } from '../../../types/ai';
 import { mediumImpact, lightImpact } from '../../../utils/haptics';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -594,8 +594,20 @@ export function CoachChatModal({
       const coachContext: CoachContext = {
         mode: currentMode,
         conversationHistory: messages.slice(-10),
-        userGoals: context?.userGoals,
-        recentActivity: currentMode === 'meal' ? context?.recentMeals : context?.recentWorkouts,
+        userGoals: context?.userGoals ? {
+          primaryGoal: context.userGoals.fitnessGoal,
+          calorieTarget: context.userGoals.dailyCalories,
+          proteinTarget: context.userGoals.dailyProtein,
+        } : undefined,
+        recentMeals: currentMode === 'meal' && context?.recentMeals ? context.recentMeals.map((m, i) => ({
+          id: `recent_${i}`,
+          name: m.name,
+          mealType: (m.mealType || 'snack') as AIMeal['mealType'],
+          nutrients: { calories: m.calories || 0, protein_g: 0, carbs_g: 0, fat_g: 0 },
+          ingredients: [],
+          prepTimeMinutes: 0,
+          servings: 1,
+        })) : undefined,
       };
 
       const response = await aiService.sendCoachMessage(messageText, coachContext);

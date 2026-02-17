@@ -128,7 +128,7 @@ export function CardioRecommendationProvider({
   }, [
     goalWizard.state?.results,
     adaptiveTDEE.state.calorieHistory,
-    training.weeklyPlan
+    training.state.weeklyPlan
   ]);
 
   const calculate = useCallback((): CardioRecommendation | null => {

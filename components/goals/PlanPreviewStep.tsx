@@ -230,7 +230,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
 
       {/* Main Calorie Card */}
       <View>
-        <GlassCard isDark={isDark} borderColor="rgba(78, 205, 196, 0.25)" style={styles.mainCard}>
+        <GlassCard borderColor="rgba(78, 205, 196, 0.25)" style={styles.mainCard}>
         <View style={styles.calorieSection}>
           <Text style={[styles.calorieLabel, { color: colors.textMuted }]}>DAILY CALORIES</Text>
           <View style={styles.calorieRow}>
@@ -373,7 +373,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   {state.activityLevel === 'sedentary' ? 'Sedentary' :
                    state.activityLevel === 'light' ? 'Lightly Active' :
                    state.activityLevel === 'moderate' ? 'Moderately Active' :
-                   state.activityLevel === 'active' ? 'Very Active' : 'Extra Active'}
+                   state.activityLevel === 'very' ? 'Very Active' : 'Extra Active'}
                 </Text>
               </GlassCard>
             </View>
@@ -812,11 +812,11 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         </GlassCard>
 
         {/* Equipment & Modifications */}
-        {state.equipmentAvailable && state.equipmentAvailable.length > 0 && (
+        {state.availableEquipment && state.availableEquipment.length > 0 && (
           <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
             <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>AVAILABLE EQUIPMENT</Text>
             <View style={styles.equipmentTags}>
-              {state.equipmentAvailable.map((equipment, index) => (
+              {state.availableEquipment.map((equipment, index) => (
                 <View key={index} style={[styles.equipmentTag, { backgroundColor: 'rgba(150, 206, 180, 0.15)' }]}>
                   <CheckCircle2 size={12} color={Colors.success} />
                   <Text style={[styles.equipmentTagText, { color: Colors.success }]}>

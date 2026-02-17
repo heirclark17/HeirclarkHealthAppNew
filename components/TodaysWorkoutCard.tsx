@@ -24,22 +24,22 @@ import { useSettings } from '../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../utils/haptics';
 
 // Workout type icons and colors
-const WORKOUT_TYPE_CONFIG: Record<string, { Icon: React.ComponentType<{ size: number; color: string }>; color: string }> = {
-  'Leg Day': { Icon: Dumbbell, color: Colors.error },
-  'Upper Body': { Icon: Dumbbell, color: Colors.success },
-  'Lower Body': { Icon: Dumbbell, color: Colors.error },
-  'Push Day': { Icon: CircleArrowUp, color: '#FF8C42' },
-  'Pull Day': { Icon: CircleArrowDown, color: '#6366F1' },
-  'Full Body': { Icon: User, color: '#06B6D4' },
-  'Core': { Icon: Circle, color: '#DC2626' },
-  'Walking Session': { Icon: Footprints, color: Colors.success },
-  'Running Session': { Icon: Footprints, color: Colors.error },
-  'HIIT': { Icon: Zap, color: '#FF8C42' },
-  'Cardio': { Icon: Heart, color: '#DC2626' },
-  'Recovery': { Icon: Leaf, color: Colors.successMuted },
-  'Yoga': { Icon: Leaf, color: '#6366F1' },
-  'Rest Day': { Icon: Bed, color: Colors.textMuted },
-  'Workout': { Icon: BicepsFlexed, color: Colors.success },
+const WORKOUT_TYPE_CONFIG: Record<string, { Icon: React.ComponentType<{ size: number; color: string }>; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+  'Leg Day': { Icon: Dumbbell, icon: 'barbell-outline', color: Colors.error },
+  'Upper Body': { Icon: Dumbbell, icon: 'barbell-outline', color: Colors.success },
+  'Lower Body': { Icon: Dumbbell, icon: 'barbell-outline', color: Colors.error },
+  'Push Day': { Icon: CircleArrowUp, icon: 'arrow-up-circle-outline', color: '#FF8C42' },
+  'Pull Day': { Icon: CircleArrowDown, icon: 'arrow-down-circle-outline', color: '#6366F1' },
+  'Full Body': { Icon: User, icon: 'body-outline', color: '#06B6D4' },
+  'Core': { Icon: Circle, icon: 'ellipse-outline', color: '#DC2626' },
+  'Walking Session': { Icon: Footprints, icon: 'footsteps-outline', color: Colors.success },
+  'Running Session': { Icon: Footprints, icon: 'footsteps-outline', color: Colors.error },
+  'HIIT': { Icon: Zap, icon: 'flash-outline', color: '#FF8C42' },
+  'Cardio': { Icon: Heart, icon: 'heart-outline', color: '#DC2626' },
+  'Recovery': { Icon: Leaf, icon: 'leaf-outline', color: Colors.successMuted },
+  'Yoga': { Icon: Leaf, icon: 'leaf-outline', color: '#6366F1' },
+  'Rest Day': { Icon: Bed, icon: 'bed-outline', color: Colors.textMuted },
+  'Workout': { Icon: BicepsFlexed, icon: 'fitness-outline', color: Colors.success },
 };
 
 const getWorkoutConfig = (workoutType: string) => {

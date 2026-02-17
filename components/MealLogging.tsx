@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Fonts, Spacing } from '../constants/Theme';
-import { Camera, CameraType, BarCodeScanningResult } from 'expo-camera';
+import { CameraView, BarcodeScanningResult } from 'expo-camera';
+import type { CameraType } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
 interface MealData {
@@ -60,7 +61,7 @@ export function MealLoggingModal({
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [aiPhotoLoading, setAiPhotoLoading] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<CameraView>(null);
 
   // AI Text state
   const [aiTextInput, setAiTextInput] = useState('');
@@ -91,7 +92,7 @@ export function MealLoggingModal({
   };
 
   const requestPermissions = async () => {
-    const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+    const { status: cameraStatus } = await CameraView.requestCameraPermissionsAsync();
     setHasCameraPerm(cameraStatus === 'granted');
   };
 
@@ -576,10 +577,10 @@ export function MealLoggingModal({
           <View style={styles.cameraContainer}>
             {hasCameraPerm ? (
               <>
-                <Camera
+                <CameraView
                   ref={cameraRef}
                   style={StyleSheet.absoluteFillObject}
-                  type={CameraType.back}
+                  facing="back"
                   onCameraReady={() => setCameraReady(true)}
                 />
                 <View style={styles.cameraControls}>

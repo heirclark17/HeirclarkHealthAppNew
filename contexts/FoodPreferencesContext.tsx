@@ -135,7 +135,21 @@ export function FoodPreferencesProvider({ children }: { children: React.ReactNod
 
         if (backendPrefs) {
           console.log('[FoodPreferences] ✅ Loaded from backend');
-          const mergedPrefs = { ...defaultPreferences, ...backendPrefs };
+          const mergedPrefs: FoodPreferences = {
+            dietaryPreferences: backendPrefs.dietaryPreferences ?? defaultPreferences.dietaryPreferences,
+            allergens: backendPrefs.allergens ?? defaultPreferences.allergens,
+            favoriteCuisines: backendPrefs.favoriteCuisines ?? defaultPreferences.favoriteCuisines,
+            favoriteProteins: backendPrefs.favoriteProteins ?? defaultPreferences.favoriteProteins,
+            favoriteVegetables: backendPrefs.favoriteVegetables ?? defaultPreferences.favoriteVegetables,
+            favoriteFruits: backendPrefs.favoriteFruits ?? defaultPreferences.favoriteFruits,
+            favoriteStarches: backendPrefs.favoriteStarches ?? defaultPreferences.favoriteStarches,
+            favoriteSnacks: backendPrefs.favoriteSnacks ?? defaultPreferences.favoriteSnacks,
+            hatedFoods: backendPrefs.hatedFoods ?? defaultPreferences.hatedFoods,
+            mealStyle: (backendPrefs.mealStyle as FoodPreferences['mealStyle']) ?? defaultPreferences.mealStyle,
+            mealDiversity: (backendPrefs.mealDiversity as FoodPreferences['mealDiversity']) ?? defaultPreferences.mealDiversity,
+            cheatDays: backendPrefs.cheatDays ?? defaultPreferences.cheatDays,
+            cookingSkill: (backendPrefs.cookingSkill as FoodPreferences['cookingSkill']) ?? defaultPreferences.cookingSkill,
+          };
           setPreferences(mergedPrefs);
           // Also save to local storage for offline access
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(mergedPrefs));

@@ -168,7 +168,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       default:
         return {
           backgroundColor: getGlassBackground('regular'),
-          textColor: colors.text.primary,
+          textColor: colors.textNested.primary,
           iconColor: colors.icon.primary,
           borderWidth: 0,
         };

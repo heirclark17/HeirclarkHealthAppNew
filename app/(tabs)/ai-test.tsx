@@ -130,7 +130,6 @@ export default function AITestScreen() {
         mode: 'training',
         userGoals: {
           primaryGoal: 'strength',
-          activityLevel: 'active',
         },
       });
 

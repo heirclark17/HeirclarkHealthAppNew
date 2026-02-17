@@ -700,7 +700,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   </View>
                 </View>
                 <GlassCard style={styles.oneRMNote} interactive>
-                  <TrendingUp size={18} color={Colors.info} />
+                  <TrendingUp size={18} color={Colors.accentCyan} />
                   <Text style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>
                     We'll use these values to calculate appropriate training weights (usually 60-85% of 1RM)
                   </Text>
@@ -826,7 +826,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         </View>
         {state.injuries.length > 0 && (
           <GlassCard style={styles.injuryNote} interactive>
-            <Info size={20} color={Colors.info} />
+            <Info size={20} color={Colors.accentCyan} />
             <Text style={[styles.injuryNoteText, { color: colors.textSecondary }]}>
               Workouts will be modified to avoid or reduce stress on these areas.
             </Text>

@@ -13,11 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedGestureHandler,
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Colors, Fonts, Spacing } from '../../constants/Theme';
 import { LoggedMeal } from './EditMealModal';
 
@@ -43,20 +42,21 @@ export function SwipeableMealItem({
   onDelete,
 }: SwipeableMealItemProps) {
   const translateX = useSharedValue(0);
+  const startX = useSharedValue(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx: any) => {
-      ctx.startX = translateX.value;
-    },
-    onActive: (event, ctx: any) => {
-      const newValue = ctx.startX + event.translationX;
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      startX.value = translateX.value;
+    })
+    .onUpdate((event) => {
+      const newValue = startX.value + event.translationX;
       // Only allow left swipe (negative values)
       if (newValue <= 0 && newValue >= -ACTION_WIDTH * 2) {
         translateX.value = newValue;
       }
-    },
-    onEnd: (event) => {
+    })
+    .onEnd(() => {
       if (translateX.value < SWIPE_THRESHOLD) {
         // Open actions
         translateX.value = withSpring(-ACTION_WIDTH * 2, GLASS_SPRING);
@@ -66,8 +66,7 @@ export function SwipeableMealItem({
         translateX.value = withSpring(0, GLASS_SPRING);
         runOnJS(setIsOpen)(false);
       }
-    },
-  });
+    });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -112,7 +111,7 @@ export function SwipeableMealItem({
       </View>
 
       {/* Meal Content (swipeable) */}
-      <PanGestureHandler onGestureEvent={gestureHandler}>
+      <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.mealContent, animatedStyle]}>
           <Pressable
             style={styles.mealPressable}
@@ -151,7 +150,7 @@ export function SwipeableMealItem({
             />
           </Pressable>
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
     </View>
   );
 }

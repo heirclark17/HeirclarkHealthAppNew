@@ -970,6 +970,7 @@ class AIService {
               fat_g: m.fat,
             },
             prepTimeMinutes: m.prepTimeMinutes || m.prep_time_minutes || 15,
+            servings: m.servings || 1,
             ingredients: m.ingredients || [],
             tags: m.tags || [],
             imageUrl: m.photoUrl || m.photo_url || undefined,

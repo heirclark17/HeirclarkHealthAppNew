@@ -197,10 +197,10 @@ export function CalorieBankingProvider({ children }: { children: React.ReactNode
       // Sync banking calculation to backend (fire-and-forget)
       try {
         const weeklyBudget = week.weeklyTarget;
-        const dailyLogs = week.days.map(d => ({
+        const dailyLogs = week.dailyLogs.map(d => ({
           date: d.date,
           target: d.targetCalories,
-          consumed: d.actualCalories || 0,
+          consumed: d.consumedCalories || 0,
           isComplete: d.isComplete,
         }));
         const specialEvents = week.specialEvents || [];

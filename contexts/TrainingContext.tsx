@@ -942,6 +942,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             workout,
             isRestDay: !workout,
             completed: false,
+            calendarDate: dateStr,
+            weekNumber: 1,
           };
         });
 
@@ -1621,15 +1623,18 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           const weeklyPlanDays = dayNames.map((dayName, index) => {
             const dayDate = new Date(customStartDate);
             dayDate.setDate(customStartDate.getDate() + index);
+            const dateStr = dayDate.toISOString().split('T')[0];
             const customDay = index < customDays.length ? customDays[index] : null;
 
             return {
               id: `custom-day-${activeCustom.id}-${index}`,
               dayOfWeek: dayName,
               dayNumber: index + 1,
-              date: dayDate.toISOString().split('T')[0],
+              date: dateStr,
               isRestDay: !customDay || customDay.exercises.length === 0,
               completed: false,
+              calendarDate: dateStr,
+              weekNumber: 1,
               workout: customDay && customDay.exercises.length > 0 ? {
                 id: `custom-${activeCustom.id}-day-${index}`,
                 name: customDay.dayName || `Day ${index + 1}`,

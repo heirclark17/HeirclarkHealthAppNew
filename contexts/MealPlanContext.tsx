@@ -16,6 +16,7 @@ import {
   MealPlanPreferences,
   UserGoalsForMealPlan,
 } from '../types/mealPlan';
+import { MealPlanPreferences as AIMealPlanPreferences } from '../types/ai';
 import { useGoalWizard } from './GoalWizardContext';
 import { useFoodPreferencesSafe, FoodPreferences } from './FoodPreferencesContext';
 
@@ -293,7 +294,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         : preferences.dietStyle || 'balanced';
 
       // Convert to AI service format with full food preferences
-      const aiPreferences = {
+      const aiPreferences: AIMealPlanPreferences = {
         calorieTarget: userGoals.dailyCalories,
         proteinTarget: userGoals.dailyProtein,
         carbsTarget: userGoals.dailyCarbs,

@@ -1172,13 +1172,13 @@ export const trainingService = {
   // Get today's workout from a weekly plan
   getTodaysWorkout(weeklyPlan: WeeklyTrainingPlan): TrainingDay | null {
     const today = new Date().toISOString().split('T')[0];
-    const allDays = weeklyPlan.weeks?.flatMap(w => w.days) || weeklyPlan.days || [];
+    const allDays = weeklyPlan.days || [];
     return allDays.find(d => d?.date === today) || null;
   },
 
   // Get plan summary for display
   getPlanSummary(weeklyPlan: WeeklyTrainingPlan, preferences: TrainingPreferences): PlanSummary {
-    const allDays = weeklyPlan.weeks?.flatMap(w => w.days) || weeklyPlan.days || [];
+    const allDays = weeklyPlan.days || [];
     const workouts = allDays.filter(d => d?.workout).map(d => d.workout!);
     const workoutCount = workouts.length;
     const totalDuration = workouts.reduce((sum, w) => sum + (w.duration || 0), 0);

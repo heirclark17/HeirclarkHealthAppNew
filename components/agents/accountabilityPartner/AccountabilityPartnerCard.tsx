@@ -40,7 +40,7 @@ const ACTIVITY_NAMES: Record<keyof ActivityStreaks, string> = {
 };
 
 export default function AccountabilityPartnerCard() {
-  const { colors } = useGlassTheme();
+  const { isDark, colors } = useGlassTheme();
   const {
     state,
     getBestCurrentStreak,

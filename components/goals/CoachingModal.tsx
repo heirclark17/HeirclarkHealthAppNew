@@ -569,8 +569,7 @@ export function CoachingModal({
             <View style={[styles.statusBadge, { backgroundColor: glassColors.card, borderColor: glassColors.cardBorder }]}>
               <View style={[styles.statusDot, { backgroundColor: glassColors.textMuted }, isSpeaking && { backgroundColor: glassColors.accent }]} />
               <Text style={[styles.statusText, { color: glassColors.text }]}>
-                {state === 'loading' ? 'Loading...' :
-                 state === 'ready' ? 'Ready' :
+                {state === 'ready' ? 'Ready' :
                  isSpeaking ? 'Speaking' :
                  'Completed'}
               </Text>

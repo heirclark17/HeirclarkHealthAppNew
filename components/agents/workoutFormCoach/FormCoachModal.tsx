@@ -161,7 +161,7 @@ export function FormCoachModal({
 
     return (
       <View style={styles.cuesList}>
-        {(cues.length > 0 ? cues : instructions.map((instr, i) => ({ id: `instr_${i}`, cue: instr, order: i + 1 }))).map((cue, index) => (
+        {(cues.length > 0 ? cues : instructions.map((instr, i): FormCue => ({ id: `instr_${i}`, cue: instr, order: i + 1 }))).map((cue, index) => (
           <View key={cue.id || index} style={styles.cueItem}>
             <View style={[styles.cueNumber, { backgroundColor: colors.primary + '20' }]}>
               <NumberText weight="semiBold" style={[styles.cueNumberText, { color: colors.primary }]}>

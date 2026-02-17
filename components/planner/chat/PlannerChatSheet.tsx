@@ -246,7 +246,7 @@ export const PlannerChatSheet = forwardRef<PlannerChatSheetRef, PlannerChatSheet
   let recoveryScore: number | null = null;
   try {
     const sleepRecovery = useSleepRecovery();
-    recoveryScore = sleepRecovery?.state?.recoveryScore ?? null;
+    recoveryScore = sleepRecovery?.state?.recoveryScores?.[0]?.score ?? null;
   } catch { /* not available */ }
 
   let goalState: any = null;

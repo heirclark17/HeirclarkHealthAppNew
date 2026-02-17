@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TextStyle } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Colors, Fonts, DarkColors, LightColors } from '../constants/Theme';
 import { NumberText } from './NumberText';
@@ -87,7 +87,7 @@ export const CircularGauge: React.FC<CircularGaugeProps> = ({
         <RoundedNumeral
           value={value}
           size="large"
-          style={[styles.mainValue, { color: colors.text }]}
+          style={StyleSheet.flatten([styles.mainValue, { color: colors.text }]) as TextStyle}
           showCommas={true}
           decimals={0}
         />

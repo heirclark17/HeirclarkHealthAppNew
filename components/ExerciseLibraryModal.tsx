@@ -37,7 +37,7 @@ import { exerciseDbService } from '../services/exerciseDbService';
 import type { ExerciseDBExercise } from '../types/ai';
 
 // Filter types
-type MuscleFilter = MuscleGroup | 'all';
+type MuscleFilter = MuscleGroup | 'arms' | 'all';
 type EquipmentFilter = Equipment | 'all';
 type DifficultyFilter = 'beginner' | 'intermediate' | 'advanced' | 'all';
 

@@ -44,10 +44,10 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Colorful gradient colors for animations
 const GRADIENT_COLORS = {
-  primary: [Colors.error, '#FF8E53', '#FFC857', Colors.success, '#45B7D1', '#96E6A1'],
-  scanner: ['#00F5A0', Colors.accentCyan, Colors.accentPurple, '#FF61DC'],
-  voice: [Colors.error, '#FF8E53', '#FFC857', '#45B7D1'],
-  camera: [Colors.accentPurple, Colors.accentCyan, '#00F5A0', '#FFC857'],
+  primary: [Colors.error, '#FF8E53', '#FFC857', Colors.success, '#45B7D1', '#96E6A1'] as const,
+  scanner: ['#00F5A0', Colors.accentCyan, Colors.accentPurple, '#FF61DC'] as const,
+  voice: [Colors.error, '#FF8E53', '#FFC857', '#45B7D1'] as const,
+  camera: [Colors.accentPurple, Colors.accentCyan, '#00F5A0', '#FFC857'] as const,
 };
 
 // Animated Barcode Scanner Line Component

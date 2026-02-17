@@ -161,7 +161,7 @@ export function EditMealModal({
   return (
     <GlassModal
       visible={visible}
-      onClose={onClose}
+      onDismiss={onClose}
       title="Edit Meal"
     >
       <ScrollView

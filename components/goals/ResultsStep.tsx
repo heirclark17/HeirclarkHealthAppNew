@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  TextStyle,
 } from 'react-native';
 import { CheckCircle2, Check } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -54,7 +55,7 @@ export function ResultsStep({
           <RoundedNumeral
             value={results.calories}
             size="large"
-            style={[styles.calorieValue, { color: colors.text }]}
+            style={StyleSheet.flatten([styles.calorieValue, { color: colors.text }]) as TextStyle}
             showCommas={true}
             decimals={0}
           />
@@ -66,7 +67,7 @@ export function ResultsStep({
             <RoundedNumeral
               value={results.protein}
               size="medium"
-              style={[styles.macroValue, { color: colors.text }]}
+              style={StyleSheet.flatten([styles.macroValue, { color: colors.text }]) as TextStyle}
               showCommas={false}
               decimals={0}
             />
@@ -77,7 +78,7 @@ export function ResultsStep({
             <RoundedNumeral
               value={results.carbs}
               size="medium"
-              style={[styles.macroValue, { color: colors.text }]}
+              style={StyleSheet.flatten([styles.macroValue, { color: colors.text }]) as TextStyle}
               showCommas={false}
               decimals={0}
             />
@@ -88,7 +89,7 @@ export function ResultsStep({
             <RoundedNumeral
               value={results.fat}
               size="medium"
-              style={[styles.macroValue, { color: colors.text }]}
+              style={StyleSheet.flatten([styles.macroValue, { color: colors.text }]) as TextStyle}
               showCommas={false}
               decimals={0}
             />

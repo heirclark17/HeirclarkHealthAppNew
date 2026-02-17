@@ -49,7 +49,7 @@ export const PostHogProvider: React.FC<PostHogProviderProps> = ({ children }) =>
         const client = new PostHog(apiKey, {
           host,
           // Enable automatic screen tracking
-          captureApplicationLifecycleEvents: true,
+          captureAppLifecycleEvents: true,
           // Enable session recording (optional)
           enableSessionReplay: false,
           // Flush events every 30 seconds

@@ -660,11 +660,11 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
           console.log('[GoalWizard] ✅ Loaded preferences from backend:', backendPrefs);
           setState(prev => ({
             ...prev,
-            cardioPreference: backendPrefs.cardioPreference || prev.cardioPreference,
-            fitnessLevel: (backendPrefs.fitnessLevel as any) || prev.fitnessLevel,
-            workoutDuration: (backendPrefs.workoutDuration as any) || prev.workoutDuration,
+            cardioPreference: (backendPrefs.cardioPreference as CardioPreference) || prev.cardioPreference,
+            fitnessLevel: (backendPrefs.fitnessLevel as FitnessLevel) || prev.fitnessLevel,
+            workoutDuration: (backendPrefs.workoutDuration as WizardState['workoutDuration']) || prev.workoutDuration,
             workoutsPerWeek: backendPrefs.workoutsPerWeek || prev.workoutsPerWeek,
-            dietStyle: (backendPrefs.dietStyle as any) || prev.dietStyle,
+            dietStyle: (backendPrefs.dietStyle as DietStyle) || prev.dietStyle,
             mealsPerDay: backendPrefs.mealsPerDay || prev.mealsPerDay,
             intermittentFasting: backendPrefs.intermittentFasting ?? prev.intermittentFasting,
             fastingStart: backendPrefs.fastingStart || prev.fastingStart,
@@ -674,7 +674,7 @@ export function GoalWizardProvider({ children }: { children: React.ReactNode }) 
             injuries: backendPrefs.injuries || prev.injuries,
             // Strength baseline
             hasLiftingExperience: backendPrefs.hasLiftingExperience ?? prev.hasLiftingExperience,
-            strengthLevel: (backendPrefs.strengthLevel as any) || prev.strengthLevel,
+            strengthLevel: (backendPrefs.strengthLevel as StrengthLevel) || prev.strengthLevel,
             benchPress1RM: backendPrefs.benchPress1RM ?? prev.benchPress1RM,
             squat1RM: backendPrefs.squat1RM ?? prev.squat1RM,
             deadlift1RM: backendPrefs.deadlift1RM ?? prev.deadlift1RM,

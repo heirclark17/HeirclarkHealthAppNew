@@ -125,7 +125,6 @@ export function AdaptiveTDEEDisplay({
               maxValue={100}
               size={80}
               label="Confidence"
-              color={confidenceColor}
             />
             <View style={styles.confidenceInfo}>
               <Text style={styles.confidenceLabel}>Data Quality</Text>
