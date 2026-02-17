@@ -23,6 +23,7 @@ import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants
 import { Exercise, ExerciseAlternative, DifficultyModifier } from '../../types/training';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
+import { groupAlternativesByEquipment } from '../../services/equipmentSwapper';
 
 // iOS 26 Liquid Glass spring configuration
 const GLASS_SPRING = {
@@ -248,6 +249,10 @@ export function ExerciseAlternativesModal({
   if (!exercise) return null;
 
   const alternatives = exercise.alternatives || [];
+  const groupedAlternatives = useMemo(
+    () => groupAlternativesByEquipment(alternatives),
+    [alternatives]
+  );
 
   return (
     <Modal
@@ -283,33 +288,47 @@ export function ExerciseAlternativesModal({
             <View style={styles.headerSpacer} />
           </BlurView>
 
-          {/* Description */}
-          <View style={styles.description}>
-            <Text style={[styles.descriptionText, { color: glassColors.textMuted }]}>
-              Choose an alternative based on your available equipment and preferences.
-              Each variation targets similar muscles with different equipment.
+          {/* Current Equipment Badge */}
+          <View style={styles.currentEquipment}>
+            <Ionicons name={getEquipmentIcon(exercise.equipment) as any} size={16} color={glassColors.textMuted} />
+            <Text style={[styles.currentEquipmentText, { color: glassColors.textMuted }]}>
+              Currently using: {formatEquipment(exercise.equipment)}
             </Text>
           </View>
 
-          {/* Alternatives List */}
+          {/* Alternatives List - Grouped by Equipment */}
           <ScrollView
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
           >
-            {alternatives.length > 0 ? (
-              alternatives.map((alt, index) => (
-                <AlternativeCard
-                  key={alt.id}
-                  alternative={alt}
-                  index={index}
-                  onSelect={() => {
-                    onSelectAlternative(alt);
-                    onClose();
-                  }}
-                  glassColors={glassColors}
-                  isDark={isDark}
-                />
+            {groupedAlternatives.length > 0 ? (
+              groupedAlternatives.map((group) => (
+                <View key={group.equipment}>
+                  <View style={styles.equipmentGroupHeader}>
+                    <Ionicons
+                      name={getEquipmentIcon(group.equipment) as any}
+                      size={18}
+                      color={glassColors.textMuted}
+                    />
+                    <Text style={[styles.equipmentGroupTitle, { color: glassColors.textMuted }]}>
+                      {group.label.toUpperCase()}
+                    </Text>
+                  </View>
+                  {group.alternatives.map((alt, index) => (
+                    <AlternativeCard
+                      key={alt.id}
+                      alternative={alt}
+                      index={index}
+                      onSelect={() => {
+                        onSelectAlternative(alt);
+                        onClose();
+                      }}
+                      glassColors={glassColors}
+                      isDark={isDark}
+                    />
+                  ))}
+                </View>
               ))
             ) : (
               <View style={styles.emptyState}>
@@ -369,15 +388,30 @@ const styles = StyleSheet.create({
   headerSpacer: {
     width: 40,
   },
-  description: {
+  currentEquipment: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
     paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.md,
   },
-  descriptionText: {
-    fontSize: 14,
+  currentEquipmentText: {
+    fontSize: 13,
     fontFamily: Fonts.regular,
-    lineHeight: 20,
-    textAlign: 'center',
+  },
+  equipmentGroupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  equipmentGroupTitle: {
+    fontSize: 11,
+    fontFamily: Fonts.semiBold,
+    letterSpacing: 1,
   },
   scrollView: {
     flex: 1,

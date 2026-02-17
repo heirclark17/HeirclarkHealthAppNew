@@ -25,7 +25,8 @@ import {
 import { CardioRecommendationCard } from '../../components/programs/CardioRecommendationCard';
 import { GlassButton } from '../../components/liquidGlass/GlassButton';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
-import { ExerciseAlternative, WorkoutExercise, WeightLog } from '../../types/training';
+import { ExerciseAlternative, WorkoutExercise, WeightLog, Equipment } from '../../types/training';
+import { swapDayEquipment, getAvailableEquipmentForDay, EQUIPMENT_LABELS } from '../../services/equipmentSwapper';
 import { CoachChatModal } from '../../components/agents/aiCoach';
 import { FormCoachModal } from '../../components/agents/workoutFormCoach';
 import { api } from '../../services/api';
@@ -551,6 +552,63 @@ export default function ProgramsScreen() {
                   onLogWeight={handleLogWeight}
                   onViewForm={handleViewForm}
                 />
+
+                {/* Switch Equipment Button */}
+                {currentDay && !currentDay.isRestDay && (
+                  <TouchableOpacity
+                    style={[styles.switchEquipmentButton, { borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)' }]}
+                    onPress={() => {
+                      if (!currentDay) return;
+                      const available = getAvailableEquipmentForDay(currentDay);
+                      if (available.length === 0) {
+                        Alert.alert('No Alternatives', 'No equipment alternatives available for today\'s exercises.');
+                        return;
+                      }
+                      const options = available.map(eq => EQUIPMENT_LABELS[eq] || eq);
+                      Alert.alert(
+                        'Switch Equipment',
+                        'Swap all exercises to use a different equipment type for today.',
+                        [
+                          ...available.map((eq, idx) => ({
+                            text: options[idx],
+                            onPress: () => {
+                              const result = swapDayEquipment(currentDay, eq);
+                              if (result.swaps.length > 0) {
+                                // Update the day in TrainingContext
+                                const updatedExercises = result.updatedDay.workout?.exercises;
+                                if (updatedExercises) {
+                                  updatedExercises.forEach((ex, i) => {
+                                    const original = currentDay.workout?.exercises[i];
+                                    if (original && ex.exercise.name !== original.exercise.name) {
+                                      // Find the alternative and swap it
+                                      const alt = original.exercise.alternatives?.find(a => a.name === ex.exercise.name);
+                                      if (alt) {
+                                        swapExerciseWithAlternative(selectedDayIndex, original.id, alt);
+                                      }
+                                    }
+                                  });
+                                }
+                                lightImpact();
+                                Alert.alert(
+                                  'Equipment Switched',
+                                  `Swapped ${result.swaps.length} exercise${result.swaps.length > 1 ? 's' : ''} to ${EQUIPMENT_LABELS[eq] || eq}.${result.warnings.length > 0 ? '\n\n' + result.warnings.join('\n') : ''}`
+                                );
+                              } else {
+                                Alert.alert('No Changes', result.warnings.join('\n') || 'All exercises already use this equipment.');
+                              }
+                            },
+                          })),
+                          { text: 'Cancel', style: 'cancel' },
+                        ]
+                      );
+                    }}
+                  >
+                    <Settings size={16} color={colors.textMuted} />
+                    <Text style={[styles.switchEquipmentText, { color: colors.textMuted }]}>
+                      Switch Equipment
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
 
@@ -986,6 +1044,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textMuted,
     fontFamily: Fonts.regular,
+  },
+  switchEquipmentButton: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: 8,
+  },
+  switchEquipmentText: {
+    fontSize: 13,
+    fontFamily: Fonts.medium,
   },
   restDayCard: {
     padding: 24,
