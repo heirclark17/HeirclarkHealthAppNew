@@ -248,7 +248,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
                   </Text>
 
                   <NumberText
-                    weight="semiBold"
+                    weight="regular"
                     style={[
                       styles.dayNumber,
                       { color: colors.text },
@@ -492,13 +492,13 @@ const styles = StyleSheet.create({
   dayName: {
     fontSize: 11,
     marginBottom: 4,
-    fontFamily: Fonts.numericSemiBold,
+    fontFamily: Fonts.numericRegular,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   dayNumber: {
     fontSize: 18,
-    fontFamily: Fonts.numericSemiBold,
+    fontFamily: Fonts.numericRegular,
   },
   indicatorContainer: {
     marginTop: 6,
