@@ -389,9 +389,23 @@ export function DailyTimelineView() {
       <WeeklyCoachCard optimization={state.aiOptimization ?? null} />
       <BehaviorInsightCard completionPatterns={state.completionPatterns ?? {}} />
 
-      {/* Timeline — Frosted Glass Card */}
+      {/* Timeline — Frosted Liquid Glass Card */}
       <View style={styles.timelineGlassWrapper}>
-        <View style={styles.timelineGlassOuter}>
+        <View style={[
+          styles.timelineGlassOuter,
+          {
+            borderWidth: 1,
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.08)',
+            ...(Platform.OS === 'ios' ? {
+              shadowColor: isDark ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.08)',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 1,
+              shadowRadius: 12,
+            } : {
+              elevation: 4,
+            }),
+          },
+        ]}>
           {/* Frosted glass backdrop */}
           <BlurView
             intensity={isDark ? 40 : 35}
@@ -403,7 +417,7 @@ export function DailyTimelineView() {
             style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : `${themeColors.background}88`,
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.40)',
                 borderRadius: 24,
               },
             ]}
@@ -695,7 +709,7 @@ const styles = StyleSheet.create({
   },
   timelineGlassWrapper: {
     flex: 1,
-    marginHorizontal: 12,
+    marginHorizontal: 16,
     marginTop: 8,
     marginBottom: 4,
   },
