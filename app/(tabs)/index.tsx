@@ -2506,8 +2506,7 @@ const styles = StyleSheet.create({
   quickActionValue: {
     fontSize: 16,
     color: Colors.text,
-    fontFamily: Fonts.regular,
-    fontWeight: '300',
+    fontFamily: Fonts.semiBold,
     marginBottom: 10,
     textAlign: 'center',
     paddingHorizontal: 4,
