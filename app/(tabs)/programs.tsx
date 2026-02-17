@@ -109,6 +109,19 @@ export default function ProgramsScreen() {
     return weeklyPlan.days || [];
   }, [weeklyPlan]);
 
+  // Derive current equipment from today's exercises (majority equipment type)
+  const currentEquipment = useMemo(() => {
+    const day = allDays.length > 0 ? allDays[Math.min(selectedDayIndex % 7, allDays.length - 1)] : undefined;
+    if (!day?.workout?.exercises?.length) return null;
+    const counts: Record<string, number> = {};
+    day.workout.exercises.forEach(ex => {
+      const eq = ex.exercise.equipment || 'bodyweight';
+      counts[eq] = (counts[eq] || 0) + 1;
+    });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    return top ? top[0] : null;
+  }, [allDays, selectedDayIndex]);
+
   // Get current day's workout (clamp to valid range)
   const dayIndexInWeek = allDays.length > 0 ? Math.min(selectedDayIndex % 7, allDays.length - 1) : 0;
   const currentDay = allDays.length > 0 ? allDays[dayIndexInWeek] : undefined;
@@ -555,10 +568,11 @@ export default function ProgramsScreen() {
                   onViewForm={handleViewForm}
                 />
 
-                {/* Switch Equipment Button */}
+                {/* Switch Equipment Button - Frosted Glass */}
                 {currentDay && !currentDay.isRestDay && (
                   <TouchableOpacity
-                    style={[styles.switchEquipmentButton, { borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)' }]}
+                    activeOpacity={0.7}
+                    style={styles.switchEquipmentWrapper}
                     onPress={() => {
                       if (!currentDay) return;
                       const available = getAvailableEquipmentForDay(currentDay);
@@ -576,13 +590,11 @@ export default function ProgramsScreen() {
                             onPress: () => {
                               const result = swapDayEquipment(currentDay, eq);
                               if (result.swaps.length > 0) {
-                                // Update the day in TrainingContext
                                 const updatedExercises = result.updatedDay.workout?.exercises;
                                 if (updatedExercises) {
                                   updatedExercises.forEach((ex, i) => {
                                     const original = currentDay.workout?.exercises[i];
                                     if (original && ex.exercise.name !== original.exercise.name) {
-                                      // Find the alternative and swap it
                                       const alt = original.exercise.alternatives?.find(a => a.name === ex.exercise.name);
                                       if (alt) {
                                         swapExerciseWithAlternative(selectedDayIndex, original.id, alt);
@@ -605,10 +617,12 @@ export default function ProgramsScreen() {
                       );
                     }}
                   >
-                    <Settings size={16} color={colors.textMuted} />
-                    <Text style={[styles.switchEquipmentText, { color: colors.textMuted }]}>
-                      Switch Equipment
-                    </Text>
+                    <GlassCard style={styles.switchEquipmentButton} interactive>
+                      <Settings size={16} color={colors.textMuted} />
+                      <Text style={[styles.switchEquipmentText, { color: colors.textMuted }]}>
+                        {currentEquipment ? `Equipment: ${EQUIPMENT_LABELS[currentEquipment] || currentEquipment}` : 'Switch Equipment'}
+                      </Text>
+                    </GlassCard>
                   </TouchableOpacity>
                 )}
               </View>
@@ -706,58 +720,34 @@ export default function ProgramsScreen() {
           </GlassCard>
         </TouchableOpacity>
 
-        {/* Action Buttons - Frosted Liquid Glass */}
+        {/* Action Buttons - Continue/Back Pattern */}
         {weeklyPlan && (
           <View style={styles.actionRow}>
             <TouchableOpacity
               onPress={handleOpenProgramModal}
               activeOpacity={0.7}
-              style={styles.actionButtonWrapper}
+              style={{ flex: 1 }}
               accessibilityLabel="Change program"
               accessibilityRole="button"
               accessibilityHint="Opens the program library to select a different training program"
             >
-              <GlassCard style={styles.actionButton} interactive>
-                <View style={styles.actionButtonInner}>
-                  <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                    <Dumbbell size={20} color={colors.textMuted} strokeWidth={1.5} />
-                  </View>
-                  <Text style={[styles.actionText, { color: colors.textSecondary }]}>Programs</Text>
-                </View>
+              <GlassCard style={styles.actionButtonGlass} interactive>
+                <Text style={[styles.actionButtonText, { color: colors.text }]}>PROGRAMS</Text>
               </GlassCard>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleSetGoals}
               activeOpacity={0.7}
-              style={styles.actionButtonWrapper}
+              style={{ flex: 2 }}
               accessibilityLabel="Adjust goals"
               accessibilityRole="button"
               accessibilityHint="Opens the goals wizard to update your fitness goals and preferences"
             >
-              <GlassCard style={styles.actionButton} interactive>
-                <View style={styles.actionButtonInner}>
-                  <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                    <Settings size={20} color={colors.textMuted} strokeWidth={1.5} />
-                  </View>
-                  <Text style={[styles.actionText, { color: colors.textSecondary }]}>Goals</Text>
-                </View>
-              </GlassCard>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleOpenCoachModal}
-              activeOpacity={0.7}
-              style={styles.actionButtonWrapper}
-              accessibilityLabel="AI coach"
-              accessibilityRole="button"
-              accessibilityHint="Opens AI coaching to get personalized training guidance and workout advice"
-            >
-              <GlassCard style={styles.actionButton} interactive>
-                <View style={styles.actionButtonInner}>
-                  <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                    <Sparkles size={20} color={colors.textMuted} strokeWidth={1.5} />
-                  </View>
-                  <Text style={[styles.actionText, { color: colors.textSecondary }]}>AI Coach</Text>
-                </View>
+              <GlassCard
+                style={[styles.actionButtonGlass, { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }]}
+                interactive
+              >
+                <Text style={[styles.actionButtonText, { color: colors.primary }]}>GOALS</Text>
               </GlassCard>
             </TouchableOpacity>
           </View>
@@ -765,6 +755,30 @@ export default function ProgramsScreen() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Floating AI Coach FAB */}
+      {weeklyPlan && (
+        <View style={styles.coachFab}>
+          <GlassCard
+            style={[styles.coachFabGlass, { backgroundColor: isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)' }]}
+            interactive
+          >
+            <TouchableOpacity
+              style={styles.coachFabInner}
+              onPress={() => {
+                mediumImpact();
+                handleOpenCoachModal();
+              }}
+              activeOpacity={0.8}
+              accessibilityLabel="AI coach"
+              accessibilityRole="button"
+              accessibilityHint="Opens AI coaching to get personalized training guidance and workout advice"
+            >
+              <Sparkles size={22} color="#a855f7" />
+            </TouchableOpacity>
+          </GlassCard>
+        </View>
+      )}
 
       {/* Program Library Modal - Frosted Liquid Glass */}
       <Modal
@@ -1044,18 +1058,16 @@ const styles = StyleSheet.create({
   },
   restBadgeText: {
     fontSize: 12,
-    color: Colors.textMuted,
     fontFamily: Fonts.regular,
+  },
+  switchEquipmentWrapper: {
+    marginTop: 8,
   },
   switchEquipmentButton: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     gap: 8,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    marginTop: 8,
   },
   switchEquipmentText: {
     fontSize: 13,
@@ -1068,13 +1080,11 @@ const styles = StyleSheet.create({
   },
   restDayTitle: {
     fontSize: 18,
-    color: Colors.text,
     fontFamily: Fonts.medium,
     marginBottom: 8,
   },
   restDayText: {
     fontSize: 14,
-    color: Colors.textMuted,
     fontFamily: Fonts.regular,
     textAlign: 'center',
   },
@@ -1130,32 +1140,41 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    gap: 10,
+    gap: 12,
     marginTop: 8,
   },
-  actionButtonWrapper: {
-    flex: 1,
-  },
-  actionButton: {
-    // GlassCard handles styling
-  },
-  actionButtonInner: {
+  actionButtonGlass: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    paddingVertical: 16,
   },
-  actionIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  actionButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as any,
+    letterSpacing: 1,
+  },
+  coachFab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 160,
+    zIndex: 10,
+  },
+  coachFabGlass: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    overflow: 'hidden',
+    padding: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionText: {
-    fontSize: 13,
-    fontFamily: Fonts.thin,
-    letterSpacing: 0.3,
+  coachFabInner: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Modal styles - Frosted Liquid Glass

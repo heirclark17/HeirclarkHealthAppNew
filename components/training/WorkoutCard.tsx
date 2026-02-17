@@ -467,27 +467,38 @@ export function WorkoutCard({
             ))}
           </View>
 
-          {/* Complete Workout Button */}
+          {/* Complete Workout Button - Frosted Glass */}
           <TouchableOpacity
-            style={[styles.completeButtonInline, { backgroundColor: colors.primary }, workout.completed && [styles.completeButtonDone, { backgroundColor: cardBg }]]}
             onPress={() => {
               mediumImpact();
               onMarkComplete();
             }}
             disabled={workout.completed}
+            activeOpacity={0.7}
+            style={styles.completeButtonWrapper}
             accessibilityLabel={workout.completed ? `${workout.name} completed` : `Mark ${workout.name} as complete`}
             accessibilityRole="button"
             accessibilityState={{ disabled: workout.completed }}
             accessibilityHint={workout.completed ? 'Workout has been completed' : `Marks all ${totalExercises} exercises as complete and logs ${workout.estimatedCaloriesBurned} calories burned`}
           >
-            <Ionicons
-              name={workout.completed ? 'checkmark-circle' : 'checkmark-circle-outline'}
-              size={22}
-              color={workout.completed ? colors.text : colors.primaryText}
-            />
-            <Text style={[styles.completeButtonText, { color: colors.primaryText }, workout.completed && { color: colors.text }]}>
-              {workout.completed ? 'Workout Completed' : 'Mark as Complete'}
-            </Text>
+            <GlassCard
+              style={[
+                styles.completeButtonInline,
+                !workout.completed && {
+                  backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)',
+                },
+              ]}
+              interactive
+            >
+              <Ionicons
+                name={workout.completed ? 'checkmark-circle' : 'checkmark-circle-outline'}
+                size={22}
+                color={workout.completed ? colors.textMuted : colors.primary}
+              />
+              <Text style={[styles.completeButtonText, { color: workout.completed ? colors.textMuted : colors.primary }]}>
+                {workout.completed ? 'WORKOUT COMPLETED' : 'MARK AS COMPLETE'}
+              </Text>
+            </GlassCard>
           </TouchableOpacity>
         </GlassCard>
       </View>
@@ -536,7 +547,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 12,
-    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -750,22 +760,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.numericMedium,
   },
+  completeButtonWrapper: {
+    marginTop: 8,
+  },
   completeButtonInline: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
     paddingVertical: 16,
-    borderRadius: Spacing.borderRadius,
     gap: 8,
-    marginTop: 8,
-  },
-  completeButtonDone: {
-    backgroundColor: 'transparent',
   },
   completeButtonText: {
-    fontSize: 16,
-    color: Colors.primaryText,
-    fontFamily: Fonts.semiBold,
+    fontSize: 14,
+    fontFamily: Fonts.light,
+    fontWeight: '200' as any,
+    letterSpacing: 1,
   },
 });
