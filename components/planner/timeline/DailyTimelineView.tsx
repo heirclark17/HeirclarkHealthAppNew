@@ -270,7 +270,7 @@ export function DailyTimelineView() {
 
   if (!timeline) {
     return (
-      <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <View style={styles.container}>
         <View style={[styles.emptyContainer, { paddingBottom: bottomPadding }]}>
           <GlassCard style={styles.emptyCard}>
             <Calendar size={48} color={themeColors.primary} style={{ opacity: 0.5 }} />
@@ -321,7 +321,7 @@ export function DailyTimelineView() {
   const overflowCount = allDayBlocks.length - MAX_VISIBLE_CHIPS;
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <View style={styles.container}>
       {/* All-day event banner (holidays, birthdays, OOO) */}
       {allDayBlocks.length > 0 && (
         <View
@@ -391,21 +391,7 @@ export function DailyTimelineView() {
 
       {/* Timeline — Frosted Liquid Glass Card */}
       <View style={styles.timelineGlassWrapper}>
-        <View style={[
-          styles.timelineGlassOuter,
-          {
-            borderWidth: 1,
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.08)',
-            ...(Platform.OS === 'ios' ? {
-              shadowColor: isDark ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.08)',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 1,
-              shadowRadius: 12,
-            } : {
-              elevation: 4,
-            }),
-          },
-        ]}>
+        <View style={styles.timelineGlassOuter}>
           {/* Frosted glass backdrop */}
           <BlurView
             intensity={isDark ? 40 : 35}
