@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
   },
   equipmentCardText: {
     fontSize: 13,
-    fontFamily: Fonts.numericRegular,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0.5,
   },
   completeButtonWrapper: {
