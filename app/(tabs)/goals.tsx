@@ -195,21 +195,29 @@ function GoalWizardContent() {
   };
 
   const handleStartTrainingPlan = async () => {
-    // Select the program from goal wizard, then generate AI workout plan
+    // Select the program from goal wizard, then generate a detailed workout plan
     setIsGeneratingTrainingPlan(true);
     try {
-      // First, select the program that was chosen in the goal wizard
+      let success = false;
+
+      // Use the selected program to generate a detailed multi-week plan
       if (state.selectedProgramId) {
         const programs = getEnhancedPrograms();
         const selectedProgram = programs.find(p => p.id === state.selectedProgramId);
 
         if (selectedProgram) {
-          selectProgram(selectedProgram);
+          console.log('[Goals] Generating plan with selected program:', selectedProgram.name);
+          // selectProgramAndGenerate selects the program AND generates a multi-week plan
+          success = await selectProgramAndGenerate(selectedProgram);
         }
       }
 
-      // Now generate the AI workout plan
-      const success = await generateAIWorkoutPlan();
+      // Fallback: if no program selected, generate a generic AI plan
+      if (!success && !state.selectedProgramId) {
+        console.log('[Goals] No program selected, generating generic AI plan');
+        success = await generateAIWorkoutPlan();
+      }
+
       if (success) {
         // Delay navigation to ensure router is ready
         setTimeout(() => {
@@ -230,7 +238,7 @@ function GoalWizardContent() {
         );
       }
     } catch (error) {
-      console.error('Failed to generate AI workout plan:', error);
+      console.error('Failed to generate workout plan:', error);
       Alert.alert(
         'Could not generate plan',
         'Would you like to try again or go to Programs to generate manually?',

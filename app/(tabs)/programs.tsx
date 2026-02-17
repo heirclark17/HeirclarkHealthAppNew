@@ -270,13 +270,15 @@ export default function ProgramsScreen() {
     }
 
     mediumImpact();
-    console.log('[Programs] Calling generateAIWorkoutPlan()...');
-    const success = await generateAIWorkoutPlan();
-    console.log('[Programs] generateAIWorkoutPlan returned:', success);
+    // Use selectProgramAndGenerate to generate a detailed multi-week plan
+    // based on the selected program template (instead of generic AI plan)
+    console.log('[Programs] Generating plan with program:', selectedProgram.name);
+    const success = await selectProgramAndGenerate(selectedProgram);
+    console.log('[Programs] selectProgramAndGenerate returned:', success);
     if (!success && error) {
       console.error('[Programs] Failed to generate AI training plan:', error);
     }
-  }, [generateAIWorkoutPlan, error, goalWizardState?.primaryGoal, selectedProgram]);
+  }, [selectProgramAndGenerate, error, goalWizardState?.primaryGoal, selectedProgram]);
 
   // Handle program tap - shows preview modal - memoized
   const handleProgramTap = useCallback((program: any) => {
