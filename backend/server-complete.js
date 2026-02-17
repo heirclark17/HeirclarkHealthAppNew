@@ -31,12 +31,50 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// ============================================
+// TIME FORMATTING UTILITIES
+// ============================================
+
+/**
+ * Convert timestamp to 12-hour format with AM/PM
+ * @param {Date|string} timestamp - Date object or ISO string
+ * @returns {string} Formatted time string (e.g., "3:45 PM EST")
+ */
+function formatTime12Hour(timestamp) {
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  return date.toLocaleString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZoneName: 'short'
+  });
+}
+
+/**
+ * Convert timestamp to readable date and time
+ * @param {Date|string} timestamp - Date object or ISO string
+ * @returns {string} Formatted datetime string (e.g., "Jan 15, 2026 at 3:45 PM EST")
+ */
+function formatDateTime12Hour(timestamp) {
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZoneName: 'short'
+  });
+}
+
 // Test database connection
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('Database connection error:', err);
   } else {
-    console.log('Database connected:', res.rows[0].now);
+    const timestamp = res.rows[0].now;
+    console.log('Database connected:', formatDateTime12Hour(timestamp));
   }
 });
 
