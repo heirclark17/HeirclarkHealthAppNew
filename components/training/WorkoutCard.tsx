@@ -261,21 +261,6 @@ function ExerciseRow({
           </View>
         </TouchableOpacity>
       )}
-      {/* Weight Log Button */}
-      {onLogWeight && (
-        <TouchableOpacity
-          style={[styles.weightButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)' }]}
-          onPress={() => {
-            lightImpact();
-            onLogWeight();
-          }}
-          accessibilityLabel={`Log weight for ${exercise.exercise.name}`}
-          accessibilityRole="button"
-          accessibilityHint="Opens weight logging interface to track weight lifted for this exercise"
-        >
-          <Ionicons name="barbell-outline" size={16} color={Colors.protein} />
-        </TouchableOpacity>
-      )}
       <TouchableOpacity
         style={styles.swapButton}
         onPress={() => {
