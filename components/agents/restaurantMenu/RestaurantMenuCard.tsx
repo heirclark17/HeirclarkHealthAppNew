@@ -13,6 +13,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { UtensilsCrossed, ArrowRight, Lightbulb, X, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useGlassTheme } from '../../liquidGlass';
@@ -25,7 +26,7 @@ import { generateRestaurantDishGuidance, RestaurantDishParams } from '../../../s
 const CUISINE_TYPES = ['mexican', 'italian', 'asian', 'american', 'fastfood', 'general'];
 
 export default function RestaurantMenuCard() {
-  const { colors } = useGlassTheme();
+  const { colors, isDark } = useGlassTheme();
   const { state: goalState } = useGoalWizard();
   const { state: mealState } = useMealPlan();
   const { addRecentSearch } = useRestaurantMenu();
@@ -109,7 +110,9 @@ export default function RestaurantMenuCard() {
         </View>
 
         {/* Calorie Budget Display */}
-        <View style={[styles.budgetPreview, { backgroundColor: remainingCalories < dailyTargets.calories * 0.3 ? colors.error + '15' : colors.success + '15' }]}>
+        <View style={[styles.budgetPreview, { overflow: 'hidden', borderWidth: 0.5, borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)' }]}>
+          <BlurView intensity={isDark ? 30 : 25} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: remainingCalories < dailyTargets.calories * 0.3 ? colors.error + '10' : colors.success + '10' }]} pointerEvents="none" />
           <View style={styles.budgetRow}>
             <Text style={[styles.budgetLabel, { color: colors.textMuted }]}>Remaining Today</Text>
             <Text style={[styles.budgetValue, { color: remainingCalories < dailyTargets.calories * 0.3 ? colors.error : colors.success }]}>
@@ -128,7 +131,7 @@ export default function RestaurantMenuCard() {
           {CUISINE_TYPES.map((cuisine) => (
             <TouchableOpacity
               key={cuisine}
-              style={[styles.cuisineChip, { backgroundColor: colors.cardGlass }]}
+              style={[styles.cuisineChip, { overflow: 'hidden', borderWidth: 0.5, borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)' }]}
               onPress={() => {
                 handleCuisineSelect(cuisine);
                 setShowModal(true);
@@ -137,6 +140,8 @@ export default function RestaurantMenuCard() {
               accessibilityRole="button"
               accessibilityHint={`Opens restaurant guide modal with AI-powered ${cuisine} dish recommendations based on your remaining ${Math.round(remainingCalories)} calories`}
             >
+              <BlurView intensity={isDark ? 25 : 20} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.30)' }]} pointerEvents="none" />
               <Text style={[styles.cuisineText, { color: colors.text }]}>
                 {cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}
               </Text>

@@ -14,6 +14,7 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { GlassCard } from '../../GlassCard';
 import { useGlassTheme } from '../../liquidGlass';
@@ -37,7 +38,7 @@ const CATEGORY_ICONS: Record<ExerciseCategory, keyof typeof Ionicons.glyphMap> =
 };
 
 export default function WorkoutFormCoachCard() {
-  const { colors } = useGlassTheme();
+  const { colors, isDark } = useGlassTheme();
   const {
     state,
     getExercise,
@@ -187,12 +188,14 @@ export default function WorkoutFormCoachCard() {
         {/* Daily Tip */}
         {state.dailyTip && (
           <TouchableOpacity
-            style={[styles.dailyTipCard, { backgroundColor: colors.primary + '15' }]}
+            style={[styles.dailyTipCard, { overflow: 'hidden', borderWidth: 0.5, borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)' }]}
             onPress={handleTipTap}
             accessibilityLabel={`Tip of the day${!state.dailyTip.seen ? ', new' : ''}: ${state.dailyTip.exerciseName} - ${state.dailyTip.tip}`}
             accessibilityRole="button"
             accessibilityHint="Opens detailed exercise guide with form cues and common mistakes"
           >
+            <BlurView intensity={isDark ? 30 : 25} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.primary + '10' }]} pointerEvents="none" />
             <View style={styles.tipHeader}>
               <Ionicons name="bulb" size={18} color={colors.primary} />
               <Text style={[styles.tipLabel, { color: colors.primary }]}>TIP OF THE DAY</Text>
@@ -216,7 +219,7 @@ export default function WorkoutFormCoachCard() {
           {categories.map((category) => (
             <TouchableOpacity
               key={category}
-              style={[styles.categoryChip, { backgroundColor: colors.cardGlass }]}
+              style={[styles.categoryChip, { overflow: 'hidden', borderWidth: 0.5, borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)' }]}
               onPress={() => {
                 setSelectedCategory(category);
                 setShowExercisesModal(true);
@@ -225,6 +228,8 @@ export default function WorkoutFormCoachCard() {
               accessibilityRole="button"
               accessibilityHint={`Opens exercise library filtered to show only ${category} exercises`}
             >
+              <BlurView intensity={isDark ? 25 : 20} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.30)' }]} pointerEvents="none" />
               <Ionicons name={CATEGORY_ICONS[category]} size={14} color={colors.text} />
               <Text style={[styles.categoryText, { color: colors.text }]}>
                 {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -241,12 +246,14 @@ export default function WorkoutFormCoachCard() {
               {recommendations.slice(0, 3).map((exercise) => (
                 <TouchableOpacity
                   key={exercise.id}
-                  style={[styles.recommendedCard, { backgroundColor: colors.cardGlass }]}
+                  style={[styles.recommendedCard, { overflow: 'hidden', borderWidth: 0.5, borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.06)' }]}
                   onPress={() => handleExerciseTap(exercise)}
                   accessibilityLabel={`Recommended: ${exercise.name}, ${exercise.category} category`}
                   accessibilityRole="button"
                   accessibilityHint="Opens detailed exercise guide with form cues, common mistakes, and variations"
                 >
+                  <BlurView intensity={isDark ? 25 : 20} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+                  <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.30)' }]} pointerEvents="none" />
                   <Text style={[styles.recommendedName, { color: colors.text }]} numberOfLines={1}>
                     {exercise.name}
                   </Text>
