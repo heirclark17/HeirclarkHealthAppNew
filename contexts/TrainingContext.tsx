@@ -1460,17 +1460,36 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         if (exerciseIndex === -1) return prev;
 
         const currentExercise = day.workout.exercises[exerciseIndex];
+        const oldExercise = currentExercise.exercise;
 
-        // Create a new exercise from the alternative
+        // Build reverse alternatives: original exercise + remaining alts (excluding the one being swapped in)
+        const originalAsAlternative: ExerciseAlternative = {
+          id: oldExercise.id,
+          name: oldExercise.name,
+          equipment: oldExercise.equipment,
+          difficultyModifier: 'same',
+          muscleActivationNotes: '',
+          whenToUse: ['Original exercise'],
+          formCues: oldExercise.instructions,
+        };
+        const remainingAlternatives = (oldExercise.alternatives || []).filter(
+          alt => alt.id !== alternative.id && alt.name !== alternative.name
+        );
+        const newAlternatives = [originalAsAlternative, ...remainingAlternatives];
+
+        // Create a new exercise from the alternative, preserving alternatives for future swaps
         const newExercise: Exercise = {
           id: alternative.id,
           name: alternative.name,
           equipment: alternative.equipment,
-          muscleGroups: currentExercise.exercise.muscleGroups,
-          category: currentExercise.exercise.category,
-          difficulty: currentExercise.exercise.difficulty,
-          caloriesPerMinute: currentExercise.exercise.caloriesPerMinute,
+          muscleGroups: oldExercise.muscleGroups,
+          category: oldExercise.category,
+          difficulty: oldExercise.difficulty,
+          caloriesPerMinute: oldExercise.caloriesPerMinute,
           instructions: alternative.formCues,
+          primaryMuscle: oldExercise.primaryMuscle,
+          secondaryMuscles: oldExercise.secondaryMuscles,
+          alternatives: newAlternatives,
         };
 
         const updatedExercises = [...day.workout.exercises];
@@ -1492,7 +1511,18 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
       const updatedPlan = { ...prev.weeklyPlan, days: updatedDays };
 
-      // Save the update
+      // Also update the multiWeekPlan so swaps persist across reloads
+      let updatedMultiWeek = prev.multiWeekPlan;
+      if (updatedMultiWeek && updatedMultiWeek.weeklyPlans) {
+        const weekIdx = prev.currentWeekIndex;
+        if (weekIdx >= 0 && weekIdx < updatedMultiWeek.weeklyPlans.length) {
+          const updatedWeeklyPlans = [...updatedMultiWeek.weeklyPlans];
+          updatedWeeklyPlans[weekIdx] = updatedPlan;
+          updatedMultiWeek = { ...updatedMultiWeek, weeklyPlans: updatedWeeklyPlans };
+        }
+      }
+
+      // Save to local cache
       trainingStorage.savePlanCache({
         weeklyPlan: updatedPlan,
         selectedProgram: prev.selectedProgram,
@@ -1503,12 +1533,34 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         planSummary: prev.planSummary,
       });
 
-      return { ...prev, weeklyPlan: updatedPlan, showAlternativesModal: false };
+      // Fire-and-forget sync to backend
+      if (updatedMultiWeek) {
+        api.saveWorkoutPlan(
+          { weeklyPlan: updatedPlan, preferences: prev.preferences, summary: updatedMultiWeek.summary, lastGeneratedAt: prev.lastGeneratedAt },
+          prev.selectedProgram?.id,
+          prev.selectedProgram?.name,
+          {
+            multiWeekPlan: updatedMultiWeek,
+            currentWeekIndex: prev.currentWeekIndex,
+            totalWeeks: updatedMultiWeek.totalWeeks,
+          }
+        ).then(() => {
+          console.log('[Training] ✅ Exercise swap synced to backend');
+        }).catch((err: any) => {
+          console.error('[Training] ❌ Exercise swap backend sync error:', err);
+        });
+      }
+
+      return { ...prev, weeklyPlan: updatedPlan, multiWeekPlan: updatedMultiWeek, showAlternativesModal: false };
     });
   }, []);
 
   // Show exercise alternatives modal
   const showExerciseAlternatives = useCallback((exercise: Exercise) => {
+    console.log('[Training] Opening alternatives for:', exercise.name, '| alternatives count:', exercise.alternatives?.length || 0);
+    if (exercise.alternatives && exercise.alternatives.length > 0) {
+      console.log('[Training] Alternatives:', exercise.alternatives.map(a => `${a.name} (${a.equipment})`).join(', '));
+    }
     setState(prev => ({
       ...prev,
       selectedExercise: exercise,
@@ -1690,6 +1742,19 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         // Determine which week to show
         const weekIdx = backendWeekIndex || 0;
         const resolvedWeeklyPlan = backendMultiWeek?.weeklyPlans?.[weekIdx] || planData.weeklyPlan || null;
+
+        // Debug: check if alternatives are present on loaded exercises
+        if (resolvedWeeklyPlan) {
+          let totalExercises = 0;
+          let withAlternatives = 0;
+          for (const day of resolvedWeeklyPlan.days || []) {
+            for (const ex of day.workout?.exercises || []) {
+              totalExercises++;
+              if (ex.exercise?.alternatives?.length > 0) withAlternatives++;
+            }
+          }
+          console.log(`[Training] 📊 Backend plan loaded: ${withAlternatives}/${totalExercises} exercises have alternatives`);
+        }
 
         setState(prev => ({
           ...prev,

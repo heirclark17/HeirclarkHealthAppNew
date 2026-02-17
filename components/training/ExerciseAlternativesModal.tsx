@@ -35,10 +35,10 @@ const GLASS_SPRING = {
 // iOS 26 Liquid Glass colors
 const GLASS_COLORS = {
   light: {
-    background: Colors.backgroundSecondary,
+    background: LightColors.backgroundSecondary,
     card: 'rgba(255, 255, 255, 0.75)',
     cardBorder: 'rgba(255, 255, 255, 0.5)',
-    text: Colors.text,
+    text: LightColors.text,
     textMuted: 'rgba(60, 60, 67, 0.6)',
     textSecondary: 'rgba(60, 60, 67, 0.4)',
     border: 'rgba(0, 0, 0, 0.08)',
@@ -46,10 +46,10 @@ const GLASS_COLORS = {
     secondaryBg: 'rgba(0, 0, 0, 0.04)',
   },
   dark: {
-    background: Colors.background,
+    background: DarkColors.background,
     card: 'rgba(255, 255, 255, 0.08)',
     cardBorder: 'rgba(255, 255, 255, 0.12)',
-    text: Colors.text,
+    text: DarkColors.text,
     textMuted: 'rgba(235, 235, 245, 0.6)',
     textSecondary: 'rgba(235, 235, 245, 0.4)',
     border: 'rgba(255, 255, 255, 0.1)',
@@ -86,11 +86,11 @@ const getEquipmentIcon = (equipment: string): string => {
 const getDifficultyColor = (modifier: DifficultyModifier, isDark: boolean): string => {
   switch (modifier) {
     case 'easier':
-      return Colors.goalAchieved; // iOS Green
+      return isDark ? DarkColors.goalAchieved : LightColors.goalAchieved;
     case 'same':
       return isDark ? GLASS_COLORS.dark.text : GLASS_COLORS.light.text;
     case 'harder':
-      return Colors.errorStrong; // iOS Red
+      return isDark ? DarkColors.errorStrong : LightColors.errorStrong;
     default:
       return isDark ? GLASS_COLORS.dark.textMuted : GLASS_COLORS.light.textMuted;
   }
@@ -210,7 +210,7 @@ function AlternativeCard({
             <Text style={[styles.formCuesLabel, { color: glassColors.textMuted }]}>FORM CUES</Text>
             {alternative.formCues.map((cue, i) => (
               <View key={i} style={styles.formCueItem}>
-                <Text style={[styles.formCueBullet, { color: Colors.success }]}>•</Text>
+                <Text style={[styles.formCueBullet, { color: isDark ? DarkColors.success : LightColors.success }]}>•</Text>
                 <Text style={[styles.formCueText, { color: glassColors.textSecondary }]}>{cue}</Text>
               </View>
             ))}
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     borderWidth: 1,
     // Soft shadow
-    shadowColor: Colors.background,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,

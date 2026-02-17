@@ -6,7 +6,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { ArrowLeftRight, Settings } from 'lucide-react-native';
+import { ArrowLeftRight, BicepsFlexed, Dumbbell } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { Workout, WorkoutExercise, WeightLog } from '../../types/training';
@@ -411,7 +411,7 @@ export function WorkoutCard({
           {/* Header */}
           <View style={styles.header}>
             <View style={[styles.iconContainer, { backgroundColor: `${typeColor}20` }]}>
-              <Ionicons name={getWorkoutTypeIcon(workout.type)} size={24} color={typeColor} />
+              <BicepsFlexed size={24} color={colors.text} />
             </View>
             <View style={styles.headerText}>
               <Text style={[styles.workoutName, { color: colors.text }]}>{workout.name}</Text>
@@ -456,7 +456,7 @@ export function WorkoutCard({
           {onSwitchEquipment && availableEquipment && availableEquipment.length > 0 && (
             <GlassCard style={styles.equipmentCard}>
               <View style={styles.equipmentCardHeader}>
-                <Settings size={14} color={colors.text} />
+                <Dumbbell size={14} color={colors.text} />
                 <Text style={[styles.equipmentCardText, { color: colors.text }]}>Equipment</Text>
               </View>
               <View style={styles.equipmentChipRow}>
