@@ -204,12 +204,12 @@ export const GlassSegmentedControl: React.FC<GlassSegmentedControlProps> = ({
                   size={sizeStyles.iconSize}
                   customColor={
                     isSegmentDisabled
-                      ? colors.text.muted
+                      ? colors.textMuted
                       : isSelected
                       ? isDark
                         ? Colors.text
                         : Colors.background
-                      : colors.text.secondary
+                      : colors.textSecondary
                   }
                   style={segment.label ? styles.segmentIcon : undefined}
                 />
@@ -219,12 +219,12 @@ export const GlassSegmentedControl: React.FC<GlassSegmentedControlProps> = ({
                 weight={isSelected ? '600' : '400'}
                 customColor={
                   isSegmentDisabled
-                    ? colors.text.muted
+                    ? colors.textMuted
                     : isSelected
                     ? isDark
                       ? Colors.text
                       : Colors.background
-                    : colors.text.secondary
+                    : colors.textSecondary
                 }
               >
                 {segment.label}

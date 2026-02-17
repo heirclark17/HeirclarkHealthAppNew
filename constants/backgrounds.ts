@@ -101,7 +101,8 @@ export type BackgroundId =
   | 'tiger-stripes'
   | 'zebra-pattern'
   | 'snake-scales'
-  | 'peacock-feathers';
+  | 'peacock-feathers'
+  | 'custom';
 
 export type BackgroundType = 'solid' | 'gradient' | 'animated' | 'pattern';
 

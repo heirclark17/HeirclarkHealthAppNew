@@ -310,6 +310,31 @@ const styles = StyleSheet.create({
   statusCard: {
     marginBottom: 20,
   },
+  statusContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  statusIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusInfo: {
+    flex: 1,
+  },
+  statusTitle: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    marginBottom: 2,
+  },
+  statusSubtitle: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    lineHeight: 18,
+  },
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -348,6 +373,53 @@ const styles = StyleSheet.create({
   providerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  providerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
+  connectedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    gap: 3,
+  },
+  connectedText: {
+    fontSize: 10,
+    fontFamily: Fonts.medium,
+  },
+  providerDescription: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    lineHeight: 16,
+  },
+  connectButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    gap: 6,
+  },
+  connectButtonText: {
+    fontSize: 13,
+    fontFamily: Fonts.semiBold,
+  },
+  infoCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 20,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    lineHeight: 18,
   },
   providerIconContainer: {
     width: 48,

@@ -178,8 +178,8 @@ export const GlassInput: React.FC<GlassInputProps> = ({
   const variantStyles = getVariantStyles();
 
   // Colors
-  const textColor = colors.text.primary;
-  const placeholderColor = colors.text.muted;
+  const textColor = colors.text;
+  const placeholderColor = colors.textMuted;
   const focusBorderColor = error ? colors.semantic.error : colors.semantic.info;
 
   const inputContainerStyle: ViewStyle[] = [
@@ -270,7 +270,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
       {(error || helperText) && (
         <AdaptiveText
           variant="caption1"
-          customColor={error ? colors.semantic.error : colors.text.muted}
+          customColor={error ? colors.semantic.error : colors.textMuted}
           style={styles.helperText}
         >
           {error || helperText}

@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
   },
   progressTitle: {
     fontSize: 15,
-    fontFamily: Fonts.semibold,
+    fontFamily: Fonts.semiBold,
     marginBottom: 1,
   },
   progressStats: {

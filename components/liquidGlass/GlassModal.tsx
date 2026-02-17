@@ -181,7 +181,7 @@ export const GlassModal: React.FC<GlassModalProps> = ({
     return (
       <View style={styles.header}>
         {showDragIndicator && variant === 'sheet' && (
-          <View style={[styles.dragIndicator, { backgroundColor: colors.text.muted }]} />
+          <View style={[styles.dragIndicator, { backgroundColor: colors.textMuted }]} />
         )}
         {headerContent || (
           <View style={styles.headerContent}>

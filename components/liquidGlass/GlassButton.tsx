@@ -139,14 +139,14 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       case 'primary':
         return {
           backgroundColor: isDark ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.90)',
-          textColor: isDark ? colors.text.inverse : colors.text.inverse,
+          textColor: isDark ? colors.textNested.inverse : colors.textNested.inverse,
           iconColor: isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)',
           borderWidth: 0,
         };
       case 'secondary':
         return {
           backgroundColor: getGlassBackground('thin'),
-          textColor: colors.text.primary,
+          textColor: colors.textNested.primary,
           iconColor: colors.icon.primary,
           borderWidth: 1,
           borderColor: getGlassBorder('thin'),
@@ -154,7 +154,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       case 'ghost':
         return {
           backgroundColor: 'transparent',
-          textColor: colors.text.primary,
+          textColor: colors.textNested.primary,
           iconColor: colors.icon.primary,
           borderWidth: 0,
         };
