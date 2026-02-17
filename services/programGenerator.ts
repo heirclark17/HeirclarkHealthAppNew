@@ -473,7 +473,7 @@ USER PROFILE:
 - Training Experience: ${profile.experience?.yearsTraining || 0} years
 - Available Equipment: ${preferences.availableEquipment.join(', ')}
 - Training Days per Week: ${template.daysPerWeek}
-- Session Duration: ~${preferences.sessionDuration || profile.sessionDuration} minutes
+- Session Duration: ~${preferences.workoutDuration || 60} minutes
 - Injuries/Limitations: ${profile.injuries?.join(', ') || 'None'}
 - Weight: ${preferences.weight || 'Not specified'} lbs
 - Age: ${preferences.age || 'Not specified'}

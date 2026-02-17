@@ -771,12 +771,12 @@ function selectExercisesForWorkout(
     // Map injury areas to muscle groups that should be avoided
     const injuryToMuscleMap: Record<string, MuscleGroup[]> = {
       'lower_back': ['core', 'glutes'],
-      'knee': ['quadriceps', 'hamstrings', 'glutes'],
+      'knee': ['quads', 'hamstrings', 'glutes'],
       'shoulder': ['shoulders', 'chest', 'back'],
       'elbow': ['biceps', 'triceps'],
       'wrist': ['biceps', 'triceps', 'chest'],
-      'hip': ['glutes', 'quadriceps', 'hamstrings'],
-      'ankle': ['quadriceps', 'hamstrings', 'calves'],
+      'hip': ['glutes', 'quads', 'hamstrings'],
+      'ankle': ['quads', 'hamstrings', 'calves'],
       'neck': ['shoulders', 'back'],
     };
 
@@ -806,7 +806,7 @@ function selectExercisesForWorkout(
         // Fall back to very safe bodyweight exercises (core, cardio)
         availableExercises = EXERCISES.filter(ex =>
           ex.equipment === 'bodyweight' &&
-          (ex.category === 'cardio' || ex.category === 'core')
+          (ex.category === 'cardio' || ex.primaryMuscle === 'core')
         );
       }
     }
@@ -1074,6 +1074,8 @@ export const trainingService = {
         workout,
         isRestDay: !isWorkoutDay,
         completed: false,
+        calendarDate: dayDate.toISOString().split('T')[0],
+        weekNumber: 1,
       });
 
       if (workout) workoutDaysCount++;
@@ -1103,8 +1105,8 @@ export const trainingService = {
     let muscleGrowthPotential = 50;
     let cardiovascularHealth = 50;
 
-    // Analyze workouts in the plan - flatten weeks into days
-    const allDays = weeklyPlan.weeks?.flatMap(w => w.days) || weeklyPlan.days || [];
+    // Analyze workouts in the plan
+    const allDays = weeklyPlan.days || [];
     const workouts = allDays.filter(d => d?.workout).map(d => d.workout!);
     const hiitCount = workouts.filter(w => w.type === 'hiit').length;
     const cardioCount = workouts.filter(w => w.type === 'cardio' || w.type === 'hiit').length;

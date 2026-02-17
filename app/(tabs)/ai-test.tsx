@@ -69,9 +69,9 @@ export default function AITestScreen() {
 
     try {
       const result = await aiService.generateAIWorkoutPlan({
-        fitnessGoal: 'strength',
-        experienceLevel: 'intermediate',
-        daysPerWeek: 3,
+        primaryGoal: 'strength',
+        fitnessLevel: 'intermediate',
+        workoutsPerWeek: 3,
         sessionDuration: 60,
         availableEquipment: ['dumbbells', 'barbell', 'gym'],
         injuries: [],
@@ -79,7 +79,7 @@ export default function AITestScreen() {
 
       if (result) {
         setWorkoutPlanResult(result);
-        Alert.alert('Success!', `Generated ${result.weeks?.length || 0}-week workout plan`);
+        Alert.alert('Success!', `Generated ${result.weeks || 0}-week workout plan`);
       } else {
         Alert.alert('Error', 'Failed to generate workout plan. Check console for details.');
       }
@@ -102,7 +102,7 @@ export default function AITestScreen() {
         userGoals: {
           calorieTarget: 2500,
           proteinTarget: 180,
-          fitnessGoal: 'muscle_gain',
+          primaryGoal: 'muscle_gain',
         },
       });
 
@@ -129,7 +129,7 @@ export default function AITestScreen() {
       const result = await aiService.sendCoachMessage('How do I improve my squat form?', {
         mode: 'training',
         userGoals: {
-          fitnessGoal: 'strength',
+          primaryGoal: 'strength',
           activityLevel: 'active',
         },
       });
@@ -158,7 +158,7 @@ export default function AITestScreen() {
         mode: 'general',
         userGoals: {
           calorieTarget: 2000,
-          fitnessGoal: 'weight_loss',
+          primaryGoal: 'weight_loss',
         },
       });
 
@@ -207,7 +207,7 @@ export default function AITestScreen() {
           {loading === loadingKey ? (
             <ActivityIndicator color={iconColor} />
           ) : (
-            <Ionicons name="chevron-forward" size={24} color={colors.textTertiary} />
+            <Ionicons name="chevron-forward" size={24} color={colors.textMuted} />
           )}
         </View>
       </GlassCard>
@@ -320,7 +320,7 @@ export default function AITestScreen() {
         )}
 
         {/* Info */}
-        <GlassCard style={[styles.infoCard, { backgroundColor: colors.surface + '40' }]}>
+        <GlassCard style={[styles.infoCard, { backgroundColor: colors.card + '40' }]}>
           <Ionicons name="information-circle" size={20} color={colors.primary} />
           <Text style={[styles.infoText, { color: colors.textSecondary }]}>
             These buttons test the backend AI endpoints. Check console for detailed logs.

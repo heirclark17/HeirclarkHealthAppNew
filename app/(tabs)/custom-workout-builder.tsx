@@ -100,10 +100,7 @@ export default function CustomWorkoutBuilderScreen() {
   const loadInitialExercises = async () => {
     setIsLoadingExercises(true);
     try {
-      const data = await exerciseDbService.getExercises({
-        limit: 50,
-        offset: 0,
-      });
+      const data = await exerciseDbService.getAllExercises(50, 0);
       setExercises(data);
     } catch (error) {
       console.error('[CustomWorkoutBuilder] Error loading exercises:', error);
@@ -120,10 +117,7 @@ export default function CustomWorkoutBuilderScreen() {
 
     setIsLoadingExercises(true);
     try {
-      const data = await exerciseDbService.searchExercises({
-        query,
-        limit: 50,
-      });
+      const data = await exerciseDbService.searchExercisesByName(query);
       setExercises(data);
     } catch (error) {
       console.error('[CustomWorkoutBuilder] Search error:', error);
@@ -352,7 +346,7 @@ export default function CustomWorkoutBuilderScreen() {
               onPress={() => handleEditExercise(exercise, dayIndex)}
               style={styles.exerciseActionButton}
             >
-              <Edit3 size={18} color={colors.accentBlue} />
+              <Edit3 size={18} color={colors.accentCyan} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -376,7 +370,7 @@ export default function CustomWorkoutBuilderScreen() {
         {/* Day Header */}
         <View style={styles.dayHeader}>
           <View style={styles.dayHeaderLeft}>
-            <Dumbbell size={20} color={colors.accentBlue} strokeWidth={2} />
+            <Dumbbell size={20} color={colors.accentCyan} strokeWidth={2} />
             <Text style={[styles.dayName, { color: colors.text }]}>{day.dayName}</Text>
           </View>
           <View style={styles.dayHeaderRight}>
@@ -415,11 +409,11 @@ export default function CustomWorkoutBuilderScreen() {
         {/* Add Exercise Button */}
         <TouchableOpacity
           onPress={() => handleAddExerciseTap(index)}
-          style={[styles.addExerciseButton, { borderColor: colors.accentBlue + '40' }]}
+          style={[styles.addExerciseButton, { borderColor: colors.accentCyan + '40' }]}
           activeOpacity={0.7}
         >
-          <Plus size={20} color={colors.accentBlue} strokeWidth={2} />
-          <Text style={[styles.addExerciseText, { color: colors.accentBlue }]}>
+          <Plus size={20} color={colors.accentCyan} strokeWidth={2} />
+          <Text style={[styles.addExerciseText, { color: colors.accentCyan }]}>
             Add Exercise
           </Text>
         </TouchableOpacity>
@@ -437,7 +431,7 @@ export default function CustomWorkoutBuilderScreen() {
           </Text>
           <TouchableOpacity
             onPress={() => router.back()}
-            style={[styles.backButton, { backgroundColor: colors.accentBlue }]}
+            style={[styles.backButton, { backgroundColor: colors.accentCyan }]}
           >
             <Text style={[styles.backButtonText, { color: colors.background }]}>
               Go Back
@@ -458,7 +452,7 @@ export default function CustomWorkoutBuilderScreen() {
         <Text style={[styles.headerTitle, { color: colors.text }]}>Custom Workout</Text>
         <TouchableOpacity
           onPress={handleSave}
-          style={[styles.headerButton, styles.saveButton, { backgroundColor: colors.accentBlue }]}
+          style={[styles.headerButton, styles.saveButton, { backgroundColor: colors.accentCyan }]}
           disabled={isSaving}
         >
           {isSaving ? (
@@ -581,7 +575,7 @@ export default function CustomWorkoutBuilderScreen() {
           {/* Exercise List */}
           {isLoadingExercises ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.accentBlue} />
+              <ActivityIndicator size="large" color={colors.accentCyan} />
               <Text style={[styles.loadingText, { color: colors.textMuted }]}>
                 Loading exercises...
               </Text>
@@ -696,7 +690,7 @@ export default function CustomWorkoutBuilderScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleSaveExerciseEdit}
-                  style={[styles.editModalButton, { backgroundColor: colors.accentBlue }]}
+                  style={[styles.editModalButton, { backgroundColor: colors.accentCyan }]}
                 >
                   <Text style={[styles.editModalButtonText, { color: colors.background }]}>
                     Save

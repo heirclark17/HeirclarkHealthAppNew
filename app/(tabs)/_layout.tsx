@@ -252,11 +252,11 @@ const GlassTabButton = forwardRef<View, GlassTabButtonProps>(
       }
     }, []);
 
-    const handlePress = useCallback(() => {
+    const handlePress = useCallback((event: any) => {
       if (!isFocused) {
         selectionFeedback(); // Selection haptic for tab change
       }
-      props.onPress?.();
+      props.onPress?.(event);
     }, [isFocused, props.onPress]);
 
     const animatedContainerStyle = useAnimatedStyle(() => ({

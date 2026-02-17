@@ -500,6 +500,9 @@ export const planGenerator = {
       endDate: endDate.toISOString(),
       currentWeek: 1,
       isActive: true,
+      calendarStartDate: startDate.toISOString().split('T')[0],
+      currentWeekIndex: 0,
+      totalWeeks: weeks,
     };
   },
 
