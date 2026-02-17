@@ -12,6 +12,7 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
 import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Sparkles, Moon, UtensilsCrossed } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomSheetModal,
@@ -388,15 +389,38 @@ export function DailyTimelineView() {
       <WeeklyCoachCard optimization={state.aiOptimization ?? null} />
       <BehaviorInsightCard completionPatterns={state.completionPatterns ?? {}} />
 
-      {/* Timeline */}
-      <ScrollView
-        ref={scrollRef}
-        style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding + 80 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.timeline}>
-          <TimeSlotGrid wakeTime={state.preferences?.wakeTime} />
+      {/* Timeline — Frosted Glass Card */}
+      <View style={styles.timelineGlassWrapper}>
+        <View style={[
+          styles.timelineGlassOuter,
+          {
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.08)',
+            shadowColor: isDark ? 'rgba(0, 0, 0, 0.25)' : 'rgba(0, 0, 0, 0.08)',
+          },
+        ]}>
+          {/* Blur backdrop */}
+          <BlurView
+            intensity={isDark ? 40 : 35}
+            tint={isDark ? 'dark' : 'light'}
+            style={StyleSheet.absoluteFill}
+          />
+          {/* Glass tint overlay */}
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.40)' },
+            ]}
+            pointerEvents="none"
+          />
+
+          <ScrollView
+            ref={scrollRef}
+            style={styles.scrollView}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPadding + 80 }]}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.timeline}>
+              <TimeSlotGrid wakeTime={state.preferences?.wakeTime} />
 
           {/* Sleep overlay zones - combined with single label */}
           {sleepZone && (sleepZone.evening.height > 0 || sleepZone.morning.height > 0) && (
@@ -507,6 +531,8 @@ export function DailyTimelineView() {
           ))}
         </View>
       </ScrollView>
+        </View>
+      </View>
 
       {/* Floating AI Chat Button */}
       {timeline && !isChatOpen && (
@@ -670,9 +696,30 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200' as const,
   },
+  timelineGlassWrapper: {
+    flex: 1,
+    marginHorizontal: 12,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  timelineGlassOuter: {
+    flex: 1,
+    borderRadius: 24,
+    overflow: 'hidden',
+    borderWidth: 1,
+    ...Platform.select({
+      ios: {
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
   scrollView: {
     flex: 1,
-    marginTop: 20, // Add gap between all-day banner/cards and timeline
   },
   scrollContent: {
     paddingHorizontal: 16,
