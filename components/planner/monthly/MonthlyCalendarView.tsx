@@ -71,9 +71,13 @@ interface Props {
 export function MonthlyCalendarView({ selectedDate, onDateChange }: Props) {
   const { state } = useDayPlanner();
   const { settings } = useSettings();
-  const isDark = settings.themeMode === 'dark';
-  const themeColors = isDark ? DarkColors : LightColors;
   const insets = useSafeAreaInsets();
+
+  // Dynamic theme colors
+  const themeColors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
+  const isDark = settings.themeMode === 'dark';
 
   // Access training and meal plan contexts for full month data
   let trainingState: any = null;

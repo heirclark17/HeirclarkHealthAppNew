@@ -47,8 +47,12 @@ export function PlannerCalendarStrip({
   allDayEventDots,
 }: Props) {
   const { settings } = useSettings();
+
+  // Dynamic theme colors
+  const themeColors = useMemo(() => {
+    return settings.themeMode === 'light' ? LightColors : DarkColors;
+  }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
-  const themeColors = isDark ? DarkColors : LightColors;
   const dayItemBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
   const dayNameColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
   const actionBtnBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
