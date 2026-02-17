@@ -883,14 +883,14 @@ app.get('/api/v1/workouts/stats', authenticateToken, async (req, res) => {
 // POST /api/v1/workouts/plan - Save workout plan to backend
 app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
   try {
-    const { planData, programId, programName, weekly_schedule } = req.body;
+    const { planData, programId, programName, weekly_schedule, multiWeekPlan, currentWeekIndex, totalWeeks, perplexityResearch } = req.body;
 
     console.log('[Workout] Saving workout plan for user:', req.userId);
 
-    // Upsert the workout plan - include all required columns including weekly_schedule
+    // Upsert the workout plan - include all columns including multi-week plan
     const result = await pool.query(
-      `INSERT INTO workout_plans (user_id, plan_name, plan_data, program_id, program_name, weekly_schedule, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      `INSERT INTO workout_plans (user_id, plan_name, plan_data, program_id, program_name, weekly_schedule, multi_week_plan, current_week_index, total_weeks, perplexity_research, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
        ON CONFLICT (user_id)
        DO UPDATE SET
          plan_name = EXCLUDED.plan_name,
@@ -898,6 +898,10 @@ app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
          program_id = EXCLUDED.program_id,
          program_name = EXCLUDED.program_name,
          weekly_schedule = EXCLUDED.weekly_schedule,
+         multi_week_plan = COALESCE(EXCLUDED.multi_week_plan, workout_plans.multi_week_plan),
+         current_week_index = COALESCE(EXCLUDED.current_week_index, workout_plans.current_week_index),
+         total_weeks = COALESCE(EXCLUDED.total_weeks, workout_plans.total_weeks),
+         perplexity_research = COALESCE(EXCLUDED.perplexity_research, workout_plans.perplexity_research),
          updated_at = NOW()
        RETURNING id, created_at, updated_at`,
       [
@@ -906,7 +910,11 @@ app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
         JSON.stringify(planData),
         programId || null,
         programName || null,
-        JSON.stringify(weekly_schedule || [])
+        JSON.stringify(weekly_schedule || []),
+        multiWeekPlan ? JSON.stringify(multiWeekPlan) : null,
+        currentWeekIndex != null ? currentWeekIndex : null,
+        totalWeeks != null ? totalWeeks : null,
+        perplexityResearch ? JSON.stringify(perplexityResearch) : null
       ]
     );
 
@@ -929,7 +937,7 @@ app.post('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
 app.get('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, plan_data, program_id, program_name, weekly_schedule, created_at, updated_at
+      `SELECT id, plan_data, program_id, program_name, weekly_schedule, multi_week_plan, current_week_index, total_weeks, perplexity_research, created_at, updated_at
        FROM workout_plans
        WHERE user_id = $1`,
       [req.userId]
@@ -948,6 +956,10 @@ app.get('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
         programId: row.program_id,
         programName: row.program_name,
         weeklySchedule: row.weekly_schedule,
+        multiWeekPlan: row.multi_week_plan,
+        currentWeekIndex: row.current_week_index,
+        totalWeeks: row.total_weeks,
+        perplexityResearch: row.perplexity_research,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
       }
@@ -955,6 +967,37 @@ app.get('/api/v1/workouts/plan', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('[Workout] Get plan error:', error);
     res.status(500).json({ error: 'Failed to get workout plan' });
+  }
+});
+
+// PATCH /api/v1/workouts/plan/week - Update current week index only (lightweight sync)
+app.patch('/api/v1/workouts/plan/week', authenticateToken, async (req, res) => {
+  try {
+    const { currentWeekIndex } = req.body;
+
+    if (currentWeekIndex == null || typeof currentWeekIndex !== 'number') {
+      return res.status(400).json({ error: 'currentWeekIndex is required and must be a number' });
+    }
+
+    console.log('[Workout] Updating week index for user:', req.userId, '→ week', currentWeekIndex);
+
+    const result = await pool.query(
+      `UPDATE workout_plans
+       SET current_week_index = $1, updated_at = NOW()
+       WHERE user_id = $2
+       RETURNING id`,
+      [currentWeekIndex, req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No workout plan found' });
+    }
+
+    console.log('[Workout] ✅ Week index updated to', currentWeekIndex);
+    res.json({ success: true, currentWeekIndex });
+  } catch (error) {
+    console.error('[Workout] Update week index error:', error.message);
+    res.status(500).json({ error: 'Failed to update week index' });
   }
 });
 
@@ -5013,6 +5056,27 @@ async function runMigrations() {
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_planner_weekly_plans_week
       ON planner_weekly_plans(week_start_date)
+    `);
+
+    // Add multi-week plan columns to workout_plans
+    await pool.query(`
+      ALTER TABLE workout_plans
+      ADD COLUMN IF NOT EXISTS multi_week_plan JSONB
+    `);
+
+    await pool.query(`
+      ALTER TABLE workout_plans
+      ADD COLUMN IF NOT EXISTS current_week_index INTEGER DEFAULT 0
+    `);
+
+    await pool.query(`
+      ALTER TABLE workout_plans
+      ADD COLUMN IF NOT EXISTS total_weeks INTEGER DEFAULT 1
+    `);
+
+    await pool.query(`
+      ALTER TABLE workout_plans
+      ADD COLUMN IF NOT EXISTS perplexity_research JSONB
     `);
 
     console.log('[Migrations] ✅ Completed successfully');

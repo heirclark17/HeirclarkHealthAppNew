@@ -512,7 +512,12 @@ class HeirclarkAPI {
   }
 
   // Save workout plan to backend
-  async saveWorkoutPlan(planData: any, programId?: string, programName?: string): Promise<boolean> {
+  async saveWorkoutPlan(planData: any, programId?: string, programName?: string, multiWeekData?: {
+    multiWeekPlan?: any;
+    currentWeekIndex?: number;
+    totalWeeks?: number;
+    perplexityResearch?: any;
+  }): Promise<boolean> {
     try {
       console.log('[API] Saving workout plan to backend...');
 
@@ -527,6 +532,10 @@ class HeirclarkAPI {
           programId,
           programName,
           weekly_schedule: weekly_schedule || [],
+          multiWeekPlan: multiWeekData?.multiWeekPlan || null,
+          currentWeekIndex: multiWeekData?.currentWeekIndex ?? null,
+          totalWeeks: multiWeekData?.totalWeeks ?? null,
+          perplexityResearch: multiWeekData?.perplexityResearch || null,
         }),
       });
 
@@ -545,7 +554,15 @@ class HeirclarkAPI {
   }
 
   // Get saved workout plan from backend
-  async getWorkoutPlan(): Promise<{ planData: any; programId?: string; programName?: string } | null> {
+  async getWorkoutPlan(): Promise<{
+    planData: any;
+    programId?: string;
+    programName?: string;
+    multiWeekPlan?: any;
+    currentWeekIndex?: number;
+    totalWeeks?: number;
+    perplexityResearch?: any;
+  } | null> {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/workouts/plan`, {
         headers: this.getHeaders(),
@@ -562,12 +579,34 @@ class HeirclarkAPI {
           planData: data.plan.planData,
           programId: data.plan.programId,
           programName: data.plan.programName,
+          multiWeekPlan: data.plan.multiWeekPlan || null,
+          currentWeekIndex: data.plan.currentWeekIndex ?? 0,
+          totalWeeks: data.plan.totalWeeks ?? 1,
+          perplexityResearch: data.plan.perplexityResearch || null,
         };
       }
       return null;
     } catch (error) {
       console.error('[API] Get workout plan error:', error);
       return null;
+    }
+  }
+
+  // Update current week index (lightweight sync for week navigation)
+  async updateWeekIndex(currentWeekIndex: number): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/workouts/plan/week`, {
+        method: 'PATCH',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ currentWeekIndex }),
+      });
+
+      if (!response.ok) return false;
+      console.log('[API] ✅ Week index synced:', currentWeekIndex);
+      return true;
+    } catch (error) {
+      console.error('[API] Update week index error:', error);
+      return false;
     }
   }
 

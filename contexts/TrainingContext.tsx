@@ -634,7 +634,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             nutritionGuidance: templateNutrition,
           }));
 
-          // Cache the multi-week plan
+          // Cache the multi-week plan locally
           await trainingStorage.savePlanCache({
             weeklyPlan: multiWeekPlan.weeklyPlans[0],
             selectedProgram: program,
@@ -646,6 +646,59 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
             cardioRecommendations: templateCardio,
             nutritionGuidance: templateNutrition,
           });
+
+          // *** Sync multi-week plan to backend ***
+          try {
+            console.log('[Training] 🔄 Syncing multi-week plan to backend...');
+            const weekly_schedule = multiWeekPlan.weeklyPlans[0].days.map((day: any, idx: number) => ({
+              dayNumber: idx + 1,
+              dayOfWeek: day.dayOfWeek,
+              date: day.date,
+              workoutType: day.workout?.type || (day.isRestDay ? 'rest' : 'workout'),
+              workoutName: day.workout?.name || null,
+              exercises: day.workout?.exercises?.map((ex: any) => ({
+                name: ex.exercise?.name || ex.name,
+                sets: ex.sets,
+                reps: ex.reps,
+                restSeconds: ex.restSeconds,
+              })) || [],
+              duration: day.workout?.duration || 0,
+              estimatedCalories: day.workout?.estimatedCaloriesBurned || 0,
+              isRestDay: day.isRestDay || false,
+            }));
+
+            const syncSuccess = await api.saveWorkoutPlan(
+              { weeklyPlan: multiWeekPlan.weeklyPlans[0], preferences, summary: multiWeekPlan.summary, lastGeneratedAt, weekly_schedule },
+              program.id,
+              program.name,
+              {
+                multiWeekPlan,
+                currentWeekIndex: 0,
+                totalWeeks: multiWeekPlan.totalWeeks,
+                perplexityResearch: multiWeekPlan.perplexityResearchSummary ? { summary: multiWeekPlan.perplexityResearchSummary } : undefined,
+              }
+            );
+
+            if (syncSuccess) {
+              console.log('[Training] ✅ Multi-week plan synced to backend');
+              const totalWorkouts = multiWeekPlan.weeklyPlans[0].days.filter((d: any) => d.workout).length;
+              await api.saveTrainingState({
+                weeklyStats: { completedWorkouts: 0, totalWorkouts, currentWeek: 1, caloriesBurned: 0 },
+                goalAlignment: alignment ? {
+                  calorieDeficitSupport: alignment.calorieDeficitSupport,
+                  musclePreservation: alignment.musclePreservation,
+                  muscleGrowthPotential: alignment.muscleGrowthPotential,
+                  cardiovascularHealth: alignment.cardiovascularHealth,
+                  overallAlignment: alignment.overallAlignment,
+                } : undefined,
+                planSummary: multiWeekPlan.summary,
+                preferences,
+              });
+              console.log('[Training] ✅ Training state synced to backend');
+            }
+          } catch (syncError) {
+            console.error('[Training] ❌ Multi-week backend sync error:', syncError);
+          }
 
           console.log('[Training] ✅ Multi-week program generation complete');
           return true;
@@ -1297,6 +1350,9 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       const newWeek = Math.min(prev.currentWeek + 1, maxWeek);
       const newWeekIndex = newWeek - 1; // 0-based index
 
+      // Fire-and-forget: sync week index to backend
+      api.updateWeekIndex(newWeekIndex).catch(() => {});
+
       return {
         ...prev,
         currentWeek: newWeek,
@@ -1309,6 +1365,9 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     setState(prev => {
       const newWeek = Math.max(1, prev.currentWeek - 1);
       const newWeekIndex = newWeek - 1; // 0-based index
+
+      // Fire-and-forget: sync week index to backend
+      api.updateWeekIndex(newWeekIndex).catch(() => {});
 
       return {
         ...prev,
@@ -1621,34 +1680,40 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       const backendPlan = await api.getWorkoutPlan();
       if (backendPlan && backendPlan.planData) {
         console.log('[Training] ✅ Loaded plan from backend');
-        const { planData, programId, programName } = backendPlan;
+        const { planData, programId, programName, multiWeekPlan: backendMultiWeek, currentWeekIndex: backendWeekIndex, totalWeeks: backendTotalWeeks } = backendPlan;
 
         // Find matching program or create a placeholder
         const programs = getEnhancedPrograms();
         const matchedProgram = programs.find(p => p.id === programId) ||
           (programId ? { id: programId, name: programName || 'Saved Plan' } as ProgramTemplate : null);
 
+        // Determine which week to show
+        const weekIdx = backendWeekIndex || 0;
+        const resolvedWeeklyPlan = backendMultiWeek?.weeklyPlans?.[weekIdx] || planData.weeklyPlan || null;
+
         setState(prev => ({
           ...prev,
-          weeklyPlan: planData.weeklyPlan || null,
+          weeklyPlan: resolvedWeeklyPlan,
+          multiWeekPlan: backendMultiWeek || null,
+          currentWeekIndex: weekIdx,
           selectedProgram: matchedProgram,
           preferences: planData.preferences || null,
-          planSummary: planData.summary || null,
+          planSummary: backendMultiWeek?.summary || planData.summary || null,
           lastGeneratedAt: planData.lastGeneratedAt,
         }));
 
         // Cache locally for future use
-        if (planData.weeklyPlan) {
+        if (resolvedWeeklyPlan) {
           await trainingStorage.savePlanCache({
-            weeklyPlan: planData.weeklyPlan,
+            weeklyPlan: resolvedWeeklyPlan,
             selectedProgram: matchedProgram as TrainingProgram | ProgramTemplate | null,
             goalAlignment: planData.goalAlignment || null,
-            currentWeek: planData.currentWeek || 1,
+            currentWeek: weekIdx + 1,
             preferences: planData.preferences || null,
-            planSummary: planData.summary,
+            planSummary: backendMultiWeek?.summary || planData.summary,
             lastGeneratedAt: planData.lastGeneratedAt || new Date().toISOString(),
           });
-          console.log('[Training] ✅ Cached backend plan locally');
+          console.log('[Training] ✅ Cached backend plan locally (week', weekIdx + 1, 'of', backendTotalWeeks || 1, ')');
         }
       } else {
         console.log('[Training] No plan found (local or backend)');
