@@ -626,114 +626,146 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         {/* Workout Split */}
         <GlassCard style={styles.trainingSectionCard} borderColor="transparent">
           <Text style={[styles.trainingSectionTitle, { color: colors.textMuted }]}>WEEKLY WORKOUT SPLIT</Text>
-          {state.primaryGoal === 'build_muscle' && (
+
+          {/* Display actual program structure if a program was selected */}
+          {selectedProgram?.weeklyStructure ? (
             <View style={styles.splitDetails}>
-              {(state.workoutsPerWeek || 3) >= 5 ? (
-                <>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+              {selectedProgram.weeklyStructure.map((programDay, index) => {
+                // Format muscle groups for display
+                const muscleGroupsText = programDay.muscleGroups
+                  .map(mg => {
+                    // Capitalize and format muscle group names
+                    return mg.charAt(0).toUpperCase() + mg.slice(1).replace('_', ' ');
+                  })
+                  .join(', ');
+
+                return (
+                  <GlassCard key={index} style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
                     <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push (Chest, Shoulders, Triceps)</Text>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>
+                        Day {programDay.day}:
+                      </Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
+                        {programDay.name} {muscleGroupsText && `(${muscleGroupsText})`}
+                      </Text>
                     </View>
                   </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull (Back, Biceps, Rear Delts)</Text>
-                    </View>
-                  </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Legs (Quads, Hamstrings, Glutes, Calves)</Text>
-                    </View>
-                  </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body Hypertrophy</Text>
-                    </View>
-                  </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 5:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body Strength</Text>
-                    </View>
-                  </GlassCard>
-                </>
-              ) : (state.workoutsPerWeek || 3) >= 4 ? (
-                <>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body (Chest, Back, Shoulders, Arms)</Text>
-                    </View>
-                  </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body (Legs, Glutes, Calves)</Text>
-                    </View>
-                  </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push Focus (Chest, Shoulders, Triceps)</Text>
-                    </View>
-                  </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull Focus (Back, Biceps, Hamstrings)</Text>
-                    </View>
-                  </GlassCard>
-                </>
-              ) : (
-                <>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Compound Focus</Text>
-                    </View>
-                  </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Hypertrophy Focus</Text>
-                    </View>
-                  </GlassCard>
-                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                    <View style={{ flexDirection: 'row', gap: 10 }}>
-                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
-                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Strength Focus</Text>
-                    </View>
-                  </GlassCard>
-                </>
+                );
+              })}
+            </View>
+          ) : (
+            /* Fallback to hardcoded splits if no program selected */
+            <>
+              {state.primaryGoal === 'build_muscle' && (
+                <View style={styles.splitDetails}>
+                  {(state.workoutsPerWeek || 3) >= 5 ? (
+                    <>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push (Chest, Shoulders, Triceps)</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull (Back, Biceps, Rear Delts)</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Legs (Quads, Hamstrings, Glutes, Calves)</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body Hypertrophy</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 5:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body Strength</Text>
+                        </View>
+                      </GlassCard>
+                    </>
+                  ) : (state.workoutsPerWeek || 3) >= 4 ? (
+                    <>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Upper Body (Chest, Back, Shoulders, Arms)</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Lower Body (Legs, Glutes, Calves)</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Push Focus (Chest, Shoulders, Triceps)</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 4:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Pull Focus (Back, Biceps, Hamstrings)</Text>
+                        </View>
+                      </GlassCard>
+                    </>
+                  ) : (
+                    <>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 1:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Compound Focus</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 2:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Hypertrophy Focus</Text>
+                        </View>
+                      </GlassCard>
+                      <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                          <Text style={[styles.splitDayLabel, { color: colors.text }]}>Day 3:</Text>
+                          <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>Full Body - Strength Focus</Text>
+                        </View>
+                      </GlassCard>
+                    </>
+                  )}
+                </View>
               )}
-            </View>
-          )}
-          {state.primaryGoal === 'lose_weight' && (
-            <View style={styles.splitDetails}>
-              <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <Text style={[styles.splitDayLabel, { color: colors.text }]}>Days 1-{state.workoutsPerWeek || 3}:</Text>
-                  <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
-                    {state.cardioPreference === 'walking' ? 'Brisk Walking + Light Resistance Training' :
-                     state.cardioPreference === 'running' ? 'Running Intervals + Core Work' :
-                     state.cardioPreference === 'hiit' ? 'HIIT Circuits + Strength Training' :
-                     'Mixed Cardio + Resistance Training'}
-                  </Text>
+              {state.primaryGoal === 'lose_weight' && (
+                <View style={styles.splitDetails}>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Days 1-{state.workoutsPerWeek || 3}:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
+                        {state.cardioPreference === 'walking' ? 'Brisk Walking + Light Resistance Training' :
+                         state.cardioPreference === 'running' ? 'Running Intervals + Core Work' :
+                         state.cardioPreference === 'hiit' ? 'HIIT Circuits + Strength Training' :
+                         'Mixed Cardio + Resistance Training'}
+                      </Text>
+                    </View>
+                  </GlassCard>
+                  <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      <Text style={[styles.splitDayLabel, { color: colors.text }]}>Rest Days:</Text>
+                      <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
+                        Active recovery (walking, stretching, mobility work)
+                      </Text>
+                    </View>
+                  </GlassCard>
                 </View>
-              </GlassCard>
-              <GlassCard style={{ padding: 12, marginBottom: 8 }} borderColor="transparent">
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <Text style={[styles.splitDayLabel, { color: colors.text }]}>Rest Days:</Text>
-                  <Text style={[styles.splitDayWorkout, { color: colors.textSecondary }]}>
-                    Active recovery (walking, stretching, mobility work)
-                  </Text>
-                </View>
-              </GlassCard>
-            </View>
+              )}
+            </>
           )}
         </GlassCard>
 
