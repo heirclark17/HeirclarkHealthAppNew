@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView, ActivityIndicator } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   withSpring,
@@ -32,62 +32,6 @@ interface WorkoutCardProps {
   currentEquipmentLabel?: string | null;
   availableEquipment?: { key: string; label: string }[];
   isSwappingEquipment?: boolean;
-}
-
-function ExerciseGifThumbnail({
-  gifUrl,
-  onPress,
-  isDark
-}: {
-  gifUrl: string;
-  onPress: () => void;
-  isDark: boolean;
-}) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  if (error) {
-    return (
-      <TouchableOpacity
-        style={[styles.gifThumbnail, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}
-        onPress={onPress}
-        accessibilityLabel="Play exercise form demonstration"
-        accessibilityRole="button"
-        accessibilityHint="Opens a video showing proper exercise form and technique"
-      >
-        <Ionicons name="play-circle-outline" size={24} color={isDark ? '#fff' : '#333'} />
-      </TouchableOpacity>
-    );
-  }
-
-  return (
-    <TouchableOpacity
-      style={styles.gifThumbnail}
-      onPress={onPress}
-      accessibilityLabel="Play exercise form demonstration"
-      accessibilityRole="button"
-      accessibilityHint="Opens a video showing proper exercise form and technique"
-    >
-      {loading && (
-        <View style={[styles.gifLoading, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }]}>
-          <ActivityIndicator size="small" color={isDark ? '#fff' : '#333'} />
-        </View>
-      )}
-      <Image
-        source={{ uri: gifUrl }}
-        style={styles.gifImage}
-        resizeMode="cover"
-        onLoad={() => setLoading(false)}
-        onError={() => {
-          setLoading(false);
-          setError(true);
-        }}
-      />
-      <View style={styles.gifPlayOverlay}>
-        <Ionicons name="play-circle" size={20} color="rgba(255, 255, 255, 0.9)" />
-      </View>
-    </TouchableOpacity>
-  );
 }
 
 // Helper: check if weight string contains a numeric value (not just "bodyweight")
@@ -135,42 +79,29 @@ function ExerciseRow({
 }) {
   const exerciseBg = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)';
   const borderColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.10)';
-  const hasGif = !!exercise.exercise.gifUrl;
-
   return (
     <View style={[styles.exerciseRow, { backgroundColor: exerciseBg }]}>
-      {/* GIF Thumbnail - shows animated form demo */}
-      {hasGif && onViewForm ? (
-        <ExerciseGifThumbnail
-          gifUrl={exercise.exercise.gifUrl!}
-          onPress={() => {
-            lightImpact();
-            onViewForm();
-          }}
-          isDark={isDark}
-        />
-      ) : (
-        <TouchableOpacity
-          style={styles.exerciseCheckbox}
-          onPress={() => {
-            lightImpact();
-            onToggle();
-          }}
-          accessibilityLabel={`${exercise.exercise.name}${exercise.completed ? ', completed' : ', not completed'}`}
-          accessibilityRole="button"
-          accessibilityState={{ checked: exercise.completed }}
-          accessibilityHint={exercise.completed ? 'Marks exercise as incomplete' : 'Marks exercise as complete'}
-        >
-          <View style={[
-            styles.circleCheckbox,
-            { backgroundColor: exercise.completed ? Colors.protein : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
-          ]}>
-            {exercise.completed && (
-              <Ionicons name="checkmark" size={14} color="#fff" />
-            )}
-          </View>
-        </TouchableOpacity>
-      )}
+      {/* Checkbox */}
+      <TouchableOpacity
+        style={styles.exerciseCheckbox}
+        onPress={() => {
+          lightImpact();
+          onToggle();
+        }}
+        accessibilityLabel={`${exercise.exercise.name}${exercise.completed ? ', completed' : ', not completed'}`}
+        accessibilityRole="button"
+        accessibilityState={{ checked: exercise.completed }}
+        accessibilityHint={exercise.completed ? 'Marks exercise as incomplete' : 'Marks exercise as complete'}
+      >
+        <View style={[
+          styles.circleCheckbox,
+          { backgroundColor: exercise.completed ? Colors.protein : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
+        ]}>
+          {exercise.completed && (
+            <Ionicons name="checkmark" size={14} color="#fff" />
+          )}
+        </View>
+      </TouchableOpacity>
       <TouchableOpacity
         style={styles.exerciseInfo}
         onPress={() => {
@@ -180,7 +111,7 @@ function ExerciseRow({
           }
         }}
         disabled={!onShowAlternatives}
-        accessibilityLabel={`${exercise.exercise.name}, ${exercise.sets} sets of ${exercise.reps}, ${exercise.restSeconds} seconds rest${hasGif ? ', tap GIF for form guide' : onShowAlternatives ? ', tap to see alternatives' : ''}`}
+        accessibilityLabel={`${exercise.exercise.name}, ${exercise.sets} sets of ${exercise.reps}, ${exercise.restSeconds} seconds rest${onShowAlternatives ? ', tap to see alternatives' : ''}`}
         accessibilityRole="button"
         accessibilityState={{ disabled: !onShowAlternatives }}
         accessibilityHint={onShowAlternatives ? 'Shows alternative exercises for this movement pattern' : undefined}
@@ -238,35 +169,10 @@ function ExerciseRow({
             <Text style={[styles.newExerciseText, { color: colors.textMuted }]}>NEW</Text>
           )}
         </View>
-        {hasGif ? (
-          <Text style={[styles.alternativesHint, { color: colors.primary }]}>Tap GIF for form guide</Text>
-        ) : onShowAlternatives ? (
+        {onShowAlternatives ? (
           <Text style={[styles.alternativesHint, { color: colors.primary }]}>Tap to see alternatives</Text>
         ) : null}
       </TouchableOpacity>
-      {/* Checkbox when GIF is present */}
-      {hasGif && (
-        <TouchableOpacity
-          style={styles.checkboxButton}
-          onPress={() => {
-            lightImpact();
-            onToggle();
-          }}
-          accessibilityLabel={`${exercise.exercise.name}${exercise.completed ? ', completed' : ', not completed'}`}
-          accessibilityRole="button"
-          accessibilityState={{ checked: exercise.completed }}
-          accessibilityHint={exercise.completed ? 'Marks exercise as incomplete' : 'Marks exercise as complete'}
-        >
-          <View style={[
-            styles.circleCheckbox,
-            { backgroundColor: exercise.completed ? Colors.protein : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
-          ]}>
-            {exercise.completed && (
-              <Ionicons name="checkmark" size={14} color="#fff" />
-            )}
-          </View>
-        </TouchableOpacity>
-      )}
       <TouchableOpacity
         style={styles.swapButton}
         onPress={() => {
@@ -718,38 +624,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  checkboxButton: {
-    padding: 4,
-    marginRight: 4,
-  },
-  gifThumbnail: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
-    marginRight: 12,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    position: 'relative',
-  },
-  gifImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 12,
-  },
-  gifLoading: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
-  },
-  gifPlayOverlay: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 12,
-    padding: 2,
   },
   exerciseInfo: {
     flex: 1,
