@@ -500,10 +500,18 @@ CRITICAL REQUIREMENTS:
 1. Each exercise MUST have 2-3 alternatives covering different equipment types (barbell, dumbbell, machine/cable, bodyweight)
 2. Use REAL exercise names (e.g., "Barbell Back Squat", "Dumbbell Romanian Deadlift", "Cable Lateral Raise")
 3. Prescribe specific sets, reps (as range like "8-12"), and rest periods
-4. Each workout day must have 4-6 main exercises
-5. Rest days MUST have isRestDay: true and no workout
-6. Include estimated calories burned per workout (based on duration and intensity)
-7. For EVERY exercise, provide a SPECIFIC weight in lbs based on the user's strength baselines. Use the user's 1RM values to calculate appropriate working weights (typically 60-85% of 1RM depending on rep range and exercise). For compound lifts related to bench/squat/deadlift, derive weights from the provided 1RMs. For accessory/isolation exercises, estimate proportionally based on strength level, sex, and bodyweight. For bodyweight exercises, use "bodyweight". NEVER use vague terms like "moderate", "heavy", or "light" - always use a specific number like "135 lbs".
+4. **EXACT EXERCISE COUNTS PER MUSCLE GROUP:**
+   - **PULL DAY (Back/Biceps):** 6 back exercises + 4 biceps exercises (10 total)
+   - **PUSH DAY (Chest/Shoulders/Triceps):** 4 chest exercises + 4 shoulder exercises + 3 triceps exercises (11 total)
+   - **LEG DAY (Quads/Hamstrings/Calves):** 3 quad exercises + 3 hamstring exercises + 2 calf exercises (8 total)
+5. **WARMUP & CARDIO:**
+   - Start EVERY workout with a "warmup" section (1-2 exercises, 5-10 minutes)
+   - End EVERY workout with a "cooldown" section containing cardio (${preferences.cardioPreference || 'walking'})
+   - Warmup examples: Dynamic stretching, light cardio (treadmill walk), mobility drills
+   - Cardio cooldown: ${preferences.cardioPreference === 'hiit' ? 'HIIT intervals (20 sec sprint, 40 sec rest) x 8 rounds' : preferences.cardioPreference === 'running' ? 'Treadmill run at moderate pace' : 'Treadmill walk at brisk pace'} for 10-15 minutes
+6. Rest days MUST have isRestDay: true and no workout
+7. Include estimated calories burned per workout (based on duration and intensity)
+8. For EVERY exercise, provide a SPECIFIC weight in lbs based on the user's strength baselines. Use the user's 1RM values to calculate appropriate working weights (typically 60-85% of 1RM depending on rep range and exercise). For compound lifts related to bench/squat/deadlift, derive weights from the provided 1RMs. For accessory/isolation exercises, estimate proportionally based on strength level, sex, and bodyweight. For bodyweight exercises, use "bodyweight". NEVER use vague terms like "moderate", "heavy", or "light" - always use a specific number like "135 lbs".
 
 RESPOND WITH THIS EXACT JSON STRUCTURE (Week 1 ONLY, all 7 days):
 {
@@ -519,12 +527,36 @@ RESPOND WITH THIS EXACT JSON STRUCTURE (Week 1 ONLY, all 7 days):
           "dayName": "Monday",
           "isRestDay": false,
           "workout": {
-            "name": "Push Day - Chest & Shoulders",
+            "name": "Push Day - Chest, Shoulders & Triceps",
             "type": "push",
-            "duration": 50,
+            "duration": 60,
             "difficulty": "intermediate",
             "musclesFocused": ["chest", "shoulders", "triceps"],
-            "estimatedCalories": 350,
+            "estimatedCalories": 400,
+            "warmup": [
+              {
+                "name": "Dynamic Chest Stretches",
+                "equipment": "bodyweight",
+                "primaryMuscles": ["chest", "shoulders"],
+                "sets": 2,
+                "reps": "10",
+                "restSeconds": 30,
+                "weight": "bodyweight",
+                "notes": "Arm circles and band pull-aparts",
+                "alternatives": []
+              },
+              {
+                "name": "Light Treadmill Walk",
+                "equipment": "cardio",
+                "primaryMuscles": ["full body"],
+                "sets": 1,
+                "reps": "5 min",
+                "restSeconds": 0,
+                "weight": "bodyweight",
+                "notes": "Increase heart rate gradually",
+                "alternatives": []
+              }
+            ],
             "exercises": [
               {
                 "name": "Barbell Bench Press",
@@ -541,6 +573,19 @@ RESPOND WITH THIS EXACT JSON STRUCTURE (Week 1 ONLY, all 7 days):
                   { "name": "Machine Chest Press", "equipment": "machine", "difficulty": "easier" }
                 ]
               }
+            ],
+            "cooldown": [
+              {
+                "name": "${preferences.cardioPreference === 'hiit' ? 'HIIT Treadmill Sprints' : preferences.cardioPreference === 'running' ? 'Treadmill Running' : 'Treadmill Walking'}",
+                "equipment": "cardio",
+                "primaryMuscles": ["cardiovascular"],
+                "sets": 1,
+                "reps": "${preferences.cardioPreference === 'hiit' ? '8 rounds (20s sprint, 40s rest)' : '15 min'}",
+                "restSeconds": 0,
+                "weight": "bodyweight",
+                "notes": "${preferences.cardioPreference === 'hiit' ? 'Max effort sprints with active rest' : preferences.cardioPreference === 'running' ? 'Moderate pace, maintain conversation' : 'Brisk pace, slight incline'}",
+                "alternatives": []
+              }
             ]
           }
         },
@@ -554,7 +599,12 @@ RESPOND WITH THIS EXACT JSON STRUCTURE (Week 1 ONLY, all 7 days):
   ]
 }
 
-Generate ONLY Week 1 with ALL 7 days. Include ${template.daysPerWeek} workout days and ${7 - template.daysPerWeek} rest days.`.trim();
+Generate ONLY Week 1 with ALL 7 days. Include ${template.daysPerWeek} workout days and ${7 - template.daysPerWeek} rest days.
+
+REMINDER: Every workout MUST include:
+- warmup array (1-2 exercises)
+- exercises array (PULL: 10 total [6 back + 4 biceps], PUSH: 11 total [4 chest + 4 shoulders + 3 triceps], LEGS: 8 total [3 quads + 3 hamstrings + 2 calves])
+- cooldown array (1 cardio exercise: ${preferences.cardioPreference || 'walking'})`.trim();
 }
 
 // ============================================================================

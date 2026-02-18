@@ -215,8 +215,15 @@ export function WorkoutCard({
   // Load last logged weights, overload trends, and suggested next weights - parallelized
   useEffect(() => {
     const loadExerciseData = async () => {
+      // Include warmup and cooldown in data loading
+      const allExercises = [
+        ...(workout.warmup || []),
+        ...workout.exercises,
+        ...(workout.cooldown || []),
+      ];
+
       const results = await Promise.all(
-        workout.exercises.map(async (exercise) => {
+        allExercises.map(async (exercise) => {
           try {
             const [lastLog, progress] = await Promise.all([
               weightTrackingStorage.getLastLogForExercise(exercise.exerciseId),
@@ -250,7 +257,7 @@ export function WorkoutCard({
     };
 
     loadExerciseData();
-  }, [workout.exercises]);
+  }, [workout.exercises, workout.warmup, workout.cooldown]);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -275,8 +282,14 @@ export function WorkoutCard({
     transform: [{ scale: scale.value }],
   }));
 
-  const completedExercises = workout.exercises.filter(e => e.completed).length;
-  const totalExercises = workout.exercises.length;
+  // Calculate total including warmup and cooldown
+  const allExercises = [
+    ...(workout.warmup || []),
+    ...workout.exercises,
+    ...(workout.cooldown || []),
+  ];
+  const completedExercises = allExercises.filter(e => e.completed).length;
+  const totalExercises = allExercises.length;
   const progress = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
 
   const getWorkoutTypeIcon = (type: string) => {
@@ -409,7 +422,30 @@ export function WorkoutCard({
             </GlassCard>
           )}
 
-          {/* Exercise List */}
+          {/* Warmup Section */}
+          {workout.warmup && workout.warmup.length > 0 && (
+            <View style={styles.exerciseListInline}>
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>WARMUP</Text>
+              {workout.warmup.map((exercise, index) => (
+                <ExerciseRow
+                  key={exercise.id || `warmup-${index}`}
+                  exercise={exercise}
+                  onToggle={() => onExerciseToggle(exercise.id)}
+                  onSwap={() => onSwapExercise(exercise.id)}
+                  onShowAlternatives={onShowAlternatives ? () => onShowAlternatives(exercise) : undefined}
+                  onLogWeight={onLogWeight ? () => onLogWeight(exercise) : undefined}
+                  onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
+                  lastWeight={lastWeights[exercise.exerciseId]}
+                  overloadTrend={exerciseTrends[exercise.exerciseId]}
+                  suggestedNext={suggestedWeights[exercise.exerciseId]}
+                  colors={colors}
+                  isDark={isDark}
+                />
+              ))}
+            </View>
+          )}
+
+          {/* Main Exercises */}
           <View style={styles.exerciseListInline}>
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>EXERCISES</Text>
             {workout.exercises.map((exercise, index) => (
@@ -429,6 +465,29 @@ export function WorkoutCard({
               />
             ))}
           </View>
+
+          {/* Cooldown Section */}
+          {workout.cooldown && workout.cooldown.length > 0 && (
+            <View style={styles.exerciseListInline}>
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>COOLDOWN</Text>
+              {workout.cooldown.map((exercise, index) => (
+                <ExerciseRow
+                  key={exercise.id || `cooldown-${index}`}
+                  exercise={exercise}
+                  onToggle={() => onExerciseToggle(exercise.id)}
+                  onSwap={() => onSwapExercise(exercise.id)}
+                  onShowAlternatives={onShowAlternatives ? () => onShowAlternatives(exercise) : undefined}
+                  onLogWeight={onLogWeight ? () => onLogWeight(exercise) : undefined}
+                  onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
+                  lastWeight={lastWeights[exercise.exerciseId]}
+                  overloadTrend={exerciseTrends[exercise.exerciseId]}
+                  suggestedNext={suggestedWeights[exercise.exerciseId]}
+                  colors={colors}
+                  isDark={isDark}
+                />
+              ))}
+            </View>
+          )}
 
           {/* View Progress Button */}
           {onViewProgress && (
