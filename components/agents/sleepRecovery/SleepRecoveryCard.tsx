@@ -19,6 +19,7 @@ import { useGlassTheme } from '../../liquidGlass';
 import { useSleepRecovery } from '../../../contexts/SleepRecoveryContext';
 import { Fonts } from '../../../constants/Theme';
 import { NumberText } from '../../../components/NumberText';
+import { api } from '../../../services/api';
 
 const QUALITY_OPTIONS = [
   { value: 1 as const, label: 'Poor', emoji: '😫' },
@@ -46,8 +47,24 @@ export default function SleepRecoveryCard() {
   const [notes, setNotes] = useState('');
   const [tip, setTip] = useState('');
   const [todayRecovery, setTodayRecovery] = useState<number | null>(null);
+  const [extendedSleep, setExtendedSleep] = useState<any[]>([]);
 
   const todaySleep = getTodaySleep();
+
+  // Fetch extended sleep data from backend (includes Oura fields)
+  useEffect(() => {
+    const fetchExtendedSleep = async () => {
+      try {
+        const logs = await api.getSleepHistory(14);
+        if (logs && logs.length > 0) {
+          setExtendedSleep(logs);
+        }
+      } catch (error) {
+        console.error('[SleepRecoveryCard] Extended sleep fetch error:', error);
+      }
+    };
+    fetchExtendedSleep();
+  }, [showStatsModal]);
 
   useEffect(() => {
     setTip(getSleepTip());
@@ -159,12 +176,21 @@ export default function SleepRecoveryCard() {
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Avg Sleep</Text>
           </View>
 
-          <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
-            <NumberText weight="semiBold" style={[styles.statValue, { color: sleepDebtStatus.color }]}>
-              {sleepDebtStatus.text}
-            </NumberText>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Sleep Debt</Text>
-          </View>
+          {extendedSleep.length > 0 && extendedSleep[0].sleep_score != null ? (
+            <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: colors.primary }]}>
+                {extendedSleep[0].sleep_score}
+              </NumberText>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Sleep Score</Text>
+            </View>
+          ) : (
+            <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
+              <NumberText weight="semiBold" style={[styles.statValue, { color: sleepDebtStatus.color }]}>
+                {sleepDebtStatus.text}
+              </NumberText>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Sleep Debt</Text>
+            </View>
+          )}
 
           <View style={[styles.statBox, { backgroundColor: colors.cardGlass }]}>
             <NumberText
@@ -372,32 +398,204 @@ export default function SleepRecoveryCard() {
               </View>
             </View>
 
+            {/* Extended Metrics (from Oura/wearable) */}
+            {extendedSleep.length > 0 && extendedSleep[0].sleep_score != null && (
+              <>
+                <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 20 }]}>
+                  Sleep Insights
+                </Text>
+
+                {/* Sleep Score */}
+                {extendedSleep[0].sleep_score != null && (
+                  <View style={[styles.sleepScoreRow, { backgroundColor: colors.cardGlass }]}>
+                    <View style={styles.sleepScoreLeft}>
+                      <NumberText weight="bold" style={[styles.sleepScoreBig, { color: colors.primary }]}>
+                        {extendedSleep[0].sleep_score}
+                      </NumberText>
+                      <Text style={[styles.sleepScoreUnit, { color: colors.textMuted }]}>/100</Text>
+                    </View>
+                    <Text style={[styles.sleepScoreLabel, { color: colors.text }]}>Last Night's Sleep Score</Text>
+                  </View>
+                )}
+
+                {/* Sleep Stages Bar */}
+                {(extendedSleep[0].deep_sleep_hours != null || extendedSleep[0].rem_sleep_hours != null || extendedSleep[0].light_sleep_hours != null) && (() => {
+                  const latest = extendedSleep[0];
+                  const deep = parseFloat(latest.deep_sleep_hours) || 0;
+                  const rem = parseFloat(latest.rem_sleep_hours) || 0;
+                  const light = parseFloat(latest.light_sleep_hours) || 0;
+                  const total = deep + rem + light;
+                  if (total === 0) return null;
+                  const deepPct = (deep / total) * 100;
+                  const remPct = (rem / total) * 100;
+                  const lightPct = (light / total) * 100;
+                  return (
+                    <View style={[styles.stagesContainer, { backgroundColor: colors.cardGlass }]}>
+                      <Text style={[styles.stagesTitle, { color: colors.text }]}>Sleep Stages</Text>
+                      <View style={styles.stagesBar}>
+                        {deepPct > 0 && (
+                          <View style={[styles.stageSegment, { width: `${deepPct}%`, backgroundColor: '#5B21B6' }]} />
+                        )}
+                        {remPct > 0 && (
+                          <View style={[styles.stageSegment, { width: `${remPct}%`, backgroundColor: '#7C3AED' }]} />
+                        )}
+                        {lightPct > 0 && (
+                          <View style={[styles.stageSegment, { width: `${lightPct}%`, backgroundColor: '#A78BFA' }]} />
+                        )}
+                      </View>
+                      <View style={styles.stagesLegend}>
+                        <View style={styles.legendItem}>
+                          <View style={[styles.legendDot, { backgroundColor: '#5B21B6' }]} />
+                          <Text style={[styles.legendText, { color: colors.textMuted }]}>Deep</Text>
+                          <NumberText weight="medium" style={[styles.legendValue, { color: colors.text }]}>
+                            {(deep * 60).toFixed(0)}m
+                          </NumberText>
+                        </View>
+                        <View style={styles.legendItem}>
+                          <View style={[styles.legendDot, { backgroundColor: '#7C3AED' }]} />
+                          <Text style={[styles.legendText, { color: colors.textMuted }]}>REM</Text>
+                          <NumberText weight="medium" style={[styles.legendValue, { color: colors.text }]}>
+                            {(rem * 60).toFixed(0)}m
+                          </NumberText>
+                        </View>
+                        <View style={styles.legendItem}>
+                          <View style={[styles.legendDot, { backgroundColor: '#A78BFA' }]} />
+                          <Text style={[styles.legendText, { color: colors.textMuted }]}>Light</Text>
+                          <NumberText weight="medium" style={[styles.legendValue, { color: colors.text }]}>
+                            {(light * 60).toFixed(0)}m
+                          </NumberText>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })()}
+
+                {/* Vitals Grid */}
+                <View style={styles.vitalsGrid}>
+                  {extendedSleep[0].avg_hrv != null && (
+                    <View style={[styles.vitalCard, { backgroundColor: colors.cardGlass }]}>
+                      <Ionicons name="pulse" size={18} color="#10B981" />
+                      <NumberText weight="semiBold" style={[styles.vitalValue, { color: colors.text }]}>
+                        {Math.round(parseFloat(extendedSleep[0].avg_hrv))}
+                      </NumberText>
+                      <Text style={[styles.vitalUnit, { color: colors.textMuted }]}>ms</Text>
+                      <Text style={[styles.vitalLabel, { color: colors.textMuted }]}>HRV</Text>
+                    </View>
+                  )}
+                  {extendedSleep[0].spo2_avg != null && (
+                    <View style={[styles.vitalCard, { backgroundColor: colors.cardGlass }]}>
+                      <Ionicons name="water" size={18} color="#3B82F6" />
+                      <NumberText weight="semiBold" style={[styles.vitalValue, { color: colors.text }]}>
+                        {Math.round(parseFloat(extendedSleep[0].spo2_avg))}
+                      </NumberText>
+                      <Text style={[styles.vitalUnit, { color: colors.textMuted }]}>%</Text>
+                      <Text style={[styles.vitalLabel, { color: colors.textMuted }]}>SpO2</Text>
+                    </View>
+                  )}
+                  {extendedSleep[0].lowest_heart_rate != null && (
+                    <View style={[styles.vitalCard, { backgroundColor: colors.cardGlass }]}>
+                      <Ionicons name="heart" size={18} color="#EF4444" />
+                      <NumberText weight="semiBold" style={[styles.vitalValue, { color: colors.text }]}>
+                        {Math.round(parseFloat(extendedSleep[0].lowest_heart_rate))}
+                      </NumberText>
+                      <Text style={[styles.vitalUnit, { color: colors.textMuted }]}>bpm</Text>
+                      <Text style={[styles.vitalLabel, { color: colors.textMuted }]}>Lowest HR</Text>
+                    </View>
+                  )}
+                  {extendedSleep[0].avg_breathing_rate != null && (
+                    <View style={[styles.vitalCard, { backgroundColor: colors.cardGlass }]}>
+                      <Ionicons name="leaf" size={18} color="#8B5CF6" />
+                      <NumberText weight="semiBold" style={[styles.vitalValue, { color: colors.text }]}>
+                        {parseFloat(extendedSleep[0].avg_breathing_rate).toFixed(1)}
+                      </NumberText>
+                      <Text style={[styles.vitalUnit, { color: colors.textMuted }]}>br/m</Text>
+                      <Text style={[styles.vitalLabel, { color: colors.textMuted }]}>Breathing</Text>
+                    </View>
+                  )}
+                  {extendedSleep[0].sleep_efficiency != null && (
+                    <View style={[styles.vitalCard, { backgroundColor: colors.cardGlass }]}>
+                      <Ionicons name="analytics" size={18} color="#F59E0B" />
+                      <NumberText weight="semiBold" style={[styles.vitalValue, { color: colors.text }]}>
+                        {Math.round(parseFloat(extendedSleep[0].sleep_efficiency))}
+                      </NumberText>
+                      <Text style={[styles.vitalUnit, { color: colors.textMuted }]}>%</Text>
+                      <Text style={[styles.vitalLabel, { color: colors.textMuted }]}>Efficiency</Text>
+                    </View>
+                  )}
+                  {extendedSleep[0].sleep_latency_minutes != null && (
+                    <View style={[styles.vitalCard, { backgroundColor: colors.cardGlass }]}>
+                      <Ionicons name="timer" size={18} color="#6366F1" />
+                      <NumberText weight="semiBold" style={[styles.vitalValue, { color: colors.text }]}>
+                        {Math.round(parseFloat(extendedSleep[0].sleep_latency_minutes))}
+                      </NumberText>
+                      <Text style={[styles.vitalUnit, { color: colors.textMuted }]}>min</Text>
+                      <Text style={[styles.vitalLabel, { color: colors.textMuted }]}>Fell Asleep</Text>
+                    </View>
+                  )}
+                </View>
+              </>
+            )}
+
             {/* Recent Sleep */}
             <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 20 }]}>
               Recent Sleep Logs
             </Text>
-            {state.sleepEntries.slice(0, 7).map((entry, index) => (
-              <View key={entry.id || index} style={[styles.sleepEntry, { backgroundColor: colors.cardGlass }]}>
-                <View style={styles.entryLeft}>
-                  <Text style={[styles.entryDate, { color: colors.text }]}>
-                    {new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                  </Text>
-                  <Text style={[styles.entryTimes, { color: colors.textMuted }]}>
-                    {entry.bedtime} → {entry.wakeTime}
-                  </Text>
-                </View>
-                <View style={styles.entryRight}>
-                  <NumberText weight="semiBold" style={[styles.entryDuration, { color: colors.primary }]}>
-                    {formatDuration(entry.duration)}
-                  </NumberText>
-                  <Text style={styles.entryQuality}>
-                    {QUALITY_OPTIONS.find((q) => q.value === entry.quality)?.emoji}
-                  </Text>
-                </View>
-              </View>
-            ))}
 
-            {state.sleepEntries.length === 0 && (
+            {/* Use extended data if available, otherwise fall back to context */}
+            {(extendedSleep.length > 0 ? extendedSleep.slice(0, 7) : state.sleepEntries.slice(0, 7)).map((entry: any, index: number) => {
+              const isExtended = extendedSleep.length > 0;
+              const entryDate = isExtended ? entry.date : entry.date;
+              const entryBedtime = isExtended ? entry.bed_time : entry.bedtime;
+              const entryWakeTime = isExtended ? entry.wake_time : entry.wakeTime;
+              const entryDuration = isExtended
+                ? Math.round((parseFloat(entry.total_hours) || 0) * 60)
+                : entry.duration;
+              const entryQuality = isExtended ? entry.quality_score : entry.quality;
+              const sleepScore = isExtended ? entry.sleep_score : null;
+              const deep = isExtended ? parseFloat(entry.deep_sleep_hours) || 0 : 0;
+              const rem = isExtended ? parseFloat(entry.rem_sleep_hours) || 0 : 0;
+              const light = isExtended ? parseFloat(entry.light_sleep_hours) || 0 : 0;
+              const stageTotal = deep + rem + light;
+
+              return (
+                <View key={entry.id || index} style={[styles.sleepEntry, { backgroundColor: colors.cardGlass }]}>
+                  <View style={styles.entryLeft}>
+                    <View style={styles.entryDateRow}>
+                      <Text style={[styles.entryDate, { color: colors.text }]}>
+                        {new Date(entryDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      </Text>
+                      {sleepScore != null && (
+                        <View style={[styles.entryScoreBadge, { backgroundColor: colors.primary + '20' }]}>
+                          <NumberText weight="semiBold" style={[styles.entryScoreText, { color: colors.primary }]}>
+                            {sleepScore}
+                          </NumberText>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[styles.entryTimes, { color: colors.textMuted }]}>
+                      {entryBedtime || '--'} → {entryWakeTime || '--'}
+                    </Text>
+                    {stageTotal > 0 && (
+                      <View style={styles.miniStagesBar}>
+                        <View style={[styles.miniStageSegment, { width: `${(deep / stageTotal) * 100}%`, backgroundColor: '#5B21B6' }]} />
+                        <View style={[styles.miniStageSegment, { width: `${(rem / stageTotal) * 100}%`, backgroundColor: '#7C3AED' }]} />
+                        <View style={[styles.miniStageSegment, { width: `${(light / stageTotal) * 100}%`, backgroundColor: '#A78BFA' }]} />
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.entryRight}>
+                    <NumberText weight="semiBold" style={[styles.entryDuration, { color: colors.primary }]}>
+                      {formatDuration(entryDuration)}
+                    </NumberText>
+                    <Text style={styles.entryQuality}>
+                      {QUALITY_OPTIONS.find((q) => q.value === entryQuality)?.emoji || ''}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+
+            {state.sleepEntries.length === 0 && extendedSleep.length === 0 && (
               <View style={[styles.emptyState, { backgroundColor: colors.cardGlass }]}>
                 <Ionicons name="moon-outline" size={40} color={colors.textMuted} />
                 <Text style={[styles.emptyText, { color: colors.textMuted }]}>
@@ -475,8 +673,13 @@ const styles = StyleSheet.create({
   weeklyLabel: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 4 },
   sleepEntry: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderRadius: 12, marginBottom: 8 },
   entryLeft: { flex: 1 },
+  entryDateRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   entryDate: { fontSize: 13, fontFamily: Fonts.medium },
+  entryScoreBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  entryScoreText: { fontSize: 11 },
   entryTimes: { fontSize: 11, fontFamily: Fonts.regular, marginTop: 2 },
+  miniStagesBar: { flexDirection: 'row', height: 4, borderRadius: 2, marginTop: 4, overflow: 'hidden' },
+  miniStageSegment: { height: 4 },
   entryRight: { alignItems: 'flex-end' },
   entryDuration: { fontSize: 14 },
   entryQuality: { fontSize: 16, marginTop: 2 },
@@ -486,4 +689,24 @@ const styles = StyleSheet.create({
   goalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
   goalLabel: { fontSize: 13, fontFamily: Fonts.regular },
   goalValue: { fontSize: 14 },
+  // Extended sleep stats styles
+  sleepScoreRow: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, marginBottom: 12, gap: 12 },
+  sleepScoreLeft: { flexDirection: 'row', alignItems: 'baseline' },
+  sleepScoreBig: { fontSize: 36 },
+  sleepScoreUnit: { fontSize: 14, fontFamily: Fonts.regular, marginLeft: 2 },
+  sleepScoreLabel: { fontSize: 14, fontFamily: Fonts.medium, flex: 1 },
+  stagesContainer: { padding: 16, borderRadius: 12, marginBottom: 12 },
+  stagesTitle: { fontSize: 13, fontFamily: Fonts.medium, marginBottom: 10 },
+  stagesBar: { flexDirection: 'row', height: 12, borderRadius: 6, overflow: 'hidden' },
+  stageSegment: { height: 12 },
+  stagesLegend: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 10 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 11, fontFamily: Fonts.regular },
+  legendValue: { fontSize: 11 },
+  vitalsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
+  vitalCard: { flexBasis: '30%', flexGrow: 1, alignItems: 'center', padding: 12, borderRadius: 12 },
+  vitalValue: { fontSize: 20, marginTop: 4 },
+  vitalUnit: { fontSize: 10, fontFamily: Fonts.regular },
+  vitalLabel: { fontSize: 10, fontFamily: Fonts.regular, marginTop: 2 },
 });

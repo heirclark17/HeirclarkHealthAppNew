@@ -1499,20 +1499,6 @@ class HeirclarkAPI {
     }
   }
 
-  async getSleepHistory(days: number = 14): Promise<any[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/api/v1/health/sleep?days=${days}`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) return [];
-      const data = await response.json();
-      return data.success ? data.sleepLogs : [];
-    } catch (error) {
-      return [];
-    }
-  }
-
   // ============================================
   // HABITS
   // ============================================
@@ -1833,41 +1819,22 @@ class HeirclarkAPI {
 
   /**
    * Get extended sleep history (includes HRV, SpO2, breathing rate, efficiency, all stages)
+   * Returns raw rows from sleep_logs table including new Oura fields
    */
-  async getSleepHistory(days: number = 14): Promise<{
-    sleepLogs: Array<{
-      date: string;
-      total_hours: number | null;
-      deep_sleep_hours: number | null;
-      rem_sleep_hours: number | null;
-      light_sleep_hours: number | null;
-      sleep_score: number | null;
-      sleep_efficiency: number | null;
-      avg_breathing_rate: number | null;
-      spo2_avg: number | null;
-      avg_heart_rate: number | null;
-      avg_hrv: number | null;
-      lowest_heart_rate: number | null;
-      sleep_latency_minutes: number | null;
-      bed_time: string | null;
-      wake_time: string | null;
-      quality_score: number | null;
-      source: string | null;
-    }>;
-  }> {
+  async getSleepHistory(days: number = 14): Promise<any[]> {
     try {
       const response = await fetch(
         `${this.baseUrl}/api/v1/health/sleep?days=${days}`,
         { headers: this.getHeaders() }
       );
 
-      if (!response.ok) return { sleepLogs: [] };
+      if (!response.ok) return [];
 
       const data = await response.json();
-      return { sleepLogs: data.sleepLogs || [] };
+      return data.success ? data.sleepLogs : [];
     } catch (error) {
       console.error('[API] Get sleep history error:', error);
-      return { sleepLogs: [] };
+      return [];
     }
   }
 

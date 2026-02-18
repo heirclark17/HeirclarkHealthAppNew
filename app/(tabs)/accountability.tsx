@@ -31,7 +31,7 @@ import { AccountabilityPartnerCard } from '../../components/agents/accountabilit
 import { ProgressPredictionCard } from '../../components/agents/progressPrediction';
 import { HabitFormationCard } from '../../components/agents/habitFormation';
 import { RestaurantMenuCard } from '../../components/agents/restaurantMenu';
-import { SleepRecoveryCard } from '../../components/agents/sleepRecovery';
+import { SleepRecoveryCard, ReadinessCard } from '../../components/agents/sleepRecovery';
 import { HydrationCard } from '../../components/agents/hydration';
 import WorkoutFormCoachCard from '../../components/agents/workoutFormCoach/WorkoutFormCoachCard';
 
@@ -150,6 +150,11 @@ export default function AccountabilityScreen() {
             {/* Sleep & Recovery */}
             <View style={styles.cardWrapper}>
               <SleepRecoveryCard />
+            </View>
+
+            {/* Oura Readiness (auto-hides if no data) */}
+            <View style={styles.cardWrapper}>
+              <ReadinessCard />
             </View>
 
             {/* Eating Out Guide */}
