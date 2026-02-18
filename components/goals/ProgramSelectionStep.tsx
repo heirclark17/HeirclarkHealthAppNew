@@ -457,8 +457,6 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingTop: 12,
     marginTop: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(128, 128, 128, 0.2)',
   },
   viewDetailsText: {
     fontSize: 11,
