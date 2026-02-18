@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert, Dimensions, Modal } from 'react-native';
+import Animated, { SlideInRight } from 'react-native-reanimated';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import {
   Flame,
@@ -17,7 +18,13 @@ import {
   Settings as SettingsIcon,
   Timer,
   Play,
-  ChevronRight
+  ChevronRight,
+  Apple,
+  Pizza,
+  Coffee,
+  Cookie,
+  Salad,
+  CheckCircle2
 } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -243,6 +250,81 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
   return (
     <View style={{ flex: 1 }}>
+      {/* Meal Plan Loading Modal */}
+      <Modal
+        visible={isGeneratingMealPlan || false}
+        animationType="fade"
+        transparent={false}
+      >
+        <View style={[styles.mealLoadingContainer, { backgroundColor: isDark ? '#000' : '#fff' }]}>
+          <View style={styles.mealLoadingContent}>
+            {/* Colorful food circles */}
+            <View style={styles.foodCirclesContainer}>
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(0)}
+                style={[styles.foodColorCircle, { backgroundColor: '#FF6B6B' }]}
+              >
+                <Apple size={24} color="#fff" />
+              </Animated.View>
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(100)}
+                style={[styles.foodColorCircle, { backgroundColor: '#FFB800' }]}
+              >
+                <Pizza size={24} color="#fff" />
+              </Animated.View>
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(200)}
+                style={[styles.foodColorCircle, { backgroundColor: '#8B4513' }]}
+              >
+                <Coffee size={24} color="#fff" />
+              </Animated.View>
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(300)}
+                style={[styles.foodColorCircle, { backgroundColor: '#F9CA24' }]}
+              >
+                <Cookie size={24} color="#fff" />
+              </Animated.View>
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(400)}
+                style={[styles.foodColorCircle, { backgroundColor: '#6AB04C' }]}
+              >
+                <Salad size={24} color="#fff" />
+              </Animated.View>
+            </View>
+
+            {/* Main icon */}
+            <Animated.View
+              entering={SlideInRight.duration(600).delay(500)}
+              style={styles.mealLoadingIconContainer}
+            >
+              <View style={[styles.mealLoadingCircle, { backgroundColor: Colors.error }]}>
+                <Utensils size={56} color={Colors.background} />
+              </View>
+            </Animated.View>
+
+            {/* Text content */}
+            <Animated.Text
+              entering={SlideInRight.duration(600).delay(700)}
+              style={[styles.mealLoadingTitle, { color: colors.text }]}
+            >
+              🍽️ Creating Your Meal Plan...
+            </Animated.Text>
+            <Animated.Text
+              entering={SlideInRight.duration(600).delay(900)}
+              style={[styles.mealLoadingSubtitle, { color: colors.textSecondary }]}
+            >
+              AI is crafting personalized meals
+            </Animated.Text>
+            <Animated.Text
+              entering={SlideInRight.duration(600).delay(1100)}
+              style={[styles.mealLoadingDetail, { color: colors.textMuted }]}
+            >
+              Balancing macros and matching your preferences
+            </Animated.Text>
+          </View>
+        </View>
+      </Modal>
+
       {/* Confetti Celebration */}
       <ConfettiCannon
         ref={confettiRef}
@@ -868,5 +950,62 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.light,
     color: Colors.textMuted,
+  },
+  // Meal plan loading modal styles
+  mealLoadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  mealLoadingContent: {
+    alignItems: 'center',
+    gap: 20,
+  },
+  foodCirclesContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 32,
+  },
+  foodColorCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    opacity: 0.9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mealLoadingIconContainer: {
+    marginBottom: 24,
+  },
+  mealLoadingCircle: {
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  mealLoadingTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  mealLoadingSubtitle: {
+    fontSize: 17,
+    textAlign: 'center',
+    opacity: 0.8,
+    fontWeight: '500',
+  },
+  mealLoadingDetail: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.6,
+    marginTop: 8,
   },
 });
