@@ -898,7 +898,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <Leaf size={20} color={Colors.success} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Dietary Style</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   <View style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
                     <Text style={[styles.prefTagText, { color: Colors.success }]}>
                       {state.dietStyle.charAt(0).toUpperCase() + state.dietStyle.slice(1).replace('_', ' ')}
@@ -915,7 +915,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <AlertTriangle size={16} color={Colors.error} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Allergens to Avoid</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   {state.allergies.map((allergen, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.error }]}>
@@ -934,7 +934,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <UtensilsCrossed size={16} color={Colors.success} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meals Per Day</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   <View style={[styles.mealsCircle, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
                     <NumberText weight="semiBold" style={[styles.mealsCircleNumber, { color: Colors.success }]}>
                       {state.mealsPerDay}
@@ -948,13 +948,21 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             {state.intermittentFasting && state.fastingStart && state.fastingEnd && (
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
-                  <Clock size={16} color={Colors.warning} />
+                  <Clock size={16} color={colors.primary} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Fasting Window</Text>
                 </View>
-                <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
-                  <View style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
-                    <Text style={[styles.prefTagText, { color: Colors.warning }]}>
-                      {state.fastingStart} - {state.fastingEnd}
+                <View style={[styles.prefTagsRow, { marginTop: 8, marginLeft: 24 }]}>
+                  <View style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
+                    <Text style={[styles.prefTagText, { color: colors.primary }]}>
+                      {(() => {
+                        const formatTime = (time: string) => {
+                          const [hours, minutes] = time.split(':').map(Number);
+                          const period = hours >= 12 ? 'PM' : 'AM';
+                          const displayHours = hours % 12 || 12;
+                          return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+                        };
+                        return `${formatTime(state.fastingStart)} - ${formatTime(state.fastingEnd)}`;
+                      })()}
                     </Text>
                   </View>
                 </View>
@@ -968,7 +976,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <UtensilsCrossed size={16} color={colors.protein} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Cuisines</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   {foodPrefs.preferences.favoriteCuisines.map((cuisine, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
                       <Text style={[styles.prefTagText, { color: colors.text }]}>
@@ -987,7 +995,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <Fish size={16} color={colors.protein} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Proteins</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   {foodPrefs.preferences.favoriteProteins.map((protein, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: colors.protein }]}>
@@ -1006,7 +1014,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <Leaf size={16} color={Colors.success} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Vegetables</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   {foodPrefs.preferences.favoriteVegetables.map((veggie, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.success }]}>
@@ -1025,7 +1033,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <Pizza size={16} color={colors.carbs} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Starches</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   {foodPrefs.preferences.favoriteStarches.map((starch, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: colors.carbs }]}>
@@ -1044,7 +1052,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <IceCream size={16} color={colors.carbs} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Favorite Snacks</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   {foodPrefs.preferences.favoriteSnacks.map((snack, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
                       <Text style={[styles.prefTagText, { color: colors.text }]}>
@@ -1063,7 +1071,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                   <XCircle size={16} color={Colors.error} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Foods to Avoid</Text>
                 </View>
-                <View style={styles.prefTagsRow}>
+                <View style={[styles.prefTagsRow, { marginLeft: 24 }]}>
                   {foodPrefs.preferences.hatedFoods.split(',').map(s => s.trim()).filter(Boolean).map((food, index) => (
                     <View key={index} style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
                       <Text style={[styles.prefTagText, { color: Colors.error }]}>
