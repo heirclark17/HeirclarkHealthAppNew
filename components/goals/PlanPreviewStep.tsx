@@ -1644,6 +1644,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   prefTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
