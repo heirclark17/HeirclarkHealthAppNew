@@ -1085,7 +1085,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                       <Settings size={16} color={colors.primary} />
                       <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Variety</Text>
                     </View>
-                    <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                    <View style={[styles.prefTagsRow, { marginTop: 8, marginLeft: 24 }]}>
                       <View style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
                         <Text style={[styles.prefTagText, { color: colors.text }]}>
                           {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily' : 'Diverse Meals'}
@@ -1102,7 +1102,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                       <Clock size={16} color={colors.carbs} />
                       <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style</Text>
                     </View>
-                    <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                    <View style={[styles.prefTagsRow, { marginTop: 8, marginLeft: 24 }]}>
                       <View style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
                         <Text style={[styles.prefTagText, { color: colors.carbs }]}>
                           {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer Larger Meals'}
@@ -1119,7 +1119,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                       <Calendar size={16} color={colors.primary} />
                       <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days</Text>
                     </View>
-                    <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                    <View style={[styles.prefTagsRow, { marginTop: 8, marginLeft: 24 }]}>
                       <View style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
                         <NumberText weight="semiBold" style={[styles.prefTagText, { color: colors.text }]}>
                           {foodPrefs.preferences.cheatDays.length}
@@ -1137,7 +1137,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                       <Flame size={16} color={Colors.error} />
                       <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cooking Skill</Text>
                     </View>
-                    <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                    <View style={[styles.prefTagsRow, { marginTop: 8, marginLeft: 24 }]}>
                       <View style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
                         <Text style={[styles.prefTagText, { color: Colors.error }]}>
                           {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
