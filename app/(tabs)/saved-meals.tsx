@@ -14,8 +14,8 @@ import {
   RefreshControl,
   Alert,
   Platform,
-  Image,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { Grid3x3, Heart, Sun, UtensilsCrossed, Moon, Coffee, Search, XCircle, Bookmark, Sparkles, FileText, Trash2 } from 'lucide-react-native';
@@ -188,7 +188,9 @@ export default function SavedMealsScreen() {
             <Image
               source={{ uri: meal.imageUrl }}
               style={styles.mealPhoto}
-              resizeMode="cover"
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={200}
             />
           ) : (
             <View style={[styles.mealPhoto, styles.mealPhotoPlaceholder, { backgroundColor: colors.backgroundSecondary }]}>
