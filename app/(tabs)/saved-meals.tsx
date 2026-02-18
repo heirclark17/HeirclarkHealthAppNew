@@ -684,13 +684,14 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    paddingHorizontal: Spacing.md,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 2,
     gap: 8,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: Spacing.md,
+    paddingVertical: 8,
     fontSize: 14,
     fontFamily: Fonts.regular,
   },
