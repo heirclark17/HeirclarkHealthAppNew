@@ -460,7 +460,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               {state.primaryGoal === 'lose_weight' ? 'WEEKLY FAT LOSS TARGET' : 'WEEKLY MUSCLE GAIN TARGET'}
             </Text>
             <View style={styles.weeklyRateRow}>
-              <NumberText weight="light" style={[
+              <NumberText weight="semiBold" style={[
                 styles.weeklyRateValue,
                 { color: state.primaryGoal === 'lose_weight' ? Colors.error : Colors.success }
               ]}>
@@ -623,9 +623,9 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             </GlassCard>
             <GlassCard style={styles.scheduleItemCard} borderColor="transparent">
               <Zap size={16} color={colors.primary} />
-              <Text numberOfLines={1} style={[styles.scheduleValue, { color: colors.text, fontSize: 17, marginTop: 3 }]}>
+              <Text numberOfLines={1} style={[styles.scheduleValue, { color: colors.text, fontSize: 17, marginTop: 3, fontFamily: Fonts.numericSemiBold }]}>
                 {state.activityLevel === 'sedentary' || state.activityLevel === 'light' ? 'Beginner' :
-                 state.activityLevel === 'moderate' ? 'Intermediate' : 'Advanced'}
+                 state.activityLevel === 'moderate' ? 'Interm.' : 'Advanced'}
               </Text>
               <Text numberOfLines={1} style={[styles.scheduleLabel, { color: colors.textMuted }]}>Intensity</Text>
             </GlassCard>
@@ -1545,8 +1545,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
   confirmButton: {
@@ -1560,8 +1559,7 @@ const styles = StyleSheet.create({
   },
   confirmButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
     color: Colors.primaryText,
   },

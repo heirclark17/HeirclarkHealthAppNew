@@ -123,6 +123,8 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 100,
     overflow: 'hidden',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   glassOverlay: {
     ...StyleSheet.absoluteFillObject,
