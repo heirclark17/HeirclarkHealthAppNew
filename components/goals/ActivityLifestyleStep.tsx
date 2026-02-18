@@ -605,7 +605,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       {/* Cardio Preference */}
       <View style={styles.cardioSection}>
-        <Text style={styles.cardioSectionTitle}>PREFERRED CARDIO TYPE</Text>
+        <Text style={[styles.cardioSectionTitle, { color: colors.text }]}>PREFERRED CARDIO TYPE</Text>
         <Text style={[styles.cardioSectionSubtitle, { color: colors.textSecondary }]}>
           Choose your preferred style of cardiovascular exercise
         </Text>
