@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert, Dimensions, Modal } from 'react-native';
-import Animated, { SlideInRight } from 'react-native-reanimated';
+import Animated, {
+  SlideInRight,
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+  Easing
+} from 'react-native-reanimated';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import {
   Flame,
@@ -237,6 +245,101 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
     }
   };
 
+  // Pulsating Food Circle Component
+  const PulsatingFoodCircle = ({ delay, backgroundColor, icon }: { delay: number; backgroundColor: string; icon: React.ReactNode }) => {
+    const scale = useSharedValue(1);
+
+    useEffect(() => {
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.2, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        false
+      );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+
+    return (
+      <Animated.View
+        entering={SlideInRight.duration(600).delay(delay)}
+        style={[styles.foodColorCircle, { backgroundColor }, animatedStyle]}
+      >
+        {icon}
+      </Animated.View>
+    );
+  };
+
+  // Rotating Main Icon Component
+  const RotatingMainIcon = () => {
+    const rotation = useSharedValue(0);
+    const scale = useSharedValue(1);
+
+    useEffect(() => {
+      rotation.value = withRepeat(
+        withTiming(360, { duration: 3000, easing: Easing.linear }),
+        -1,
+        false
+      );
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.1, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        false
+      );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ rotate: `${rotation.value}deg` }, { scale: scale.value }],
+    }));
+
+    return (
+      <Animated.View
+        entering={SlideInRight.duration(600).delay(500)}
+        style={styles.mealLoadingIconContainer}
+      >
+        <Animated.View style={[styles.mealLoadingCircle, { backgroundColor: Colors.error }, animatedStyle]}>
+          <Utensils size={56} color={Colors.background} />
+        </Animated.View>
+      </Animated.View>
+    );
+  };
+
+  // Pulsating Text Component
+  const PulsatingText = ({ delay, style, children }: { delay: number; style: any; children: React.ReactNode }) => {
+    const opacity = useSharedValue(0.6);
+
+    useEffect(() => {
+      opacity.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.6, { duration: 1500, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        false
+      );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      opacity: opacity.value,
+    }));
+
+    return (
+      <Animated.Text
+        entering={SlideInRight.duration(600).delay(delay)}
+        style={[style, animatedStyle]}
+      >
+        {children}
+      </Animated.Text>
+    );
+  };
+
   // Show loading while calculating results
   if (!state.results) {
     return (
@@ -258,69 +361,57 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       >
         <View style={[styles.mealLoadingContainer, { backgroundColor: isDark ? '#000' : '#fff' }]}>
           <View style={styles.mealLoadingContent}>
-            {/* Colorful food circles */}
+            {/* Colorful food circles with pulsating animation */}
             <View style={styles.foodCirclesContainer}>
-              <Animated.View
-                entering={SlideInRight.duration(600).delay(0)}
-                style={[styles.foodColorCircle, { backgroundColor: '#FF6B6B' }]}
-              >
-                <Apple size={24} color="#fff" />
-              </Animated.View>
-              <Animated.View
-                entering={SlideInRight.duration(600).delay(100)}
-                style={[styles.foodColorCircle, { backgroundColor: '#FFB800' }]}
-              >
-                <Pizza size={24} color="#fff" />
-              </Animated.View>
-              <Animated.View
-                entering={SlideInRight.duration(600).delay(200)}
-                style={[styles.foodColorCircle, { backgroundColor: '#8B4513' }]}
-              >
-                <Coffee size={24} color="#fff" />
-              </Animated.View>
-              <Animated.View
-                entering={SlideInRight.duration(600).delay(300)}
-                style={[styles.foodColorCircle, { backgroundColor: '#F9CA24' }]}
-              >
-                <Cookie size={24} color="#fff" />
-              </Animated.View>
-              <Animated.View
-                entering={SlideInRight.duration(600).delay(400)}
-                style={[styles.foodColorCircle, { backgroundColor: '#6AB04C' }]}
-              >
-                <Salad size={24} color="#fff" />
-              </Animated.View>
+              <PulsatingFoodCircle
+                delay={0}
+                backgroundColor="#FF6B6B"
+                icon={<Apple size={24} color="#fff" />}
+              />
+              <PulsatingFoodCircle
+                delay={100}
+                backgroundColor="#FFB800"
+                icon={<Pizza size={24} color="#fff" />}
+              />
+              <PulsatingFoodCircle
+                delay={200}
+                backgroundColor="#8B4513"
+                icon={<Coffee size={24} color="#fff" />}
+              />
+              <PulsatingFoodCircle
+                delay={300}
+                backgroundColor="#F9CA24"
+                icon={<Cookie size={24} color="#fff" />}
+              />
+              <PulsatingFoodCircle
+                delay={400}
+                backgroundColor="#6AB04C"
+                icon={<Salad size={24} color="#fff" />}
+              />
             </View>
 
-            {/* Main icon */}
-            <Animated.View
-              entering={SlideInRight.duration(600).delay(500)}
-              style={styles.mealLoadingIconContainer}
-            >
-              <View style={[styles.mealLoadingCircle, { backgroundColor: Colors.error }]}>
-                <Utensils size={56} color={Colors.background} />
-              </View>
-            </Animated.View>
+            {/* Main icon with rotating and pulsing animation */}
+            <RotatingMainIcon />
 
-            {/* Text content */}
-            <Animated.Text
-              entering={SlideInRight.duration(600).delay(700)}
+            {/* Text content with pulsating animation */}
+            <PulsatingText
+              delay={700}
               style={[styles.mealLoadingTitle, { color: colors.text }]}
             >
               🍽️ Creating Your Meal Plan...
-            </Animated.Text>
-            <Animated.Text
-              entering={SlideInRight.duration(600).delay(900)}
+            </PulsatingText>
+            <PulsatingText
+              delay={900}
               style={[styles.mealLoadingSubtitle, { color: colors.textSecondary }]}
             >
               AI is crafting personalized meals
-            </Animated.Text>
-            <Animated.Text
-              entering={SlideInRight.duration(600).delay(1100)}
+            </PulsatingText>
+            <PulsatingText
+              delay={1100}
               style={[styles.mealLoadingDetail, { color: colors.textMuted }]}
             >
               Balancing macros and matching your preferences
-            </Animated.Text>
+            </PulsatingText>
           </View>
         </View>
       </Modal>
