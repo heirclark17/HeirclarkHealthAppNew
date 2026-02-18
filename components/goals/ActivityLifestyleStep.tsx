@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
@@ -29,6 +29,105 @@ import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
 import { WizardHeader } from './WizardHeader';
+
+// Scrollable Number Picker for 1RM values
+interface ScrollableNumberPickerProps {
+  value: number | null;
+  onChange: (value: number | null) => void;
+  min: number;
+  max: number;
+  step: number;
+  placeholder: number;
+  colors: typeof DarkColors;
+  isDark: boolean;
+}
+
+function ScrollableNumberPicker({ value, onChange, min, max, step, placeholder, colors, isDark }: ScrollableNumberPickerProps) {
+  const scrollViewRef = useRef<ScrollView>(null);
+  const ITEM_HEIGHT = 44;
+  const VISIBLE_ITEMS = 5;
+
+  // Generate array of values
+  const values = useMemo(() => {
+    const arr: (number | null)[] = [null, null]; // Padding top
+    for (let i = min; i <= max; i += step) {
+      arr.push(i);
+    }
+    arr.push(null, null); // Padding bottom
+    return arr;
+  }, [min, max, step]);
+
+  // Calculate initial scroll position
+  useEffect(() => {
+    const targetValue = value || placeholder;
+    const index = values.findIndex(v => v === targetValue);
+    if (index !== -1 && scrollViewRef.current) {
+      // Scroll to center the selected value
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          y: (index - 2) * ITEM_HEIGHT,
+          animated: false,
+        });
+      }, 100);
+    }
+  }, []);
+
+  const handleScroll = (event: any) => {
+    const yOffset = event.nativeEvent.contentOffset.y;
+    const index = Math.round(yOffset / ITEM_HEIGHT) + 2;
+    const selectedValue = values[index];
+    if (selectedValue !== value) {
+      onChange(selectedValue);
+      lightImpact();
+    }
+  };
+
+  return (
+    <View style={styles.pickerContainer}>
+      {/* Center highlight indicator */}
+      <View style={[styles.pickerHighlight, {
+        backgroundColor: isDark ? 'rgba(150, 206, 180, 0.15)' : 'rgba(150, 206, 180, 0.12)',
+        borderColor: isDark ? 'rgba(150, 206, 180, 0.3)' : 'rgba(150, 206, 180, 0.25)',
+      }]} />
+
+      <ScrollView
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+        snapToInterval={ITEM_HEIGHT}
+        decelerationRate="fast"
+        onMomentumScrollEnd={handleScroll}
+        style={{ height: ITEM_HEIGHT * VISIBLE_ITEMS }}
+        contentContainerStyle={{ paddingVertical: 0 }}
+      >
+        {values.map((val, index) => {
+          const isCenter = index >= 2 && index < values.length - 2;
+          const opacity = val === null ? 0 : isCenter ? 1 : 0.3;
+          return (
+            <View
+              key={index}
+              style={[styles.pickerItem, { height: ITEM_HEIGHT }]}
+            >
+              {val !== null && (
+                <NumberText
+                  weight="semiBold"
+                  style={[
+                    styles.pickerItemText,
+                    {
+                      color: colors.text,
+                      opacity,
+                    }
+                  ]}
+                >
+                  {val}
+                </NumberText>
+              )}
+            </View>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
 
 // Section wrapper using GlassCard
 function GlassSection({ children, style }: { children: React.ReactNode; style?: any }) {
@@ -635,21 +734,16 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   <View style={styles.oneRMInput}>
                     <Text style={[styles.oneRMLabel, { color: colors.text }]}>Bench Press</Text>
                     <View style={styles.oneRMInputRow}>
-                      <GlassCard style={styles.oneRMField} interactive>
-                        <TextInput
-                          keyboardType="numeric"
-                          placeholder="185"
-                          placeholderTextColor={colors.textMuted}
-                          value={state.benchPress1RM?.toString() || ''}
-                          onChangeText={(text) => setBenchPress1RM(text ? Number(text) : null)}
-                          style={{
-                            fontSize: 16,
-                            fontFamily: Fonts.numericRegular,
-                            color: colors.text,
-                            textAlign: 'center',
-                          }}
-                        />
-                      </GlassCard>
+                      <ScrollableNumberPicker
+                        value={state.benchPress1RM}
+                        onChange={setBenchPress1RM}
+                        min={45}
+                        max={500}
+                        step={5}
+                        placeholder={185}
+                        colors={colors}
+                        isDark={isDark}
+                      />
                       <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
                     </View>
                   </View>
@@ -658,21 +752,16 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   <View style={styles.oneRMInput}>
                     <Text style={[styles.oneRMLabel, { color: colors.text }]}>Squat</Text>
                     <View style={styles.oneRMInputRow}>
-                      <GlassCard style={styles.oneRMField} interactive>
-                        <TextInput
-                          keyboardType="numeric"
-                          placeholder="225"
-                          placeholderTextColor={colors.textMuted}
-                          value={state.squat1RM?.toString() || ''}
-                          onChangeText={(text) => setSquat1RM(text ? Number(text) : null)}
-                          style={{
-                            fontSize: 16,
-                            fontFamily: Fonts.numericRegular,
-                            color: colors.text,
-                            textAlign: 'center',
-                          }}
-                        />
-                      </GlassCard>
+                      <ScrollableNumberPicker
+                        value={state.squat1RM}
+                        onChange={setSquat1RM}
+                        min={45}
+                        max={600}
+                        step={5}
+                        placeholder={225}
+                        colors={colors}
+                        isDark={isDark}
+                      />
                       <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
                     </View>
                   </View>
@@ -681,21 +770,16 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   <View style={styles.oneRMInput}>
                     <Text style={[styles.oneRMLabel, { color: colors.text }]}>Deadlift</Text>
                     <View style={styles.oneRMInputRow}>
-                      <GlassCard style={styles.oneRMField} interactive>
-                        <TextInput
-                          keyboardType="numeric"
-                          placeholder="275"
-                          placeholderTextColor={colors.textMuted}
-                          value={state.deadlift1RM?.toString() || ''}
-                          onChangeText={(text) => setDeadlift1RM(text ? Number(text) : null)}
-                          style={{
-                            fontSize: 16,
-                            fontFamily: Fonts.numericRegular,
-                            color: colors.text,
-                            textAlign: 'center',
-                          }}
-                        />
-                      </GlassCard>
+                      <ScrollableNumberPicker
+                        value={state.deadlift1RM}
+                        onChange={setDeadlift1RM}
+                        min={45}
+                        max={700}
+                        step={5}
+                        placeholder={275}
+                        colors={colors}
+                        isDark={isDark}
+                      />
                       <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
                     </View>
                   </View>
@@ -1268,5 +1352,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.light,
     lineHeight: 18,
+  },
+  // Scrollable Picker Styles
+  pickerContainer: {
+    flex: 1,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  pickerHighlight: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    height: 44,
+    marginTop: -22,
+    borderWidth: 1,
+    borderRadius: 8,
+    zIndex: 1,
+    pointerEvents: 'none',
+  },
+  pickerItem: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pickerItemText: {
+    fontSize: 22,
+    fontFamily: Fonts.numericSemiBold,
   },
 });
