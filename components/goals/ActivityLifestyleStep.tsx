@@ -538,19 +538,25 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         </View>
 
       {/* Activity Level Selection */}
-      <View style={styles.activityList}>
-        {ACTIVITY_OPTIONS.map((option, index) => (
-          <ActivityCard
-            key={option.id}
-            option={option}
-            isSelected={state.activityLevel === option.id}
-            onSelect={() => setActivityLevel(option.id)}
-            index={index}
-            colors={colors}
-            isDark={isDark}
-          />
-        ))}
-      </View>
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>EXERCISE HABITS</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+          Select your typical weekly activity level
+        </Text>
+        <View style={styles.activityList}>
+          {ACTIVITY_OPTIONS.map((option, index) => (
+            <ActivityCard
+              key={option.id}
+              option={option}
+              isSelected={state.activityLevel === option.id}
+              onSelect={() => setActivityLevel(option.id)}
+              index={index}
+              colors={colors}
+              isDark={isDark}
+            />
+          ))}
+        </View>
+      </GlassSection>
 
       {/* Workouts Per Week */}
       <GlassSection>
@@ -1016,8 +1022,6 @@ const styles = StyleSheet.create({
   },
   activityList: {
     gap: 8,
-    marginBottom: 24,
-    marginHorizontal: 16,
   },
   activityCard: {
     flexDirection: 'row',
