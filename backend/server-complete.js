@@ -4302,7 +4302,8 @@ IMPORTANT RULES:
 - No bullet points or lists — this is spoken coaching, make it flow naturally
 - No emojis or markdown formatting
 - Don't say "as your coach" or "as an AI" — just speak naturally
-- Keep the tone warm but direct, like a trusted coach who respects their intelligence`
+- Keep the tone warm but direct, like a trusted coach who respects their intelligence
+- NEVER use abbreviations — always spell out the full word (for example: say "pounds" not "lbs", "grams" not "g", "calories" not "cal", "basal metabolic rate" not "BMR", "total daily energy expenditure" not "TDEE", "body mass index" not "BMI")`
         },
         {
           role: 'user',
@@ -4441,7 +4442,8 @@ IMPORTANT RULES:
 - No bullet points or lists — this is spoken coaching, make it flow naturally
 - No emojis or markdown formatting
 - Don't say "as your coach" or "as an AI" — just speak naturally
-- Keep the tone warm but knowledgeable, like a nutrition expert who genuinely cares`
+- Keep the tone warm but knowledgeable, like a nutrition expert who genuinely cares
+- NEVER use abbreviations — always spell out the full word (for example: say "pounds" not "lbs", "grams" not "g", "calories" not "cal")`
         },
         {
           role: 'user',
