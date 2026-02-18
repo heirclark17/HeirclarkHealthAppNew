@@ -1115,12 +1115,12 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 {foodPrefs.preferences.mealStyle && (
                   <View style={{ marginBottom: 12 }}>
                     <View style={styles.prefRow}>
-                      <Clock size={16} color={Colors.warning} />
+                      <Clock size={16} color={colors.carbs} />
                       <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style</Text>
                     </View>
                     <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
-                      <View style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
-                        <Text style={[styles.prefTagText, { color: Colors.warning }]}>
+                      <View style={[styles.prefTag, { backgroundColor: 'rgba(99, 177, 255, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: colors.carbs }]}>
                           {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer Larger Meals'}
                         </Text>
                       </View>
