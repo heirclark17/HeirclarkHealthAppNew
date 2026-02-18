@@ -633,9 +633,9 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       </GlassSection>
 
       {/* Cardio Preference */}
-      <View style={styles.cardioSection}>
-        <Text style={[styles.cardioSectionTitle, { color: colors.text }]}>PREFERRED CARDIO TYPE</Text>
-        <Text style={[styles.cardioSectionSubtitle, { color: colors.textSecondary }]}>
+      <GlassSection isDark={isDark}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>PREFERRED CARDIO TYPE</Text>
+        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Choose your preferred style of cardiovascular exercise
         </Text>
         <View style={styles.cardioList}>
@@ -651,7 +651,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
             />
           ))}
         </View>
-      </View>
+      </GlassSection>
 
       {/* Fitness Level */}
       <GlassSection>
