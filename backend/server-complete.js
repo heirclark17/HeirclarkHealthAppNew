@@ -2520,6 +2520,10 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
     const userCtx = userData.rows.length > 0 ? `User context: Calorie goal: ${userData.rows[0].daily_calories}, Protein goal: ${userData.rows[0].daily_protein} grams` : '';
     const additionalCtx = context ? `Additional context: ${JSON.stringify(context)}` : '';
 
+    // Extract user's name for personalization
+    const userName = context?.userName || '';
+    const nameInstruction = userName ? `\nThe user's name is ${userName}. ALWAYS address them by name naturally throughout the conversation to make it feel like a real 1-on-1 coaching session. Use their name in greetings, encouragements, and when giving specific advice.` : '';
+
     let systemPrompt;
     let maxTokens = 500;
 
@@ -2527,7 +2531,7 @@ app.post('/api/v1/ai/coach-message', authenticateToken, async (req, res) => {
       systemPrompt = `You are a friendly nutrition coach for the Heirclark health app.
 Keep responses concise (2-4 sentences). Be specific and actionable but brief.
 Reference the user's calorie and protein goals when relevant.
-Never abbreviate units or metrics. Always use the full word: "grams" not "g", "calories" not "kcal", "milligrams" not "mg", "pounds" not "lbs", "ounces" not "oz".
+Never abbreviate units or metrics. Always use the full word: "grams" not "g", "calories" not "kcal", "milligrams" not "mg", "pounds" not "lbs", "ounces" not "oz".${nameInstruction}
 ${userCtx}
 ${additionalCtx}`;
       maxTokens = 500;
@@ -2536,7 +2540,7 @@ ${additionalCtx}`;
 Be conversational, supportive, and specific about exercises, form, programming, and recovery.
 Provide detailed explanations when discussing workout technique, programming, or injury prevention.
 Reference the user's actual data when available.
-IMPORTANT: Never abbreviate units or metrics. Always use the full word. Examples: "grams" not "g", "calories" not "kcal" or "cal", "milligrams" not "mg", "kilograms" not "kg", "pounds" not "lbs", "ounces" not "oz", "milliliters" not "ml", "liters" not "L".
+IMPORTANT: Never abbreviate units or metrics. Always use the full word. Examples: "grams" not "g", "calories" not "kcal" or "cal", "milligrams" not "mg", "kilograms" not "kg", "pounds" not "lbs", "ounces" not "oz", "milliliters" not "ml", "liters" not "L".${nameInstruction}
 ${userCtx}
 ${additionalCtx}`;
       maxTokens = 800;
@@ -2544,7 +2548,7 @@ ${additionalCtx}`;
       systemPrompt = `You are a friendly, knowledgeable health and fitness coach for the Heirclark app.
 Be conversational, supportive, and specific. Reference the user's actual data when available.
 Keep responses concise (2-4 sentences) unless asked for detailed explanations.
-IMPORTANT: Never abbreviate units or metrics. Always use the full word. Examples: "grams" not "g", "calories" not "kcal" or "cal", "milligrams" not "mg", "kilograms" not "kg", "pounds" not "lbs", "ounces" not "oz", "milliliters" not "ml", "liters" not "L".
+IMPORTANT: Never abbreviate units or metrics. Always use the full word. Examples: "grams" not "g", "calories" not "kcal" or "cal", "milligrams" not "mg", "kilograms" not "kg", "pounds" not "lbs", "ounces" not "oz", "milliliters" not "ml", "liters" not "L".${nameInstruction}
 ${userCtx}
 ${additionalCtx}`;
     }

@@ -31,6 +31,7 @@ import {
 } from '../../services/openaiService';
 import { GoalAlignmentCard } from '../training/GoalAlignmentCard';
 import { PlanSummaryCard } from './PlanSummaryCard';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SuccessScreenProps {
   onLogMeal: () => void;
@@ -46,6 +47,7 @@ interface SuccessScreenProps {
 export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvatar, onStartMealPlan, onStartTrainingPlan, isGeneratingMealPlan, isGeneratingTrainingPlan }: SuccessScreenProps) {
   const { state, resetWizard, calculateResults } = useGoalWizard();
   const { settings } = useSettings();
+  const { user } = useAuth();
   const { state: trainingState, getEnhancedPrograms } = useTraining();
   const { goalAlignment, preferences, planSummary } = trainingState;
   const hasPlayedHaptic = useRef(false);
@@ -114,6 +116,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           activityLevel: state.activityLevel || 'moderate',
           equipmentAccess: state.availableEquipment || [],
           injuries: state.injuries?.join(', ') || undefined,
+          userName: user?.firstName || undefined,
           selectedProgram: selectedProgramInfo,
         });
         setWorkoutGuidance(guidance);
@@ -144,6 +147,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           protein: state.results.protein,
           carbs: state.results.carbs,
           fat: state.results.fat,
+          userName: user?.firstName || undefined,
         });
         setDailyGuidance(guidance);
       } catch (error) {

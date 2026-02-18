@@ -22,11 +22,13 @@ import { useGoalWizard } from '../../../contexts/GoalWizardContext';
 import { useMealPlan } from '../../../contexts/MealPlanContext';
 import { Fonts } from '../../../constants/Theme';
 import { generateRestaurantDishGuidance, RestaurantDishParams } from '../../../services/openaiService';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const CUISINE_TYPES = ['mexican', 'italian', 'asian', 'american', 'fastfood', 'general'];
 
 export default function RestaurantMenuCard() {
   const { colors, isDark } = useGlassTheme();
+  const { user } = useAuth();
   const { state: goalState } = useGoalWizard();
   const { state: mealState } = useMealPlan();
   const { addRecentSearch } = useRestaurantMenu();
@@ -68,6 +70,7 @@ export default function RestaurantMenuCard() {
         primaryGoal: goalState.primaryGoal || 'maintain',
         allergies: goalState.allergies || [],
         dietaryPreferences: goalState.dietStyle ? [goalState.dietStyle] : [],
+        userName: user?.firstName || undefined,
       };
 
       const guidance = await generateRestaurantDishGuidance(params);

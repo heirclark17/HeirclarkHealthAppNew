@@ -306,14 +306,14 @@ export default function DashboardScreen() {
             return acc;
           }
           const dayNetCalories = (day.caloriesIn || 0) - (day.caloriesOut || 0);
-          const dayFatLoss = Math.abs(dayNetCalories / 3500);
+          const dayFatChange = dayNetCalories / 3500; // negative = loss, positive = gain
           return {
             steps: acc.steps + (day.steps || 0),
             calories: acc.calories + (day.caloriesIn || 0),
             protein: acc.protein + (day.protein || 0),
             carbs: acc.carbs + (day.carbs || 0),
             fat: acc.fat + (day.fat || 0),
-            fatLoss: acc.fatLoss + dayFatLoss,
+            fatLoss: acc.fatLoss - dayFatChange, // subtract because negative net = fat loss (positive contribution)
           };
         }, { steps: 0, calories: 0, protein: 0, carbs: 0, fat: 0, fatLoss: 0 });
 
@@ -323,10 +323,10 @@ export default function DashboardScreen() {
           weeklyTotals.protein += protein;
           weeklyTotals.carbs += carbs;
           weeklyTotals.fat += fat;
-          // Add today's fat loss
+          // Add today's fat change (deficit adds to fat loss, surplus subtracts)
           const todayNetCalories = caloriesIn - caloriesOut;
-          const todayFatLoss = Math.abs(todayNetCalories / 3500);
-          weeklyTotals.fatLoss += todayFatLoss;
+          const todayFatChange = todayNetCalories / 3500; // negative = loss, positive = gain
+          weeklyTotals.fatLoss -= todayFatChange; // subtract: negative net → positive fat loss
           // Note: Steps will be added separately after Apple Health fetch
         }
 
@@ -668,13 +668,13 @@ export default function DashboardScreen() {
                 fat: day.fat
               });
               const dayNetCalories = (day.caloriesIn || 0) - (day.caloriesOut || 0);
-              const dayFatLoss = Math.abs(dayNetCalories / 3500);
+              const dayFatChange = dayNetCalories / 3500; // negative = loss, positive = gain
               return {
                 calories: acc.calories + (day.caloriesIn || 0),
                 protein: acc.protein + (day.protein || 0),
                 carbs: acc.carbs + (day.carbs || 0),
                 fat: acc.fat + (day.fat || 0),
-                fatLoss: acc.fatLoss + dayFatLoss,
+                fatLoss: acc.fatLoss - dayFatChange, // subtract: negative net → positive fat loss
               };
             }, { calories: 0, protein: 0, carbs: 0, fat: 0, fatLoss: 0 });
           }
@@ -685,8 +685,8 @@ export default function DashboardScreen() {
           const totalWeeklyCarbs = historyTotals.carbs + carbs;
           const totalWeeklyFat = historyTotals.fat + fat;
           const todayNetCalories = caloriesIn - caloriesOut;
-          const todayFatLoss = Math.abs(todayNetCalories / 3500);
-          const totalWeeklyFatLoss = historyTotals.fatLoss + todayFatLoss;
+          const todayFatChange = todayNetCalories / 3500; // negative = loss, positive = gain
+          const totalWeeklyFatLoss = historyTotals.fatLoss - todayFatChange; // subtract: negative net → positive fat loss
 
           console.log('[Weekly Update] 🎯 FINAL WEEKLY TOTALS:', {
             historyTotals,
@@ -1072,7 +1072,7 @@ export default function DashboardScreen() {
         // Determine if it's a loss or gain for display
         const isDeficit = dailyDeficit >= 0;
         const fatChangeLabel = isDeficit ? 'FAT LOSS' : 'FAT GAIN';
-        const fatChangeValue = Math.abs(projectedDailyFatChange).toFixed(0);
+        const fatChangeValue = Math.abs(projectedDailyFatChange) < 0.01 ? '0' : Math.abs(projectedDailyFatChange).toFixed(2);
 
         // Handle edge cases: if no TDEE data yet, show placeholder
         const hasTDEE = caloriesOut > 0;

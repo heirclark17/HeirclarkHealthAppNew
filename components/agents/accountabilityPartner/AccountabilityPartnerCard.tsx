@@ -26,6 +26,7 @@ import { useSleepRecovery } from '../../../contexts/SleepRecoveryContext';
 import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { useCalorieBanking } from '../../../contexts/CalorieBankingContext';
 import { useAccountabilityPartner } from '../../../contexts/AccountabilityPartnerContext';
+import { useAuth } from '../../../contexts/AuthContext';
 
 // Services
 import {
@@ -43,6 +44,7 @@ import AccountabilityCoachModal from './AccountabilityCoachModal';
 
 export default function AccountabilityPartnerCard() {
   const { isDark, colors } = useGlassTheme();
+  const { user } = useAuth();
 
   // All context hooks
   const { state: goalState } = useGoalWizard();
@@ -199,7 +201,7 @@ export default function AccountabilityPartnerCard() {
       setSnapshot(snap);
 
       try {
-        const result = await generateAccountabilitySummary(snap);
+        const result = await generateAccountabilitySummary(snap, user?.firstName || undefined);
         if (!cancelled) {
           setSummary(result);
           await saveDailySummaryCache(result, []);

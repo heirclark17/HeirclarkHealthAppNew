@@ -322,7 +322,7 @@ export default function AccountabilityCoachModal({
 
     setIsLoading(true);
     try {
-      const response = await sendAccountabilityChat(text, snapshot, updated);
+      const response = await sendAccountabilityChat(text, snapshot, updated, user?.firstName || undefined);
       const assistantMsg: ChatMessage = {
         id: `msg_${Date.now()}_assistant`,
         role: 'assistant',

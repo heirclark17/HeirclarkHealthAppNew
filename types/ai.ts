@@ -183,6 +183,7 @@ export interface CoachMessage {
 
 export interface CoachContext {
   mode: CoachMode;
+  userName?: string;
   userGoals?: {
     primaryGoal?: string;
     targetWeight?: number;

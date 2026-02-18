@@ -593,6 +593,7 @@ export function CoachChatModal({
     try {
       const coachContext: CoachContext = {
         mode: currentMode,
+        userName: user?.firstName || undefined,
         conversationHistory: messages.slice(-10),
         userGoals: context?.userGoals ? {
           primaryGoal: context.userGoals.fitnessGoal,

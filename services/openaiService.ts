@@ -41,6 +41,7 @@ export interface WorkoutGuidanceParams {
   activityLevel: string;
   equipmentAccess: string[];
   injuries?: string;
+  userName?: string;
   selectedProgram?: {
     name: string;
     description: string;
@@ -60,6 +61,7 @@ export interface DailyGuidanceParams {
   protein: number;
   carbs: number;
   fat: number;
+  userName?: string;
 }
 
 export interface NutritionGuidanceParams {
@@ -72,6 +74,7 @@ export interface NutritionGuidanceParams {
   intermittentFasting?: boolean;
   fastingWindow?: { start: string; end: string };
   dislikedIngredients?: string[];
+  userName?: string;
 }
 
 /**
@@ -90,7 +93,9 @@ Focus Areas: ${params.selectedProgram.focus.join(', ')}
 `
       : '';
 
-    const prompt = `You are a professional fitness coach. Create a detailed, personalized workout guidance summary (3-4 paragraphs) for a client with the following profile:
+    const nameInstruction = params.userName ? `\nIMPORTANT: The user's name is ${params.userName}. Address them by name throughout your response to make it personal and engaging.\n` : '';
+
+    const prompt = `You are a professional fitness coach.${params.userName ? ` You are speaking directly to ${params.userName}.` : ''} Create a detailed, personalized workout guidance summary (3-4 paragraphs) for ${params.userName ? params.userName : 'a client'} with the following profile:
 
 Goal: ${params.primaryGoal.replace('_', ' ')}
 Training Frequency: ${params.workoutsPerWeek} days per week
@@ -107,14 +112,14 @@ Provide:
 3. Progressive overload strategy (how to advance over time)
 4. Recovery recommendations
 
-Keep it motivating, practical, and specific to their goals${params.selectedProgram ? ' and chosen program' : ' and constraints'}. Write in second person ("you should..."). Be concise but comprehensive.`;
+Keep it motivating, practical, and specific to their goals${params.selectedProgram ? ' and chosen program' : ' and constraints'}. Write in second person ("you should..."). Be concise but comprehensive.${nameInstruction}`;
 
     const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
-          content: 'You are an expert fitness coach providing personalized workout guidance. Be encouraging, specific, and evidence-based.',
+          content: `You are an expert fitness coach providing personalized workout guidance. Be encouraging, specific, and evidence-based.${params.userName ? ` The user's name is ${params.userName}. Address them by name to make it personal.` : ''}`,
         },
         {
           role: 'user',
@@ -148,7 +153,7 @@ export async function generateDailyGuidance(
     const weightChange = params.currentWeight - params.targetWeight;
     const goalDirection = weightChange > 0 ? 'lose' : weightChange < 0 ? 'gain' : 'maintain';
 
-    const prompt = `You are a nutrition and lifestyle coach. Create a brief daily guidance summary (2-3 paragraphs) for a client with the following profile:
+    const prompt = `You are a nutrition and lifestyle coach.${params.userName ? ` You are speaking directly to ${params.userName}.` : ''} Create a brief daily guidance summary (2-3 paragraphs) for ${params.userName ? params.userName : 'a client'} with the following profile:
 
 Goal: ${goalDirection} weight (${params.currentWeight} lbs → ${params.targetWeight} lbs)
 Activity Level: ${params.activityLevel}
@@ -159,14 +164,14 @@ Provide practical daily guidance covering:
 2. Key habits to build or maintain
 3. How to handle challenges (hunger, cravings, social situations)
 
-Keep it actionable, positive, and realistic. Write in second person ("Focus on...", "Make sure to..."). Be encouraging but honest.`;
+Keep it actionable, positive, and realistic. Write in second person ("Focus on...", "Make sure to..."). Be encouraging but honest.${params.userName ? `\nIMPORTANT: The user's name is ${params.userName}. Address them by name throughout your response to make it personal and engaging.` : ''}`;
 
     const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
-          content: 'You are a supportive nutrition and lifestyle coach. Provide practical, evidence-based daily guidance.',
+          content: `You are a supportive nutrition and lifestyle coach. Provide practical, evidence-based daily guidance.${params.userName ? ` The user's name is ${params.userName}. Address them by name to make it personal.` : ''}`,
         },
         {
           role: 'user',
@@ -217,7 +222,7 @@ export async function generateNutritionGuidance(
       ? `Intermittent Fasting: ${params.fastingWindow.start} - ${params.fastingWindow.end}`
       : '';
 
-    const prompt = `You are a nutrition specialist. Create a detailed nutrition guidance summary (3-4 paragraphs) for a client with the following preferences:
+    const prompt = `You are a nutrition specialist.${params.userName ? ` You are speaking directly to ${params.userName}.` : ''} Create a detailed nutrition guidance summary (3-4 paragraphs) for ${params.userName ? params.userName : 'a client'} with the following preferences:
 
 ${dietStyleText}
 ${allergiesText}
@@ -234,14 +239,14 @@ Provide:
 3. Tips for meal prep and planning
 4. How to navigate restaurants or social eating
 
-Keep it practical, varied, and enjoyable. Write in second person. Focus on abundance and what they CAN eat, not just restrictions.`;
+Keep it practical, varied, and enjoyable. Write in second person. Focus on abundance and what they CAN eat, not just restrictions.${params.userName ? `\nIMPORTANT: The user's name is ${params.userName}. Address them by name throughout your response to make it personal and engaging.` : ''}`;
 
     const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
           role: 'system',
-          content: 'You are a knowledgeable nutrition specialist. Provide practical, enjoyable nutrition guidance that respects preferences and constraints.',
+          content: `You are a knowledgeable nutrition specialist. Provide practical, enjoyable nutrition guidance that respects preferences and constraints.${params.userName ? ` The user's name is ${params.userName}. Address them by name to make it personal.` : ''}`,
         },
         {
           role: 'user',
@@ -279,6 +284,7 @@ export interface RestaurantDishParams {
   primaryGoal: string; // 'lose_weight', 'build_muscle', 'maintain'
   allergies?: string[];
   dietaryPreferences?: string[]; // 'vegetarian', 'vegan', 'keto', etc.
+  userName?: string;
 }
 
 /**
@@ -291,7 +297,7 @@ export async function generateRestaurantDishGuidance(
     const percentRemaining = (params.remainingCalories / params.dailyCalories) * 100;
     const budgetStatus = percentRemaining >= 50 ? 'comfortable' : percentRemaining >= 25 ? 'moderate' : 'tight';
 
-    const prompt = `You are a nutrition specialist and accountability coach helping someone make smart dining-out choices. Provide DETAILED, ACTIONABLE guidance for ordering at a ${params.cuisine} restaurant.
+    const prompt = `You are a nutrition specialist and accountability coach helping ${params.userName ? params.userName : 'someone'} make smart dining-out choices. Provide DETAILED, ACTIONABLE guidance for ordering at a ${params.cuisine} restaurant.
 
 CLIENT PROFILE & DAILY TARGETS:
 - Primary Goal: ${params.primaryGoal.replace('_', ' ')}
@@ -328,7 +334,7 @@ PROVIDE DETAILED GUIDANCE IN 4-5 PARAGRAPHS:
    - Beverage recommendations (save calories here!)
    - How to handle sides/extras
 
-Be HONEST, DIRECT, and PRACTICAL. Use actual dish names from ${params.cuisine} cuisine. Focus on ACCOUNTABILITY - help them stay on track while still enjoying eating out. Make recommendations feel achievable, not restrictive.`;
+Be HONEST, DIRECT, and PRACTICAL. Use actual dish names from ${params.cuisine} cuisine. Focus on ACCOUNTABILITY - help them stay on track while still enjoying eating out. Make recommendations feel achievable, not restrictive.${params.userName ? `\nIMPORTANT: The user's name is ${params.userName}. Address them by name to make the interaction feel personal and coach-like.` : ''}`;
 
     console.log('[OpenAI Service] Generating restaurant dish guidance for:', params.cuisine);
 
@@ -337,7 +343,7 @@ Be HONEST, DIRECT, and PRACTICAL. Use actual dish names from ${params.cuisine} c
       messages: [
         {
           role: 'system',
-          content: 'You are a nutrition specialist and accountability coach. Provide detailed, practical restaurant guidance that helps people stay on track with their goals while enjoying dining out. Be specific, honest, and actionable.',
+          content: `You are a nutrition specialist and accountability coach. Provide detailed, practical restaurant guidance that helps people stay on track with their goals while enjoying dining out. Be specific, honest, and actionable.${params.userName ? ` The user's name is ${params.userName}. Address them by name to make it personal and coach-like.` : ''}`,
         },
         {
           role: 'user',
@@ -367,8 +373,14 @@ Be HONEST, DIRECT, and PRACTICAL. Use actual dish names from ${params.cuisine} c
 
 import { DailySnapshot, ChatMessage, formatSnapshotForAI } from './accountabilityCoachService';
 
-const ACCOUNTABILITY_SYSTEM_PROMPT = `You are Coach — an AI accountability coach inside the Heirclark health app.
+function getAccountabilitySystemPrompt(userName?: string): string {
+  const nameGreeting = userName
+    ? `The user's name is ${userName}. ALWAYS address them by name — use "${userName}" naturally in your greeting, throughout the review, and in your closing encouragement. Make it feel like a real 1-on-1 coaching session.`
+    : '';
+
+  return `You are Coach — an AI accountability coach inside the Heirclark health app.
 Your job is to review the user's ENTIRE day of data and give them an honest, detailed accountability report. You are like a real-life coach who sees everything.
+${nameGreeting}
 
 RULES:
 1. Be BRUTALLY HONEST about what you see. If they only logged 1 meal, call it out.
@@ -378,20 +390,22 @@ RULES:
 5. Connect everything to their GOAL — "You said you want to lose weight, but..."
 6. Give 2-3 SPECIFIC action items for tomorrow
 7. End with genuine encouragement tied to their progress
-8. Use second person ("you") and be conversational
+8. Use second person ("you") and be conversational${userName ? ` — and address them as "${userName}"` : ''}
 9. If data is missing, point it out — "I don't see any water logged today"
 10. Keep under 300 words. Be concise but thorough.
 
 FORMAT:
-Start with a greeting and overall day grade (A-F).
+Start with a greeting${userName ? ` using their name ("Hey ${userName}!")` : ''} and overall day grade (A-F).
 Then cover: Nutrition → Training → Hydration → Sleep → Overall adherence.
 End with tomorrow's action items and encouragement.`;
+}
 
 /**
  * Generate the daily accountability summary from the user's full snapshot
  */
 export async function generateAccountabilitySummary(
-  snapshot: DailySnapshot
+  snapshot: DailySnapshot,
+  userName?: string
 ): Promise<string> {
   try {
     const snapshotText = formatSnapshotForAI(snapshot);
@@ -399,7 +413,7 @@ export async function generateAccountabilitySummary(
     const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
-        { role: 'system', content: ACCOUNTABILITY_SYSTEM_PROMPT },
+        { role: 'system', content: getAccountabilitySystemPrompt(userName) },
         {
           role: 'user',
           content: `Here is my complete daily data. Give me my accountability review.\n\n${snapshotText}`,
@@ -427,14 +441,15 @@ export async function generateAccountabilitySummary(
 export async function sendAccountabilityChat(
   message: string,
   snapshot: DailySnapshot,
-  history: ChatMessage[]
+  history: ChatMessage[],
+  userName?: string
 ): Promise<string> {
   try {
     const snapshotText = formatSnapshotForAI(snapshot);
 
     // Build conversation history for context
     const conversationMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
-      { role: 'system', content: ACCOUNTABILITY_SYSTEM_PROMPT + `\n\nYou have access to the user's full daily data:\n${snapshotText}\n\nUse this data to answer follow-up questions with specific numbers and honest assessment.` },
+      { role: 'system', content: getAccountabilitySystemPrompt(userName) + `\n\nYou have access to the user's full daily data:\n${snapshotText}\n\nUse this data to answer follow-up questions with specific numbers and honest assessment.` },
     ];
 
     // Add recent conversation history (last 10 messages)
