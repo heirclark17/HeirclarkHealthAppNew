@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import {
   Flame,
   Dumbbell,
@@ -18,6 +19,8 @@ import {
   Play,
   ChevronRight
 } from 'lucide-react-native';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { NumberText } from '../NumberText';
@@ -52,6 +55,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   const { goalAlignment, preferences, planSummary } = trainingState;
   const hasPlayedHaptic = useRef(false);
   const hasCalculatedResults = useRef(false);
+  const confettiRef = useRef<any>(null);
 
   // AI-generated content state
   const [workoutGuidance, setWorkoutGuidance] = useState<string>('');
@@ -78,10 +82,14 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   }, [state.results, calculateResults]);
 
   useEffect(() => {
-    // Play haptic once
+    // Play haptic and confetti once
     if (!hasPlayedHaptic.current) {
       hasPlayedHaptic.current = true;
       successNotification();
+      // Trigger confetti after a tiny delay
+      setTimeout(() => {
+        confettiRef.current?.start();
+      }, 100);
     }
   }, []);
 
@@ -234,13 +242,25 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   }
 
   return (
-    <ScrollView
-      style={styles.scrollContainer}
-      contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Success Icon */}
-      <View style={styles.iconContainer}>
+    <View style={{ flex: 1 }}>
+      {/* Confetti Celebration */}
+      <ConfettiCannon
+        ref={confettiRef}
+        count={200}
+        origin={{ x: SCREEN_WIDTH / 2, y: 0 }}
+        autoStart={false}
+        fadeOut
+        fallSpeed={3000}
+        colors={['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6ab04c', '#badc58', '#f0932b', '#eb4d4b', '#686de0', '#be2edd']}
+      />
+
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Success Icon */}
+        <View style={styles.iconContainer}>
         <View style={styles.checkContainer}>
           <View style={styles.checkCircle}>
             <Target size={48} color={Colors.background} />
@@ -587,6 +607,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 }
 
