@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -13,6 +14,7 @@ import Animated, {
   SlideInLeft,
   SlideOutRight,
 } from 'react-native-reanimated';
+import { CheckCircle2 } from 'lucide-react-native';
 
 import { useRouter } from 'expo-router';
 import { Colors, DarkColors, LightColors } from '../../constants/Theme';
@@ -62,6 +64,7 @@ function GoalWizardContent() {
   const { generateAIWorkoutPlan, state: trainingState, selectProgram, selectProgramAndGenerate, getEnhancedPrograms } = useTraining();
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isLoadingSuccess, setIsLoadingSuccess] = useState(false);
   const [showCoachingModal, setShowCoachingModal] = useState(false);
   const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false);
   const [isGeneratingTrainingPlan, setIsGeneratingTrainingPlan] = useState(false);
@@ -123,7 +126,14 @@ function GoalWizardContent() {
   };
 
   const handleConfirm = () => {
-    setShowSuccess(true);
+    // Show loading screen while calculating results
+    setIsLoadingSuccess(true);
+
+    // Simulate calculation time (2 seconds)
+    setTimeout(() => {
+      setIsLoadingSuccess(false);
+      setShowSuccess(true);
+    }, 2000);
   };
 
   const handleAdjust = () => {
@@ -288,6 +298,38 @@ function GoalWizardContent() {
     userName: isAuthenticated && user?.firstName ? user.firstName : null,
   };
 
+  // Loading screen (transition)
+  if (isLoadingSuccess) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]}>
+        <View style={styles.loadingContainer}>
+          <View style={styles.loadingContent}>
+            <Animated.View
+              entering={SlideInRight.duration(400)}
+              style={styles.loadingIconContainer}
+            >
+              <View style={[styles.loadingCircle, { backgroundColor: colors.primary }]}>
+                <CheckCircle2 size={48} color={Colors.background} />
+              </View>
+            </Animated.View>
+            <Animated.Text
+              entering={SlideInRight.duration(400).delay(200)}
+              style={[styles.loadingTitle, { color: colors.text }]}
+            >
+              Preparing Your Plan...
+            </Animated.Text>
+            <Animated.Text
+              entering={SlideInRight.duration(400).delay(400)}
+              style={[styles.loadingSubtitle, { color: colors.textSecondary }]}
+            >
+              Calculating personalized targets
+            </Animated.Text>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   // Success screen
   if (showSuccess || state.isComplete) {
     return (
@@ -387,5 +429,35 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingContent: {
+    alignItems: 'center',
+    gap: 24,
+  },
+  loadingIconContainer: {
+    marginBottom: 16,
+  },
+  loadingCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  loadingSubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    opacity: 0.7,
   },
 });
