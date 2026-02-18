@@ -960,8 +960,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
     color: Colors.textMuted,
     textTransform: 'uppercase',
@@ -1078,8 +1077,7 @@ const styles = StyleSheet.create({
   },
   cardioSectionTitle: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
     color: Colors.error,
     textTransform: 'uppercase',
