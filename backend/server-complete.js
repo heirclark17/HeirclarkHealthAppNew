@@ -1467,9 +1467,13 @@ app.delete('/api/v1/meals/:mealId', authenticateToken, async (req, res) => {
 // SAVED MEALS (Favorites)
 // ============================================
 
-// Deduplicate and add unique constraint on startup
+// Deduplicate, add unique constraint, and ensure instructions column exists on startup
 (async () => {
   try {
+    // Add instructions column if it doesn't exist
+    await pool.query(`
+      ALTER TABLE saved_meals ADD COLUMN IF NOT EXISTS instructions JSONB DEFAULT '[]'::jsonb
+    `);
     // Remove duplicate saved meals (keep the one with most recent last_used_at or created_at)
     await pool.query(`
       DELETE FROM saved_meals a USING saved_meals b
@@ -1481,7 +1485,7 @@ app.delete('/api/v1/meals/:mealId', authenticateToken, async (req, res) => {
       CREATE UNIQUE INDEX IF NOT EXISTS idx_saved_meals_user_meal
       ON saved_meals (user_id, meal_name)
     `);
-    console.log('[Saved Meals] Unique constraint ready, duplicates cleaned');
+    console.log('[Saved Meals] Unique constraint ready, instructions column ensured, duplicates cleaned');
   } catch (err) {
     console.error('[Saved Meals] Dedup/index error:', err.message);
   }
@@ -1501,16 +1505,19 @@ app.get('/api/v1/meals/saved', authenticateToken, async (req, res) => {
 
 app.post('/api/v1/meals/saved', authenticateToken, async (req, res) => {
   try {
-    const { mealName, mealType, calories, protein, carbs, fat, ingredients, recipe, prepTimeMinutes, photoUrl, tags } = req.body;
+    const { mealName, mealType, calories, protein, carbs, fat, ingredients, instructions, recipe, prepTimeMinutes, photoUrl, tags } = req.body;
 
     const saved = await pool.query(
-      `INSERT INTO saved_meals (user_id, meal_name, meal_type, calories, protein, carbs, fat, ingredients, recipe, prep_time_minutes, photo_url, tags)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      `INSERT INTO saved_meals (user_id, meal_name, meal_type, calories, protein, carbs, fat, ingredients, instructions, recipe, prep_time_minutes, photo_url, tags)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        ON CONFLICT (user_id, meal_name) DO UPDATE SET
          photo_url = COALESCE(NULLIF(EXCLUDED.photo_url, ''), saved_meals.photo_url),
+         ingredients = COALESCE(EXCLUDED.ingredients, saved_meals.ingredients),
+         instructions = COALESCE(EXCLUDED.instructions, saved_meals.instructions),
+         recipe = COALESCE(NULLIF(EXCLUDED.recipe, ''), saved_meals.recipe),
          last_used_at = NOW()
        RETURNING *`,
-      [req.userId, mealName, mealType, calories, protein, carbs, fat, JSON.stringify(ingredients || []), recipe, prepTimeMinutes, photoUrl || '', tags || []]
+      [req.userId, mealName, mealType, calories, protein, carbs, fat, JSON.stringify(ingredients || []), JSON.stringify(instructions || []), recipe, prepTimeMinutes, photoUrl || '', tags || []]
     );
 
     res.json({ success: true, savedMeal: saved.rows[0] });

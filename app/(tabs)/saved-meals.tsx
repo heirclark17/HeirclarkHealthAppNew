@@ -421,22 +421,18 @@ export default function SavedMealsScreen() {
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Your meal collection</Text>
       </Animated.View>
 
-      {/* Stats Card */}
-      <Animated.View entering={statsAnimation}>
-        <GlassCard style={styles.statsCard}>
-          <View style={styles.statsRow}>
-            <GlassCard style={styles.statItemCard} borderColor="transparent">
-              <Bookmark size={20} color={colors.primary} strokeWidth={1.5} />
-              <NumberText weight="semiBold" style={[styles.statValue, { color: colors.text }]}>{stats.total}</NumberText>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Meals</Text>
-            </GlassCard>
-            <GlassCard style={styles.statItemCard} borderColor="transparent">
-              <Heart size={20} color="#ff6b6b" strokeWidth={1.5} />
-              <NumberText weight="semiBold" style={[styles.statValue, { color: '#ff6b6b' }]}>{stats.favorites}</NumberText>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Favorites</Text>
-            </GlassCard>
-          </View>
-        </GlassCard>
+      {/* Compact Stats Row */}
+      <Animated.View entering={statsAnimation} style={styles.statsRow}>
+        <View style={[styles.statChip, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
+          <Bookmark size={14} color={colors.primary} strokeWidth={1.5} />
+          <NumberText weight="semiBold" style={[styles.statChipValue, { color: colors.text }]}>{stats.total}</NumberText>
+          <Text style={[styles.statChipLabel, { color: colors.textSecondary }]}>saved</Text>
+        </View>
+        <View style={[styles.statChip, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }]}>
+          <Heart size={14} color="#ff6b6b" strokeWidth={1.5} />
+          <NumberText weight="semiBold" style={[styles.statChipValue, { color: '#ff6b6b' }]}>{stats.favorites}</NumberText>
+          <Text style={[styles.statChipLabel, { color: colors.textSecondary }]}>favorites</Text>
+        </View>
       </Animated.View>
 
       {/* Search Input */}
@@ -646,8 +642,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
   },
   title: {
     fontSize: 32,
@@ -660,26 +656,24 @@ const styles = StyleSheet.create({
     marginTop: 4,
     letterSpacing: 0.5,
   },
-  statsCard: {
-    marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.md,
-    padding: Spacing.md,
-  },
   statsRow: {
     flexDirection: 'row',
-    gap: 12,
-  },
-  statItemCard: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
     gap: 8,
   },
-  statValue: {
-    fontSize: 28,
+  statChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
-  statLabel: {
+  statChipValue: {
+    fontSize: 15,
+  },
+  statChipLabel: {
     fontSize: 11,
     fontFamily: Fonts.regular,
   },
@@ -736,7 +730,7 @@ const styles = StyleSheet.create({
   },
   mealPhoto: {
     width: '100%',
-    height: 160,
+    height: 120,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },

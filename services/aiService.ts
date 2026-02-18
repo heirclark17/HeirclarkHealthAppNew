@@ -956,30 +956,43 @@ class AIService {
         console.log('[AIService] ✅ Loaded', backendMeals.length, 'saved meals from backend');
 
         // Convert backend format to local format and cache locally
-        const localFormat: SavedMeal[] = backendMeals.map((m: any) => ({
-          id: m.id,
-          meal: {
+        const localFormat: SavedMeal[] = backendMeals.map((m: any) => {
+          // Parse ingredients if stored as JSON string
+          let ingredients = m.ingredients || [];
+          if (typeof ingredients === 'string') {
+            try { ingredients = JSON.parse(ingredients); } catch { ingredients = []; }
+          }
+          // Parse instructions if stored as JSON string
+          let instructions = m.instructions || [];
+          if (typeof instructions === 'string') {
+            try { instructions = JSON.parse(instructions); } catch { instructions = []; }
+          }
+          return {
             id: m.id,
-            name: m.mealName || m.meal_name,
-            mealType: m.mealType || m.meal_type || 'lunch',
-            description: m.recipe || '',
-            nutrients: {
-              calories: m.calories,
-              protein_g: m.protein,
-              carbs_g: m.carbs,
-              fat_g: m.fat,
+            meal: {
+              id: m.id,
+              name: m.mealName || m.meal_name,
+              mealType: m.mealType || m.meal_type || 'lunch',
+              description: m.recipe || '',
+              nutrients: {
+                calories: m.calories,
+                protein_g: m.protein,
+                carbs_g: m.carbs,
+                fat_g: m.fat,
+              },
+              prepTimeMinutes: m.prepTimeMinutes || m.prep_time_minutes || 15,
+              servings: m.servings || 1,
+              ingredients,
+              instructions,
+              tags: m.tags || [],
+              imageUrl: m.photoUrl || m.photo_url || undefined,
             },
-            prepTimeMinutes: m.prepTimeMinutes || m.prep_time_minutes || 15,
-            servings: m.servings || 1,
-            ingredients: m.ingredients || [],
-            tags: m.tags || [],
-            imageUrl: m.photoUrl || m.photo_url || undefined,
-          },
-          savedAt: m.lastUsedAt || m.last_used_at || new Date().toISOString(),
-          source: 'custom',
-          isFavorite: (m.useCount || m.use_count || 0) > 3,
-          timesUsed: m.useCount || m.use_count || 0,
-        }));
+            savedAt: m.lastUsedAt || m.last_used_at || new Date().toISOString(),
+            source: 'custom' as const,
+            isFavorite: (m.useCount || m.use_count || 0) > 3,
+            timesUsed: m.useCount || m.use_count || 0,
+          };
+        });
 
         // Deduplicate by meal name (keep most recent)
         const seen = new Map<string, SavedMeal>();
@@ -1067,6 +1080,7 @@ class AIService {
           carbs: meal.nutrients.carbs_g,
           fat: meal.nutrients.fat_g,
           ingredients: meal.ingredients,
+          instructions: meal.instructions || [],
           recipe: meal.description,
           prepTimeMinutes: meal.prepTimeMinutes,
           photoUrl: meal.imageUrl || '',
