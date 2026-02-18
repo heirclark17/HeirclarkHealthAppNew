@@ -290,8 +290,31 @@ interface ActivityCardProps {
 }
 
 function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: ActivityCardProps) {
-  // Selected tint color
-  const selectedBg = isDark ? 'rgba(78, 205, 196, 0.15)' : 'rgba(78, 205, 196, 0.12)';
+  // Progressive color scheme from cold (blue) to hot (red) based on activity level
+  const getActivityColor = (activityId: string) => {
+    const colorMap = {
+      sedentary: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.12)', // Blue
+      light: isDark ? 'rgba(6, 182, 212, 0.15)' : 'rgba(6, 182, 212, 0.12)', // Cyan
+      moderate: isDark ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.12)', // Amber/Orange
+      very: isDark ? 'rgba(249, 115, 22, 0.15)' : 'rgba(249, 115, 22, 0.12)', // Orange
+      extra: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.12)', // Red
+    };
+    return colorMap[activityId as keyof typeof colorMap] || (isDark ? 'rgba(78, 205, 196, 0.15)' : 'rgba(78, 205, 196, 0.12)');
+  };
+
+  const getActivityIconColor = (activityId: string) => {
+    const colorMap = {
+      sedentary: '#3B82F6', // Blue
+      light: '#06B6D4', // Cyan
+      moderate: '#F59E0B', // Amber/Orange
+      very: '#F97316', // Orange
+      extra: '#EF4444', // Red
+    };
+    return colorMap[activityId as keyof typeof colorMap] || Colors.success;
+  };
+
+  const selectedBg = getActivityColor(option.id);
+  const iconColor = getActivityIconColor(option.id);
 
   const handlePress = async () => {
     await selectionFeedback();
@@ -317,12 +340,12 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                 <View style={[styles.activityIcon, isSelected && styles.activityIconSelected]}>
                   <IconComponent
                     size={22}
-                    color={isSelected ? Colors.success : colors.textMuted}
+                    color={isSelected ? iconColor : colors.textMuted}
                   />
                 </View>
               </View>
               <View style={styles.activityContent}>
-                <Text style={[styles.activityTitle, { color: colors.text }, isSelected && styles.activityTitleSelected]}>
+                <Text style={[styles.activityTitle, { color: isSelected ? iconColor : colors.text }]}>
                   {option.title}
                 </Text>
                 <Text style={[styles.activityDescription, { color: colors.textSecondary }]}>
@@ -347,7 +370,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                 <Text style={[styles.activityExample, { color: colors.textMuted }]}>{option.example}</Text>
               </View>
               {isSelected && (
-                <CheckCircle2 size={24} color={Colors.success} />
+                <CheckCircle2 size={24} color={iconColor} />
               )}
             </View>
           </GlassCard>
