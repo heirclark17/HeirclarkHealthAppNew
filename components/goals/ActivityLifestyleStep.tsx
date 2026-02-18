@@ -1328,6 +1328,7 @@ const styles = StyleSheet.create({
   },
   oneRMCard: {
     padding: 16,
+    borderRadius: 20,
   },
   oneRMLabel: {
     fontSize: 13,
