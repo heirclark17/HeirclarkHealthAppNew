@@ -732,56 +732,62 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                 <View style={styles.oneRMContainer}>
                   {/* Bench Press 1RM */}
                   <View style={styles.oneRMInput}>
-                    <Text style={[styles.oneRMLabel, { color: colors.text }]}>Bench Press</Text>
-                    <View style={styles.oneRMInputRow}>
-                      <ScrollableNumberPicker
-                        value={state.benchPress1RM}
-                        onChange={setBenchPress1RM}
-                        min={45}
-                        max={500}
-                        step={5}
-                        placeholder={185}
-                        colors={colors}
-                        isDark={isDark}
-                      />
-                      <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
-                    </View>
+                    <GlassCard style={styles.oneRMCard} interactive>
+                      <Text style={[styles.oneRMLabel, { color: colors.text }]}>Bench Press</Text>
+                      <View style={styles.oneRMInputRow}>
+                        <ScrollableNumberPicker
+                          value={state.benchPress1RM}
+                          onChange={setBenchPress1RM}
+                          min={45}
+                          max={500}
+                          step={5}
+                          placeholder={185}
+                          colors={colors}
+                          isDark={isDark}
+                        />
+                        <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                      </View>
+                    </GlassCard>
                   </View>
 
                   {/* Squat 1RM */}
                   <View style={styles.oneRMInput}>
-                    <Text style={[styles.oneRMLabel, { color: colors.text }]}>Squat</Text>
-                    <View style={styles.oneRMInputRow}>
-                      <ScrollableNumberPicker
-                        value={state.squat1RM}
-                        onChange={setSquat1RM}
-                        min={45}
-                        max={600}
-                        step={5}
-                        placeholder={225}
-                        colors={colors}
-                        isDark={isDark}
-                      />
-                      <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
-                    </View>
+                    <GlassCard style={styles.oneRMCard} interactive>
+                      <Text style={[styles.oneRMLabel, { color: colors.text }]}>Squat</Text>
+                      <View style={styles.oneRMInputRow}>
+                        <ScrollableNumberPicker
+                          value={state.squat1RM}
+                          onChange={setSquat1RM}
+                          min={45}
+                          max={600}
+                          step={5}
+                          placeholder={225}
+                          colors={colors}
+                          isDark={isDark}
+                        />
+                        <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                      </View>
+                    </GlassCard>
                   </View>
 
                   {/* Deadlift 1RM */}
                   <View style={styles.oneRMInput}>
-                    <Text style={[styles.oneRMLabel, { color: colors.text }]}>Deadlift</Text>
-                    <View style={styles.oneRMInputRow}>
-                      <ScrollableNumberPicker
-                        value={state.deadlift1RM}
-                        onChange={setDeadlift1RM}
-                        min={45}
-                        max={700}
-                        step={5}
-                        placeholder={275}
-                        colors={colors}
-                        isDark={isDark}
-                      />
-                      <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
-                    </View>
+                    <GlassCard style={styles.oneRMCard} interactive>
+                      <Text style={[styles.oneRMLabel, { color: colors.text }]}>Deadlift</Text>
+                      <View style={styles.oneRMInputRow}>
+                        <ScrollableNumberPicker
+                          value={state.deadlift1RM}
+                          onChange={setDeadlift1RM}
+                          min={45}
+                          max={700}
+                          step={5}
+                          placeholder={275}
+                          colors={colors}
+                          isDark={isDark}
+                        />
+                        <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                      </View>
+                    </GlassCard>
                   </View>
                 </View>
                 <GlassCard style={styles.oneRMNote} interactive>
@@ -1319,6 +1325,9 @@ const styles = StyleSheet.create({
   },
   oneRMInput: {
     marginBottom: 12,
+  },
+  oneRMCard: {
+    padding: 16,
   },
   oneRMLabel: {
     fontSize: 13,
