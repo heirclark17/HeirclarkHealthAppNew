@@ -608,7 +608,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Weight Section */}
       <GlassSection isDark={isDark}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>WEIGHT</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>WEIGHT</Text>
           <ToggleButton
             options={[
               { value: 'lb', label: 'lb' },
@@ -649,7 +649,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Start Date Section */}
       <GlassSection isDark={isDark}>
-        <Text style={styles.sectionTitle}>WHEN DO YOU WANT TO START?</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>WHEN DO YOU WANT TO START?</Text>
         <TouchableOpacity
           style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
           onPress={() => setShowStartDatePicker(true)}
@@ -659,7 +659,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           accessibilityHint="Opens date picker to select when you want to start"
         >
           <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
-          <NumberText weight="light" style={[styles.datePickerButtonText, { color: colors.text }]}>
+          <NumberText weight="semiBold" style={[styles.datePickerButtonText, { color: colors.text }]}>
             {formatDateForDisplay(state.startDate)}
           </NumberText>
         </TouchableOpacity>
@@ -693,7 +693,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Target Date Section - Show for all goals except maintain */}
       {state.primaryGoal !== 'maintain' && (
         <GlassSection isDark={isDark}>
-          <Text style={styles.sectionTitle}>WHEN DO YOU WANT TO REACH YOUR GOAL?</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>WHEN DO YOU WANT TO REACH YOUR GOAL?</Text>
           <TouchableOpacity
             style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
             onPress={() => setShowTargetDatePicker(true)}
@@ -703,7 +703,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             accessibilityHint="Opens date picker to select your goal completion date"
           >
             <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
-            <NumberText weight="light" style={[styles.datePickerButtonText, { color: colors.text }]}>
+            <NumberText weight="semiBold" style={[styles.datePickerButtonText, { color: colors.text }]}>
               {formatDateForDisplay(state.targetDate)}
             </NumberText>
           </TouchableOpacity>
@@ -739,7 +739,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Height Section */}
       <GlassSection isDark={isDark}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>HEIGHT</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>HEIGHT</Text>
           <ToggleButton
             options={[
               { value: 'ft_in', label: 'ft/in' },
@@ -791,7 +791,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Age Section - Using simple picker */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>AGE</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: 12, color: colors.text }]}>AGE</Text>
         <SimplePicker
           data={ageData}
           selectedValue={state.age}
@@ -803,7 +803,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Biological Sex Section */}
       <GlassSection isDark={isDark}>
-        <Text style={styles.sectionTitle}>BIOLOGICAL SEX</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>BIOLOGICAL SEX</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Used for accurate BMR calculation</Text>
         <View style={styles.sexToggle}>
           <TouchableOpacity
@@ -950,13 +950,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
-    color: Colors.text,
     textTransform: 'uppercase',
   },
   sectionSubtitle: {
     fontSize: 12,
     fontFamily: Fonts.light,
-    color: Colors.textMuted,
     marginTop: 4,
     marginBottom: 12,
   },
@@ -1209,8 +1207,7 @@ const styles = StyleSheet.create({
   },
   sexText: {
     fontSize: 15,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
   },
   // Button Styles
