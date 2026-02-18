@@ -125,7 +125,6 @@ export function TodaysWorkoutCard({
             <Text
               style={[styles.value, { color: colors.text }]}
               numberOfLines={2}
-              adjustsFontSizeToFit
             >
               {isRestDay ? 'Rest Day' : (propWorkoutName || workoutType)}
             </Text>
