@@ -432,7 +432,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       {/* Workouts Per Week */}
       <GlassSection>
-        <Text style={styles.sectionTitle}>WORKOUTS PER WEEK</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>WORKOUTS PER WEEK</Text>
         <View style={styles.workoutChips}>
           {[0, 1, 2, 3, 4, 5, 6, 7].map((num) => {
             const isSelected = state.workoutsPerWeek === num;
@@ -473,7 +473,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       {/* Workout Duration */}
       <GlassSection>
-        <Text style={styles.sectionTitle}>TYPICAL WORKOUT DURATION</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>TYPICAL WORKOUT DURATION</Text>
         <View style={styles.durationChips}>
           {WORKOUT_DURATIONS.map((duration) => {
             const isSelected = state.workoutDuration === duration;
@@ -527,7 +527,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       {/* Fitness Level */}
       <GlassSection>
-        <Text style={styles.sectionTitle}>FITNESS EXPERIENCE LEVEL</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>FITNESS EXPERIENCE LEVEL</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Help us tailor workout intensity and complexity
         </Text>
@@ -553,7 +553,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       <GlassSection>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
           <Weight size={16} color={Colors.primary} style={{ marginRight: 8 }} />
-          <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>STRENGTH TRAINING BASELINE</Text>
+          <Text style={[styles.sectionTitle, { marginBottom: 0, color: colors.text }]}>STRENGTH TRAINING BASELINE</Text>
         </View>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Help us personalize weight recommendations for strength workouts
@@ -714,7 +714,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       {/* Available Equipment */}
       <GlassSection>
-        <Text style={styles.sectionTitle}>AVAILABLE EQUIPMENT</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>AVAILABLE EQUIPMENT</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select all equipment you have access to (select multiple)
         </Text>
@@ -769,7 +769,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       {/* Injuries / Limitations */}
       <GlassSection>
-        <Text style={styles.sectionTitle}>INJURIES OR LIMITATIONS</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>INJURIES OR LIMITATIONS</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select any areas to avoid or modify exercises for (optional)
         </Text>
@@ -959,14 +959,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
-    color: Colors.text,
     textTransform: 'uppercase',
     marginBottom: 12,
   },
   sectionSubtitle: {
     fontSize: 13,
     fontFamily: Fonts.light,
-    color: Colors.textMuted,
     marginBottom: 16,
     lineHeight: 18,
   },
