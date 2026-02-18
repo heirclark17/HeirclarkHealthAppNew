@@ -1602,7 +1602,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   prefSectionCard: {
-    marginBottom: 12,
+    marginBottom: 20,
     padding: 14,
   },
   prefRow: {

@@ -1050,8 +1050,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
   continueButton: {
@@ -1063,8 +1062,7 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
   // Cardio preference styles
