@@ -897,7 +897,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
           <GlassCard style={styles.foodPreferencesCard} interactive>
             <View style={styles.foodPrefsHeader}>
               <View style={styles.foodPrefsIconContainer}>
-                <Apple size={24} color={Colors.success} />
+                <Apple size={28} color={Colors.success} />
               </View>
               <View style={styles.foodPrefsHeaderText}>
                 <Text style={styles.foodPrefsTitle}>YOUR NUTRITION PREFERENCES</Text>
@@ -965,10 +965,14 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
                   <Clock size={16} color={Colors.warning} />
-                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Fasting Window: </Text>
-                  <Text style={[styles.prefValue, { color: colors.text }]}>
-                    {state.fastingStart} - {state.fastingEnd}
-                  </Text>
+                  <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Fasting Window</Text>
+                </View>
+                <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                  <View style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
+                    <Text style={[styles.prefTagText, { color: Colors.warning }]}>
+                      {state.fastingStart} - {state.fastingEnd}
+                    </Text>
+                  </View>
                 </View>
               </GlassCard>
             )}
@@ -1092,47 +1096,71 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 {/* Meal Diversity */}
                 {foodPrefs.preferences.mealDiversity && (
-                  <View style={styles.prefRow}>
-                    <Settings size={16} color={colors.primary} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Variety: </Text>
-                    <Text style={[styles.prefValue, { color: colors.text }]}>
-                      {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily' : 'Diverse Meals'}
-                    </Text>
+                  <View style={{ marginBottom: 12 }}>
+                    <View style={styles.prefRow}>
+                      <Settings size={16} color={colors.primary} />
+                      <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Variety</Text>
+                    </View>
+                    <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                      <View style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
+                        <Text style={[styles.prefTagText, { color: colors.text }]}>
+                          {foodPrefs.preferences.mealDiversity === 'sameDaily' ? 'Same Meals Daily' : 'Diverse Meals'}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 )}
 
                 {/* Meal Style */}
                 {foodPrefs.preferences.mealStyle && (
-                  <View style={styles.prefRow}>
-                    <Clock size={16} color={Colors.warning} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style: </Text>
-                    <Text style={[styles.prefValue, { color: colors.text }]}>
-                      {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer Larger Meals'}
-                    </Text>
+                  <View style={{ marginBottom: 12 }}>
+                    <View style={styles.prefRow}>
+                      <Clock size={16} color={Colors.warning} />
+                      <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Meal Style</Text>
+                    </View>
+                    <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                      <View style={[styles.prefTag, { backgroundColor: 'rgba(255, 179, 71, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: Colors.warning }]}>
+                          {foodPrefs.preferences.mealStyle === 'threePlusSnacks' ? '3 Meals + Snacks' : 'Fewer Larger Meals'}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 )}
 
                 {/* Cheat Days */}
                 {foodPrefs.preferences.cheatDays && foodPrefs.preferences.cheatDays.length > 0 && (
-                  <View style={styles.prefRow}>
-                    <Calendar size={16} color={colors.primary} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days: </Text>
-                    <NumberText weight="light" style={[styles.prefValue, { color: colors.text }]}>
-                      {foodPrefs.preferences.cheatDays.length}
-                    </NumberText>
-                    <Text style={[styles.prefValue, { color: colors.text }]}> per week</Text>
+                  <View style={{ marginBottom: 12 }}>
+                    <View style={styles.prefRow}>
+                      <Calendar size={16} color={colors.primary} />
+                      <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days</Text>
+                    </View>
+                    <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                      <View style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
+                        <NumberText weight="semiBold" style={[styles.prefTagText, { color: colors.text }]}>
+                          {foodPrefs.preferences.cheatDays.length}
+                        </NumberText>
+                        <Text style={[styles.prefTagText, { color: colors.text }]}> per week</Text>
+                      </View>
+                    </View>
                   </View>
                 )}
 
                 {/* Cooking Skill */}
                 {foodPrefs.preferences.cookingSkill && (
-                  <View style={styles.prefRow}>
-                    <Flame size={16} color={Colors.error} />
-                    <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cooking Skill: </Text>
-                    <Text style={[styles.prefValue, { color: colors.text }]}>
-                      {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
-                       foodPrefs.preferences.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
-                    </Text>
+                  <View>
+                    <View style={styles.prefRow}>
+                      <Flame size={16} color={Colors.error} />
+                      <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cooking Skill</Text>
+                    </View>
+                    <View style={[styles.prefTagsRow, { marginTop: 8 }]}>
+                      <View style={[styles.prefTag, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
+                        <Text style={[styles.prefTagText, { color: Colors.error }]}>
+                          {foodPrefs.preferences.cookingSkill === 'beginner' ? 'Beginner' :
+                           foodPrefs.preferences.cookingSkill === 'intermediate' ? 'Intermediate' : 'Advanced'}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 )}
               </GlassCard>
@@ -1240,8 +1268,7 @@ const styles = StyleSheet.create({
   },
   calorieLabel: {
     fontSize: 11,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 2,
     color: Colors.textMuted,
     marginBottom: 8,
@@ -1283,8 +1310,7 @@ const styles = StyleSheet.create({
   },
   macroSectionTitle: {
     fontSize: 11,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 2,
     color: Colors.textMuted,
     marginBottom: 4,
@@ -1299,8 +1325,7 @@ const styles = StyleSheet.create({
   },
   macroLabel: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
   },
   macroValue: {
@@ -1339,8 +1364,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 10,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
     color: Colors.textMuted,
   },
@@ -1364,8 +1388,7 @@ const styles = StyleSheet.create({
   },
   weeklyRateLabel: {
     fontSize: 10,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
     color: Colors.textMuted,
     marginBottom: 4,
@@ -1411,8 +1434,7 @@ const styles = StyleSheet.create({
   },
   timelineTitle: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     marginBottom: 2,
   },
@@ -1459,16 +1481,14 @@ const styles = StyleSheet.create({
   },
   workoutPlanTitle: {
     fontSize: 10,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
     color: Colors.success,
     marginBottom: 2,
   },
   workoutPlanSubtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
   },
   workoutStatsRow: {
@@ -1487,8 +1507,7 @@ const styles = StyleSheet.create({
   },
   workoutStatLabel: {
     fontSize: 10,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -1571,12 +1590,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 28,
   },
   foodPrefsIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: 'rgba(78, 205, 196, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1585,17 +1604,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   foodPrefsTitle: {
-    fontSize: 10,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontSize: 12,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
     color: Colors.success,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   foodPrefsSubtitle: {
-    fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontSize: 18,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
   },
   prefSection: {
@@ -1613,8 +1630,7 @@ const styles = StyleSheet.create({
   },
   prefLabel: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
   },
   prefValue: {
@@ -1692,14 +1708,14 @@ const styles = StyleSheet.create({
   },
   profileTitle: {
     fontSize: 10,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
     color: Colors.success,
     marginBottom: 2,
   },
   profileSubtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
   },
   profileSection: {
@@ -1707,7 +1723,7 @@ const styles = StyleSheet.create({
   },
   profileSectionTitle: {
     fontSize: 11,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 2,
     color: Colors.textMuted,
     marginBottom: 16,
@@ -1729,7 +1745,7 @@ const styles = StyleSheet.create({
   },
   profileDataLabel: {
     fontSize: 10,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     marginBottom: 6,
   },
@@ -1772,7 +1788,7 @@ const styles = StyleSheet.create({
   },
   profileStatLabel: {
     fontSize: 9,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
     color: Colors.textMuted,
     textAlign: 'center',
@@ -1793,7 +1809,7 @@ const styles = StyleSheet.create({
   },
   trainingSectionTitle: {
     fontSize: 11,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 2,
     color: Colors.textMuted,
     marginBottom: 16,
@@ -1862,7 +1878,7 @@ const styles = StyleSheet.create({
   },
   scheduleLabel: {
     fontSize: 8,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     textAlign: 'center',
     letterSpacing: 0.3,
