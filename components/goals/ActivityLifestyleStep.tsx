@@ -436,7 +436,6 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         <View style={styles.workoutChips}>
           {[0, 1, 2, 3, 4, 5, 6, 7].map((num) => {
             const isSelected = state.workoutsPerWeek === num;
-            const selectedBg = isSelected ? Colors.success : undefined;
             return (
               <TouchableOpacity
                 key={num}
@@ -452,7 +451,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                 <GlassCard
                   style={[
                     styles.workoutChip,
-                    isSelected && { backgroundColor: selectedBg }
+                    isSelected && { backgroundColor: primaryGlassBg }
                   ]}
                   interactive
                 >
@@ -461,7 +460,6 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                     style={[
                       styles.workoutChipText,
                       { color: colors.text },
-                      isSelected && styles.workoutChipTextSelected,
                     ]}
                   >
                     {num}
@@ -479,7 +477,6 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         <View style={styles.durationChips}>
           {WORKOUT_DURATIONS.map((duration) => {
             const isSelected = state.workoutDuration === duration;
-            const selectedBg = isSelected ? Colors.success : undefined;
             return (
               <TouchableOpacity
                 key={duration}
@@ -493,9 +490,9 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                 accessibilityState={{ selected: isSelected }}
                 accessibilityHint="Sets typical workout session length"
               >
-                <GlassCard style={[styles.chip, isSelected && { backgroundColor: selectedBg }, { borderWidth: 0 }]} borderColor="transparent" interactive>
-                  <Text style={[styles.chipText, { color: colors.text }, isSelected && styles.chipTextSelected]}>
-                    <NumberText weight="light" style={[{ fontSize: 14 }, { color: colors.text }, isSelected && styles.chipTextSelected]}>
+                <GlassCard style={[styles.chip, isSelected && { backgroundColor: primaryGlassBg }, { borderWidth: 0 }]} borderColor="transparent" interactive>
+                  <Text style={[styles.chipText, { color: colors.text }]}>
+                    <NumberText weight="light" style={[{ fontSize: 14 }, { color: colors.text }]}>
                       {duration}
                     </NumberText>
                     {' min'}
@@ -724,7 +721,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         <View style={styles.equipmentGrid}>
           {EQUIPMENT_OPTIONS.map((equipment) => {
             const isSelected = state.availableEquipment.includes(equipment.id);
-            const selectedBg = isSelected ? Colors.primary : undefined;
+            const equipmentSelectedBg = isDark ? 'rgba(99, 102, 241, 0.20)' : 'rgba(99, 102, 241, 0.15)';
             const IconComponent = equipment.icon;
             return (
               <TouchableOpacity
@@ -741,20 +738,19 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                 <GlassCard
                   style={[
                     styles.equipmentChip,
-                    isSelected && { backgroundColor: selectedBg }
+                    isSelected && { backgroundColor: equipmentSelectedBg }
                   ]}
                   interactive
                 >
                   <IconComponent
                     size={18}
-                    color={isSelected ? Colors.background : colors.textMuted}
+                    color={isSelected ? Colors.primary : colors.textMuted}
                     style={{ marginRight: 6 }}
                   />
                   <Text
                     style={[
                       styles.equipmentChipText,
                       { color: colors.text },
-                      isSelected && styles.equipmentChipTextSelected,
                     ]}
                   >
                     {equipment.label}
@@ -780,7 +776,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         <View style={styles.injuryGrid}>
           {INJURY_OPTIONS.map((injury) => {
             const isSelected = state.injuries.includes(injury.id);
-            const selectedBg = isSelected ? Colors.warning : undefined;
+            const injurySelectedBg = isDark ? 'rgba(255, 183, 77, 0.20)' : 'rgba(255, 183, 77, 0.15)';
             return (
               <TouchableOpacity
                 key={injury.id}
@@ -796,7 +792,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                 <GlassCard
                   style={[
                     styles.injuryChip,
-                    isSelected && { backgroundColor: selectedBg }
+                    isSelected && { backgroundColor: injurySelectedBg }
                   ]}
                   interactive
                 >
@@ -805,7 +801,6 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                       style={[
                         styles.injuryChipLabel,
                         { color: colors.text },
-                        isSelected && styles.injuryChipLabelSelected,
                       ]}
                     >
                       {injury.label}
@@ -814,14 +809,13 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                       style={[
                         styles.injuryChipDescription,
                         { color: colors.textMuted },
-                        isSelected && styles.injuryChipDescriptionSelected,
                       ]}
                     >
                       {injury.description}
                     </Text>
                   </View>
                   {isSelected && (
-                    <CheckCircle2 size={20} color={Colors.background} style={{ marginLeft: 8 }} />
+                    <CheckCircle2 size={20} color={Colors.warning} style={{ marginLeft: 8 }} />
                   )}
                 </GlassCard>
               </TouchableOpacity>
