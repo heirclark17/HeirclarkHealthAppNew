@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import LottieView from 'lottie-react-native';
 import {
   Flame,
   Dumbbell,
@@ -234,13 +235,23 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
   }
 
   return (
-    <ScrollView
-      style={styles.scrollContainer}
-      contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Success Icon */}
-      <View style={styles.iconContainer}>
+    <View style={{ flex: 1 }}>
+      {/* Confetti Animation */}
+      <LottieView
+        source={require('../../assets/animations/confetti.json')}
+        autoPlay
+        loop={false}
+        style={styles.confettiAnimation}
+        resizeMode="cover"
+      />
+
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Success Icon */}
+        <View style={styles.iconContainer}>
         <View style={styles.checkContainer}>
           <View style={styles.checkCircle}>
             <Target size={48} color={Colors.background} />
@@ -585,12 +596,22 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
+  },
+  confettiAnimation: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+    pointerEvents: 'none',
   },
   container: {
     alignItems: 'center',
