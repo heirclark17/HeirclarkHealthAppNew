@@ -1653,7 +1653,7 @@ const styles = StyleSheet.create({
   },
   prefTagText: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.semiBold,
     color: Colors.text,
   },
   mealsCircle: {
