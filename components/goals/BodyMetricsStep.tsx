@@ -45,7 +45,9 @@ interface ToggleButtonProps {
   colors: typeof DarkColors;
 }
 
-function ToggleButton({ options, selected, onSelect, colors }: ToggleButtonProps) {
+function ToggleButton({ options, selected, onSelect, colors }: ToggleButtonProps & { isDark?: boolean }) {
+  const selectedBg = (colors as any).background === DarkColors.background
+    ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)';
   return (
     <View style={[styles.toggleContainer, { backgroundColor: colors.background }]}>
       {options.map((option) => (
@@ -53,7 +55,7 @@ function ToggleButton({ options, selected, onSelect, colors }: ToggleButtonProps
           key={option.value}
           style={[
             styles.toggleOption,
-            selected === option.value && [styles.toggleOptionSelected, { backgroundColor: colors.primary }],
+            selected === option.value && [styles.toggleOptionSelected, { backgroundColor: selectedBg }],
           ]}
           onPress={async () => {
             await selectionFeedback();
@@ -69,7 +71,7 @@ function ToggleButton({ options, selected, onSelect, colors }: ToggleButtonProps
             style={[
               styles.toggleText,
               { color: colors.textMuted },
-              selected === option.value && { color: colors.primaryText },
+              selected === option.value && { color: colors.text },
             ]}
           >
             {option.label}
@@ -606,7 +608,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Weight Section */}
       <GlassSection isDark={isDark}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>WEIGHT</Text>
+          <Text style={styles.sectionTitle}>WEIGHT</Text>
           <ToggleButton
             options={[
               { value: 'lb', label: 'lb' },
@@ -647,7 +649,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Start Date Section */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>WHEN DO YOU WANT TO START?</Text>
+        <Text style={styles.sectionTitle}>WHEN DO YOU WANT TO START?</Text>
         <TouchableOpacity
           style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
           onPress={() => setShowStartDatePicker(true)}
@@ -691,7 +693,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Target Date Section - Show for all goals except maintain */}
       {state.primaryGoal !== 'maintain' && (
         <GlassSection isDark={isDark}>
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>WHEN DO YOU WANT TO REACH YOUR GOAL?</Text>
+          <Text style={styles.sectionTitle}>WHEN DO YOU WANT TO REACH YOUR GOAL?</Text>
           <TouchableOpacity
             style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
             onPress={() => setShowTargetDatePicker(true)}
@@ -737,7 +739,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Height Section */}
       <GlassSection isDark={isDark}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>HEIGHT</Text>
+          <Text style={styles.sectionTitle}>HEIGHT</Text>
           <ToggleButton
             options={[
               { value: 'ft_in', label: 'ft/in' },
@@ -789,7 +791,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Age Section - Using simple picker */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted, marginBottom: 12 }]}>AGE</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>AGE</Text>
         <SimplePicker
           data={ageData}
           selectedValue={state.age}
@@ -801,14 +803,14 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Biological Sex Section */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>BIOLOGICAL SEX</Text>
+        <Text style={styles.sectionTitle}>BIOLOGICAL SEX</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Used for accurate BMR calculation</Text>
         <View style={styles.sexToggle}>
           <TouchableOpacity
             style={[
               styles.sexOption,
               { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' },
-              state.sex === 'male' && { backgroundColor: colors.primary },
+              state.sex === 'male' && { backgroundColor: primaryGlassBg },
             ]}
             onPress={async () => {
               await selectionFeedback();
@@ -822,13 +824,12 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             <Ionicons
               name="male"
               size={24}
-              color={state.sex === 'male' ? colors.primaryText : colors.textMuted}
+              color={state.sex === 'male' ? colors.primary : colors.textMuted}
             />
             <Text
               style={[
                 styles.sexText,
                 { color: colors.text },
-                state.sex === 'male' && { color: colors.primaryText },
               ]}
             >
               Male
@@ -838,7 +839,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             style={[
               styles.sexOption,
               { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' },
-              state.sex === 'female' && { backgroundColor: colors.primary },
+              state.sex === 'female' && { backgroundColor: primaryGlassBg },
             ]}
             onPress={async () => {
               await selectionFeedback();
@@ -852,13 +853,12 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             <Ionicons
               name="female"
               size={24}
-              color={state.sex === 'female' ? colors.primaryText : colors.textMuted}
+              color={state.sex === 'female' ? colors.primary : colors.textMuted}
             />
             <Text
               style={[
                 styles.sexText,
                 { color: colors.text },
-                state.sex === 'female' && { color: colors.primaryText },
               ]}
             >
               Female
@@ -948,10 +948,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
-    color: Colors.textMuted,
+    color: Colors.text,
     textTransform: 'uppercase',
   },
   sectionSubtitle: {

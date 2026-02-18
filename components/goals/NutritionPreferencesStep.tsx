@@ -281,7 +281,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Diet Style Selection */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DIET STYLE</Text>
+        <Text style={styles.sectionTitle}>DIET STYLE</Text>
         <View style={styles.dietGrid}>
           {DIET_OPTIONS.map((option) => (
             <DietCard
@@ -298,11 +298,13 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Meals Per Day */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>MEALS PER DAY</Text>
+        <Text style={styles.sectionTitle}>MEALS PER DAY</Text>
         <View style={styles.mealsRow}>
           {[2, 3, 4, 5, 6].map((num) => {
             const isSelected = state.mealsPerDay === num;
-            const selectedBg = isSelected ? Colors.successMuted : undefined;
+            const selectedBg = isSelected
+              ? (isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)')
+              : undefined;
 
             return (
               <TouchableOpacity
@@ -328,7 +330,6 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                     style={[
                       styles.mealChipText,
                       { color: colors.text },
-                      isSelected && styles.mealChipTextSelected,
                     ]}
                   >
                     {num}
@@ -419,7 +420,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Allergies & Restrictions */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>ALLERGIES & RESTRICTIONS</Text>
+        <Text style={styles.sectionTitle}>ALLERGIES & RESTRICTIONS</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select any foods you need to avoid (optional)
         </Text>
@@ -462,7 +463,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Meal Variety */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>MEAL VARIETY</Text>
+        <Text style={styles.sectionTitle}>MEAL VARIETY</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Different meals daily or meal prep friendly?
         </Text>
@@ -512,7 +513,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Snack Preferences */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>SNACK PREFERENCES</Text>
+        <Text style={styles.sectionTitle}>SNACK PREFERENCES</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Include snacks or stick to main meals?
         </Text>
@@ -562,7 +563,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Cheat Days */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>CHEAT DAYS</Text>
+        <Text style={styles.sectionTitle}>CHEAT DAYS</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select days when you want flexibility (no meal plan generated)
         </Text>
@@ -612,7 +613,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Proteins */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE PROTEINS</Text>
+        <Text style={styles.sectionTitle}>FAVORITE PROTEINS</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select proteins you enjoy</Text>
         <View style={styles.foodChipsContainer}>
           {PROTEIN_OPTIONS.map((protein) => {
@@ -642,7 +643,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Vegetables */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE VEGETABLES</Text>
+        <Text style={styles.sectionTitle}>FAVORITE VEGETABLES</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select vegetables you enjoy</Text>
         <View style={styles.foodChipsContainer}>
           {VEGETABLE_OPTIONS.map((veg) => {
@@ -672,7 +673,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Starches */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE CARBS & STARCHES</Text>
+        <Text style={styles.sectionTitle}>FAVORITE CARBS & STARCHES</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select starches you enjoy</Text>
         <View style={styles.foodChipsContainer}>
           {STARCH_OPTIONS.map((starch) => {
@@ -702,7 +703,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Snacks */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE SNACKS</Text>
+        <Text style={styles.sectionTitle}>FAVORITE SNACKS</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select snacks you enjoy</Text>
         <View style={styles.foodChipsContainer}>
           {SNACK_OPTIONS.map((snack) => {
@@ -732,7 +733,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Cuisines */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>FAVORITE CUISINES</Text>
+        <Text style={styles.sectionTitle}>FAVORITE CUISINES</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Cuisines you enjoy most</Text>
         <View style={styles.foodChipsContainer}>
           {CUISINE_OPTIONS.map((cuisine) => {
@@ -762,7 +763,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Disliked Foods */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DISLIKED FOODS</Text>
+        <Text style={styles.sectionTitle}>DISLIKED FOODS</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Foods to avoid in your meal plans</Text>
         <View style={styles.foodChipsContainer}>
           {DISLIKED_OPTIONS.map((food) => {
@@ -802,7 +803,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Cooking Skill */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>COOKING SKILL LEVEL</Text>
+        <Text style={styles.sectionTitle}>COOKING SKILL LEVEL</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Help us tailor recipe complexity to your experience
         </Text>
@@ -868,7 +869,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Daily Goals */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>DAILY GOALS</Text>
+        <Text style={styles.sectionTitle}>DAILY GOALS</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Customize your daily health targets
         </Text>
@@ -1063,10 +1064,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1.5,
-    color: Colors.textMuted,
+    color: Colors.text,
     textTransform: 'uppercase',
     marginBottom: 12,
   },
@@ -1139,7 +1139,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   mealChipTextSelected: {
-    color: Colors.background,
+    // Removed solid white - now stays normal text color with translucent bg
   },
   mealsHint: {
     marginTop: 12,
