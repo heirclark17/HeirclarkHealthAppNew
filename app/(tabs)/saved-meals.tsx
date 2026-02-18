@@ -259,7 +259,7 @@ export default function SavedMealsScreen() {
                 accessibilityRole="button"
                 accessibilityHint="Permanently deletes this saved meal from your library"
               >
-                <Trash2 size={18} color={colors.textMuted} strokeWidth={1.5} />
+                <Trash2 size={18} color="#FF3B30" strokeWidth={1.5} />
               </TouchableOpacity>
             </View>
           </View>
@@ -283,6 +283,18 @@ export default function SavedMealsScreen() {
                 {Math.round(meal.nutrients.protein_g)}g
               </NumberText>
               <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>protein</Text>
+            </View>
+            <View style={styles.nutrientBadge}>
+              <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
+                {Math.round(meal.nutrients.carbs_g)}g
+              </NumberText>
+              <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>carbs</Text>
+            </View>
+            <View style={styles.nutrientBadge}>
+              <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
+                {Math.round(meal.nutrients.fat_g)}g
+              </NumberText>
+              <Text style={[styles.nutrientLabel, { color: colors.textMuted }]}>fat</Text>
             </View>
             <View style={styles.nutrientBadge}>
               <NumberText weight="semiBold" style={[styles.nutrientValue, { color: colors.text }]}>
