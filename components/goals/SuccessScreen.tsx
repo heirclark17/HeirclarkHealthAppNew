@@ -278,16 +278,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         </Text>
       </View>
 
-      {/* Your Training Plan Card */}
-      {planSummary && (
-        <PlanSummaryCard
-          summary={planSummary}
-          onStartTraining={handleStartTrainingPlan}
-          showStartButton={false}
-          containerStyle={{ marginHorizontal: 0, width: '100%' }}
-        />
-      )}
-
       {/* Daily Targets - Separate Cards */}
       {state.results && (
         <View style={styles.targetsSection}>
@@ -332,6 +322,16 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             </GlassCard>
           </View>
         </View>
+      )}
+
+      {/* Your Training Plan Card */}
+      {planSummary && (
+        <PlanSummaryCard
+          summary={planSummary}
+          onStartTraining={handleStartTrainingPlan}
+          showStartButton={false}
+          containerStyle={{ marginHorizontal: 0, width: '100%' }}
+        />
       )}
 
       {/* Goal Alignment Card */}
