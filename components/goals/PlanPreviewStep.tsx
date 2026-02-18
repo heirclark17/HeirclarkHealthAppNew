@@ -911,7 +911,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
             {state.dietStyle && state.dietStyle !== 'standard' && (
               <GlassCard style={styles.prefSectionCard} borderColor="transparent">
                 <View style={styles.prefRow}>
-                  <Leaf size={16} color={Colors.success} />
+                  <Leaf size={20} color={Colors.success} />
                   <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Dietary Style</Text>
                 </View>
                 <View style={styles.prefTagsRow}>
@@ -1653,7 +1653,7 @@ const styles = StyleSheet.create({
   },
   prefTagText: {
     fontSize: 12,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.regular,
     color: Colors.text,
   },
   mealsCircle: {
