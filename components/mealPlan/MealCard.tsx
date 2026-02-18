@@ -736,8 +736,8 @@ const styles = StyleSheet.create({
   mealName: {
     fontSize: 18,
     color: Colors.text,
-    fontFamily: Fonts.light, // Weight 300
-    fontWeight: '300',
+    fontFamily: Fonts.numericSemiBold,
+    fontWeight: '600',
     marginBottom: 6,
     letterSpacing: 0.3,
   },
