@@ -1454,7 +1454,7 @@ const styles = StyleSheet.create({
   dietText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.semiBold,
     color: Colors.textSecondary,
     lineHeight: 18,
   },
