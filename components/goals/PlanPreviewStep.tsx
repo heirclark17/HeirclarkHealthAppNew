@@ -1120,12 +1120,13 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                       <Text style={[styles.prefLabel, { color: colors.textMuted }]}>Cheat Days</Text>
                     </View>
                     <View style={[styles.prefTagsRow, { marginTop: 8, marginLeft: 24 }]}>
-                      <View style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
-                        <NumberText weight="semiBold" style={[styles.prefTagText, { color: colors.text }]}>
-                          {foodPrefs.preferences.cheatDays.length}
-                        </NumberText>
-                        <Text style={[styles.prefTagText, { color: colors.text }]}> per week</Text>
-                      </View>
+                      {foodPrefs.preferences.cheatDays.map((day, index) => (
+                        <View key={index} style={[styles.prefTag, { backgroundColor: colors.backgroundSecondary }]}>
+                          <Text style={[styles.prefTagText, { color: colors.text }]}>
+                            {day}
+                          </Text>
+                        </View>
+                      ))}
                     </View>
                   </View>
                 )}
