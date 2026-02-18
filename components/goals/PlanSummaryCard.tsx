@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.md,
+    paddingBottom: 24,
   },
   sectionHeader: {
     flexDirection: 'row',
