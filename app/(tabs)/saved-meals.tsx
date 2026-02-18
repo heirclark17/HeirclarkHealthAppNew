@@ -14,8 +14,12 @@ import {
   RefreshControl,
   Alert,
   Platform,
+  Modal,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { BlurView } from 'expo-blur';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { Grid3x3, Heart, Sun, UtensilsCrossed, Moon, Coffee, Search, XCircle, Bookmark, Sparkles, FileText, Trash2 } from 'lucide-react-native';
@@ -65,6 +69,8 @@ export default function SavedMealsScreen() {
   const [filteredMeals, setFilteredMeals] = useState<SavedMeal[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState<SavedMeal | null>(null);
   const hasLoadedRef = useRef(false);
 
   // Load saved meals
@@ -131,6 +137,17 @@ export default function SavedMealsScreen() {
     await loadSavedMeals(true); // Force refresh
     setRefreshing(false);
   }, [loadSavedMeals]);
+
+  const handleViewRecipe = useCallback((meal: SavedMeal) => {
+    lightImpact();
+    setSelectedMeal(meal);
+    setShowRecipeModal(true);
+  }, []);
+
+  const handleCloseRecipeModal = useCallback(() => {
+    setShowRecipeModal(false);
+    setTimeout(() => setSelectedMeal(null), 300);
+  }, []);
 
   const handleToggleFavorite = useCallback(async (mealId: string) => {
     lightImpact();
@@ -199,10 +216,25 @@ export default function SavedMealsScreen() {
           )}
           <View style={styles.mealCardContent}>
           <View style={styles.mealHeader}>
-            <View style={[styles.mealTypeIndicator, { backgroundColor: colors.backgroundSecondary }]}>
-              <Text style={[styles.mealTypeText, { color: colors.textSecondary }]}>
-                {meal.mealType}
-              </Text>
+            <View style={styles.mealHeaderLeft}>
+              <View style={[styles.mealTypeIndicator, { backgroundColor: colors.backgroundSecondary }]}>
+                <Text style={[styles.mealTypeText, { color: colors.textSecondary }]}>
+                  {meal.mealType}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => handleViewRecipe(item)}
+                activeOpacity={0.6}
+                style={[
+                  styles.viewRecipeButton,
+                  { backgroundColor: `${colors.primary}25` }
+                ]}
+                accessibilityLabel={`View recipe for ${meal.name}`}
+                accessibilityRole="button"
+                accessibilityHint="Opens detailed recipe with ingredients and instructions"
+              >
+                <Text style={[styles.viewRecipeText, { color: colors.primary }]}>View Recipe</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.mealActions}>
               <TouchableOpacity
@@ -463,6 +495,137 @@ export default function SavedMealsScreen() {
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* Recipe Detail Modal */}
+      <Modal
+        visible={showRecipeModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCloseRecipeModal}
+      >
+        <BlurView intensity={isDark ? 60 : 80} tint={isDark ? 'dark' : 'light'} style={{ flex: 1 }}>
+          <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+            {selectedMeal && (
+              <>
+                {/* Header */}
+                <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.modalTitle, { color: colors.text }]}>{selectedMeal.meal.name}</Text>
+                    <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
+                      {selectedMeal.meal.mealType.charAt(0).toUpperCase() + selectedMeal.meal.mealType.slice(1)}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={handleCloseRecipeModal}
+                    style={styles.closeButton}
+                    accessibilityLabel="Close recipe"
+                    accessibilityRole="button"
+                  >
+                    <X size={24} color={colors.text} strokeWidth={2} />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.modalContent}>
+                  {/* Meal Image */}
+                  {selectedMeal.meal.imageUrl && (
+                    <Image
+                      source={{ uri: selectedMeal.meal.imageUrl }}
+                      style={styles.modalImage}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
+                      transition={200}
+                    />
+                  )}
+
+                  {/* Nutrients */}
+                  <GlassCard style={styles.nutrientsCard}>
+                    <View style={styles.nutrientsRow}>
+                      <View style={styles.nutrientItem}>
+                        <NumberText weight="semiBold" style={[styles.nutrientBigValue, { color: colors.text }]}>
+                          {Math.round(selectedMeal.meal.nutrients.calories)}
+                        </NumberText>
+                        <Text style={[styles.nutrientBigLabel, { color: colors.textMuted }]}>Calories</Text>
+                      </View>
+                      <View style={styles.nutrientItem}>
+                        <NumberText weight="semiBold" style={[styles.nutrientBigValue, { color: colors.text }]}>
+                          {Math.round(selectedMeal.meal.nutrients.protein_g)}g
+                        </NumberText>
+                        <Text style={[styles.nutrientBigLabel, { color: colors.textMuted }]}>Protein</Text>
+                      </View>
+                      <View style={styles.nutrientItem}>
+                        <NumberText weight="semiBold" style={[styles.nutrientBigValue, { color: colors.text }]}>
+                          {Math.round(selectedMeal.meal.nutrients.carbs_g)}g
+                        </NumberText>
+                        <Text style={[styles.nutrientBigLabel, { color: colors.textMuted }]}>Carbs</Text>
+                      </View>
+                      <View style={styles.nutrientItem}>
+                        <NumberText weight="semiBold" style={[styles.nutrientBigValue, { color: colors.text }]}>
+                          {Math.round(selectedMeal.meal.nutrients.fat_g)}g
+                        </NumberText>
+                        <Text style={[styles.nutrientBigLabel, { color: colors.textMuted }]}>Fat</Text>
+                      </View>
+                    </View>
+                  </GlassCard>
+
+                  {/* Ingredients */}
+                  {selectedMeal.meal.ingredients && selectedMeal.meal.ingredients.length > 0 && (
+                    <GlassCard style={styles.sectionCard}>
+                      <Text style={[styles.sectionTitle, { color: colors.text }]}>Ingredients</Text>
+                      {selectedMeal.meal.ingredients.map((ingredient, idx) => (
+                        <View key={idx} style={[styles.ingredientRow, { borderBottomColor: colors.border }]}>
+                          <Text style={[styles.ingredientBullet, { color: colors.textMuted }]}>•</Text>
+                          <Text style={[styles.ingredientText, { color: colors.text }]}>
+                            {ingredient.amount} {ingredient.unit} {ingredient.name}
+                          </Text>
+                        </View>
+                      ))}
+                    </GlassCard>
+                  )}
+
+                  {/* Instructions */}
+                  {selectedMeal.meal.instructions && selectedMeal.meal.instructions.length > 0 && (
+                    <GlassCard style={styles.sectionCard}>
+                      <Text style={[styles.sectionTitle, { color: colors.text }]}>Instructions</Text>
+                      {selectedMeal.meal.instructions.map((step, idx) => (
+                        <View key={idx} style={[styles.instructionRow, { borderBottomColor: colors.border }]}>
+                          <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
+                            <NumberText weight="semiBold" style={styles.stepNumberText}>{idx + 1}</NumberText>
+                          </View>
+                          <Text style={[styles.instructionText, { color: colors.text }]}>{step}</Text>
+                        </View>
+                      ))}
+                    </GlassCard>
+                  )}
+
+                  {/* Time Info */}
+                  {(selectedMeal.meal.prepTimeMinutes || selectedMeal.meal.cookTimeMinutes) && (
+                    <GlassCard style={styles.timeCard}>
+                      <View style={styles.timeRow}>
+                        {selectedMeal.meal.prepTimeMinutes > 0 && (
+                          <View style={styles.timeItem}>
+                            <Clock size={16} color={colors.textMuted} strokeWidth={1.5} />
+                            <Text style={[styles.timeText, { color: colors.textSecondary }]}>
+                              Prep: <NumberText weight="semiBold">{selectedMeal.meal.prepTimeMinutes}</NumberText> min
+                            </Text>
+                          </View>
+                        )}
+                        {selectedMeal.meal.cookTimeMinutes && selectedMeal.meal.cookTimeMinutes > 0 && (
+                          <View style={styles.timeItem}>
+                            <Clock size={16} color={colors.textMuted} strokeWidth={1.5} />
+                            <Text style={[styles.timeText, { color: colors.textSecondary }]}>
+                              Cook: <NumberText weight="semiBold">{selectedMeal.meal.cookTimeMinutes}</NumberText> min
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </GlassCard>
+                  )}
+                </ScrollView>
+              </>
+            )}
+          </SafeAreaView>
+        </BlurView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -590,6 +753,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.sm,
   },
+  mealHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
   mealTypeIndicator: {
     borderRadius: 6,
     paddingHorizontal: 8,
@@ -598,6 +767,15 @@ const styles = StyleSheet.create({
   mealTypeText: {
     fontSize: 10,
     textTransform: 'capitalize',
+    fontFamily: Fonts.medium,
+  },
+  viewRecipeButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  viewRecipeText: {
+    fontSize: 10,
     fontFamily: Fonts.medium,
   },
   mealActions: {
@@ -689,5 +867,121 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  // Recipe Modal Styles
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: Fonts.semiBold,
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    textTransform: 'capitalize',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalContent: {
+    padding: Spacing.lg,
+    paddingBottom: Spacing.xl + 20,
+  },
+  modalImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginBottom: Spacing.lg,
+  },
+  nutrientsCard: {
+    marginBottom: Spacing.lg,
+    padding: Spacing.lg,
+  },
+  nutrientsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  nutrientItem: {
+    alignItems: 'center',
+  },
+  nutrientBigValue: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  nutrientBigLabel: {
+    fontSize: 11,
+    fontFamily: Fonts.regular,
+  },
+  sectionCard: {
+    marginBottom: Spacing.lg,
+    padding: Spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    marginBottom: Spacing.md,
+  },
+  ingredientRow: {
+    flexDirection: 'row',
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+  },
+  ingredientBullet: {
+    fontSize: 16,
+    marginRight: 8,
+    marginTop: -2,
+  },
+  ingredientText: {
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+    flex: 1,
+  },
+  instructionRow: {
+    flexDirection: 'row',
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    alignItems: 'flex-start',
+  },
+  stepNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+    marginTop: 2,
+  },
+  stepNumberText: {
+    fontSize: 12,
+    color: '#FFFFFF',
+  },
+  instructionText: {
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+    flex: 1,
+    lineHeight: 20,
+  },
+  timeCard: {
+    padding: Spacing.md,
+  },
+  timeRow: {
+    flexDirection: 'row',
+    gap: Spacing.lg,
+  },
+  timeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  timeText: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
   },
 });
