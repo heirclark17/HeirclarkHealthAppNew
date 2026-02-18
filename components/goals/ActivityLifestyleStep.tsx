@@ -302,6 +302,17 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
     return colorMap[activityId as keyof typeof colorMap] || (isDark ? 'rgba(78, 205, 196, 0.15)' : 'rgba(78, 205, 196, 0.12)');
   };
 
+  const getActivityIconBg = (activityId: string) => {
+    const colorMap = {
+      sedentary: isDark ? 'rgba(59, 130, 246, 0.25)' : 'rgba(59, 130, 246, 0.20)', // Blue
+      light: isDark ? 'rgba(6, 182, 212, 0.25)' : 'rgba(6, 182, 212, 0.20)', // Cyan
+      moderate: isDark ? 'rgba(245, 158, 11, 0.25)' : 'rgba(245, 158, 11, 0.20)', // Amber/Orange
+      very: isDark ? 'rgba(249, 115, 22, 0.25)' : 'rgba(249, 115, 22, 0.20)', // Orange
+      extra: isDark ? 'rgba(239, 68, 68, 0.25)' : 'rgba(239, 68, 68, 0.20)', // Red
+    };
+    return colorMap[activityId as keyof typeof colorMap] || (isDark ? 'rgba(78, 205, 196, 0.25)' : 'rgba(78, 205, 196, 0.20)');
+  };
+
   const getActivityIconColor = (activityId: string) => {
     const colorMap = {
       sedentary: '#3B82F6', // Blue
@@ -314,6 +325,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
   };
 
   const selectedBg = getActivityColor(option.id);
+  const iconBg = getActivityIconBg(option.id);
   const iconColor = getActivityIconColor(option.id);
 
   const handlePress = async () => {
@@ -337,7 +349,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
           <GlassCard style={[isSelected && { backgroundColor: selectedBg }]} interactive>
             <View style={styles.activityCard}>
               <View style={styles.activityLeft}>
-                <View style={[styles.activityIcon, isSelected && styles.activityIconSelected]}>
+                <View style={[styles.activityIcon, isSelected && { backgroundColor: iconBg }]}>
                   <IconComponent
                     size={22}
                     color={isSelected ? iconColor : colors.textMuted}
