@@ -278,6 +278,16 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         </Text>
       </View>
 
+      {/* Your Training Plan Card */}
+      {planSummary && (
+        <PlanSummaryCard
+          summary={planSummary}
+          onStartTraining={handleStartTrainingPlan}
+          showStartButton={false}
+          containerStyle={{ marginHorizontal: 0, width: '100%' }}
+        />
+      )}
+
       {/* Daily Targets - Separate Cards */}
       {state.results && (
         <View style={styles.targetsSection}>
@@ -324,91 +334,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         </View>
       )}
 
-      {/* Workout Plan Commentary */}
-      <View>
-        <GlassCard style={styles.workoutPlanCard} interactive>
-          <View style={styles.workoutPlanHeader}>
-            <Dumbbell size={20} color={Colors.error} />
-            <Text style={[styles.workoutPlanTitle, { fontFamily: Fonts.light }]}>YOUR WORKOUT PLAN</Text>
-          </View>
-
-          {isLoadingWorkout ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={colors.protein} />
-              <Text style={[styles.loadingText, { color: colors.textMuted }]}>
-                Generating your personalized workout plan...
-              </Text>
-            </View>
-          ) : (
-            <Text style={[styles.workoutPlanDescription, { color: colors.text, fontFamily: Fonts.light }]}>
-              {workoutGuidance}
-            </Text>
-          )}
-
-          <View style={styles.workoutPlanFeatures}>
-            <View style={styles.workoutFeatureItem}>
-              <Calendar size={16} color={colors.protein} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
-                <NumberText weight="light" style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
-                  {state.workoutsPerWeek || 3}
-                </NumberText> workouts per week
-              </Text>
-            </View>
-            <View style={styles.workoutFeatureItem}>
-              <Timer size={16} color={colors.protein} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
-                <NumberText weight="light" style={[styles.workoutFeatureText, { color: colors.textSecondary }]}>
-                  {state.workoutDuration || 30}
-                </NumberText> minutes per session
-              </Text>
-            </View>
-            <View style={styles.workoutFeatureItem}>
-              <Activity size={16} color={Colors.error} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
-                {state.cardioPreference === 'walking' && 'Walking-based cardio'}
-                {state.cardioPreference === 'running' && 'Running-based cardio'}
-                {state.cardioPreference === 'hiit' && 'HIIT training sessions'}
-                {!state.cardioPreference && 'Customized cardio'}
-              </Text>
-            </View>
-            <View style={styles.workoutFeatureItem}>
-              <TrendingUp size={16} color={colors.protein} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
-                Progressive difficulty levels
-              </Text>
-            </View>
-            <View style={styles.workoutFeatureItem}>
-              <Target size={16} color={colors.protein} />
-              <Text style={[styles.workoutFeatureText, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
-                {state.primaryGoal === 'lose_weight' && 'Optimized for fat burning'}
-                {state.primaryGoal === 'build_muscle' && 'Maximizes muscle growth'}
-                {state.primaryGoal === 'maintain' && 'Sustains current fitness'}
-                {state.primaryGoal === 'improve_health' && 'Enhances overall wellness'}
-              </Text>
-            </View>
-          </View>
-
-          <GlassCard style={styles.workoutPlanNote} interactive>
-            <View style={styles.workoutPlanNoteInner}>
-              <Lightbulb size={16} color={colors.textMuted} />
-              <Text style={[styles.workoutPlanNoteText, { color: colors.textMuted, fontFamily: Fonts.light }]}>
-                Your plan adapts based on your progress and includes rest days for optimal recovery.
-              </Text>
-            </View>
-          </GlassCard>
-        </GlassCard>
-      </View>
-
-      {/* Your Training Plan Card */}
-      {planSummary && (
-        <PlanSummaryCard
-          summary={planSummary}
-          onStartTraining={handleStartTrainingPlan}
-          showStartButton={false}
-          containerStyle={{ marginHorizontal: 0, width: '100%' }}
-        />
-      )}
-
       {/* Goal Alignment Card */}
       {goalAlignment && preferences && (
         <GoalAlignmentCard
@@ -417,28 +342,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           containerStyle={{ marginHorizontal: 0, width: '100%' }}
         />
       )}
-
-      {/* Guidance Card */}
-      <View>
-        <GlassCard style={styles.guidanceCard} interactive>
-          <View style={styles.guidanceHeader}>
-            <Lightbulb size={20} color={Colors.warning} />
-            <Text style={[styles.guidanceTitle, { fontFamily: Fonts.light }]}>DAILY GUIDANCE</Text>
-          </View>
-          {isLoadingDaily ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={Colors.warning} />
-              <Text style={[styles.loadingText, { color: colors.textMuted }]}>
-                Generating your daily guidance...
-              </Text>
-            </View>
-          ) : (
-            <Text style={[styles.guidanceText, { color: colors.textSecondary }]}>
-              {dailyGuidance}
-            </Text>
-          )}
-        </GlassCard>
-      </View>
 
       {/* Action Cards Container */}
       <View style={styles.actionCardsContainer}>
