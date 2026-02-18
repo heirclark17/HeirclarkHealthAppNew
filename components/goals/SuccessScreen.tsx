@@ -263,7 +263,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
       {/* Success Text */}
       <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.light }]}>You're All Set!</Text>
+        <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.light }]}>
+          {user?.firstName ? `${user.firstName}, ` : ''}You're All Set!
+        </Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
           Your personalized nutrition plan is ready. Use this as your daily guide to reach your goals.
         </Text>
