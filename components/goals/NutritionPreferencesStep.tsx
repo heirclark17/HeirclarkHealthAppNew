@@ -1164,8 +1164,7 @@ const styles = StyleSheet.create({
   },
   fastingTitle: {
     fontSize: 15,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
   },
   fastingSubtitle: {
