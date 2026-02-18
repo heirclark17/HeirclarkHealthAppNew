@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     fontSize: 13,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     letterSpacing: 0.5,
   },
   cardContent: {
@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
   mealTypeLabel: {
     fontSize: 12,
     color: Colors.textMuted,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     flex: 1,
     letterSpacing: 0.5,
   },
@@ -731,20 +731,20 @@ const styles = StyleSheet.create({
   },
   recipeButton: {
     fontSize: 12,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericRegular,
   },
   mealName: {
     fontSize: 18,
     color: Colors.text,
-    fontFamily: Fonts.numericSemiBold,
-    fontWeight: '600',
+    fontFamily: Fonts.numericRegular,
+    fontWeight: '400',
     marginBottom: 6,
     letterSpacing: 0.3,
   },
   mealDescription: {
     fontSize: 13,
     color: 'rgba(255, 255, 255, 0.5)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     lineHeight: 18,
     marginBottom: 12,
   },
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
   },
   timeBadgeText: {
     fontSize: 12,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericRegular,
   },
   macroRow: {
     flexDirection: 'row',
@@ -779,13 +779,13 @@ const styles = StyleSheet.create({
   macroValue: {
     fontSize: 16,
     color: Colors.text,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     letterSpacing: 0.5,
   },
   macroLabel: {
     fontSize: 11,
     color: 'rgba(255, 255, 255, 0.4)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
   },
 
   // Modal styles
@@ -813,7 +813,7 @@ const styles = StyleSheet.create({
   modalMealType: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.6)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
   },
   closeButton: {
     width: 36,
@@ -839,15 +839,15 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 32,
     color: Colors.text,
-    fontFamily: Fonts.extraLight, // Weight 200
-    fontWeight: '200',
+    fontFamily: Fonts.numericRegular,
+    fontWeight: '400',
     marginBottom: 8,
     letterSpacing: 0.5,
   },
   modalDescription: {
     fontSize: 15,
     color: 'rgba(255, 255, 255, 0.6)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     lineHeight: 22,
     marginBottom: 20,
   },
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   },
   modalPillText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericRegular,
   },
   nutritionCard: {
     marginBottom: 32,
@@ -876,7 +876,7 @@ const styles = StyleSheet.create({
   nutritionTitle: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.4)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     marginBottom: 16,
@@ -898,13 +898,13 @@ const styles = StyleSheet.create({
   nutritionValue: {
     fontSize: 22,
     color: Colors.text,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     letterSpacing: 0.5,
   },
   nutritionLabel: {
     fontSize: 11,
     color: 'rgba(255, 255, 255, 0.4)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
   },
   section: {
     marginBottom: 32,
@@ -912,7 +912,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     color: 'rgba(255, 255, 255, 0.4)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
     marginBottom: 16,
@@ -945,16 +945,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     color: 'rgba(255, 255, 255, 0.8)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     lineHeight: 22,
   },
   ingredientAmount: {
     color: 'rgba(255, 255, 255, 0.5)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
   },
   emptyRecipeText: {
     fontSize: 14,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     lineHeight: 20,
     fontStyle: 'italic',
     marginBottom: 16,
@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
   },
   generateRecipeText: {
     fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericRegular,
     letterSpacing: 0.3,
   },
   loadingContainer: {
@@ -980,7 +980,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
   },
   instructionsList: {
     gap: 16,
@@ -1001,13 +1001,13 @@ const styles = StyleSheet.create({
   instructionNumber: {
     fontSize: 13,
     color: 'rgba(255, 255, 255, 0.6)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
   },
   instructionText: {
     flex: 1,
     fontSize: 15,
     color: 'rgba(255, 255, 255, 0.8)',
-    fontFamily: Fonts.thin,
+    fontFamily: Fonts.numericRegular,
     lineHeight: 22,
   },
   modalFooter: {
@@ -1033,8 +1033,8 @@ const styles = StyleSheet.create({
   },
   actionPillText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericRegular,
+    fontWeight: '400',
     letterSpacing: 0.3,
   },
 });
