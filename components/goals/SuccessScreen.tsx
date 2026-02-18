@@ -250,7 +250,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
       {/* Success Text */}
       <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.light }]}>
+        <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
           {user?.firstName ? `${user.firstName}, ` : ''}You're All Set!
         </Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
