@@ -499,11 +499,11 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
                 'Ongoing healthy lifestyle'
               ) : results.totalWeeks > 0 ? (
                 <>
-                  <NumberText weight="light" style={styles.timelineValue}>{Math.round(results.totalWeeks)}</NumberText> weeks to reach goal
+                  <NumberText weight="semiBold" style={styles.timelineValue}>{Math.round(results.totalWeeks)}</NumberText> weeks to reach goal
                 </>
               ) : (
                 <>
-                  <NumberText weight="light" style={styles.timelineValue}>12</NumberText> weeks initial plan
+                  <NumberText weight="semiBold" style={styles.timelineValue}>12</NumberText> weeks initial plan
                 </>
               )}
             </Text>
@@ -1433,8 +1433,7 @@ const styles = StyleSheet.create({
   },
   timelineValue: {
     fontSize: 15,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.semiBold,
     color: Colors.successMuted,
   },
   workoutPlanCard: {
