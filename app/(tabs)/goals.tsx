@@ -129,11 +129,11 @@ function GoalWizardContent() {
     // Show loading screen while calculating results
     setIsLoadingSuccess(true);
 
-    // Simulate calculation time (2 seconds)
+    // Simulate calculation time (5 seconds for longer anticipation)
     setTimeout(() => {
       setIsLoadingSuccess(false);
       setShowSuccess(true);
-    }, 2000);
+    }, 5000);
   };
 
   const handleAdjust = () => {
@@ -304,25 +304,58 @@ function GoalWizardContent() {
       <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]}>
         <View style={styles.loadingContainer}>
           <View style={styles.loadingContent}>
+            {/* Colorful animated circles */}
+            <View style={styles.circlesContainer}>
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(0)}
+                style={[styles.colorCircle, { backgroundColor: '#FF6B6B' }]}
+              />
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(100)}
+                style={[styles.colorCircle, { backgroundColor: '#4ECDC4' }]}
+              />
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(200)}
+                style={[styles.colorCircle, { backgroundColor: '#45B7D1' }]}
+              />
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(300)}
+                style={[styles.colorCircle, { backgroundColor: '#F9CA24' }]}
+              />
+              <Animated.View
+                entering={SlideInRight.duration(600).delay(400)}
+                style={[styles.colorCircle, { backgroundColor: '#6AB04C' }]}
+              />
+            </View>
+
+            {/* Main icon */}
             <Animated.View
-              entering={SlideInRight.duration(400)}
+              entering={SlideInRight.duration(600).delay(500)}
               style={styles.loadingIconContainer}
             >
               <View style={[styles.loadingCircle, { backgroundColor: colors.primary }]}>
-                <CheckCircle2 size={48} color={Colors.background} />
+                <CheckCircle2 size={56} color={Colors.background} />
               </View>
             </Animated.View>
+
+            {/* Text content */}
             <Animated.Text
-              entering={SlideInRight.duration(400).delay(200)}
+              entering={SlideInRight.duration(600).delay(700)}
               style={[styles.loadingTitle, { color: colors.text }]}
             >
-              Preparing Your Plan...
+              ✨ Preparing Your Plan...
             </Animated.Text>
             <Animated.Text
-              entering={SlideInRight.duration(400).delay(400)}
+              entering={SlideInRight.duration(600).delay(900)}
               style={[styles.loadingSubtitle, { color: colors.textSecondary }]}
             >
               Calculating personalized targets
+            </Animated.Text>
+            <Animated.Text
+              entering={SlideInRight.duration(600).delay(1100)}
+              style={[styles.loadingDetail, { color: colors.textMuted }]}
+            >
+              Optimizing for your goals
             </Animated.Text>
           </View>
         </View>
@@ -438,26 +471,50 @@ const styles = StyleSheet.create({
   },
   loadingContent: {
     alignItems: 'center',
-    gap: 24,
+    gap: 20,
+  },
+  circlesContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 32,
+  },
+  colorCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    opacity: 0.8,
   },
   loadingIconContainer: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   loadingCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 112,
+    height: 112,
+    borderRadius: 56,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   loadingTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: 28,
+    fontWeight: '700',
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   loadingSubtitle: {
-    fontSize: 16,
+    fontSize: 17,
     textAlign: 'center',
-    opacity: 0.7,
+    opacity: 0.8,
+    fontWeight: '500',
+  },
+  loadingDetail: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.6,
+    marginTop: 8,
   },
 });
