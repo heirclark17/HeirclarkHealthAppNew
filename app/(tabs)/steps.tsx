@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl } from 'react-native';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Platform, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 import { api } from '../../services/api';
+import { appleHealthService } from '../../services/appleHealthService';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { NumberText } from '../../components/NumberText';
 import { CircularGauge } from '../../components/CircularGauge';
@@ -33,53 +35,85 @@ export default function StepsScreen() {
   const [weeklySteps, setWeeklySteps] = useState(0);
   const [caloriesBurned, setCaloriesBurned] = useState(0);
 
+  // Throttle ref for health data fetches (prevent hammering HealthKit on rapid tab switches)
+  const lastHealthFetchRef = useRef<number>(0);
+
   const weeklyGoal = stepsGoal * 7;
   const distance = (currentSteps * 0.0005).toFixed(2); // Approximate miles
   const dailyAvg = Math.round(weeklySteps / 7);
   const stepsPercent = Math.round((currentSteps / stepsGoal) * 100);
   const weeklyPercent = Math.round((weeklySteps / weeklyGoal) * 100);
 
-  // Fetch data from API
-  const fetchData = async () => {
+  // Fetch steps data - reads directly from Apple Health for today on iOS
+  const fetchData = useCallback(async (force: boolean = false) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isToday = selectedDate === todayStr;
+
     try {
-      // Get today's metrics
-      const metrics = await api.getMetricsByDate(selectedDate);
-      if (metrics) {
-        setCurrentSteps(metrics.steps || 0);
-        setCaloriesBurned(metrics.caloriesOut || 0);
+      // For today + iOS: read directly from Apple Health
+      if (isToday && Platform.OS === 'ios') {
+        // Throttle: skip if last fetch was < 60s ago (unless force)
+        const now = Date.now();
+        if (!force && now - lastHealthFetchRef.current < 60_000) {
+          console.log('[Steps] Skipping health fetch - throttled (last fetch', Math.round((now - lastHealthFetchRef.current) / 1000), 's ago)');
+        } else {
+          console.log('[Steps] Fetching fresh Apple Health data for today...');
+          const healthData = await appleHealthService.getTodayData();
+          if (healthData) {
+            console.log('[Steps] Apple Health data received:', { steps: healthData.steps, caloriesOut: healthData.caloriesOut });
+            setCurrentSteps(healthData.steps || 0);
+            setCaloriesBurned(healthData.caloriesOut || 0);
+            setLastSynced(new Date().toLocaleTimeString());
+            setDataSource('Apple Health');
+            lastHealthFetchRef.current = Date.now();
+
+            // Fire-and-forget sync to backend
+            api.ingestHealthData({
+              date: selectedDate,
+              steps: healthData.steps || 0,
+              caloriesOut: healthData.caloriesOut || 0,
+              restingEnergy: healthData.restingEnergy || 0,
+            }).catch((err: any) => console.log('[Steps] Backend sync error:', err));
+          }
+        }
       } else {
-        setCurrentSteps(0);
-        setCaloriesBurned(0);
+        // For historical dates OR non-iOS: read from backend API
+        const metrics = await api.getMetricsByDate(selectedDate);
+        if (metrics) {
+          setCurrentSteps(metrics.steps || 0);
+          setCaloriesBurned(metrics.caloriesOut || 0);
+        } else {
+          setCurrentSteps(0);
+          setCaloriesBurned(0);
+        }
       }
 
-      // Get weekly history
+      // Always fetch weekly history and goals from backend
       const history = await api.getHistory(7);
       if (history && history.length > 0) {
-        const totalSteps = history.reduce((sum, day) => sum + (day.steps || 0), 0);
+        const totalSteps = history.reduce((sum: number, day: any) => sum + (day.steps || 0), 0);
         setWeeklySteps(totalSteps);
       }
 
-      // Get goals
       const goals = await api.getGoals();
       if (goals && goals.dailySteps) {
         setStepsGoal(goals.dailySteps);
       }
 
-      // Get connected devices
       const devices = await api.getConnectedDevices();
       if (devices && devices.length > 0) {
         setDataSource(devices[0]);
       }
     } catch (error) {
-      // console.error('Error fetching steps data:', error);
+      console.log('[Steps] Error fetching steps data:', error);
     }
-  };
+  }, [selectedDate]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchData();
+    await fetchData(true); // force=true bypasses throttle on pull-to-refresh
     setRefreshing(false);
-  }, [selectedDate]);
+  }, [fetchData]);
 
   const handleSync = async () => {
     setLastSynced('Syncing...');
@@ -100,6 +134,7 @@ export default function StepsScreen() {
     }
   };
 
+  // One-time setup (greeting, week days)
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Good Morning');
@@ -125,10 +160,34 @@ export default function StepsScreen() {
       });
     }
     setWeekDays(week);
-
-    fetchData();
   }, []);
 
+  // Auto-refresh: fetch on tab focus, app foreground, and poll every 5 minutes
+  useFocusEffect(
+    useCallback(() => {
+      // Fetch data when tab gains focus
+      fetchData();
+
+      // Refresh when app returns from background
+      const sub = AppState.addEventListener('change', (nextState) => {
+        if (nextState === 'active') {
+          fetchData();
+        }
+      });
+
+      // Poll every 5 minutes while tab is focused
+      const interval = setInterval(() => {
+        fetchData();
+      }, 5 * 60 * 1000);
+
+      return () => {
+        sub.remove();
+        clearInterval(interval);
+      };
+    }, [fetchData])
+  );
+
+  // Refetch when calendar date changes
   useEffect(() => {
     fetchData();
   }, [selectedDate]);

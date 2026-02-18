@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Alert, Modal, TextInput, Animated, Platform, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Alert, Modal, TextInput, Animated, Platform, Pressable, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Dumbbell, BarChart3, Watch, X, Clock, Trash2 } from 'lucide-react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReanimatedModule, { useSharedValue, useAnimatedStyle, withSpring, ReduceMotion } from 'react-native-reanimated';
 import { api } from '../../services/api';
@@ -159,6 +159,9 @@ export default function DashboardScreen() {
     'workoutFasting', // Today's Workout & Fasting Timer cards
     'quickActions',
   ]);
+
+  // Throttle ref for health data fetches (prevent hammering HealthKit on rapid tab switches)
+  const lastHealthFetchRef = useRef<number>(0);
 
   // Bottom sheet modal refs
   const workoutSheetRef = useRef<DashboardBottomSheetRef>(null);
@@ -355,7 +358,14 @@ export default function DashboardScreen() {
   }, [selectedDate]);
 
   // Fetch wearables data (steps, active/resting energy) for the selected date
-  const fetchWearablesData = useCallback(async () => {
+  const fetchWearablesData = useCallback(async (force: boolean = false) => {
+    // Throttle: skip if last fetch was < 60s ago (unless force)
+    const now = Date.now();
+    if (!force && now - lastHealthFetchRef.current < 60_000) {
+      console.log('[Dashboard] Skipping health fetch - throttled (last fetch', Math.round((now - lastHealthFetchRef.current) / 1000), 's ago)');
+      return;
+    }
+
     const todayStr = new Date().toISOString().split('T')[0];
     const isToday = selectedDate === todayStr;
 
@@ -383,6 +393,7 @@ export default function DashboardScreen() {
           setBloodPressureSystolic(systolic);
           setBloodPressureDiastolic(diastolic);
           setLastSynced(new Date().toLocaleTimeString());
+          lastHealthFetchRef.current = Date.now();
 
           // Store today's data in backend for persistence
           try {
@@ -413,6 +424,7 @@ export default function DashboardScreen() {
           setRestingEnergy(metrics.restingEnergy || 0);
           const activeEnergy = (metrics.caloriesOut || 0) - (metrics.restingEnergy || 0);
           setActiveEnergy(activeEnergy);
+          lastHealthFetchRef.current = Date.now();
         } else {
           console.log('[Dashboard] No backend data for date:', selectedDate);
           // No data for this date - reset to zero
@@ -438,9 +450,9 @@ export default function DashboardScreen() {
     });
     await checkApiConnection();
     await fetchData();
-    await fetchAppleHealthCalories();
+    await fetchWearablesData(true); // force=true bypasses throttle on pull-to-refresh
     setRefreshing(false);
-  }, [fetchData, fetchAppleHealthCalories, capture]);
+  }, [fetchData, fetchWearablesData, capture]);
 
   // Sync with fitness tracker
   const handleSync = async () => {
@@ -516,6 +528,7 @@ export default function DashboardScreen() {
     );
   };
 
+  // One-time setup (greeting, week days, API check, analytics)
   useEffect(() => {
     // Set greeting based on time
     const hour = new Date().getHours();
@@ -543,10 +556,7 @@ export default function DashboardScreen() {
     }
     setWeekDays(week);
 
-    // Initial data fetch
     checkApiConnection();
-    fetchData();
-    fetchAppleHealthCalories();
 
     // Track screen view
     capture('screen_viewed', {
@@ -555,10 +565,38 @@ export default function DashboardScreen() {
     });
   }, []);
 
-  // Refetch when date changes
+  // Auto-refresh: fetch on tab focus, app foreground, and poll every 5 minutes
+  useFocusEffect(
+    useCallback(() => {
+      // Fetch data when tab gains focus
+      fetchData();
+      fetchWearablesData();
+
+      // Refresh when app returns from background
+      const sub = AppState.addEventListener('change', (nextState) => {
+        if (nextState === 'active') {
+          fetchData();
+          fetchWearablesData();
+        }
+      });
+
+      // Poll every 5 minutes while tab is focused
+      const interval = setInterval(() => {
+        fetchData();
+        fetchWearablesData();
+      }, 5 * 60 * 1000);
+
+      return () => {
+        sub.remove();
+        clearInterval(interval);
+      };
+    }, [fetchData, fetchWearablesData])
+  );
+
+  // Refetch when calendar date changes
   useEffect(() => {
     fetchData();
-    fetchAppleHealthCalories();
+    fetchWearablesData();
   }, [selectedDate]);
 
   // Log net calorie calculation for verification
