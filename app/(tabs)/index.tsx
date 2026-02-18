@@ -1519,7 +1519,7 @@ export default function DashboardScreen() {
               weeklyProtein={weeklyProtein}
               weeklyCarbs={weeklyCarbs}
               weeklyFat={weeklyFat}
-              weeklyFatLoss={weeklyFatLoss}
+              weeklyFatLoss={Math.max(0, weeklyFatLoss)}
               stepsGoal={stepsGoal}
               caloriesGoal={calorieGoal}
               proteinGoal={proteinGoal}
