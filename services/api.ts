@@ -1795,6 +1795,83 @@ class HeirclarkAPI {
   }
 
   // ============================================
+  // READINESS & EXTENDED HEALTH DATA
+  // ============================================
+
+  /**
+   * Get readiness history (Oura-exclusive data: readiness score, HRV, temp, stress)
+   */
+  async getReadinessHistory(days: number = 14): Promise<{
+    readinessLogs: Array<{
+      date: string;
+      readiness_score: number | null;
+      hrv_balance_score: number | null;
+      temperature_deviation: number | null;
+      resting_heart_rate: number | null;
+      stress_high_seconds: number | null;
+      recovery_high_seconds: number | null;
+      resilience_level: string | null;
+      spo2_avg: number | null;
+      avg_hrv: number | null;
+    }>;
+  }> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/health/readiness?days=${days}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) return { readinessLogs: [] };
+
+      const data = await response.json();
+      return { readinessLogs: data.readinessLogs || [] };
+    } catch (error) {
+      console.error('[API] Get readiness error:', error);
+      return { readinessLogs: [] };
+    }
+  }
+
+  /**
+   * Get extended sleep history (includes HRV, SpO2, breathing rate, efficiency, all stages)
+   */
+  async getSleepHistory(days: number = 14): Promise<{
+    sleepLogs: Array<{
+      date: string;
+      total_hours: number | null;
+      deep_sleep_hours: number | null;
+      rem_sleep_hours: number | null;
+      light_sleep_hours: number | null;
+      sleep_score: number | null;
+      sleep_efficiency: number | null;
+      avg_breathing_rate: number | null;
+      spo2_avg: number | null;
+      avg_heart_rate: number | null;
+      avg_hrv: number | null;
+      lowest_heart_rate: number | null;
+      sleep_latency_minutes: number | null;
+      bed_time: string | null;
+      wake_time: string | null;
+      quality_score: number | null;
+      source: string | null;
+    }>;
+  }> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/v1/health/sleep?days=${days}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (!response.ok) return { sleepLogs: [] };
+
+      const data = await response.json();
+      return { sleepLogs: data.sleepLogs || [] };
+    } catch (error) {
+      console.error('[API] Get sleep history error:', error);
+      return { sleepLogs: [] };
+    }
+  }
+
+  // ============================================
   // WEATHER
   // ============================================
 

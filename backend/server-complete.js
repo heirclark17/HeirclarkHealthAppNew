@@ -3815,6 +3815,16 @@ app.get('/api/v1/health/metrics', authenticateToken, async (req, res) => {
       pool.query(`SELECT total_hours, quality_score FROM sleep_logs WHERE user_id = $1 ORDER BY date DESC LIMIT 1`, [req.userId]),
     ]);
 
+    // Also fetch today's readiness if available
+    const readiness = await pool.query(
+      `SELECT readiness_score, resting_heart_rate, temperature_deviation, avg_hrv, spo2_avg, stress_high_seconds, resilience_level
+       FROM oura_readiness WHERE user_id = $1 AND date = $2`,
+      [req.userId, today]
+    );
+
+    const sleepRow = sleep.rows[0] || {};
+    const readinessRow = readiness.rows[0] || {};
+
     res.json({
       success: true,
       metrics: {
@@ -3827,8 +3837,16 @@ app.get('/api/v1/health/metrics', authenticateToken, async (req, res) => {
         waterOz: parseFloat(hydration.rows[0]?.water) || 0,
         weight: weight.rows[0]?.weight || null,
         weightUnit: weight.rows[0]?.unit || 'lbs',
-        sleepHours: parseFloat(sleep.rows[0]?.total_hours) || null,
-        sleepQuality: sleep.rows[0]?.quality_score || null,
+        sleepHours: parseFloat(sleepRow.total_hours) || null,
+        sleepQuality: sleepRow.quality_score || null,
+        sleepScore: sleepRow.sleep_score || null,
+        sleepEfficiency: sleepRow.sleep_efficiency || null,
+        avgHRV: parseFloat(sleepRow.avg_hrv) || readinessRow.avg_hrv ? parseFloat(readinessRow.avg_hrv) : null,
+        spo2: parseFloat(sleepRow.spo2_avg) || readinessRow.spo2_avg ? parseFloat(readinessRow.spo2_avg) : null,
+        restingHeartRate: readinessRow.resting_heart_rate || null,
+        readinessScore: readinessRow.readiness_score || null,
+        temperatureDeviation: readinessRow.temperature_deviation ? parseFloat(readinessRow.temperature_deviation) : null,
+        resilienceLevel: readinessRow.resilience_level || null,
       }
     });
   } catch (error) {
@@ -4017,6 +4035,20 @@ app.get('/api/v1/health/sleep', authenticateToken, async (req, res) => {
     res.json({ success: true, sleepLogs: sleep.rows });
   } catch (error) {
     res.status(500).json({ error: 'Failed to get sleep data' });
+  }
+});
+
+// Get readiness history (Oura-exclusive data)
+app.get('/api/v1/health/readiness', authenticateToken, async (req, res) => {
+  try {
+    const { days } = req.query;
+    const readiness = await pool.query(
+      `SELECT * FROM oura_readiness WHERE user_id = $1 ORDER BY date DESC LIMIT $2`,
+      [req.userId, parseInt(days) || 14]
+    );
+    res.json({ success: true, readinessLogs: readiness.rows });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get readiness data' });
   }
 });
 
@@ -5312,47 +5344,114 @@ app.post('/api/v1/wearables/sync/:providerId', authenticateToken, async (req, re
     const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const ouraHeaders = { Authorization: `Bearer ${access_token}` };
 
-    const [sleepRes, activityRes, readinessRes] = await Promise.all([
+    // Fetch last 7 days from 6 Oura API v2 endpoints in parallel
+    const [dailySleepRes, detailedSleepRes, activityRes, readinessRes, spo2Res, stressRes] = await Promise.all([
       fetch(`https://api.ouraring.com/v2/usercollection/daily_sleep?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
+      fetch(`https://api.ouraring.com/v2/usercollection/sleep?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
       fetch(`https://api.ouraring.com/v2/usercollection/daily_activity?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
       fetch(`https://api.ouraring.com/v2/usercollection/daily_readiness?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
+      fetch(`https://api.ouraring.com/v2/usercollection/daily_spo2?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
+      fetch(`https://api.ouraring.com/v2/usercollection/daily_stress?start_date=${startDate}&end_date=${endDate}`, { headers: ouraHeaders }),
     ]);
 
     let sleepCount = 0, activityCount = 0, readinessCount = 0;
 
-    // Process sleep data
-    if (sleepRes.ok) {
-      const sleepData = await sleepRes.json();
+    // Build a map of detailed sleep data keyed by day (for extended fields)
+    const detailedSleepMap = {};
+    if (detailedSleepRes.ok) {
+      const detailedData = await detailedSleepRes.json();
+      for (const period of (detailedData.data || [])) {
+        // Only use primary sleep period (period 0 or type=long_sleep)
+        if (period.type === 'long_sleep' || period.period === 0) {
+          detailedSleepMap[period.day] = period;
+        }
+      }
+    } else {
+      console.warn('[Oura] Detailed sleep fetch failed:', detailedSleepRes.status);
+    }
+
+    // Build SpO2 map keyed by day
+    const spo2Map = {};
+    if (spo2Res.ok) {
+      const spo2Data = await spo2Res.json();
+      for (const day of (spo2Data.data || [])) {
+        spo2Map[day.day] = day.spo2_percentage?.average || null;
+      }
+    } else {
+      console.warn('[Oura] SpO2 fetch failed:', spo2Res.status);
+    }
+
+    // Build stress map keyed by day
+    const stressMap = {};
+    if (stressRes.ok) {
+      const stressData = await stressRes.json();
+      for (const day of (stressData.data || [])) {
+        stressMap[day.day] = day;
+      }
+    } else {
+      console.warn('[Oura] Stress fetch failed:', stressRes.status);
+    }
+
+    // Process sleep data (daily_sleep for scores + detailed sleep for stages/HR/HRV)
+    if (dailySleepRes.ok) {
+      const sleepData = await dailySleepRes.json();
       for (const day of (sleepData.data || [])) {
-        const totalHours = day.contributors?.total_sleep ? (day.contributors.total_sleep / 3600) : null;
-        const deepHours = day.contributors?.deep_sleep ? (day.contributors.deep_sleep / 3600) : null;
-        const remHours = day.contributors?.rem_sleep ? (day.contributors.rem_sleep / 3600) : null;
+        const detail = detailedSleepMap[day.day] || {};
+        const spo2 = spo2Map[day.day] || null;
+
+        // Duration fields from detailed sleep (all in seconds -> hours)
+        const totalHours = detail.total_sleep_duration ? (detail.total_sleep_duration / 3600) : null;
+        const deepHours = detail.deep_sleep_duration ? (detail.deep_sleep_duration / 3600) : null;
+        const remHours = detail.rem_sleep_duration ? (detail.rem_sleep_duration / 3600) : null;
+        const lightHours = detail.light_sleep_duration ? (detail.light_sleep_duration / 3600) : null;
+        const efficiency = detail.efficiency || null;
+        const breathingRate = detail.average_breath || null;
+        const avgHR = detail.average_heart_rate || null;
+        const avgHRV = detail.average_hrv || null;
+        const lowestHR = detail.lowest_heart_rate || null;
+        const latencyMin = detail.latency ? Math.round(detail.latency / 60) : null;
 
         await pool.query(
-          `INSERT INTO sleep_logs (user_id, date, total_hours, deep_sleep_hours, rem_sleep_hours, sleep_score, source)
-           VALUES ($1, $2, $3, $4, $5, $6, 'oura')
+          `INSERT INTO sleep_logs (user_id, date, total_hours, deep_sleep_hours, rem_sleep_hours, light_sleep_hours,
+             sleep_score, sleep_efficiency, avg_breathing_rate, spo2_avg, avg_heart_rate, avg_hrv, lowest_heart_rate, sleep_latency_minutes, source)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'oura')
            ON CONFLICT (user_id, date) DO UPDATE SET
              total_hours = COALESCE($3, sleep_logs.total_hours),
              deep_sleep_hours = COALESCE($4, sleep_logs.deep_sleep_hours),
              rem_sleep_hours = COALESCE($5, sleep_logs.rem_sleep_hours),
-             sleep_score = COALESCE($6, sleep_logs.sleep_score)`,
-          [req.userId, day.day, totalHours, deepHours, remHours, day.score || null]
+             light_sleep_hours = COALESCE($6, sleep_logs.light_sleep_hours),
+             sleep_score = COALESCE($7, sleep_logs.sleep_score),
+             sleep_efficiency = COALESCE($8, sleep_logs.sleep_efficiency),
+             avg_breathing_rate = COALESCE($9, sleep_logs.avg_breathing_rate),
+             spo2_avg = COALESCE($10, sleep_logs.spo2_avg),
+             avg_heart_rate = COALESCE($11, sleep_logs.avg_heart_rate),
+             avg_hrv = COALESCE($12, sleep_logs.avg_hrv),
+             lowest_heart_rate = COALESCE($13, sleep_logs.lowest_heart_rate),
+             sleep_latency_minutes = COALESCE($14, sleep_logs.sleep_latency_minutes)`,
+          [req.userId, day.day, totalHours, deepHours, remHours, lightHours,
+           day.score || null, efficiency, breathingRate, spo2, avgHR, avgHRV, lowestHR, latencyMin]
         );
         sleepCount++;
       }
     } else {
-      console.warn('[Oura] Sleep fetch failed:', sleepRes.status);
+      console.warn('[Oura] Daily sleep fetch failed:', dailySleepRes.status);
     }
 
-    // Process activity data (steps + calories)
+    // Process activity data (steps + calories + distance)
     if (activityRes.ok) {
       const activityData = await activityRes.json();
       for (const day of (activityData.data || [])) {
         if (day.steps) {
           await pool.query(
-            `INSERT INTO step_logs (user_id, date, steps, source) VALUES ($1, $2, $3, 'oura')
-             ON CONFLICT (user_id, date) DO UPDATE SET steps = $3`,
-            [req.userId, day.day, Math.floor(day.steps)]
+            `INSERT INTO step_logs (user_id, date, steps, distance_meters, active_calories, source)
+             VALUES ($1, $2, $3, $4, $5, 'oura')
+             ON CONFLICT (user_id, date) DO UPDATE SET
+               steps = $3,
+               distance_meters = COALESCE($4, step_logs.distance_meters),
+               active_calories = COALESCE($5, step_logs.active_calories)`,
+            [req.userId, day.day, Math.floor(day.steps),
+             day.equivalent_walking_distance ? Math.round(day.equivalent_walking_distance) : null,
+             day.active_calories ? Math.round(day.active_calories) : null]
           );
         }
         if (day.total_calories) {
@@ -5368,18 +5467,39 @@ app.post('/api/v1/wearables/sync/:providerId', authenticateToken, async (req, re
       console.warn('[Oura] Activity fetch failed:', activityRes.status);
     }
 
-    // Process readiness data (Oura-exclusive premium data)
+    // Process readiness + stress + SpO2 data (Oura-exclusive premium data)
     if (readinessRes.ok) {
       const readinessData = await readinessRes.json();
       for (const day of (readinessData.data || [])) {
+        const stress = stressMap[day.day] || {};
+        const spo2 = spo2Map[day.day] || null;
+        // Get nightly HRV from detailed sleep
+        const detail = detailedSleepMap[day.day] || {};
+
         await pool.query(
-          `INSERT INTO oura_readiness (user_id, date, readiness_score, temperature_deviation, resting_heart_rate)
-           VALUES ($1, $2, $3, $4, $5)
+          `INSERT INTO oura_readiness (user_id, date, readiness_score, temperature_deviation, resting_heart_rate,
+             hrv_balance_score, stress_high_seconds, recovery_high_seconds, resilience_level, spo2_avg, avg_hrv)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
            ON CONFLICT (user_id, date) DO UPDATE SET
              readiness_score = COALESCE($3, oura_readiness.readiness_score),
              temperature_deviation = COALESCE($4, oura_readiness.temperature_deviation),
-             resting_heart_rate = COALESCE($5, oura_readiness.resting_heart_rate)`,
-          [req.userId, day.day, day.score || null, day.temperature_deviation || null, day.contributors?.resting_heart_rate || null]
+             resting_heart_rate = COALESCE($5, oura_readiness.resting_heart_rate),
+             hrv_balance_score = COALESCE($6, oura_readiness.hrv_balance_score),
+             stress_high_seconds = COALESCE($7, oura_readiness.stress_high_seconds),
+             recovery_high_seconds = COALESCE($8, oura_readiness.recovery_high_seconds),
+             resilience_level = COALESCE($9, oura_readiness.resilience_level),
+             spo2_avg = COALESCE($10, oura_readiness.spo2_avg),
+             avg_hrv = COALESCE($11, oura_readiness.avg_hrv)`,
+          [req.userId, day.day,
+           day.score || null,
+           day.temperature_deviation || null,
+           day.contributors?.resting_heart_rate || null,
+           day.contributors?.hrv_balance || null,
+           stress.stress_high || null,
+           stress.recovery_high || null,
+           stress.day_summary || null,
+           spo2,
+           detail.average_hrv || null]
         );
         readinessCount++;
       }
@@ -5602,6 +5722,27 @@ async function runMigrations() {
 
     // Add sleep_score column to sleep_logs
     await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS sleep_score INTEGER`);
+
+    // Extended sleep columns (from Oura + Fitbit APIs)
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS light_sleep_hours DECIMAL(5,2)`);
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS sleep_efficiency INTEGER`); // 0-100%
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS avg_breathing_rate DECIMAL(4,1)`); // breaths/min
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS spo2_avg DECIMAL(4,1)`); // blood oxygen %
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS avg_heart_rate INTEGER`); // bpm during sleep
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS avg_hrv DECIMAL(5,1)`); // HRV RMSSD ms
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS lowest_heart_rate INTEGER`);
+    await pool.query(`ALTER TABLE sleep_logs ADD COLUMN IF NOT EXISTS sleep_latency_minutes INTEGER`); // time to fall asleep
+
+    // Extended oura_readiness columns
+    await pool.query(`ALTER TABLE oura_readiness ADD COLUMN IF NOT EXISTS stress_high_seconds INTEGER`);
+    await pool.query(`ALTER TABLE oura_readiness ADD COLUMN IF NOT EXISTS recovery_high_seconds INTEGER`);
+    await pool.query(`ALTER TABLE oura_readiness ADD COLUMN IF NOT EXISTS resilience_level VARCHAR(20)`); // stressed/engaged/relaxed/restored
+    await pool.query(`ALTER TABLE oura_readiness ADD COLUMN IF NOT EXISTS spo2_avg DECIMAL(4,1)`);
+    await pool.query(`ALTER TABLE oura_readiness ADD COLUMN IF NOT EXISTS avg_hrv DECIMAL(5,1)`); // daily HRV
+
+    // Extended step_logs columns
+    await pool.query(`ALTER TABLE step_logs ADD COLUMN IF NOT EXISTS distance_meters INTEGER`);
+    await pool.query(`ALTER TABLE step_logs ADD COLUMN IF NOT EXISTS active_calories INTEGER`);
 
     console.log('[Migrations] ✅ Completed successfully');
   } catch (error) {
