@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert, Platform } from 'react-native';
 import LottieView from 'lottie-react-native';
 import {
   Flame,
@@ -236,14 +236,16 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Confetti Animation */}
-      <LottieView
-        source={require('../../assets/animations/confetti.json')}
-        autoPlay
-        loop={false}
-        style={styles.confettiAnimation}
-        resizeMode="cover"
-      />
+      {/* Confetti Animation - Native only */}
+      {Platform.OS !== 'web' && (
+        <LottieView
+          source={require('../../assets/animations/confetti.json')}
+          autoPlay
+          loop={false}
+          style={styles.confettiAnimation}
+          resizeMode="cover"
+        />
+      )}
 
       <ScrollView
         style={styles.scrollContainer}
