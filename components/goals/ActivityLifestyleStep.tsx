@@ -673,10 +673,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
       {/* Strength Training Baseline */}
       <GlassSection>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-          <Weight size={16} color={Colors.primary} style={{ marginRight: 8 }} />
-          <Text style={[styles.sectionTitle, { marginBottom: 0, color: colors.text }]}>STRENGTH TRAINING BASELINE</Text>
-        </View>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>STRENGTH TRAINING BASELINE</Text>
         <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Help us personalize weight recommendations for strength workouts
         </Text>
