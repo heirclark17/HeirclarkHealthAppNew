@@ -511,22 +511,6 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         </GlassCard>
       </View>
 
-      {/* Diet Summary */}
-      {state.dietStyle !== 'standard' && (
-        <View>
-          <GlassCard style={styles.dietCard} interactive>
-            <Apple size={18} color={Colors.success} />
-            <Text style={[styles.dietText, { color: colors.textSecondary }]}>
-              {state.dietStyle === 'keto' && 'Keto-optimized macros (70% fat, 25% protein, 5% carbs)'}
-              {state.dietStyle === 'high_protein' && 'High protein for muscle support (40% protein)'}
-              {state.dietStyle === 'vegetarian' && 'Vegetarian-friendly plan'}
-              {state.dietStyle === 'vegan' && 'Plant-based nutrition plan'}
-              {state.dietStyle === 'custom' && 'Custom macro distribution'}
-            </Text>
-          </GlassCard>
-        </View>
-      )}
-
       {/* Workout Plan Preview Card - DETAILED */}
       <View>
         <GlassCard style={styles.workoutPlanCard} interactive>
@@ -1443,20 +1427,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     fontWeight: '200',
     color: Colors.successMuted,
-  },
-  dietCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 16,
-    marginBottom: 16,
-  },
-  dietText: {
-    flex: 1,
-    fontSize: 13,
-    fontFamily: Fonts.semiBold,
-    color: Colors.textSecondary,
-    lineHeight: 18,
   },
   workoutPlanCard: {
     padding: 16,
