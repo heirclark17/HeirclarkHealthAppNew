@@ -612,9 +612,9 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     accessibilityLabel={`Add ${meal.name} to today's meals`}
                     accessibilityRole="button"
                   >
-                    <PlusCircle size={14} color={colors.text} strokeWidth={1.5} />
+                    <PlusCircle size={12} color={colors.text} strokeWidth={1.5} />
                     <Text style={[styles.actionPillText, { color: colors.text }]}>
-                      {isAddingToMeals ? 'Adding...' : "Today's Meals"}
+                      {isAddingToMeals ? 'Adding...' : 'Add'}
                     </Text>
                   </TouchableOpacity>
                 </GlassCard>
@@ -630,7 +630,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                       accessibilityLabel={`Save ${meal.name} to favorites`}
                       accessibilityRole="button"
                     >
-                      <Bookmark size={14} color={colors.text} strokeWidth={1.5} />
+                      <Bookmark size={12} color={colors.text} strokeWidth={1.5} />
                       <Text style={[styles.actionPillText, { color: colors.text }]}>
                         {isSavingMeal ? 'Saving...' : 'Save'}
                       </Text>
@@ -648,7 +648,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                     accessibilityLabel={`Add ${meal.name} ingredients to Instacart`}
                     accessibilityRole="button"
                   >
-                    <ShoppingCart size={14} color={colors.text} strokeWidth={1.5} />
+                    <ShoppingCart size={12} color={colors.text} strokeWidth={1.5} />
                     <Text style={[styles.actionPillText, { color: colors.text }]}>
                       {isAddingToInstacart ? 'Adding...' : 'Instacart'}
                     </Text>
@@ -666,7 +666,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
                       accessibilityLabel={`Swap ${meal.name} for different meal`}
                       accessibilityRole="button"
                     >
-                      <ArrowLeftRight size={14} color={colors.text} strokeWidth={1.5} />
+                      <ArrowLeftRight size={12} color={colors.text} strokeWidth={1.5} />
                       <Text style={[styles.actionPillText, { color: colors.text }]}>
                         {isSwapping ? 'Swapping...' : 'Swap'}
                       </Text>
@@ -1011,31 +1011,31 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   modalFooter: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 16,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
   actionPillRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'center',
+    gap: 6,
   },
   actionPill: {
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   actionPillInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   actionPillText: {
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: Fonts.numericRegular,
     fontWeight: '400',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
 });
 
