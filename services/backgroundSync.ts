@@ -5,7 +5,7 @@
 
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { appleHealthService, HealthData } from './appleHealthService';
 import { Platform } from 'react-native';
 
@@ -19,8 +19,8 @@ const LAST_SYNC_KEY = 'heirclark_last_sync';
  */
 async function syncHealthDataToBackend(healthData: HealthData): Promise<boolean> {
   try {
-    // Get auth token from secure storage
-    const authToken = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+    // Get auth token from AsyncStorage (accessible in background unlike SecureStore)
+    const authToken = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
     if (!authToken) {
       console.log('[BackgroundSync] No auth token, skipping sync');
       return false;
@@ -85,7 +85,7 @@ TaskManager.defineTask(BACKGROUND_SYNC_TASK, async () => {
 
     if (success) {
       // Store last sync time
-      await SecureStore.setItemAsync(LAST_SYNC_KEY, new Date().toISOString());
+      await AsyncStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
       console.log('[BackgroundSync] Background sync completed successfully');
       return BackgroundFetch.BackgroundFetchResult.NewData;
     } else {
@@ -171,7 +171,7 @@ export async function isBackgroundSyncRegistered(): Promise<boolean> {
  */
 export async function getLastSyncTime(): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync(LAST_SYNC_KEY);
+    return await AsyncStorage.getItem(LAST_SYNC_KEY);
   } catch (error) {
     console.error('[BackgroundSync] Error getting last sync time:', error);
     return null;
@@ -196,7 +196,7 @@ export async function triggerManualSync(): Promise<boolean> {
     const success = await syncHealthDataToBackend(healthData);
 
     if (success) {
-      await SecureStore.setItemAsync(LAST_SYNC_KEY, new Date().toISOString());
+      await AsyncStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
     }
 
     return success;

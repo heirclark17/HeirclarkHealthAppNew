@@ -31,8 +31,9 @@ class SecureStorageService {
   private isSecureStoreAvailable: boolean = false;
 
   constructor() {
-    this.checkAvailability();
-    this.migrateOldKeys();
+    // Run availability check first, then migrate
+    // Both are async but fire-and-forget in constructor
+    this.checkAvailability().then(() => this.migrateOldKeys()).catch(() => {});
   }
 
   /**
@@ -93,7 +94,9 @@ class SecureStorageService {
   async setItem(key: string, value: string): Promise<boolean> {
     try {
       if (this.isSecureStoreAvailable && value.length <= MAX_SECURE_VALUE_LENGTH) {
-        await SecureStore.setItemAsync(key, value);
+        await SecureStore.setItemAsync(key, value, {
+          keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+        });
         console.log(`[SecureStorage] Stored ${key} securely`);
       } else {
         // Fallback to AsyncStorage for large values or unsupported platforms
@@ -225,7 +228,9 @@ class SecureStorageService {
 
         if (asyncValue && !secureValue) {
           console.log(`[SecureStorage] Migrating ${key} to SecureStore`);
-          await SecureStore.setItemAsync(key, asyncValue);
+          await SecureStore.setItemAsync(key, asyncValue, {
+            keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+          });
           // Optionally remove from AsyncStorage after migration
           // await AsyncStorage.removeItem(key);
         }
