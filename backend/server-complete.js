@@ -2749,6 +2749,8 @@ app.post('/api/v1/ai/cheat-day-guidance', authenticateToken, async (req, res) =>
 
 Your task is to provide warm, personalized guidance for someone on their designated cheat day. Be positive and understanding - cheat days are important for mental health and sustainability!
 
+IMPORTANT: Never use abbreviations. Always spell out the full word. Examples: "pounds" not "lbs", "grams" not "g", "calories" not "cal".
+
 Return a JSON object with exactly this structure:
 {
   "greeting": "A warm, personalized greeting acknowledging their cheat day (1-2 sentences)",
@@ -3329,7 +3331,11 @@ app.post('/api/v1/agents/smart-meal-logger/suggestions', authenticateToken, asyn
       messages: [
         {
           role: 'system',
-          content: `You are a smart meal suggestion assistant. Based on the user's meal history patterns, suggest meals they're likely to eat. Return JSON:
+          content: `You are a smart meal suggestion assistant. Based on the user's meal history patterns, suggest meals they're likely to eat.
+
+IMPORTANT: Never use abbreviations in the "reason" field. Always spell out the full word. Examples: "pounds" not "lbs", "grams" not "g", "calories" not "cal".
+
+Return JSON:
           {
             "suggestions": [
               {"name": "Meal Name", "confidence": 0.85, "reason": "You often eat this for breakfast", "calories": 400, "protein": 25}
@@ -3375,7 +3381,11 @@ app.post('/api/v1/agents/accountability/check-in', authenticateToken, async (req
       messages: [
         {
           role: 'system',
-          content: `You are an encouraging accountability partner. Provide a brief, personalized check-in message. Be specific about their progress. Return JSON:
+          content: `You are an encouraging accountability partner. Provide a brief, personalized check-in message. Be specific about their progress.
+
+IMPORTANT: Never use abbreviations in messages and tips. Always spell out the full word. Examples: "pounds" not "lbs", "grams" not "g", "calories" not "cal".
+
+Return JSON:
           {
             "message": "Encouraging message",
             "progressScore": 85,
@@ -3421,14 +3431,18 @@ app.post('/api/v1/agents/prediction/forecast', authenticateToken, async (req, re
       messages: [
         {
           role: 'system',
-          content: `You are a progress prediction specialist. Analyze weight trends and provide realistic forecasts. Return JSON:
+          content: `You are a progress prediction specialist. Analyze weight trends and provide realistic forecasts.
+
+IMPORTANT: Never use abbreviations in factors, recommendations, or celebrations. Always spell out the full word. Examples: "pounds" not "lbs", "calories" not "cal".
+
+Return JSON:
           {
             "predictedDate": "2025-03-15",
             "confidenceLevel": "medium",
             "weeklyProjections": [{"week": 1, "predictedWeight": 185, "range": [184, 186]}],
             "factors": ["Current deficit is sustainable", "Weight loss may slow after week 4"],
             "recommendations": ["Consider a diet break", "Increase protein slightly"],
-            "milestones": [{"weight": 180, "estimatedDate": "2025-02-28", "celebration": "First 10 lbs!"}]
+            "milestones": [{"weight": 180, "estimatedDate": "2025-02-28", "celebration": "First 10 pounds!"}]
           }`
         },
         {
@@ -3470,7 +3484,11 @@ app.post('/api/v1/agents/habits/analyze', authenticateToken, async (req, res) =>
       messages: [
         {
           role: 'system',
-          content: `You are a habit formation expert using behavioral psychology. Analyze habit patterns and provide insights. Return JSON:
+          content: `You are a habit formation expert using behavioral psychology. Analyze habit patterns and provide insights.
+
+IMPORTANT: Never use abbreviations in patterns, suggestions, science explanations, or messages. Always spell out the full word. Examples: "pounds" not "lbs", "grams" not "g".
+
+Return JSON:
           {
             "streaks": [{"habit": "name", "currentStreak": 7, "bestStreak": 14}],
             "patterns": ["You're most consistent on weekdays", "Morning habits have 80% completion"],
@@ -3510,7 +3528,11 @@ app.post('/api/v1/agents/restaurant/analyze', authenticateToken, async (req, res
       messages: [
         {
           role: 'system',
-          content: `You are a restaurant menu nutrition analyst. Help users make healthy choices while dining out. Return JSON:
+          content: `You are a restaurant menu nutrition analyst. Help users make healthy choices while dining out.
+
+IMPORTANT: Never use abbreviations in reasons, modifications, or tips. Always spell out the full word. Examples: "pounds" not "lbs", "grams" not "g", "calories" not "cal".
+
+Return JSON:
           {
             "recommendations": [
               {"item": "Grilled Salmon", "reason": "High protein, healthy fats", "estimatedNutrition": {"calories": 450, "protein": 40}, "modifications": ["Ask for sauce on side"]}
@@ -3566,13 +3588,17 @@ app.post('/api/v1/agents/sleep/analyze', authenticateToken, async (req, res) => 
       messages: [
         {
           role: 'system',
-          content: `You are a sleep and recovery specialist. Analyze sleep patterns and provide recommendations. Return JSON:
+          content: `You are a sleep and recovery specialist. Analyze sleep patterns and provide recommendations.
+
+IMPORTANT: Never use abbreviations in trends, tips, or impact descriptions. Always spell out the full word. Examples: "hours" not "hrs", "1 hour" not "1hr".
+
+Return JSON:
           {
             "averageSleep": 7.2,
             "sleepDebt": 3.5,
             "quality": "good",
             "trends": ["Improving over past week", "Consistent bedtime"],
-            "recommendations": [{"priority": "high", "tip": "Avoid screens 1hr before bed", "impact": "Could improve quality by 15%"}],
+            "recommendations": [{"priority": "high", "tip": "Avoid screens 1 hour before bed", "impact": "Could improve quality by 15%"}],
             "recoveryScore": 75,
             "optimalBedtime": "10:30 PM",
             "optimalWakeTime": "6:30 AM"
@@ -3617,7 +3643,11 @@ app.post('/api/v1/agents/hydration/status', authenticateToken, async (req, res) 
       messages: [
         {
           role: 'system',
-          content: `You are a hydration specialist. Analyze water intake and provide recommendations. Return JSON:
+          content: `You are a hydration specialist. Analyze water intake and provide recommendations.
+
+IMPORTANT: Never use abbreviations in reminders or tips. Always spell out the full word. Examples: "ounces" not "oz", "fluid ounces" not "fl oz".
+
+Return JSON:
           {
             "currentStatus": "slightly dehydrated",
             "percentOfGoal": 65,
@@ -3689,15 +3719,19 @@ app.post('/api/v1/agents/banking/calculate', authenticateToken, async (req, res)
       messages: [
         {
           role: 'system',
-          content: `You are a calorie banking strategist helping users save/spend calories wisely. Return JSON:
+          content: `You are a calorie banking strategist helping users save/spend calories wisely.
+
+IMPORTANT: Never use abbreviations in strategy, event planning strategies, or recommendations. Always spell out the full word. Examples: "calories" not "cal".
+
+Return JSON:
           {
             "currentBalance": 500,
             "weeklyStatus": {"saved": 700, "spent": 200, "net": 500},
             "todayBudget": 1800,
-            "strategy": "Save 100 cal today for Saturday dinner",
+            "strategy": "Save 100 calories today for Saturday dinner",
             "eventPlanning": [{"event": "Saturday dinner", "allocatedCalories": 2500, "strategy": "Light breakfast, skip snacks"}],
             "safeWithdrawalLimit": 300,
-            "recommendations": ["Don't exceed 500 cal deficit any single day", "Plan ahead for events"]
+            "recommendations": ["Don't exceed 500 calorie deficit any single day", "Plan ahead for events"]
           }`
         },
         {
@@ -3731,7 +3765,11 @@ app.post('/api/v1/agents/form-coach/analyze', authenticateToken, async (req, res
       messages: [
         {
           role: 'system',
-          content: `You are an expert exercise form coach. Provide detailed form corrections and tips. Return JSON:
+          content: `You are an expert exercise form coach. Provide detailed form corrections and tips.
+
+IMPORTANT: Never use abbreviations in corrections, cues, mistakes, progressions, or safety notes. Always spell out the full word. Examples: "pounds" not "lbs", "kilograms" not "kg", "repetitions" not "reps", "seconds" not "secs".
+
+Return JSON:
           {
             "exercise": "Squat",
             "overallScore": 75,
@@ -3774,7 +3812,11 @@ app.post('/api/v1/agents/nutrition-accuracy/verify', authenticateToken, async (r
       messages: [
         {
           role: 'system',
-          content: `You are a nutrition accuracy verifier. Cross-check nutrition estimates and flag potential issues. Return JSON:
+          content: `You are a nutrition accuracy verifier. Cross-check nutrition estimates and flag potential issues.
+
+IMPORTANT: Never use abbreviations in issue descriptions, reasoning, or suggestions. Always spell out the full word. Examples: "grams" not "g", "calories" not "cal", "milligrams" not "mg".
+
+Return JSON:
           {
             "isAccurate": true,
             "confidenceScore": 85,
@@ -4619,7 +4661,9 @@ app.post('/api/v1/agents/tdee/insights', authenticateToken, async (req, res) => 
       messages: [
         {
           role: 'system',
-          content: `You are a knowledgeable nutrition coach analyzing metabolic data. Provide 3 personalized, encouraging insights. Be specific to their numbers.`
+          content: `You are a knowledgeable nutrition coach analyzing metabolic data. Provide 3 personalized, encouraging insights. Be specific to their numbers.
+
+IMPORTANT: Never use abbreviations. Always spell out the full word. Examples: "total daily energy expenditure" not "TDEE", "calories" not "cal", "percent" not "%".`
         },
         {
           role: 'user',
