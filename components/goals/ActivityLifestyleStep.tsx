@@ -263,10 +263,11 @@ interface ChipProps {
   isSelected: boolean;
   onSelect: () => void;
   colors: typeof DarkColors;
+  isDark?: boolean;
 }
 
-function Chip({ label, isSelected, onSelect, colors }: ChipProps) {
-  const selectedBg = isSelected ? Colors.success : undefined;
+function Chip({ label, isSelected, onSelect, colors, isDark }: ChipProps) {
+  const selectedBg = isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)';
 
   return (
     <TouchableOpacity
@@ -280,7 +281,7 @@ function Chip({ label, isSelected, onSelect, colors }: ChipProps) {
       accessibilityState={{ selected: isSelected }}
     >
       <GlassCard style={[styles.chip, isSelected && { backgroundColor: selectedBg }]} interactive>
-        <Text style={[styles.chipText, { color: colors.text }, isSelected && styles.chipTextSelected]}>
+        <Text style={[styles.chipText, { color: colors.text }]}>
           {label}
         </Text>
       </GlassCard>
@@ -545,6 +546,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
               isSelected={state.fitnessLevel === level.value}
               onSelect={() => setFitnessLevel(level.value as 'beginner' | 'intermediate' | 'advanced')}
               colors={colors}
+              isDark={isDark}
             />
           ))}
         </View>
@@ -570,12 +572,14 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
             isSelected={!state.hasLiftingExperience}
             onSelect={() => setHasLiftingExperience(false)}
             colors={colors}
+            isDark={isDark}
           />
           <Chip
             label="Yes, I Lift"
             isSelected={state.hasLiftingExperience}
             onSelect={() => setHasLiftingExperience(true)}
             colors={colors}
+            isDark={isDark}
           />
         </View>
 
