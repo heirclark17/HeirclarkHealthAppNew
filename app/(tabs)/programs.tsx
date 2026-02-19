@@ -988,8 +988,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as any,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
   coachFab: {
