@@ -1803,12 +1803,22 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         const isCheatDay = (foodPrefs?.cheatDays || []).includes(dayName);
         const isFasting = goalState?.intermittentFasting ?? false;
 
+        // ⚠️ CRITICAL FIX: Treat existing workouts as immovable anchors (like calendar events)
+        // NOT as workouts to re-schedule. This prevents the scheduling engine from
+        // trying to re-place workouts that already have valid times assigned.
+        const existingWorkouts = preservedBlocks.filter(b => b.type === 'workout');
+        const calendarEvents = preservedBlocks.filter(b => b.type === 'calendar_event');
+        const sleepBlocks = preservedBlocks.filter(b => b.type === 'sleep');
+
+        // Combine all immovable blocks (calendar events, sleep, and existing workouts)
+        const immovableBlocks = [...calendarEvents, ...sleepBlocks, ...existingWorkouts];
+
         const request: SchedulingRequest = {
           date: day.date,
           preferences: currentPrefs,
-          workoutBlocks: preservedBlocks.filter(b => b.type === 'workout'),
+          workoutBlocks: [], // ✅ Empty - we're only scheduling meals, workouts are immovable
           mealBlocks: freshMealBlocks,
-          calendarBlocks: preservedBlocks.filter(b => b.type === 'calendar_event'),
+          calendarBlocks: immovableBlocks, // ✅ Treat existing workouts as immovable
           completionPatterns: stateRef.current.completionPatterns,
           lifeContext: {
             isFasting,
@@ -1835,7 +1845,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
               }
             : null;
 
-        const workout = request.workoutBlocks.length > 0 ? request.workoutBlocks[0] : null;
+        const workout = null; // ✅ No workout to schedule - existing workouts are immovable
 
         const result = SchedulingEngineV2.buildDailySchedule(
           request.date,
@@ -1958,12 +1968,22 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         const isCheatDay = (foodPrefs?.cheatDays || []).includes(dayName);
         const isFasting = goalState?.intermittentFasting ?? false;
 
+        // ⚠️ CRITICAL FIX: Treat existing meals as immovable anchors (like calendar events)
+        // NOT as meals to re-schedule. This prevents the scheduling engine from
+        // trying to re-anchor meals that already have valid times assigned.
+        const existingMeals = preservedBlocks.filter(b => b.type === 'meal_eating' || b.type === 'meal_prep');
+        const calendarEvents = preservedBlocks.filter(b => b.type === 'calendar_event');
+        const sleepBlocks = preservedBlocks.filter(b => b.type === 'sleep');
+
+        // Combine all immovable blocks (calendar events, sleep, and existing meals)
+        const immovableBlocks = [...calendarEvents, ...sleepBlocks, ...existingMeals];
+
         const request: SchedulingRequest = {
           date: day.date,
           preferences: currentPrefs,
           workoutBlocks: freshWorkoutBlocks,
-          mealBlocks: preservedBlocks.filter(b => b.type === 'meal_eating' || b.type === 'meal_prep'),
-          calendarBlocks: preservedBlocks.filter(b => b.type === 'calendar_event'),
+          mealBlocks: [], // ✅ Empty - we're only scheduling workouts, meals are immovable
+          calendarBlocks: immovableBlocks, // ✅ Treat existing meals as immovable
           completionPatterns: stateRef.current.completionPatterns,
           lifeContext: {
             isFasting,
