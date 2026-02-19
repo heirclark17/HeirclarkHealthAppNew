@@ -83,7 +83,7 @@ export default function DashboardScreen() {
   const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const [showMealModal, setShowMealModal] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('breakfast');
-  const [isMealsExpanded, setIsMealsExpanded] = useState(true); // Always shown by default, user can collapse if desired
+  // Today's Meals is always expanded (no collapse feature)
 
   // Modal states for quick action cards
   const [showFatLossModal, setShowFatLossModal] = useState(false);
@@ -1378,24 +1378,14 @@ export default function DashboardScreen() {
 
       {/* Today's Meals Card - Handled separately due to complex state */}
       <GlassCard style={{ marginHorizontal: 16, marginBottom: 24 }} interactive>
-        {/* Collapsible Header */}
-        <TouchableOpacity
-          onPress={() => setIsMealsExpanded(!isMealsExpanded)}
-          style={styles.cardHeader}
-          accessible={true}
-          accessibilityLabel={`Today's Meals card, ${isMealsExpanded ? 'expanded' : 'collapsed'}`}
-          accessibilityHint="Tap to expand or collapse"
-          accessibilityRole="button"
-        >
+        {/* Header */}
+        <View style={styles.cardHeader}>
           <View>
             <Text style={[styles.sectionTitle, { color: colors.text, fontSize: 24, fontFamily: Fonts.numericSemiBold, letterSpacing: 1.5 }]}>TODAY'S MEALS</Text>
-            <Text style={[styles.cardSubtitle, { color: colors.textMuted }]}>Click to expand • View your meals</Text>
           </View>
-          <Text style={[styles.chevron, { color: colors.textMuted }]}>{isMealsExpanded ? '▲' : '▼'}</Text>
-        </TouchableOpacity>
+        </View>
 
-        {/* Expandable Content */}
-        {isMealsExpanded && (
+        {/* Meals Content */}
           <View style={styles.cardContent}>
             {['breakfast', 'lunch', 'dinner', 'snack'].map((mealType) => {
           const mealList = meals.filter(m => m.mealType === mealType);
@@ -1449,7 +1439,6 @@ export default function DashboardScreen() {
           );
         })}
           </View>
-        )}
       </GlassCard>
 
       {/* AI Meal Logger */}
