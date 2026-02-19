@@ -978,6 +978,8 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 34,
     overflow: 'hidden',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   glassButtonContent: {
     width: '100%',
