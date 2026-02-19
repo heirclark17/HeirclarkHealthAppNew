@@ -237,7 +237,8 @@ export function ActionCardStack({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Next Steps</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>YOUR NEXT STEPS</Text>
+      <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>Swipe through to get started</Text>
       <GestureDetector gesture={gesture}>
         <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
           {/* Render back-to-front so front card is on top */}
@@ -437,10 +438,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontFamily: Fonts.bold,
-    marginBottom: 16,
+    fontSize: 26,
+    fontFamily: Fonts.numericBold,
+    letterSpacing: 1.5,
     paddingHorizontal: 8,
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+    paddingHorizontal: 8,
+    marginBottom: 18,
   },
   dotsContainer: {
     flexDirection: 'row',
