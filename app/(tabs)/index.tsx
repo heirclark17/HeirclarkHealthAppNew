@@ -1381,7 +1381,7 @@ export default function DashboardScreen() {
         {/* Header */}
         <View style={styles.cardHeader}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Salad size={24} color={colors.text} />
+            <Salad size={42} color={colors.text} />
             <Text style={[styles.sectionTitle, { color: colors.text, fontSize: 24, fontFamily: Fonts.numericSemiBold, letterSpacing: 1.5 }]}>TODAY'S MEALS</Text>
           </View>
         </View>
