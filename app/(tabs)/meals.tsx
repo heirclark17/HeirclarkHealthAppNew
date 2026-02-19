@@ -639,7 +639,7 @@ export default function MealsScreen() {
         )}
 
         {/* Bottom spacing for sticky buttons */}
-        {weeklyPlan && !isCheatDay && <View style={{ height: 20 }} />}
+        {weeklyPlan && !isCheatDay && <View style={{ height: 0 }} />}
       </ScrollView>
 
       {/* Sticky Action Buttons - Frosted Liquid Glass */}
