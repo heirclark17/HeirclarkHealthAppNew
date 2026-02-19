@@ -232,49 +232,52 @@ export function PlannerCalendarStrip({
           return (
             <TouchableOpacity
               key={item.dateStr}
-              style={[
-                styles.dayItem,
-                { backgroundColor: dayItemBg, opacity },
-                isSelected ? styles.dayItemActive : {},
-                isSelected ? {
-                  backgroundColor: '#FF0000', // Bright red for debugging
-                  opacity: 1,
-                  borderWidth: 5,
-                  borderColor: '#00FF00' // Bright green for debugging
-                } : {},
-              ]}
               onPress={() => onDateChange(item.dateStr)}
               activeOpacity={0.7}
             >
-              <Text
+              <View
                 style={[
-                  styles.dayName,
-                  { color: dayNameColor },
-                  isSelected && { color: '#FFFFFF' },
+                  styles.dayItem,
+                  { backgroundColor: dayItemBg, opacity },
+                  isSelected ? styles.dayItemActive : {},
+                  isSelected ? {
+                    backgroundColor: '#FF0000', // Bright red for debugging
+                    opacity: 1,
+                    borderWidth: 5,
+                    borderColor: '#00FF00' // Bright green for debugging
+                  } : {},
                 ]}
               >
-                {item.day}
-              </Text>
-              <Text
-                style={[
-                  styles.dayNumber,
-                  { color: themeColors.text },
-                  isSelected && { color: '#FFFFFF' },
-                ]}
-              >
-                {item.date}
-              </Text>
-              {item.isToday && !isSelected && (
-                <View style={[styles.todayDot, { backgroundColor: themeColors.primary }]} />
-              )}
-              {/* All-day event color dots (hidden on selected day) */}
-              {!isSelected && allDayEventDots?.[item.dateStr]?.length ? (
-                <View style={styles.eventDotsRow}>
-                  {allDayEventDots[item.dateStr].map((dotColor, idx) => (
-                    <View key={idx} style={[styles.eventDot, { backgroundColor: dotColor }]} />
-                  ))}
-                </View>
-              ) : null}
+                <Text
+                  style={[
+                    styles.dayName,
+                    { color: dayNameColor },
+                    isSelected ? { color: '#FFFFFF' } : {},
+                  ]}
+                >
+                  {item.day}
+                </Text>
+                <Text
+                  style={[
+                    styles.dayNumber,
+                    { color: themeColors.text },
+                    isSelected ? { color: '#FFFFFF' } : {},
+                  ]}
+                >
+                  {item.date}
+                </Text>
+                {item.isToday && !isSelected && (
+                  <View style={[styles.todayDot, { backgroundColor: themeColors.primary }]} />
+                )}
+                {/* All-day event color dots (hidden on selected day) */}
+                {!isSelected && allDayEventDots?.[item.dateStr]?.length ? (
+                  <View style={styles.eventDotsRow}>
+                    {allDayEventDots[item.dateStr].map((dotColor, idx) => (
+                      <View key={idx} style={[styles.eventDot, { backgroundColor: dotColor }]} />
+                    ))}
+                  </View>
+                ) : null}
+              </View>
             </TouchableOpacity>
           );
         })}
