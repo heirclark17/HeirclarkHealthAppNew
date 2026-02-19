@@ -440,6 +440,7 @@ export default function ProgramsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
+          <Dumbbell size={30} color={colors.text} strokeWidth={1.5} />
           <Text style={[styles.title, { color: colors.text }]}>Training</Text>
         </View>
 
@@ -740,11 +741,11 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 20,
+    gap: 10,
   },
   title: {
     fontSize: 32,
