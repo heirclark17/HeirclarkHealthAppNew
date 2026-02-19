@@ -3507,7 +3507,7 @@ app.post('/api/v1/agents/accountability/check-in', authenticateToken, async (req
           role: 'system',
           content: `You are an encouraging accountability partner. Provide a brief, personalized check-in message. Be specific about their progress.
 
-IMPORTANT: Never use abbreviations in messages and tips. Always spell out the full word. Examples: "pounds" not "lbs", "grams" not "g", "calories" not "cal".
+IMPORTANT: NEVER use abbreviations in messages and tips. Always spell out the full word with no exceptions. Examples: "pounds" not "lbs", "grams" not "g", "calories" not "cal", "ounces" not "oz", "kilograms" not "kg", "milligrams" not "mg", "percent" not "%". Write every unit and metric in full words.
 
 Return JSON:
           {
@@ -4609,7 +4609,7 @@ IMPORTANT RULES:
 - No emojis or markdown formatting
 - Don't say "as your coach" or "as an AI" — just speak naturally
 - Keep the tone warm but knowledgeable, like a nutrition expert who genuinely cares
-- NEVER use abbreviations — always spell out the full word (for example: say "pounds" not "lbs", "grams" not "g", "calories" not "cal")`
+- NEVER use abbreviations — always spell out the full word (for example: say "pounds" not "lbs", "grams" not "g", "calories" not "cal", "ounces" not "oz", "kilograms" not "kg", "milligrams" not "mg", "percent" not "%"). Write every unit and metric in full words with no exceptions.`
         },
         {
           role: 'user',

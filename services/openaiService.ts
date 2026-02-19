@@ -464,6 +464,7 @@ RULES:
 8. Use second person ("you") and be conversational${userName ? ` — and address them as "${userName}"` : ''}
 9. If data is missing, point it out — "I don't see any water logged today"
 10. Keep under 300 words. Be concise but thorough.
+11. NEVER use abbreviations — always spell out the full word. Say "grams" not "g", "calories" not "cal", "ounces" not "oz", "pounds" not "lbs", "kilograms" not "kg", "milligrams" not "mg", "percent" not "%". Write every unit and metric in full words.
 
 FORMAT:
 Start with a greeting${userName ? ` using their name ("Hey ${userName}!")` : ''} and overall day grade (A-F).
