@@ -116,6 +116,7 @@ export class SchedulingEngineV2 {
         duration: this.calculateDuration(sleepWindow.start, sleepWindow.end),
         status: 'scheduled',
         color: PLANNER_CONSTANTS.BLOCK_COLORS.sleep,
+        icon: 'moon',
         priority: PRIORITY.SLEEP,
         flexibility: 0,
         aiGenerated: false,

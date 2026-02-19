@@ -20,6 +20,7 @@ function createMeal(title: string, type: string = 'meal_eating'): TimeBlock {
     duration: 30,
     status: 'scheduled',
     color: '#10B981',
+    icon: 'utensils',
     priority: 3,
     flexibility: 0.5,
     aiGenerated: true,
@@ -36,6 +37,7 @@ function createWorkout(title: string = 'Push Day'): TimeBlock {
     duration: 60,
     status: 'scheduled',
     color: '#EF4444',
+    icon: 'dumbbell',
     priority: 4,
     flexibility: 0.3,
     aiGenerated: true,
@@ -52,6 +54,7 @@ function createCalendarEvent(title: string, startTime: string, endTime: string):
     duration: calculateDuration(startTime, endTime),
     status: 'scheduled',
     color: '#3B82F6',
+    icon: 'calendar',
     priority: 2,
     flexibility: 0,
     aiGenerated: false,
@@ -68,8 +71,9 @@ const DEFAULT_PREFS: PlannerPreferences = {
   wakeTime: '06:30',
   sleepTime: '22:30',
   energyPeak: 'morning',
-  flexibility: 'moderate',
-  mealsPerDay: 3,
+  flexibility: 'somewhat',
+  calendarSyncEnabled: true,
+  priorities: ['health', 'work'],
 };
 
 // ===================================
