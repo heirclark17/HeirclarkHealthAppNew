@@ -644,7 +644,7 @@ export default function MealsScreen() {
 
       {/* Sticky Action Buttons - Frosted Liquid Glass */}
       {weeklyPlan && !isCheatDay && (
-        <View style={[styles.stickyButtonContainer, { paddingBottom: insets.bottom + 16 }]}>
+        <View style={[styles.stickyButtonContainer, { paddingBottom: insets.bottom + 80 }]}>
           {/* Instacart Button - Frosted Glass with Orange Tint */}
           <TouchableOpacity
             onPress={() => setShowGroceryModal(true)}
