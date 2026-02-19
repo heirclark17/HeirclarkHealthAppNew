@@ -20,11 +20,15 @@ import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - 48;
-const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.25);
+const CARD_WIDTH = SCREEN_WIDTH - 64;
+const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.35);
 const SWIPE_THRESHOLD = CARD_WIDTH * 0.25;
-const BEHIND_SCALE_STEP = 0.05;
-const BEHIND_Y_STEP = 12;
+
+// Fan spread: each behind card rotates & offsets to peek out
+const FAN_ROTATION = 6;   // degrees per card
+const FAN_OFFSET_X = 18;  // horizontal peek per card
+const FAN_OFFSET_Y = 4;   // slight downward shift
+const BEHIND_SCALE = 0.95;
 
 const API_URL =
   Constants.expoConfig?.extra?.apiUrl ||
@@ -92,7 +96,7 @@ export function ActionCardStack({
         subtitle: 'Your AI coach explains your plan',
         loadingTitle: 'Watch Coaching',
         loadingSubtitle: 'Your AI coach explains your plan',
-        icon: <Play size={22} color="#fff" fill="#fff" />,
+        icon: <Play size={20} color="#fff" fill="#fff" />,
         accent: '#4ECDC4',
         onPress: onViewAvatar,
         isLoading: false,
@@ -106,7 +110,7 @@ export function ActionCardStack({
         subtitle: 'AI-generated meals for your goals',
         loadingTitle: 'Generating Meal Plan...',
         loadingSubtitle: 'Please wait while AI creates your plan',
-        icon: <Utensils size={22} color="#fff" />,
+        icon: <Utensils size={20} color="#fff" />,
         accent: '#FF6B6B',
         onPress: onStartMealPlan,
         isLoading: isGeneratingMealPlan,
@@ -120,7 +124,7 @@ export function ActionCardStack({
         subtitle: `${workoutsPerWeek} days/week \u2022 ${goalLabel} focused`,
         loadingTitle: 'Generating Training...',
         loadingSubtitle: 'Please wait while AI creates your plan',
-        icon: <Dumbbell size={22} color="#fff" />,
+        icon: <Dumbbell size={20} color="#fff" />,
         accent: '#00D9F5',
         onPress: onStartTrainingPlan,
         isLoading: isGeneratingTrainingPlan,
@@ -152,7 +156,7 @@ export function ActionCardStack({
     },
   );
 
-  // Fetch card images from backend
+  // Fetch pastel card images from backend
   useEffect(() => {
     cards.forEach(async (card) => {
       if (cardImages[card.type]) return;
@@ -227,18 +231,19 @@ export function ActionCardStack({
 
   if (totalCards === 0) return null;
 
-  const behindCount = Math.max(0, totalCards - 1);
-  const containerHeight = CARD_HEIGHT + behindCount * BEHIND_Y_STEP;
+  // Extra height for fan spread
+  const containerHeight = CARD_HEIGHT + 40;
   const activeIdx = displayIndex % totalCards;
 
   return (
     <View style={styles.container}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
+          {/* Render back-to-front so front card is on top */}
           {[...cards].reverse().map((card, reverseI) => {
             const i = cards.length - 1 - reverseI;
             return (
-              <SwipeCard
+              <FanCard
                 key={card.id}
                 card={card}
                 cardIndex={i}
@@ -273,9 +278,9 @@ export function ActionCardStack({
   );
 }
 
-// ---------- Individual card ----------
+// ---------- Individual fanned card ----------
 
-interface SwipeCardProps {
+interface FanCardProps {
   card: CardDef;
   cardIndex: number;
   totalCards: number;
@@ -284,14 +289,14 @@ interface SwipeCardProps {
   imageUrl?: string;
 }
 
-function SwipeCard({
+function FanCard({
   card,
   cardIndex,
   totalCards,
   currentIndex,
   translateX,
   imageUrl,
-}: SwipeCardProps) {
+}: FanCardProps) {
   const animatedStyle = useAnimatedStyle(() => {
     'worklet';
     const ci = currentIndex.value % totalCards;
@@ -305,11 +310,12 @@ function SwipeCard({
       Extrapolation.CLAMP,
     );
 
+    // FRONT CARD: swipeable with drag rotation
     if (isFront) {
       const rotation = interpolate(
         translateX.value,
         [-SCREEN_WIDTH * 0.5, 0, SCREEN_WIDTH * 0.5],
-        [-12, 0, 12],
+        [-15, 0, 15],
         Extrapolation.CLAMP,
       );
       return {
@@ -324,44 +330,65 @@ function SwipeCard({
       };
     }
 
-    const baseScale = 1 - stackPos * BEHIND_SCALE_STEP;
-    const baseY = stackPos * BEHIND_Y_STEP;
+    // BEHIND CARDS: fanned out to the right with rotation
+    // Alternate fan direction: odd cards fan right, even fan left
+    const fanDir = stackPos % 2 === 1 ? 1 : -1;
+    const fanRot = fanDir * stackPos * FAN_ROTATION;
+    const fanX = fanDir * stackPos * FAN_OFFSET_X;
+    const fanY = stackPos * FAN_OFFSET_Y;
+    const scale = Math.max(0.85, 1 - stackPos * (1 - BEHIND_SCALE));
 
     if (stackPos === 1) {
-      const scale = baseScale + BEHIND_SCALE_STEP * dragProgress;
-      const y = baseY - BEHIND_Y_STEP * dragProgress;
+      // Next card: unfans toward center as front card is dragged
+      const rot = fanRot * (1 - dragProgress);
+      const x = fanX * (1 - dragProgress);
+      const y = fanY * (1 - dragProgress);
+      const s = scale + (1 - scale) * dragProgress;
       return {
         transform: [
-          { translateX: 0 },
+          { translateX: x },
           { translateY: y },
-          { rotateZ: '0deg' },
-          { scale },
+          { rotateZ: `${rot}deg` },
+          { scale: s },
         ],
         zIndex: 99,
         opacity: 1,
       };
     }
 
-    const prevScale = 1 - (stackPos - 1) * BEHIND_SCALE_STEP;
-    const prevY = (stackPos - 1) * BEHIND_Y_STEP;
-    const scale = baseScale + (prevScale - baseScale) * dragProgress;
-    const y = baseY + (prevY - baseY) * dragProgress;
+    // Further back: shift one fan position closer during drag
+    const prevFanDir = (stackPos - 1) % 2 === 1 ? 1 : -1;
+    const prevRot = prevFanDir * (stackPos - 1) * FAN_ROTATION;
+    const prevX = prevFanDir * (stackPos - 1) * FAN_OFFSET_X;
+    const prevY = (stackPos - 1) * FAN_OFFSET_Y;
+    const prevScale = Math.max(0.85, 1 - (stackPos - 1) * (1 - BEHIND_SCALE));
+
+    const rot = fanRot + (prevRot - fanRot) * dragProgress;
+    const x = fanX + (prevX - fanX) * dragProgress;
+    const y = fanY + (prevY - fanY) * dragProgress;
+    const s = scale + (prevScale - scale) * dragProgress;
 
     return {
       transform: [
-        { translateX: 0 },
+        { translateX: x },
         { translateY: y },
-        { rotateZ: '0deg' },
-        { scale },
+        { rotateZ: `${rot}deg` },
+        { scale: s },
       ],
       zIndex: 100 - stackPos,
-      opacity: 0.7,
+      opacity: 0.85,
     };
   });
 
+  // Pastel fallback colors per type (shown while image loads)
+  const fallbackBg =
+    card.type === 'coaching' ? '#E8F5F3' :
+    card.type === 'mealPlan' ? '#FFF0EC' :
+    '#EDF4FF';
+
   return (
     <Animated.View style={[styles.card, animatedStyle]}>
-      {/* Background image */}
+      {/* Background image or pastel fallback */}
       {imageUrl ? (
         <Image
           source={{ uri: imageUrl }}
@@ -371,20 +398,13 @@ function SwipeCard({
           transition={300}
         />
       ) : (
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1a1a2e' }]} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: fallbackBg }]} />
       )}
 
       {/* Bottom gradient for text readability */}
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)']}
-        locations={[0.35, 0.6, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-
-      {/* Top subtle vignette */}
-      <LinearGradient
-        colors={['rgba(0,0,0,0.25)', 'transparent']}
-        locations={[0, 0.3]}
+        colors={['transparent', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0.75)']}
+        locations={[0.4, 0.65, 1]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -397,12 +417,14 @@ function SwipeCard({
             card.icon
           )}
         </View>
-        <Text style={styles.cardTitle} numberOfLines={1}>
-          {card.isLoading ? card.loadingTitle : card.title}
-        </Text>
-        <Text style={styles.cardSubtitle} numberOfLines={2}>
-          {card.isLoading ? card.loadingSubtitle : card.subtitle}
-        </Text>
+        <View style={styles.textArea}>
+          <Text style={styles.cardTitle} numberOfLines={1}>
+            {card.isLoading ? card.loadingTitle : card.title}
+          </Text>
+          <Text style={styles.cardSubtitle} numberOfLines={1}>
+            {card.isLoading ? card.loadingSubtitle : card.subtitle}
+          </Text>
+        </View>
       </View>
     </Animated.View>
   );
@@ -418,7 +440,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
-    marginTop: 16,
+    marginTop: 12,
   },
   dot: {
     height: 6,
@@ -426,6 +448,7 @@ const styles = StyleSheet.create({
   },
   stackContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
   },
   card: {
     position: 'absolute',
@@ -434,37 +457,42 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
+    elevation: 10,
   },
   cardContent: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 24,
-    paddingBottom: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 22,
+    paddingTop: 16,
+    gap: 14,
   },
   iconPill: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+  },
+  textArea: {
+    flex: 1,
   },
   cardTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: Fonts.bold,
     color: '#fff',
-    marginBottom: 6,
+    marginBottom: 3,
   },
   cardSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Fonts.regular,
-    color: 'rgba(255,255,255,0.7)',
-    lineHeight: 20,
+    color: 'rgba(255,255,255,0.75)',
   },
 });

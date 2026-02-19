@@ -3027,15 +3027,15 @@ app.get('/api/v1/food-photo', async (req, res) => {
 // ============================================
 
 const CARD_IMAGE_PROMPTS = {
-  coaching: 'Black outline illustration of a friendly fitness coach character giving a thumbs up, clean thin line art on a dark navy gradient background, animated cartoon style, minimal shading, modern health app aesthetic, no text, no words',
-  mealPlan: 'Black outline illustration of a bowl of healthy food with vegetables and grains, clean thin line art on a dark navy gradient background, animated cartoon style, minimal shading, modern health app aesthetic, no text, no words',
-  trainingPlan: 'Black outline illustration of dumbbells and a kettlebell, clean thin line art on a dark navy gradient background, animated cartoon style, minimal shading, modern health app aesthetic, no text, no words',
+  coaching: 'Soft pastel aesthetic photo of a serene wellness scene, a person meditating in warm morning light, soft pink lavender and mint green tones, dreamy bokeh background, gentle diffused lighting, calm and inviting mood, portrait orientation, no text no words no letters',
+  mealPlan: 'Soft pastel aesthetic overhead photo of a beautiful healthy meal, fresh colorful salad bowl with avocado salmon quinoa and edible flowers, soft peach pink and sage green tones, marble surface, gentle natural lighting, portrait orientation, no text no words no letters',
+  trainingPlan: 'Soft pastel aesthetic photo of minimal gym equipment, light pink dumbbells and yoga mat on clean white floor, soft lavender and blush tones, airy bright space with natural light streaming in, calm motivating mood, portrait orientation, no text no words no letters',
 };
 
 const CARD_IMAGE_KEYS = {
-  coaching: 'card_coaching_v2',
-  mealPlan: 'card_mealplan_v2',
-  trainingPlan: 'card_trainingplan_v2',
+  coaching: 'card_coaching_v3',
+  mealPlan: 'card_mealplan_v3',
+  trainingPlan: 'card_trainingplan_v3',
 };
 
 app.get('/api/v1/card-image', async (req, res) => {
