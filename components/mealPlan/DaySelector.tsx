@@ -215,13 +215,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                   accessibilityRole="tab"
                   accessibilityState={{ selected: isSelected }}
                 >
-                  {/* Multi-layer glass border highlight */}
-                  {isSelected && (
-                    <View style={[
-                      styles.glassHighlight,
-                      { borderColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)' }
-                    ]} />
-                  )}
+                  {/* Glass highlight border removed */}
 
                   {/* Cheat day indicator - transparent glass with light orange */}
                   {isCheat && (
@@ -230,10 +224,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                       {
                         backgroundColor: isSelected
                           ? (isDark ? 'rgba(251, 146, 60, 0.20)' : 'rgba(251, 146, 60, 0.15)')
-                          : (isDark ? 'rgba(251, 146, 60, 0.12)' : 'rgba(251, 146, 60, 0.10)'),
-                        borderColor: isSelected
-                          ? (isDark ? 'rgba(251, 146, 60, 0.40)' : 'rgba(251, 146, 60, 0.35)')
-                          : cheatDayBorder
+                          : (isDark ? 'rgba(251, 146, 60, 0.12)' : 'rgba(251, 146, 60, 0.10)')
                       }
                     ]}>
                       <Ionicons
@@ -448,17 +439,7 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  glassHighlight: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    pointerEvents: 'none',
-  },
+  // Glass highlight border removed
   dayContent: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -488,7 +469,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 8,
-    borderWidth: 0.5,
+    // Border removed
   },
   cheatBadgeActive: {
     // Active state styling handled inline
