@@ -195,7 +195,10 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   };
 
   // Get meal summary for a day
-  const getMealSummary = (day: DayPlan): string => {
+  const getMealSummary = (day: DayPlan, isCheat: boolean): string => {
+    // Don't show meal info on cheat days
+    if (isCheat) return '';
+
     if (!day.meals || day.meals.length === 0) return '';
 
     const mealCount = day.meals.length;
@@ -319,14 +322,14 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                       {getDayNumber(day.date)}
                     </NumberText>
                     {/* Meal summary */}
-                    {getMealSummary(day) && (
+                    {getMealSummary(day, isCheat) && (
                       <Text style={[
                         styles.mealSummary,
                         { color: colors.textMuted },
                         isCheat && !isSelected && { color: cheatDayColor },
                         isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
                       ]}>
-                        {getMealSummary(day)}
+                        {getMealSummary(day, isCheat)}
                       </Text>
                     )}
                   </View>
