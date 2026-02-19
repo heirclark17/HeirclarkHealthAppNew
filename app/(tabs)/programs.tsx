@@ -915,7 +915,7 @@ const styles = StyleSheet.create({
   },
   weekHeaderSection: {
     paddingHorizontal: 16,
-    marginBottom: 4,
+    marginBottom: 0,
   },
   weekHeaderTop: {
     flexDirection: 'row',
@@ -944,8 +944,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 4,
+    marginTop: 4,
+    marginBottom: 0,
   },
   weekButton: {
     flexDirection: 'row',
