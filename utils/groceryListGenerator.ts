@@ -197,6 +197,9 @@ function aggregateByName(ingredients: Ingredient[]): AggregatedIngredient[] {
 function normalizeIngredientName(name: string): string {
   let normalized = name.toLowerCase().trim();
 
+  // Remove parentheses and their contents (e.g., "chicken (boneless)")
+  normalized = normalized.replace(/\([^)]*\)/g, '');
+
   // Remove common descriptive words
   const descriptors = [
     'fresh', 'dried', 'frozen', 'canned', 'cooked', 'raw',
@@ -205,6 +208,7 @@ function normalizeIngredientName(name: string): string {
     'organic', 'extra virgin', 'virgin', 'light', 'dark',
     'boneless', 'skinless', 'peeled', 'seeded',
     'to taste', 'optional', 'for serving', 'for garnish',
+    'shredded', 'cubed', 'ground', 'lean',
   ];
 
   // Remove descriptors (word boundaries to avoid partial matches)
@@ -213,8 +217,8 @@ function normalizeIngredientName(name: string): string {
     normalized = normalized.replace(regex, '');
   });
 
-  // Remove commas and extra spaces
-  normalized = normalized.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+  // Remove commas, periods, and extra spaces
+  normalized = normalized.replace(/[,\.]/g, ' ').replace(/\s+/g, ' ').trim();
 
   // Singularize common plurals
   const pluralMap: { [key: string]: string } = {
@@ -370,6 +374,43 @@ function addAmounts(amount1: string, amount2: string): string {
 }
 
 /**
+ * Normalize category name to standard form
+ * Handles variations: "Proteins" → "Protein", "Vegetables" → "Produce"
+ */
+function normalizeCategory(category: string): string {
+  const normalized = category.toLowerCase().trim();
+
+  // Category mapping
+  const categoryMap: { [key: string]: string } = {
+    'proteins': 'Protein',
+    'protein': 'Protein',
+    'meat': 'Protein',
+    'meats': 'Protein',
+    'produce': 'Produce',
+    'vegetables': 'Produce',
+    'veggies': 'Produce',
+    'fruits': 'Produce',
+    'fruit': 'Produce',
+    'dairy': 'Dairy',
+    'dairy products': 'Dairy',
+    'grains': 'Grains',
+    'grain': 'Grains',
+    'grains & starches': 'Grains',
+    'carbs': 'Grains',
+    'pantry': 'Pantry',
+    'pantry items': 'Pantry',
+    'condiments': 'Pantry',
+    'spices': 'Spices',
+    'spice': 'Spices',
+    'seasonings': 'Spices',
+    'herbs': 'Spices',
+    'other': 'Other',
+  };
+
+  return categoryMap[normalized] || 'Other';
+}
+
+/**
  * Categorize ingredients into food groups
  * Ensures no duplicates - each ingredient appears in only one category
  */
@@ -402,7 +443,9 @@ function categorizeIngredients(ingredients: AggregatedIngredient[]): GroceryCate
 
   ingredients.forEach((ingredient, index) => {
     // Use existing category if provided, otherwise infer from name
-    const category = ingredient.category || inferCategory(ingredient.name);
+    // Always normalize category to handle AI variations ("Proteins" → "Protein")
+    const rawCategory = ingredient.category || inferCategory(ingredient.name);
+    const category = normalizeCategory(rawCategory);
 
     // Create unique key for this ingredient (name + unit)
     const key = `${ingredient.name}::${ingredient.unit}`;
