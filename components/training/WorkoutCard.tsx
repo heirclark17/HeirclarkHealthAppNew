@@ -95,10 +95,10 @@ function ExerciseRow({
       >
         <View style={[
           styles.circleCheckbox,
-          { backgroundColor: exercise.completed ? Colors.protein : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
+          { backgroundColor: exercise.completed ? (isDark ? '#FFFFFF' : '#000000') : isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
         ]}>
           {exercise.completed && (
-            <Ionicons name="checkmark" size={14} color="#fff" />
+            <Ionicons name="checkmark" size={14} color={isDark ? '#000000' : '#FFFFFF'} />
           )}
         </View>
       </TouchableOpacity>
