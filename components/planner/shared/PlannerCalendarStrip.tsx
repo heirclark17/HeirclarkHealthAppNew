@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   dateLabel: {
     fontSize: 16,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericLight,
     fontWeight: '200' as const,
   },
   actionButtons: {
