@@ -735,7 +735,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 15,
     color: Colors.text,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.semiBold,
   },
   exerciseCompleted: {
     textDecorationLine: 'line-through',
