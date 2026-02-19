@@ -43,7 +43,7 @@ interface AnimatedNumberProps {
 
 function AnimatedNumber({ value, duration = 1200, delay = 0, suffix = '', style }: AnimatedNumberProps) {
   return (
-    <NumberText weight="semibold" style={style}>
+    <NumberText weight="semiBold" style={style}>
       {Math.round(value)}{suffix}
     </NumberText>
   );
