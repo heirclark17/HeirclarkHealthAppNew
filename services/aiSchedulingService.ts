@@ -248,11 +248,15 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
 
       if (!found) {
         console.warn(`[AI Scheduler] ⚠️ AI OMITTED meal: "${inputMeal.title}" – adding it back`);
-        // Add the missing meal with a reasonable time
+        // Add the missing meal at a conflict-free time.
+        // FIX (Bug 4): Scan for an available slot rather than blindly using a
+        // fixed target time, preventing overlap with already-placed AI blocks.
         const duration = inputMeal.duration || 30;
         const wakeMin = timeToMinutes(request.preferences.wakeTime);
         const sleepMin = timeToMinutes(request.preferences.sleepTime);
         let targetMin: number;
+        let rangeStart = wakeMin;
+        let rangeEnd = sleepMin > wakeMin ? sleepMin : wakeMin + 960;
 
         if (inputTitle.includes('breakfast')) targetMin = wakeMin + 30;
         else if (inputTitle.includes('lunch')) targetMin = Math.round((wakeMin + sleepMin) / 2);
@@ -263,29 +267,66 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
         if (request.lifeContext?.isFasting && !request.lifeContext?.isCheatDay) {
           const ewStart = timeToMinutes(request.lifeContext.fastingEnd);
           const ewEnd = timeToMinutes(request.lifeContext.fastingStart);
+          rangeStart = ewStart;
+          rangeEnd = ewEnd;
           targetMin = Math.max(targetMin, ewStart);
           targetMin = Math.min(targetMin, ewEnd - duration);
         }
 
         const minToTime = (m: number) => {
-          const h = Math.floor(m / 60), mi = m % 60;
+          const h = Math.floor(m / 60) % 24;
+          const mi = m % 60;
           return `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`;
         };
 
-        blocks.push({
-          id: `ai-recovered-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-          type: 'meal_eating' as any,
-          title: inputMeal.title,
-          startTime: minToTime(targetMin),
-          endTime: minToTime(targetMin + duration),
-          duration,
-          status: 'scheduled' as any,
-          color: getDefaultColor('meal_eating'),
-          icon: getDefaultIcon('meal_eating'),
-          priority: 3,
-          flexibility: 0.5,
-          aiGenerated: true,
-        });
+        // Find a conflict-free slot near targetMin
+        const isSlotFree = (slotStart: number): boolean => {
+          const slotEnd = slotStart + duration;
+          for (const b of blocks) {
+            if (b.isAllDay) continue;
+            const bStart = timeToMinutes(b.startTime);
+            const bEnd = timeToMinutes(b.endTime);
+            if (slotStart < bEnd && slotEnd > bStart) return false;
+          }
+          return true;
+        };
+
+        let chosenMin: number | null = null;
+        const clampedTarget = Math.max(rangeStart, Math.min(targetMin, rangeEnd - duration));
+        if (isSlotFree(clampedTarget)) {
+          chosenMin = clampedTarget;
+        } else {
+          let offset = 15;
+          const maxOffset = Math.max(clampedTarget - rangeStart, rangeEnd - clampedTarget);
+          while (offset <= maxOffset) {
+            const earlier = clampedTarget - offset;
+            if (earlier >= rangeStart && isSlotFree(earlier)) { chosenMin = earlier; break; }
+            const later = clampedTarget + offset;
+            if (later + duration <= rangeEnd && isSlotFree(later)) { chosenMin = later; break; }
+            offset += 15;
+          }
+        }
+
+        if (chosenMin === null) {
+          console.warn(`[AI Scheduler] ⚠️ No conflict-free slot for recovered meal "${inputMeal.title}" – skipping`);
+          // Do not push a block; the outer DayPlannerContext safety net will handle it.
+        } else {
+          console.log(`[AI Scheduler] ✅ Recovered "${inputMeal.title}" at ${to12Hour(minToTime(chosenMin))}`);
+          blocks.push({
+            id: `ai-recovered-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+            type: 'meal_eating' as any,
+            title: inputMeal.title,
+            startTime: minToTime(chosenMin),
+            endTime: minToTime(chosenMin + duration),
+            duration,
+            status: 'scheduled' as any,
+            color: getDefaultColor('meal_eating'),
+            icon: getDefaultIcon('meal_eating'),
+            priority: 3,
+            flexibility: 0.5,
+            aiGenerated: true,
+          });
+        }
       }
     }
 

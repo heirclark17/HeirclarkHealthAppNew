@@ -1247,15 +1247,71 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         return h * 60 + m;
       })();
 
-      // Place missing meals at reasonable default times within waking hours
+      // Place missing meals at reasonable default times within waking hours.
+      // FIX (Bug 3): Check for conflicts with existing blocks before placing a
+      // recovered meal so the safety net does not itself create overlaps.
       const defaultMealTimes: Record<string, number> = {
         breakfast: wakeMinutes + 30,
         lunch: Math.round((wakeMinutes + sleepMinutes) / 2),
         dinner: sleepMinutes - 90,
       };
 
+      // Helpers for conflict-aware slot finding
+      const timeStrToMin = (t: string): number => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      };
+      const minToTimeStr = (mins: number): string => {
+        const h = Math.floor(mins / 60) % 24;
+        const m = mins % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      };
+
+      /**
+       * Returns true when [slotStart, slotStart+duration) does not overlap
+       * with any timed block already in the timeline.
+       */
+      const isSlotClear = (slotStart: number, duration: number): boolean => {
+        const slotEnd = slotStart + duration;
+        for (const existing of timeline.blocks) {
+          if (existing.isAllDay) continue;
+          const exStart = timeStrToMin(existing.startTime);
+          const exEnd = timeStrToMin(existing.endTime);
+          if (slotStart < exEnd && slotEnd > exStart) return false;
+        }
+        return true;
+      };
+
+      /**
+       * Find the nearest available slot to targetMinutes, scanning in 15-min
+       * increments within [rangeStart, rangeEnd).
+       */
+      const findClearSlot = (
+        targetMins: number,
+        rangeStart: number,
+        rangeEnd: number,
+        duration: number
+      ): number | null => {
+        if (rangeStart + duration > rangeEnd) return null;
+        // Try target first
+        const clampedTarget = Math.max(rangeStart, Math.min(targetMins, rangeEnd - duration));
+        if (isSlotClear(clampedTarget, duration)) return clampedTarget;
+        // Scan outward
+        let offset = 15;
+        const maxOffset = Math.max(clampedTarget - rangeStart, rangeEnd - clampedTarget);
+        while (offset <= maxOffset) {
+          const earlier = clampedTarget - offset;
+          if (earlier >= rangeStart && isSlotClear(earlier, duration)) return earlier;
+          const later = clampedTarget + offset;
+          if (later + duration <= rangeEnd && isSlotClear(later, duration)) return later;
+          offset += 15;
+        }
+        return null;
+      };
+
       for (const missingMeal of missingMeals) {
         const titleLower = missingMeal.title.toLowerCase();
+        const duration = missingMeal.duration || 30;
         let targetMinutes: number;
 
         if (titleLower.includes('breakfast')) {
@@ -1270,6 +1326,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         }
 
         // Apply eating window constraint if fasting
+        let rangeStart = wakeMinutes;
+        let rangeEnd = sleepMinutes > wakeMinutes ? sleepMinutes : wakeMinutes + 960; // 16hr day
         if (isFasting && !isCheatDay) {
           const ewStart = (() => {
             const [h, m] = (lifeContext.fastingEnd || '12:00').split(':').map(Number);
@@ -1279,25 +1337,29 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
             const [h, m] = (lifeContext.fastingStart || '20:00').split(':').map(Number);
             return h * 60 + m;
           })();
+          rangeStart = ewStart;
+          rangeEnd = ewEnd;
           targetMinutes = Math.max(targetMinutes, ewStart);
-          targetMinutes = Math.min(targetMinutes, ewEnd - missingMeal.duration);
+          targetMinutes = Math.min(targetMinutes, ewEnd - duration);
         }
 
-        const startHour = Math.floor(targetMinutes / 60);
-        const startMin = targetMinutes % 60;
-        const endMinutes = targetMinutes + (missingMeal.duration || 30);
-        const endHour = Math.floor(endMinutes / 60);
-        const endMin = endMinutes % 60;
+        // Find a conflict-free slot near the target time
+        const chosenSlot = findClearSlot(targetMinutes, rangeStart, rangeEnd, duration);
 
-        const startTime = `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
-        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+        if (chosenSlot === null) {
+          console.warn(`[Planner] ⚠️ SAFETY NET: No conflict-free slot for "${missingMeal.title}" – skipping to avoid overlap`);
+          continue;
+        }
+
+        const startTime = minToTimeStr(chosenSlot);
+        const endTime = minToTimeStr(chosenSlot + duration);
 
         const recoveredBlock: TimeBlock = {
           ...missingMeal,
           id: `meal_recovered_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
           startTime,
           endTime,
-          duration: missingMeal.duration || 30,
+          duration,
         };
 
         timeline.blocks.push(recoveredBlock);

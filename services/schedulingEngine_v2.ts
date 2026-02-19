@@ -385,31 +385,46 @@ export class SchedulingEngineV2 {
         this.minutesToTime(effectiveFlexStart), '-', this.minutesToTime(effectiveFlexEnd));
     }
 
-    // Enforce minimum gap after last meal
-    if (lastMealEndTime > 0) {
-      const minStartTime = lastMealEndTime + config.minGapAfter;
-      if (effectiveFlexStart < minStartTime) {
-        effectiveFlexStart = minStartTime;
-        console.log('[Scheduling V2] Min gap enforced, flex start pushed to:', this.minutesToTime(effectiveFlexStart));
-      }
+    // Enforce minimum gap after last meal.
+    // FIX (Bug 2): Apply this as an absolute lower bound on any slot we try,
+    // not just on effectiveFlexStart. This prevents findNearestSlot from
+    // returning an earlier-than-target slot that violates the minimum gap.
+    const absoluteMinStart = lastMealEndTime > 0
+      ? lastMealEndTime + config.minGapAfter
+      : 0;
+
+    if (effectiveFlexStart < absoluteMinStart) {
+      effectiveFlexStart = absoluteMinStart;
+      console.log('[Scheduling V2] Min gap enforced, flex start pushed to:', this.minutesToTime(effectiveFlexStart));
     }
 
-    // Rule 1: Try target time first
-    console.log('[Scheduling V2] Attempting target time:', config.targetTime);
-    if (targetMinutes >= effectiveFlexStart && targetMinutes + duration <= effectiveFlexEnd) {
-      if (this.isSlotAvailable(targetMinutes, duration, existingBlocks)) {
-        console.log('[Scheduling V2] ✅ Target time is available');
-        return {
-          success: true,
-          block: this.createMealBlock(meal, this.minutesToTime(targetMinutes), duration),
-        };
-      }
+    // Validate flex window is still viable after all constraints
+    if (effectiveFlexStart + duration > effectiveFlexEnd) {
+      console.error('[Scheduling V2] ❌ No viable flex window for', meal.title,
+        `(start=${this.minutesToTime(effectiveFlexStart)}, end=${this.minutesToTime(effectiveFlexEnd)})`);
+      return {
+        success: false,
+        warning: `Unable to fit ${meal.title} - eating window too narrow or day too packed`,
+      };
     }
 
-    // Rule 2: Scan flex window outward from target
+    // Rule 1: Try target time first (clamped to effective flex window)
+    const clampedTarget = Math.max(effectiveFlexStart, Math.min(targetMinutes, effectiveFlexEnd - duration));
+    console.log('[Scheduling V2] Attempting target time:', this.minutesToTime(clampedTarget));
+    if (this.isSlotAvailable(clampedTarget, duration, existingBlocks)) {
+      console.log('[Scheduling V2] ✅ Target time is available');
+      return {
+        success: true,
+        block: this.createMealBlock(meal, this.minutesToTime(clampedTarget), duration),
+      };
+    }
+
+    // Rule 2: Scan flex window outward from clamped target.
+    // Pass absoluteMinStart as rangeStart so findNearestSlot never returns
+    // a slot that would violate the minimum gap after the previous meal.
     console.log('[Scheduling V2] Target blocked, scanning flex window...');
     const bestSlot = this.findNearestSlot(
-      targetMinutes,
+      clampedTarget,
       effectiveFlexStart,
       effectiveFlexEnd,
       duration,
@@ -430,13 +445,14 @@ export class SchedulingEngineV2 {
       };
     }
 
-    // Rule 3: Last resort - expand ±30 min beyond flex window
+    // Rule 3: Last resort - expand ±30 min beyond flex window,
+    // but never go below absoluteMinStart (min gap from last meal).
     console.log('[Scheduling V2] Flex window full, expanding search ±30 min...');
-    const expandedStart = Math.max(0, effectiveFlexStart - 30);
+    const expandedStart = Math.max(absoluteMinStart, effectiveFlexStart - 30);
     const expandedEnd = Math.min(1440 - duration, effectiveFlexEnd + 30);
 
     const emergencySlot = this.findNearestSlot(
-      targetMinutes,
+      clampedTarget,
       expandedStart,
       expandedEnd,
       duration,
@@ -669,10 +685,10 @@ export class SchedulingEngineV2 {
         const overlapsMorning = candidateStart < blockEnd && candidateEnd > 0;
         overlaps = overlapsNight || overlapsMorning;
       } else {
-        // Normal same-day block
-        overlaps =
-          (candidateStart < blockEnd && candidateEnd > blockStart) ||
-          (blockStart < candidateEnd && blockEnd > candidateStart);
+        // Normal same-day block: standard interval overlap test.
+        // FIX (Bug 1): The original code had two identical boolean expressions
+        // joined by ||. A single standard overlap check is correct and sufficient.
+        overlaps = candidateStart < blockEnd && candidateEnd > blockStart;
       }
 
       if (overlaps) return false;
