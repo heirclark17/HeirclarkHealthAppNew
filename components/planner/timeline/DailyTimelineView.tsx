@@ -32,6 +32,7 @@ import { BehaviorInsightCard } from '../insights/BehaviorInsightCard';
 import { WeeklyCoachCard } from '../coaching/WeeklyCoachCard';
 import { PlannerChatSheet, PlannerChatSheetRef } from '../chat/PlannerChatSheet';
 import { BlockDetailModal } from '../modals/BlockDetailModal';
+import { AnimatedSparkleIcon } from '../../AnimatedSparkleIcon';
 import { mediumImpact } from '../../../utils/haptics';
 
 // Must match _layout.tsx tab bar constants
@@ -546,7 +547,7 @@ export function DailyTimelineView() {
               }}
               activeOpacity={0.8}
             >
-              <Sparkles size={22} color="#a855f7" />
+              <AnimatedSparkleIcon size={22} color="#a855f7" containerSize={48} />
             </TouchableOpacity>
           </GlassCard>
         </View>

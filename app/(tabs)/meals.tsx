@@ -26,6 +26,7 @@ import {
   BudgetTierType,
 } from '../../components/mealPlan';
 import { CoachChatModal } from '../../components/agents/aiCoach';
+import { AnimatedSparkleIcon } from '../../components/AnimatedSparkleIcon';
 import { FoodPreferencesModal } from '../../components/FoodPreferences';
 
 export default function MealsScreen() {
@@ -702,10 +703,10 @@ export default function MealsScreen() {
                     : 'rgba(147, 51, 234, 0.06)',
                 }
               ]}>
-                <Sparkles
+                <AnimatedSparkleIcon
                   size={22}
                   color={isDark ? '#A855F7' : '#9333EA'}
-                  strokeWidth={2.5}
+                  containerSize={52}
                 />
               </View>
             </BlurView>
