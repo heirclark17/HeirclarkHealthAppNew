@@ -459,7 +459,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
               <Flame size={20} color={Colors.error} />
-              <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
+              <NumberText weight="regular" style={[styles.targetValue, { color: colors.text }]}>
                 {Math.round(state.results.calories).toLocaleString()}
               </NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Calories</Text>
@@ -467,7 +467,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             <GlassCard style={styles.targetCard} interactive>
               <Beef size={20} color={colors.protein} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
+                <NumberText weight="regular" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.protein}
                 </NumberText>
                 <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.numericRegular }]}>g</Text>
@@ -477,7 +477,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             <GlassCard style={styles.targetCard} interactive>
               <Wheat size={20} color={colors.carbs} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
+                <NumberText weight="regular" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.carbs}
                 </NumberText>
                 <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.numericRegular }]}>g</Text>
@@ -487,7 +487,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             <GlassCard style={styles.targetCard} interactive>
               <Nut size={20} color={colors.fat} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-                <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
+                <NumberText weight="regular" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.fat}
                 </NumberText>
                 <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.numericRegular }]}>g</Text>
