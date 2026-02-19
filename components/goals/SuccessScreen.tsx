@@ -644,7 +644,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           <GlassCard style={[styles.primaryButtonCard, { backgroundColor: primaryGlassBg }]} interactive>
             <View style={styles.primaryButton}>
               <Target size={22} color={colors.primary} />
-              <Text style={[styles.primaryButtonText, { color: colors.primary, fontFamily: Fonts.light }]}>LOG YOUR FIRST MEAL</Text>
+              <Text style={[styles.primaryButtonText, { color: colors.primary, fontFamily: Fonts.numericSemiBold }]}>LOG YOUR FIRST MEAL</Text>
             </View>
           </GlassCard>
         </Pressable>
@@ -660,7 +660,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
             <GlassCard style={styles.secondaryButtonCard} interactive>
               <View style={styles.secondaryButton}>
                 <Heart size={20} color={colors.text} />
-                <Text style={[styles.secondaryButtonText, { color: colors.text, fontFamily: Fonts.light }]}>DASHBOARD</Text>
+                <Text style={[styles.secondaryButtonText, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>DASHBOARD</Text>
               </View>
             </GlassCard>
           </Pressable>
@@ -676,7 +676,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <GlassCard style={styles.adjustButtonCard} interactive>
                 <View style={styles.adjustButton}>
                   <SettingsIcon size={20} color={colors.text} />
-                  <Text style={[styles.adjustButtonText, { color: colors.text, fontFamily: Fonts.light }]}>ADJUST</Text>
+                  <Text style={[styles.adjustButtonText, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>ADJUST</Text>
                 </View>
               </GlassCard>
             </Pressable>
@@ -993,8 +993,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     fontSize: 15,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
   secondaryButtonRow: {
@@ -1011,8 +1010,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
   adjustButtonCard: {
@@ -1025,8 +1023,7 @@ const styles = StyleSheet.create({
   },
   adjustButtonText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
   loadingContainer: {
