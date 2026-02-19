@@ -284,19 +284,42 @@ export class SchedulingEngine {
       const mealType = meal.title.toLowerCase().includes('breakfast') ? 'meal_breakfast'
         : meal.title.toLowerCase().includes('lunch') ? 'meal_lunch'
         : meal.title.toLowerCase().includes('dinner') ? 'meal_dinner'
-        : 'meal_eating';
+        : 'meal_snack'; // Snacks are flexible
+
       const mealPattern = patterns?.[mealType];
 
       if (mealPattern?.preferredWindow && mealPattern.completionRate > 0.6) {
         preferredTime = mealPattern.preferredWindow;
-      } else if (meal.title.toLowerCase().includes('breakfast')) {
-        preferredTime = this.addMinutesToTime(preferences.wakeTime, 15);
-      } else if (meal.title.toLowerCase().includes('lunch')) {
-        preferredTime = '12:00';
-      } else if (meal.title.toLowerCase().includes('dinner')) {
-        preferredTime = '18:00';
       } else {
-        preferredTime = '12:00';
+        // ✨ FLEXIBLE MEAL TIME WINDOWS (not fixed times)
+        if (meal.title.toLowerCase().includes('breakfast')) {
+          // Breakfast window: wake time to 14:00 (or eating window start to 14:00 if fasting)
+          const breakfastStart = isFasting && !isCheatDay
+            ? this.minutesToTime(eatingWindowStart)
+            : this.addMinutesToTime(preferences.wakeTime, 15);
+          const breakfastEnd = '14:00';
+          // Prefer middle of breakfast window
+          const startMinutes = this.timeToMinutes(breakfastStart);
+          const endMinutes = this.timeToMinutes(breakfastEnd);
+          preferredTime = this.minutesToTime(Math.floor((startMinutes + endMinutes) / 2));
+        } else if (meal.title.toLowerCase().includes('lunch')) {
+          // Lunch window: 14:00 to 17:00
+          // Prefer middle of lunch window (15:30)
+          preferredTime = '15:30';
+        } else if (meal.title.toLowerCase().includes('dinner')) {
+          // Dinner window: 17:00 to fasting start (or sleep time)
+          const dinnerEnd = isFasting && !isCheatDay
+            ? this.minutesToTime(eatingWindowEnd)
+            : preferences.sleepTime;
+          const startMinutes = this.timeToMinutes('17:00');
+          const endMinutes = this.timeToMinutes(dinnerEnd);
+          // Prefer middle of dinner window
+          preferredTime = this.minutesToTime(Math.floor((startMinutes + endMinutes) / 2));
+        } else {
+          // Snacks: flexible, prefer between meals
+          // Default to mid-afternoon (between lunch and dinner)
+          preferredTime = '16:00';
+        }
       }
 
       // Tier 4a: IF fasting window enforcement

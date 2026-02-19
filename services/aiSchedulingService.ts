@@ -60,7 +60,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       messages: [
         {
           role: 'system',
-          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. If fasting is active, meals must be within the eating window.',
+          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. IMPORTANT: Meals have FLEXIBLE TIME WINDOWS (breakfast: morning, lunch: midday, dinner: evening). Schedule each meal type WITHIN its designated window, not at fixed times. Snacks go between meal windows. If fasting is active, all meals must be within the eating window.',
         },
         {
           role: 'user',
@@ -266,25 +266,61 @@ ${isCheatDay ? '- 🎂 CHEAT DAY: No fasting restrictions today - schedule meals
 ${workoutBlocks.length > 0 ? workoutBlocks.map(w => `- ${w.title} (${w.duration} min)`).join('\n') : '- None'}
 
 **Meals to Schedule:**
-${mealBlocks.length > 0 ? mealBlocks.map(m => `- ${m.title} (${m.duration} min)`).join('\n') : '- Breakfast (30 min), Lunch (45 min), Dinner (45 min)'}
+${mealBlocks.length > 0 ? mealBlocks.map(m => {
+  const mealType = m.title.toLowerCase().includes('breakfast') ? 'breakfast'
+    : m.title.toLowerCase().includes('lunch') ? 'lunch'
+    : m.title.toLowerCase().includes('dinner') ? 'dinner'
+    : 'snack';
+  return `- ${m.title} (${m.duration} min) - TYPE: ${mealType}`;
+}).join('\n') : '- Breakfast (30 min), Lunch (45 min), Dinner (45 min)'}
+
+**MEAL TIME WINDOWS (Flexible Ranges):**
+🍳 **BREAKFAST WINDOW:** ${isFasting ? lifeContext.fastingEnd : preferences.wakeTime} - 14:00
+   - First meal after waking/breaking fast
+   - Can be scheduled ANYTIME within this window
+   - Example: 12:30-13:00, or 13:15-13:45
+
+🥗 **LUNCH WINDOW:** 14:00 - 17:00
+   - Mid-day meal
+   - Can be scheduled ANYTIME within this window
+   - Example: 15:00-15:45, or 16:00-16:30
+
+🍽️ **DINNER WINDOW:** 17:00 - ${isFasting ? lifeContext.fastingStart : preferences.sleepTime}
+   - Evening meal
+   - Can be scheduled ANYTIME within this window
+   - Must END before fasting window closes (${isFasting ? lifeContext.fastingStart : 'bedtime'})
+   - Example: 18:30-19:15, or 19:00-19:45
+
+🍿 **SNACKS (Flexible):**
+   - Can be scheduled ANYTIME between meal windows
+   - Ideal times: After breakfast before lunch, After lunch before dinner
+   - Keep 30-60 min gap from main meals
 
 **Calendar Events (DO NOT SCHEDULE OVER THESE):**
 ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- None'}
 
 **CRITICAL SCHEDULING RULES:**
 1. Include sleep block from ${preferences.sleepTime} to ${preferences.wakeTime}
-2. 🚨 IF FASTING: ALL meals MUST be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
-3. 🚨 NEVER overlap workouts with meals - they must be completely separate time blocks
-4. 🚨 NEVER overlap workouts/meals with calendar events
-5. 🚨 Leave at least 15 minutes between consecutive blocks (workout→meal, meal→workout, etc.)
-6. Schedule workouts BEFORE or AFTER meals, never during
-7. If fasting is active, schedule workouts outside eating window when possible
+2. 🚨 **MEAL TYPE AWARENESS**:
+   - Breakfast → Schedule within BREAKFAST WINDOW
+   - Lunch → Schedule within LUNCH WINDOW
+   - Dinner → Schedule within DINNER WINDOW
+   - Snacks → Schedule BETWEEN meal windows (flexible)
+3. 🚨 IF FASTING: ALL meals MUST be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
+4. 🚨 NEVER overlap workouts with meals - they must be completely separate time blocks
+5. 🚨 NEVER overlap workouts/meals with calendar events
+6. 🚨 Leave at least 15 minutes between consecutive blocks (workout→meal, meal→workout, etc.)
+7. Schedule workouts BEFORE or AFTER meals, never during
+8. **DO NOT use fixed meal times** - use the flexible windows above
 
 **Scheduling Strategy:**
 - Find all occupied time slots (calendar events + sleep)
 - Identify free time windows
 - Place workouts in free windows (avoiding fasting eating time if possible)
-- Place meals in free windows that are within eating window (if fasting)
+- Place BREAKFAST within breakfast window (${isFasting ? lifeContext.fastingEnd : preferences.wakeTime}-14:00)
+- Place LUNCH within lunch window (14:00-17:00)
+- Place DINNER within dinner window (17:00-${isFasting ? lifeContext.fastingStart : preferences.sleepTime})
+- Place SNACKS between meal windows with 30-60 min gaps
 - Ensure no overlaps between any blocks
 
 **Output (JSON):**
