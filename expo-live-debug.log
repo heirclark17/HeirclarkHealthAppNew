@@ -1,0 +1,11 @@
+
+> heirclarkhealthappnew@1.0.0 start
+> expo start --port 8082
+
+env: load .env
+env: export EXPO_PUBLIC_OPENAI_API_KEY EXPO_PUBLIC_API_URL EXPO_PUBLIC_UNSPLASH_ACCESS_KEY EXPO_PUBLIC_EXERCISEDB_API_KEY EXPO_PUBLIC_POSTHOG_API_KEY EXPO_PUBLIC_POSTHOG_HOST
+The /android project does not contain any URI schemes. Expo CLI will not be able to use links to launch the project. You can configure a custom URI scheme using the --scheme option.
+Starting project at C:\Users\derri\HeirclarkHealthAppNew
+Starting Metro Bundler
+Waiting on http://localhost:8082
+Logs for your project will appear below.

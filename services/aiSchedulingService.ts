@@ -60,7 +60,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       messages: [
         {
           role: 'system',
-          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. IMPORTANT: Meals have STRICT TIME WINDOWS - Breakfast: 05:00-10:59 (target 08:00), Lunch: 11:00-14:00 (target 12:00), Dinner: 17:00-22:00 (target 18:30). Schedule each meal type WITHIN its designated window. DO NOT schedule breakfast after 11 AM, lunch outside 11 AM-2 PM, or dinner outside 5 PM-10 PM. If fasting is active, meals must ALSO be within the eating window.',
+          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. CRITICAL RULES: (1) Meals have STRICT TIME WINDOWS - Breakfast: 05:00-10:59 (target 08:00), Lunch: 11:00-14:00 (target 12:00), Dinner: 17:00-22:00 (target 18:30). (2) EACH MEAL MUST BE AT A DIFFERENT TIME - NEVER schedule two meals at the same time. (3) Leave at least 45 minutes between meals. (4) NEVER overlap meals with each other or with workouts. (5) Each meal type goes in its designated window only. If fasting is active, meals must ALSO be within the eating window.',
         },
         {
           role: 'user',
@@ -223,7 +223,10 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
     if (conflicts.length > 0) {
       console.error('[AI Scheduler] 🚨 CONFLICTS DETECTED:');
       conflicts.forEach(conflict => console.error(`  ${conflict}`));
-      console.error('[AI Scheduler] ⚠️  AI generated conflicting blocks - this should not happen!');
+      console.error('[AI Scheduler] ⚠️  AI generated conflicting blocks - falling back to algorithmic scheduler');
+
+      // Throw error to trigger fallback to SchedulingEngineV2
+      throw new Error(`AI generated ${conflicts.length} conflicting blocks - algorithmic fallback required`);
     }
 
     // VERIFICATION: Ensure AI included all input meals in its response
@@ -435,17 +438,20 @@ ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endT
 
 **CRITICAL SCHEDULING RULES:**
 1. Include sleep block from ${preferences.sleepTime} to ${preferences.wakeTime}
-2. 🚨 **MEAL TYPE AWARENESS**:
-   - Breakfast → Schedule within BREAKFAST WINDOW
-   - Lunch → Schedule within LUNCH WINDOW
-   - Dinner → Schedule within DINNER WINDOW
+2. 🚨 **MEAL TYPE AWARENESS - EACH MEAL AT DIFFERENT TIME**:
+   - Breakfast → Schedule within BREAKFAST WINDOW (05:00-10:59)
+   - Lunch → Schedule within LUNCH WINDOW (11:00-14:00) - DIFFERENT time than breakfast
+   - Dinner → Schedule within DINNER WINDOW (17:00-22:00) - DIFFERENT time than lunch/breakfast
+   - NEVER schedule two meals at the same time (e.g., lunch at 11:30 AND dinner at 11:30 is WRONG)
    - Snacks → Schedule BETWEEN meal windows (flexible)
-3. 🚨 IF FASTING: ALL meals MUST be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
-4. 🚨 NEVER overlap workouts with meals - they must be completely separate time blocks
-5. 🚨 NEVER overlap workouts/meals with calendar events
-6. 🚨 Leave at least 15 minutes between consecutive blocks (workout→meal, meal→workout, etc.)
-7. Schedule workouts BEFORE or AFTER meals, never during
-8. **DO NOT use fixed meal times** - use the flexible windows above
+3. 🚨 **MEAL SPACING**: Leave at least 45 minutes between meals (breakfast ends, wait 45 min, then lunch starts)
+4. 🚨 IF FASTING: ALL meals MUST be between ${isFasting ? lifeContext.fastingEnd : 'N/A'} and ${isFasting ? lifeContext.fastingStart : 'N/A'}
+5. 🚨 NEVER overlap workouts with meals - they must be completely separate time blocks
+6. 🚨 NEVER overlap ANY blocks with each other (no two blocks at the same time)
+7. 🚨 NEVER overlap workouts/meals with calendar events
+8. 🚨 Leave at least 15 minutes between consecutive blocks (workout→meal, meal→workout, etc.)
+9. Schedule workouts BEFORE or AFTER meals, never during
+10. **DO NOT use fixed meal times** - use the flexible windows above
 
 **Scheduling Strategy:**
 - Find all occupied time slots (calendar events + sleep)
