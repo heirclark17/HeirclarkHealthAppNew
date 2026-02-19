@@ -144,12 +144,17 @@ function aggregateByName(ingredients: Ingredient[]): AggregatedIngredient[] {
   console.log('[GroceryListGenerator] 🔄 Starting aggregation for', ingredients.length, 'ingredients');
 
   ingredients.forEach((ingredient, index) => {
+    // Log raw ingredient for debugging
+    console.log(`[GroceryListGenerator] 🔍 Raw #${index + 1}: "${ingredient.name}" | amount: "${ingredient.amount}" | unit: "${ingredient.unit}" | category: "${ingredient.category}"`);
+
     // Normalize name: lowercase, trim whitespace, remove descriptors, singularize
     const normalizedName = normalizeIngredientName(ingredient.name);
     const normalizedUnit = normalizeUnit(ingredient.unit || 'each');
 
     // Create unique key: name + unit (so "milk cup" and "milk ml" stay separate)
     const key = `${normalizedName}::${normalizedUnit}`;
+
+    console.log(`[GroceryListGenerator]   ↳ Normalized: "${normalizedName}" :: "${normalizedUnit}" (key: "${key}")`);
 
     if (ingredientMap.has(key)) {
       // Ingredient exists - add to quantity
@@ -165,7 +170,7 @@ function aggregateByName(ingredients: Ingredient[]): AggregatedIngredient[] {
         unit: normalizedUnit,
         category: ingredient.category || '',
       });
-      console.log(`[GroceryListGenerator] 🆕 New ingredient: "${normalizedName}" ${ingredient.amount} ${normalizedUnit}`);
+      console.log(`[GroceryListGenerator] 🆕 New ingredient: "${normalizedName}" ${ingredient.amount} ${normalizedUnit} | category: "${ingredient.category || 'none'}"`);
     }
   });
 
@@ -393,12 +398,16 @@ function categorizeIngredients(ingredients: AggregatedIngredient[]): GroceryCate
     Other: 1,
   };
 
-  ingredients.forEach((ingredient) => {
+  console.log('[GroceryListGenerator] 📦 Starting categorization for', ingredients.length, 'aggregated ingredients');
+
+  ingredients.forEach((ingredient, index) => {
     // Use existing category if provided, otherwise infer from name
     const category = ingredient.category || inferCategory(ingredient.name);
 
     // Create unique key for this ingredient (name + unit)
     const key = `${ingredient.name}::${ingredient.unit}`;
+
+    console.log(`[GroceryListGenerator] 🏷️  Cat #${index + 1}: "${ingredient.name}" ${ingredient.totalAmount} ${ingredient.unit} → ${category} (key: "${key}")`);
 
     // Check if we've already seen this exact ingredient
     if (seenIngredients.has(key)) {

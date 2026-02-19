@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   programName: {
-    fontSize: 16,
+    fontSize: 19,
     fontFamily: Fonts.semiBold,
     marginBottom: 4,
   },
