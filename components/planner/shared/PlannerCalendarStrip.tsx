@@ -218,17 +218,6 @@ export function PlannerCalendarStrip({
           const isSelected = selectedDate === item.dateStr;
           const opacity = item.isFuture ? 0.6 : 1; // Dim future dates slightly
 
-          // Debug logging
-          if (item.isToday) {
-            console.log('[PlannerCalendarStrip] Today check:', {
-              selectedDate,
-              itemDateStr: item.dateStr,
-              isSelected,
-              selectedDateType: typeof selectedDate,
-              itemDateStrType: typeof item.dateStr,
-            });
-          }
-
           return (
             <TouchableOpacity
               key={item.dateStr}
@@ -238,9 +227,13 @@ export function PlannerCalendarStrip({
             >
               {/* Background layer with absolute positioning */}
               <View
+                pointerEvents="none"
                 style={[
                   StyleSheet.absoluteFill,
-                  { borderRadius: 12 },
+                  {
+                    borderRadius: 12,
+                    zIndex: -1,
+                  },
                   isSelected ? {
                     backgroundColor: '#000000',
                     opacity: 1,

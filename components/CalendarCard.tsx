@@ -181,9 +181,13 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
                 accessibilityState={{ selected: isSelected, disabled: item.isFuture }}
               >
                 <View
+                  pointerEvents="none"
                   style={[
                     StyleSheet.absoluteFill,
-                    { borderRadius: 12 },
+                    {
+                      borderRadius: 12,
+                      zIndex: -1,
+                    },
                     isSelected ? {
                       backgroundColor: colors.primary,
                       opacity: 1
