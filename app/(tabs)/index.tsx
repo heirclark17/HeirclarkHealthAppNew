@@ -1413,7 +1413,7 @@ export default function DashboardScreen() {
                      mealType === 'dinner' ? '6:00 - 9:00 PM' : 'Any time'}
                   </Text>
                 </View>
-                <NumberText weight="regular" style={[styles.mealCalories, { color: colors.textSecondary }]}>{mealCals} kcal</NumberText>
+                <NumberText weight="regular" style={[styles.mealCalories, { color: colors.textSecondary }]}>{Math.round(mealCals)} kcal</NumberText>
               </TouchableOpacity>
 
               {/* Individual Meals */}
@@ -1422,7 +1422,7 @@ export default function DashboardScreen() {
                   <View style={styles.loggedMealContent}>
                     <Text style={[styles.loggedMealName, { color: colors.text }]}>{meal.name}</Text>
                     <NumberText weight="regular" style={[styles.loggedMealMacros, { color: colors.textMuted }]}>
-                      {Math.round(meal.calories)} cal • P: {meal.protein}g • C: {meal.carbs}g • F: {meal.fat}g
+                      {Math.round(meal.calories)} cal • P: {Math.round(meal.protein)}g • C: {Math.round(meal.carbs)}g • F: {Math.round(meal.fat)}g
                     </NumberText>
                   </View>
                   <TouchableOpacity
