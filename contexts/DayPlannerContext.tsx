@@ -40,7 +40,7 @@ function getCalendar(): any {
   return _Calendar;
 }
 import { api } from '../services/api';
-import { SchedulingEngine } from '../services/schedulingEngine';
+import { SchedulingEngineV2 } from '../services/schedulingEngine_v2';
 import { generateAISchedule } from '../services/aiSchedulingService';
 import { useTraining } from './TrainingContext';
 import { useMealPlan } from './MealPlanContext';
@@ -1166,9 +1166,34 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       timeline = await generateAISchedule(request);
       console.log('[Planner] ✅ AI schedule generated successfully');
     } catch (aiError: any) {
-      // Fallback to algorithmic scheduling
-      console.warn('[Planner] AI scheduling failed, falling back to algorithm:', aiError.message);
-      const result = SchedulingEngine.generateTimeline(request);
+      // Fallback to algorithmic scheduling V2
+      console.warn('[Planner] AI scheduling failed, falling back to SchedulingEngineV2:', aiError.message);
+
+      // Map request to V2 API parameters
+      const sleepWindow = {
+        start: request.preferences.sleepTime,
+        end: request.preferences.wakeTime,
+      };
+
+      const eatingWindow =
+        request.lifeContext.isFasting && !request.lifeContext.isCheatDay
+          ? {
+              start: request.lifeContext.fastingEnd,
+              end: request.lifeContext.fastingStart,
+            }
+          : null;
+
+      const workout = request.workoutBlocks.length > 0 ? request.workoutBlocks[0] : null;
+
+      const result = SchedulingEngineV2.buildDailySchedule(
+        request.date,
+        request.calendarBlocks,
+        sleepWindow,
+        eatingWindow,
+        request.mealBlocks,
+        workout,
+        request.preferences
+      );
 
       if (!result.success) {
         console.warn(`[Planner] Timeline for ${dateStr} has conflicts:`, result.conflicts);
@@ -1690,8 +1715,31 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           },
         };
 
-        // 4. Run algorithmic scheduler to get timed meals
-        const result = SchedulingEngine.generateTimeline(request);
+        // 4. Run SchedulingEngineV2 to get timed meals
+        const sleepWindow = {
+          start: request.preferences.sleepTime,
+          end: request.preferences.wakeTime,
+        };
+
+        const eatingWindow =
+          request.lifeContext.isFasting && !request.lifeContext.isCheatDay
+            ? {
+                start: request.lifeContext.fastingEnd,
+                end: request.lifeContext.fastingStart,
+              }
+            : null;
+
+        const workout = request.workoutBlocks.length > 0 ? request.workoutBlocks[0] : null;
+
+        const result = SchedulingEngineV2.buildDailySchedule(
+          request.date,
+          request.calendarBlocks,
+          sleepWindow,
+          eatingWindow,
+          request.mealBlocks,
+          workout,
+          request.preferences
+        );
 
         // 5. Extract only newly-timed meal blocks from the result
         const timedMeals = result.timeline.blocks.filter(
@@ -1781,8 +1829,31 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           },
         };
 
-        // 4. Run algorithmic scheduler to get timed workouts
-        const result = SchedulingEngine.generateTimeline(request);
+        // 4. Run SchedulingEngineV2 to get timed workouts
+        const sleepWindow = {
+          start: request.preferences.sleepTime,
+          end: request.preferences.wakeTime,
+        };
+
+        const eatingWindow =
+          request.lifeContext.isFasting && !request.lifeContext.isCheatDay
+            ? {
+                start: request.lifeContext.fastingEnd,
+                end: request.lifeContext.fastingStart,
+              }
+            : null;
+
+        const workout = request.workoutBlocks.length > 0 ? request.workoutBlocks[0] : null;
+
+        const result = SchedulingEngineV2.buildDailySchedule(
+          request.date,
+          request.calendarBlocks,
+          sleepWindow,
+          eatingWindow,
+          request.mealBlocks,
+          workout,
+          request.preferences
+        );
 
         // 5. Extract only newly-timed workout blocks from the result
         const timedWorkouts = result.timeline.blocks.filter(b => b.type === 'workout');
