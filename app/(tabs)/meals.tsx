@@ -478,47 +478,26 @@ export default function MealsScreen() {
                 showPantryInput={true}
               />
 
-              <View style={[styles.generateButtonsRow, { marginTop: 16 }]}>
-                <GlassCard
-                  style={styles.halfButtonGlass}
-                  intensity={isDark ? 40 : 60}
-                  interactive
+              {/* Budget Generate Button - Full Width */}
+              <GlassCard
+                style={[styles.fullButtonGlass, { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.15)', marginTop: 16 }]}
+                intensity={isDark ? 50 : 70}
+                interactive
+              >
+                <TouchableOpacity
+                  onPress={handleBudgetGenerate}
+                  disabled={isGenerating}
+                  activeOpacity={0.7}
+                  style={styles.halfButtonInner}
+                  accessibilityLabel={`Budget meal plan generation, ${selectedBudgetTier} tier selected`}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
+                  accessibilityHint="Generates a cost-optimized 7-day meal plan with Instacart shopping cart based on your budget tier and pantry items"
                 >
-                  <TouchableOpacity
-                    onPress={handleGenerate}
-                    disabled={isGenerating}
-                    activeOpacity={0.7}
-                    style={styles.halfButtonInner}
-                    accessibilityLabel="Quick meal plan generation"
-                    accessibilityRole="button"
-                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-                    accessibilityHint="Generates a 7-day meal plan quickly using template-based approach"
-                  >
-                    <Zap size={20} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)', fontFamily: Fonts.light }]}>Quick</Text>
-                  </TouchableOpacity>
-                </GlassCard>
-
-                <GlassCard
-                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.15)' }]}
-                  intensity={isDark ? 50 : 70}
-                  interactive
-                >
-                  <TouchableOpacity
-                    onPress={handleBudgetGenerate}
-                    disabled={isGenerating}
-                    activeOpacity={0.7}
-                    style={styles.halfButtonInner}
-                    accessibilityLabel={`Budget meal plan generation, ${selectedBudgetTier} tier selected`}
-                    accessibilityRole="button"
-                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-                    accessibilityHint="Generates a cost-optimized 7-day meal plan with Instacart shopping cart based on your budget tier and pantry items"
-                  >
-                    <ShoppingCart size={20} color={colors.successMuted} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? '#86efac' : '#22c55e', fontFamily: Fonts.light }]}>Budget</Text>
-                  </TouchableOpacity>
-                </GlassCard>
-              </View>
+                  <ShoppingCart size={20} color={colors.successMuted} />
+                  <Text style={[styles.halfButtonText, { color: isDark ? '#86efac' : '#22c55e', fontFamily: Fonts.light }]}>Budget</Text>
+                </TouchableOpacity>
+              </GlassCard>
             </GlassCard>
           </View>
         )}
@@ -652,31 +631,7 @@ export default function MealsScreen() {
                   )}
                 </View>
 
-                {/* Regenerate buttons - Only show on non-cheat days */}
-                <View style={styles.regenerateSection}>
-                  <View style={styles.generateButtonsRow}>
-                    <GlassCard
-                      style={styles.halfButtonGlass}
-                      intensity={isDark ? 40 : 60}
-                      interactive
-                    >
-                      <TouchableOpacity
-                        onPress={handleGenerate}
-                        disabled={isGenerating}
-                        activeOpacity={0.7}
-                        style={styles.halfButtonInner}
-                        accessibilityLabel="Quick regenerate meal plan"
-                        accessibilityRole="button"
-                        accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-                        accessibilityHint="Regenerates the entire 7-day meal plan quickly using template-based approach"
-                      >
-                        <Zap size={18} color={isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'} />
-                        <Text style={[styles.halfButtonText, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)', fontFamily: Fonts.light }]}>Quick</Text>
-                      </TouchableOpacity>
-                    </GlassCard>
-
-                  </View>
-                </View>
+                {/* Regenerate section removed - Quick button removed */}
               </>
             )}
           </View>
@@ -845,6 +800,10 @@ const styles = StyleSheet.create({
   halfButtonGlass: {
     flex: 1,
     borderRadius: Spacing.borderRadius,
+  },
+  fullButtonGlass: {
+    borderRadius: Spacing.borderRadius,
+    marginHorizontal: 16,
   },
   halfButtonInner: {
     paddingVertical: 14,
