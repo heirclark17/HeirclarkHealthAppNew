@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Ruler, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { Ruler, ArrowLeft, ArrowRight } from 'lucide-react-native';
 import {
   View,
   Text,
@@ -879,13 +879,12 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           <TouchableOpacity
             onPress={onBack}
             activeOpacity={0.7}
-            style={{ flex: 1 }}
             accessibilityLabel="Back"
             accessibilityRole="button"
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <ChevronLeft size={28} color={colors.text} />
+              <ArrowLeft size={24} color={colors.text} />
             </GlassCard>
           </TouchableOpacity>
 
@@ -893,7 +892,6 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             onPress={handleContinue}
             disabled={!isValid()}
             activeOpacity={0.7}
-            style={{ flex: 2 }}
             accessibilityLabel="Continue to next step"
             accessibilityRole="button"
             accessibilityState={{ disabled: !isValid() }}
@@ -906,7 +904,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               ]}
               interactive
             >
-              <ChevronRight size={28} color={isValid() ? colors.primary : colors.textMuted} />
+              <ArrowRight size={24} color={isValid() ? colors.primary : colors.textMuted} />
             </GlassCard>
           </TouchableOpacity>
         </View>
@@ -1224,11 +1222,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   backButton: {
-    flexDirection: 'row',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 16,
   },
   backButtonText: {
     fontSize: 14,
@@ -1237,11 +1235,11 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   continueButton: {
-    flexDirection: 'row',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
   },
   continueButtonText: {
     fontSize: 14,

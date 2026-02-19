@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target, ChevronRight } from 'lucide-react-native';
+import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target, ArrowRight } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -208,7 +208,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
             onPress={handleContinue}
             disabled={!state.primaryGoal}
             activeOpacity={0.7}
-            style={{ flex: 1 }}
+            style={{ alignSelf: 'center' }}
             accessibilityLabel={state.primaryGoal ? 'Continue to next step' : 'Continue, select a goal first'}
             accessibilityRole="button"
             accessibilityState={{ disabled: !state.primaryGoal }}
@@ -221,7 +221,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
               ]}
               interactive
             >
-              <ChevronRight size={28} color={state.primaryGoal ? colors.primary : colors.textMuted} />
+              <ArrowRight size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} />
             </GlassCard>
           </TouchableOpacity>
         </View>
@@ -313,11 +313,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   continueButton: {
-    flexDirection: 'row',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
   },
   continueButtonText: {
     fontSize: 14,
