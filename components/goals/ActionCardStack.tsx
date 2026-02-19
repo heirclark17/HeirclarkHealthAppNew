@@ -426,6 +426,7 @@ function FanCard({
 
 const styles = StyleSheet.create({
   glassWrapper: {
+    width: '100%',
     marginBottom: 16,
   },
   sectionTitle: {
