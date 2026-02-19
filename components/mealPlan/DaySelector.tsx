@@ -196,8 +196,8 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
 
   // Get meal summary for a day
   const getMealSummary = (day: DayPlan, isCheat: boolean): string => {
-    // Don't show meal info on cheat days
-    if (isCheat) return '';
+    // Show special commentary for cheat days
+    if (isCheat) return 'Enjoy!';
 
     if (!day.meals || day.meals.length === 0) return '';
 
