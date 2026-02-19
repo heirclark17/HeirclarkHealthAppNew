@@ -51,6 +51,7 @@ export type Equipment =
   | 'kettlebell'
   | 'resistance_bands'
   | 'cable_machine'
+  | 'machine'
   | 'bodyweight'
   | 'cardio_machine'
   | 'smith_machine'

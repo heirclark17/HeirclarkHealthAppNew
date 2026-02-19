@@ -50,7 +50,7 @@ function normalizeEquipment(eq: string): string {
   // Map common variations
   if (normalized === 'dumbbell') return 'dumbbells';
   if (normalized === 'cable') return 'cable_machine';
-  if (normalized === 'machine') return 'cable_machine';
+  // Keep 'machine' as its own type (for general gym machines)
   return normalized;
 }
 
@@ -157,7 +157,7 @@ export function groupAlternativesByEquipment(
   }
 
   // Sort groups: barbell, dumbbells, cable, machine, bodyweight, others
-  const order = ['barbell', 'dumbbells', 'cable_machine', 'kettlebell', 'bodyweight', 'resistance_bands', 'smith_machine'];
+  const order = ['barbell', 'dumbbells', 'cable_machine', 'machine', 'kettlebell', 'bodyweight', 'resistance_bands', 'smith_machine'];
   const sorted = Array.from(groups.entries()).sort(([a], [b]) => {
     const aIdx = order.indexOf(a);
     const bIdx = order.indexOf(b);

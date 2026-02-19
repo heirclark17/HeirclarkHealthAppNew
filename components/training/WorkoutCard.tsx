@@ -327,6 +327,32 @@ export function WorkoutCard({
 
   const typeColor = getWorkoutTypeColor(workout.type);
 
+  // Group exercises by muscle group
+  const groupedExercises = useMemo(() => {
+    const groups = new Map<string, WorkoutExercise[]>();
+
+    for (const exercise of workout.exercises) {
+      const muscleGroup = exercise.exercise.primaryMuscle || 'other';
+      if (!groups.has(muscleGroup)) {
+        groups.set(muscleGroup, []);
+      }
+      groups.get(muscleGroup)!.push(exercise);
+    }
+
+    // Sort groups by typical workout order (chest → back → shoulders → biceps → triceps → quads → hamstrings → calves)
+    const muscleOrder = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'quads', 'hamstrings', 'calves', 'glutes', 'core', 'forearms'];
+    const sorted = Array.from(groups.entries()).sort(([a], [b]) => {
+      const aIdx = muscleOrder.indexOf(a);
+      const bIdx = muscleOrder.indexOf(b);
+      if (aIdx === -1 && bIdx === -1) return a.localeCompare(b);
+      if (aIdx === -1) return 1;
+      if (bIdx === -1) return -1;
+      return aIdx - bIdx;
+    });
+
+    return sorted;
+  }, [workout.exercises]);
+
   return (
     <Animated.View style={animatedStyle}>
       <View style={[styles.cardWrapper, workout.completed && styles.cardCompleted]}>
@@ -380,7 +406,7 @@ export function WorkoutCard({
             <GlassCard style={styles.equipmentCard}>
               <View style={styles.equipmentCardHeader}>
                 <Dumbbell size={14} color={colors.text} />
-                <Text style={[styles.equipmentCardText, { color: colors.text }]}>Equipment</Text>
+                <Text style={[styles.equipmentCardText, { color: colors.text }]}>Choose Your Preferred Equipment</Text>
                 {isSwappingEquipment && (
                   <ActivityIndicator size="small" color={colors.primary} style={{ marginLeft: 8 }} />
                 )}
@@ -445,24 +471,31 @@ export function WorkoutCard({
             </View>
           )}
 
-          {/* Main Exercises */}
+          {/* Main Exercises - Grouped by Muscle */}
           <View style={styles.exerciseListInline}>
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>EXERCISES</Text>
-            {workout.exercises.map((exercise, index) => (
-              <ExerciseRow
-                key={exercise.id || `exercise-${index}`}
-                exercise={exercise}
-                onToggle={() => onExerciseToggle(exercise.id)}
-                onSwap={() => onSwapExercise(exercise.id)}
-                onShowAlternatives={onShowAlternatives ? () => onShowAlternatives(exercise) : undefined}
-                onLogWeight={onLogWeight ? () => onLogWeight(exercise) : undefined}
-                onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
-                lastWeight={lastWeights[exercise.exerciseId]}
-                overloadTrend={exerciseTrends[exercise.exerciseId]}
-                suggestedNext={suggestedWeights[exercise.exerciseId]}
-                colors={colors}
-                isDark={isDark}
-              />
+            {groupedExercises.map(([muscleGroup, exercises]) => (
+              <View key={muscleGroup} style={styles.muscleGroupSection}>
+                <Text style={[styles.muscleGroupTitle, { color: colors.textMuted }]}>
+                  {muscleGroup.toUpperCase().replace('_', ' ')}
+                </Text>
+                {exercises.map((exercise, index) => (
+                  <ExerciseRow
+                    key={exercise.id || `${muscleGroup}-${index}`}
+                    exercise={exercise}
+                    onToggle={() => onExerciseToggle(exercise.id)}
+                    onSwap={() => onSwapExercise(exercise.id)}
+                    onShowAlternatives={onShowAlternatives ? () => onShowAlternatives(exercise) : undefined}
+                    onLogWeight={onLogWeight ? () => onLogWeight(exercise) : undefined}
+                    onViewForm={onViewForm ? () => onViewForm(exercise) : undefined}
+                    lastWeight={lastWeights[exercise.exerciseId]}
+                    overloadTrend={exerciseTrends[exercise.exerciseId]}
+                    suggestedNext={suggestedWeights[exercise.exerciseId]}
+                    colors={colors}
+                    isDark={isDark}
+                  />
+                ))}
+              </View>
             ))}
           </View>
 
@@ -501,9 +534,9 @@ export function WorkoutCard({
             >
               <GlassCard style={styles.viewProgressButton} interactive>
                 <Ionicons name="analytics-outline" size={18} color={colors.textSecondary} />
-                <Text style={[styles.viewProgressText, { color: colors.textSecondary }]}>
+                <NumberText weight="semiBold" style={[styles.viewProgressText, { color: colors.textSecondary }]}>
                   VIEW PROGRESS
-                </Text>
+                </NumberText>
               </GlassCard>
             </TouchableOpacity>
           )}
@@ -536,9 +569,9 @@ export function WorkoutCard({
                 size={22}
                 color={workout.completed ? colors.textMuted : colors.primary}
               />
-              <Text style={[styles.completeButtonText, { color: workout.completed ? colors.textMuted : colors.primary }]}>
+              <NumberText weight="semiBold" style={[styles.completeButtonText, { color: workout.completed ? colors.textMuted : colors.primary }]}>
                 {workout.completed ? 'WORKOUT COMPLETED' : 'MARK AS COMPLETE'}
-              </Text>
+              </NumberText>
             </GlassCard>
           </TouchableOpacity>
         </GlassCard>
@@ -665,6 +698,18 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semiBold,
     letterSpacing: 1,
     marginBottom: 12,
+  },
+  muscleGroupSection: {
+    marginBottom: 12,
+  },
+  muscleGroupTitle: {
+    fontSize: 11,
+    color: Colors.textMuted,
+    fontFamily: Fonts.medium,
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    marginTop: 4,
+    opacity: 0.7,
   },
   exerciseRow: {
     flexDirection: 'row',
