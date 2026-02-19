@@ -28,12 +28,15 @@ import { NumberText } from '../NumberText';
 import { Meal } from '../../types/mealPlan';
 import { aiService } from '../../services/aiService';
 import { pexelsService } from '../../services/pexelsService';
+import { useMealPlan } from '../../contexts/MealPlanContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface MealCardProps {
   meal: Meal;
   index: number;
+  dayIndex?: number;
+  mealIndex?: number;
   onSwap?: () => void;
   isSwapping?: boolean;
   onAddToTodaysMeals?: (meal: Meal) => void;
@@ -41,7 +44,7 @@ interface MealCardProps {
   onSaveToSavedMeals?: (meal: Meal) => void;
 }
 
-export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, onAddIngredientsToInstacart, onSaveToSavedMeals }: MealCardProps) {
+export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping, onAddToTodaysMeals, onAddIngredientsToInstacart, onSaveToSavedMeals }: MealCardProps) {
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [isAddingToMeals, setIsAddingToMeals] = useState(false);
   const [isAddingToInstacart, setIsAddingToInstacart] = useState(false);
@@ -61,6 +64,7 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
   const [imageReady, setImageReady] = useState(false);
   const insets = useSafeAreaInsets();
   const { settings } = useSettings();
+  const { updateMealRecipe } = useMealPlan();
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -105,16 +109,25 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
           if (details) {
             console.log('[MealCard] Recipe details fetched:', details.ingredients?.length, 'ingredients');
             // Map API response ingredients to match Ingredient type (amount: string instead of quantity: number)
+            const mappedIngredients = (details.ingredients || []).map((ing: any) => ({
+              name: ing.name,
+              amount: ing.amount || String(ing.quantity || ''),
+              unit: ing.unit,
+            }));
+            const mappedInstructions = details.instructions || [];
             const mappedDetails = {
               ...details,
-              ingredients: (details.ingredients || []).map((ing: any) => ({
-                name: ing.name,
-                amount: ing.amount || String(ing.quantity || ''),
-                unit: ing.unit,
-              })),
+              ingredients: mappedIngredients,
+              instructions: mappedInstructions,
             };
             setRecipeDetails(mappedDetails);
             hasFetchedRef.current = true;
+
+            // Persist recipe to database so it's never fetched again
+            if (dayIndex !== undefined && mealIndex !== undefined) {
+              updateMealRecipe(dayIndex, mealIndex, mappedIngredients, mappedInstructions);
+              console.log('[MealCard] ✅ Recipe persisted to database');
+            }
           } else {
             console.log('[MealCard] No recipe details returned from API');
           }
@@ -305,8 +318,16 @@ export function MealCard({ meal, index, onSwap, isSwapping, onAddToTodaysMeals, 
       );
       if (details) {
         console.log('[MealCard] AI recipe generated:', details.ingredients?.length, 'ingredients');
-        setRecipeDetails({ ...details, ingredients: (details.ingredients || []).map((i: any) => ({ name: i.name, amount: String(i.quantity ?? i.amount ?? ""), unit: i.unit, quantity: i.quantity })) });
+        const mappedIngredients = (details.ingredients || []).map((i: any) => ({ name: i.name, amount: String(i.quantity ?? i.amount ?? ""), unit: i.unit }));
+        const mappedInstructions = details.instructions || [];
+        setRecipeDetails({ ...details, ingredients: mappedIngredients, instructions: mappedInstructions });
         hasFetchedRef.current = true;
+
+        // Persist recipe to database
+        if (dayIndex !== undefined && mealIndex !== undefined) {
+          updateMealRecipe(dayIndex, mealIndex, mappedIngredients, mappedInstructions);
+          console.log('[MealCard] ✅ AI recipe persisted to database');
+        }
       } else {
         console.log('[MealCard] No recipe details returned from AI');
       }

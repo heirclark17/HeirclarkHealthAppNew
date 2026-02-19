@@ -52,6 +52,7 @@ interface MealPlanContextType {
   loadCachedPlan: () => Promise<void>;
   generateGroceryListOnDemand: (budgetTier?: 'low' | 'medium' | 'high') => Promise<void>; // NEW - with budget awareness
   orderWithInstacart: (filters?: { budgetTier?: 'low' | 'medium' | 'high'; dietary?: string[] }) => Promise<void>; // UPDATED
+  updateMealRecipe: (dayIndex: number, mealIndex: number, ingredients: any[], instructions: string[]) => void;
 }
 
 const initialState: MealPlanState = {
@@ -1145,6 +1146,42 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, selectedDayIndex: currentDayIndex }));
   }, []); // Only run once on mount
 
+  // Update a specific meal's recipe (ingredients + instructions) and persist to cache + backend
+  const updateMealRecipe = useCallback((dayIndex: number, mealIndex: number, ingredients: any[], instructions: string[]) => {
+    if (!state.weeklyPlan) return;
+
+    setState(prev => {
+      if (!prev.weeklyPlan) return prev;
+
+      const updatedPlan = [...prev.weeklyPlan];
+      const day = { ...updatedPlan[dayIndex] };
+      const meals = [...day.meals];
+      meals[mealIndex] = { ...meals[mealIndex], ingredients, instructions };
+      day.meals = meals;
+      updatedPlan[dayIndex] = day;
+
+      // Persist to AsyncStorage
+      const cacheData = {
+        weeklyPlan: updatedPlan,
+        groceryList: prev.groceryList,
+        weekSummary: prev.weekSummary,
+        lastGeneratedAt: prev.lastGeneratedAt,
+      };
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData))
+        .catch(err => console.error('[MealPlanContext] Cache save error after recipe update:', err));
+
+      // Sync to backend (fire-and-forget)
+      const weekStart = updatedPlan[0]?.date || new Date().toISOString().split('T')[0];
+      api.saveMealPlan(
+        { weeklyPlan: updatedPlan, groceryList: prev.groceryList, weekSummary: prev.weekSummary },
+        weekStart
+      ).catch(err => console.error('[MealPlanContext] Backend sync error after recipe update:', err));
+
+      console.log(`[MealPlanContext] ✅ Recipe persisted for day ${dayIndex}, meal ${mealIndex}`);
+      return { ...prev, weeklyPlan: updatedPlan };
+    });
+  }, [state.weeklyPlan]);
+
   const value = useMemo<MealPlanContextType>(() => ({
     state,
     generateMealPlan,
@@ -1158,6 +1195,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     generateAIMealPlan,
     generateGroceryListOnDemand,
     orderWithInstacart,
+    updateMealRecipe,
   }), [
     state,
     generateMealPlan,
@@ -1171,6 +1209,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
     loadCachedPlan,
     generateGroceryListOnDemand,
     orderWithInstacart,
+    updateMealRecipe,
   ]);
 
   return (

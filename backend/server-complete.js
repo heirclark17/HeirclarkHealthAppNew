@@ -2160,15 +2160,14 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
     console.log('[Meal Plan] Received preferences:', JSON.stringify(preferences, null, 2));
 
     const systemPrompt = `You are an expert nutritionist creating personalized meal plans.
-    Generate complete meal plans with ingredients and instructions included.
+    Generate MINIMAL meal plans with ONLY essential information.
 
-    RULES:
-    - Descriptions: Max 10 words
-    - Include 4-8 ingredients per meal with name, amount, and unit
-    - Include 3-6 short instruction steps per meal
-    - Focus on accurate macros
+    CRITICAL - KEEP IT MINIMAL:
+    - Descriptions: Max 10 words, just name the main components
+    - NO ingredients, NO instructions, NO grocery list (user can request these later)
+    - Focus on accurate macros and meal names only
 
-    Return a JSON object with this structure:
+    Return a JSON object with ONLY this structure:
     {
       "weeklyPlan": [
         {
@@ -2184,18 +2183,7 @@ app.post('/api/v1/ai/generate-meal-plan', authenticateToken, async (req, res) =>
               "carbs": 40,
               "fat": 15,
               "prepTime": 10,
-              "cookTime": 5,
-              "ingredients": [
-                {"name": "eggs", "amount": "3", "unit": "large"},
-                {"name": "whole grain bread", "amount": "2", "unit": "slices"},
-                {"name": "butter", "amount": "1", "unit": "tbsp"}
-              ],
-              "instructions": [
-                "Crack eggs into a bowl and whisk with salt and pepper.",
-                "Melt butter in a non-stick skillet over medium heat.",
-                "Pour in eggs and stir gently until set.",
-                "Toast bread and serve alongside eggs."
-              ]
+              "cookTime": 5
             }
           ]
         }
@@ -2263,7 +2251,7 @@ ${mealDiversityInstruction}
       ],
       response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 12000, // Increased to include ingredients and instructions for all meals
+      max_tokens: 3500,
     });
 
     const rawContent = completion.choices[0].message.content;

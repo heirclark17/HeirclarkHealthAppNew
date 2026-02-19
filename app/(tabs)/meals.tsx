@@ -602,6 +602,8 @@ export default function MealsScreen() {
                           key={`breakfast-${index}`}
                           meal={meal}
                           index={index}
+                          dayIndex={selectedDayIndex}
+                          mealIndex={currentDayMeals.indexOf(meal)}
                           onSwap={() => handleSwapMeal('breakfast')}
                           isSwapping={isSwapping}
                           onAddToTodaysMeals={handleAddToTodaysMeals}
@@ -616,6 +618,8 @@ export default function MealsScreen() {
                           key={`lunch-${index}`}
                           meal={meal}
                           index={mealsByType.breakfast.length + index}
+                          dayIndex={selectedDayIndex}
+                          mealIndex={currentDayMeals.indexOf(meal)}
                           onSwap={() => handleSwapMeal('lunch')}
                           isSwapping={isSwapping}
                           onAddToTodaysMeals={handleAddToTodaysMeals}
@@ -630,6 +634,8 @@ export default function MealsScreen() {
                           key={`dinner-${index}`}
                           meal={meal}
                           index={mealsByType.breakfast.length + mealsByType.lunch.length + index}
+                          dayIndex={selectedDayIndex}
+                          mealIndex={currentDayMeals.indexOf(meal)}
                           onSwap={() => handleSwapMeal('dinner')}
                           isSwapping={isSwapping}
                           onAddToTodaysMeals={handleAddToTodaysMeals}
@@ -649,6 +655,8 @@ export default function MealsScreen() {
                             mealsByType.dinner.length +
                             index
                           }
+                          dayIndex={selectedDayIndex}
+                          mealIndex={currentDayMeals.indexOf(meal)}
                           onSwap={() => handleSwapMeal('snack')}
                           isSwapping={isSwapping}
                           onAddToTodaysMeals={handleAddToTodaysMeals}
