@@ -1388,7 +1388,7 @@ export default function DashboardScreen() {
           accessibilityRole="button"
         >
           <View>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>TODAY'S MEALS</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text, fontSize: 18, fontFamily: Fonts.numericSemiBold, letterSpacing: 0.5 }]}>TODAY'S MEALS</Text>
             <Text style={[styles.cardSubtitle, { color: colors.textMuted }]}>Click to expand • View your meals</Text>
           </View>
           <Text style={[styles.chevron, { color: colors.textMuted }]}>{isMealsExpanded ? '▲' : '▼'}</Text>
