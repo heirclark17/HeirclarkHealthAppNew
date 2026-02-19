@@ -637,47 +637,50 @@ export default function MealsScreen() {
           </View>
         )}
 
-        {/* Action Buttons - Only show on non-cheat days */}
+        {/* Action Buttons - Circular Gradient Style (matches GroceryListModal Instacart button) */}
         {weeklyPlan && !isCheatDay && (
           <View style={styles.actionRow}>
-            <GlassCard
-              style={styles.glassActionButton}
-              intensity={isDark ? 40 : 60}
-              interactive
+            {/* Order Groceries Button - Orange/Green Gradient with ShoppingCart icon */}
+            <TouchableOpacity
+              onPress={() => setShowGroceryModal(true)}
+              activeOpacity={0.7}
+              style={styles.circleActionButton}
+              accessibilityLabel="Order groceries with Instacart"
+              accessibilityRole="button"
+              accessibilityHint="Opens grocery list to view all ingredients and order through Instacart"
             >
-              <TouchableOpacity
-                onPress={() => setShowGroceryModal(true)}
-                activeOpacity={0.7}
-                style={styles.actionButtonInner}
-                accessibilityLabel="Order groceries"
-                accessibilityRole="button"
-                accessibilityHint="Opens grocery list to view all ingredients and order through Instacart"
+              <LinearGradient
+                colors={isDark
+                  ? ['rgba(255, 140, 0, 0.15)', 'rgba(255, 184, 77, 0.12)', 'rgba(76, 175, 80, 0.15)']
+                  : ['rgba(255, 152, 0, 0.12)', 'rgba(255, 167, 38, 0.10)', 'rgba(102, 187, 106, 0.12)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.circleGradient}
               >
-                <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                  <ShoppingCart size={18} color={isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)'} />
-                </View>
-                <Text style={[styles.actionText, { color: isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.7)', fontFamily: Fonts.light }]}>Order Groceries</Text>
-              </TouchableOpacity>
-            </GlassCard>
-            <GlassCard
-              style={styles.glassActionButton}
-              intensity={isDark ? 40 : 60}
-              interactive
+                <ShoppingCart size={24} color={isDark ? '#FF8C00' : '#FF9800'} strokeWidth={2} />
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* AI Coach Button - Purple/Blue Gradient with Sparkles icon */}
+            <TouchableOpacity
+              onPress={() => setShowCoachingModal(true)}
+              activeOpacity={0.7}
+              style={styles.circleActionButton}
+              accessibilityLabel="AI nutrition coach"
+              accessibilityRole="button"
+              accessibilityHint="Opens AI coaching to get personalized guidance on your meal plan and nutrition goals"
             >
-              <TouchableOpacity
-                onPress={() => setShowCoachingModal(true)}
-                activeOpacity={0.7}
-                style={styles.actionButtonInner}
-                accessibilityLabel="AI coach"
-                accessibilityRole="button"
-                accessibilityHint="Opens AI coaching to get personalized guidance on your meal plan and nutrition goals"
+              <LinearGradient
+                colors={isDark
+                  ? ['rgba(139, 92, 246, 0.15)', 'rgba(168, 85, 247, 0.12)', 'rgba(59, 130, 246, 0.15)']
+                  : ['rgba(147, 51, 234, 0.12)', 'rgba(168, 85, 247, 0.10)', 'rgba(99, 102, 241, 0.12)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.circleGradient}
               >
-                <View style={[styles.actionIconContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }]}>
-                  <Sparkles size={20} color={colors.textMuted} strokeWidth={1.5} />
-                </View>
-                <Text style={[styles.actionText, { color: colors.textSecondary }]}>AI Coach</Text>
-              </TouchableOpacity>
-            </GlassCard>
+                <Sparkles size={24} color={isDark ? '#A855F7' : '#9333EA'} strokeWidth={2} />
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
@@ -905,34 +908,24 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 24,
     paddingHorizontal: 16,
-    gap: 12,
-    marginTop: 8,
+    marginTop: 16,
+    marginBottom: 8,
   },
-  glassActionButton: {
-    flex: 1,
-    borderRadius: 24,
+  circleActionButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     overflow: 'hidden',
   },
-  actionButtonInner: {
-    flexDirection: 'row',
+  circleGradient: {
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  actionIconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionText: {
-    fontSize: 14,
-    fontFamily: Fonts.medium,
-    letterSpacing: 0.3,
+    borderRadius: 30,
   },
   savingsBanner: {
     flexDirection: 'row',
