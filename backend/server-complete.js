@@ -3027,13 +3027,13 @@ app.get('/api/v1/food-photo', async (req, res) => {
 // ============================================
 
 const CARD_IMAGE_PROMPTS = {
-  coaching: 'Soft pastel aesthetic photo of a sunrise over calm water with gentle fog, warm amber and soft teal tones, golden hour light reflecting on still lake, serene peaceful atmosphere, no people, portrait orientation, no text no words no letters',
+  coaching: 'Overhead photo of a sports coaching playbook open on a wooden desk, hand-drawn Xs and Os diagrams but for nutrition and fitness instead of football, sketched meal plates and dumbbell icons connected by arrows and dotted lines, clipboard with workout schedule, warm neutral tones with soft amber lighting, clean aesthetic, no people, portrait orientation, no text no words no letters',
   mealPlan: 'Soft pastel aesthetic overhead photo of a beautiful healthy meal, fresh colorful grain bowl with avocado greens cherry tomatoes and seeds, warm earth tones sage green and soft amber, wooden table surface, gentle natural lighting, portrait orientation, no text no words no letters',
   trainingPlan: 'Soft pastel aesthetic photo of modern gym equipment on concrete floor, matte black iron dumbbells and kettlebell, soft warm neutral tones with amber and cool gray, clean minimal industrial space with morning light, no people, portrait orientation, no text no words no letters',
 };
 
 const CARD_IMAGE_KEYS = {
-  coaching: 'card_coaching_v4',
+  coaching: 'card_coaching_v5',
   mealPlan: 'card_mealplan_v4',
   trainingPlan: 'card_trainingplan_v4',
 };
