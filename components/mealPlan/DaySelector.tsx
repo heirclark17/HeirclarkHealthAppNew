@@ -295,9 +295,11 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                               cal
                             </NumberText>
                           </View>
-                          <NumberText weight="regular" style={[styles.macroSummary, { color: summaryColor }]}>
-                            P {macros.protein} · C {macros.carbs} · F {macros.fat}
-                          </NumberText>
+                          <View style={styles.macrosColumn}>
+                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>P {macros.protein}</NumberText>
+                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>C {macros.carbs}</NumberText>
+                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>F {macros.fat}</NumberText>
+                          </View>
                         </>
                       );
                     })()}
@@ -521,13 +523,16 @@ const styles = StyleSheet.create({
     lineHeight: 10,
     paddingHorizontal: 2,
   },
-  macroSummary: {
-    fontSize: 7,
+  macrosColumn: {
     marginTop: 4,
+    alignItems: 'center',
+    gap: 1,
+  },
+  macroLine: {
+    fontSize: 8,
     textAlign: 'center',
-    letterSpacing: 0.2,
     opacity: 0.7,
-    lineHeight: 9,
+    lineHeight: 11,
   },
   cheatDayItem: {
     // Border removed per user request
