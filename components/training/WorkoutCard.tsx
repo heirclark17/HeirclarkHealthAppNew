@@ -735,7 +735,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 15,
     color: Colors.text,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   exerciseCompleted: {
     textDecorationLine: 'line-through',
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
   exerciseDetails: {
     fontSize: 12,
     color: Colors.textMuted,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     marginTop: 2,
   },
   alternativesHint: {
