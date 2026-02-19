@@ -214,8 +214,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 13, // Default for meals/workouts, overridden inline for calendar events
-    fontFamily: Fonts.numericLight,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
+    fontWeight: '600' as const,
     flex: 1,
   },
   time: {
