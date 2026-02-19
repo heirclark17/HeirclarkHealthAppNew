@@ -35,8 +35,9 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
 
   // Theme-aware styling (matching CalendarCard exactly)
   const dayItemBg = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-  const cheatDayBg = isDark ? 'rgba(236, 72, 153, 0.18)' : 'rgba(236, 72, 153, 0.12)';
-  const cheatDayColor = isDark ? '#f472b6' : '#ec4899';
+  const cheatDayBg = isDark ? 'rgba(251, 146, 60, 0.08)' : 'rgba(251, 146, 60, 0.06)';
+  const cheatDayColor = isDark ? 'rgba(251, 146, 60, 0.9)' : 'rgba(251, 146, 60, 0.85)';
+  const cheatDayBorder = isDark ? 'rgba(251, 146, 60, 0.25)' : 'rgba(251, 146, 60, 0.20)';
   const dayNameColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)';
   const modalOverlayBg = isDark ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.5)';
 
@@ -222,18 +223,17 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     ]} />
                   )}
 
-                  {/* Cheat day indicator - vibrant coral/pink badge */}
+                  {/* Cheat day indicator - transparent glass with light orange */}
                   {isCheat && (
                     <View style={[
                       styles.cheatBadge,
-                      isSelected && styles.cheatBadgeActive,
                       {
                         backgroundColor: isSelected
-                          ? (isDark ? 'rgba(236, 72, 153, 0.35)' : 'rgba(236, 72, 153, 0.25)')
-                          : (isDark ? 'rgba(236, 72, 153, 0.22)' : 'rgba(236, 72, 153, 0.15)'),
+                          ? (isDark ? 'rgba(251, 146, 60, 0.20)' : 'rgba(251, 146, 60, 0.15)')
+                          : (isDark ? 'rgba(251, 146, 60, 0.12)' : 'rgba(251, 146, 60, 0.10)'),
                         borderColor: isSelected
-                          ? (isDark ? 'rgba(244, 114, 182, 0.6)' : 'rgba(236, 72, 153, 0.5)')
-                          : (isDark ? 'rgba(244, 114, 182, 0.4)' : 'rgba(236, 72, 153, 0.3)')
+                          ? (isDark ? 'rgba(251, 146, 60, 0.40)' : 'rgba(251, 146, 60, 0.35)')
+                          : cheatDayBorder
                       }
                     ]}>
                       <Ionicons
@@ -256,7 +256,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     <Text style={[
                       styles.dayName,
                       { color: dayNameColor },
-                      isCheat && !isSelected && { color: isDark ? 'rgba(244, 114, 182, 0.8)' : 'rgba(236, 72, 153, 0.8)' },
+                      isCheat && !isSelected && { color: cheatDayColor },
                       isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.7)' },
                     ]}>
                       {shortDayName.toUpperCase()}
@@ -341,7 +341,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     style={[
                       styles.calendarDay,
                       item.isToday && [styles.calendarDayToday, { borderColor: item.isCheat ? cheatDayColor : colors.primary }],
-                      item.isCheat && !item.isSelected && { backgroundColor: cheatDayBg, borderWidth: 1, borderColor: isDark ? 'rgba(244, 114, 182, 0.4)' : 'rgba(236, 72, 153, 0.4)' },
+                      item.isCheat && !item.isSelected && { backgroundColor: cheatDayBg },
                       item.isSelected && { backgroundColor: item.isCheat ? cheatDayColor : colors.text },
                       item.isInPlan && !item.isSelected && !item.isCheat && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
                       !item.isInPlan && !item.isCheat && styles.calendarDayDisabled,
@@ -478,8 +478,7 @@ const styles = StyleSheet.create({
     // Font family handled by NumberText component (SF Pro Rounded)
   },
   cheatDayItem: {
-    borderWidth: 1,
-    borderColor: 'rgba(236, 72, 153, 0.3)',
+    // Border removed per user request
   },
   cheatBadge: {
     position: 'absolute',
