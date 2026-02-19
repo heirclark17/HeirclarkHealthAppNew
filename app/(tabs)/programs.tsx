@@ -6,6 +6,7 @@ import Animated, {
   withRepeat,
   withTiming,
   withSequence,
+  withDelay,
   Easing,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -714,24 +715,61 @@ export default function ProgramsScreen() {
   );
 }
 
-// Animated AI Coach FAB with pulse + rotation
+// Single sparkle particle
+function SparkleParticle({ delay, x, y, size }: { delay: number; x: number; y: number; size: number }) {
+  const opacity = useSharedValue(0);
+  const particleScale = useSharedValue(0);
+
+  useEffect(() => {
+    const startAnimation = () => {
+      opacity.value = withDelay(delay,
+        withRepeat(
+          withSequence(
+            withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
+            withTiming(0, { duration: 600, easing: Easing.in(Easing.ease) }),
+            withTiming(0, { duration: 800 }),
+          ),
+          -1,
+        ),
+      );
+      particleScale.value = withDelay(delay,
+        withRepeat(
+          withSequence(
+            withTiming(1, { duration: 400, easing: Easing.out(Easing.back(2)) }),
+            withTiming(0, { duration: 600, easing: Easing.in(Easing.ease) }),
+            withTiming(0, { duration: 800 }),
+          ),
+          -1,
+        ),
+      );
+    };
+    startAnimation();
+  }, []);
+
+  const style = useAnimatedStyle(() => ({
+    position: 'absolute' as const,
+    left: x,
+    top: y,
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+    backgroundColor: '#c084fc',
+    opacity: opacity.value,
+    transform: [{ scale: particleScale.value }],
+  }));
+
+  return <Animated.View style={style} />;
+}
+
+// Animated AI Coach FAB with sparkle effect
 function AnimatedCoachFab({ isDark, colors, onPress }: { isDark: boolean; colors: any; onPress: () => void }) {
   const scale = useSharedValue(1);
-  const rotation = useSharedValue(0);
 
   useEffect(() => {
     scale.value = withRepeat(
       withSequence(
-        withTiming(1.15, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-      ),
-      -1,
-      true,
-    );
-    rotation.value = withRepeat(
-      withSequence(
-        withTiming(15, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-15, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1.1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
       true,
@@ -739,11 +777,19 @@ function AnimatedCoachFab({ isDark, colors, onPress }: { isDark: boolean; colors
   }, []);
 
   const animatedIcon = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value },
-      { rotate: `${rotation.value}deg` },
-    ],
+    transform: [{ scale: scale.value }],
   }));
+
+  const sparkles = [
+    { delay: 0, x: 4, y: 6, size: 4 },
+    { delay: 600, x: 38, y: 4, size: 3 },
+    { delay: 300, x: 40, y: 36, size: 4 },
+    { delay: 900, x: 6, y: 38, size: 3 },
+    { delay: 450, x: 22, y: 2, size: 3 },
+    { delay: 750, x: 2, y: 22, size: 3 },
+    { delay: 1050, x: 42, y: 20, size: 3 },
+    { delay: 150, x: 20, y: 42, size: 3 },
+  ];
 
   return (
     <View style={styles.coachFab}>
@@ -759,6 +805,9 @@ function AnimatedCoachFab({ isDark, colors, onPress }: { isDark: boolean; colors
           accessibilityRole="button"
           accessibilityHint="Opens AI coaching to get personalized training guidance and workout advice"
         >
+          {sparkles.map((s, i) => (
+            <SparkleParticle key={i} delay={s.delay} x={s.x} y={s.y} size={s.size} />
+          ))}
           <Animated.View style={animatedIcon}>
             <Sparkles size={22} color="#a855f7" />
           </Animated.View>
