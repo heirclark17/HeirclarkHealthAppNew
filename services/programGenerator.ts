@@ -660,8 +660,9 @@ function parseAIProgramOutput(
       // Use AI-provided week
       weeklyPlans.push(buildWeekFromAI(parsed.weeks[weekIndex], weekStartDate, weekIndex));
     } else {
-      // Generate from Week 1 with progressive overload
-      weeklyPlans.push(buildProgressiveWeek(week1, weekStartDate, weekIndex, weeks));
+      // Generate from Week 1 with progressive overload (with AI weight adjustments)
+      const progressiveWeek = await buildProgressiveWeek(week1, weekStartDate, weekIndex, weeks, preferences, profile);
+      weeklyPlans.push(progressiveWeek);
     }
   }
 
@@ -816,15 +817,126 @@ let _lastGenerationPreferences: TrainingPreferences | null = null;
  * - Weeks 2-3 (Accumulation/Intensification): +1 set or +reps
  * - Last week (Deload): -40% volume, maintain exercise selection
  */
-function buildProgressiveWeek(
+/**
+ * Generate AI-adjusted weights for a specific week based on periodization phase
+ * Uses GPT-4.1-mini for fast, consistent weight recommendations
+ */
+async function generateWeekWeights(
+  week1Exercises: Array<{ name: string; weight: string; sets: number; reps: string }>,
+  weekIndex: number,
+  totalWeeks: number,
+  phase: 'Accumulation' | 'Intensification' | 'Deload',
+  userProfile?: { benchPress1RM?: number; squat1RM?: number; deadlift1RM?: number; sex?: string; weight?: number }
+): Promise<Array<{ exerciseName: string; weight: string }>> {
+  try {
+    const openai = getOpenAI();
+
+    const prompt = `Given these Week 1 exercises with their base weights, generate appropriate weights for Week ${weekIndex + 1} (${phase} phase) of a ${totalWeeks}-week program.
+
+USER PROFILE:
+${userProfile?.benchPress1RM ? `- Bench Press 1RM: ${userProfile.benchPress1RM} lbs` : ''}
+${userProfile?.squat1RM ? `- Squat 1RM: ${userProfile.squat1RM} lbs` : ''}
+${userProfile?.deadlift1RM ? `- Deadlift 1RM: ${userProfile.deadlift1RM} lbs` : ''}
+${userProfile?.sex ? `- Sex: ${userProfile.sex}` : ''}
+${userProfile?.weight ? `- Bodyweight: ${userProfile.weight} lbs` : ''}
+
+WEEK 1 EXERCISES (base weights):
+${week1Exercises.map(ex => `- ${ex.name}: ${ex.weight} (${ex.sets} sets x ${ex.reps} reps)`).join('\n')}
+
+PERIODIZATION PHASE: ${phase}
+- Accumulation: Maintain or slight increase (+2-5 lbs on compounds, stay conservative)
+- Intensification: Increase weight to match lower rep range (Week 1 was 8-12 reps, this week may be 6-8 reps with heavier weight)
+- Deload: Reduce weight by ~20% for recovery week
+
+Return a JSON object with a "weights" array containing SPECIFIC weights in lbs for each exercise. Use the SAME format as Week 1 (e.g., "135 lbs", "bodyweight", "30 lbs"). For bodyweight exercises, always return "bodyweight".
+
+RESPOND WITH THIS EXACT JSON STRUCTURE:
+{
+  "weights": [
+    { "exerciseName": "Barbell Bench Press", "weight": "140 lbs" },
+    { "exerciseName": "Pull-ups", "weight": "bodyweight" }
+  ]
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.2, // Low temperature for consistent recommendations
+      max_tokens: 500,
+      response_format: { type: 'json_object' }, // Ensure JSON response
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No response from AI');
+    }
+
+    // Parse JSON response
+    const parsed = JSON.parse(content);
+    const weights = Array.isArray(parsed) ? parsed : parsed.weights || [];
+
+    console.log(`[ProgramGenerator] AI generated ${weights.length} weight adjustments for Week ${weekIndex + 1} (${phase})`);
+    return weights;
+
+  } catch (error: any) {
+    console.error(`[ProgramGenerator] AI weight generation failed:`, error.message);
+
+    // Fallback: Simple algorithmic weight progression
+    console.log(`[ProgramGenerator] Using algorithmic fallback for Week ${weekIndex + 1} weights`);
+    return week1Exercises.map(ex => {
+      let weight = ex.weight;
+
+      // Skip bodyweight exercises
+      if (weight.toLowerCase().includes('bodyweight')) {
+        return { exerciseName: ex.name, weight };
+      }
+
+      // Parse numeric weight
+      const match = weight.match(/(\d+(?:\.\d+)?)/);
+      if (!match) {
+        return { exerciseName: ex.name, weight };
+      }
+
+      let numericWeight = parseFloat(match[1]);
+      const unit = weight.match(/\d+(?:\.\d+)?\s*(lbs?|kg)/i)?.[1] || 'lbs';
+
+      // Apply phase-based adjustment
+      if (phase === 'Deload') {
+        numericWeight = Math.round(numericWeight * 0.8); // -20%
+      } else if (phase === 'Intensification') {
+        // Compounds: +5-10 lbs, Isolation: +2.5-5 lbs
+        const isCompound = ex.name.toLowerCase().includes('squat') ||
+                          ex.name.toLowerCase().includes('deadlift') ||
+                          ex.name.toLowerCase().includes('bench') ||
+                          ex.name.toLowerCase().includes('row') ||
+                          ex.name.toLowerCase().includes('press') && !ex.name.toLowerCase().includes('tricep');
+        numericWeight += isCompound ? 5 : 2.5;
+      } else {
+        // Accumulation: +2.5 lbs compounds, no change isolation
+        const isCompound = ex.name.toLowerCase().includes('squat') ||
+                          ex.name.toLowerCase().includes('deadlift') ||
+                          ex.name.toLowerCase().includes('bench');
+        if (isCompound) {
+          numericWeight += 2.5;
+        }
+      }
+
+      return { exerciseName: ex.name, weight: `${numericWeight} ${unit}` };
+    });
+  }
+}
+
+async function buildProgressiveWeek(
   week1: WeeklyTrainingPlan,
   weekStartDate: Date,
   weekIndex: number,
-  totalWeeks: number
-): WeeklyTrainingPlan {
+  totalWeeks: number,
+  preferences?: TrainingPreferences,
+  profile?: UserTrainingProfile
+): Promise<WeeklyTrainingPlan> {
   const isDeload = weekIndex >= totalWeeks - 1 && totalWeeks > 2;
   const phase = isDeload ? 'Deload' : weekIndex < Math.floor(totalWeeks * 0.5) ? 'Accumulation' : 'Intensification';
-  console.log(`[ProgramGenerator] Building Week ${weekIndex + 1} (${phase}) from Week 1 template`);
+  console.log(`[ProgramGenerator] Building Week ${weekIndex + 1} (${phase}) from Week 1 template with AI weight adjustments`);
 
   const days: TrainingDay[] = week1.days.map((day, dayIdx) => {
     const dayDate = addDays(weekStartDate, dayIdx);
@@ -916,6 +1028,59 @@ function buildProgressiveWeek(
       weekNumber: weekIndex + 1,
     };
   });
+
+  // ============================================================================
+  // AI Weight Adjustment for Progressive Overload
+  // ============================================================================
+  if (weekIndex > 0) { // Only adjust weights for Week 2+
+    try {
+      // Extract all exercises from Week 1 for weight reference
+      const week1Exercises: Array<{ name: string; weight: string; sets: number; reps: string }> = [];
+      week1.days.forEach(day => {
+        if (day.workout) {
+          day.workout.exercises.forEach(ex => {
+            if (ex.exercise.weight && ex.exercise.weight !== '') {
+              week1Exercises.push({
+                name: ex.exercise.name,
+                weight: ex.exercise.weight,
+                sets: ex.sets,
+                reps: ex.reps,
+              });
+            }
+          });
+        }
+      });
+
+      if (week1Exercises.length > 0) {
+        // Build user profile for AI
+        const userProfile = {
+          benchPress1RM: preferences?.benchPress1RM,
+          squat1RM: preferences?.squat1RM,
+          deadlift1RM: preferences?.deadlift1RM,
+          sex: preferences?.sex,
+          weight: preferences?.weight,
+        };
+
+        // Call AI to generate adjusted weights
+        const aiWeights = await generateWeekWeights(week1Exercises, weekIndex, totalWeeks, phase, userProfile);
+
+        // Update cloned exercises with AI-generated weights
+        days.forEach(day => {
+          if (day.workout) {
+            day.workout.exercises.forEach(ex => {
+              const aiWeight = aiWeights.find(w => w.exerciseName === ex.exercise.name);
+              if (aiWeight) {
+                ex.exercise.weight = aiWeight.weight;
+                console.log(`[ProgramGenerator] Week ${weekIndex + 1} - ${ex.exercise.name}: ${ex.exercise.weight}`);
+              }
+            });
+          }
+        });
+      }
+    } catch (error: any) {
+      console.warn(`[ProgramGenerator] Weight adjustment failed for Week ${weekIndex + 1}, using Week 1 weights:`, error.message);
+    }
+  }
 
   const focusAreas = new Set<MuscleGroup>();
   let totalCalories = 0;
