@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Leaf, Settings, Zap, Sparkles, ShoppingCart } from 'lucide-react-native';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
