@@ -360,7 +360,7 @@ export function WorkoutCard({
           {/* Header */}
           <View style={styles.header}>
             <View style={[styles.iconContainer, { backgroundColor: `${typeColor}20` }]}>
-              <BicepsFlexed size={24} color={colors.text} />
+              <BicepsFlexed size={32} color={colors.text} />
             </View>
             <View style={styles.headerText}>
               <Text style={[styles.workoutName, { color: colors.text }]}>{workout.name}</Text>
@@ -596,9 +596,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
   workoutName: {
     fontSize: 22,
     color: Colors.text,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   workoutMeta: {
     fontSize: 13,
