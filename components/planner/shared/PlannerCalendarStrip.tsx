@@ -235,13 +235,13 @@ export function PlannerCalendarStrip({
               style={[
                 styles.dayItem,
                 { backgroundColor: dayItemBg, opacity },
-                isSelected && styles.dayItemActive,
-                isSelected && {
+                isSelected ? styles.dayItemActive : {},
+                isSelected ? {
                   backgroundColor: '#FF0000', // Bright red for debugging
                   opacity: 1,
                   borderWidth: 5,
                   borderColor: '#00FF00' // Bright green for debugging
-                },
+                } : {},
               ]}
               onPress={() => onDateChange(item.dateStr)}
               activeOpacity={0.7}
