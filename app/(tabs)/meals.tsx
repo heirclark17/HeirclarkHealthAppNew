@@ -668,7 +668,7 @@ export default function MealsScreen() {
                 }
               ]}>
                 <ShoppingCart
-                  size={26}
+                  size={22}
                   color={isDark ? '#FF8C00' : '#FF9800'}
                   strokeWidth={2.5}
                 />
@@ -699,7 +699,7 @@ export default function MealsScreen() {
                 }
               ]}>
                 <Sparkles
-                  size={26}
+                  size={22}
                   color={isDark ? '#A855F7' : '#9333EA'}
                   strokeWidth={2.5}
                 />
@@ -956,9 +956,9 @@ const styles = StyleSheet.create({
     }),
   },
   glassActionButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     overflow: 'hidden',
     // Subtle shadow for elevation
     ...Platform.select({
@@ -976,7 +976,7 @@ const styles = StyleSheet.create({
   glassButtonInner: {
     width: '100%',
     height: '100%',
-    borderRadius: 34,
+    borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 0.5,
     borderColor: 'rgba(255, 255, 255, 0.2)',
@@ -986,7 +986,7 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 34,
+    borderRadius: 28,
   },
   savingsBanner: {
     flexDirection: 'row',
