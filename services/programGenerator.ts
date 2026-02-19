@@ -336,7 +336,7 @@ export async function generateMultiWeekProgram(
     }
 
     // Parse structured JSON output - AI generates Week 1 only
-    const weeklyPlans = parseAIProgramOutput(aiOutput, startDate, weeks, programTemplate.daysPerWeek);
+    const weeklyPlans = await parseAIProgramOutput(aiOutput, startDate, weeks, programTemplate.daysPerWeek);
 
     // AI-powered weight adjustment for weeks 2+ (progressive overload)
     if (weeklyPlans.length > 1) {
@@ -611,12 +611,12 @@ REMINDER: Every workout MUST include:
 // AI output parser
 // ============================================================================
 
-function parseAIProgramOutput(
+async function parseAIProgramOutput(
   aiOutput: string,
   startDate: Date,
   weeks: number,
   daysPerWeek: number
-): WeeklyTrainingPlan[] {
+): Promise<WeeklyTrainingPlan[]> {
   console.log('[ProgramGenerator] Parsing AI JSON output into', weeks, 'weeks');
 
   let parsed: AIProgramResponse;

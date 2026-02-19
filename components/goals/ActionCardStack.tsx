@@ -404,13 +404,6 @@ function FanCard({
       />
 
       <View style={styles.cardContent}>
-        <View style={[styles.iconPill, { backgroundColor: card.accent }]}>
-          {card.isLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            card.icon
-          )}
-        </View>
         <View style={styles.textArea}>
           <Text style={styles.cardTitle} numberOfLines={1}>
             {card.isLoading ? card.loadingTitle : card.title}
@@ -430,9 +423,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 26,
+    fontSize: 18,
     fontFamily: Fonts.numericBold,
-    letterSpacing: 1.5,
+    letterSpacing: 0,
     marginBottom: 4,
   },
   sectionSubtitle: {
