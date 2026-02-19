@@ -32,7 +32,7 @@ const API_URL =
 
 // Card dimensions — slightly taller for image-based cards
 const CARD_WIDTH = SCREEN_WIDTH - 80;
-const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.4);
+const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.25);
 const SWIPE_THRESHOLD = CARD_WIDTH * 0.25;
 
 // Fan spread constants
@@ -478,6 +478,7 @@ const styles = StyleSheet.create({
   stackContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: -12,
   },
   card: {
     position: 'absolute',
@@ -582,7 +583,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: Spacing.md,
-    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+    paddingBottom: Platform.OS === 'ios' ? 90 : 70,
   },
   buttonRow: {
     flexDirection: 'row',
