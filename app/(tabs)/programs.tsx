@@ -591,7 +591,7 @@ export default function ProgramsScreen() {
             <TouchableOpacity
               onPress={handleSetGoals}
               activeOpacity={0.7}
-              style={{ flex: 2 }}
+              style={{ flex: 1 }}
               accessibilityLabel="Edit goals"
               accessibilityRole="button"
               accessibilityHint="Opens the goals wizard to update your fitness goals"
