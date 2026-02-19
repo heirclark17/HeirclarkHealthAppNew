@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Modal, Platform } from 'react-native';
-// Removed FadeInRight import - entrance animations removed
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -224,7 +224,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   useEffect(() => {
     if (weeklyPlan.length > 0 && scrollViewRef.current) {
       setTimeout(() => {
-        const dayWidth = 84; // 72px width + 12px gap
+        const dayWidth = 110; // 96px width + 14px gap
         const maxScroll = weeklyPlan.length * dayWidth;
         scrollViewRef.current?.scrollTo({ x: maxScroll, y: 0, animated: false });
       }, 100);
@@ -256,86 +256,117 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                 <TouchableOpacity
                   style={[
                     styles.dayItem,
-                    { backgroundColor: isCheat ? cheatDayBg : dayItemBg },
-                    isCheat && !isSelected && styles.cheatDayItem,
-                    isSelected && [
-                      styles.dayItemActive,
-                      { backgroundColor: isCheat ? cheatDayColor : colors.primary }
-                    ],
+                    isSelected && styles.dayItemActive,
                   ]}
                   onPress={() => onSelectDay(index)}
                   accessible={true}
                   accessibilityLabel={accessibilityLabel}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: isSelected }}
+                  activeOpacity={0.85}
                 >
-                  {/* Glass highlight border removed */}
-
-                  {/* Cheat day indicator - transparent glass with light orange */}
-                  {isCheat && (
-                    <View style={[
-                      styles.cheatBadge,
-                      {
-                        backgroundColor: isSelected
-                          ? (isDark ? 'rgba(251, 146, 60, 0.20)' : 'rgba(251, 146, 60, 0.15)')
-                          : (isDark ? 'rgba(251, 146, 60, 0.12)' : 'rgba(251, 146, 60, 0.10)')
-                      }
-                    ]}>
-                      <Ionicons
-                        name="pizza"
-                        size={8}
-                        color={isSelected ? (isDark ? '#1f2937' : '#fff') : cheatDayColor}
-                        style={{ marginRight: 2 }}
-                      />
-                      <Text style={[
-                        styles.cheatBadgeText,
-                        { color: isSelected ? (isDark ? '#1f2937' : '#fff') : cheatDayColor }
-                      ]}>
-                        CHEAT
-                      </Text>
-                    </View>
-                  )}
-
-                  {/* Day content */}
-                  <View style={styles.dayContent}>
-                    <Text style={[
-                      styles.dayName,
-                      { color: dayNameColor },
-                      isCheat && !isSelected && { color: cheatDayColor },
-                      isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.7)' },
-                    ]}>
-                      {shortDayName.toUpperCase()}
-                    </Text>
-                    <NumberText
-                      weight="semiBold"
+                  {/* Frosted glass background with dynamic intensity */}
+                  <BlurView
+                    intensity={isSelected ? 100 : 60}
+                    tint={isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight'}
+                    style={styles.glassBackground}
+                  >
+                    {/* Colored overlay for selection and cheat day states */}
+                    <View
                       style={[
-                        styles.dayNumber,
-                        { color: colors.text },
-                        isCheat && !isSelected && { color: cheatDayColor },
-                        isSelected && { color: isDark ? Colors.background : Colors.text },
+                        styles.colorOverlay,
+                        {
+                          backgroundColor: isSelected
+                            ? (isCheat
+                                ? (isDark ? 'rgba(251, 146, 60, 0.35)' : 'rgba(251, 146, 60, 0.30)')
+                                : (isDark ? 'rgba(94, 169, 221, 0.35)' : 'rgba(94, 169, 221, 0.28)'))
+                            : (isCheat
+                                ? (isDark ? 'rgba(251, 146, 60, 0.08)' : 'rgba(251, 146, 60, 0.06)')
+                                : 'transparent')
+                        }
                       ]}
-                    >
-                      {getDayNumber(day.date)}
-                    </NumberText>
-                    {/* Meal summary - each part on its own line, wrapping if needed */}
-                    {getMealSummary(day, isCheat) && (
-                      <>
-                        {getMealSummary(day, isCheat).split(' • ').map((part, index) => (
-                          <Text
-                            key={index}
-                            style={[
-                              styles.mealSummary,
-                              { color: colors.textMuted },
-                              isCheat && !isSelected && { color: cheatDayColor },
-                              isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
-                            ]}
-                          >
-                            {part}
-                          </Text>
-                        ))}
-                      </>
+                    />
+
+                    {/* Premium cheat day badge */}
+                    {isCheat && (
+                      <View style={styles.cheatBadgeContainer}>
+                        <BlurView
+                          intensity={40}
+                          tint={isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight'}
+                          style={styles.cheatBadgeGlass}
+                        >
+                          <View style={[
+                            styles.cheatBadge,
+                            {
+                              backgroundColor: isSelected
+                                ? (isDark ? 'rgba(251, 146, 60, 0.25)' : 'rgba(251, 146, 60, 0.20)')
+                                : (isDark ? 'rgba(251, 146, 60, 0.15)' : 'rgba(251, 146, 60, 0.12)')
+                            }
+                          ]}>
+                            <Ionicons
+                              name="pizza"
+                              size={11}
+                              color={isSelected ? (isDark ? '#fff' : '#fff') : cheatDayColor}
+                              style={{ marginRight: 4 }}
+                            />
+                            <Text style={[
+                              styles.cheatBadgeText,
+                              { color: isSelected ? '#fff' : cheatDayColor }
+                            ]}>
+                              CHEAT
+                            </Text>
+                          </View>
+                        </BlurView>
+                      </View>
                     )}
-                  </View>
+
+                    {/* Day content with refined typography */}
+                    <View style={styles.dayContent}>
+                      <Text style={[
+                        styles.dayName,
+                        {
+                          color: isSelected
+                            ? (isDark ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.90)')
+                            : (isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.40)')
+                        },
+                      ]}>
+                        {shortDayName.toUpperCase()}
+                      </Text>
+                      <NumberText
+                        weight="semiBold"
+                        style={[
+                          styles.dayNumber,
+                          {
+                            color: isSelected
+                              ? (isDark ? '#fff' : '#fff')
+                              : (isDark ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.90)')
+                          },
+                        ]}
+                      >
+                        {getDayNumber(day.date)}
+                      </NumberText>
+                      {/* Meal summary with elegant line breaks */}
+                      {getMealSummary(day, isCheat) && (
+                        <View style={styles.mealSummaryContainer}>
+                          {getMealSummary(day, isCheat).split(' • ').map((part, idx) => (
+                            <Text
+                              key={idx}
+                              style={[
+                                styles.mealSummary,
+                                {
+                                  color: isSelected
+                                    ? (isDark ? 'rgba(255, 255, 255, 0.75)' : 'rgba(255, 255, 255, 0.80)')
+                                    : (isDark ? 'rgba(255, 255, 255, 0.50)' : 'rgba(0, 0, 0, 0.50)')
+                                },
+                              ]}
+                            >
+                              {part}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  </BlurView>
                 </TouchableOpacity>
               </View>
             );
@@ -460,109 +491,125 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 24,
-    paddingVertical: 4,
+    borderRadius: 28,
+    paddingVertical: 6,
   },
   weekStrip: {
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+    gap: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   dayCardContainer: {
     position: 'relative',
   },
   dayItem: {
-    width: 72,
-    minHeight: 120, // Changed to minHeight to allow dynamic height based on text
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 6,
-    borderRadius: 20,
-    backgroundColor: 'transparent',
+    width: 96,
+    minHeight: 136,
+    borderRadius: 24,
+    overflow: 'hidden',
     position: 'relative',
-    overflow: 'visible',
-    // Subtle base shadow for depth
+    // Premium layered shadow for depth
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.10,
+        shadowRadius: 12,
       },
       android: {
-        elevation: 2,
+        elevation: 4,
       },
     }),
   },
   dayItemActive: {
-    transform: [{ scale: 1.08 }],
-    // Elevated state with dramatic glow
+    transform: [{ scale: 1.06 }],
+    // Enhanced glow for selected state
     ...Platform.select({
       ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 24,
+        shadowColor: '#5EA9DD',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.45,
+        shadowRadius: 28,
       },
       android: {
-        elevation: 12,
+        elevation: 16,
       },
     }),
   },
-  // Glass highlight border removed
+  glassBackground: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 24,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    position: 'relative',
+  },
+  colorOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 24,
+  },
   dayContent: {
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
   },
   dayName: {
-    fontSize: 9,
-    color: 'rgba(255, 255, 255, 0.4)',
-    marginBottom: 6,
-    fontFamily: Fonts.medium,
-    letterSpacing: 1.2,
-    fontWeight: '600',
+    fontSize: 10,
+    marginBottom: 8,
+    fontFamily: Fonts.semiBold,
+    letterSpacing: 1.5,
+    fontWeight: '700',
   },
   dayNumber: {
-    fontSize: 24,
-    color: Colors.text,
+    fontSize: 32,
+    marginBottom: 2,
     // Font family handled by NumberText component (SF Pro Rounded)
   },
-  mealSummary: {
-    fontSize: 9,
-    fontFamily: Fonts.medium,
-    marginTop: 6,
-    textAlign: 'center',
-    letterSpacing: 0.2,
-    opacity: 0.9,
-    lineHeight: 12,
-    paddingHorizontal: 2,
+  mealSummaryContainer: {
+    marginTop: 8,
+    alignItems: 'center',
+    gap: 2,
   },
-  cheatDayItem: {
-    // Border removed per user request
+  mealSummary: {
+    fontSize: 10,
+    fontFamily: Fonts.medium,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+    lineHeight: 13,
+    paddingHorizontal: 4,
+  },
+  cheatBadgeContainer: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    right: 8,
+    zIndex: 3,
+  },
+  cheatBadgeGlass: {
+    borderRadius: 10,
+    overflow: 'hidden',
   },
   cheatBadge: {
-    position: 'absolute',
-    top: 4,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 8,
-    // Border removed
-  },
-  cheatBadgeActive: {
-    // Active state styling handled inline
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   cheatBadgeText: {
-    fontSize: 6,
+    fontSize: 8,
     fontFamily: Fonts.bold,
-    letterSpacing: 0.5,
-    color: '#f59e0b',
+    letterSpacing: 0.8,
+    fontWeight: '800',
   },
   fullCalendarButton: {
     alignSelf: 'center',
