@@ -402,12 +402,26 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
         console.log('[MealPlanContext] Calculated week summary from actual meals:', calculatedWeekSummary);
 
         // *** OPTION 1: Generate ALL images UPFRONT before showing meal plan ***
-        console.log('[MealPlanContext] 🖼️ Generating all food photos before displaying plan...');
+        console.log('[MealPlanContext] 🖼️ Generating all food photos in parallel...');
         const updatedPlan = [...weeklyPlan];
         const totalMeals = weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0);
-        let imagesGenerated = 0;
 
-        // Generate images for all meals with progress updates
+        // Show initial loading state
+        setState(prev => ({
+          ...prev,
+          isGenerating: true,
+          error: `Generating food photos... 0/${totalMeals}`,
+        }));
+
+        // ✅ PARALLEL IMAGE GENERATION - Fetch all images concurrently
+        const imagePromises: Array<{
+          dayIdx: number;
+          mealIdx: number;
+          promise: Promise<string | null>;
+          mealName: string;
+        }> = [];
+
+        // Collect all image fetch promises
         for (let dayIdx = 0; dayIdx < updatedPlan.length; dayIdx++) {
           const day = updatedPlan[dayIdx];
           for (let mealIdx = 0; mealIdx < day.meals.length; mealIdx++) {
@@ -415,38 +429,48 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
             // Skip if imageUrl already exists
             if (meal.imageUrl) {
-              imagesGenerated++;
               continue;
             }
 
-            // Update loading progress
-            setState(prev => ({
-              ...prev,
-              isGenerating: true,
-              error: `Generating food photos... ${imagesGenerated + 1}/${totalMeals}`,
-            }));
-
-            try {
-              const imageUrl = await pexelsService.searchFoodPhoto(meal.name, 'card');
-              if (imageUrl) {
-                updatedPlan[dayIdx] = {
-                  ...updatedPlan[dayIdx],
-                  meals: updatedPlan[dayIdx].meals.map((m, idx) =>
-                    idx === mealIdx ? { ...m, imageUrl } : m
-                  ),
-                };
-                imagesGenerated++;
-                console.log(`[MealPlanContext] 🖼️ Image ${imagesGenerated}/${totalMeals}: ${meal.name}`);
-              }
-            } catch (imgErr) {
-              console.error(`[MealPlanContext] ❌ Image error for ${meal.name}:`, imgErr);
-              // Continue even if one image fails
-              imagesGenerated++;
-            }
+            // Create promise for this image
+            imagePromises.push({
+              dayIdx,
+              mealIdx,
+              mealName: meal.name,
+              promise: pexelsService.searchFoodPhoto(meal.name, 'card').catch(err => {
+                console.error(`[MealPlanContext] ❌ Image error for ${meal.name}:`, err);
+                return null; // Return null on error so Promise.all doesn't fail
+              }),
+            });
           }
         }
 
-        console.log(`[MealPlanContext] ✅ Generated ${imagesGenerated}/${totalMeals} food photos`);
+        console.log(`[MealPlanContext] 🚀 Fetching ${imagePromises.length} images in parallel...`);
+        const startTime = Date.now();
+
+        // Fetch all images in parallel
+        const imageResults = await Promise.all(imagePromises.map(p => p.promise));
+
+        const fetchTime = Date.now() - startTime;
+        console.log(`[MealPlanContext] ⚡ Fetched ${imageResults.length} images in ${fetchTime}ms (${Math.round(fetchTime / imageResults.length)}ms avg per image)`);
+
+        // Apply results to plan
+        let imagesGenerated = 0;
+        imagePromises.forEach((item, index) => {
+          const imageUrl = imageResults[index];
+          if (imageUrl) {
+            updatedPlan[item.dayIdx] = {
+              ...updatedPlan[item.dayIdx],
+              meals: updatedPlan[item.dayIdx].meals.map((m, idx) =>
+                idx === item.mealIdx ? { ...m, imageUrl } : m
+              ),
+            };
+            imagesGenerated++;
+            console.log(`[MealPlanContext] 🖼️ Image ${imagesGenerated}/${imagePromises.length}: ${item.mealName}`);
+          }
+        });
+
+        console.log(`[MealPlanContext] ✅ Generated ${imagesGenerated}/${totalMeals} food photos in ${fetchTime}ms`);
 
         // Now set state with COMPLETE plan (includes all images)
         setState(prev => ({
