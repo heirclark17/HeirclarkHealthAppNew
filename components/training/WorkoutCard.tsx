@@ -855,8 +855,7 @@ const styles = StyleSheet.create({
   },
   viewProgressText: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as any,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
   completeButtonWrapper: {
@@ -871,8 +870,7 @@ const styles = StyleSheet.create({
   },
   completeButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as any,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 1,
   },
 });
