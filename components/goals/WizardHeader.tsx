@@ -1,24 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { ChevronLeft } from 'lucide-react-native';
 import { Fonts } from '../../constants/Theme';
-import { lightImpact } from '../../utils/haptics';
 
 interface WizardHeaderProps {
   currentStep: number;
   totalSteps: number;
   title: string;
   icon?: React.ReactNode;
-  onBack: () => void;
+  onBack?: () => void; // Optional now, not used
   isDark?: boolean;
 }
 
-export function WizardHeader({ currentStep, totalSteps, title, icon, onBack, isDark = true }: WizardHeaderProps) {
-  const handleBack = async () => {
-    await lightImpact();
-    onBack();
-  };
+export function WizardHeader({ currentStep, totalSteps, title, icon, isDark = true }: WizardHeaderProps) {
 
   // iOS 26 Liquid Glass colors - adaptive based on theme
   const textColor = isDark ? '#FFFFFF' : '#000000';
@@ -41,21 +35,8 @@ export function WizardHeader({ currentStep, totalSteps, title, icon, onBack, isD
 
       {/* Header Content */}
       <View style={styles.headerContent}>
-        {/* Top Row: Back Button + Step Counter */}
+        {/* Top Row: Step Counter */}
         <View style={styles.topRow}>
-          <TouchableOpacity
-            onPress={handleBack}
-            style={styles.backButton}
-            activeOpacity={0.7}
-            accessibilityLabel="Go back"
-            accessibilityRole="button"
-            accessibilityHint="Returns to the previous step"
-          >
-            <View style={[styles.backButtonInner, { backgroundColor: progressBg }]}>
-              <ChevronLeft size={20} color={textColor} strokeWidth={2.5} />
-            </View>
-          </TouchableOpacity>
-
           <Text style={[styles.stepCounter, { color: textSecondary }]}>
             Step {currentStep} of {totalSteps}
           </Text>
@@ -141,7 +122,7 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginBottom: 16,
   },
   backButton: {
