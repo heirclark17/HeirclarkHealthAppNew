@@ -11,6 +11,7 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Play, Utensils, Dumbbell } from 'lucide-react-native';
@@ -235,47 +236,60 @@ export function ActionCardStack({
   const containerHeight = CARD_HEIGHT + 40;
   const activeIdx = displayIndex % totalCards;
 
-  return (
-    <View style={styles.container}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>YOUR NEXT STEPS</Text>
-      <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>Swipe through to get started</Text>
-      <GestureDetector gesture={gesture}>
-        <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
-          {/* Render back-to-front so front card is on top */}
-          {[...cards].reverse().map((card, reverseI) => {
-            const i = cards.length - 1 - reverseI;
-            return (
-              <FanCard
-                key={card.id}
-                card={card}
-                cardIndex={i}
-                totalCards={totalCards}
-                currentIndex={currentIndex}
-                translateX={translateX}
-                imageUrl={cardImages[card.type]}
-              />
-            );
-          })}
-        </Animated.View>
-      </GestureDetector>
+  const isDark = settings.themeMode !== 'light';
 
-      {totalCards > 1 && (
-        <View style={styles.dotsContainer}>
-          {cards.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                {
-                  backgroundColor: activeIdx === i ? colors.text : colors.textMuted,
-                  width: activeIdx === i ? 18 : 6,
-                  opacity: activeIdx === i ? 1 : 0.35,
-                },
-              ]}
-            />
-          ))}
+  return (
+    <View style={styles.outerContainer}>
+      <BlurView
+        intensity={isDark ? 40 : 60}
+        tint={isDark ? 'dark' : 'light'}
+        style={styles.glassCard}
+      >
+        <View style={[
+          styles.glassInner,
+          { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.45)' },
+        ]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>YOUR NEXT STEPS</Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>Swipe through to get started</Text>
+
+          <GestureDetector gesture={gesture}>
+            <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
+              {[...cards].reverse().map((card, reverseI) => {
+                const i = cards.length - 1 - reverseI;
+                return (
+                  <FanCard
+                    key={card.id}
+                    card={card}
+                    cardIndex={i}
+                    totalCards={totalCards}
+                    currentIndex={currentIndex}
+                    translateX={translateX}
+                    imageUrl={cardImages[card.type]}
+                  />
+                );
+              })}
+            </Animated.View>
+          </GestureDetector>
+
+          {totalCards > 1 && (
+            <View style={styles.dotsContainer}>
+              {cards.map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.dot,
+                    {
+                      backgroundColor: activeIdx === i ? colors.text : colors.textMuted,
+                      width: activeIdx === i ? 18 : 6,
+                      opacity: activeIdx === i ? 1 : 0.35,
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+          )}
         </View>
-      )}
+      </BlurView>
     </View>
   );
 }
@@ -433,21 +447,33 @@ function FanCard({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  outerContainer: {
     width: '100%',
     marginBottom: 16,
+    borderRadius: 28,
+    overflow: 'hidden',
+  },
+  glassCard: {
+    borderRadius: 28,
+    overflow: 'hidden',
+  },
+  glassInner: {
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    paddingTop: 24,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 26,
     fontFamily: Fonts.numericBold,
     letterSpacing: 1.5,
-    paddingHorizontal: 8,
     marginBottom: 4,
   },
   sectionSubtitle: {
     fontSize: 14,
     fontFamily: Fonts.regular,
-    paddingHorizontal: 8,
     marginBottom: 18,
   },
   dotsContainer: {
