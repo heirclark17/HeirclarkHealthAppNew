@@ -8,6 +8,7 @@ import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
 import { DayPlan } from '../../types/mealPlan';
+import { generateMealTheme } from '../../services/openaiService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -23,9 +24,46 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState<any[]>([]);
+  const [mealThemes, setMealThemes] = useState<Record<number, string>>({});
 
   // Get cheat days from preferences
   const cheatDays = foodPrefsContext?.preferences?.cheatDays || [];
+
+  // Generate AI meal themes for each day
+  useEffect(() => {
+    const generateThemes = async () => {
+      const themes: Record<number, string> = {};
+
+      for (const day of weeklyPlan) {
+        if (day.meals && day.meals.length > 0) {
+          try {
+            const theme = await generateMealTheme({
+              meals: day.meals.map(m => ({
+                name: m.name,
+                mealType: m.mealType,
+                calories: m.calories,
+                protein: m.protein,
+              })),
+              totalCalories: day.dailyTotals.calories,
+              totalProtein: day.dailyTotals.protein,
+            });
+
+            if (theme) {
+              themes[day.dayNumber] = theme;
+            }
+          } catch (error) {
+            console.error('[DaySelector] Error generating theme for day', day.dayNumber, error);
+          }
+        }
+      }
+
+      setMealThemes(themes);
+    };
+
+    if (weeklyPlan.length > 0) {
+      generateThemes();
+    }
+  }, [weeklyPlan]);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -156,6 +194,23 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
     return cheatDays.includes(fullDayName);
   };
 
+  // Get meal summary for a day
+  const getMealSummary = (day: DayPlan): string => {
+    if (!day.meals || day.meals.length === 0) return '';
+
+    const mealCount = day.meals.length;
+    const calories = Math.round(day.dailyTotals?.calories || 0);
+    const theme = mealThemes[day.dayNumber];
+
+    // If we have an AI theme, show that with calories
+    if (theme) {
+      return `${theme} • ${calories} cal`;
+    }
+
+    // Otherwise, show meal count with calories
+    return `${mealCount} meal${mealCount > 1 ? 's' : ''} • ${calories} cal`;
+  };
+
   if (!weeklyPlan || weeklyPlan.length === 0) {
     return null;
   }
@@ -263,6 +318,17 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     >
                       {getDayNumber(day.date)}
                     </NumberText>
+                    {/* Meal summary */}
+                    {getMealSummary(day) && (
+                      <Text style={[
+                        styles.mealSummary,
+                        { color: colors.textMuted },
+                        isCheat && !isSelected && { color: cheatDayColor },
+                        isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
+                      ]}>
+                        {getMealSummary(day)}
+                      </Text>
+                    )}
                   </View>
                 </TouchableOpacity>
               </View>
@@ -456,6 +522,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: Colors.text,
     // Font family handled by NumberText component (SF Pro Rounded)
+  },
+  mealSummary: {
+    fontSize: 7,
+    fontFamily: Fonts.medium,
+    marginTop: 4,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+    opacity: 0.9,
   },
   cheatDayItem: {
     // Border removed per user request

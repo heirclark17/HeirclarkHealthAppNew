@@ -368,6 +368,77 @@ Be HONEST, DIRECT, and PRACTICAL. Use actual dish names from ${params.cuisine} c
 }
 
 // ============================================================
+// Meal Theme Generation
+// ============================================================
+
+export interface MealThemeParams {
+  meals: Array<{
+    name: string;
+    mealType: string;
+    calories: number;
+    protein: number;
+  }>;
+  totalCalories: number;
+  totalProtein: number;
+}
+
+/**
+ * Generate a short 2-3 word theme describing the day's meals
+ * Examples: "High Protein", "Mediterranean", "Light & Fresh", "Balanced Day"
+ */
+export async function generateMealTheme(
+  params: MealThemeParams
+): Promise<string> {
+  try {
+    const mealList = params.meals
+      .map(m => `${m.mealType}: ${m.name} (${m.calories} cal, ${m.protein}g protein)`)
+      .join('\n');
+
+    const prompt = `You are analyzing a day of meals. Based on these meals, generate a SHORT 2-3 word theme that captures the essence of this eating pattern.
+
+MEALS:
+${mealList}
+
+TOTALS:
+- Total Calories: ${params.totalCalories}
+- Total Protein: ${params.totalProtein}g
+
+Generate ONLY a 2-3 word theme. Examples of good themes:
+- "High Protein"
+- "Mediterranean"
+- "Light & Fresh"
+- "Balanced Day"
+- "Asian Fusion"
+- "Comfort Food"
+- "Clean Eating"
+- "Low Carb"
+
+Return ONLY the theme, nothing else. No punctuation, no explanation.`;
+
+    const completion = await getOpenAI().chat.completions.create({
+      model: 'gpt-4.1-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You generate concise 2-3 word meal themes. Be creative but accurate.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.5,
+      max_tokens: 10, // Very short response
+    });
+
+    return completion.choices[0]?.message?.content?.trim() || '';
+  } catch (error) {
+    console.error('[OpenAI Service] Error generating meal theme:', error);
+    return ''; // Return empty string on error, fallback to simple display
+  }
+}
+
+// ============================================================
 // Accountability Coach AI Functions
 // ============================================================
 
