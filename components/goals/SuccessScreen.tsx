@@ -444,12 +444,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
 
       {/* Success Text */}
       <View style={styles.textContainer}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <PartyPopper size={36} color={colors.text} />
-          <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
-            {user?.firstName ? `${user.firstName}, ` : ''}You're All Set!
-          </Text>
-        </View>
+        <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
+          {user?.firstName ? `${user.firstName}, ` : ''}You're All Set!
+        </Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
           Your personalized nutrition plan is ready. Use this as your daily guide to reach your goals.
         </Text>
