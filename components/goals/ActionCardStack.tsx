@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   sectionSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: Fonts.regular,
     marginBottom: 18,
     paddingHorizontal: 16,
