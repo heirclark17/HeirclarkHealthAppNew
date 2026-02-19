@@ -1822,8 +1822,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
     overflow: 'hidden',
   },
   nutritionCard: {
@@ -1877,10 +1875,9 @@ const styles = StyleSheet.create({
   },
   nutritionTitle: {
     fontSize: 18,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     color: '#fff',
     marginBottom: 6,
-    fontWeight: '300',
   },
   nutritionSubtitle: {
     flexDirection: 'row',
@@ -1889,9 +1886,8 @@ const styles = StyleSheet.create({
   },
   mealName: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: '#fff',
-    fontWeight: '300',
   },
   caloriesBadge: {
     flexDirection: 'row',
@@ -1942,14 +1938,14 @@ const styles = StyleSheet.create({
   },
   macroLabelNew: {
     fontSize: 10,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: '#888',
     marginBottom: 2,
     fontWeight: '300',
   },
   macroValueNew: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: '#fff',
     fontWeight: '300',
   },
@@ -1968,16 +1964,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   mealTypeButtonActive: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   mealTypeButtonText: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: 'rgba(255, 255, 255, 0.6)',
     fontWeight: '400',
   },
