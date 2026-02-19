@@ -11,7 +11,6 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Play, Utensils, Dumbbell } from 'lucide-react-native';
@@ -19,16 +18,18 @@ import Constants from 'expo-constants';
 
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
+import { GlassCard } from '../GlassCard';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - 64;
+// Narrower cards so there's padding inside the glass container
+const CARD_WIDTH = SCREEN_WIDTH - 112;
 const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.35);
 const SWIPE_THRESHOLD = CARD_WIDTH * 0.25;
 
 // Fan spread: each behind card rotates & offsets to peek out
-const FAN_ROTATION = 6;   // degrees per card
-const FAN_OFFSET_X = 18;  // horizontal peek per card
-const FAN_OFFSET_Y = 4;   // slight downward shift
+const FAN_ROTATION = 6;
+const FAN_OFFSET_X = 18;
+const FAN_OFFSET_Y = 4;
 const BEHIND_SCALE = 0.95;
 
 const API_URL =
@@ -232,65 +233,51 @@ export function ActionCardStack({
 
   if (totalCards === 0) return null;
 
-  // Extra height for fan spread
   const containerHeight = CARD_HEIGHT + 40;
   const activeIdx = displayIndex % totalCards;
 
-  const isDark = settings.themeMode !== 'light';
-
   return (
-    <View style={styles.outerContainer}>
-      <BlurView
-        intensity={isDark ? 40 : 60}
-        tint={isDark ? 'dark' : 'light'}
-        style={styles.glassCard}
-      >
-        <View style={[
-          styles.glassInner,
-          { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.45)' },
-        ]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>YOUR NEXT STEPS</Text>
-          <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>Swipe through to get started</Text>
+    <GlassCard style={styles.glassWrapper} interactive>
+      <Text style={[styles.sectionTitle, { color: colors.text }]}>YOUR NEXT STEPS</Text>
+      <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>Swipe through to get started</Text>
 
-          <GestureDetector gesture={gesture}>
-            <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
-              {[...cards].reverse().map((card, reverseI) => {
-                const i = cards.length - 1 - reverseI;
-                return (
-                  <FanCard
-                    key={card.id}
-                    card={card}
-                    cardIndex={i}
-                    totalCards={totalCards}
-                    currentIndex={currentIndex}
-                    translateX={translateX}
-                    imageUrl={cardImages[card.type]}
-                  />
-                );
-              })}
-            </Animated.View>
-          </GestureDetector>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
+          {[...cards].reverse().map((card, reverseI) => {
+            const i = cards.length - 1 - reverseI;
+            return (
+              <FanCard
+                key={card.id}
+                card={card}
+                cardIndex={i}
+                totalCards={totalCards}
+                currentIndex={currentIndex}
+                translateX={translateX}
+                imageUrl={cardImages[card.type]}
+              />
+            );
+          })}
+        </Animated.View>
+      </GestureDetector>
 
-          {totalCards > 1 && (
-            <View style={styles.dotsContainer}>
-              {cards.map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.dot,
-                    {
-                      backgroundColor: activeIdx === i ? colors.text : colors.textMuted,
-                      width: activeIdx === i ? 18 : 6,
-                      opacity: activeIdx === i ? 1 : 0.35,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-          )}
+      {totalCards > 1 && (
+        <View style={styles.dotsContainer}>
+          {cards.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.dot,
+                {
+                  backgroundColor: activeIdx === i ? colors.text : colors.textMuted,
+                  width: activeIdx === i ? 18 : 6,
+                  opacity: activeIdx === i ? 1 : 0.35,
+                },
+              ]}
+            />
+          ))}
         </View>
-      </BlurView>
-    </View>
+      )}
+    </GlassCard>
   );
 }
 
@@ -326,7 +313,6 @@ function FanCard({
       Extrapolation.CLAMP,
     );
 
-    // FRONT CARD: swipeable with drag rotation
     if (isFront) {
       const rotation = interpolate(
         translateX.value,
@@ -346,8 +332,6 @@ function FanCard({
       };
     }
 
-    // BEHIND CARDS: fanned out to the right with rotation
-    // Alternate fan direction: odd cards fan right, even fan left
     const fanDir = stackPos % 2 === 1 ? 1 : -1;
     const fanRot = fanDir * stackPos * FAN_ROTATION;
     const fanX = fanDir * stackPos * FAN_OFFSET_X;
@@ -355,7 +339,6 @@ function FanCard({
     const scale = Math.max(0.85, 1 - stackPos * (1 - BEHIND_SCALE));
 
     if (stackPos === 1) {
-      // Next card: unfans toward center as front card is dragged
       const rot = fanRot * (1 - dragProgress);
       const x = fanX * (1 - dragProgress);
       const y = fanY * (1 - dragProgress);
@@ -372,7 +355,6 @@ function FanCard({
       };
     }
 
-    // Further back: shift one fan position closer during drag
     const prevFanDir = (stackPos - 1) % 2 === 1 ? 1 : -1;
     const prevRot = prevFanDir * (stackPos - 1) * FAN_ROTATION;
     const prevX = prevFanDir * (stackPos - 1) * FAN_OFFSET_X;
@@ -396,7 +378,6 @@ function FanCard({
     };
   });
 
-  // Pastel fallback colors per type (shown while image loads)
   const fallbackBg =
     card.type === 'coaching' ? '#F0EDE6' :
     card.type === 'mealPlan' ? '#EDE8E0' :
@@ -404,7 +385,6 @@ function FanCard({
 
   return (
     <Animated.View style={[styles.card, animatedStyle]}>
-      {/* Background image or pastel fallback */}
       {imageUrl ? (
         <Image
           source={{ uri: imageUrl }}
@@ -417,14 +397,12 @@ function FanCard({
         <View style={[StyleSheet.absoluteFill, { backgroundColor: fallbackBg }]} />
       )}
 
-      {/* Bottom gradient for text readability */}
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0.75)']}
         locations={[0.4, 0.65, 1]}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Content pinned to bottom */}
       <View style={styles.cardContent}>
         <View style={[styles.iconPill, { backgroundColor: card.accent }]}>
           {card.isLoading ? (
@@ -447,23 +425,8 @@ function FanCard({
 }
 
 const styles = StyleSheet.create({
-  outerContainer: {
-    width: '100%',
+  glassWrapper: {
     marginBottom: 16,
-    borderRadius: 28,
-    overflow: 'hidden',
-  },
-  glassCard: {
-    borderRadius: 28,
-    overflow: 'hidden',
-  },
-  glassInner: {
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    paddingTop: 24,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 26,
@@ -495,7 +458,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    borderRadius: 24,
+    borderRadius: 20,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
@@ -510,15 +473,15 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 22,
-    paddingTop: 16,
-    gap: 14,
+    paddingHorizontal: 16,
+    paddingBottom: 18,
+    paddingTop: 14,
+    gap: 12,
   },
   iconPill: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -526,13 +489,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: Fonts.bold,
     color: '#fff',
-    marginBottom: 3,
+    marginBottom: 2,
   },
   cardSubtitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: Fonts.regular,
     color: 'rgba(255,255,255,0.75)',
   },
