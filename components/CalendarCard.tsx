@@ -191,8 +191,6 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
                     isSelected ? {
                       backgroundColor: isDark ? '#FFFFFF' : '#000000',
                       opacity: 1,
-                      borderWidth: 3,
-                      borderColor: isDark ? '#000000' : '#FFFFFF'
                     } : item.isFuture ? {
                       backgroundColor: dayItemBg,
                       opacity: 0.3

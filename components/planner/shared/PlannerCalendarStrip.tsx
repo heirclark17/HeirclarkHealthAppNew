@@ -237,8 +237,6 @@ export function PlannerCalendarStrip({
                   isSelected ? {
                     backgroundColor: isDark ? '#FFFFFF' : '#000000',
                     opacity: 1,
-                    borderWidth: 3,
-                    borderColor: isDark ? '#000000' : '#FFFFFF'
                   } : {
                     backgroundColor: dayItemBg,
                     opacity: opacity
