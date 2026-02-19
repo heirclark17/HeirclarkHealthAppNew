@@ -1019,7 +1019,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <Icon name="hand-point-left" size={24} color={colors.text} />
+              <Icon name="hand-pointer" size={24} color={colors.text} />
             </GlassCard>
           </TouchableOpacity>
 
@@ -1031,7 +1031,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             accessibilityHint="Saves nutrition preferences and proceeds to next step"
           >
             <GlassCard style={styles.continueButton} interactive>
-              <Icon name="hand-point-right" size={24} color={colors.primary} />
+              <Icon name="hand-pointer" size={24} color={colors.primary} />
             </GlassCard>
           </TouchableOpacity>
         </View>

@@ -218,7 +218,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
               style={styles.continueButton}
               interactive
             >
-              <Icon name="hand-point-right" size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} />
+              <Icon name="hand-pointer" size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} />
             </GlassCard>
           </TouchableOpacity>
         </View>
