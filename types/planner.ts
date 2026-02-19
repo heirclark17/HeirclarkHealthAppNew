@@ -61,6 +61,15 @@ export type EnergyPeak = 'morning' | 'afternoon' | 'evening';
 
 export type Flexibility = 'very' | 'somewhat' | 'not_very';
 
+export type PlannerLoadingPhase =
+  | 'idle'                  // Not loading
+  | 'syncing_calendar'      // Step 1: Syncing device calendar events
+  | 'fetching_data'         // Step 2: Fetching meals and workouts
+  | 'analyzing_schedule'    // Step 3: AI analyzing calendar for open windows
+  | 'placing_meals'         // Step 4: AI placing meals into optimal slots
+  | 'placing_workouts'      // Step 5: AI placing workouts into remaining slots
+  | 'ready';                // Step 6: Timeline ready to render
+
 export interface DailyTimeline {
   date: string;               // "2026-02-16"
   dayOfWeek?: string;          // "Sunday"

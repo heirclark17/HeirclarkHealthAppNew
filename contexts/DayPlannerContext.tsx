@@ -58,6 +58,7 @@ import {
   CompletionPatterns,
   RecoveryContext,
   LifeContext,
+  PlannerLoadingPhase,
   PLANNER_CONSTANTS,
 } from '../types/planner';
 
@@ -92,6 +93,7 @@ interface DayPlannerState {
   completionPatterns: CompletionPatterns;
 
   // Loading states
+  loadingPhase: PlannerLoadingPhase;
   isGeneratingPlan: boolean;
   isSyncingCalendar: boolean;
   isSyncingMeals: boolean;
@@ -207,6 +209,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     lastCalendarSync: null,
     aiOptimization: null,
     completionPatterns: {},
+    loadingPhase: 'idle',
     isGeneratingPlan: false,
     isSyncingCalendar: false,
     isSyncingMeals: false,
@@ -665,7 +668,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setState((prev) => ({ ...prev, isGeneratingPlan: true, error: null }));
+    setState((prev) => ({ ...prev, isGeneratingPlan: true, error: null, loadingPhase: 'fetching_data' }));
 
     try {
       // Tier 1: Fetch recovery context before generating
@@ -690,10 +693,18 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       const oldWeeklyPlan = stateRef.current.weeklyPlan;
 
       // Generate 7 daily timelines with AI
+      setState((prev) => ({ ...prev, loadingPhase: 'analyzing_schedule' }));
       const days: DailyTimeline[] = [];
       for (let i = 0; i < 7; i++) {
         const date = new Date(sunday);
         date.setDate(sunday.getDate() + i);
+
+        // Update loading phase during generation
+        if (i === 0) {
+          setState((prev) => ({ ...prev, loadingPhase: 'placing_meals' }));
+        } else if (i === 2) {
+          setState((prev) => ({ ...prev, loadingPhase: 'placing_workouts' }));
+        }
 
         const timeline = await generateDailyTimeline(date, currentPrefs);
 
@@ -741,6 +752,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         ...prev,
         weeklyPlan,
         isGeneratingPlan: false,
+        loadingPhase: 'ready',
       }));
 
       console.log('[Planner] Weekly plan generated with', days.reduce((s, d) => s + d.blocks.length, 0), 'total blocks');
@@ -750,6 +762,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         ...prev,
         error: error.message || 'Failed to generate plan',
         isGeneratingPlan: false,
+        loadingPhase: 'idle',
       }));
     }
   }, [getWorkoutBlocksForDay, getMealBlocksForDay]);
@@ -1008,7 +1021,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    setState((prev) => ({ ...prev, isSyncingCalendar: true }));
+    setState((prev) => ({ ...prev, isSyncingCalendar: true, loadingPhase: 'syncing_calendar' }));
 
     try {
       // Get all calendars
@@ -1055,6 +1068,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         deviceCalendarEvents: events,
         lastCalendarSync: new Date().toISOString(),
         isSyncingCalendar: false,
+        loadingPhase: 'idle',
       }));
 
       // Persist to AsyncStorage for cache-first pattern
@@ -1072,6 +1086,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       setState((prev) => ({
         ...prev,
         isSyncingCalendar: false,
+        loadingPhase: 'idle',
         error: error.message,
       }));
       Alert.alert('Sync Failed', 'Could not sync calendar events. Please try again.');
