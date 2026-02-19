@@ -24,6 +24,7 @@ import {
   Coffee,
   Cookie,
   Salad,
+  BarChart3,
 } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -536,21 +537,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         </Pressable>
 
         <View style={styles.secondaryButtonRow}>
-          <Pressable
-            onPress={handleViewDashboard}
-            testID="view-dashboard-button"
-            accessibilityRole="button"
-            accessibilityLabel="View dashboard"
-            style={{ flex: 1 }}
-          >
-            <GlassCard style={styles.secondaryButtonCard} interactive>
-              <View style={styles.secondaryButton}>
-                <Heart size={20} color={colors.text} />
-                <Text style={[styles.secondaryButtonText, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>DASHBOARD</Text>
-              </View>
-            </GlassCard>
-          </Pressable>
-
           {onAdjust && (
             <Pressable
               onPress={handleAdjust}
@@ -567,6 +553,21 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               </GlassCard>
             </Pressable>
           )}
+
+          <Pressable
+            onPress={handleViewDashboard}
+            testID="view-dashboard-button"
+            accessibilityRole="button"
+            accessibilityLabel="View dashboard"
+            style={{ flex: 1 }}
+          >
+            <GlassCard style={styles.secondaryButtonCard} interactive>
+              <View style={styles.secondaryButton}>
+                <BarChart3 size={20} color={colors.text} />
+                <Text style={[styles.secondaryButtonText, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>DASHBOARD</Text>
+              </View>
+            </GlassCard>
+          </Pressable>
         </View>
       </View>
     </ScrollView>
