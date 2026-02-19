@@ -44,7 +44,7 @@ interface AnimatedNumberProps {
 function AnimatedNumber({ value, duration = 1200, delay = 0, suffix = '', style }: AnimatedNumberProps) {
   return (
     <NumberText weight="light" style={style}>
-      {value.toLocaleString()}{suffix}
+      {Math.round(value)}{suffix}
     </NumberText>
   );
 }
