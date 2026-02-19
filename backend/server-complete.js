@@ -3027,15 +3027,15 @@ app.get('/api/v1/food-photo', async (req, res) => {
 // ============================================
 
 const CARD_IMAGE_PROMPTS = {
-  coaching: 'Soft pastel aesthetic photo of a serene wellness scene, a person meditating in warm morning light, soft pink lavender and mint green tones, dreamy bokeh background, gentle diffused lighting, calm and inviting mood, portrait orientation, no text no words no letters',
-  mealPlan: 'Soft pastel aesthetic overhead photo of a beautiful healthy meal, fresh colorful salad bowl with avocado salmon quinoa and edible flowers, soft peach pink and sage green tones, marble surface, gentle natural lighting, portrait orientation, no text no words no letters',
-  trainingPlan: 'Soft pastel aesthetic photo of minimal gym equipment, light pink dumbbells and yoga mat on clean white floor, soft lavender and blush tones, airy bright space with natural light streaming in, calm motivating mood, portrait orientation, no text no words no letters',
+  coaching: 'Soft pastel aesthetic photo of a sunrise over calm water with gentle fog, warm amber and soft teal tones, golden hour light reflecting on still lake, serene peaceful atmosphere, no people, portrait orientation, no text no words no letters',
+  mealPlan: 'Soft pastel aesthetic overhead photo of a beautiful healthy meal, fresh colorful grain bowl with avocado greens cherry tomatoes and seeds, warm earth tones sage green and soft amber, wooden table surface, gentle natural lighting, portrait orientation, no text no words no letters',
+  trainingPlan: 'Soft pastel aesthetic photo of modern gym equipment on concrete floor, matte black iron dumbbells and kettlebell, soft warm neutral tones with amber and cool gray, clean minimal industrial space with morning light, no people, portrait orientation, no text no words no letters',
 };
 
 const CARD_IMAGE_KEYS = {
-  coaching: 'card_coaching_v3',
-  mealPlan: 'card_mealplan_v3',
-  trainingPlan: 'card_trainingplan_v3',
+  coaching: 'card_coaching_v4',
+  mealPlan: 'card_mealplan_v4',
+  trainingPlan: 'card_trainingplan_v4',
 };
 
 app.get('/api/v1/card-image', async (req, res) => {

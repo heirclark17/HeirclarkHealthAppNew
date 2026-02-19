@@ -382,9 +382,9 @@ function FanCard({
 
   // Pastel fallback colors per type (shown while image loads)
   const fallbackBg =
-    card.type === 'coaching' ? '#E8F5F3' :
-    card.type === 'mealPlan' ? '#FFF0EC' :
-    '#EDF4FF';
+    card.type === 'coaching' ? '#F0EDE6' :
+    card.type === 'mealPlan' ? '#EDE8E0' :
+    '#E8EAED';
 
   return (
     <Animated.View style={[styles.card, animatedStyle]}>
