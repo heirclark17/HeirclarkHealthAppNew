@@ -243,10 +243,6 @@ function FanGoalCard({
         )}
       </View>
 
-      {/* Selected border glow */}
-      {isSelected && (
-        <View style={[styles.cardSelectedBorder, { borderColor: option.color + '70' }]} />
-      )}
     </Animated.View>
   );
 }
@@ -561,12 +557,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     color: 'rgba(255,255,255,0.4)',
     letterSpacing: 0.5,
-  },
-  cardSelectedBorder: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 24,
-    borderWidth: 2.5,
-    pointerEvents: 'none',
   },
   dotsContainer: {
     flexDirection: 'row',
