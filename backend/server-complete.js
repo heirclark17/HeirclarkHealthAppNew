@@ -3057,44 +3057,64 @@ app.post('/api/v1/ai/recipe-details-batch', authenticateToken, async (req, res) 
       messages: [
         {
           role: 'system',
-          content: `You are a professional chef providing detailed recipes for an entire week of meals. Return JSON with:
+          content: `You are a professional chef. Return JSON with ${meals.length} recipes:
           {
             "recipes": [
               {
-                "ingredients": [{"name": "ingredient", "amount": "1", "unit": "cup", "category": "Produce"}],
-                "instructions": ["Step 1", "Step 2"],
-                "prepTime": 15,
-                "cookTime": 30
+                "ingredients": [{"name": "chicken breast", "amount": "2", "unit": "pieces", "category": "Protein"}],
+                "instructions": ["Step 1", "Step 2", "Step 3"],
+                "prepTime": 10,
+                "cookTime": 20
               }
             ]
           }
 
-          CRITICAL REQUIREMENTS:
-          - Return recipes array with EXACTLY ${meals.length} recipe objects (one per meal)
-          - Each recipe MUST have ingredients array with objects containing: name, amount, unit, category
-          - category must be one of: Produce, Protein, Dairy, Grains, Pantry, Spices, Other
-          - amount should be a string (e.g., "1", "2.5", "1/4")
-          - instructions array must be array of strings
-          - prepTime and cookTime must be numbers (minutes)
-          - Match the provided calorie and macro targets
+          REQUIREMENTS:
+          - EXACTLY ${meals.length} recipe objects
+          - ingredients: name, amount, unit, category (Produce/Protein/Dairy/Grains/Pantry/Spices/Other)
+          - 3-5 clear instruction steps
+          - prepTime and cookTime as numbers (minutes)
 
-          BUDGET GUIDANCE: ${budgetGuidance}`
+          ${budgetGuidance}`
         },
         {
           role: 'user',
-          content: `Provide detailed recipes with ingredients for these ${meals.length} meals:\n\n${mealList}`
+          content: `Generate recipes for:\n\n${mealList}`
         }
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.5,
-      max_tokens: 16000, // Increased to 16K for 21 recipes (GPT-4.1-mini max output: 16,385)
+      temperature: 0.3,
+      max_tokens: 12000, // Reduced from 16K to avoid truncation (safe margin for 7 recipes)
     });
 
-    const result = JSON.parse(completion.choices[0].message.content);
+    const rawContent = completion.choices[0].message.content;
 
-    if (!result.recipes || result.recipes.length !== meals.length) {
-      console.error('[Batch Recipe Details] AI returned wrong number of recipes:', result.recipes?.length, 'expected:', meals.length);
+    // Log raw response for debugging
+    if (!rawContent || rawContent.length < 50) {
+      console.error('[Batch Recipe Details] AI returned empty or very short response:', rawContent);
+      return res.status(500).json({ error: 'AI returned empty response' });
+    }
+
+    let result;
+    try {
+      result = JSON.parse(rawContent);
+    } catch (parseError) {
+      console.error('[Batch Recipe Details] JSON parse failed. Raw response length:', rawContent.length);
+      console.error('[Batch Recipe Details] First 500 chars:', rawContent.substring(0, 500));
+      console.error('[Batch Recipe Details] Last 500 chars:', rawContent.substring(rawContent.length - 500));
+      return res.status(500).json({ error: 'AI returned malformed JSON' });
+    }
+
+    // Allow partial success if we got at least 80% of recipes (e.g., 6 out of 7)
+    const minRequired = Math.ceil(meals.length * 0.8);
+    if (!result.recipes || result.recipes.length < minRequired) {
+      console.error('[Batch Recipe Details] AI returned insufficient recipes:', result.recipes?.length, 'expected:', meals.length, 'minimum:', minRequired);
       return res.status(500).json({ error: 'AI returned incomplete recipe data' });
+    }
+
+    // If we got fewer than expected but still acceptable, log warning
+    if (result.recipes.length !== meals.length) {
+      console.warn(`[Batch Recipe Details] ⚠️ Got ${result.recipes.length}/${meals.length} recipes (acceptable)`);
     }
 
     const totalIngredients = result.recipes.reduce((sum, recipe) => sum + (recipe.ingredients?.length || 0), 0);
