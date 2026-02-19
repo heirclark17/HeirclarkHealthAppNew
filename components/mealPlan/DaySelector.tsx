@@ -8,7 +8,6 @@ import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
 import { DayPlan } from '../../types/mealPlan';
-import { generateMealTheme } from '../../services/openaiService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -24,56 +23,8 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState<any[]>([]);
-  const [mealThemes, setMealThemes] = useState<Record<number, string>>({});
-  const lastThemeKeyRef = useRef<string>('');
-
   // Get cheat days from preferences
   const cheatDays = foodPrefsContext?.preferences?.cheatDays || [];
-
-  // Stable key based on actual meal content - only changes when meals truly change
-  const mealContentKey = useMemo(() => {
-    if (!weeklyPlan || weeklyPlan.length === 0) return '';
-    return weeklyPlan.map(day =>
-      `${day.dayNumber}:${(day.meals || []).map(m => m.name).join(',')}`
-    ).join('|');
-  }, [weeklyPlan]);
-
-  // Generate AI meal themes for each day - only when meal content actually changes
-  useEffect(() => {
-    if (!mealContentKey || mealContentKey === lastThemeKeyRef.current) return;
-    lastThemeKeyRef.current = mealContentKey;
-
-    const generateThemes = async () => {
-      const themes: Record<number, string> = {};
-
-      for (const day of weeklyPlan) {
-        if (day.meals && day.meals.length > 0) {
-          try {
-            const theme = await generateMealTheme({
-              meals: day.meals.map(m => ({
-                name: m.name,
-                mealType: m.mealType,
-                calories: m.calories,
-                protein: m.protein,
-              })),
-              totalCalories: day.dailyTotals.calories,
-              totalProtein: day.dailyTotals.protein,
-            });
-
-            if (theme) {
-              themes[day.dayNumber] = theme;
-            }
-          } catch (error) {
-            console.error('[DaySelector] Error generating theme for day', day.dayNumber, error);
-          }
-        }
-      }
-
-      setMealThemes(themes);
-    };
-
-    generateThemes();
-  }, [mealContentKey]);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
@@ -204,24 +155,16 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
     return cheatDays.includes(fullDayName);
   };
 
-  // Get meal summary for a day
-  const getMealSummary = (day: DayPlan, isCheat: boolean): string => {
-    // Show special commentary for cheat days
-    if (isCheat) return 'Enjoy!';
-
-    if (!day.meals || day.meals.length === 0) return '';
-
-    const mealCount = day.meals.length;
-    const calories = Math.round(day.dailyTotals?.calories || 0);
-    const theme = mealThemes[day.dayNumber];
-
-    // If we have an AI theme, show that with calories
-    if (theme) {
-      return `${theme} • ${calories} cal`;
-    }
-
-    // Otherwise, show meal count with calories
-    return `${mealCount} meal${mealCount > 1 ? 's' : ''} • ${calories} cal`;
+  // Get macro summary for a day (calories + P/C/F)
+  const getDayMacros = (day: DayPlan, isCheat: boolean): { calories: number; protein: number; carbs: number; fat: number } | null => {
+    if (isCheat) return null;
+    if (!day.meals || day.meals.length === 0) return null;
+    return {
+      calories: Math.round(day.dailyTotals?.calories || 0),
+      protein: Math.round(day.dailyTotals?.protein || 0),
+      carbs: Math.round(day.dailyTotals?.carbs || 0),
+      fat: Math.round(day.dailyTotals?.fat || 0),
+    };
   };
 
   if (!weeklyPlan || weeklyPlan.length === 0) {
@@ -327,24 +270,33 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     >
                       {getDayNumber(day.date)}
                     </NumberText>
-                    {/* Meal summary - each part on its own line, wrapping if needed */}
-                    {getMealSummary(day, isCheat) && (
-                      <>
-                        {getMealSummary(day, isCheat).split(' • ').map((part, index) => (
-                          <Text
-                            key={index}
-                            style={[
-                              styles.mealSummary,
-                              { color: colors.textMuted },
-                              isCheat && !isSelected && { color: cheatDayColor },
-                              isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
-                            ]}
-                          >
-                            {part}
+                    {/* Calories + macros */}
+                    {(() => {
+                      const macros = getDayMacros(day, isCheat);
+                      if (isCheat) return (
+                        <Text style={[
+                          styles.mealSummary,
+                          { color: colors.textMuted },
+                          { color: cheatDayColor },
+                          isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
+                        ]}>Enjoy!</Text>
+                      );
+                      if (!macros) return null;
+                      const summaryColor = isSelected
+                        ? (isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)')
+                        : colors.textMuted;
+                      return (
+                        <>
+                          <NumberText weight="semiBold" style={[styles.caloriesSummary, { color: summaryColor }]}>
+                            {macros.calories}
+                          </NumberText>
+                          <Text style={[styles.mealSummary, { color: summaryColor }]}>cal</Text>
+                          <Text style={[styles.macroSummary, { color: summaryColor }]}>
+                            P {macros.protein} · C {macros.carbs} · F {macros.fat}
                           </Text>
-                        ))}
-                      </>
-                    )}
+                        </>
+                      );
+                    })()}
                   </View>
                 </TouchableOpacity>
               </View>
@@ -539,15 +491,29 @@ const styles = StyleSheet.create({
     color: Colors.text,
     // Font family handled by NumberText component (SF Pro Rounded)
   },
-  mealSummary: {
-    fontSize: 9,
-    fontFamily: Fonts.medium,
+  caloriesSummary: {
+    fontSize: 14,
     marginTop: 6,
+    textAlign: 'center',
+  },
+  mealSummary: {
+    fontSize: 8,
+    fontFamily: Fonts.medium,
+    marginTop: 1,
     textAlign: 'center',
     letterSpacing: 0.2,
     opacity: 0.9,
-    lineHeight: 12,
+    lineHeight: 10,
     paddingHorizontal: 2,
+  },
+  macroSummary: {
+    fontSize: 7,
+    fontFamily: Fonts.medium,
+    marginTop: 4,
+    textAlign: 'center',
+    letterSpacing: 0.2,
+    opacity: 0.7,
+    lineHeight: 9,
   },
   cheatDayItem: {
     // Border removed per user request
