@@ -487,6 +487,8 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     color: '#fff',
     marginBottom: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
   },
   cardSubtitle: {
     fontSize: 12,
