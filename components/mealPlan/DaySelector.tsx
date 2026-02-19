@@ -218,20 +218,18 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
     return null;
   }
 
-  // Reverse the weekly plan so latest day is on the right
-  const reversedPlan = useMemo(() => [...weeklyPlan].reverse(), [weeklyPlan]);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Auto-scroll to the end (latest day) after mount
   useEffect(() => {
-    if (reversedPlan.length > 0 && scrollViewRef.current) {
+    if (weeklyPlan.length > 0 && scrollViewRef.current) {
       setTimeout(() => {
         const dayWidth = 76; // 64px width + 12px gap
-        const maxScroll = reversedPlan.length * dayWidth;
+        const maxScroll = weeklyPlan.length * dayWidth;
         scrollViewRef.current?.scrollTo({ x: maxScroll, y: 0, animated: false });
       }, 100);
     }
-  }, [reversedPlan.length]);
+  }, [weeklyPlan.length]);
 
   return (
     <>
@@ -247,10 +245,8 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
           decelerationRate="fast"
           accessibilityRole="tablist"
         >
-          {reversedPlan.map((day, reverseIndex) => {
-            // Map back to original index for selection
-            const originalIndex = weeklyPlan.length - 1 - reverseIndex;
-            const isSelected = originalIndex === selectedDayIndex;
+          {weeklyPlan.map((day, index) => {
+            const isSelected = index === selectedDayIndex;
             const shortDayName = getShortDayName(day.dayName, day.date);
             const isCheat = isCheatDay(day.dayName, day.date);
             const accessibilityLabel = `${shortDayName} ${getDayNumber(day.date)}${isSelected ? ', Selected' : ''}${isCheat ? ', Cheat Day' : ''}`;
@@ -267,7 +263,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                       { backgroundColor: isCheat ? cheatDayColor : colors.primary }
                     ],
                   ]}
-                  onPress={() => onSelectDay(originalIndex)}
+                  onPress={() => onSelectDay(index)}
                   accessible={true}
                   accessibilityLabel={accessibilityLabel}
                   accessibilityRole="tab"
