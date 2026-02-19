@@ -915,6 +915,7 @@ const styles = StyleSheet.create({
   },
   weekHeaderSection: {
     paddingHorizontal: 16,
+    marginTop: -8,
     marginBottom: 0,
   },
   weekHeaderTop: {
