@@ -673,8 +673,8 @@ const styles = StyleSheet.create({
   },
   allDayChipText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.semiBold,
+    fontWeight: '600' as const,
     paddingHorizontal: 6,
     paddingVertical: 6,
     maxWidth: 160,
