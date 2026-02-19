@@ -1696,109 +1696,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   // Load cached plan (local first, then backend fallback)
   const loadCachedPlan = useCallback(async () => {
     try {
-      // FIRST: Check for active custom workout (highest priority)
-      try {
-        const customWorkouts = await api.getCustomWorkouts();
-        const activeCustom = customWorkouts?.find((w: any) => w.is_active);
-
-        if (activeCustom) {
-          console.log('[Training] ✅ Loading active custom workout:', activeCustom.name);
-
-          // Convert custom workout structure to weeklyPlan format
-          // Custom workouts use day-based structure, need to convert to weekly format
-          const dayNames: Array<'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'> =
-            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-          const customStartDate = new Date();
-          const dayOfWeekNum = customStartDate.getDay();
-          const daysToMonday = dayOfWeekNum === 0 ? 6 : dayOfWeekNum - 1;
-          customStartDate.setDate(customStartDate.getDate() - daysToMonday);
-          customStartDate.setHours(0, 0, 0, 0);
-          const customEndDate = new Date(customStartDate);
-          customEndDate.setDate(customStartDate.getDate() + 6);
-
-          // Create 7 days, mapping custom workout days and filling remaining with rest
-          const customDays = activeCustom.workout_structure.days;
-          const weeklyPlanDays = dayNames.map((dayName, index) => {
-            const dayDate = new Date(customStartDate);
-            dayDate.setDate(customStartDate.getDate() + index);
-            const dateStr = dayDate.toISOString().split('T')[0];
-            const customDay = index < customDays.length ? customDays[index] : null;
-
-            return {
-              id: `custom-day-${activeCustom.id}-${index}`,
-              dayOfWeek: dayName,
-              dayNumber: index + 1,
-              date: dateStr,
-              isRestDay: !customDay || customDay.exercises.length === 0,
-              completed: false,
-              calendarDate: dateStr,
-              weekNumber: 1,
-              workout: customDay && customDay.exercises.length > 0 ? {
-                id: `custom-${activeCustom.id}-day-${index}`,
-                name: customDay.dayName || `Day ${index + 1}`,
-                type: 'strength' as const,
-                duration: 45,
-                estimatedCaloriesBurned: 0,
-                muscleGroupsFocused: [],
-                difficulty: 'intermediate' as const,
-                exercises: customDay.exercises.map((exercise: any) => ({
-                  id: `${activeCustom.id}-${exercise.id}-${index}`,
-                  exerciseId: exercise.id,
-                  exercise: {
-                    id: exercise.id,
-                    name: exercise.name,
-                    category: 'compound' as const,
-                    muscleGroups: [],
-                    equipment: exercise.equipment || 'bodyweight',
-                    difficulty: 'intermediate' as const,
-                    caloriesPerMinute: 8,
-                    bodyPart: exercise.bodyPart || exercise.target || 'general',
-                    target: exercise.target || exercise.bodyPart || 'general',
-                    gifUrl: exercise.gifUrl,
-                  },
-                  sets: exercise.sets || 3,
-                  reps: exercise.reps || '8-12',
-                  restSeconds: parseInt(exercise.rest) || 60,
-                  completed: false,
-                })),
-                completed: false,
-              } : null,
-            };
-          });
-
-          const weeklyPlan: WeeklyTrainingPlan = {
-            id: `custom-plan-${activeCustom.id}`,
-            weekNumber: 1,
-            startDate: customStartDate.toISOString().split('T')[0],
-            endDate: customEndDate.toISOString().split('T')[0],
-            days: weeklyPlanDays,
-            completedWorkouts: 0,
-            totalWorkouts: customDays.filter((d: any) => d.exercises && d.exercises.length > 0).length,
-            totalCaloriesBurned: 0,
-            focusAreas: [],
-          };
-
-          setState(prev => ({
-            ...prev,
-            weeklyPlan,
-            selectedProgram: {
-              id: `custom-${activeCustom.id}`,
-              name: activeCustom.name,
-              description: activeCustom.description || 'Custom Workout',
-            } as ProgramTemplate,
-            currentWeek: 1,
-            lastGeneratedAt: activeCustom.updated_at,
-          }));
-
-          console.log('[Training] ✅ Custom workout loaded as active plan');
-          return; // Exit early - custom workout takes priority
-        }
-      } catch (customError) {
-        console.log('[Training] Custom workout check failed (non-critical):', customError);
-        // Continue to AI plan fallback
-      }
-
-      // SECOND: Try local storage (AI-generated plan)
+      // FIRST: Try local storage (AI-generated plan)
       const cached = await trainingStorage.loadPlanCache();
       if (cached) {
         console.log('[Training] ✅ Loaded plan from local cache');
@@ -1830,7 +1728,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // THIRD: Try backend (AI-generated plan)
+      // SECOND: Try backend (AI-generated plan)
       console.log('[Training] 🔄 No local cache, checking backend...');
       const backendPlan = await api.getWorkoutPlan();
       if (backendPlan && backendPlan.planData) {

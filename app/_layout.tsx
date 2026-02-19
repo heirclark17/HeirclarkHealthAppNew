@@ -13,7 +13,7 @@ import {
   Urbanist_600SemiBold,
   Urbanist_700Bold,
 } from '@expo-google-fonts/urbanist';
-import { GoalWizardProvider, MealPlanProvider, TrainingProvider, CustomWorkoutProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
+import { GoalWizardProvider, MealPlanProvider, TrainingProvider, SettingsProvider, FastingTimerProvider, WorkoutTrackingProvider, AdaptiveTDEEProvider, SmartMealLoggerProvider, CalorieBankingProvider, AccountabilityPartnerProvider, ProgressPredictionProvider, WorkoutFormCoachProvider, HabitFormationProvider, RestaurantMenuProvider, SleepRecoveryProvider, HydrationProvider, FoodPreferencesProvider } from '../contexts';
 import { CardioRecommendationProvider } from '../contexts/CardioRecommendationContext';
 import { DayPlannerProvider } from '../contexts/DayPlannerContext';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
@@ -141,41 +141,39 @@ export default function RootLayout() {
               <GoalWizardProvider>
                 <MealPlanProvider>
                   <TrainingProvider>
-                    <CustomWorkoutProvider>
-                      <FastingTimerProvider>
-                        <WorkoutTrackingProvider>
-                          <CalorieBankingProvider>
-                          <RestaurantMenuProvider>
-                            <FoodPreferencesProvider>
-                              <AccountabilityPartnerProvider>
-                                <ProgressPredictionProvider>
-                                  <WorkoutFormCoachProvider>
-                                    <SleepRecoveryProvider>
-                                      <HydrationProvider>
-                                        <HabitFormationProvider>
-                                          <AdaptiveTDEEProvider>
-                                            <CardioRecommendationProvider>
-                                              <DayPlannerProvider>
-                                                <SmartMealLoggerProvider>
-                                                  <BackgroundLayer>
-                                                    <Slot />
-                                                  </BackgroundLayer>
-                                                </SmartMealLoggerProvider>
-                                              </DayPlannerProvider>
-                                            </CardioRecommendationProvider>
-                                          </AdaptiveTDEEProvider>
-                                        </HabitFormationProvider>
-                                      </HydrationProvider>
-                                    </SleepRecoveryProvider>
-                                  </WorkoutFormCoachProvider>
-                                </ProgressPredictionProvider>
-                              </AccountabilityPartnerProvider>
-                            </FoodPreferencesProvider>
-                          </RestaurantMenuProvider>
-                          </CalorieBankingProvider>
-                        </WorkoutTrackingProvider>
-                      </FastingTimerProvider>
-                    </CustomWorkoutProvider>
+                    <FastingTimerProvider>
+                      <WorkoutTrackingProvider>
+                        <CalorieBankingProvider>
+                        <RestaurantMenuProvider>
+                          <FoodPreferencesProvider>
+                            <AccountabilityPartnerProvider>
+                              <ProgressPredictionProvider>
+                                <WorkoutFormCoachProvider>
+                                  <SleepRecoveryProvider>
+                                    <HydrationProvider>
+                                      <HabitFormationProvider>
+                                        <AdaptiveTDEEProvider>
+                                          <CardioRecommendationProvider>
+                                            <DayPlannerProvider>
+                                              <SmartMealLoggerProvider>
+                                                <BackgroundLayer>
+                                                  <Slot />
+                                                </BackgroundLayer>
+                                              </SmartMealLoggerProvider>
+                                            </DayPlannerProvider>
+                                          </CardioRecommendationProvider>
+                                        </AdaptiveTDEEProvider>
+                                      </HabitFormationProvider>
+                                    </HydrationProvider>
+                                  </SleepRecoveryProvider>
+                                </WorkoutFormCoachProvider>
+                              </ProgressPredictionProvider>
+                            </AccountabilityPartnerProvider>
+                          </FoodPreferencesProvider>
+                        </RestaurantMenuProvider>
+                        </CalorieBankingProvider>
+                      </WorkoutTrackingProvider>
+                    </FastingTimerProvider>
                   </TrainingProvider>
                 </MealPlanProvider>
               </GoalWizardProvider>

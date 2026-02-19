@@ -21,15 +21,6 @@ export {
 } from './TrainingContext';
 
 export {
-  CustomWorkoutProvider,
-  useCustomWorkout,
-  type Exercise,
-  type WorkoutDay,
-  type WorkoutStructure,
-  type CustomWorkout,
-} from './CustomWorkoutContext';
-
-export {
   SettingsProvider,
   useSettings,
   type SettingsState,

@@ -11,7 +11,6 @@ import { GlassCard } from '../../components/GlassCard';
 import { useSettings } from '../../contexts/SettingsContext';
 import { usePostHog } from '../../contexts/PostHogContext';
 import { useTraining } from '../../contexts/TrainingContext';
-import { useCustomWorkout } from '../../contexts/CustomWorkoutContext';
 import { useSafeGoalWizard } from '../../hooks/useSafeGoalWizard';
 import {
   LoadingState,
@@ -74,16 +73,6 @@ export default function ProgramsScreen() {
     hideExerciseAlternatives,
     getPlanSummary,
   } = useTraining();
-
-  // Custom workout context
-  const {
-    state: customWorkoutState,
-    startNewWorkout,
-    editWorkout,
-    deleteWorkout,
-    activateWorkout,
-    loadCustomWorkouts,
-  } = useCustomWorkout();
 
   const {
     weeklyPlan,
@@ -224,14 +213,13 @@ export default function ProgramsScreen() {
       if (!isGenerating) {
         loadCachedPlan();
       }
-      loadCustomWorkouts();
 
       // Track screen view
       capture('screen_viewed', {
         screen_name: 'Programs',
         screen_type: 'tab',
       });
-    }, [loadCachedPlan, loadCustomWorkouts, isGenerating])
+    }, [loadCachedPlan, isGenerating])
   );
 
   // Handle quick generate (template-based) - memoized
@@ -402,53 +390,6 @@ export default function ProgramsScreen() {
     setShowProgramModal(true);
   }, []);
 
-  // Custom workout handlers
-  const handleCreateCustomWorkout = useCallback(() => {
-    lightImpact();
-    startNewWorkout();
-    router.push('/custom-workout-builder');
-  }, [router, startNewWorkout]);
-
-  const handleEditCustomWorkout = useCallback((workout: any) => {
-    lightImpact();
-    editWorkout(workout);
-    router.push('/custom-workout-builder');
-  }, [router, editWorkout]);
-
-  const handleActivateCustomWorkout = useCallback(async (workoutId: string) => {
-    mediumImpact();
-    const success = await activateWorkout(workoutId);
-    if (success) {
-      Alert.alert('Workout Activated', 'This custom workout is now your active training plan.');
-      await loadCustomWorkouts(); // Refresh list
-    } else {
-      Alert.alert('Activation Failed', customWorkoutState.error || 'Failed to activate workout.');
-    }
-  }, [activateWorkout, loadCustomWorkouts, customWorkoutState.error]);
-
-  const handleDeleteCustomWorkout = useCallback(async (workoutId: string, workoutName: string) => {
-    Alert.alert(
-      'Delete Workout?',
-      `Are you sure you want to delete "${workoutName}"? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            mediumImpact();
-            const success = await deleteWorkout(workoutId);
-            if (success) {
-              await loadCustomWorkouts(); // Refresh list
-            } else {
-              Alert.alert('Delete Failed', customWorkoutState.error || 'Failed to delete workout.');
-            }
-          },
-        },
-      ]
-    );
-  }, [deleteWorkout, loadCustomWorkouts, customWorkoutState.error]);
-
   const handleCloseProgramModal = useCallback(() => {
     setShowProgramModal(false);
   }, []);
@@ -613,85 +554,6 @@ export default function ProgramsScreen() {
             )}
           </View>
         )}
-
-        {/* Custom Workouts Section */}
-        {customWorkoutState.customWorkouts.length > 0 && (
-          <View style={styles.customWorkoutsSection}>
-            <Text style={[styles.customSectionTitle, { color: colors.text }]}>My Custom Workouts</Text>
-            {customWorkoutState.customWorkouts.map((workout) => (
-              <GlassCard key={workout.id} style={styles.customWorkoutCard}>
-                <View style={styles.customWorkoutHeader}>
-                  <View style={styles.customWorkoutInfo}>
-                    <Text style={[styles.customWorkoutName, { color: colors.text }]}>
-                      {workout.name}
-                      {workout.is_active && (
-                        <Text style={[styles.activeLabel, { color: colors.accentCyan }]}> (Active)</Text>
-                      )}
-                    </Text>
-                    {workout.description && (
-                      <Text style={[styles.customWorkoutDescription, { color: colors.textSecondary }]} numberOfLines={2}>
-                        {workout.description}
-                      </Text>
-                    )}
-                    <Text style={[styles.customWorkoutMeta, { color: colors.textMuted }]}>
-                      {workout.workout_structure.days.length} {workout.workout_structure.days.length === 1 ? 'day' : 'days'} • Created {new Date(workout.created_at).toLocaleDateString()}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.customWorkoutActions}>
-                  {!workout.is_active && (
-                    <TouchableOpacity
-                      onPress={() => handleActivateCustomWorkout(workout.id)}
-                      style={[styles.customWorkoutButton, { backgroundColor: colors.accentCyan + '20', borderColor: colors.accentCyan + '40' }]}
-                      activeOpacity={0.7}
-                    >
-                      <Check size={16} color={colors.accentCyan} />
-                      <Text style={[styles.customWorkoutButtonText, { color: colors.accentCyan }]}>Activate</Text>
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity
-                    onPress={() => handleEditCustomWorkout(workout)}
-                    style={[styles.customWorkoutButton, { backgroundColor: colors.textSecondary + '20', borderColor: colors.textSecondary + '40' }]}
-                    activeOpacity={0.7}
-                  >
-                    <Edit3 size={16} color={colors.textSecondary} />
-                    <Text style={[styles.customWorkoutButtonText, { color: colors.textSecondary }]}>Edit</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteCustomWorkout(workout.id, workout.name)}
-                    style={[styles.customWorkoutButton, { backgroundColor: colors.errorStrong + '20', borderColor: colors.errorStrong + '40' }]}
-                    activeOpacity={0.7}
-                  >
-                    <Trash2 size={16} color={colors.errorStrong} />
-                    <Text style={[styles.customWorkoutButtonText, { color: colors.errorStrong }]}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              </GlassCard>
-            ))}
-          </View>
-        )}
-
-        {/* Create Custom Workout Button */}
-        <TouchableOpacity
-          onPress={handleCreateCustomWorkout}
-          activeOpacity={0.7}
-          style={styles.createCustomButtonWrapper}
-        >
-          <GlassCard style={styles.createCustomButton} interactive>
-            <View style={styles.createCustomButtonInner}>
-              <View style={[styles.createCustomIcon, { backgroundColor: colors.accentCyan + '20' }]}>
-                <Plus size={24} color={colors.accentCyan} strokeWidth={2} />
-              </View>
-              <View style={styles.createCustomTextContainer}>
-                <Text style={[styles.createCustomButtonTitle, { color: colors.text }]}>Create Custom Workout</Text>
-                <Text style={[styles.createCustomButtonSubtitle, { color: colors.textSecondary }]}>
-                  Build your own plan from exercise library
-                </Text>
-              </View>
-              <ChevronRight size={20} color={colors.textMuted} />
-            </View>
-          </GlassCard>
-        </TouchableOpacity>
 
         {/* Bottom spacing for sticky buttons */}
         <View style={{ height: weeklyPlan ? 180 : 100 }} />
@@ -1194,92 +1056,6 @@ const styles = StyleSheet.create({
   },
   modalScrollContent: {
     paddingHorizontal: 16,
-  },
-  // Custom Workouts Styles
-  customWorkoutsSection: {
-    marginTop: Spacing.lg,
-    marginHorizontal: Spacing.md,
-  },
-  customSectionTitle: {
-    fontSize: 20,
-    fontFamily: Fonts.semiBold,
-    marginBottom: Spacing.md,
-  },
-  customWorkoutCard: {
-    marginBottom: Spacing.md,
-  },
-  customWorkoutHeader: {
-    marginBottom: Spacing.md,
-  },
-  customWorkoutInfo: {
-    gap: Spacing.xs,
-  },
-  customWorkoutName: {
-    fontSize: 18,
-    fontFamily: Fonts.semiBold,
-  },
-  activeLabel: {
-    fontSize: 16,
-    fontFamily: Fonts.medium,
-  },
-  customWorkoutDescription: {
-    fontSize: 14,
-    fontFamily: Fonts.regular,
-    lineHeight: 20,
-  },
-  customWorkoutMeta: {
-    fontSize: 12,
-    fontFamily: Fonts.regular,
-  },
-  customWorkoutActions: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    flexWrap: 'wrap',
-  },
-  customWorkoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  customWorkoutButtonText: {
-    fontSize: 14,
-    fontFamily: Fonts.medium,
-  },
-  createCustomButtonWrapper: {
-    marginHorizontal: Spacing.md,
-    marginTop: Spacing.md,
-    marginBottom: Spacing.lg,
-  },
-  createCustomButton: {
-    // No additional styles needed - GlassCard handles padding
-  },
-  createCustomButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  createCustomIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  createCustomTextContainer: {
-    flex: 1,
-    gap: 2,
-  },
-  createCustomButtonTitle: {
-    fontSize: 16,
-    fontFamily: Fonts.semiBold,
-  },
-  createCustomButtonSubtitle: {
-    fontSize: 14,
-    fontFamily: Fonts.regular,
   },
   selectProgramButton: {
     flexDirection: 'row',
