@@ -481,7 +481,15 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         preferences,
       }));
 
-      console.log('[Planner] Onboarding completed');
+      console.log('[Planner] Onboarding completed – auto-generating weekly plan');
+
+      // Auto-generate the weekly plan so users immediately see their schedule
+      // Small delay to let the state update render first
+      setTimeout(() => {
+        generateWeeklyPlan().catch((err: any) =>
+          console.warn('[Planner] Auto-generation after onboarding failed:', err)
+        );
+      }, 500);
     } catch (error: any) {
       console.error('[Planner] Onboarding save error:', error);
       setState((prev) => ({ ...prev, error: error.message }));
@@ -1202,6 +1210,104 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       timeline = result.timeline;
     }
 
+    // =====================================================================
+    // SAFETY NET: Ensure ALL input meals appear in the final timeline.
+    // Both the AI scheduler and V2 engine can silently drop meals
+    // (AI omits from response, V2 can't find a slot in the flex window).
+    // This guarantees every meal is present even if at a non-ideal time.
+    // =====================================================================
+    const mealBlocksInTimeline = timeline.blocks.filter(
+      (b) => b.type === 'meal_eating'
+    );
+    const missingMeals = mealBlocks.filter((inputMeal) => {
+      // Match by title substring (e.g., "Breakfast:" should match any breakfast block)
+      const inputTitle = inputMeal.title.toLowerCase();
+      return !mealBlocksInTimeline.some((tb) => {
+        const tbTitle = tb.title.toLowerCase();
+        // Match by meal type keyword
+        if (inputTitle.includes('breakfast') && tbTitle.includes('breakfast')) return true;
+        if (inputTitle.includes('lunch') && tbTitle.includes('lunch')) return true;
+        if (inputTitle.includes('dinner') && tbTitle.includes('dinner')) return true;
+        // Exact title match as fallback
+        return tbTitle === inputTitle || tbTitle.includes(inputTitle) || inputTitle.includes(tbTitle);
+      });
+    });
+
+    if (missingMeals.length > 0) {
+      console.warn(`[Planner] ⚠️ SAFETY NET: ${missingMeals.length} meals were dropped by scheduling engine for ${dateStr}`);
+      missingMeals.forEach((m) => console.warn(`  - Missing: ${m.title}`));
+
+      // Determine waking hours for last-resort placement
+      const wakeMinutes = (() => {
+        const [h, m] = preferences.wakeTime.split(':').map(Number);
+        return h * 60 + m;
+      })();
+      const sleepMinutes = (() => {
+        const [h, m] = preferences.sleepTime.split(':').map(Number);
+        return h * 60 + m;
+      })();
+
+      // Place missing meals at reasonable default times within waking hours
+      const defaultMealTimes: Record<string, number> = {
+        breakfast: wakeMinutes + 30,
+        lunch: Math.round((wakeMinutes + sleepMinutes) / 2),
+        dinner: sleepMinutes - 90,
+      };
+
+      for (const missingMeal of missingMeals) {
+        const titleLower = missingMeal.title.toLowerCase();
+        let targetMinutes: number;
+
+        if (titleLower.includes('breakfast')) {
+          targetMinutes = defaultMealTimes.breakfast;
+        } else if (titleLower.includes('lunch')) {
+          targetMinutes = defaultMealTimes.lunch;
+        } else if (titleLower.includes('dinner')) {
+          targetMinutes = defaultMealTimes.dinner;
+        } else {
+          // Snack or unknown - place in the middle of the day
+          targetMinutes = defaultMealTimes.lunch + 60;
+        }
+
+        // Apply eating window constraint if fasting
+        if (isFasting && !isCheatDay) {
+          const ewStart = (() => {
+            const [h, m] = (lifeContext.fastingEnd || '12:00').split(':').map(Number);
+            return h * 60 + m;
+          })();
+          const ewEnd = (() => {
+            const [h, m] = (lifeContext.fastingStart || '20:00').split(':').map(Number);
+            return h * 60 + m;
+          })();
+          targetMinutes = Math.max(targetMinutes, ewStart);
+          targetMinutes = Math.min(targetMinutes, ewEnd - missingMeal.duration);
+        }
+
+        const startHour = Math.floor(targetMinutes / 60);
+        const startMin = targetMinutes % 60;
+        const endMinutes = targetMinutes + (missingMeal.duration || 30);
+        const endHour = Math.floor(endMinutes / 60);
+        const endMin = endMinutes % 60;
+
+        const startTime = `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
+        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+
+        const recoveredBlock: TimeBlock = {
+          ...missingMeal,
+          id: `meal_recovered_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          startTime,
+          endTime,
+          duration: missingMeal.duration || 30,
+        };
+
+        timeline.blocks.push(recoveredBlock);
+        console.log(`[Planner] ✅ SAFETY NET: Recovered "${missingMeal.title}" at ${startTime}-${endTime}`);
+      }
+
+      // Re-sort blocks by start time after adding recovered meals
+      timeline.blocks.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    }
+
     // Mark day as OOO if any all-day block is an out-of-office event
     const hasOOO = timeline.blocks.some((b) => b.isAllDay && b.isOOO);
     if (hasOOO) {
@@ -1745,6 +1851,47 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         const timedMeals = result.timeline.blocks.filter(
           b => b.type === 'meal_eating' || b.type === 'meal_prep'
         );
+
+        // 5b. SAFETY NET: Recover any meals that the V2 engine dropped
+        const missingMeals = freshMealBlocks.filter((inputMeal) => {
+          const inputTitle = inputMeal.title.toLowerCase();
+          return !timedMeals.some((tb) => {
+            const tbTitle = tb.title.toLowerCase();
+            if (inputTitle.includes('breakfast') && tbTitle.includes('breakfast')) return true;
+            if (inputTitle.includes('lunch') && tbTitle.includes('lunch')) return true;
+            if (inputTitle.includes('dinner') && tbTitle.includes('dinner')) return true;
+            return tbTitle === inputTitle || tbTitle.includes(inputTitle) || inputTitle.includes(tbTitle);
+          });
+        });
+
+        if (missingMeals.length > 0) {
+          console.warn(`[resyncMeals] ⚠️ SAFETY NET: ${missingMeals.length} meals dropped for ${day.date}`);
+          const wakeMin = (() => { const [h, m] = currentPrefs.wakeTime.split(':').map(Number); return h * 60 + m; })();
+          const sleepMin = (() => { const [h, m] = currentPrefs.sleepTime.split(':').map(Number); return h * 60 + m; })();
+          const defaults: Record<string, number> = { breakfast: wakeMin + 30, lunch: Math.round((wakeMin + sleepMin) / 2), dinner: sleepMin - 90 };
+
+          for (const mm of missingMeals) {
+            const tl = mm.title.toLowerCase();
+            let tgt = tl.includes('breakfast') ? defaults.breakfast : tl.includes('lunch') ? defaults.lunch : tl.includes('dinner') ? defaults.dinner : defaults.lunch + 60;
+            if (isFasting && !isCheatDay) {
+              const ewS = (() => { const [h, m] = (request.lifeContext.fastingEnd || '12:00').split(':').map(Number); return h * 60 + m; })();
+              const ewE = (() => { const [h, m] = (request.lifeContext.fastingStart || '20:00').split(':').map(Number); return h * 60 + m; })();
+              tgt = Math.max(tgt, ewS);
+              tgt = Math.min(tgt, ewE - (mm.duration || 30));
+            }
+            const sH = Math.floor(tgt / 60), sM = tgt % 60;
+            const eM = tgt + (mm.duration || 30);
+            const eH = Math.floor(eM / 60), eMi = eM % 60;
+            timedMeals.push({
+              ...mm,
+              id: `meal_recovered_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+              startTime: `${String(sH).padStart(2, '0')}:${String(sM).padStart(2, '0')}`,
+              endTime: `${String(eH).padStart(2, '0')}:${String(eMi).padStart(2, '0')}`,
+              duration: mm.duration || 30,
+            });
+            console.log(`[resyncMeals] ✅ Recovered "${mm.title}" for ${day.date}`);
+          }
+        }
 
         // 6. Merge: preserved blocks + newly-timed meals, sorted by time
         const mergedBlocks = [...preservedBlocks, ...timedMeals]

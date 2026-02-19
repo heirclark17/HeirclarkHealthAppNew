@@ -118,40 +118,69 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       ...(block.notes && { notes: block.notes }),
     }));
 
-    // VALIDATION: Filter out meals outside eating window if fasting active
+    // VALIDATION: Fix meals outside eating window if fasting active
+    // Instead of just removing them, reschedule within the eating window
     if (request.lifeContext?.isFasting && !request.lifeContext?.isCheatDay) {
       const fastingEnd = request.lifeContext.fastingEnd;
       const fastingStart = request.lifeContext.fastingStart;
 
-      const timeToMinutes = (time: string) => {
+      const timeToMin = (time: string) => {
         const [hours, minutes] = time.split(':').map(Number);
         return hours * 60 + minutes;
       };
 
-      const eatingWindowStart = timeToMinutes(fastingEnd);
-      const eatingWindowEnd = timeToMinutes(fastingStart);
+      const minToTime = (minutes: number) => {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      };
 
-      const originalCount = blocks.length;
-      blocks = blocks.filter(block => {
-        if (block.type !== 'meal_eating') return true; // Keep non-meal blocks
+      const eatingWindowStart = timeToMin(fastingEnd);
+      const eatingWindowEnd = timeToMin(fastingStart);
 
-        const blockStart = timeToMinutes(block.startTime);
-        const blockEnd = timeToMinutes(block.endTime);
+      blocks = blocks.map(block => {
+        if (block.type !== 'meal_eating') return block;
+
+        const blockStart = timeToMin(block.startTime);
+        const blockEnd = timeToMin(block.endTime);
+        const duration = block.duration || (blockEnd - blockStart);
 
         const isValid = blockStart >= eatingWindowStart && blockEnd <= eatingWindowEnd;
 
         if (!isValid) {
           const blockTime = `${to12Hour(block.startTime)}-${to12Hour(block.endTime)}`;
           const windowTime = `${to12Hour(fastingEnd)}-${to12Hour(fastingStart)}`;
-          console.warn(`[AI Scheduler] ❌ REMOVED meal outside eating window: ${block.title} at ${blockTime} (window: ${windowTime})`);
+          console.warn(`[AI Scheduler] ⚠️ RESCHEDULING meal outside eating window: ${block.title} at ${blockTime} (window: ${windowTime})`);
+
+          // Reschedule within eating window based on meal type
+          const title = block.title.toLowerCase();
+          let newStart: number;
+          if (title.includes('breakfast')) {
+            newStart = eatingWindowStart; // First meal at window open
+          } else if (title.includes('lunch')) {
+            newStart = Math.round((eatingWindowStart + eatingWindowEnd) / 2) - Math.round(duration / 2); // Middle
+          } else if (title.includes('dinner')) {
+            newStart = eatingWindowEnd - duration - 15; // Near window close
+          } else {
+            newStart = eatingWindowStart + 60; // Snack shortly after window opens
+          }
+
+          // Clamp to eating window
+          newStart = Math.max(newStart, eatingWindowStart);
+          newStart = Math.min(newStart, eatingWindowEnd - duration);
+
+          console.log(`[AI Scheduler] ✅ Rescheduled "${block.title}" to ${to12Hour(minToTime(newStart))}-${to12Hour(minToTime(newStart + duration))}`);
+
+          return {
+            ...block,
+            startTime: minToTime(newStart),
+            endTime: minToTime(newStart + duration),
+            duration,
+          };
         }
 
-        return isValid;
+        return block;
       });
-
-      if (blocks.length < originalCount) {
-        console.warn(`[AI Scheduler] Filtered out ${originalCount - blocks.length} meals outside eating window`);
-      }
     }
 
     // VALIDATION: Detect conflicts between blocks
@@ -195,6 +224,69 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       console.error('[AI Scheduler] 🚨 CONFLICTS DETECTED:');
       conflicts.forEach(conflict => console.error(`  ${conflict}`));
       console.error('[AI Scheduler] ⚠️  AI generated conflicting blocks - this should not happen!');
+    }
+
+    // VERIFICATION: Ensure AI included all input meals in its response
+    const aiMealBlocks = blocks.filter(b => b.type === 'meal_eating');
+    const inputMealTypes = request.mealBlocks.map(m => {
+      const t = m.title.toLowerCase();
+      if (t.includes('breakfast')) return 'breakfast';
+      if (t.includes('lunch')) return 'lunch';
+      if (t.includes('dinner')) return 'dinner';
+      return 'snack';
+    });
+
+    for (const inputMeal of request.mealBlocks) {
+      const inputTitle = inputMeal.title.toLowerCase();
+      const found = aiMealBlocks.some(ab => {
+        const abTitle = ab.title.toLowerCase();
+        if (inputTitle.includes('breakfast') && abTitle.includes('breakfast')) return true;
+        if (inputTitle.includes('lunch') && abTitle.includes('lunch')) return true;
+        if (inputTitle.includes('dinner') && abTitle.includes('dinner')) return true;
+        return abTitle === inputTitle || abTitle.includes(inputTitle) || inputTitle.includes(abTitle);
+      });
+
+      if (!found) {
+        console.warn(`[AI Scheduler] ⚠️ AI OMITTED meal: "${inputMeal.title}" – adding it back`);
+        // Add the missing meal with a reasonable time
+        const duration = inputMeal.duration || 30;
+        const wakeMin = timeToMinutes(request.preferences.wakeTime);
+        const sleepMin = timeToMinutes(request.preferences.sleepTime);
+        let targetMin: number;
+
+        if (inputTitle.includes('breakfast')) targetMin = wakeMin + 30;
+        else if (inputTitle.includes('lunch')) targetMin = Math.round((wakeMin + sleepMin) / 2);
+        else if (inputTitle.includes('dinner')) targetMin = sleepMin - 90;
+        else targetMin = Math.round((wakeMin + sleepMin) / 2) + 60;
+
+        // Apply eating window constraint if fasting
+        if (request.lifeContext?.isFasting && !request.lifeContext?.isCheatDay) {
+          const ewStart = timeToMinutes(request.lifeContext.fastingEnd);
+          const ewEnd = timeToMinutes(request.lifeContext.fastingStart);
+          targetMin = Math.max(targetMin, ewStart);
+          targetMin = Math.min(targetMin, ewEnd - duration);
+        }
+
+        const minToTime = (m: number) => {
+          const h = Math.floor(m / 60), mi = m % 60;
+          return `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`;
+        };
+
+        blocks.push({
+          id: `ai-recovered-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          type: 'meal_eating' as any,
+          title: inputMeal.title,
+          startTime: minToTime(targetMin),
+          endTime: minToTime(targetMin + duration),
+          duration,
+          status: 'scheduled' as any,
+          color: getDefaultColor('meal_eating'),
+          icon: getDefaultIcon('meal_eating'),
+          priority: 3,
+          flexibility: 0.5,
+          aiGenerated: true,
+        });
+      }
     }
 
     // MERGE: Add calendar blocks to final timeline
