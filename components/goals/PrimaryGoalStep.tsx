@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textSecondary,
     lineHeight: 19,
     textAlign: 'center',
