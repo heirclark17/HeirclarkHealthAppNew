@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target } from 'lucide-react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target, Hand } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -218,7 +217,9 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
               style={styles.continueButton}
               interactive
             >
-              <Icon name="hand-pointer" size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} />
+              <View style={{ transform: [{ rotate: '90deg' }] }}>
+                <Hand size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
         </View>

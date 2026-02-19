@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Ruler } from 'lucide-react-native';
+import { Ruler, Hand } from 'lucide-react-native';
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard, WeightUnit, HeightUnit } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -885,7 +884,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <Icon name="hand-pointer" size={24} color={colors.text} />
+              <View style={{ transform: [{ rotate: '-90deg' }] }}>
+                <Hand size={24} color={colors.text} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
 
@@ -899,7 +900,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             accessibilityHint="Proceeds to the next step if all fields are filled"
           >
             <GlassCard style={styles.continueButton} interactive>
-              <Icon name="hand-pointer" size={24} color={isValid() ? colors.primary : colors.textMuted} />
+              <View style={{ transform: [{ rotate: '90deg' }] }}>
+                <Hand size={24} color={isValid() ? colors.primary : colors.textMuted} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
         </View>

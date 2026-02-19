@@ -21,9 +21,9 @@ import {
   Moon,
   Footprints,
   Flame,
-  Salad
+  Salad,
+  Hand
 } from 'lucide-react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
@@ -1019,7 +1019,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <Icon name="hand-pointer" size={24} color={colors.text} />
+              <View style={{ transform: [{ rotate: '-90deg' }] }}>
+                <Hand size={24} color={colors.text} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
 
@@ -1031,7 +1033,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             accessibilityHint="Saves nutrition preferences and proceeds to next step"
           >
             <GlassCard style={styles.continueButton} interactive>
-              <Icon name="hand-pointer" size={24} color={colors.primary} />
+              <View style={{ transform: [{ rotate: '90deg' }] }}>
+                <Hand size={24} color={colors.primary} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
         </View>

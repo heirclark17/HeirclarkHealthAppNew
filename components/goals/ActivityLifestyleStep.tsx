@@ -20,9 +20,9 @@ import {
   Building2,
   Weight,
   TrendingUp,
-  HeartPulse
+  HeartPulse,
+  Hand
 } from 'lucide-react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard, CardioPreference, FitnessLevel, StrengthLevel } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -989,7 +989,9 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <Icon name="hand-pointer" size={24} color={colors.text} />
+              <View style={{ transform: [{ rotate: '-90deg' }] }}>
+                <Hand size={24} color={colors.text} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
 
@@ -1001,7 +1003,9 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
             accessibilityHint="Saves activity preferences and proceeds to next step"
           >
             <GlassCard style={styles.continueButton} interactive>
-              <Icon name="hand-pointer" size={24} color={colors.primary} />
+              <View style={{ transform: [{ rotate: '90deg' }] }}>
+                <Hand size={24} color={colors.primary} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
         </View>
