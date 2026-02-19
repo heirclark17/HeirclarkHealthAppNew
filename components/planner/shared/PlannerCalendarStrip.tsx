@@ -223,7 +223,7 @@ export function PlannerCalendarStrip({
               style={[
                 styles.dayItem,
                 { backgroundColor: dayItemBg, opacity },
-                isSelected && [styles.dayItemActive, { backgroundColor: themeColors.primary, opacity: 1 }],
+                isSelected && [styles.dayItemActive, { backgroundColor: '#000000', opacity: 1 }],
               ]}
               onPress={() => onDateChange(item.dateStr)}
               activeOpacity={0.7}
@@ -232,7 +232,7 @@ export function PlannerCalendarStrip({
                 style={[
                   styles.dayName,
                   { color: dayNameColor },
-                  isSelected && { color: isDark ? 'rgba(0,0,0,0.6)' : '#fff' },
+                  isSelected && { color: '#FFFFFF' },
                 ]}
               >
                 {item.day}
@@ -241,7 +241,7 @@ export function PlannerCalendarStrip({
                 style={[
                   styles.dayNumber,
                   { color: themeColors.text },
-                  isSelected && { color: isDark ? Colors.background : '#fff' },
+                  isSelected && { color: '#FFFFFF' },
                 ]}
               >
                 {item.date}
