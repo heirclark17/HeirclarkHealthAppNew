@@ -157,6 +157,12 @@ export class SchedulingEngineV2 {
           blocks.push(result.block);
           lastMealEndTime = this.timeToMinutes(result.block.endTime);
           console.log('[Scheduling V2] ✅ Breakfast placed:', result.block.startTime);
+
+          // Collect warning even on success (e.g., meal placed far from target)
+          if (result.warning) {
+            warnings.push(result.warning);
+            console.warn('[Scheduling V2] ⚠️', result.warning);
+          }
         } else {
           warnings.push(result.warning || 'Failed to place breakfast');
           console.warn('[Scheduling V2] ⚠️ Breakfast placement failed:', result.warning);
@@ -179,6 +185,12 @@ export class SchedulingEngineV2 {
           blocks.push(result.block);
           lastMealEndTime = this.timeToMinutes(result.block.endTime);
           console.log('[Scheduling V2] ✅ Lunch placed:', result.block.startTime);
+
+          // Collect warning even on success (e.g., meal placed far from target)
+          if (result.warning) {
+            warnings.push(result.warning);
+            console.warn('[Scheduling V2] ⚠️', result.warning);
+          }
         } else {
           warnings.push(result.warning || 'Failed to place lunch');
           console.warn('[Scheduling V2] ⚠️ Lunch placement failed:', result.warning);
@@ -201,6 +213,12 @@ export class SchedulingEngineV2 {
           blocks.push(result.block);
           lastMealEndTime = this.timeToMinutes(result.block.endTime);
           console.log('[Scheduling V2] ✅ Dinner placed:', result.block.startTime);
+
+          // Collect warning even on success (e.g., meal placed far from target)
+          if (result.warning) {
+            warnings.push(result.warning);
+            console.warn('[Scheduling V2] ⚠️', result.warning);
+          }
         } else {
           warnings.push(result.warning || 'Failed to place dinner');
           console.warn('[Scheduling V2] ⚠️ Dinner placement failed:', result.warning);
@@ -490,6 +508,56 @@ export class SchedulingEngineV2 {
       }
     }
 
+    // Priority 3: Try shifting dinner if it's blocking workout placement
+    console.log('[Scheduling V2] 5-7 PM zone blocked, checking if dinner is the blocker...');
+    const dinnerBlockIndex = existingBlocks.findIndex(b => b.title.toLowerCase().includes('dinner'));
+
+    if (dinnerBlockIndex !== -1) {
+      console.log('[Scheduling V2] Dinner found - attempting to shift it for workout placement');
+
+      // Temporarily remove dinner
+      const dinnerBlock = existingBlocks[dinnerBlockIndex];
+      const blocksWithoutDinner = existingBlocks.filter((_, idx) => idx !== dinnerBlockIndex);
+
+      // Try workout placement without dinner blocking
+      for (let time = fivePM; time <= windowEnd; time += 15) {
+        if (this.isSlotAvailable(time, duration, blocksWithoutDinner, 30)) {
+          const workoutEnd = time + duration;
+          const newDinnerStart = workoutEnd + 30; // 30 min buffer
+          const newDinnerEnd = newDinnerStart + 30; // 30 min dinner duration
+
+          // Verify shifted dinner fits within dinner flex window (17:00-22:00)
+          const dinnerFlexStart = this.timeToMinutes(MEAL_CONFIGS.dinner.flexStart);
+          const dinnerFlexEnd = this.timeToMinutes(MEAL_CONFIGS.dinner.flexEnd);
+
+          if (newDinnerStart >= dinnerFlexStart && newDinnerEnd <= dinnerFlexEnd) {
+            // Check if shifted dinner conflicts with other blocks
+            if (this.isSlotAvailable(newDinnerStart, 30, blocksWithoutDinner, 0)) {
+              console.log('[Scheduling V2] ✅ Dinner shifted to:', this.minutesToTime(newDinnerStart));
+              console.log('[Scheduling V2] ✅ Workout placed at:', this.minutesToTime(time));
+
+              // Remove old dinner from existingBlocks and add shifted dinner
+              existingBlocks.splice(dinnerBlockIndex, 1);
+              const shiftedDinner: TimeBlock = {
+                ...dinnerBlock,
+                startTime: this.minutesToTime(newDinnerStart),
+                endTime: this.minutesToTime(newDinnerEnd),
+              };
+              existingBlocks.push(shiftedDinner);
+
+              return {
+                success: true,
+                block: this.createWorkoutBlock(workout, this.minutesToTime(time), duration),
+                warning: `Workout at ${this.minutesToTime(time)} pushed dinner from ${dinnerBlock.startTime} to ${this.minutesToTime(newDinnerStart)}`,
+              };
+            }
+          }
+        }
+      }
+
+      console.warn('[Scheduling V2] ⚠️ Could not shift dinner - new time outside flex window or conflicts');
+    }
+
     // Failed to place within window
     console.error('[Scheduling V2] ❌ No slot in 2-7 PM window for workout');
     return {
@@ -524,11 +592,13 @@ export class SchedulingEngineV2 {
       const gapMidpoint = Math.floor((gap.start + gap.end) / 2);
       const snackStart = gapMidpoint - Math.floor(snackDuration / 2);
 
+      // Check against both existing blocks AND previously placed snacks
+      const allBlocks = [...existingBlocks, ...placed];
+
       // Ensure 30 min gap from adjacent blocks
-      if (this.isSlotAvailable(snackStart, snackDuration, existingBlocks, 30)) {
+      if (this.isSlotAvailable(snackStart, snackDuration, allBlocks, 30)) {
         const block = this.createSnackBlock(snack, this.minutesToTime(snackStart), snackDuration);
         placed.push(block);
-        existingBlocks.push(block); // Add to avoid next snack overlapping
         console.log('[Scheduling V2] ✅ Snack placed at:', this.minutesToTime(snackStart));
       }
     }
