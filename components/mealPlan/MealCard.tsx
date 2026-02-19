@@ -623,7 +623,7 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
                   onPress={handleAddToTodaysMeals}
                   disabled={isAddingToMeals}
                   activeOpacity={0.7}
-                  style={styles.instacartCircleButton}
+                  style={[styles.instacartCircleButton, { borderWidth: 1, borderColor: isDark ? '#64B4FF' : '#3C8CFF' }]}
                   accessibilityLabel={`Add ${meal.name} to today's meals`}
                   accessibilityRole="button"
                 >
@@ -645,7 +645,7 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
                     onPress={handleSaveToSavedMeals}
                     disabled={isSavingMeal}
                     activeOpacity={0.7}
-                    style={styles.instacartCircleButton}
+                    style={[styles.instacartCircleButton, { borderWidth: 1, borderColor: isDark ? '#B482FF' : '#8C5AFF' }]}
                     accessibilityLabel={`Save ${meal.name} to favorites`}
                     accessibilityRole="button"
                   >
@@ -667,7 +667,7 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
                   onPress={handleAddToInstacart}
                   disabled={isAddingToInstacart}
                   activeOpacity={0.7}
-                  style={styles.instacartCircleButton}
+                  style={[styles.instacartCircleButton, { borderWidth: 1, borderColor: isDark ? '#FF8C00' : '#FF9800' }]}
                   accessibilityLabel={`Add ${meal.name} ingredients to Instacart`}
                   accessibilityRole="button"
                 >
@@ -689,7 +689,7 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
                     onPress={handleSwap}
                     disabled={isSwapping}
                     activeOpacity={0.7}
-                    style={styles.instacartCircleButton}
+                    style={[styles.instacartCircleButton, { borderWidth: 1, borderColor: isDark ? '#50C878' : '#3CB464' }]}
                     accessibilityLabel={`Swap ${meal.name} for different meal`}
                     accessibilityRole="button"
                   >
