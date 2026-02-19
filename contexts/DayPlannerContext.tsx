@@ -72,6 +72,40 @@ const STORAGE_KEYS = {
   COMPLETION_PATTERNS: 'hc_planner_completion_patterns',
 };
 
+// Retry configuration
+const RETRY_CONFIG = {
+  MAX_RETRIES: 2,
+  RETRY_DELAY_MS: 1000, // 1 second between retries
+};
+
+/**
+ * Retry helper for transient failures (network errors, temporary API issues)
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries: number = RETRY_CONFIG.MAX_RETRIES,
+  delay: number = RETRY_CONFIG.RETRY_DELAY_MS
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error: any) {
+    // Only retry on transient errors (network, timeout, 5xx)
+    const isTransient =
+      error.message?.includes('network') ||
+      error.message?.includes('timeout') ||
+      error.message?.includes('fetch failed') ||
+      error.status >= 500;
+
+    if (isTransient && retries > 0) {
+      console.log(`[Retry] Attempt failed, retrying in ${delay}ms... (${retries} retries left)`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return withRetry(fn, retries - 1, delay);
+    }
+
+    throw error;
+  }
+}
+
 interface DayPlannerState {
   // Onboarding
   hasCompletedOnboarding: boolean;
@@ -365,14 +399,15 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         sunday.setDate(today.getDate() - today.getDay());
         const weekStart = formatLocalDate(sunday);
 
-        const backendPlan = await api.getWeeklyPlan(weekStart);
+        // Use retry logic for backend fetch (graceful degradation on failure)
+        const backendPlan = await withRetry(() => api.getWeeklyPlan(weekStart));
         if (backendPlan) {
           console.log('[Planner] Backend plan loaded, updating local cache');
           setState((prev) => ({ ...prev, weeklyPlan: backendPlan }));
           await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(backendPlan));
         }
       } catch (err) {
-        console.warn('[Planner] Backend plan fetch failed, using local cache');
+        console.warn('[Planner] Backend plan fetch failed after retries, using local cache');
       }
 
       // Load calendar permission
@@ -758,12 +793,42 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       console.log('[Planner] Weekly plan generated with', days.reduce((s, d) => s + d.blocks.length, 0), 'total blocks');
     } catch (error: any) {
       console.error('[Planner] Generation error:', error);
+
+      // Provide user-friendly error messages based on error type
+      let errorMessage = 'Failed to generate plan';
+      let userMessage = 'An error occurred while generating your plan. Please try again.';
+
+      if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorMessage = 'Network error during plan generation';
+        userMessage = 'Network connection issue. Please check your internet and try again.';
+      } else if (error.message?.includes('OpenAI') || error.message?.includes('API')) {
+        errorMessage = 'AI service temporarily unavailable';
+        userMessage = 'AI scheduling service is temporarily unavailable. Your plan will use smart algorithmic scheduling instead.';
+      } else if (error.message?.includes('permission')) {
+        errorMessage = 'Calendar permission required';
+        userMessage = 'Calendar access is needed. Please enable it in Settings.';
+      }
+
       setState((prev) => ({
         ...prev,
-        error: error.message || 'Failed to generate plan',
+        error: errorMessage,
         isGeneratingPlan: false,
         loadingPhase: 'idle',
       }));
+
+      // Show user-friendly alert (non-blocking)
+      Alert.alert(
+        'Plan Generation Issue',
+        userMessage,
+        [
+          { text: 'OK', style: 'cancel' },
+          {
+            text: 'Retry',
+            onPress: () => generateWeeklyPlan(),
+            style: 'default'
+          }
+        ]
+      );
     }
   }, [getWorkoutBlocksForDay, getMealBlocksForDay]);
 
@@ -1083,13 +1148,41 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error: any) {
       console.error('[Planner] Calendar sync error:', error);
+
+      // Provide specific error messages
+      let errorMessage = 'Calendar sync failed';
+      let userMessage = 'Could not sync calendar events. Please try again.';
+
+      if (error.message?.includes('permission')) {
+        errorMessage = 'Calendar permission denied';
+        userMessage = 'Calendar access was denied. Please enable it in Settings to sync events.';
+      } else if (error.message?.includes('not available') || error.message?.includes('native module')) {
+        errorMessage = 'Calendar not available';
+        userMessage = 'Calendar sync requires a native build. Using planner without calendar integration.';
+      } else if (error.message?.includes('network')) {
+        errorMessage = 'Network error during calendar sync';
+        userMessage = 'Network issue while syncing calendar. You can continue using cached events.';
+      }
+
       setState((prev) => ({
         ...prev,
         isSyncingCalendar: false,
         loadingPhase: 'idle',
-        error: error.message,
+        error: errorMessage,
       }));
-      Alert.alert('Sync Failed', 'Could not sync calendar events. Please try again.');
+
+      Alert.alert(
+        'Calendar Sync Issue',
+        userMessage,
+        [
+          { text: 'OK', style: 'cancel' },
+          {
+            text: 'Retry',
+            onPress: () => syncCalendar(),
+            style: 'default'
+          }
+        ]
+      );
       return false;
     }
   }, []);
