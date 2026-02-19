@@ -1380,9 +1380,9 @@ export default function DashboardScreen() {
       <GlassCard style={{ marginHorizontal: 16, marginBottom: 24 }} interactive>
         {/* Header */}
         <View style={styles.cardHeader}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Salad size={42} color={colors.text} />
-            <Text style={[styles.sectionTitle, { color: colors.text, fontSize: 24, fontFamily: Fonts.numericSemiBold, letterSpacing: 1.5 }]}>TODAY'S MEALS</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text, fontSize: 28, fontFamily: Fonts.numericSemiBold, letterSpacing: 1.5, lineHeight: 42 }]}>TODAY'S MEALS</Text>
           </View>
         </View>
 
