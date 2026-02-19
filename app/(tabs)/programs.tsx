@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    marginTop: 4,
+    marginTop: 0,
     marginBottom: 0,
   },
   weekButton: {

@@ -422,7 +422,7 @@ export function WorkoutCalendarCard({ weeklyPlan, selectedDayIndex, onSelectDay 
 const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   weekHeader: {
     flexDirection: 'row',
