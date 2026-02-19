@@ -317,19 +317,24 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     >
                       {getDayNumber(day.date)}
                     </NumberText>
-                    {/* Meal summary */}
+                    {/* Meal summary - each part on its own line */}
                     {getMealSummary(day, isCheat) && (
-                      <Text
-                        numberOfLines={2}
-                        style={[
-                          styles.mealSummary,
-                          { color: colors.textMuted },
-                          isCheat && !isSelected && { color: cheatDayColor },
-                          isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
-                        ]}
-                      >
-                        {getMealSummary(day, isCheat)}
-                      </Text>
+                      <>
+                        {getMealSummary(day, isCheat).split(' • ').map((part, index) => (
+                          <Text
+                            key={index}
+                            numberOfLines={1}
+                            style={[
+                              styles.mealSummary,
+                              { color: colors.textMuted },
+                              isCheat && !isSelected && { color: cheatDayColor },
+                              isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
+                            ]}
+                          >
+                            {part}
+                          </Text>
+                        ))}
+                      </>
                     )}
                   </View>
                 </TouchableOpacity>
