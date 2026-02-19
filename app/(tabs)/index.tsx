@@ -1999,6 +1999,40 @@ export default function DashboardScreen() {
       <DashboardBottomSheet ref={wearablesSyncSheetRef} title="Wearables Sync" snapPoints={['55%', '80%']}>
         <WearablesSyncContent />
       </DashboardBottomSheet>
+
+      {/* AI Coach FAB */}
+      <View style={styles.dashboardCoachFab}>
+        <GlassCard
+          style={[styles.dashboardCoachFabGlass, { backgroundColor: isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)' }]}
+          interactive
+        >
+          <TouchableOpacity
+            style={styles.dashboardCoachFabInner}
+            onPress={() => setShowCoachingModal(true)}
+            activeOpacity={0.8}
+            accessibilityLabel="AI coach"
+            accessibilityRole="button"
+            accessibilityHint="Opens AI coaching to walk through your dashboard data"
+          >
+            <AnimatedSparkleIcon size={22} color="#a855f7" containerSize={48} icon={LayoutDashboard} />
+          </TouchableOpacity>
+        </GlassCard>
+      </View>
+
+      {/* AI Coach Chat Modal - Dashboard Mode */}
+      <CoachChatModal
+        visible={showCoachingModal}
+        onClose={() => setShowCoachingModal(false)}
+        mode="general"
+        initialMessage={dashboardSummaryMessage}
+        context={{
+          userGoals: {
+            dailyCalories: calorieGoal,
+            dailyProtein: proteinGoal,
+            fitnessGoal: goalType,
+          },
+        }}
+      />
     </View>
     </BottomSheetModalProvider>
   );
@@ -2606,5 +2640,27 @@ const styles = StyleSheet.create({
     color: Colors.text,
     lineHeight: 22,
     marginBottom: 12,
+  },
+  dashboardCoachFab: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    marginTop: -26,
+    zIndex: 100,
+  },
+  dashboardCoachFabGlass: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    overflow: 'hidden',
+    padding: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dashboardCoachFabInner: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
