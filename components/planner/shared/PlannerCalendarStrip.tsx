@@ -241,13 +241,15 @@ export function PlannerCalendarStrip({
                 style={[
                   StyleSheet.absoluteFill,
                   { borderRadius: 12 },
-                  { backgroundColor: dayItemBg, opacity },
                   isSelected ? {
                     backgroundColor: '#000000',
                     opacity: 1,
                     borderWidth: 3,
                     borderColor: '#FFFFFF'
-                  } : {},
+                  } : {
+                    backgroundColor: dayItemBg,
+                    opacity: opacity
+                  },
                 ]}
               />
               {/* Content layer */}

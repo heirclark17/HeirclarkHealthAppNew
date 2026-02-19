@@ -184,9 +184,16 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
                   style={[
                     StyleSheet.absoluteFill,
                     { borderRadius: 12 },
-                    { backgroundColor: dayItemBg },
-                    isSelected ? { backgroundColor: colors.primary } : {},
-                    item.isFuture ? { opacity: 0.3 } : {}
+                    isSelected ? {
+                      backgroundColor: colors.primary,
+                      opacity: 1
+                    } : item.isFuture ? {
+                      backgroundColor: dayItemBg,
+                      opacity: 0.3
+                    } : {
+                      backgroundColor: dayItemBg,
+                      opacity: 1
+                    },
                   ]}
                 />
                 <Text style={[
