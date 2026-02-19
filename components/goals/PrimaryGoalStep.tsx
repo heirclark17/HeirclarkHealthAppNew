@@ -503,10 +503,11 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 30,
-    fontFamily: Fonts.numericBold,
+    fontFamily: Fonts.numericSemiBold,
     color: '#fff',
     marginBottom: 4,
     letterSpacing: 0.3,
+    textTransform: 'uppercase',
   },
   cardSubtitle: {
     fontSize: 15,
