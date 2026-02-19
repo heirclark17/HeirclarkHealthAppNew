@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Ruler } from 'lucide-react-native';
+import { Ruler, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import {
   View,
   Text,
@@ -877,10 +877,23 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       <View style={styles.bottomContainer}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
+            onPress={onBack}
+            activeOpacity={0.7}
+            style={{ flex: 1 }}
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityHint="Returns to previous step"
+          >
+            <GlassCard style={styles.backButton} interactive>
+              <ChevronLeft size={28} color={colors.text} />
+            </GlassCard>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={handleContinue}
             disabled={!isValid()}
             activeOpacity={0.7}
-            style={{ flex: 1 }}
+            style={{ flex: 2 }}
             accessibilityLabel="Continue to next step"
             accessibilityRole="button"
             accessibilityState={{ disabled: !isValid() }}
@@ -893,9 +906,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               ]}
               interactive
             >
-              <Text style={[styles.continueButtonText, { color: isValid() ? colors.primary : colors.textMuted }]}>
-                CONTINUE
-              </Text>
+              <ChevronRight size={28} color={isValid() ? colors.primary : colors.textMuted} />
             </GlassCard>
           </TouchableOpacity>
         </View>

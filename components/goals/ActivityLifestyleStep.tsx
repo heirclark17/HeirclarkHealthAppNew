@@ -20,7 +20,9 @@ import {
   Building2,
   Weight,
   TrendingUp,
-  HeartPulse
+  HeartPulse,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard, CardioPreference, FitnessLevel, StrengthLevel } from '../../contexts/GoalWizardContext';
@@ -981,15 +983,28 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       <View style={styles.bottomContainer}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            onPress={handleContinue}
+            onPress={onBack}
             activeOpacity={0.7}
             style={{ flex: 1 }}
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityHint="Returns to previous step"
+          >
+            <GlassCard style={styles.backButton} interactive>
+              <ChevronLeft size={28} color={colors.text} />
+            </GlassCard>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleContinue}
+            activeOpacity={0.7}
+            style={{ flex: 2 }}
             accessibilityLabel="Continue"
             accessibilityRole="button"
             accessibilityHint="Saves activity preferences and proceeds to next step"
           >
             <GlassCard style={[styles.continueButton, { backgroundColor: primaryGlassBg }]} interactive>
-              <Text style={[styles.continueButtonText, { color: colors.primary }]}>CONTINUE</Text>
+              <ChevronRight size={28} color={colors.primary} />
             </GlassCard>
           </TouchableOpacity>
         </View>

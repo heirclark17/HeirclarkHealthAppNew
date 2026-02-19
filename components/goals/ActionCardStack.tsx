@@ -22,8 +22,8 @@ import { useSettings } from '../../contexts/SettingsContext';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 48;
 const CARD_HEIGHT = Math.round(SCREEN_WIDTH * 0.5);
-const PEEK_HEIGHT = 52;
-const CARD_GAP = 6;
+// Height of the title strip that peeks out for behind cards
+const PEEK_HEIGHT = 50;
 const SWIPE_THRESHOLD = CARD_WIDTH * 0.25;
 
 const API_URL =
@@ -71,10 +71,8 @@ export function ActionCardStack({
     [settings.themeMode],
   );
 
-  // Shared values for pure-worklet animation (fixes race condition bugs 1, 7)
   const currentIndex = useSharedValue(0);
   const translateX = useSharedValue(0);
-  // React state only for dots display (synced via useAnimatedReaction)
   const [displayIndex, setDisplayIndex] = useState(0);
   const [cardImages, setCardImages] = useState<Record<string, string>>({});
 
@@ -141,14 +139,12 @@ export function ActionCardStack({
 
   const totalCards = cards.length;
 
-  // Reset when card count changes (bug 8 fix)
   useEffect(() => {
     currentIndex.value = 0;
     translateX.value = 0;
     setDisplayIndex(0);
   }, [totalCards]);
 
-  // Sync shared value → React state for dots (bug 3 fix)
   useAnimatedReaction(
     () => currentIndex.value,
     (val) => {
@@ -179,7 +175,6 @@ export function ActionCardStack({
     });
   }, [cards]);
 
-  // Tap handler reads currentIndex directly (avoids displayIndex staleness)
   const handleTapFront = useCallback(() => {
     if (totalCards === 0) return;
     const idx = currentIndex.value % totalCards;
@@ -187,7 +182,6 @@ export function ActionCardStack({
     if (card && !card.isLoading) card.onPress();
   }, [cards, totalCards, currentIndex]);
 
-  // Memoized gesture to avoid teardown/re-attach on every render (bug 4 fix)
   const gesture = useMemo(() => {
     const n = totalCards;
     if (n === 0) return Gesture.Tap();
@@ -213,7 +207,6 @@ export function ActionCardStack({
             (finished) => {
               'worklet';
               if (finished) {
-                // Pure worklet update — no JS thread round-trip (bug 1 fix)
                 currentIndex.value = currentIndex.value + 1;
                 translateX.value = 0;
               }
@@ -234,13 +227,13 @@ export function ActionCardStack({
 
   if (totalCards === 0) return null;
 
+  // Container: front card full height + peek strip for each behind card (flush, no gaps)
   const behindCount = Math.max(0, totalCards - 1);
-  const containerHeight = CARD_HEIGHT + behindCount * (PEEK_HEIGHT + CARD_GAP);
+  const containerHeight = CARD_HEIGHT + behindCount * PEEK_HEIGHT;
   const activeIdx = displayIndex % totalCards;
 
   return (
     <View style={styles.container}>
-      {/* Page indicator dots — now track active card (bug 3 fix) */}
       {totalCards > 1 && (
         <View style={styles.dotsContainer}>
           {cards.map((_, i) => (
@@ -258,7 +251,6 @@ export function ActionCardStack({
         </View>
       )}
 
-      {/* Single GestureDetector wraps entire stack (bug 4 fix) */}
       <GestureDetector gesture={gesture}>
         <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
           {cards.map((card, i) => (
@@ -297,7 +289,6 @@ function WalletCard({
   translateX,
   imageUrl,
 }: WalletCardProps) {
-  // All position logic runs in worklet — no stale JS closures (bug 7 fix)
   const animatedStyle = useAnimatedStyle(() => {
     'worklet';
     const ci = currentIndex.value % totalCards;
@@ -311,6 +302,7 @@ function WalletCard({
       Extrapolation.CLAMP,
     );
 
+    // ---- FRONT CARD: full size, swipeable ----
     if (isFront) {
       const rotation = interpolate(
         translateX.value,
@@ -331,11 +323,14 @@ function WalletCard({
       };
     }
 
-    // Apple Wallet peek position for behind cards
-    const restY = CARD_HEIGHT + CARD_GAP + (stackPos - 1) * (PEEK_HEIGHT + CARD_GAP);
+    // ---- BEHIND CARDS: positioned flush below front, showing title peek strip ----
+    // Each behind card sits directly below the previous one
+    // stackPos 1 = first behind card, starts at CARD_HEIGHT
+    // stackPos 2 = second behind card, starts at CARD_HEIGHT + PEEK_HEIGHT
+    const restY = CARD_HEIGHT + (stackPos - 1) * PEEK_HEIGHT;
 
     if (stackPos === 1) {
-      // Next card — rises to front position and expands as drag progresses
+      // Next card: as user drags, this card rises to front position and expands
       const y = restY * (1 - dragProgress);
       const h = PEEK_HEIGHT + (CARD_HEIGHT - PEEK_HEIGHT) * dragProgress;
       return {
@@ -351,8 +346,8 @@ function WalletCard({
       };
     }
 
-    // Further back — shift up one peek slot
-    const prevY = CARD_HEIGHT + CARD_GAP + (stackPos - 2) * (PEEK_HEIGHT + CARD_GAP);
+    // Further behind cards: shift up one slot as drag progresses
+    const prevY = CARD_HEIGHT + (stackPos - 2) * PEEK_HEIGHT;
     const y = restY + (prevY - restY) * dragProgress;
 
     return {
@@ -370,7 +365,6 @@ function WalletCard({
 
   return (
     <Animated.View style={[styles.card, { width: CARD_WIDTH }, animatedStyle]}>
-      {/* Fixed inner container so clipping reveals/hides image area */}
       <View style={styles.cardInner}>
         {/* Background image */}
         {imageUrl ? (
@@ -383,14 +377,14 @@ function WalletCard({
           />
         ) : null}
 
-        {/* Top gradient for title bar readability */}
+        {/* Top gradient for title readability */}
         <LinearGradient
           colors={['rgba(0,0,0,0.7)', 'rgba(0,0,0,0.25)', 'transparent']}
           locations={[0, 0.35, 0.65]}
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Fallback gradient when no image loaded yet */}
+        {/* Fallback gradient when no image */}
         {!imageUrl && (
           <LinearGradient
             colors={[card.iconBg + '55', card.iconBg + '18']}
@@ -398,7 +392,7 @@ function WalletCard({
           />
         )}
 
-        {/* Title bar at TOP — always visible in peek and full modes */}
+        {/* Title bar at TOP — visible as peek strip for behind cards */}
         <View style={styles.titleBar}>
           <View style={[styles.iconCircle, { backgroundColor: card.iconBg }]}>
             {card.isLoading ? (
@@ -439,12 +433,16 @@ const styles = StyleSheet.create({
   },
   stackContainer: {
     alignItems: 'center',
+    overflow: 'hidden',
   },
   card: {
     position: 'absolute',
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: '#1a1a2e',
+    // Thin top border to separate peek strips visually
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.15)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

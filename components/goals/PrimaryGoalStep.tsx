@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target } from 'lucide-react-native';
+import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target, ChevronRight } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -221,9 +221,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
               ]}
               interactive
             >
-              <Text style={[styles.continueButtonText, { color: state.primaryGoal ? colors.primary : colors.textMuted }]}>
-                CONTINUE
-              </Text>
+              <ChevronRight size={28} color={state.primaryGoal ? colors.primary : colors.textMuted} />
             </GlassCard>
           </TouchableOpacity>
         </View>
