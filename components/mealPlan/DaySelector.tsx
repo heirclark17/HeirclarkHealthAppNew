@@ -317,13 +317,12 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     >
                       {getDayNumber(day.date)}
                     </NumberText>
-                    {/* Meal summary - each part on its own line */}
+                    {/* Meal summary - each part on its own line, wrapping if needed */}
                     {getMealSummary(day, isCheat) && (
                       <>
                         {getMealSummary(day, isCheat).split(' • ').map((part, index) => (
                           <Text
                             key={index}
-                            numberOfLines={1}
                             style={[
                               styles.mealSummary,
                               { color: colors.textMuted },
