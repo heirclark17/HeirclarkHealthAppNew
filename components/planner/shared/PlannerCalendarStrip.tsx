@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
   },
   dateLabel: {
     fontSize: 16,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
+    fontWeight: '600' as const,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -325,8 +325,8 @@ const styles = StyleSheet.create({
   },
   dayNumber: {
     fontSize: 18,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
+    fontWeight: '600' as const,
   },
   todayDot: {
     width: 4,
