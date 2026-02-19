@@ -590,7 +590,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       <WizardHeader
         currentStep={2}
         totalSteps={6}
-        title="Your Body Metrics"
+        title="📏 Your Body Metrics"
         onBack={onBack}
         isDark={isDark}
       />

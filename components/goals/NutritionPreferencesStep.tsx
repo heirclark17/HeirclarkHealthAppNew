@@ -264,7 +264,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
       <WizardHeader
         currentStep={4}
         totalSteps={6}
-        title="Nutrition Preferences"
+        title="🥗 Nutrition Preferences"
         onBack={onBack}
         isDark={isDark}
       />

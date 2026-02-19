@@ -103,7 +103,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
         <WizardHeader
           currentStep={5}
           totalSteps={6}
-          title="Training Program"
+          title="💪 Training Program"
           onBack={onBack}
           isDark={isDark}
         />

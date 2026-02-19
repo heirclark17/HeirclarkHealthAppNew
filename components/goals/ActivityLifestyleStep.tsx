@@ -534,7 +534,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       <WizardHeader
         currentStep={3}
         totalSteps={6}
-        title="Activity & Lifestyle"
+        title="🏃 Activity & Lifestyle"
         onBack={onBack}
         isDark={isDark}
       />

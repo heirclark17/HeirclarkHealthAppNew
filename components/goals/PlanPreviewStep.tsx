@@ -213,7 +213,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       <WizardHeader
         currentStep={6}
         totalSteps={6}
-        title="Review Your Plan"
+        title="📋 Review Your Plan"
         onBack={onBack}
         isDark={isDark}
       />

@@ -161,7 +161,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
       <WizardHeader
         currentStep={1}
         totalSteps={6}
-        title="What's Your Goal?"
+        title="🎯 What's Your Goal?"
         onBack={handleBack}
         isDark={isDark}
       />
