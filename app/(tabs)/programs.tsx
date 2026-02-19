@@ -1004,7 +1004,8 @@ const styles = StyleSheet.create({
   coachFab: {
     position: 'absolute',
     right: 16,
-    bottom: 160,
+    top: '50%',
+    marginTop: -26,
     zIndex: 10,
   },
   coachFabGlass: {
