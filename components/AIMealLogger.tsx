@@ -1452,7 +1452,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
             <TouchableOpacity onPress={handleClose}>
               <Ionicons name="close" size={28} color={headerIconColor} />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: headerTextColor }]}>Log Meal</Text>
+            <Text style={[styles.headerTitle, { color: headerTextColor }]}>LOG MEAL</Text>
             <View style={{ width: 28 }} />
           </View>
 
@@ -1493,6 +1493,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 1.5,
   },
   scrollView: {
     flex: 1,
