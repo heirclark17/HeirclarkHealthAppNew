@@ -58,13 +58,15 @@ interface AnimatedSparkleIconProps {
   color?: string;
   /** Size of the sparkle particle container (defaults to size + 30) */
   containerSize?: number;
+  /** Custom icon component to render instead of Sparkles */
+  icon?: React.ComponentType<{ size: number; color: string }>;
 }
 
 /**
  * Animated Sparkles icon with floating particle effect.
  * Drop-in replacement for static <Sparkles /> in FAB buttons.
  */
-export function AnimatedSparkleIcon({ size = 22, color = '#a855f7', containerSize }: AnimatedSparkleIconProps) {
+export function AnimatedSparkleIcon({ size = 22, color = '#a855f7', containerSize, icon: IconComponent }: AnimatedSparkleIconProps) {
   const scale = useSharedValue(1);
   const cSize = containerSize || size + 30;
 
@@ -101,7 +103,7 @@ export function AnimatedSparkleIcon({ size = 22, color = '#a855f7', containerSiz
         <SparkleParticle key={i} delay={s.delay} x={s.x} y={s.y} size={s.size} />
       ))}
       <Animated.View style={animatedIcon}>
-        <Sparkles size={size} color={color} />
+        {IconComponent ? <IconComponent size={size} color={color} /> : <Sparkles size={size} color={color} />}
       </Animated.View>
     </View>
   );

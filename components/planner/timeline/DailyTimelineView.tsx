@@ -11,7 +11,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
-import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Sparkles, Moon, UtensilsCrossed } from 'lucide-react-native';
+import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Brain, Moon, UtensilsCrossed } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -547,7 +547,7 @@ export function DailyTimelineView() {
               }}
               activeOpacity={0.8}
             >
-              <AnimatedSparkleIcon size={22} color="#a855f7" containerSize={48} />
+              <AnimatedSparkleIcon size={22} color="#a855f7" containerSize={48} icon={Brain} />
             </TouchableOpacity>
           </GlassCard>
         </View>
