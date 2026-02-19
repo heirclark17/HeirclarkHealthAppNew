@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { Leaf, Settings, Zap, Sparkles, ShoppingCart } from 'lucide-react-native';
+import { Leaf, Settings, Zap, Sparkles, ShoppingCart, UtensilsCrossed } from 'lucide-react-native';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
@@ -419,6 +419,7 @@ export default function MealsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
+          <UtensilsCrossed size={24} color={colors.text} strokeWidth={2} />
           <Text style={[styles.title, { color: colors.text }]}>7-Day Meal Plan</Text>
         </View>
 
@@ -761,6 +762,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 20,
