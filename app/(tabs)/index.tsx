@@ -404,7 +404,7 @@ export default function DashboardScreen() {
           const diastolic = healthData.bloodPressureDiastolic || 0;
 
           setCaloriesOut(totalCaloriesOut);
-          setSteps(totalSteps);
+          setSteps(Math.round(totalSteps));
           setActiveEnergy(totalActiveEnergy);
           setRestingEnergy(totalRestingEnergy);
           setHeartRate(currentHeartRate);
@@ -438,7 +438,7 @@ export default function DashboardScreen() {
         if (metrics) {
           console.log('[Dashboard] Backend metrics received:', metrics);
           setCaloriesOut(metrics.caloriesOut || 0);
-          setSteps(metrics.steps || 0);
+          setSteps(Math.round(metrics.steps || 0));
           setRestingEnergy(metrics.restingEnergy || 0);
           const activeEnergy = (metrics.caloriesOut || 0) - (metrics.restingEnergy || 0);
           setActiveEnergy(activeEnergy);

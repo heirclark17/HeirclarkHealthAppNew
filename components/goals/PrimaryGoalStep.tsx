@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Dimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target, Hand } from 'lucide-react-native';
+import { Check, Target, Hand } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -13,7 +13,9 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { BlurView } from 'expo-blur';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import Constants from 'expo-constants';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -23,65 +25,70 @@ import { WizardHeader } from './WizardHeader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Card dimensions
+const API_URL =
+  Constants.expoConfig?.extra?.apiUrl ||
+  process.env.EXPO_PUBLIC_API_URL ||
+  'https://heirclarkinstacartbackend-production.up.railway.app';
+
+// Card dimensions — slightly taller for image-based cards
 const CARD_WIDTH = SCREEN_WIDTH - 80;
-const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.3);
+const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.4);
 const SWIPE_THRESHOLD = CARD_WIDTH * 0.25;
 
 // Fan spread constants
-const FAN_ROTATION = 5;
-const FAN_OFFSET_X = 14;
-const FAN_OFFSET_Y = 6;
-const BEHIND_SCALE = 0.94;
+const FAN_ROTATION = 6;
+const FAN_OFFSET_X = 18;
+const FAN_OFFSET_Y = 4;
+const BEHIND_SCALE = 0.95;
 
 const GLASS_SPRING = { damping: 18, stiffness: 120, mass: 1 };
 
 interface GoalOption {
   id: PrimaryGoal;
+  imageType: string;
   title: string;
   subtitle: string;
   description: string;
-  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
   color: string;
-  gradient: [string, string];
+  fallbackBg: string;
 }
 
 const GOAL_OPTIONS: GoalOption[] = [
   {
     id: 'lose_weight',
+    imageType: 'goal_lose_weight',
     title: 'Lose Weight',
     subtitle: 'Burn fat, get lean',
     description: 'Calorie deficit focused plan with high protein to preserve muscle while shedding fat',
-    icon: Flame,
     color: '#FF6B6B',
-    gradient: ['#FF6B6B', '#EE5A24'],
+    fallbackBg: '#F8E8E8',
   },
   {
     id: 'build_muscle',
+    imageType: 'goal_build_muscle',
     title: 'Build Muscle',
     subtitle: 'Get stronger',
     description: 'Calorie surplus with optimized protein timing to maximize lean muscle growth',
-    icon: Dumbbell,
     color: '#4ECDC4',
-    gradient: ['#4ECDC4', '#2ECC71'],
+    fallbackBg: '#E4F5F3',
   },
   {
     id: 'maintain',
+    imageType: 'goal_maintain',
     title: 'Maintain',
     subtitle: 'Stay where you are',
     description: 'Balanced macros at maintenance calories to sustain your current physique',
-    icon: ShieldCheck,
     color: '#45B7D1',
-    gradient: ['#45B7D1', '#3498DB'],
+    fallbackBg: '#E3F1F7',
   },
   {
     id: 'improve_health',
+    imageType: 'goal_improve_health',
     title: 'Improve Health',
     subtitle: 'Feel better daily',
     description: 'Nutrient-dense eating focused on energy, sleep quality, and overall wellbeing',
-    icon: Heart,
     color: '#A78BFA',
-    gradient: ['#A78BFA', '#8B5CF6'],
+    fallbackBg: '#EDE8F9',
   },
 ];
 
@@ -94,7 +101,7 @@ interface FanGoalCardProps {
   currentIndex: Animated.SharedValue<number>;
   translateX: Animated.SharedValue<number>;
   isSelected: boolean;
-  isDark: boolean;
+  imageUrl?: string;
 }
 
 function FanGoalCard({
@@ -104,7 +111,7 @@ function FanGoalCard({
   currentIndex,
   translateX,
   isSelected,
-  isDark,
+  imageUrl,
 }: FanGoalCardProps) {
   const animatedStyle = useAnimatedStyle(() => {
     'worklet';
@@ -123,7 +130,7 @@ function FanGoalCard({
       const rotation = interpolate(
         translateX.value,
         [-SCREEN_WIDTH * 0.5, 0, SCREEN_WIDTH * 0.5],
-        [-12, 0, 12],
+        [-15, 0, 15],
         Extrapolation.CLAMP,
       );
       return {
@@ -184,60 +191,61 @@ function FanGoalCard({
     };
   });
 
-  const IconComponent = option.icon;
-
   return (
     <Animated.View style={[styles.card, animatedStyle]}>
-      {/* Card background with gradient feel */}
-      <View style={[styles.cardBackground, { backgroundColor: isDark ? '#1A1A2E' : '#FAFAFA' }]}>
-        {/* Accent color bar at top */}
-        <View style={[styles.cardAccentBar, { backgroundColor: option.color }]} />
+      {/* AI-generated pastel image background */}
+      {imageUrl ? (
+        <Image
+          source={{ uri: imageUrl }}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={400}
+        />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: option.fallbackBg }]} />
+      )}
 
-        {/* Card content */}
-        <View style={styles.cardContent}>
-          {/* Large icon */}
-          <View style={[styles.cardIconCircle, { backgroundColor: option.color + '18' }]}>
-            <IconComponent size={64} color={option.color} strokeWidth={1.5} />
-          </View>
+      {/* Gradient overlay for text legibility */}
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.08)', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.82)']}
+        locations={[0.25, 0.45, 0.7, 1]}
+        style={StyleSheet.absoluteFill}
+      />
 
-          {/* Title */}
-          <Text style={[styles.cardTitle, { color: isDark ? '#FFFFFF' : '#1A1A2E' }]}>
-            {option.title}
-          </Text>
-
-          {/* Subtitle */}
-          <Text style={[styles.cardSubtitle, { color: option.color }]}>
-            {option.subtitle}
-          </Text>
-
-          {/* Description */}
-          <Text style={[styles.cardDescription, { color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)' }]}>
-            {option.description}
-          </Text>
-
-          {/* Selected indicator */}
-          {isSelected && (
-            <View style={[styles.selectedBadge, { backgroundColor: option.color }]}>
-              <Check size={16} color="#fff" strokeWidth={3} />
-              <Text style={styles.selectedText}>Selected</Text>
-            </View>
-          )}
-
-          {/* Tap hint at bottom */}
-          {!isSelected && (
-            <Text style={[styles.tapHint, { color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)' }]}>
-              Tap to select
-            </Text>
-          )}
+      {/* Selected checkmark - top right */}
+      {isSelected && (
+        <View style={[styles.selectedCheck, { backgroundColor: option.color }]}>
+          <Check size={18} color="#fff" strokeWidth={3} />
         </View>
-      </View>
+      )}
 
-      {/* Frosted glass overlay for depth */}
-      <View style={[styles.cardGlassEdge, { borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]} />
+      {/* Bottom text content */}
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>
+          {option.title}
+        </Text>
+        <Text style={[styles.cardSubtitle, { color: option.color }]}>
+          {option.subtitle}
+        </Text>
+        <Text style={styles.cardDescription}>
+          {option.description}
+        </Text>
+
+        {/* Selection state */}
+        {isSelected ? (
+          <View style={[styles.selectedPill, { backgroundColor: option.color }]}>
+            <Check size={14} color="#fff" strokeWidth={3} />
+            <Text style={styles.selectedPillText}>Selected</Text>
+          </View>
+        ) : (
+          <Text style={styles.tapHint}>Tap to select</Text>
+        )}
+      </View>
 
       {/* Selected border glow */}
       {isSelected && (
-        <View style={[styles.cardSelectedBorder, { borderColor: option.color + '60' }]} />
+        <View style={[styles.cardSelectedBorder, { borderColor: option.color + '70' }]} />
       )}
     </Animated.View>
   );
@@ -262,6 +270,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
   const currentIndex = useSharedValue(0);
   const translateX = useSharedValue(0);
   const [displayIndex, setDisplayIndex] = useState(0);
+  const [cardImages, setCardImages] = useState<Record<string, string>>({});
 
   useAnimatedReaction(
     () => currentIndex.value,
@@ -269,6 +278,29 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
       runOnJS(setDisplayIndex)(val);
     },
   );
+
+  // Fetch AI-generated card images from backend
+  useEffect(() => {
+    GOAL_OPTIONS.forEach(async (option) => {
+      if (cardImages[option.imageType]) return;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 45000);
+        const resp = await fetch(`${API_URL}/api/v1/card-image?type=${option.imageType}`, {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.url) {
+            setCardImages((prev) => ({ ...prev, [option.imageType]: data.url }));
+          }
+        }
+      } catch (err) {
+        console.log('[GoalCards] Image fetch error for', option.imageType);
+      }
+    });
+  }, []);
 
   const handleTapFront = useCallback(async () => {
     const idx = currentIndex.value % totalCards;
@@ -364,7 +396,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
                   currentIndex={currentIndex}
                   translateX={translateX}
                   isSelected={state.primaryGoal === option.id}
-                  isDark={isDark}
+                  imageUrl={cardImages[option.imageType]}
                 />
               );
             })}
@@ -459,86 +491,81 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  cardBackground: {
-    flex: 1,
-    borderRadius: 24,
-    overflow: 'hidden',
-  },
-  cardAccentBar: {
-    height: 4,
-    width: '100%',
+    shadowOpacity: 0.25,
+    shadowRadius: 18,
+    elevation: 12,
   },
   cardContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 24,
-  },
-  cardIconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingBottom: 28,
+    paddingTop: 20,
   },
   cardTitle: {
-    fontSize: 28,
-    fontFamily: Fonts.semiBold,
-    textAlign: 'center',
-    marginBottom: 6,
-    letterSpacing: 0.5,
+    fontSize: 30,
+    fontFamily: Fonts.bold,
+    color: '#fff',
+    marginBottom: 4,
+    letterSpacing: 0.3,
   },
   cardSubtitle: {
     fontSize: 15,
-    fontFamily: Fonts.medium,
-    textAlign: 'center',
-    marginBottom: 16,
-    letterSpacing: 0.3,
+    fontFamily: Fonts.semiBold,
+    marginBottom: 10,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   cardDescription: {
     fontSize: 13,
     fontFamily: Fonts.regular,
-    textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 8,
+    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 19,
+    marginBottom: 16,
   },
-  selectedBadge: {
+  selectedCheck: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  selectedPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
     gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    marginTop: 20,
   },
-  selectedText: {
+  selectedPillText: {
     fontSize: 13,
     fontFamily: Fonts.semiBold,
     color: '#fff',
     letterSpacing: 0.5,
   },
   tapHint: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: Fonts.regular,
-    marginTop: 20,
+    color: 'rgba(255,255,255,0.4)',
     letterSpacing: 0.5,
-  },
-  cardGlassEdge: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 24,
-    borderWidth: 1,
-    pointerEvents: 'none',
   },
   cardSelectedBorder: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 24,
-    borderWidth: 2,
+    borderWidth: 2.5,
     pointerEvents: 'none',
   },
   dotsContainer: {

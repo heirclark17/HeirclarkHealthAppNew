@@ -421,7 +421,7 @@ export default function MealsScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Salad size={42} color={colors.text} strokeWidth={2} />
-          <Text style={[styles.title, { color: colors.text }]}>7-Day Meal Plan</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Seven Day Meal Plan</Text>
         </View>
 
         {/* Day Selector (Calendar) - Moved to top when plan exists */}
@@ -768,8 +768,8 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    alignItems: 'flex-end',
+    gap: 8,
     paddingHorizontal: 16,
     paddingTop: 36,
     paddingBottom: 20,
@@ -779,6 +779,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0.5,
+    marginBottom: -2,
   },
   card: {
     marginHorizontal: 16,
