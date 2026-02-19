@@ -1305,7 +1305,6 @@ const styles = StyleSheet.create({
   },
   calorieValue: {
     fontSize: 56,
-    fontWeight: '100',
     color: Colors.text,
   },
   calorieUnit: {
