@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Modal, Platform, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -224,7 +224,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   useEffect(() => {
     if (weeklyPlan.length > 0 && scrollViewRef.current) {
       setTimeout(() => {
-        const dayWidth = 110; // 96px width + 14px gap
+        const dayWidth = 124; // 108px width + 16px gap
         const maxScroll = weeklyPlan.length * dayWidth;
         scrollViewRef.current?.scrollTo({ x: maxScroll, y: 0, animated: false });
       }, 100);
@@ -263,11 +263,11 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                   accessibilityLabel={accessibilityLabel}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: isSelected }}
-                  activeOpacity={0.85}
+                  activeOpacity={0.7}
                 >
                   {/* Frosted glass background with dynamic intensity */}
                   <BlurView
-                    intensity={isSelected ? 100 : 60}
+                    intensity={isSelected ? 100 : 70}
                     tint={isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight'}
                     style={styles.glassBackground}
                   >
@@ -278,10 +278,10 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                         {
                           backgroundColor: isSelected
                             ? (isCheat
-                                ? (isDark ? 'rgba(251, 146, 60, 0.35)' : 'rgba(251, 146, 60, 0.30)')
-                                : (isDark ? 'rgba(94, 169, 221, 0.35)' : 'rgba(94, 169, 221, 0.28)'))
+                                ? (isDark ? 'rgba(251, 146, 60, 0.40)' : 'rgba(251, 146, 60, 0.35)')
+                                : (isDark ? 'rgba(94, 169, 221, 0.38)' : 'rgba(94, 169, 221, 0.32)'))
                             : (isCheat
-                                ? (isDark ? 'rgba(251, 146, 60, 0.08)' : 'rgba(251, 146, 60, 0.06)')
+                                ? (isDark ? 'rgba(251, 146, 60, 0.10)' : 'rgba(251, 146, 60, 0.08)')
                                 : 'transparent')
                         }
                       ]}
@@ -291,7 +291,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     {isCheat && (
                       <View style={styles.cheatBadgeContainer}>
                         <BlurView
-                          intensity={40}
+                          intensity={50}
                           tint={isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight'}
                           style={styles.cheatBadgeGlass}
                         >
@@ -299,15 +299,15 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                             styles.cheatBadge,
                             {
                               backgroundColor: isSelected
-                                ? (isDark ? 'rgba(251, 146, 60, 0.25)' : 'rgba(251, 146, 60, 0.20)')
-                                : (isDark ? 'rgba(251, 146, 60, 0.15)' : 'rgba(251, 146, 60, 0.12)')
+                                ? (isDark ? 'rgba(251, 146, 60, 0.30)' : 'rgba(251, 146, 60, 0.25)')
+                                : (isDark ? 'rgba(251, 146, 60, 0.18)' : 'rgba(251, 146, 60, 0.15)')
                             }
                           ]}>
                             <Ionicons
                               name="pizza"
-                              size={11}
+                              size={12}
                               color={isSelected ? (isDark ? '#fff' : '#fff') : cheatDayColor}
-                              style={{ marginRight: 4 }}
+                              style={{ marginRight: 5 }}
                             />
                             <Text style={[
                               styles.cheatBadgeText,
@@ -326,11 +326,11 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                         styles.dayName,
                         {
                           color: isSelected
-                            ? (isDark ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.90)')
-                            : (isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.40)')
+                            ? (isDark ? 'rgba(255, 255, 255, 0.90)' : 'rgba(255, 255, 255, 0.95)')
+                            : (isDark ? 'rgba(255, 255, 255, 0.50)' : 'rgba(0, 0, 0, 0.45)')
                         },
                       ]}>
-                        {shortDayName.toUpperCase()}
+                        {shortDayName}
                       </Text>
                       <NumberText
                         weight="semiBold"
@@ -496,56 +496,56 @@ const styles = StyleSheet.create({
   },
   weekStrip: {
     flexDirection: 'row',
-    gap: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    gap: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
   },
   dayCardContainer: {
     position: 'relative',
   },
   dayItem: {
-    width: 96,
-    minHeight: 136,
-    borderRadius: 24,
+    width: 108,
+    minHeight: 148,
+    borderRadius: 28,
     overflow: 'hidden',
     position: 'relative',
-    // Premium layered shadow for depth
+    // Sculptural shadow for depth without harshness
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.10,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
       },
       android: {
-        elevation: 4,
+        elevation: 5,
       },
     }),
   },
   dayItemActive: {
-    transform: [{ scale: 1.06 }],
-    // Enhanced glow for selected state
+    transform: [{ scale: 1.03 }],
+    // Sophisticated glow matching state color
     ...Platform.select({
       ios: {
         shadowColor: '#5EA9DD',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.45,
-        shadowRadius: 28,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.35,
+        shadowRadius: 24,
       },
       android: {
-        elevation: 16,
+        elevation: 12,
       },
     }),
   },
   glassBackground: {
     width: '100%',
     height: '100%',
-    borderRadius: 24,
+    borderRadius: 28,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    paddingVertical: 24,
+    paddingHorizontal: 12,
     position: 'relative',
   },
   colorOverlay: {
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 24,
+    borderRadius: 28,
   },
   dayContent: {
     alignItems: 'center',
@@ -562,54 +562,58 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   dayName: {
-    fontSize: 10,
-    marginBottom: 8,
+    fontSize: 11,
+    marginBottom: 10,
     fontFamily: Fonts.semiBold,
-    letterSpacing: 1.5,
-    fontWeight: '700',
+    letterSpacing: 2.0,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   dayNumber: {
-    fontSize: 32,
-    marginBottom: 2,
+    fontSize: 42,
+    marginBottom: 4,
+    fontWeight: '600',
     // Font family handled by NumberText component (SF Pro Rounded)
   },
   mealSummaryContainer: {
-    marginTop: 8,
+    marginTop: 10,
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    paddingHorizontal: 6,
   },
   mealSummary: {
     fontSize: 10,
     fontFamily: Fonts.medium,
     textAlign: 'center',
-    letterSpacing: 0.3,
-    lineHeight: 13,
-    paddingHorizontal: 4,
+    letterSpacing: 0.4,
+    lineHeight: 14,
+    paddingHorizontal: 2,
+    fontWeight: '500',
   },
   cheatBadgeContainer: {
     position: 'absolute',
-    top: 8,
-    left: 8,
-    right: 8,
+    top: 10,
+    left: 10,
+    right: 10,
     zIndex: 3,
   },
   cheatBadgeGlass: {
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   cheatBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
   },
   cheatBadgeText: {
-    fontSize: 8,
+    fontSize: 9,
     fontFamily: Fonts.bold,
-    letterSpacing: 0.8,
-    fontWeight: '800',
+    letterSpacing: 1.2,
+    fontWeight: '700',
   },
   fullCalendarButton: {
     alignSelf: 'center',
