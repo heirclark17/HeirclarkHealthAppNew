@@ -619,39 +619,47 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
             <View style={styles.modalFooter}>
               <View style={styles.actionPillRow}>
                 {/* Add to Today's Meals */}
-                <GlassCard style={styles.actionPill} interactive>
-                  <TouchableOpacity
-                    style={styles.actionPillInner}
-                    onPress={handleAddToTodaysMeals}
-                    disabled={isAddingToMeals}
-                    activeOpacity={0.7}
-                    accessibilityLabel={`Add ${meal.name} to today's meals`}
-                    accessibilityRole="button"
+                <TouchableOpacity
+                  onPress={handleAddToTodaysMeals}
+                  disabled={isAddingToMeals}
+                  activeOpacity={0.7}
+                  style={styles.instacartCircleButton}
+                  accessibilityLabel={`Add ${meal.name} to today's meals`}
+                  accessibilityRole="button"
+                >
+                  <LinearGradient
+                    colors={isDark
+                      ? ['rgba(100, 180, 255, 0.15)', 'rgba(130, 200, 255, 0.12)', 'rgba(80, 160, 240, 0.15)']
+                      : ['rgba(60, 140, 255, 0.12)', 'rgba(100, 170, 255, 0.10)', 'rgba(80, 150, 240, 0.12)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.circleGradient}
                   >
-                    <PlusCircle size={12} color={colors.text} strokeWidth={1.5} />
-                    <Text style={[styles.actionPillText, { color: colors.text }]}>
-                      {isAddingToMeals ? 'Adding...' : 'Add'}
-                    </Text>
-                  </TouchableOpacity>
-                </GlassCard>
+                    <PlusCircle size={24} color={isDark ? '#64B4FF' : '#3C8CFF'} strokeWidth={2} />
+                  </LinearGradient>
+                </TouchableOpacity>
 
                 {/* Save Meal */}
                 {onSaveToSavedMeals && (
-                  <GlassCard style={styles.actionPill} interactive>
-                    <TouchableOpacity
-                      style={styles.actionPillInner}
-                      onPress={handleSaveToSavedMeals}
-                      disabled={isSavingMeal}
-                      activeOpacity={0.7}
-                      accessibilityLabel={`Save ${meal.name} to favorites`}
-                      accessibilityRole="button"
+                  <TouchableOpacity
+                    onPress={handleSaveToSavedMeals}
+                    disabled={isSavingMeal}
+                    activeOpacity={0.7}
+                    style={styles.instacartCircleButton}
+                    accessibilityLabel={`Save ${meal.name} to favorites`}
+                    accessibilityRole="button"
+                  >
+                    <LinearGradient
+                      colors={isDark
+                        ? ['rgba(180, 130, 255, 0.15)', 'rgba(200, 150, 255, 0.12)', 'rgba(160, 110, 240, 0.15)']
+                        : ['rgba(140, 90, 255, 0.12)', 'rgba(170, 120, 255, 0.10)', 'rgba(150, 100, 240, 0.12)']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.circleGradient}
                     >
-                      <Bookmark size={12} color={colors.text} strokeWidth={1.5} />
-                      <Text style={[styles.actionPillText, { color: colors.text }]}>
-                        {isSavingMeal ? 'Saving...' : 'Save'}
-                      </Text>
-                    </TouchableOpacity>
-                  </GlassCard>
+                      <Bookmark size={24} color={isDark ? '#B482FF' : '#8C5AFF'} strokeWidth={2} />
+                    </LinearGradient>
+                  </TouchableOpacity>
                 )}
 
                 {/* Add to Instacart */}
@@ -677,21 +685,25 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
 
                 {/* Swap Meal */}
                 {onSwap && (
-                  <GlassCard style={styles.actionPill} interactive>
-                    <TouchableOpacity
-                      style={styles.actionPillInner}
-                      onPress={handleSwap}
-                      disabled={isSwapping}
-                      activeOpacity={0.7}
-                      accessibilityLabel={`Swap ${meal.name} for different meal`}
-                      accessibilityRole="button"
+                  <TouchableOpacity
+                    onPress={handleSwap}
+                    disabled={isSwapping}
+                    activeOpacity={0.7}
+                    style={styles.instacartCircleButton}
+                    accessibilityLabel={`Swap ${meal.name} for different meal`}
+                    accessibilityRole="button"
+                  >
+                    <LinearGradient
+                      colors={isDark
+                        ? ['rgba(80, 200, 120, 0.15)', 'rgba(100, 220, 140, 0.12)', 'rgba(60, 180, 100, 0.15)']
+                        : ['rgba(60, 180, 100, 0.12)', 'rgba(80, 200, 120, 0.10)', 'rgba(50, 160, 90, 0.12)']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.circleGradient}
                     >
-                      <ArrowLeftRight size={12} color={colors.text} strokeWidth={1.5} />
-                      <Text style={[styles.actionPillText, { color: colors.text }]}>
-                        {isSwapping ? 'Swapping...' : 'Swap'}
-                      </Text>
-                    </TouchableOpacity>
-                  </GlassCard>
+                      <ArrowLeftRight size={24} color={isDark ? '#50C878' : '#3CB464'} strokeWidth={2} />
+                    </LinearGradient>
+                  </TouchableOpacity>
                 )}
               </View>
             </View>
@@ -1019,24 +1031,8 @@ const styles = StyleSheet.create({
   actionPillRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
-  },
-  actionPill: {
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  actionPillInner: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  actionPillText: {
-    fontSize: 11,
-    fontFamily: Fonts.numericRegular,
-    fontWeight: '400',
-    letterSpacing: 0.2,
+    gap: 12,
   },
   instacartCircleButton: {
     width: 60,
