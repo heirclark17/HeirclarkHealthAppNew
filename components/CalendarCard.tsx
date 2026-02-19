@@ -168,6 +168,7 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
             return (
               <TouchableOpacity
                 key={index}
+                style={styles.dayItem}
                 onPress={() => {
                   if (!item.isFuture) {
                     onDateChange(item.dateStr);
@@ -181,29 +182,29 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
               >
                 <View
                   style={[
-                    styles.dayItem,
+                    StyleSheet.absoluteFill,
+                    { borderRadius: 12 },
                     { backgroundColor: dayItemBg },
-                    isSelected ? [styles.dayItemActive, { backgroundColor: colors.primary }] : {},
-                    item.isFuture ? styles.dayItemDisabled : {}
+                    isSelected ? { backgroundColor: colors.primary } : {},
+                    item.isFuture ? { opacity: 0.3 } : {}
                   ]}
-                >
-                  <Text style={[
-                    styles.dayName,
-                    { color: dayNameColor },
-                    isSelected ? { color: isDark ? 'rgba(0, 0, 0, 0.6)' : Colors.text } : {},
-                    item.isFuture ? { color: dayNameDisabledColor } : {}
-                  ]}>
-                    {item.day}
-                  </Text>
-                  <Text style={[
-                    styles.dayNumber,
-                    { color: colors.text },
-                    isSelected ? { color: isDark ? Colors.background : Colors.text } : {},
-                    item.isFuture ? { color: dayNumberDisabledColor } : {}
-                  ]}>
-                    {item.date}
-                  </Text>
-                </View>
+                />
+                <Text style={[
+                  styles.dayName,
+                  { color: dayNameColor },
+                  isSelected ? { color: isDark ? 'rgba(0, 0, 0, 0.6)' : Colors.text } : {},
+                  item.isFuture ? { color: dayNameDisabledColor } : {}
+                ]}>
+                  {item.day}
+                </Text>
+                <Text style={[
+                  styles.dayNumber,
+                  { color: colors.text },
+                  isSelected ? { color: isDark ? Colors.background : Colors.text } : {},
+                  item.isFuture ? { color: dayNumberDisabledColor } : {}
+                ]}>
+                  {item.date}
+                </Text>
               </TouchableOpacity>
             );
           })}
