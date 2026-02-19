@@ -1,5 +1,13 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Modal, Platform, Alert } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
+  Easing,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 // Animations removed for performance
@@ -608,28 +616,7 @@ export default function ProgramsScreen() {
       )}
 
       {/* Floating AI Coach FAB */}
-      {weeklyPlan && (
-        <View style={styles.coachFab}>
-          <GlassCard
-            style={[styles.coachFabGlass, { backgroundColor: isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)' }]}
-            interactive
-          >
-            <TouchableOpacity
-              style={styles.coachFabInner}
-              onPress={() => {
-                mediumImpact();
-                handleOpenCoachModal();
-              }}
-              activeOpacity={0.8}
-              accessibilityLabel="AI coach"
-              accessibilityRole="button"
-              accessibilityHint="Opens AI coaching to get personalized training guidance and workout advice"
-            >
-              <Sparkles size={22} color="#a855f7" />
-            </TouchableOpacity>
-          </GlassCard>
-        </View>
-      )}
+      {weeklyPlan && <AnimatedCoachFab isDark={isDark} colors={colors} onPress={() => { mediumImpact(); handleOpenCoachModal(); }} />}
 
       {/* Program Library Modal - Frosted Liquid Glass */}
       <Modal
@@ -724,6 +711,60 @@ export default function ProgramsScreen() {
         exerciseName={selectedExerciseForForm?.exercise?.name || ''}
       />
     </SafeAreaView>
+  );
+}
+
+// Animated AI Coach FAB with pulse + rotation
+function AnimatedCoachFab({ isDark, colors, onPress }: { isDark: boolean; colors: any; onPress: () => void }) {
+  const scale = useSharedValue(1);
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1.15, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+      ),
+      -1,
+      true,
+    );
+    rotation.value = withRepeat(
+      withSequence(
+        withTiming(15, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(-15, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+      ),
+      -1,
+      true,
+    );
+  }, []);
+
+  const animatedIcon = useAnimatedStyle(() => ({
+    transform: [
+      { scale: scale.value },
+      { rotate: `${rotation.value}deg` },
+    ],
+  }));
+
+  return (
+    <View style={styles.coachFab}>
+      <GlassCard
+        style={[styles.coachFabGlass, { backgroundColor: isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(139, 92, 246, 0.1)' }]}
+        interactive
+      >
+        <TouchableOpacity
+          style={styles.coachFabInner}
+          onPress={onPress}
+          activeOpacity={0.8}
+          accessibilityLabel="AI coach"
+          accessibilityRole="button"
+          accessibilityHint="Opens AI coaching to get personalized training guidance and workout advice"
+        >
+          <Animated.View style={animatedIcon}>
+            <Sparkles size={22} color="#a855f7" />
+          </Animated.View>
+        </TouchableOpacity>
+      </GlassCard>
+    </View>
   );
 }
 
