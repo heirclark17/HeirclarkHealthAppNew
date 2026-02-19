@@ -319,12 +319,16 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     </NumberText>
                     {/* Meal summary */}
                     {getMealSummary(day, isCheat) && (
-                      <Text style={[
-                        styles.mealSummary,
-                        { color: colors.textMuted },
-                        isCheat && !isSelected && { color: cheatDayColor },
-                        isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
-                      ]}>
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        style={[
+                          styles.mealSummary,
+                          { color: colors.textMuted },
+                          isCheat && !isSelected && { color: cheatDayColor },
+                          isSelected && { color: isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.8)' },
+                        ]}
+                      >
                         {getMealSummary(day, isCheat)}
                       </Text>
                     )}
@@ -467,13 +471,13 @@ const styles = StyleSheet.create({
   },
   dayItem: {
     width: 64,
+    height: 110, // Fixed height for consistent card lengths
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 18,
     paddingHorizontal: 8,
     borderRadius: 20,
     backgroundColor: 'transparent',
-    minHeight: Spacing.touchTarget + 20,
     position: 'relative',
     overflow: 'visible',
     // Subtle base shadow for depth
