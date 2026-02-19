@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Platform } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Leaf, Settings, Zap, Sparkles, ShoppingCart } from 'lucide-react-native';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
@@ -638,53 +638,76 @@ export default function MealsScreen() {
           </View>
         )}
 
-        {/* Action Buttons - Circular Gradient Style (matches GroceryListModal Instacart button) */}
-        {weeklyPlan && !isCheatDay && (
-          <View style={styles.actionRow}>
-            {/* Order Groceries Button - Orange/Green Gradient with ShoppingCart icon */}
-            <TouchableOpacity
-              onPress={() => setShowGroceryModal(true)}
-              activeOpacity={0.7}
-              style={styles.circleActionButton}
-              accessibilityLabel="Order groceries with Instacart"
-              accessibilityRole="button"
-              accessibilityHint="Opens grocery list to view all ingredients and order through Instacart"
-            >
-              <LinearGradient
-                colors={isDark
-                  ? ['rgba(255, 140, 0, 0.15)', 'rgba(255, 184, 77, 0.12)', 'rgba(76, 175, 80, 0.15)']
-                  : ['rgba(255, 152, 0, 0.12)', 'rgba(255, 167, 38, 0.10)', 'rgba(102, 187, 106, 0.12)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.circleGradient}
-              >
-                <ShoppingCart size={24} color={isDark ? '#FF8C00' : '#FF9800'} strokeWidth={2} />
-              </LinearGradient>
-            </TouchableOpacity>
-
-            {/* AI Coach Button - Purple/Blue Gradient with Sparkles icon */}
-            <TouchableOpacity
-              onPress={() => setShowCoachingModal(true)}
-              activeOpacity={0.7}
-              style={styles.circleActionButton}
-              accessibilityLabel="AI nutrition coach"
-              accessibilityRole="button"
-              accessibilityHint="Opens AI coaching to get personalized guidance on your meal plan and nutrition goals"
-            >
-              <LinearGradient
-                colors={isDark
-                  ? ['rgba(139, 92, 246, 0.15)', 'rgba(168, 85, 247, 0.12)', 'rgba(59, 130, 246, 0.15)']
-                  : ['rgba(147, 51, 234, 0.12)', 'rgba(168, 85, 247, 0.10)', 'rgba(99, 102, 241, 0.12)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.circleGradient}
-              >
-                <Sparkles size={24} color={isDark ? '#A855F7' : '#9333EA'} strokeWidth={2} />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        )}
+        {/* Bottom spacing for sticky buttons */}
+        {weeklyPlan && !isCheatDay && <View style={{ height: 120 }} />}
       </ScrollView>
+
+      {/* Sticky Action Buttons - Frosted Liquid Glass */}
+      {weeklyPlan && !isCheatDay && (
+        <View style={[styles.stickyButtonContainer, { paddingBottom: insets.bottom + 16 }]}>
+          {/* Instacart Button - Frosted Glass with Orange Tint */}
+          <TouchableOpacity
+            onPress={() => setShowGroceryModal(true)}
+            activeOpacity={0.8}
+            style={styles.glassActionButton}
+            accessibilityLabel="Order groceries with Instacart"
+            accessibilityRole="button"
+            accessibilityHint="Opens grocery list to view all ingredients and order through Instacart"
+          >
+            <BlurView
+              intensity={isDark ? 60 : 80}
+              tint={isDark ? 'dark' : 'light'}
+              style={styles.glassButtonInner}
+            >
+              <View style={[
+                styles.glassButtonContent,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(255, 140, 0, 0.15)'
+                    : 'rgba(255, 152, 0, 0.12)',
+                }
+              ]}>
+                <ShoppingCart
+                  size={26}
+                  color={isDark ? '#FF8C00' : '#FF9800'}
+                  strokeWidth={2.5}
+                />
+              </View>
+            </BlurView>
+          </TouchableOpacity>
+
+          {/* AI Coach Button - Frosted Glass with Purple Tint */}
+          <TouchableOpacity
+            onPress={() => setShowCoachingModal(true)}
+            activeOpacity={0.8}
+            style={styles.glassActionButton}
+            accessibilityLabel="AI nutrition coach"
+            accessibilityRole="button"
+            accessibilityHint="Opens AI coaching to get personalized guidance on your meal plan and nutrition goals"
+          >
+            <BlurView
+              intensity={isDark ? 60 : 80}
+              tint={isDark ? 'dark' : 'light'}
+              style={styles.glassButtonInner}
+            >
+              <View style={[
+                styles.glassButtonContent,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(139, 92, 246, 0.15)'
+                    : 'rgba(147, 51, 234, 0.12)',
+                }
+              ]}>
+                <Sparkles
+                  size={26}
+                  color={isDark ? '#A855F7' : '#9333EA'}
+                  strokeWidth={2.5}
+                />
+              </View>
+            </BlurView>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Grocery List Modal */}
       <GroceryListModal
@@ -907,26 +930,63 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.medium,
   },
-  actionRow: {
+  // Sticky frosted glass action buttons at bottom
+  stickyButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 24,
-    paddingHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
+    alignItems: 'center',
+    gap: 20,
+    paddingTop: 16,
+    paddingHorizontal: 20,
+    // Gradient backdrop for depth
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
-  circleActionButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  glassActionButton: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     overflow: 'hidden',
+    // Subtle shadow for elevation
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
-  circleGradient: {
+  glassButtonInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 34,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  glassButtonContent: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 30,
+    borderRadius: 34,
   },
   savingsBanner: {
     flexDirection: 'row',
