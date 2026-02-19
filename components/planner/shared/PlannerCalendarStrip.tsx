@@ -227,8 +227,8 @@ export function PlannerCalendarStrip({
                 isSelected && {
                   backgroundColor: '#000000',
                   opacity: 1,
-                  borderWidth: 2,
-                  borderColor: isDark ? '#FFFFFF' : '#000000'
+                  borderWidth: 3,
+                  borderColor: '#FFFFFF'
                 },
               ]}
               onPress={() => onDateChange(item.dateStr)}
