@@ -724,7 +724,7 @@ function AnimatedCoachFab({ isDark, onPress }: { isDark: boolean; onPress: () =>
           accessibilityRole="button"
           accessibilityHint="Opens AI coaching to get personalized training guidance and workout advice"
         >
-          <AnimatedSparkleIcon size={22} color="#a855f7" containerSize={48} />
+          <AnimatedSparkleIcon size={22} color="#a855f7" containerSize={48} icon={Dumbbell} />
         </TouchableOpacity>
       </GlassCard>
     </View>
