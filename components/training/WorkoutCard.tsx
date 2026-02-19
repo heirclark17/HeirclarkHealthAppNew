@@ -607,9 +607,9 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   workoutName: {
-    fontSize: 17,
+    fontSize: 22,
     color: Colors.text,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.semiBold,
   },
   workoutMeta: {
     fontSize: 13,
