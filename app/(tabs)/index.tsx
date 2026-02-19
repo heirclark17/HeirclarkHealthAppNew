@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Alert, Modal, TextInput, Animated, Platform, Pressable, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Dumbbell, BarChart3, Watch, X, Clock, Trash2 } from 'lucide-react-native';
+import { Dumbbell, BarChart3, Watch, X, Clock, Trash2, Salad } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReanimatedModule, { useSharedValue, useAnimatedStyle, withSpring, ReduceMotion } from 'react-native-reanimated';
@@ -1380,7 +1380,8 @@ export default function DashboardScreen() {
       <GlassCard style={{ marginHorizontal: 16, marginBottom: 24 }} interactive>
         {/* Header */}
         <View style={styles.cardHeader}>
-          <View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Salad size={24} color={colors.text} />
             <Text style={[styles.sectionTitle, { color: colors.text, fontSize: 24, fontFamily: Fonts.numericSemiBold, letterSpacing: 1.5 }]}>TODAY'S MEALS</Text>
           </View>
         </View>
