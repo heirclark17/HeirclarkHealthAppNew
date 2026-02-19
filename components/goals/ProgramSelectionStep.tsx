@@ -298,7 +298,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
               accessibilityHint="Returns to previous step"
             >
               <GlassCard style={styles.backButton} interactive>
-                <View style={{ transform: [{ rotate: '-90deg' }] }}>
+                <View style={{ transform: [{ rotate: '-90deg' }, { scaleY: -1 }] }}>
                   <Hand size={24} color={colors.text} />
                 </View>
               </GlassCard>
