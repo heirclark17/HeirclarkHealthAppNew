@@ -2169,7 +2169,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: 12,
   },
   cardContent: {
     marginTop: 20,
