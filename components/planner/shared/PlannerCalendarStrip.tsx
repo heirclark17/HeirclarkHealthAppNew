@@ -235,10 +235,10 @@ export function PlannerCalendarStrip({
                     zIndex: -1,
                   },
                   isSelected ? {
-                    backgroundColor: '#000000',
+                    backgroundColor: isDark ? '#FFFFFF' : '#000000',
                     opacity: 1,
                     borderWidth: 3,
-                    borderColor: '#FFFFFF'
+                    borderColor: isDark ? '#000000' : '#FFFFFF'
                   } : {
                     backgroundColor: dayItemBg,
                     opacity: opacity
@@ -250,7 +250,7 @@ export function PlannerCalendarStrip({
                 style={[
                   styles.dayName,
                   { color: dayNameColor },
-                  isSelected ? { color: '#FFFFFF' } : {},
+                  isSelected ? { color: isDark ? '#000000' : '#FFFFFF' } : {},
                 ]}
               >
                 {item.day}
@@ -259,7 +259,7 @@ export function PlannerCalendarStrip({
                 style={[
                   styles.dayNumber,
                   { color: themeColors.text },
-                  isSelected ? { color: '#FFFFFF' } : {},
+                  isSelected ? { color: isDark ? '#000000' : '#FFFFFF' } : {},
                 ]}
               >
                 {item.date}

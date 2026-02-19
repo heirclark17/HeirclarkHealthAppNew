@@ -189,8 +189,10 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
                       zIndex: -1,
                     },
                     isSelected ? {
-                      backgroundColor: colors.primary,
-                      opacity: 1
+                      backgroundColor: isDark ? '#FFFFFF' : '#000000',
+                      opacity: 1,
+                      borderWidth: 3,
+                      borderColor: isDark ? '#000000' : '#FFFFFF'
                     } : item.isFuture ? {
                       backgroundColor: dayItemBg,
                       opacity: 0.3
@@ -203,7 +205,7 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
                 <Text style={[
                   styles.dayName,
                   { color: dayNameColor },
-                  isSelected ? { color: isDark ? 'rgba(0, 0, 0, 0.6)' : Colors.text } : {},
+                  isSelected ? { color: isDark ? '#000000' : '#FFFFFF' } : {},
                   item.isFuture ? { color: dayNameDisabledColor } : {}
                 ]}>
                   {item.day}
@@ -211,7 +213,7 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
                 <Text style={[
                   styles.dayNumber,
                   { color: colors.text },
-                  isSelected ? { color: isDark ? Colors.background : Colors.text } : {},
+                  isSelected ? { color: isDark ? '#000000' : '#FFFFFF' } : {},
                   item.isFuture ? { color: dayNumberDisabledColor } : {}
                 ]}>
                   {item.date}
