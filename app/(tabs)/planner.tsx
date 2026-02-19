@@ -86,7 +86,7 @@ export default function PlannerScreen() {
       {/* Header with view toggle + preferences button */}
       <View style={[styles.header, { backgroundColor: 'transparent', paddingTop: 28 }]}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-          <Calendar size={24} color={themeColors.text} style={{ marginTop: 2 }} />
+          <Calendar size={32} color={themeColors.text} style={{ marginTop: 2 }} />
           <Text style={[styles.title, { color: themeColors.text }]}>Plan Meals & Workouts</Text>
         </View>
         <View style={styles.headerRow}>
