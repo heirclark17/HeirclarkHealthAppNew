@@ -25,12 +25,24 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState<any[]>([]);
   const [mealThemes, setMealThemes] = useState<Record<number, string>>({});
+  const lastThemeKeyRef = useRef<string>('');
 
   // Get cheat days from preferences
   const cheatDays = foodPrefsContext?.preferences?.cheatDays || [];
 
-  // Generate AI meal themes for each day
+  // Stable key based on actual meal content - only changes when meals truly change
+  const mealContentKey = useMemo(() => {
+    if (!weeklyPlan || weeklyPlan.length === 0) return '';
+    return weeklyPlan.map(day =>
+      `${day.dayNumber}:${(day.meals || []).map(m => m.name).join(',')}`
+    ).join('|');
+  }, [weeklyPlan]);
+
+  // Generate AI meal themes for each day - only when meal content actually changes
   useEffect(() => {
+    if (!mealContentKey || mealContentKey === lastThemeKeyRef.current) return;
+    lastThemeKeyRef.current = mealContentKey;
+
     const generateThemes = async () => {
       const themes: Record<number, string> = {};
 
@@ -60,10 +72,8 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
       setMealThemes(themes);
     };
 
-    if (weeklyPlan.length > 0) {
-      generateThemes();
-    }
-  }, [weeklyPlan]);
+    generateThemes();
+  }, [mealContentKey]);
 
   // Dynamic theme colors
   const colors = useMemo(() => {
