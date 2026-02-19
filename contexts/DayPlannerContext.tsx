@@ -596,9 +596,133 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
+   * Extract meal TimeBlocks for ALL 7 days from MealPlanContext at once.
+   * More efficient than calling getMealBlocksForDay 7 times in a loop.
+   * Returns a Map keyed by date string (YYYY-MM-DD) -> TimeBlock[]
+   */
+  const getMealBlocksForWeek = useCallback((weekStartDate: Date, preferences: PlannerPreferences): Map<string, TimeBlock[]> => {
+    const mealPlan = mealPlanRef.current;
+    const resultMap = new Map<string, TimeBlock[]>();
+
+    console.log('[getMealBlocksForWeek] 🍽️ Extracting meals for entire week');
+    console.log('[getMealBlocksForWeek] weeklyPlan exists:', !!mealPlan?.state?.weeklyPlan);
+
+    if (!mealPlan?.state?.weeklyPlan) {
+      console.log('[getMealBlocksForWeek] ⚠️ No weeklyPlan, using default meals for all 7 days');
+      // Generate default meals for all 7 days
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(weekStartDate);
+        date.setDate(weekStartDate.getDate() + i);
+        const dateStr = formatLocalDate(date);
+
+        const defaultMeals = [
+          { type: 'breakfast', title: 'Breakfast', duration: 30 },
+          { type: 'lunch', title: 'Lunch', duration: 30 },
+          { type: 'dinner', title: 'Dinner', duration: 45 },
+        ];
+
+        const blocks = defaultMeals.map((meal) => ({
+          id: `meal_default_${date.getTime()}_${meal.type}`,
+          type: 'meal_eating' as const,
+          title: meal.title,
+          startTime: '00:00',
+          endTime: '00:00',
+          duration: meal.duration,
+          status: 'scheduled' as const,
+          color: PLANNER_CONSTANTS.BLOCK_COLORS.meal_eating,
+          icon: PLANNER_CONSTANTS.BLOCK_ICONS.meal_eating,
+          priority: 3,
+          flexibility: 0.5,
+          aiGenerated: true,
+        }));
+
+        resultMap.set(dateStr, blocks);
+      }
+      return resultMap;
+    }
+
+    const weeklyMealPlan = mealPlan.state.weeklyPlan;
+    console.log(`[getMealBlocksForWeek] weeklyPlan has ${weeklyMealPlan.length} days`);
+
+    // Process all 7 days
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(weekStartDate);
+      date.setDate(weekStartDate.getDate() + i);
+      const dateStr = formatLocalDate(date);
+      const dayOfWeek = date.getDay(); // 0=Sun
+      const targetDayName = DAY_NAMES[dayOfWeek];
+
+      // Find matching meal day
+      const mealDay = weeklyMealPlan.find((d: any) => {
+        if (d.dayName === targetDayName) return true;
+        const mappedDayNum = dayOfWeek === 0 ? 7 : dayOfWeek;
+        return d.dayNumber === mappedDayNum;
+      });
+
+      if (mealDay?.meals?.length > 0) {
+        console.log(`[getMealBlocksForWeek] ✅ Found ${mealDay.meals.length} meals for ${targetDayName} (${dateStr})`);
+
+        const blocks = mealDay.meals.map((meal: any) => {
+          const eatingTime = 30; // eating duration
+
+          return {
+            id: `meal_${date.getTime()}_${meal.id || meal.mealType}`,
+            type: 'meal_eating' as const,
+            title: `${capitalize(meal.mealType)}: ${meal.name}`,
+            startTime: '00:00', // scheduling engine will place it
+            endTime: '00:00',
+            duration: eatingTime,
+            status: 'scheduled' as const,
+            color: PLANNER_CONSTANTS.BLOCK_COLORS.meal_eating,
+            icon: PLANNER_CONSTANTS.BLOCK_ICONS.meal_eating,
+            priority: 3,
+            flexibility: 0.5,
+            aiGenerated: true,
+            relatedId: meal.id,
+          };
+        });
+
+        resultMap.set(dateStr, blocks);
+      } else {
+        console.log(`[getMealBlocksForWeek] ⚠️ No meals for ${targetDayName}, using defaults`);
+
+        // Fallback to default meals for this day
+        const defaultMeals = [
+          { type: 'breakfast', title: 'Breakfast', duration: 30 },
+          { type: 'lunch', title: 'Lunch', duration: 30 },
+          { type: 'dinner', title: 'Dinner', duration: 45 },
+        ];
+
+        const blocks = defaultMeals.map((meal) => ({
+          id: `meal_default_${date.getTime()}_${meal.type}`,
+          type: 'meal_eating' as const,
+          title: meal.title,
+          startTime: '00:00',
+          endTime: '00:00',
+          duration: meal.duration,
+          status: 'scheduled' as const,
+          color: PLANNER_CONSTANTS.BLOCK_COLORS.meal_eating,
+          icon: PLANNER_CONSTANTS.BLOCK_ICONS.meal_eating,
+          priority: 3,
+          flexibility: 0.5,
+          aiGenerated: true,
+        }));
+
+        resultMap.set(dateStr, blocks);
+      }
+    }
+
+    console.log(`[getMealBlocksForWeek] ✅ Extracted meals for ${resultMap.size} days`);
+    return resultMap;
+  }, []);
+
+  /**
    * Extract meal TimeBlocks from the MealPlanContext for a given day.
    * Falls back to generating default meal blocks (breakfast, lunch, dinner)
    * based on user preferences.
+   *
+   * NOTE: For weekly plan generation, use getMealBlocksForWeek() instead
+   * for better performance (extracts all 7 days at once).
    */
   const getMealBlocksForDay = useCallback((date: Date, preferences: PlannerPreferences): TimeBlock[] => {
     const mealPlan = mealPlanRef.current;
@@ -727,12 +851,18 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       // Capture old plan so we can carry forward completion statuses
       const oldWeeklyPlan = stateRef.current.weeklyPlan;
 
+      // ✨ OPTIMIZATION: Extract ALL 7 days of meals at once (more efficient)
+      console.log('[generateWeeklyPlan] 🍽️ Extracting meals for entire week...');
+      const weeklyMealBlocks = getMealBlocksForWeek(sunday, currentPrefs);
+      console.log(`[generateWeeklyPlan] ✅ Extracted meals for ${weeklyMealBlocks.size} days`);
+
       // Generate 7 daily timelines with AI
       setState((prev) => ({ ...prev, loadingPhase: 'analyzing_schedule' }));
       const days: DailyTimeline[] = [];
       for (let i = 0; i < 7; i++) {
         const date = new Date(sunday);
         date.setDate(sunday.getDate() + i);
+        const dateStr = formatLocalDate(date);
 
         // Update loading phase during generation
         if (i === 0) {
@@ -741,7 +871,11 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           setState((prev) => ({ ...prev, loadingPhase: 'placing_workouts' }));
         }
 
-        const timeline = await generateDailyTimeline(date, currentPrefs);
+        // Get pre-fetched meals for this specific day
+        const mealBlocksForDay = weeklyMealBlocks.get(dateStr) || [];
+        console.log(`[generateWeeklyPlan] Day ${i} (${dateStr}): ${mealBlocksForDay.length} meals`);
+
+        const timeline = await generateDailyTimeline(date, currentPrefs, mealBlocksForDay);
 
         // Carry forward completion statuses from old plan where blocks match
         if (oldWeeklyPlan) {
@@ -830,7 +964,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         ]
       );
     }
-  }, [getWorkoutBlocksForDay, getMealBlocksForDay]);
+  }, [getWorkoutBlocksForDay, getMealBlocksForWeek]);
 
   /**
    * Regenerate a single day without affecting the rest of the week
@@ -939,14 +1073,23 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   /**
    * Generate daily timeline for a specific date using AI (with algorithmic fallback).
    */
-  const generateDailyTimeline = async (date: Date, preferences: PlannerPreferences): Promise<DailyTimeline> => {
+  const generateDailyTimeline = async (
+    date: Date,
+    preferences: PlannerPreferences,
+    preFetchedMealBlocks?: TimeBlock[]
+  ): Promise<DailyTimeline> => {
     const dateStr = formatLocalDate(date);
 
     // Extract real workouts from TrainingContext
     const workoutBlocks = getWorkoutBlocksForDay(date, preferences);
 
     // Extract real meals from MealPlanContext
-    const mealBlocks = getMealBlocksForDay(date, preferences);
+    // Use pre-fetched meals if provided (more efficient for weekly generation)
+    const mealBlocks = preFetchedMealBlocks !== undefined
+      ? preFetchedMealBlocks
+      : getMealBlocksForDay(date, preferences);
+
+    console.log(`[generateDailyTimeline] ${dateStr}: Using ${preFetchedMealBlocks !== undefined ? 'pre-fetched' : 'on-demand'} meals (${mealBlocks.length} blocks)`);
 
     // Get calendar events (CLIENT-SIDE ONLY)
     // Filter out canceled events (Outlook/Teams prefix "Canceled:" or "Cancelled:")
