@@ -227,7 +227,7 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
         onRequestClose={() => setShowFullCalendar(false)}
       >
         <View style={[styles.modalOverlay, { backgroundColor: modalOverlayBg }]}>
-          <View style={[styles.modalContent, { backgroundColor: colors.glassCard, borderColor: colors.glassBorder }]}>
+          <GlassCard style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <TouchableOpacity
                 onPress={() => changeMonth('prev')}
@@ -305,7 +305,7 @@ export function CalendarCard({ selectedDate, onDateChange }: CalendarCardProps) 
             >
               <Text style={[styles.closeButtonText, { color: colors.primaryText }]}>Close</Text>
             </TouchableOpacity>
-          </View>
+          </GlassCard>
         </View>
       </Modal>
     </>
@@ -391,7 +391,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: 'transparent', // Let GlassCard handle background
     borderRadius: 20, // Extra round corners
     padding: 24,
     width: width - 40,
