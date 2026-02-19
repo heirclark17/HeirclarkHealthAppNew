@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
   },
   timelineGlassWrapper: {
     flex: 1,
-    marginHorizontal: 16,
+    marginHorizontal: 8,
     marginTop: 8,
     marginBottom: 4,
   },
