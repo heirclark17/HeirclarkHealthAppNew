@@ -340,7 +340,6 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     key={index}
                     style={[
                       styles.calendarDay,
-                      item.isToday && [styles.calendarDayToday, { borderColor: item.isCheat ? cheatDayColor : colors.primary }],
                       item.isCheat && !item.isSelected && { backgroundColor: cheatDayBg },
                       item.isSelected && { backgroundColor: item.isCheat ? cheatDayColor : colors.text },
                       item.isInPlan && !item.isSelected && !item.isCheat && { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' },
@@ -573,10 +572,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
     marginBottom: 6,
   },
-  calendarDayToday: {
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
+  // Borders removed from calendar day cards
   calendarDayText: {
     fontSize: 14,
     color: Colors.text,
