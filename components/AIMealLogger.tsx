@@ -1843,8 +1843,6 @@ const styles = StyleSheet.create({
     right: 12,
     top: SCREEN_HEIGHT * 0.35,
     borderRadius: 32,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
     overflow: 'hidden',
   },
   nutritionCardContent: {
@@ -1997,8 +1995,6 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     paddingVertical: 16,
     gap: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   addMealButtonGradient: {
     flexDirection: 'row',
@@ -2015,7 +2011,7 @@ const styles = StyleSheet.create({
   },
   addMealButtonTextWhite: {
     fontSize: 16,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     color: '#fff',
   },
 
