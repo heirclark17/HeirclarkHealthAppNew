@@ -60,7 +60,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       messages: [
         {
           role: 'system',
-          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. IMPORTANT: Meals have FLEXIBLE TIME WINDOWS (breakfast: morning, lunch: midday, dinner: evening). Schedule each meal type WITHIN its designated window, not at fixed times. Snacks go between meal windows. If fasting is active, all meals must be within the eating window.',
+          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. IMPORTANT: Meals have STRICT TIME WINDOWS - Breakfast: 05:00-10:59 (target 08:00), Lunch: 11:00-14:00 (target 12:00), Dinner: 17:00-22:00 (target 18:30). Schedule each meal type WITHIN its designated window. DO NOT schedule breakfast after 11 AM, lunch outside 11 AM-2 PM, or dinner outside 5 PM-10 PM. If fasting is active, meals must ALSO be within the eating window.',
         },
         {
           role: 'user',
@@ -408,20 +408,21 @@ ${mealBlocks.length > 0 ? mealBlocks.map(m => {
 }).join('\n') : '- Breakfast (30 min), Lunch (45 min), Dinner (45 min)'}
 
 **MEAL TIME WINDOWS (Flexible Ranges):**
-🍳 **BREAKFAST WINDOW:** ${isFasting ? lifeContext.fastingEnd : preferences.wakeTime} - 14:00
-   - First meal after waking/breaking fast
+🍳 **BREAKFAST WINDOW:** 05:00 - 10:59
+   - Morning meal (target: 08:00)
    - Can be scheduled ANYTIME within this window
-   - Example: 12:30-13:00, or 13:15-13:45
+   - Example: 07:30-08:00, or 09:00-09:30
+   - ${isFasting ? `⚠️ IF FASTING: Must start AFTER ${lifeContext.fastingEnd} (eating window opens)` : ''}
 
-🥗 **LUNCH WINDOW:** 14:00 - 17:00
-   - Mid-day meal
+🥗 **LUNCH WINDOW:** 11:00 - 14:00
+   - Mid-day meal (target: 12:00)
    - Can be scheduled ANYTIME within this window
-   - Example: 15:00-15:45, or 16:00-16:30
+   - Example: 12:00-12:30, or 13:00-13:45
 
-🍽️ **DINNER WINDOW:** 17:00 - ${isFasting ? lifeContext.fastingStart : preferences.sleepTime}
-   - Evening meal
+🍽️ **DINNER WINDOW:** 17:00 - 22:00
+   - Evening meal (target: 18:30)
    - Can be scheduled ANYTIME within this window
-   - Must END before fasting window closes (${isFasting ? lifeContext.fastingStart : 'bedtime'})
+   - ${isFasting ? `⚠️ IF FASTING: Must END before ${lifeContext.fastingStart} (eating window closes)` : ''}
    - Example: 18:30-19:15, or 19:00-19:45
 
 🍿 **SNACKS (Flexible):**
