@@ -1416,7 +1416,7 @@ export default function DashboardScreen() {
                 accessibilityRole="button"
               >
                 <View style={styles.mealInfo}>
-                  <Text style={[styles.mealName, { color: colors.text }]}>{mealLabel}</Text>
+                  <Text style={[styles.mealName, { color: colors.text }]}>{mealLabel.toUpperCase()}</Text>
                   <Text style={[styles.mealTime, { color: colors.textMuted }]}>
                     {mealType === 'breakfast' ? '7:00 - 10:00 AM' :
                      mealType === 'lunch' ? '12:00 - 2:00 PM' :
@@ -2421,6 +2421,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 2,
     fontFamily: Fonts.numericSemiBold,
+    letterSpacing: 1.5,
   },
   mealTime: {
     fontSize: 12,
