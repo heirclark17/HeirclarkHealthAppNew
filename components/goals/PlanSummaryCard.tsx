@@ -136,7 +136,7 @@ export function PlanSummaryCard({
           <View style={styles.headerLeft}>
             <Ionicons name="fitness" size={24} color={colors.protein} />
             <View style={styles.headerTextContainer}>
-              <Text style={[styles.headerTitle, { color: colors.text }]}>Your Training Plan</Text>
+              <Text style={[styles.headerTitle, { color: colors.text }]}>YOUR TRAINING PLAN</Text>
               <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
                 <NumberText weight="medium" style={[styles.headerSubtitle, { color: colors.textMuted }]}>
                   {summary.expectedOutcomes.length}
@@ -297,12 +297,12 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
   },
   headerSubtitle: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: Colors.textMuted,
     marginTop: 2,
   },
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   },
   overviewText: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: Colors.textSecondary,
     lineHeight: 21,
   },
@@ -328,14 +328,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   sectionContent: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: Colors.textSecondary,
     lineHeight: 21,
   },
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
   outcomeMetric: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
     color: Colors.textMuted,
     flex: 1,
   },
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   },
   confidenceText: {
     fontSize: 10,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
     textTransform: 'capitalize',
   },
   outcomeValue: {
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   stepText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   listText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   },
   metricText: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
     color: Colors.textSecondary,
   },
   actionContainer: {
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
   },
   startButtonText: {
     fontSize: 16,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.primaryText,
   },
   detailsButton: {
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
   },
   detailsButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericMedium,
     color: Colors.textMuted,
     textDecorationLine: 'underline',
   },

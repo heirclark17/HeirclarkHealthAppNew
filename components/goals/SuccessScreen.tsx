@@ -903,8 +903,7 @@ const styles = StyleSheet.create({
   },
   mealPlanButtonTitle: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
     marginBottom: 4,
   },
@@ -939,8 +938,7 @@ const styles = StyleSheet.create({
   },
   trainingPlanButtonTitle: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
     marginBottom: 4,
   },
@@ -971,8 +969,7 @@ const styles = StyleSheet.create({
   },
   coachingButtonTitle: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
     marginBottom: 4,
   },
