@@ -1492,8 +1492,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontFamily: Fonts.regular,
-    fontWeight: '500',
+    fontFamily: Fonts.numericSemiBold,
   },
   scrollView: {
     flex: 1,
@@ -1503,9 +1502,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     marginBottom: Spacing.lg,
-    fontWeight: '400',
     textAlign: 'center',
   },
   content: {
@@ -1539,9 +1537,8 @@ const styles = StyleSheet.create({
   },
   modeTitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     marginBottom: 4,
-    fontWeight: '500',
   },
   modeDescription: {
     fontSize: 14,
@@ -1685,7 +1682,7 @@ const styles = StyleSheet.create({
   },
   cameraTitle: {
     fontSize: 18,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     color: '#fff',
   },
   cameraBottomBar: {
