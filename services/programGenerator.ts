@@ -398,10 +398,10 @@ export async function generateMultiWeekProgram(
       console.warn('[ProgramGenerator] Weight pre-population failed:', weightErr);
     }
 
-    // Enrich exercises with ExerciseDB GIF URLs (fire-and-forget, don't block)
-    enrichWithExerciseDb(weeklyPlans).catch(err =>
-      console.warn('[ProgramGenerator] ExerciseDB enrichment failed:', err)
-    );
+    // DISABLED: ExerciseDB enrichment (using AI-generated exercises only)
+    // enrichWithExerciseDb(weeklyPlans).catch(err =>
+    //   console.warn('[ProgramGenerator] ExerciseDB enrichment failed:', err)
+    // );
 
     // Build complete training plan
     const plan: CompleteTrainingPlan = {
@@ -1292,40 +1292,40 @@ Return JSON:
       return mapped;
     });
 
-    // Enrich new exercises with ExerciseDB GIFs (non-blocking)
-    enrichWithExerciseDb([{
-      id: 'temp',
-      weekNumber: weekIndex + 1,
-      startDate: '',
-      endDate: '',
-      days: [{
-        id: 'temp',
-        dayOfWeek: 'Monday',
-        dayNumber: dayNum,
-        date: '',
-        workout: {
-          id: 'temp',
-          name: 'temp',
-          type: 'strength',
-          duration: 0,
-          estimatedCaloriesBurned: 0,
-          muscleGroupsFocused: [],
-          difficulty: 'intermediate',
-          exercises: mappedExercises,
-          completed: false,
-        },
-        isRestDay: false,
-        completed: false,
-        calendarDate: '',
-        weekNumber: weekIndex + 1,
-      }],
-      totalWorkouts: 1,
-      completedWorkouts: 0,
-      totalCaloriesBurned: 0,
-      focusAreas: [],
-    }]).catch(() => {
-      // Non-critical - GIFs will load later
-    });
+    // DISABLED: ExerciseDB enrichment (using AI-generated exercises only)
+    // enrichWithExerciseDb([{
+    //   id: 'temp',
+    //   weekNumber: weekIndex + 1,
+    //   startDate: '',
+    //   endDate: '',
+    //   days: [{
+    //     id: 'temp',
+    //     dayOfWeek: 'Monday',
+    //     dayNumber: dayNum,
+    //     date: '',
+    //     workout: {
+    //       id: 'temp',
+    //       name: 'temp',
+    //       type: 'strength',
+    //       duration: 0,
+    //       estimatedCaloriesBurned: 0,
+    //       muscleGroupsFocused: [],
+    //       difficulty: 'intermediate',
+    //       exercises: mappedExercises,
+    //       completed: false,
+    //     },
+    //     isRestDay: false,
+    //     completed: false,
+    //     calendarDate: '',
+    //     weekNumber: weekIndex + 1,
+    //   }],
+    //   totalWorkouts: 1,
+    //   completedWorkouts: 0,
+    //   totalCaloriesBurned: 0,
+    //   focusAreas: [],
+    // }]).catch(() => {
+    //   // Non-critical - GIFs will load later
+    // });
 
     return {
       exercises: mappedExercises,
