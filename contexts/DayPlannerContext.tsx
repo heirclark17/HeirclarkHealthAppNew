@@ -66,6 +66,7 @@ const STORAGE_KEYS = {
   ONBOARDING: 'hc_planner_onboarding',
   WEEKLY_PLAN: 'hc_planner_weekly_plan',
   CALENDAR_PERMISSION: 'hc_planner_calendar_permission',
+  CALENDAR_EVENTS: 'hc_planner_calendar_events', // Client-side calendar cache
   AI_OPTIMIZATION: 'hc_planner_ai_optimization',
   COMPLETION_PATTERNS: 'hc_planner_completion_patterns',
 };
@@ -337,6 +338,20 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         setState((prev) => ({ ...prev, calendarPermission: calendarPerm === 'true' }));
       }
 
+      // Load cached calendar events (client-side only)
+      const calendarEventsData = await AsyncStorage.getItem(STORAGE_KEYS.CALENDAR_EVENTS);
+      if (calendarEventsData) {
+        const cachedEvents = JSON.parse(calendarEventsData);
+        // Deserialize dates from ISO strings
+        const events = cachedEvents.map((e: any) => ({
+          ...e,
+          startDate: new Date(e.startDate),
+          endDate: new Date(e.endDate),
+        }));
+        console.log('[Planner] Loaded', events.length, 'cached calendar events from AsyncStorage');
+        setState((prev) => ({ ...prev, deviceCalendarEvents: events }));
+      }
+
       // Load AI optimization
       const aiOptData = await AsyncStorage.getItem(STORAGE_KEYS.AI_OPTIMIZATION);
       if (aiOptData) {
@@ -352,6 +367,18 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       }
 
       console.log('[Planner] Cached data loaded');
+
+      // Auto-sync calendar if permission granted (bedrock data layer)
+      // This ensures calendar events are always fresh on app load
+      if (calendarPerm === 'true') {
+        console.log('[Planner] Calendar permission granted - auto-syncing calendar events...');
+        // Defer to avoid blocking initial render
+        setTimeout(() => {
+          syncCalendar().catch((err) => {
+            console.warn('[Planner] Auto-sync calendar failed (non-critical):', err);
+          });
+        }, 500);
+      }
     } catch (error) {
       console.error('[Planner] Error loading cached data:', error);
     }
@@ -990,7 +1017,9 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         isSyncingCalendar: false,
       }));
 
-      console.log(`[Planner] ✅ Synced ${events.length} calendar events (client-side only)`);
+      // Persist to AsyncStorage for cache-first pattern
+      await AsyncStorage.setItem(STORAGE_KEYS.CALENDAR_EVENTS, JSON.stringify(events));
+      console.log(`[Planner] ✅ Synced ${events.length} calendar events (client-side only, cached to AsyncStorage)`);
 
       // CRITICAL: Regenerate weekly plan with new calendar events
       console.log('[Planner] 🔄 Regenerating weekly plan with calendar events...');
