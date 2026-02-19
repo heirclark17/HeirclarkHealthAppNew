@@ -311,13 +311,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
               accessibilityRole="button"
               accessibilityHint="Proceeds to next step (program selection optional)"
             >
-              <GlassCard
-                style={[
-                  styles.continueButton,
-                  { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' },
-                ]}
-                interactive
-              >
+              <GlassCard style={styles.continueButton} interactive>
                 <View style={{ transform: [{ rotate: '90deg' }] }}>
                   <Hand size={24} color={colors.primary} />
                 </View>
