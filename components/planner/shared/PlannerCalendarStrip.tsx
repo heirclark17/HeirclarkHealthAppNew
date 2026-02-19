@@ -217,6 +217,18 @@ export function PlannerCalendarStrip({
         {weekDays.map((item) => {
           const isSelected = selectedDate === item.dateStr;
           const opacity = item.isFuture ? 0.6 : 1; // Dim future dates slightly
+
+          // Debug logging
+          if (item.isToday) {
+            console.log('[PlannerCalendarStrip] Today check:', {
+              selectedDate,
+              itemDateStr: item.dateStr,
+              isSelected,
+              selectedDateType: typeof selectedDate,
+              itemDateStrType: typeof item.dateStr,
+            });
+          }
+
           return (
             <TouchableOpacity
               key={item.dateStr}
@@ -225,10 +237,10 @@ export function PlannerCalendarStrip({
                 { backgroundColor: dayItemBg, opacity },
                 isSelected && styles.dayItemActive,
                 isSelected && {
-                  backgroundColor: '#000000',
+                  backgroundColor: '#FF0000', // Bright red for debugging
                   opacity: 1,
-                  borderWidth: 3,
-                  borderColor: '#FFFFFF'
+                  borderWidth: 5,
+                  borderColor: '#00FF00' // Bright green for debugging
                 },
               ]}
               onPress={() => onDateChange(item.dateStr)}
