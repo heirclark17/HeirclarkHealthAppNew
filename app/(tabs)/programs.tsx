@@ -93,7 +93,7 @@ export default function ProgramsScreen() {
   } = trainingState;
 
   // Goal wizard context - use safe wrapper hook
-  const { state: goalWizardState } = useSafeGoalWizard();
+  const { state: goalWizardState, goToStep } = useSafeGoalWizard();
 
   // Get all days from weekly plan
   const allDays = useMemo(() => {
@@ -324,11 +324,19 @@ export default function ProgramsScreen() {
     // Don't clear previewProgram so selection state persists in the list
   }, []);
 
-  // Navigate to goals page - memoized
+  // Navigate to goals page at PrimaryGoalStep (step 1)
   const handleSetGoals = useCallback(() => {
     lightImpact();
+    if (goToStep) goToStep(1);
     router.push('/goals');
-  }, [router]);
+  }, [router, goToStep]);
+
+  // Navigate to goals page at ProgramSelectionStep (step 5)
+  const handleEditProgram = useCallback(() => {
+    lightImpact();
+    if (goToStep) goToStep(5);
+    router.push('/goals');
+  }, [router, goToStep]);
 
   // Get goal summary - memoized
   const getGoalSummary = useCallback(() => {
@@ -568,29 +576,31 @@ export default function ProgramsScreen() {
         <View style={styles.stickyBottomContainer}>
           <View style={styles.actionRow}>
             <TouchableOpacity
-              onPress={handleOpenProgramModal}
+              onPress={handleEditProgram}
               activeOpacity={0.7}
               style={{ flex: 1 }}
-              accessibilityLabel="Change program"
+              accessibilityLabel="Edit program"
               accessibilityRole="button"
-              accessibilityHint="Opens the program library to select a different training program"
+              accessibilityHint="Opens program selection to change your training program"
             >
               <GlassCard style={styles.actionButtonGlass} interactive>
-                <Text style={[styles.actionButtonText, { color: colors.text }]}>PROGRAMS</Text>
+                <Edit3 size={16} color={colors.text} strokeWidth={1.5} />
+                <Text style={[styles.actionButtonText, { color: colors.text }]}>PROGRAM</Text>
               </GlassCard>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleSetGoals}
               activeOpacity={0.7}
               style={{ flex: 2 }}
-              accessibilityLabel="Adjust goals"
+              accessibilityLabel="Edit goals"
               accessibilityRole="button"
-              accessibilityHint="Opens the goals wizard to update your fitness goals and preferences"
+              accessibilityHint="Opens the goals wizard to update your fitness goals"
             >
               <GlassCard
                 style={[styles.actionButtonGlass, { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }]}
                 interactive
               >
+                <Edit3 size={16} color={colors.primary} strokeWidth={1.5} />
                 <Text style={[styles.actionButtonText, { color: colors.primary }]}>GOALS</Text>
               </GlassCard>
             </TouchableOpacity>
@@ -985,6 +995,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
+    gap: 8,
   },
   actionButtonText: {
     fontSize: 14,
