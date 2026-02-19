@@ -20,7 +20,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Clock, UtensilsCrossed, PlusCircle, Bookmark, ShoppingCart, ArrowLeftRight, Carrot } from 'lucide-react-native';
+import { X, Clock, UtensilsCrossed, PlusCircle, Bookmark, ShoppingCart, ArrowLeftRight, Carrot, RefreshCw } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -397,22 +397,38 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
               {/* Meal type header */}
               <View style={styles.mealTypeRow}>
                 <Text style={[styles.mealTypeLabel, { color: colors.textMuted }]}>{getMealTypeLabel(meal.mealType)}</Text>
-                <TouchableOpacity
-                  onPress={handleViewRecipe}
-                  activeOpacity={0.6}
-                  accessibilityLabel={`View recipe for ${meal.name}`}
-                  accessibilityRole="button"
-                  accessibilityHint="Opens detailed recipe with ingredients and instructions"
-                  style={[
-                    styles.recipeButtonContainer,
-                    {
-                      backgroundColor: `${colors.accentCyan}25`,
-                    }
-                  ]}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Text style={[styles.recipeButton, { color: colors.accentCyan }]}>View Recipe</Text>
-                </TouchableOpacity>
+                <View style={styles.mealTypeActions}>
+                  {onSwap && (
+                    <TouchableOpacity
+                      onPress={onSwap}
+                      disabled={isSwapping}
+                      activeOpacity={0.6}
+                      accessibilityLabel={`Refresh ${meal.name} with a new AI meal`}
+                      accessibilityRole="button"
+                      style={[
+                        styles.refreshButtonContainer,
+                        { backgroundColor: `${colors.accentPurple}20` }
+                      ]}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <RefreshCw size={14} color={colors.accentPurple} strokeWidth={2} />
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity
+                    onPress={handleViewRecipe}
+                    activeOpacity={0.6}
+                    accessibilityLabel={`View recipe for ${meal.name}`}
+                    accessibilityRole="button"
+                    accessibilityHint="Opens detailed recipe with ingredients and instructions"
+                    style={[
+                      styles.recipeButtonContainer,
+                      { backgroundColor: `${colors.accentCyan}25` }
+                    ]}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Text style={[styles.recipeButton, { color: colors.accentCyan }]}>View Recipe</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {/* Meal name */}
@@ -754,6 +770,18 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.numericRegular,
     flex: 1,
     letterSpacing: 0.5,
+  },
+  mealTypeActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  refreshButtonContainer: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   recipeButtonContainer: {
     paddingHorizontal: 12,

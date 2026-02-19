@@ -500,26 +500,6 @@ export default function MealsScreen() {
                 </GlassCard>
 
                 <GlassCard
-                  style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)' }]}
-                  intensity={isDark ? 50 : 70}
-                  interactive
-                >
-                  <TouchableOpacity
-                    onPress={handleAIGenerate}
-                    disabled={isGenerating}
-                    activeOpacity={0.7}
-                    style={styles.halfButtonInner}
-                    accessibilityLabel="AI-powered meal plan generation"
-                    accessibilityRole="button"
-                    accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-                    accessibilityHint="Generates a personalized 7-day meal plan using AI based on your food preferences and macro goals"
-                  >
-                    <Sparkles size={20} color={colors.accentPurple} />
-                    <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1', fontFamily: Fonts.light }]}>AI</Text>
-                  </TouchableOpacity>
-                </GlassCard>
-
-                <GlassCard
                   style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(34, 197, 94, 0.25)' : 'rgba(34, 197, 94, 0.15)' }]}
                   intensity={isDark ? 50 : 70}
                   interactive
@@ -695,25 +675,6 @@ export default function MealsScreen() {
                       </TouchableOpacity>
                     </GlassCard>
 
-                    <GlassCard
-                      style={[styles.halfButtonGlass, { backgroundColor: isDark ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)' }]}
-                      intensity={isDark ? 50 : 70}
-                      interactive
-                    >
-                      <TouchableOpacity
-                        onPress={handleAIGenerate}
-                        disabled={isGenerating}
-                        activeOpacity={0.7}
-                        style={styles.halfButtonInner}
-                        accessibilityLabel="AI-powered regenerate meal plan"
-                        accessibilityRole="button"
-                        accessibilityState={{ disabled: isGenerating, busy: isGenerating }}
-                        accessibilityHint="Regenerates the entire 7-day meal plan using AI personalization based on your preferences and goals"
-                      >
-                        <Sparkles size={18} color={colors.accentPurple} />
-                        <Text style={[styles.halfButtonText, { color: isDark ? '#a5b4fc' : '#6366f1', fontFamily: Fonts.light }]}>AI-Powered</Text>
-                      </TouchableOpacity>
-                    </GlassCard>
                   </View>
                 </View>
               </>
