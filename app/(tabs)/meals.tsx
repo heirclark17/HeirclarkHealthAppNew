@@ -643,10 +643,9 @@ export default function MealsScreen() {
         {weeklyPlan && !isCheatDay && <View style={{ height: 0 }} />}
       </ScrollView>
 
-      {/* Sticky Action Buttons - Frosted Liquid Glass */}
+      {/* Instacart Button - Bottom Center */}
       {weeklyPlan && !isCheatDay && (
-        <View style={[styles.stickyButtonContainer, { paddingBottom: insets.bottom + 80 }]}>
-          {/* Instacart Button - Navigation Bar Style Liquid Glass */}
+        <View style={[styles.bottomCenterButton, { paddingBottom: insets.bottom + 80 }]}>
           <TouchableOpacity
             onPress={() => setShowGroceryModal(true)}
             activeOpacity={0.8}
@@ -676,8 +675,12 @@ export default function MealsScreen() {
               </View>
             </BlurView>
           </TouchableOpacity>
+        </View>
+      )}
 
-          {/* AI Coach Button - Navigation Bar Style Liquid Glass */}
+      {/* AI Coach Button - Middle Right */}
+      {weeklyPlan && !isCheatDay && (
+        <View style={styles.rightMiddleButton}>
           <TouchableOpacity
             onPress={() => setShowCoachingModal(true)}
             activeOpacity={0.8}
@@ -935,6 +938,23 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.medium,
   },
   // Sticky frosted glass action buttons at bottom
+  bottomCenterButton: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 16,
+    paddingHorizontal: 20,
+  },
+  rightMiddleButton: {
+    position: 'absolute',
+    right: 20,
+    top: '50%',
+    transform: [{ translateY: -28 }], // Half of button height (56/2)
+  },
   stickyButtonContainer: {
     position: 'absolute',
     bottom: 0,
