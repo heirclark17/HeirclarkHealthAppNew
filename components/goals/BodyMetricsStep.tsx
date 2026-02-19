@@ -885,7 +885,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <Icon name="hand-point-left" size={24} color={colors.text} solid />
+              <Icon name="hand-point-left" size={24} color={colors.text} />
             </GlassCard>
           </TouchableOpacity>
 
@@ -898,14 +898,8 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             accessibilityState={{ disabled: !isValid() }}
             accessibilityHint="Proceeds to the next step if all fields are filled"
           >
-            <GlassCard
-              style={[
-                styles.continueButton,
-                { backgroundColor: isValid() ? primaryGlassBg : 'transparent' },
-              ]}
-              interactive
-            >
-              <Icon name="hand-point-right" size={24} color={isValid() ? colors.primary : colors.textMuted} solid />
+            <GlassCard style={styles.continueButton} interactive>
+              <Icon name="hand-point-right" size={24} color={isValid() ? colors.primary : colors.textMuted} />
             </GlassCard>
           </TouchableOpacity>
         </View>
@@ -1221,6 +1215,7 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
+    justifyContent: 'center',
   },
   backButton: {
     width: 56,

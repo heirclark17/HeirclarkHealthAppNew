@@ -209,20 +209,16 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
             onPress={handleContinue}
             disabled={!state.primaryGoal}
             activeOpacity={0.7}
-            style={{ alignSelf: 'center' }}
             accessibilityLabel={state.primaryGoal ? 'Continue to next step' : 'Continue, select a goal first'}
             accessibilityRole="button"
             accessibilityState={{ disabled: !state.primaryGoal }}
             accessibilityHint={state.primaryGoal ? 'Proceeds to the next step in goal setup' : 'Select a primary fitness goal to continue'}
           >
             <GlassCard
-              style={[
-                styles.continueButton,
-                { backgroundColor: state.primaryGoal ? primaryGlassBg : 'transparent' },
-              ]}
+              style={styles.continueButton}
               interactive
             >
-              <Icon name="hand-point-right" size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} solid />
+              <Icon name="hand-point-right" size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} />
             </GlassCard>
           </TouchableOpacity>
         </View>
@@ -312,6 +308,7 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
+    justifyContent: 'center',
   },
   continueButton: {
     width: 56,

@@ -1019,7 +1019,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <Icon name="hand-point-left" size={24} color={colors.text} solid />
+              <Icon name="hand-point-left" size={24} color={colors.text} />
             </GlassCard>
           </TouchableOpacity>
 
@@ -1030,8 +1030,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             accessibilityRole="button"
             accessibilityHint="Saves nutrition preferences and proceeds to next step"
           >
-            <GlassCard style={[styles.continueButton, { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }]} interactive>
-              <Icon name="hand-point-right" size={24} color={colors.primary} solid />
+            <GlassCard style={styles.continueButton} interactive>
+              <Icon name="hand-point-right" size={24} color={colors.primary} />
             </GlassCard>
           </TouchableOpacity>
         </View>
@@ -1356,6 +1356,7 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
+    justifyContent: 'center',
   },
   backButton: {
     width: 56,
