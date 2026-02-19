@@ -522,25 +522,6 @@ export function WorkoutCard({
             </View>
           )}
 
-          {/* View Progress Button */}
-          {onViewProgress && (
-            <TouchableOpacity
-              onPress={() => {
-                lightImpact();
-                onViewProgress();
-              }}
-              activeOpacity={0.7}
-              style={styles.viewProgressWrapper}
-            >
-              <GlassCard style={styles.viewProgressButton} interactive>
-                <Ionicons name="analytics-outline" size={18} color={colors.textSecondary} />
-                <NumberText weight="semiBold" style={[styles.viewProgressText, { color: colors.textSecondary }]}>
-                  VIEW PROGRESS
-                </NumberText>
-              </GlassCard>
-            </TouchableOpacity>
-          )}
-
           {/* Complete Workout Button - Frosted Glass */}
           <TouchableOpacity
             onPress={() => {
@@ -574,6 +555,25 @@ export function WorkoutCard({
               </NumberText>
             </GlassCard>
           </TouchableOpacity>
+
+          {/* View Progress Button */}
+          {onViewProgress && (
+            <TouchableOpacity
+              onPress={() => {
+                lightImpact();
+                onViewProgress();
+              }}
+              activeOpacity={0.7}
+              style={styles.viewProgressWrapper}
+            >
+              <GlassCard style={styles.viewProgressButton} interactive>
+                <Ionicons name="analytics-outline" size={18} color={colors.textSecondary} />
+                <NumberText weight="semiBold" style={[styles.viewProgressText, { color: colors.textSecondary }]}>
+                  VIEW PROGRESS
+                </NumberText>
+              </GlassCard>
+            </TouchableOpacity>
+          )}
         </GlassCard>
       </View>
     </Animated.View>
