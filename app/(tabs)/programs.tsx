@@ -462,16 +462,20 @@ export default function ProgramsScreen() {
                     </Text>
                   )}
                 </View>
-                <View style={[styles.weekProgressBar, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}>
-                  <View
-                    style={[
-                      styles.weekProgressFill,
-                      {
-                        width: `${(currentWeek / multiWeekPlan.totalWeeks) * 100}%`,
-                        backgroundColor: colors.primary,
-                      },
-                    ]}
-                  />
+                <View style={styles.weekProgressDots}>
+                  {Array.from({ length: multiWeekPlan.totalWeeks }, (_, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.weekDot,
+                        {
+                          backgroundColor: i < currentWeek
+                            ? colors.primary
+                            : isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+                        },
+                      ]}
+                    />
+                  ))}
                 </View>
               </View>
             )}
@@ -932,14 +936,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: Fonts.regular,
   },
-  weekProgressBar: {
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
+  weekProgressDots: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 2,
   },
-  weekProgressFill: {
-    height: '100%',
-    borderRadius: 2,
+  weekDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   weekNavigation: {
     flexDirection: 'row',
