@@ -224,7 +224,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
   useEffect(() => {
     if (weeklyPlan.length > 0 && scrollViewRef.current) {
       setTimeout(() => {
-        const dayWidth = 76; // 64px width + 12px gap
+        const dayWidth = 84; // 72px width + 12px gap
         const maxScroll = weeklyPlan.length * dayWidth;
         scrollViewRef.current?.scrollTo({ x: maxScroll, y: 0, animated: false });
       }, 100);
@@ -320,8 +320,7 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                     {/* Meal summary */}
                     {getMealSummary(day, isCheat) && (
                       <Text
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
+                        numberOfLines={2}
                         style={[
                           styles.mealSummary,
                           { color: colors.textMuted },
@@ -470,12 +469,12 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   dayItem: {
-    width: 64,
-    height: 110, // Fixed height for consistent card lengths
+    width: 72,
+    minHeight: 120, // Changed to minHeight to allow dynamic height based on text
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 18,
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     borderRadius: 20,
     backgroundColor: 'transparent',
     position: 'relative',
@@ -527,12 +526,14 @@ const styles = StyleSheet.create({
     // Font family handled by NumberText component (SF Pro Rounded)
   },
   mealSummary: {
-    fontSize: 7,
+    fontSize: 9,
     fontFamily: Fonts.medium,
-    marginTop: 4,
+    marginTop: 6,
     textAlign: 'center',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
     opacity: 0.9,
+    lineHeight: 12,
+    paddingHorizontal: 2,
   },
   cheatDayItem: {
     // Border removed per user request
