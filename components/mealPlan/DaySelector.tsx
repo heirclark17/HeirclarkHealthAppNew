@@ -545,9 +545,11 @@ const styles = StyleSheet.create({
   cheatBadge: {
     position: 'absolute',
     top: 4,
-    right: 4,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 8,
