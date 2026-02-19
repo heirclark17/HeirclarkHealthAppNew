@@ -401,36 +401,84 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
 
         console.log('[MealPlanContext] Calculated week summary from actual meals:', calculatedWeekSummary);
 
+        // *** OPTION 1: Generate ALL images UPFRONT before showing meal plan ***
+        console.log('[MealPlanContext] 🖼️ Generating all food photos before displaying plan...');
+        const updatedPlan = [...weeklyPlan];
+        const totalMeals = weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0);
+        let imagesGenerated = 0;
+
+        // Generate images for all meals with progress updates
+        for (let dayIdx = 0; dayIdx < updatedPlan.length; dayIdx++) {
+          const day = updatedPlan[dayIdx];
+          for (let mealIdx = 0; mealIdx < day.meals.length; mealIdx++) {
+            const meal = day.meals[mealIdx];
+
+            // Skip if imageUrl already exists
+            if (meal.imageUrl) {
+              imagesGenerated++;
+              continue;
+            }
+
+            // Update loading progress
+            setState(prev => ({
+              ...prev,
+              isGenerating: true,
+              error: `Generating food photos... ${imagesGenerated + 1}/${totalMeals}`,
+            }));
+
+            try {
+              const imageUrl = await pexelsService.searchFoodPhoto(meal.name, 'card');
+              if (imageUrl) {
+                updatedPlan[dayIdx] = {
+                  ...updatedPlan[dayIdx],
+                  meals: updatedPlan[dayIdx].meals.map((m, idx) =>
+                    idx === mealIdx ? { ...m, imageUrl } : m
+                  ),
+                };
+                imagesGenerated++;
+                console.log(`[MealPlanContext] 🖼️ Image ${imagesGenerated}/${totalMeals}: ${meal.name}`);
+              }
+            } catch (imgErr) {
+              console.error(`[MealPlanContext] ❌ Image error for ${meal.name}:`, imgErr);
+              // Continue even if one image fails
+              imagesGenerated++;
+            }
+          }
+        }
+
+        console.log(`[MealPlanContext] ✅ Generated ${imagesGenerated}/${totalMeals} food photos`);
+
+        // Now set state with COMPLETE plan (includes all images)
         setState(prev => ({
           ...prev,
-          weeklyPlan,
-          groceryList: [], // AI plan doesn't include grocery list yet
+          weeklyPlan: updatedPlan,
+          groceryList: [],
           weekSummary: calculatedWeekSummary,
           isGenerating: false,
           error: null,
           lastGeneratedAt: now,
         }));
 
-        // Cache the plan locally
+        // Cache the COMPLETE plan locally (includes images)
         const cacheData = {
-          weeklyPlan,
+          weeklyPlan: updatedPlan,
           groceryList: [],
           weekSummary: calculatedWeekSummary,
           lastGeneratedAt: now,
         };
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
 
-        // *** Sync AI meal plan to backend ***
+        // *** Sync COMPLETE meal plan to backend (includes images) ***
         try {
-          console.log('[MealPlanContext] 🔄 Syncing AI meal plan to backend...');
-          const weekStart = weeklyPlan[0]?.date || new Date().toISOString().split('T')[0];
+          console.log('[MealPlanContext] 🔄 Syncing complete meal plan to backend...');
+          const weekStart = updatedPlan[0]?.date || new Date().toISOString().split('T')[0];
           const syncSuccess = await api.saveMealPlan(
-            { weeklyPlan, groceryList: [], weekSummary: calculatedWeekSummary },
+            { weeklyPlan: updatedPlan, groceryList: [], weekSummary: calculatedWeekSummary },
             weekStart,
             preferences.dietStyle
           );
           if (syncSuccess) {
-            console.log('[MealPlanContext] ✅ AI meal plan synced to backend');
+            console.log('[MealPlanContext] ✅ Complete meal plan synced to backend');
           } else {
             console.warn('[MealPlanContext] ⚠️ Backend sync failed - plan saved locally');
           }
@@ -438,16 +486,14 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
           console.error('[MealPlanContext] ❌ Backend sync error:', syncError);
         }
 
-        // *** Background: Auto-save meals FIRST, then generate images ***
+        // *** Auto-save all meals to saved_meals (fire-and-forget) ***
         (async () => {
           try {
-            // STEP 1: Save all meals to saved_meals IMMEDIATELY (no images yet)
             console.log('[MealPlanContext] 💾 Auto-saving all meals to saved meals...');
             let savedCount = 0;
-            for (const day of weeklyPlan) {
+            for (const day of updatedPlan) {
               for (const meal of day.meals) {
                 try {
-                  // Save directly to backend (skip aiService.saveMeal which reads ALL saved meals each time)
                   await api.saveMeal({
                     mealName: meal.name,
                     mealType: meal.mealType,
@@ -458,7 +504,7 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
                     ingredients: meal.ingredients || [],
                     recipe: meal.description || '',
                     prepTimeMinutes: meal.prepTime || 15,
-                    photoUrl: '',
+                    photoUrl: meal.imageUrl || '',
                     tags: [],
                   });
                   savedCount++;
@@ -467,98 +513,9 @@ export function MealPlanProvider({ children }: { children: React.ReactNode }) {
                 }
               }
             }
-            console.log(`[MealPlanContext] ✅ Saved ${savedCount} meals to saved_meals`);
-
-            // STEP 2: Generate images for all meals (this takes a while)
-            console.log('[MealPlanContext] 🖼️ Starting background image generation...');
-            const updatedPlan = [...weeklyPlan];
-            let imagesGenerated = 0;
-
-            for (let dayIdx = 0; dayIdx < updatedPlan.length; dayIdx++) {
-              const day = updatedPlan[dayIdx];
-              for (let mealIdx = 0; mealIdx < day.meals.length; mealIdx++) {
-                const meal = day.meals[mealIdx];
-                if (meal.imageUrl) {
-                  imagesGenerated++;
-                  continue;
-                }
-                try {
-                  const imageUrl = await pexelsService.searchFoodPhoto(meal.name, 'card');
-                  if (imageUrl) {
-                    updatedPlan[dayIdx] = {
-                      ...updatedPlan[dayIdx],
-                      meals: updatedPlan[dayIdx].meals.map((m, idx) =>
-                        idx === mealIdx ? { ...m, imageUrl } : m
-                      ),
-                    };
-                    imagesGenerated++;
-                    console.log(`[MealPlanContext] 🖼️ Image ${imagesGenerated}: ${meal.name}`);
-
-                    // Update state progressively so MealCards show images as they arrive
-                    setState(prev => {
-                      if (!prev.weeklyPlan) return prev;
-                      const newPlan = [...prev.weeklyPlan];
-                      newPlan[dayIdx] = {
-                        ...newPlan[dayIdx],
-                        meals: newPlan[dayIdx].meals.map((m, idx) =>
-                          idx === mealIdx ? { ...m, imageUrl } : m
-                        ),
-                      };
-                      return { ...prev, weeklyPlan: newPlan };
-                    });
-                  }
-                } catch (imgErr) {
-                  console.error(`[MealPlanContext] ❌ Image error for ${meal.name}:`, imgErr);
-                }
-              }
-            }
-
-            // STEP 3: Re-cache locally with images
-            const updatedCache = {
-              weeklyPlan: updatedPlan,
-              groceryList: [],
-              weekSummary: calculatedWeekSummary,
-              lastGeneratedAt: now,
-            };
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCache));
-
-            // Re-sync plan with images to backend
-            try {
-              const weekStart = updatedPlan[0]?.date || new Date().toISOString().split('T')[0];
-              await api.saveMealPlan(
-                { weeklyPlan: updatedPlan, groceryList: [], weekSummary: calculatedWeekSummary },
-                weekStart,
-                preferences.dietStyle
-              );
-            } catch {}
-
-            // STEP 4: Update saved_meals with photo URLs
-            console.log('[MealPlanContext] 🖼️ Updating saved meals with photo URLs...');
-            for (const day of updatedPlan) {
-              for (const meal of day.meals) {
-                if (meal.imageUrl) {
-                  try {
-                    await api.saveMeal({
-                      mealName: meal.name,
-                      mealType: meal.mealType,
-                      calories: meal.calories,
-                      protein: meal.protein,
-                      carbs: meal.carbs,
-                      fat: meal.fat,
-                      ingredients: meal.ingredients || [],
-                      recipe: meal.description || '',
-                      prepTimeMinutes: meal.prepTime || 15,
-                      photoUrl: meal.imageUrl,
-                      tags: [],
-                    });
-                  } catch {}
-                }
-              }
-            }
-
-            console.log(`[MealPlanContext] ✅ Background complete: ${imagesGenerated} images generated`);
+            console.log(`[MealPlanContext] ✅ Auto-saved ${savedCount} meals to saved_meals`);
           } catch (bgError) {
-            console.error('[MealPlanContext] ❌ Background task error:', bgError);
+            console.error('[MealPlanContext] ❌ Auto-save error:', bgError);
           }
         })();
 

@@ -233,17 +233,20 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
-  // Use persisted imageUrl if available, otherwise fetch from backend
+  // Use pre-generated imageUrl (from upfront batch generation)
   useEffect(() => {
     setImageReady(false);
     setImageError(false);
 
     if (meal.imageUrl) {
+      console.log('[MealCard] ✅ Using pre-generated image for:', meal.name);
       setMealImageUrl(meal.imageUrl);
       setIsLoadingImage(false);
       return;
     }
 
+    // Fallback: This should rarely happen now that images are generated upfront
+    console.warn('[MealCard] ⚠️ No imageUrl found for meal, fetching on-demand:', meal.name);
     setIsLoadingImage(true);
     const fetchMealImage = async () => {
       try {
@@ -251,12 +254,12 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
         setMealImageUrl(imageUrl);
         if (!imageUrl) {
           setImageError(true);
-          setImageReady(true); // No image to wait for, show card with placeholder
+          setImageReady(true);
         }
       } catch (error) {
-        console.error('[MealCard] Error loading meal image:', error);
+        console.error('[MealCard] ❌ Error loading meal image:', error);
         setImageError(true);
-        setImageReady(true); // Show card with placeholder on error
+        setImageReady(true);
       } finally {
         setIsLoadingImage(false);
       }

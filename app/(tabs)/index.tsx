@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl, Alert, Modal, TextInput, Animated, Platform, Pressable, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Dumbbell, BarChart3, Watch, X, Clock, Trash2, Salad } from 'lucide-react-native';
+import { Dumbbell, BarChart3, Watch, X, Clock, Trash2, Salad, LayoutDashboard } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ReanimatedModule, { useSharedValue, useAnimatedStyle, withSpring, ReduceMotion } from 'react-native-reanimated';
@@ -38,6 +38,8 @@ import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { usePostHog } from '../../contexts/PostHogContext';
 import { NumberText } from '../../components/NumberText';
 import { LiquidGlassProfileImage } from '../../components/LiquidGlassProfileImage';
+import { CoachChatModal } from '../../components/agents/aiCoach';
+import { AnimatedSparkleIcon } from '../../components/AnimatedSparkleIcon';
 
 const AnimatedPressable = ReanimatedModule.createAnimatedComponent(Pressable);
 
@@ -98,6 +100,7 @@ export default function DashboardScreen() {
   const [showStepsInfoModal, setShowStepsInfoModal] = useState(false);
   const [showActiveEnergyInfoModal, setShowActiveEnergyInfoModal] = useState(false);
   const [showRestingEnergyInfoModal, setShowRestingEnergyInfoModal] = useState(false);
+  const [showCoachingModal, setShowCoachingModal] = useState(false);
 
   // Handle openMealModal query parameter from Log Meal button
   useEffect(() => {
@@ -185,6 +188,21 @@ export default function DashboardScreen() {
   }));
 
   const calorieBalance = caloriesIn - caloriesOut;
+
+  // Dashboard summary message for AI coach
+  const dashboardSummaryMessage = useMemo(() => {
+    const parts: string[] = [
+      `Walk me through my dashboard. Here's my data for today:`,
+    ];
+    parts.push(`Calories: ${Math.round(caloriesIn)} in / ${Math.round(caloriesOut)} out (goal: ${calorieGoal})`);
+    parts.push(`Macros: Protein ${Math.round(protein)}/${proteinGoal}g, Carbs ${Math.round(carbs)}/${carbsGoal}g, Fat ${Math.round(fat)}/${fatGoal}g`);
+    if (steps > 0) parts.push(`Steps: ${steps.toLocaleString()}`);
+    if (activeEnergy > 0) parts.push(`Active energy: ${Math.round(activeEnergy)} cal`);
+    if (restingEnergy > 0) parts.push(`Resting energy: ${Math.round(restingEnergy)} cal`);
+    if (meals.length > 0) parts.push(`Meals logged today: ${meals.length}`);
+    parts.push(`Please explain what each number means for my health and what I should focus on.`);
+    return parts.join('\n');
+  }, [caloriesIn, caloriesOut, calorieGoal, protein, proteinGoal, carbs, carbsGoal, fat, fatGoal, steps, activeEnergy, restingEnergy, meals.length]);
 
   // Check API connection
   const checkApiConnection = async () => {
