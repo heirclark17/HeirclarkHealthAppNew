@@ -636,16 +636,15 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   progressContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    gap: 10,
+    gap: 6,
   },
   progressDots: {
-    flex: 1,
     flexDirection: 'row',
     gap: 5,
     flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   progressDot: {
     width: 8,
