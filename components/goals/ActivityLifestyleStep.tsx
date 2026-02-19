@@ -20,7 +20,7 @@ import {
   Building2,
   Weight,
   TrendingUp,
-  Activity
+  HeartPulse
 } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard, CardioPreference, FitnessLevel, StrengthLevel } from '../../contexts/GoalWizardContext';
@@ -536,7 +536,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         currentStep={3}
         totalSteps={6}
         title="Activity & Lifestyle"
-        icon={<Activity size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
+        icon={<HeartPulse size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={onBack}
         isDark={isDark}
       />
