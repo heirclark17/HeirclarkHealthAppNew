@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert, Dimensions, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Alert, Dimensions, Modal } from 'react-native';
 import Animated, {
   SlideInRight,
   useSharedValue,
@@ -12,31 +12,21 @@ import Animated, {
 import ConfettiCannon from 'react-native-confetti-cannon';
 import {
   Flame,
-  Dumbbell,
-  TrendingUp,
-  Activity,
-  Calendar,
   Utensils,
   Heart,
   Target,
   Beef,
   Wheat,
   Nut,
-  Lightbulb,
   Settings as SettingsIcon,
-  Timer,
-  Play,
-  ChevronRight,
   Apple,
   Pizza,
   Coffee,
   Cookie,
   Salad,
-  CheckCircle2,
-  PartyPopper
 } from 'lucide-react-native';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
 import { NumberText } from '../NumberText';
@@ -50,6 +40,7 @@ import {
 } from '../../services/openaiService';
 import { GoalAlignmentCard } from '../training/GoalAlignmentCard';
 import { PlanSummaryCard } from './PlanSummaryCard';
+import { ActionCardStack } from './ActionCardStack';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SuccessScreenProps {
@@ -517,121 +508,16 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         />
       )}
 
-      {/* Action Cards Container */}
-      <View style={styles.actionCardsContainer}>
-        {/* Coaching Video Button */}
-        {onViewAvatar && (
-          <View>
-            <Pressable
-              onPress={handleViewAvatar}
-              testID="watch-coaching-button"
-              accessibilityRole="button"
-              accessibilityLabel="Watch your customized coaching explained"
-            >
-              <GlassCard style={styles.coachingButtonCard} interactive>
-                <View style={styles.coachingButtonInner}>
-                  <View style={styles.coachingIconContainer}>
-                    <View style={styles.playIconCircle}>
-                      <Play size={20} color="#fff" />
-                    </View>
-                  </View>
-                  <View style={styles.coachingTextContainer}>
-                    <Text style={[styles.coachingButtonTitle, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>WATCH YOUR CUSTOMIZED COACHING</Text>
-                    <Text style={[styles.coachingButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Your AI coach explains your personalized plan</Text>
-                  </View>
-                  <ChevronRight size={20} color={colors.textMuted} />
-                </View>
-              </GlassCard>
-          </Pressable>
-        </View>
-      )}
-
-      {/* Start 7-Day Meal Plan Button */}
-      {onStartMealPlan && (
-        <View>
-          <Pressable
-            onPress={handleStartMealPlan}
-            testID="start-meal-plan-button"
-            accessibilityRole="button"
-            accessibilityLabel="Start your 7-day meal plan"
-            disabled={isGeneratingMealPlan || isGeneratingTrainingPlan}
-          >
-            <GlassCard style={[styles.mealPlanButtonCard, (isGeneratingMealPlan || isGeneratingTrainingPlan) && { opacity: 0.7 }]} interactive>
-              <View style={styles.mealPlanButtonInner}>
-                <View style={styles.mealPlanIconContainer}>
-                  <View style={styles.mealPlanIconCircle}>
-                    {isGeneratingMealPlan ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <Utensils size={20} color="#fff" />
-                    )}
-                  </View>
-                </View>
-                <View style={styles.coachingTextContainer}>
-                  <Text style={[styles.mealPlanButtonTitle, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
-                    {isGeneratingMealPlan ? 'GENERATING AI MEAL PLAN...' : 'START YOUR '}
-                    {!isGeneratingMealPlan && (
-                      <NumberText weight="semiBold" style={[styles.mealPlanButtonTitle, { color: colors.text }]}>7</NumberText>
-                    )}
-                    {isGeneratingMealPlan ? '' : '-DAY MEAL PLAN'}
-                  </Text>
-                  <Text style={[styles.mealPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>
-                    {isGeneratingMealPlan ? 'Please wait while AI creates your plan' : 'AI-generated meals tailored to your goals'}
-                  </Text>
-                </View>
-                {!isGeneratingMealPlan && <ChevronRight size={20} color={colors.textMuted} />}
-              </View>
-            </GlassCard>
-          </Pressable>
-        </View>
-      )}
-
-      {/* Start Training Plan Button */}
-      {onStartTrainingPlan && (
-        <View>
-          <Pressable
-            onPress={handleStartTrainingPlan}
-            testID="start-training-plan-button"
-            accessibilityRole="button"
-            accessibilityLabel="Start your training plan"
-            disabled={isGeneratingMealPlan || isGeneratingTrainingPlan}
-          >
-            <GlassCard style={[styles.trainingPlanButtonCard, (isGeneratingMealPlan || isGeneratingTrainingPlan) && { opacity: 0.7 }]} interactive>
-              <View style={styles.trainingPlanButtonInner}>
-                <View style={styles.trainingPlanIconContainer}>
-                  <View style={styles.trainingPlanIconCircle}>
-                    {isGeneratingTrainingPlan ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <Dumbbell size={20} color="#fff" />
-                    )}
-                  </View>
-                </View>
-                <View style={styles.coachingTextContainer}>
-                  <Text style={[styles.trainingPlanButtonTitle, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
-                    {isGeneratingTrainingPlan ? 'GENERATING AI TRAINING PLAN...' : 'START YOUR TRAINING PLAN'}
-                  </Text>
-                  <Text style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>
-                    {isGeneratingTrainingPlan
-                      ? 'Please wait while AI creates your plan'
-                      : (
-                        <>
-                          <NumberText weight="light" style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted }]}>
-                            {state.workoutsPerWeek || 3}
-                          </NumberText>
-                          {` days/week • ${state.primaryGoal === 'lose_weight' ? 'Fat burning' : state.primaryGoal === 'build_muscle' ? 'Muscle building' : 'Fitness'} focused`}
-                        </>
-                      )
-                    }
-                  </Text>
-                </View>
-                {!isGeneratingTrainingPlan && <ChevronRight size={20} color={colors.textMuted} />}
-              </View>
-            </GlassCard>
-          </Pressable>
-        </View>
-      )}
-      </View>
+      {/* Swipeable Action Card Stack */}
+      <ActionCardStack
+        onViewAvatar={onViewAvatar ? handleViewAvatar : undefined}
+        onStartMealPlan={onStartMealPlan ? handleStartMealPlan : undefined}
+        onStartTrainingPlan={onStartTrainingPlan ? handleStartTrainingPlan : undefined}
+        isGeneratingMealPlan={isGeneratingMealPlan}
+        isGeneratingTrainingPlan={isGeneratingTrainingPlan}
+        workoutsPerWeek={state.workoutsPerWeek || 3}
+        primaryGoal={state.primaryGoal}
+      />
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
@@ -865,118 +751,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 20,
-  },
-  actionCardsContainer: {
-    width: '100%',
-  },
-  coachingButtonCard: {
-    marginBottom: 16,
-  },
-  coachingButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  mealPlanButtonCard: {
-    marginBottom: 16,
-  },
-  mealPlanButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  mealPlanIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: 'rgba(255, 107, 107, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mealPlanIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 16,
-    backgroundColor: Colors.error,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mealPlanButtonTitle: {
-    fontSize: 14,
-    fontFamily: Fonts.numericSemiBold,
-    color: Colors.text,
-    marginBottom: 4,
-  },
-  mealPlanButtonSubtitle: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    lineHeight: 16,
-  },
-  trainingPlanButtonCard: {
-    marginBottom: 16,
-  },
-  trainingPlanButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  trainingPlanIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: 'rgba(78, 205, 196, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trainingPlanIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 16,
-    backgroundColor: Colors.success,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trainingPlanButtonTitle: {
-    fontSize: 14,
-    fontFamily: Fonts.numericSemiBold,
-    color: Colors.text,
-    marginBottom: 4,
-  },
-  trainingPlanButtonSubtitle: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    lineHeight: 16,
-  },
-  coachingIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: 'rgba(78, 205, 196, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 16,
-    backgroundColor: Colors.success,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingLeft: 2,
-  },
-  coachingTextContainer: {
-    flex: 1,
-  },
-  coachingButtonTitle: {
-    fontSize: 14,
-    fontFamily: Fonts.numericSemiBold,
-    color: Colors.text,
-    marginBottom: 4,
-  },
-  coachingButtonSubtitle: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    lineHeight: 16,
   },
   buttonContainer: {
     width: '100%',

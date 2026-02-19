@@ -3023,6 +3023,103 @@ app.get('/api/v1/food-photo', async (req, res) => {
 });
 
 // ============================================
+// CARD IMAGE GENERATION (DALL-E) - Action card backgrounds
+// ============================================
+
+const CARD_IMAGE_PROMPTS = {
+  coaching: 'Minimalist digital art of a personal health coach, glowing holographic figure, dark background with teal light rays, futuristic wellness, no text',
+  mealPlan: 'Overhead flat lay of colorful healthy meal prep containers, grilled chicken, quinoa, roasted vegetables, fresh fruits, warm lighting, no text',
+  trainingPlan: 'Modern gym equipment in dramatic lighting, dumbbells and weight rack, dark moody atmosphere with teal accent lights, no text',
+};
+
+const CARD_IMAGE_KEYS = {
+  coaching: 'card_coaching',
+  mealPlan: 'card_mealplan',
+  trainingPlan: 'card_trainingplan',
+};
+
+app.get('/api/v1/card-image', async (req, res) => {
+  try {
+    const { type } = req.query;
+    if (!type || !CARD_IMAGE_PROMPTS[type]) {
+      return res.status(400).json({ error: 'type parameter required (coaching, mealPlan, trainingPlan)' });
+    }
+
+    const imageKey = CARD_IMAGE_KEYS[type];
+    const API_URL = `${req.protocol}://${req.get('host')}`;
+    const permanentUrl = `${API_URL}/api/v1/food-images/${encodeURIComponent(imageKey)}`;
+
+    // 1. Check in-memory cache
+    if (foodImageCache.has(imageKey)) {
+      console.log('[Card Image] Memory cache hit:', type);
+      return res.json({ url: foodImageCache.get(imageKey) });
+    }
+
+    // 2. Check database
+    try {
+      const dbResult = await pool.query(
+        'SELECT id FROM food_images WHERE image_key = $1',
+        [imageKey]
+      );
+      if (dbResult.rows.length > 0) {
+        console.log('[Card Image] Database hit:', type);
+        foodImageCache.set(imageKey, permanentUrl);
+        return res.json({ url: permanentUrl });
+      }
+    } catch (dbErr) {
+      console.error('[Card Image] DB lookup error:', dbErr.message);
+    }
+
+    // 3. Generate with DALL-E
+    console.log('[Card Image] Generating DALL-E image for:', type);
+    const response = await openai.images.generate({
+      model: 'dall-e-3',
+      prompt: CARD_IMAGE_PROMPTS[type],
+      n: 1,
+      size: '1024x1024',
+      quality: 'standard',
+    });
+
+    const dalleUrl = response.data[0]?.url;
+    if (!dalleUrl) {
+      console.error('[Card Image] No image URL in DALL-E response');
+      return res.json({ url: '' });
+    }
+
+    console.log('[Card Image] DALL-E image generated for:', type);
+
+    // 4. Download and store permanently
+    try {
+      const imgResponse = await fetch(dalleUrl);
+      if (imgResponse.ok) {
+        const arrayBuffer = await imgResponse.arrayBuffer();
+        const base64Data = Buffer.from(arrayBuffer).toString('base64');
+        const contentType = imgResponse.headers.get('content-type') || 'image/png';
+
+        await pool.query(
+          `INSERT INTO food_images (image_key, image_data, content_type)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (image_key) DO NOTHING`,
+          [imageKey, base64Data, contentType]
+        );
+
+        console.log('[Card Image] Stored permanently:', type);
+        foodImageCache.set(imageKey, permanentUrl);
+        return res.json({ url: permanentUrl });
+      }
+    } catch (storeErr) {
+      console.error('[Card Image] Storage error:', storeErr.message);
+    }
+
+    // Fallback: return DALL-E URL
+    return res.json({ url: dalleUrl });
+  } catch (error) {
+    console.error('[Card Image] DALL-E error:', error.message);
+    res.json({ url: '' });
+  }
+});
+
+// ============================================
 // AI RECIPE DETAILS
 // ============================================
 

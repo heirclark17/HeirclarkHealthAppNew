@@ -288,25 +288,9 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
         <View style={styles.bottomContainer}>
           <View style={styles.buttonRow}>
             <TouchableOpacity
-              onPress={() => {
-                lightImpact();
-                onBack();
-              }}
-              activeOpacity={0.7}
-              style={{ flex: 1 }}
-              accessibilityLabel="Back"
-              accessibilityRole="button"
-              accessibilityHint="Returns to previous step"
-            >
-              <GlassCard style={styles.backButton} interactive>
-                <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
-              </GlassCard>
-            </TouchableOpacity>
-
-            <TouchableOpacity
               onPress={handleContinue}
               activeOpacity={0.7}
-              style={{ flex: 2 }}
+              style={{ flex: 1 }}
               accessibilityLabel="Continue"
               accessibilityRole="button"
               accessibilityHint="Proceeds to next step (program selection optional)"

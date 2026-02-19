@@ -877,23 +877,10 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       <View style={styles.bottomContainer}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            onPress={onBack}
-            activeOpacity={0.7}
-            style={{ flex: 1 }}
-            accessibilityLabel="Back"
-            accessibilityRole="button"
-            accessibilityHint="Returns to previous step"
-          >
-            <GlassCard style={styles.backButton} interactive>
-              <Text style={[styles.backButtonText, { color: colors.text }]}>BACK</Text>
-            </GlassCard>
-          </TouchableOpacity>
-
-          <TouchableOpacity
             onPress={handleContinue}
             disabled={!isValid()}
             activeOpacity={0.7}
-            style={{ flex: 2 }}
+            style={{ flex: 1 }}
             accessibilityLabel="Continue to next step"
             accessibilityRole="button"
             accessibilityState={{ disabled: !isValid() }}
