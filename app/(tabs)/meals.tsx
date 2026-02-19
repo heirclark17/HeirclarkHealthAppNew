@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { Leaf, Settings, Zap, Sparkles, ShoppingCart, UtensilsCrossed } from 'lucide-react-native';
+import { Leaf, Settings, Zap, ChefHat, ShoppingCart, UtensilsCrossed } from 'lucide-react-native';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
@@ -707,6 +707,7 @@ export default function MealsScreen() {
                   size={22}
                   color={isDark ? '#A855F7' : '#9333EA'}
                   containerSize={52}
+                  icon={ChefHat}
                 />
               </View>
             </BlurView>
