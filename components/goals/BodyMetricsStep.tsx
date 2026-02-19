@@ -884,7 +884,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <View style={{ transform: [{ rotate: '-90deg' }] }}>
+              <View style={{ transform: [{ rotate: '90deg' }, { scaleX: -1 }] }}>
                 <Hand size={24} color={colors.text} />
               </View>
             </GlassCard>
