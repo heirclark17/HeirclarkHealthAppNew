@@ -3027,15 +3027,15 @@ app.get('/api/v1/food-photo', async (req, res) => {
 // ============================================
 
 const CARD_IMAGE_PROMPTS = {
-  coaching: 'Minimalist digital art of a personal health coach, glowing holographic figure, dark background with teal light rays, futuristic wellness, no text',
-  mealPlan: 'Overhead flat lay of colorful healthy meal prep containers, grilled chicken, quinoa, roasted vegetables, fresh fruits, warm lighting, no text',
-  trainingPlan: 'Modern gym equipment in dramatic lighting, dumbbells and weight rack, dark moody atmosphere with teal accent lights, no text',
+  coaching: 'Black outline illustration of a friendly fitness coach character giving a thumbs up, clean thin line art on a dark navy gradient background, animated cartoon style, minimal shading, modern health app aesthetic, no text, no words',
+  mealPlan: 'Black outline illustration of a bowl of healthy food with vegetables and grains, clean thin line art on a dark navy gradient background, animated cartoon style, minimal shading, modern health app aesthetic, no text, no words',
+  trainingPlan: 'Black outline illustration of dumbbells and a kettlebell, clean thin line art on a dark navy gradient background, animated cartoon style, minimal shading, modern health app aesthetic, no text, no words',
 };
 
 const CARD_IMAGE_KEYS = {
-  coaching: 'card_coaching',
-  mealPlan: 'card_mealplan',
-  trainingPlan: 'card_trainingplan',
+  coaching: 'card_coaching_v2',
+  mealPlan: 'card_mealplan_v2',
+  trainingPlan: 'card_trainingplan_v2',
 };
 
 app.get('/api/v1/card-image', async (req, res) => {
