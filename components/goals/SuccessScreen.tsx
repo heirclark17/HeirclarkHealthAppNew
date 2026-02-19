@@ -455,7 +455,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       {/* Daily Targets - Separate Cards */}
       {state.results && (
         <View style={styles.targetsSection}>
-          <Text style={[styles.targetsSectionHeader, { color: colors.textMuted, fontFamily: Fonts.light }]}>YOUR DAILY TARGETS</Text>
+          <Text style={[styles.targetsSectionHeader, { color: colors.textMuted, fontFamily: Fonts.numericSemiBold }]}>YOUR DAILY TARGETS</Text>
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
               <Flame size={20} color={Colors.error} />
@@ -536,7 +536,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                     </View>
                   </View>
                   <View style={styles.coachingTextContainer}>
-                    <Text style={[styles.coachingButtonTitle, { color: colors.text, fontFamily: Fonts.light }]}>Watch Your Customized Coaching</Text>
+                    <Text style={[styles.coachingButtonTitle, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>WATCH YOUR CUSTOMIZED COACHING</Text>
                     <Text style={[styles.coachingButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>Your AI coach explains your personalized plan</Text>
                   </View>
                   <ChevronRight size={20} color={colors.textMuted} />
@@ -568,12 +568,12 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                   </View>
                 </View>
                 <View style={styles.coachingTextContainer}>
-                  <Text style={[styles.mealPlanButtonTitle, { color: colors.text, fontFamily: Fonts.light }]}>
-                    {isGeneratingMealPlan ? 'Generating AI Meal Plan...' : 'Start Your '}
+                  <Text style={[styles.mealPlanButtonTitle, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
+                    {isGeneratingMealPlan ? 'GENERATING AI MEAL PLAN...' : 'START YOUR '}
                     {!isGeneratingMealPlan && (
-                      <NumberText weight="light" style={[styles.mealPlanButtonTitle, { color: colors.text }]}>7</NumberText>
+                      <NumberText weight="semiBold" style={[styles.mealPlanButtonTitle, { color: colors.text }]}>7</NumberText>
                     )}
-                    {isGeneratingMealPlan ? '' : '-Day Meal Plan'}
+                    {isGeneratingMealPlan ? '' : '-DAY MEAL PLAN'}
                   </Text>
                   <Text style={[styles.mealPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>
                     {isGeneratingMealPlan ? 'Please wait while AI creates your plan' : 'AI-generated meals tailored to your goals'}
@@ -608,8 +608,8 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                   </View>
                 </View>
                 <View style={styles.coachingTextContainer}>
-                  <Text style={[styles.trainingPlanButtonTitle, { color: colors.text, fontFamily: Fonts.light }]}>
-                    {isGeneratingTrainingPlan ? 'Generating AI Training Plan...' : 'Start Your Training Plan'}
+                  <Text style={[styles.trainingPlanButtonTitle, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
+                    {isGeneratingTrainingPlan ? 'GENERATING AI TRAINING PLAN...' : 'START YOUR TRAINING PLAN'}
                   </Text>
                   <Text style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>
                     {isGeneratingTrainingPlan
