@@ -8,7 +8,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Settings } from 'lucide-react-native';
+import { Settings, Calendar } from 'lucide-react-native';
 import { useDayPlanner } from '../../contexts/DayPlannerContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { DayPlannerOnboardingModal } from '../../components/planner/onboarding/DayPlannerOnboardingModal';
@@ -85,7 +85,10 @@ export default function PlannerScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]} edges={['top', 'bottom']}>
       {/* Header with view toggle + preferences button */}
       <View style={[styles.header, { backgroundColor: 'transparent', paddingTop: insets.top + 20 }]}>
-        <Text style={[styles.title, { color: themeColors.text }]}>Plan Meals & Workouts</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Calendar size={24} color={themeColors.text} />
+          <Text style={[styles.title, { color: themeColors.text }]}>Plan Meals & Workouts</Text>
+        </View>
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <SegmentedControl
