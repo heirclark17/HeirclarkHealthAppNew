@@ -1,11 +1,11 @@
 /**
- * PlannerCalendarStrip - Horizontal week date strip for the planner
- * Matches CalendarCard style from the calorie counter dashboard
- * Includes action buttons (calendar sync + refresh) below the date strip
+ * PlannerCalendarStrip - 7-day week strip for the planner
+ * Shows exactly the 7 days from the active weekly plan (or current week as fallback).
+ * Includes action buttons (calendar sync + refresh) below the date strip.
  */
 
-import React, { useMemo, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { CalendarClock, RefreshCw, Trash2, UtensilsCrossed, Dumbbell } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
@@ -66,68 +66,54 @@ export function PlannerCalendarStrip({
   const actionBtnBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
 
   const todayStr = useMemo(() => formatDateStr(new Date()), []);
-  const scrollViewRef = useRef<ScrollView>(null);
 
-  // Generate multiple weeks: 52 past + current + 12 future (oldest to newest)
+  // Generate exactly 7 days from the weekly plan's start date (or current week as fallback)
   const weekDays = useMemo(() => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const now = new Date();
 
-    // Calculate current week's Sunday
-    const sunday = new Date(now);
-    sunday.setDate(now.getDate() - now.getDay());
+    // Use the plan's weekStartDate if available, otherwise calculate current week's Sunday
+    let sunday: Date;
+    if (weekStartDate) {
+      sunday = parseLocalDate(weekStartDate);
+    } else {
+      sunday = new Date(now);
+      sunday.setDate(now.getDate() - now.getDay());
+    }
     sunday.setHours(0, 0, 0, 0);
 
     const dateList = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(sunday);
+      date.setDate(sunday.getDate() + i);
+      const dateStr = formatDateStr(date);
 
-    // Generate 52 past weeks + current week + 12 future weeks (65 weeks total)
-    // Loop from oldest (52 weeks ago) to newest (12 weeks in future)
-    for (let weekOffset = -52; weekOffset <= 12; weekOffset++) {
-      const weekStart = new Date(sunday);
-      weekStart.setDate(sunday.getDate() + (weekOffset * 7));
+      dateList.push({
+        day: dayNames[date.getDay()],
+        date: date.getDate(),
+        month: date.toLocaleDateString('en-US', { month: 'short' }),
+        dateStr,
+        isToday: dateStr === todayStr,
+        // Show month label on first day or when month changes from previous day
+        showMonth: i === 0,
+      });
+    }
 
-      // Generate all 7 days for this week
-      for (let dayInWeek = 0; dayInWeek < 7; dayInWeek++) {
-        const date = new Date(weekStart);
-        date.setDate(weekStart.getDate() + dayInWeek);
-        const dateStr = formatDateStr(date);
-
-        dateList.push({
-          day: days[date.getDay()],
-          date: date.getDate(),
-          dateStr,
-          isToday: dateStr === todayStr,
-          isFuture: date > now,
-        });
+    // Also mark the first day of a new month (month boundary within the week)
+    for (let i = 1; i < dateList.length; i++) {
+      if (dateList[i].month !== dateList[i - 1].month) {
+        dateList[i].showMonth = true;
       }
     }
 
     return dateList;
-  }, [todayStr]);
-
-  // Auto-scroll to current week after mount
-  useEffect(() => {
-    if (weekDays.length > 0 && scrollViewRef.current) {
-      setTimeout(() => {
-        // Find the index of today's date
-        const todayIndex = weekDays.findIndex(d => d.isToday);
-        if (todayIndex >= 0) {
-          // Each day is ~50px wide (42px min + 8px gap)
-          const dayWidth = 50;
-          const scrollToX = Math.max(0, (todayIndex - 3) * dayWidth); // Center today with 3 days visible before
-          scrollViewRef.current?.scrollTo({ x: scrollToX, y: 0, animated: false });
-        }
-      }, 100);
-    }
-  }, [weekDays]);
+  }, [weekStartDate, todayStr]);
 
   // Selected date display label
   const selectedLabel = useMemo(() => {
     const date = parseLocalDate(selectedDate);
     return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   }, [selectedDate]);
-
-  // No horizontal scroll needed — 7 day items fit on screen via flex: 1
 
   const hasActions = onSyncCalendar || onRefresh;
 
@@ -207,16 +193,10 @@ export function PlannerCalendarStrip({
         </View>
       )}
 
-      {/* Week strip */}
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.weekStrip}
-      >
+      {/* Week strip - exactly 7 days, no scroll needed */}
+      <View style={styles.weekStrip}>
         {weekDays.map((item) => {
           const isSelected = selectedDate === item.dateStr;
-          const opacity = item.isFuture ? 0.6 : 1; // Dim future dates slightly
 
           return (
             <TouchableOpacity
@@ -238,7 +218,7 @@ export function PlannerCalendarStrip({
                     opacity: 1,
                   } : {
                     backgroundColor: dayItemBg,
-                    opacity: opacity,
+                    opacity: 1,
                   },
                 ]}
               />
@@ -260,6 +240,18 @@ export function PlannerCalendarStrip({
               >
                 {item.date}
               </Text>
+              {/* Show month abbreviation when month changes within the week */}
+              {item.showMonth && (
+                <Text
+                  style={[
+                    styles.monthLabel,
+                    { color: dayNameColor },
+                    isSelected ? { color: isDark ? '#000000' : '#FFFFFF' } : {},
+                  ]}
+                >
+                  {item.month}
+                </Text>
+              )}
               {item.isToday && !isSelected && (
                 <View style={[styles.todayDot, { backgroundColor: themeColors.primary }]} />
               )}
@@ -274,7 +266,7 @@ export function PlannerCalendarStrip({
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </View>
     </GlassCard>
   );
 }
@@ -308,29 +300,14 @@ const styles = StyleSheet.create({
   },
   weekStrip: {
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 4,
-    justifyContent: 'space-between',
-    flex: 1,
+    gap: 6,
   },
   dayItem: {
     flex: 1,
-    minWidth: 42,
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 12,
-    gap: 4,
-  },
-  dayItemActive: {
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-      },
-      android: { elevation: 4 },
-    }),
+    gap: 3,
   },
   dayName: {
     fontSize: 11,
@@ -341,6 +318,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: Fonts.numericSemiBold,
     fontWeight: '600' as const,
+  },
+  monthLabel: {
+    fontSize: 9,
+    fontFamily: Fonts.numericLight,
+    fontWeight: '300' as const,
+    opacity: 0.7,
   },
   todayDot: {
     width: 4,
