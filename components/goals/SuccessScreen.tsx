@@ -445,7 +445,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
       {/* Success Text */}
       <View style={styles.textContainer}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <PartyPopper size={28} color={colors.text} />
+          <PartyPopper size={36} color={colors.text} />
           <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
             {user?.firstName ? `${user.firstName}, ` : ''}You're All Set!
           </Text>

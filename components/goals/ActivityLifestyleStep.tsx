@@ -536,7 +536,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         currentStep={3}
         totalSteps={6}
         title="Activity & Lifestyle"
-        icon={<HeartPulse size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
+        icon={<HeartPulse size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={onBack}
         isDark={isDark}
       />

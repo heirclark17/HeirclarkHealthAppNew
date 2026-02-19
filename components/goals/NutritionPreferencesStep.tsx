@@ -266,7 +266,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         currentStep={4}
         totalSteps={6}
         title="Nutrition Preferences"
-        icon={<Salad size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
+        icon={<Salad size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={onBack}
         isDark={isDark}
       />

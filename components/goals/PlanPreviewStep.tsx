@@ -215,7 +215,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
         currentStep={6}
         totalSteps={6}
         title="Review Your Plan"
-        icon={<ClipboardList size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
+        icon={<ClipboardList size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={onBack}
         isDark={isDark}
       />

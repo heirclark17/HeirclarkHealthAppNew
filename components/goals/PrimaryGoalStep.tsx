@@ -162,7 +162,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
         currentStep={1}
         totalSteps={6}
         title="What's Your Goal?"
-        icon={<Target size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
+        icon={<Target size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={handleBack}
         isDark={isDark}
       />

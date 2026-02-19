@@ -592,7 +592,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
         currentStep={2}
         totalSteps={6}
         title="Your Body Metrics"
-        icon={<Ruler size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
+        icon={<Ruler size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={onBack}
         isDark={isDark}
       />

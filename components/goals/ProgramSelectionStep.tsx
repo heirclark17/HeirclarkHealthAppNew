@@ -105,7 +105,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
           currentStep={5}
           totalSteps={6}
           title="Training Program"
-          icon={<Dumbbell size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
+          icon={<Dumbbell size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
           onBack={onBack}
           isDark={isDark}
         />
