@@ -11,33 +11,27 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Play, Utensils, Dumbbell, ChevronRight } from 'lucide-react-native';
+import { Play, Utensils, Dumbbell } from 'lucide-react-native';
+import Constants from 'expo-constants';
 
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 48;
-const CARD_HEIGHT = 180;
+const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.25);
 const SWIPE_THRESHOLD = CARD_WIDTH * 0.25;
 const BEHIND_SCALE_STEP = 0.05;
-const BEHIND_Y_STEP = 10;
+const BEHIND_Y_STEP = 12;
+
+const API_URL =
+  Constants.expoConfig?.extra?.apiUrl ||
+  process.env.EXPO_PUBLIC_API_URL ||
+  'https://heirclarkinstacartbackend-production.up.railway.app';
 
 const GLASS_SPRING = { damping: 18, stiffness: 120, mass: 1 };
-
-// Accent gradients per card type — premium dark glass look
-const CARD_GRADIENTS: Record<string, [string, string, string]> = {
-  coaching: ['#0f2027', '#203a43', '#2c5364'],
-  mealPlan: ['#1a0a2e', '#2d1b4e', '#1a0a2e'],
-  trainingPlan: ['#0a1628', '#162a4a', '#0a1628'],
-};
-
-const CARD_ACCENT: Record<string, string> = {
-  coaching: '#4ECDC4',
-  mealPlan: '#FF6B6B',
-  trainingPlan: '#00D9F5',
-};
 
 interface CardDef {
   id: string;
@@ -80,6 +74,7 @@ export function ActionCardStack({
   const currentIndex = useSharedValue(0);
   const translateX = useSharedValue(0);
   const [displayIndex, setDisplayIndex] = useState(0);
+  const [cardImages, setCardImages] = useState<Record<string, string>>({});
 
   const goalLabel = useMemo(() => {
     if (primaryGoal === 'lose_weight') return 'Fat burning';
@@ -97,8 +92,8 @@ export function ActionCardStack({
         subtitle: 'Your AI coach explains your plan',
         loadingTitle: 'Watch Coaching',
         loadingSubtitle: 'Your AI coach explains your plan',
-        icon: <Play size={28} color={CARD_ACCENT.coaching} fill={CARD_ACCENT.coaching} />,
-        accent: CARD_ACCENT.coaching,
+        icon: <Play size={22} color="#fff" fill="#fff" />,
+        accent: '#4ECDC4',
         onPress: onViewAvatar,
         isLoading: false,
       });
@@ -111,8 +106,8 @@ export function ActionCardStack({
         subtitle: 'AI-generated meals for your goals',
         loadingTitle: 'Generating Meal Plan...',
         loadingSubtitle: 'Please wait while AI creates your plan',
-        icon: <Utensils size={28} color={CARD_ACCENT.mealPlan} />,
-        accent: CARD_ACCENT.mealPlan,
+        icon: <Utensils size={22} color="#fff" />,
+        accent: '#FF6B6B',
         onPress: onStartMealPlan,
         isLoading: isGeneratingMealPlan,
       });
@@ -125,8 +120,8 @@ export function ActionCardStack({
         subtitle: `${workoutsPerWeek} days/week \u2022 ${goalLabel} focused`,
         loadingTitle: 'Generating Training...',
         loadingSubtitle: 'Please wait while AI creates your plan',
-        icon: <Dumbbell size={28} color={CARD_ACCENT.trainingPlan} />,
-        accent: CARD_ACCENT.trainingPlan,
+        icon: <Dumbbell size={22} color="#fff" />,
+        accent: '#00D9F5',
         onPress: onStartTrainingPlan,
         isLoading: isGeneratingTrainingPlan,
       });
@@ -156,6 +151,29 @@ export function ActionCardStack({
       runOnJS(setDisplayIndex)(val);
     },
   );
+
+  // Fetch card images from backend
+  useEffect(() => {
+    cards.forEach(async (card) => {
+      if (cardImages[card.type]) return;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 45000);
+        const resp = await fetch(`${API_URL}/api/v1/card-image?type=${card.type}`, {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.url) {
+            setCardImages((prev) => ({ ...prev, [card.type]: data.url }));
+          }
+        }
+      } catch (err) {
+        console.log('[ActionCardStack] Image fetch error for', card.type);
+      }
+    });
+  }, [cards]);
 
   const handleTapFront = useCallback(() => {
     if (totalCards === 0) return;
@@ -217,7 +235,6 @@ export function ActionCardStack({
     <View style={styles.container}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
-          {/* Render back-to-front so last rendered = visually on top */}
           {[...cards].reverse().map((card, reverseI) => {
             const i = cards.length - 1 - reverseI;
             return (
@@ -228,6 +245,7 @@ export function ActionCardStack({
                 totalCards={totalCards}
                 currentIndex={currentIndex}
                 translateX={translateX}
+                imageUrl={cardImages[card.type]}
               />
             );
           })}
@@ -255,7 +273,7 @@ export function ActionCardStack({
   );
 }
 
-// ---------- Individual Tinder-style card ----------
+// ---------- Individual card ----------
 
 interface SwipeCardProps {
   card: CardDef;
@@ -263,6 +281,7 @@ interface SwipeCardProps {
   totalCards: number;
   currentIndex: Animated.SharedValue<number>;
   translateX: Animated.SharedValue<number>;
+  imageUrl?: string;
 }
 
 function SwipeCard({
@@ -271,9 +290,8 @@ function SwipeCard({
   totalCards,
   currentIndex,
   translateX,
+  imageUrl,
 }: SwipeCardProps) {
-  const gradient = CARD_GRADIENTS[card.type] || CARD_GRADIENTS.coaching;
-
   const animatedStyle = useAnimatedStyle(() => {
     'worklet';
     const ci = currentIndex.value % totalCards;
@@ -306,12 +324,10 @@ function SwipeCard({
       };
     }
 
-    // Behind cards: stacked underneath, slightly smaller and offset down
     const baseScale = 1 - stackPos * BEHIND_SCALE_STEP;
     const baseY = stackPos * BEHIND_Y_STEP;
 
     if (stackPos === 1) {
-      // Next card: scales up toward 1.0 as front card is dragged
       const scale = baseScale + BEHIND_SCALE_STEP * dragProgress;
       const y = baseY - BEHIND_Y_STEP * dragProgress;
       return {
@@ -326,7 +342,6 @@ function SwipeCard({
       };
     }
 
-    // Further back cards: shift forward one position during drag
     const prevScale = 1 - (stackPos - 1) * BEHIND_SCALE_STEP;
     const prevY = (stackPos - 1) * BEHIND_Y_STEP;
     const scale = baseScale + (prevScale - baseScale) * dragProgress;
@@ -345,57 +360,49 @@ function SwipeCard({
   });
 
   return (
-    <Animated.View style={[styles.card, { width: CARD_WIDTH }, animatedStyle]}>
-      {/* Premium gradient background */}
+    <Animated.View style={[styles.card, animatedStyle]}>
+      {/* Background image */}
+      {imageUrl ? (
+        <Image
+          source={{ uri: imageUrl }}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={300}
+        />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1a1a2e' }]} />
+      )}
+
+      {/* Bottom gradient for text readability */}
       <LinearGradient
-        colors={gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)']}
+        locations={[0.35, 0.6, 1]}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Subtle accent glow at top */}
+      {/* Top subtle vignette */}
       <LinearGradient
-        colors={[card.accent + '18', 'transparent']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 0.6 }}
+        colors={['rgba(0,0,0,0.25)', 'transparent']}
+        locations={[0, 0.3]}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Glass border overlay */}
-      <View style={styles.glassBorder} />
-
-      {/* Card content */}
+      {/* Content pinned to bottom */}
       <View style={styles.cardContent}>
-        {/* Icon with glow ring */}
-        <View style={styles.iconArea}>
-          <View style={[styles.iconGlow, { backgroundColor: card.accent + '15' }]}>
-            <View style={[styles.iconCircle, { borderColor: card.accent + '40' }]}>
-              {card.isLoading ? (
-                <ActivityIndicator size="small" color={card.accent} />
-              ) : (
-                card.icon
-              )}
-            </View>
-          </View>
+        <View style={[styles.iconPill, { backgroundColor: card.accent }]}>
+          {card.isLoading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            card.icon
+          )}
         </View>
-
-        {/* Text content */}
-        <View style={styles.textArea}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
-            {card.isLoading ? card.loadingTitle : card.title}
-          </Text>
-          <Text style={styles.cardSubtitle} numberOfLines={2}>
-            {card.isLoading ? card.loadingSubtitle : card.subtitle}
-          </Text>
-        </View>
-
-        {/* Action arrow */}
-        {!card.isLoading && (
-          <View style={[styles.arrowCircle, { backgroundColor: card.accent + '15', borderColor: card.accent + '30' }]}>
-            <ChevronRight size={18} color={card.accent} />
-          </View>
-        )}
+        <Text style={styles.cardTitle} numberOfLines={1}>
+          {card.isLoading ? card.loadingTitle : card.title}
+        </Text>
+        <Text style={styles.cardSubtitle} numberOfLines={2}>
+          {card.isLoading ? card.loadingSubtitle : card.subtitle}
+        </Text>
       </View>
     </Animated.View>
   );
@@ -422,65 +429,42 @@ const styles = StyleSheet.create({
   },
   card: {
     position: 'absolute',
+    width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    borderRadius: 20,
+    borderRadius: 24,
     overflow: 'hidden',
-  },
-  glassBorder: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 12,
   },
   cardContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     paddingHorizontal: 24,
-    gap: 20,
+    paddingBottom: 28,
   },
-  iconArea: {
+  iconPill: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconGlow: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.04)',
-  },
-  textArea: {
-    flex: 1,
+    marginBottom: 14,
   },
   cardTitle: {
-    fontSize: 18,
-    fontFamily: Fonts.semiBold,
+    fontSize: 22,
+    fontFamily: Fonts.bold,
     color: '#fff',
-    letterSpacing: 0.3,
     marginBottom: 6,
   },
   cardSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: Fonts.regular,
-    color: 'rgba(255,255,255,0.55)',
-    lineHeight: 18,
-  },
-  arrowCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 20,
   },
 });
