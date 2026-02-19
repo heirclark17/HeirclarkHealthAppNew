@@ -2014,7 +2014,7 @@ export default function DashboardScreen() {
             accessibilityRole="button"
             accessibilityHint="Opens AI coaching to walk through your dashboard data"
           >
-            <AnimatedSparkleIcon size={22} color="#a855f7" containerSize={48} icon={LayoutDashboard} />
+            <AnimatedSparkleIcon size={28} color="#a855f7" containerSize={60} icon={LayoutDashboard} />
           </TouchableOpacity>
         </GlassCard>
       </View>
@@ -2645,21 +2645,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     top: '50%',
-    marginTop: -26,
+    marginTop: -32,
     zIndex: 100,
   },
   dashboardCoachFabGlass: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     overflow: 'hidden',
     padding: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
   dashboardCoachFabInner: {
-    width: 52,
-    height: 52,
+    width: 64,
+    height: 64,
     alignItems: 'center',
     justifyContent: 'center',
   },

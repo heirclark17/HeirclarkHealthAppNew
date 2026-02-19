@@ -724,7 +724,7 @@ function AnimatedCoachFab({ isDark, onPress }: { isDark: boolean; onPress: () =>
           accessibilityRole="button"
           accessibilityHint="Opens AI coaching to get personalized training guidance and workout advice"
         >
-          <AnimatedSparkleIcon size={22} color="#a855f7" containerSize={48} icon={Dumbbell} />
+          <AnimatedSparkleIcon size={28} color="#a855f7" containerSize={60} icon={Dumbbell} />
         </TouchableOpacity>
       </GlassCard>
     </View>
@@ -1010,21 +1010,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     top: '50%',
-    marginTop: -26,
+    marginTop: -32,
     zIndex: 10,
   },
   coachFabGlass: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     overflow: 'hidden',
     padding: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
   coachFabInner: {
-    width: 52,
-    height: 52,
+    width: 64,
+    height: 64,
     alignItems: 'center',
     justifyContent: 'center',
   },

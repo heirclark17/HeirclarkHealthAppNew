@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, A
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { Leaf, Settings, Zap, ChefHat, ShoppingCart, UtensilsCrossed } from 'lucide-react-native';
+import { Leaf, Settings, Zap, ChefHat, ShoppingCart, Salad } from 'lucide-react-native';
 import { api, MealData } from '../../services/api';
 import { useMealPlan } from '../../contexts/MealPlanContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
@@ -420,7 +420,7 @@ export default function MealsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <UtensilsCrossed size={24} color={colors.text} strokeWidth={2} />
+          <Salad size={42} color={colors.text} strokeWidth={2} />
           <Text style={[styles.title, { color: colors.text }]}>7-Day Meal Plan</Text>
         </View>
 
@@ -669,7 +669,7 @@ export default function MealsScreen() {
                 }
               ]}>
                 <ShoppingCart
-                  size={22}
+                  size={28}
                   color={isDark ? '#FF8C00' : '#FF9800'}
                   strokeWidth={2.5}
                 />
@@ -704,9 +704,9 @@ export default function MealsScreen() {
                 }
               ]}>
                 <AnimatedSparkleIcon
-                  size={22}
+                  size={28}
                   color={isDark ? '#A855F7' : '#9333EA'}
-                  containerSize={52}
+                  containerSize={60}
                   icon={ChefHat}
                 />
               </View>
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 36,
     paddingBottom: 20,
   },
   title: {
@@ -982,9 +982,9 @@ const styles = StyleSheet.create({
     }),
   },
   glassActionButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     overflow: 'hidden',
     // Subtle shadow for elevation
     ...Platform.select({
@@ -1002,7 +1002,7 @@ const styles = StyleSheet.create({
   glassButtonInner: {
     width: '100%',
     height: '100%',
-    borderRadius: 28,
+    borderRadius: 32,
     overflow: 'hidden',
   },
   glassButtonContent: {
