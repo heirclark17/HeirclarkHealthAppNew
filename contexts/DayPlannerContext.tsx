@@ -292,6 +292,46 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     }
   }, [state.lastCalendarSync]);
 
+  // Real-time meal sync: Auto-resync meals when MealPlanContext changes
+  const lastMealPlanHandled = useRef<any>(null);
+  useEffect(() => {
+    const currentMealPlan = mealPlanCtx?.state?.weeklyPlan;
+    if (
+      currentMealPlan &&
+      currentMealPlan !== lastMealPlanHandled.current &&
+      state.hasCompletedOnboarding &&
+      state.weeklyPlan &&
+      !state.isGeneratingPlan &&
+      !state.isSyncingMeals
+    ) {
+      lastMealPlanHandled.current = currentMealPlan;
+      console.log('[Planner] 🍽️ Meal plan changed – resyncing meals into planner timeline');
+      resyncMeals().catch((err) => {
+        console.warn('[Planner] Auto-resync meals failed:', err);
+      });
+    }
+  }, [mealPlanCtx?.state?.weeklyPlan, state.hasCompletedOnboarding, state.weeklyPlan]);
+
+  // Real-time workout sync: Auto-resync workouts when TrainingContext changes
+  const lastTrainingPlanHandled = useRef<any>(null);
+  useEffect(() => {
+    const currentTrainingPlan = trainingCtx?.state?.weeklyPlan;
+    if (
+      currentTrainingPlan &&
+      currentTrainingPlan !== lastTrainingPlanHandled.current &&
+      state.hasCompletedOnboarding &&
+      state.weeklyPlan &&
+      !state.isGeneratingPlan &&
+      !state.isSyncingWorkouts
+    ) {
+      lastTrainingPlanHandled.current = currentTrainingPlan;
+      console.log('[Planner] 💪 Training plan changed – resyncing workouts into planner timeline');
+      resyncWorkouts().catch((err) => {
+        console.warn('[Planner] Auto-resync workouts failed:', err);
+      });
+    }
+  }, [trainingCtx?.state?.weeklyPlan, state.hasCompletedOnboarding, state.weeklyPlan]);
+
   /**
    * Load cached data from AsyncStorage
    */
