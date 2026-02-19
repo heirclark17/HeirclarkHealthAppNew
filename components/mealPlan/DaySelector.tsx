@@ -296,9 +296,9 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                             </NumberText>
                           </View>
                           <View style={styles.macrosColumn}>
-                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>P {macros.protein}</NumberText>
-                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>C {macros.carbs}</NumberText>
-                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>F {macros.fat}</NumberText>
+                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>Protein {macros.protein}</NumberText>
+                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>Carbs {macros.carbs}</NumberText>
+                            <NumberText weight="regular" style={[styles.macroLine, { color: summaryColor }]}>Fat {macros.fat}</NumberText>
                           </View>
                         </>
                       );
