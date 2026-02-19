@@ -1142,12 +1142,58 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     const hasOOOBlock = calendarBlocks.some((b) => b.isAllDay && b.isOOO);
     lifeContext.isOOODay = hasOOOBlock;
 
-    // Build scheduling request
+    // Filter meals that fall outside eating window (if fasting)
+    let filteredMealBlocks = mealBlocks;
+    if (isFasting && !isCheatDay) {
+      const originalMealCount = mealBlocks.length;
+
+      // Meal time windows (from schedulingEngine_v2.ts MEAL_CONFIGS)
+      const mealWindows: Record<string, { start: string; end: string }> = {
+        breakfast: { start: '05:00', end: '10:59' },
+        lunch: { start: '11:00', end: '14:00' },
+        dinner: { start: '17:00', end: '22:00' },
+      };
+
+      const timeToMinutes = (time: string) => {
+        const [h, m] = time.split(':').map(Number);
+        return h * 60 + m;
+      };
+
+      const eatStart = timeToMinutes(lifeContext.fastingEnd || '12:00');
+      const eatEnd = timeToMinutes(lifeContext.fastingStart || '20:00');
+
+      filteredMealBlocks = mealBlocks.filter(meal => {
+        const mealType = meal.title.toLowerCase().includes('breakfast')
+          ? 'breakfast'
+          : meal.title.toLowerCase().includes('lunch')
+          ? 'lunch'
+          : 'dinner';
+
+        const mealWindow = mealWindows[mealType];
+        if (!mealWindow) return true; // Keep if can't determine type
+
+        const mealStart = timeToMinutes(mealWindow.start);
+        const mealEnd = timeToMinutes(mealWindow.end);
+
+        // Check if meal window overlaps with eating window
+        const overlaps = mealStart < eatEnd && mealEnd > eatStart;
+
+        if (!overlaps) {
+          console.log(`[Planner] 🚫 Skipping ${meal.title} - outside eating window (${lifeContext.fastingEnd}-${lifeContext.fastingStart})`);
+        }
+
+        return overlaps;
+      });
+
+      console.log(`[Planner] Filtered meals: ${filteredMealBlocks.length}/${originalMealCount} (${originalMealCount - filteredMealBlocks.length} skipped due to fasting window)`);
+    }
+
+    // Build scheduling request with filtered meals
     const request: SchedulingRequest = {
       date: dateStr,
       preferences,
       workoutBlocks,
-      mealBlocks,
+      mealBlocks: filteredMealBlocks,
       calendarBlocks,
       recoveryContext: (stateRef.current as any)._latestRecovery || undefined,
       completionPatterns: stateRef.current.completionPatterns,
@@ -1160,8 +1206,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     calendarBlocks.forEach(b => console.log(`    - ${b.startTime}-${b.endTime}: ${b.title}`));
     console.log('  💪 Workout blocks:', workoutBlocks.length);
     workoutBlocks.forEach(b => console.log(`    - ${b.title} (${b.duration} min)`));
-    console.log('  🍽️  Meal blocks:', mealBlocks.length);
-    mealBlocks.forEach(b => console.log(`    - ${b.title} (${b.duration} min)`));
+    console.log('  🍽️  Meal blocks:', filteredMealBlocks.length);
+    filteredMealBlocks.forEach(b => console.log(`    - ${b.title} (${b.duration} min)`));
     console.log('  ⏰ Fasting:', isFasting ? `${lifeContext.fastingEnd}-${lifeContext.fastingStart}` : 'Not active');
     console.log('  🎂 Cheat day:', isCheatDay);
 
@@ -1193,6 +1239,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
       const workout = request.workoutBlocks.length > 0 ? request.workoutBlocks[0] : null;
 
+      // Meals are already filtered before creating the request
       const result = SchedulingEngineV2.buildDailySchedule(
         request.date,
         request.calendarBlocks,
