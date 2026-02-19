@@ -451,9 +451,9 @@ ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endT
 - Find all occupied time slots (calendar events + sleep)
 - Identify free time windows
 - Place workouts in free windows (avoiding fasting eating time if possible)
-- Place BREAKFAST within breakfast window (${isFasting ? lifeContext.fastingEnd : preferences.wakeTime}-14:00)
-- Place LUNCH within lunch window (14:00-17:00)
-- Place DINNER within dinner window (17:00-${isFasting ? lifeContext.fastingStart : preferences.sleepTime})
+- Place BREAKFAST within breakfast window (05:00-10:59)${isFasting ? ` BUT must start AFTER ${lifeContext.fastingEnd}` : ''}
+- Place LUNCH within lunch window (11:00-14:00)${isFasting ? ` AND must end before ${lifeContext.fastingStart}` : ''}
+- Place DINNER within dinner window (17:00-22:00)${isFasting ? ` AND must end before ${lifeContext.fastingStart}` : ''}
 - Place SNACKS between meal windows with 30-60 min gaps
 - Ensure no overlaps between any blocks
 

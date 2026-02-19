@@ -1942,26 +1942,67 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           const sleepMin = (() => { const [h, m] = currentPrefs.sleepTime.split(':').map(Number); return h * 60 + m; })();
           const defaults: Record<string, number> = { breakfast: wakeMin + 30, lunch: Math.round((wakeMin + sleepMin) / 2), dinner: sleepMin - 90 };
 
+          // Helper: check whether [slotStart, slotStart+duration) conflicts with any
+          // block already placed in preservedBlocks or timedMeals
+          const allPlacedBlocks = [...preservedBlocks, ...timedMeals];
+          const isRecoverySlotFree = (slotStart: number, dur: number): boolean => {
+            const slotEnd = slotStart + dur;
+            for (const b of allPlacedBlocks) {
+              if (b.isAllDay) continue;
+              const bS = (() => { const [h, m] = b.startTime.split(':').map(Number); return h * 60 + m; })();
+              const bE = (() => { const [h, m] = b.endTime.split(':').map(Number); return h * 60 + m; })();
+              if (slotStart < bE && slotEnd > bS) return false;
+            }
+            return true;
+          };
+
           for (const mm of missingMeals) {
             const tl = mm.title.toLowerCase();
+            const dur = mm.duration || 30;
             let tgt = tl.includes('breakfast') ? defaults.breakfast : tl.includes('lunch') ? defaults.lunch : tl.includes('dinner') ? defaults.dinner : defaults.lunch + 60;
+            let rangeStart = wakeMin;
+            let rangeEnd = sleepMin > wakeMin ? sleepMin : wakeMin + 960;
             if (isFasting && !isCheatDay) {
               const ewS = (() => { const [h, m] = (request.lifeContext.fastingEnd || '12:00').split(':').map(Number); return h * 60 + m; })();
               const ewE = (() => { const [h, m] = (request.lifeContext.fastingStart || '20:00').split(':').map(Number); return h * 60 + m; })();
+              rangeStart = ewS;
+              rangeEnd = ewE;
               tgt = Math.max(tgt, ewS);
-              tgt = Math.min(tgt, ewE - (mm.duration || 30));
+              tgt = Math.min(tgt, ewE - dur);
             }
-            const sH = Math.floor(tgt / 60), sM = tgt % 60;
-            const eM = tgt + (mm.duration || 30);
+            // Scan outward from target to find a conflict-free slot
+            const clampedTgt = Math.max(rangeStart, Math.min(tgt, rangeEnd - dur));
+            let chosenSlot: number | null = null;
+            if (isRecoverySlotFree(clampedTgt, dur)) {
+              chosenSlot = clampedTgt;
+            } else {
+              let offset = 15;
+              const maxOffset = Math.max(clampedTgt - rangeStart, rangeEnd - clampedTgt);
+              while (offset <= maxOffset) {
+                const earlier = clampedTgt - offset;
+                if (earlier >= rangeStart && isRecoverySlotFree(earlier, dur)) { chosenSlot = earlier; break; }
+                const later = clampedTgt + offset;
+                if (later + dur <= rangeEnd && isRecoverySlotFree(later, dur)) { chosenSlot = later; break; }
+                offset += 15;
+              }
+            }
+            if (chosenSlot === null) {
+              console.warn(`[resyncMeals] ⚠️ No conflict-free slot for "${mm.title}" – skipping to avoid overlap`);
+              continue;
+            }
+            const sH = Math.floor(chosenSlot / 60), sM = chosenSlot % 60;
+            const eM = chosenSlot + dur;
             const eH = Math.floor(eM / 60), eMi = eM % 60;
-            timedMeals.push({
+            const recoveredBlock = {
               ...mm,
               id: `meal_recovered_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
               startTime: `${String(sH).padStart(2, '0')}:${String(sM).padStart(2, '0')}`,
               endTime: `${String(eH).padStart(2, '0')}:${String(eMi).padStart(2, '0')}`,
-              duration: mm.duration || 30,
-            });
-            console.log(`[resyncMeals] ✅ Recovered "${mm.title}" for ${day.date}`);
+              duration: dur,
+            };
+            timedMeals.push(recoveredBlock);
+            allPlacedBlocks.push(recoveredBlock); // keep allPlacedBlocks up-to-date for next iteration
+            console.log(`[resyncMeals] ✅ Recovered "${mm.title}" at ${recoveredBlock.startTime}-${recoveredBlock.endTime} for ${day.date}`);
           }
         }
 
