@@ -1430,7 +1430,7 @@ export function AIMealLogger({ visible, onClose, onSuccess, selectedDate }: AIMe
 
   const headerTextColor = isDark ? Colors.text : colors.text;
   const headerIconColor = isDark ? Colors.text : colors.text;
-  const containerBgColor = isDark ? 'rgba(20, 20, 20, 0.4)' : 'rgba(255, 255, 255, 0.4)';
+  const containerBgColor = colors.background;
 
   return (
     <Modal
