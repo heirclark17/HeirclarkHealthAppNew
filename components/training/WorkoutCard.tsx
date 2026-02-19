@@ -375,13 +375,21 @@ export function WorkoutCard({
             )}
           </View>
 
-          {/* Progress Bar */}
+          {/* Progress Dots */}
           <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { backgroundColor: secondaryBg }]}>
-              <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: typeColor }]} />
+            <View style={styles.progressDots}>
+              {allExercises.map((ex, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.progressDot,
+                    { backgroundColor: ex.completed ? typeColor : secondaryBg },
+                  ]}
+                />
+              ))}
             </View>
             <Text style={[styles.progressText, { color: colors.textMuted }]}>
-              <NumberText weight="regular">{completedExercises}</NumberText>/<NumberText weight="regular">{totalExercises}</NumberText> exercises
+              <NumberText weight="regular">{completedExercises}</NumberText>/<NumberText weight="regular">{totalExercises}</NumberText>
             </Text>
           </View>
 
@@ -631,17 +639,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    gap: 10,
   },
-  progressBar: {
+  progressDots: {
     flex: 1,
-    height: 4,
-    borderRadius: 2,
-    marginRight: 12,
-    overflow: 'hidden',
+    flexDirection: 'row',
+    gap: 5,
+    flexWrap: 'wrap',
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: 2,
+  progressDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   progressText: {
     fontSize: 12,
