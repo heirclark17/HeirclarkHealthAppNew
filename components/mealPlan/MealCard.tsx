@@ -616,12 +616,6 @@ export function MealCard({ meal, index, dayIndex, mealIndex, onSwap, isSwapping,
 
             {/* Bottom Actions */}
             <View style={styles.modalFooter}>
-              <BlurView
-                intensity={isDark ? 60 : 80}
-                tint={isDark ? "dark" : "light"}
-                style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(8, 8, 8, 0.40)' : 'rgba(250, 250, 250, 0.40)' }]}
-              />
-
               <View style={styles.actionPillRow}>
                 {/* Add to Today's Meals */}
                 <GlassCard style={styles.actionPill} interactive>
