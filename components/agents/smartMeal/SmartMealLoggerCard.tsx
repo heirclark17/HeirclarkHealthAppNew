@@ -245,7 +245,7 @@ export default function SmartMealLoggerCard({
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(74,222,128,0.15)' }]}>
-                  <Ionicons name="flash" size={20} color={Colors.successStrong} />
+                  <Ionicons name="flash" size={26} color={Colors.successStrong} />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Quick Log</Text>
@@ -373,9 +373,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },

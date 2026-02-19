@@ -112,7 +112,7 @@ export default function ReadinessCard() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={[styles.iconContainer, { backgroundColor: '#5E5CE620' }]}>
-              <Ionicons name="fitness" size={20} color="#5E5CE6" />
+              <Ionicons name="fitness" size={26} color="#5E5CE6" />
             </View>
             <View>
               <Text style={[styles.title, { color: colors.text }]}>Readiness</Text>
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   container: { padding: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  iconContainer: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  iconContainer: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 16, fontFamily: Fonts.semiBold },
   subtitle: { fontSize: 12, fontFamily: Fonts.regular, marginTop: 2 },
   viewButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },

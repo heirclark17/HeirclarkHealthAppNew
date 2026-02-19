@@ -88,7 +88,7 @@ export default function HydrationCard() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={[styles.iconContainer, { backgroundColor: colors.accentCyan + '20' }]}>
-              <Ionicons name="water" size={20} color={colors.accentCyan} />
+              <Ionicons name="water" size={26} color={colors.accentCyan} />
             </View>
             <View>
               <Text style={[styles.title, { color: colors.text }]}>Hydration</Text>
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   container: { padding: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  iconContainer: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  iconContainer: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 16, fontFamily: Fonts.semiBold },
   subtitle: { fontSize: 12, fontFamily: Fonts.regular, marginTop: 2 },
   viewButton: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },

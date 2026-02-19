@@ -100,7 +100,7 @@ export function AICoachCard({
         {/* Header */}
         <View style={styles.header}>
           <View style={[styles.iconBadge, { backgroundColor: `${config.accentColor}20` }]}>
-            <Ionicons name={config.icon as any} size={24} color={config.accentColor} />
+            <Ionicons name={config.icon as any} size={28} color={config.accentColor} />
           </View>
           <View style={styles.headerText}>
             <Text style={styles.title}>{title || config.defaultTitle}</Text>
@@ -184,9 +184,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   iconBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,

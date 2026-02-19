@@ -256,7 +256,7 @@ export default function AccountabilityPartnerCard() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
-              <Ionicons name="sparkles" size={20} color={colors.primary} />
+              <Ionicons name="sparkles" size={26} color={colors.primary} />
             </View>
             <View>
               <Text style={[styles.title, { color: colors.text }]}>AI Accountability Coach</Text>
@@ -367,9 +367,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },

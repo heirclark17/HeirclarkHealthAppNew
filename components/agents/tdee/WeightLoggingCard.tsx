@@ -214,7 +214,7 @@ export default function WeightLoggingCard({ onWeightLogged }: WeightLoggingCardP
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(96,165,250,0.15)' }]}>
-                  <Ionicons name="scale-outline" size={20} color={Colors.restingEnergy} />
+                  <Ionicons name="scale-outline" size={26} color={Colors.restingEnergy} />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Weight Log</Text>
@@ -464,9 +464,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },

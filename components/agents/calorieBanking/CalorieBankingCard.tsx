@@ -174,7 +174,7 @@ export default function CalorieBankingCard({
           <View style={styles.header}>
             <View style={styles.titleContainer}>
               <View style={[styles.iconContainer, { backgroundColor: Colors.accentPurple + '20' }]}>
-                <Ionicons name="wallet" size={20} color={Colors.accentPurple} />
+                <Ionicons name="wallet" size={26} color={Colors.accentPurple} />
               </View>
               <View>
                 <Text style={[styles.title, { color: textColor }]}>Calorie Bank</Text>
@@ -315,9 +315,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },

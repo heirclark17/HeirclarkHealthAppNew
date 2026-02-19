@@ -152,7 +152,7 @@ export default function AdaptiveTDEECard({ onPress }: AdaptiveTDEECardProps) {
             <View style={styles.header}>
               <View style={styles.titleContainer}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name="flame" size={20} color={Colors.error} />
+                  <Ionicons name="flame" size={26} color={Colors.error} />
                 </View>
                 <View>
                   <Text style={[styles.title, { color: textColor }]}>Adaptive TDEE</Text>
@@ -325,9 +325,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: 'rgba(255,107,107,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
