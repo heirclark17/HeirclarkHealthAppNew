@@ -427,11 +427,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.numericBold,
     letterSpacing: 0,
     marginBottom: 4,
+    paddingHorizontal: 16,
   },
   sectionSubtitle: {
     fontSize: 14,
     fontFamily: Fonts.regular,
     marginBottom: 18,
+    paddingHorizontal: 16,
   },
   dotsContainer: {
     flexDirection: 'row',

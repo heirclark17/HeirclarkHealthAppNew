@@ -305,9 +305,9 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                           ]}>
                             <Ionicons
                               name="pizza"
-                              size={12}
+                              size={9}
                               color={isSelected ? (isDark ? '#fff' : '#fff') : cheatDayColor}
-                              style={{ marginRight: 5 }}
+                              style={{ marginRight: 3 }}
                             />
                             <Text style={[
                               styles.cheatBadgeText,
@@ -491,61 +491,61 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginBottom: 16,
-    borderRadius: 28,
-    paddingVertical: 6,
+    borderRadius: 24,
+    paddingVertical: 4,
   },
   weekStrip: {
     flexDirection: 'row',
-    gap: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    gap: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   dayCardContainer: {
     position: 'relative',
   },
   dayItem: {
-    width: 108,
-    minHeight: 148,
-    borderRadius: 28,
+    width: 72,
+    height: 88,
+    borderRadius: 20,
     overflow: 'hidden',
     position: 'relative',
-    // Sculptural shadow for depth without harshness
+    // Refined shadow with subtle depth
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
       },
       android: {
-        elevation: 5,
+        elevation: 3,
       },
     }),
   },
   dayItemActive: {
-    transform: [{ scale: 1.03 }],
-    // Sophisticated glow matching state color
+    transform: [{ scale: 1.05 }],
+    // Elegant glow with reduced intensity
     ...Platform.select({
       ios: {
         shadowColor: '#5EA9DD',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.35,
-        shadowRadius: 24,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 16,
       },
       android: {
-        elevation: 12,
+        elevation: 8,
       },
     }),
   },
   glassBackground: {
     width: '100%',
     height: '100%',
-    borderRadius: 28,
+    borderRadius: 20,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 24,
-    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     position: 'relative',
   },
   colorOverlay: {
@@ -554,65 +554,67 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 28,
+    borderRadius: 20,
   },
   dayContent: {
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
+    flex: 1,
   },
   dayName: {
-    fontSize: 11,
-    marginBottom: 10,
+    fontSize: 9,
+    marginBottom: 4,
     fontFamily: Fonts.semiBold,
-    letterSpacing: 2.0,
+    letterSpacing: 1.4,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
   dayNumber: {
-    fontSize: 42,
-    marginBottom: 4,
+    fontSize: 28,
+    marginBottom: 2,
     fontWeight: '600',
     // Font family handled by NumberText component (SF Pro Rounded)
   },
   mealSummaryContainer: {
-    marginTop: 10,
+    marginTop: 4,
     alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 6,
+    gap: 1,
+    paddingHorizontal: 4,
+    maxWidth: '100%',
   },
   mealSummary: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: Fonts.medium,
     textAlign: 'center',
-    letterSpacing: 0.4,
-    lineHeight: 14,
-    paddingHorizontal: 2,
+    letterSpacing: 0.2,
+    lineHeight: 11,
+    paddingHorizontal: 1,
     fontWeight: '500',
   },
   cheatBadgeContainer: {
     position: 'absolute',
-    top: 10,
-    left: 10,
-    right: 10,
+    top: 6,
+    left: 6,
+    right: 6,
     zIndex: 3,
   },
   cheatBadgeGlass: {
-    borderRadius: 12,
+    borderRadius: 8,
     overflow: 'hidden',
   },
   cheatBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
   cheatBadgeText: {
-    fontSize: 9,
+    fontSize: 7,
     fontFamily: Fonts.bold,
-    letterSpacing: 1.2,
+    letterSpacing: 0.8,
     fontWeight: '700',
   },
   fullCalendarButton: {
