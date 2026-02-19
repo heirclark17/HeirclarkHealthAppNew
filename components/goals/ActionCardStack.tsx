@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-nat
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useAnimatedReaction,
   withSpring,
   withTiming,
   runOnJS,
@@ -17,22 +18,20 @@ import Constants from 'expo-constants';
 
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
-import { NumberText } from '../NumberText';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 48;
-const CARD_HEIGHT = SCREEN_WIDTH * 0.55;
+const CARD_HEIGHT = Math.round(SCREEN_WIDTH * 0.5);
+const PEEK_HEIGHT = 52;
+const CARD_GAP = 6;
 const SWIPE_THRESHOLD = CARD_WIDTH * 0.25;
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl ||
-                process.env.EXPO_PUBLIC_API_URL ||
-                'https://heirclarkinstacartbackend-production.up.railway.app';
+const API_URL =
+  Constants.expoConfig?.extra?.apiUrl ||
+  process.env.EXPO_PUBLIC_API_URL ||
+  'https://heirclarkinstacartbackend-production.up.railway.app';
 
-const GLASS_SPRING = {
-  damping: 15,
-  stiffness: 150,
-  mass: 1,
-};
+const GLASS_SPRING = { damping: 15, stiffness: 150, mass: 1 };
 
 interface CardDef {
   id: string;
@@ -72,11 +71,12 @@ export function ActionCardStack({
     [settings.themeMode],
   );
 
-  const [cardOrder, setCardOrder] = useState<number[]>([]);
-  const [cardImages, setCardImages] = useState<Record<string, string>>({});
-
+  // Shared values for pure-worklet animation (fixes race condition bugs 1, 7)
+  const currentIndex = useSharedValue(0);
   const translateX = useSharedValue(0);
-  const startX = useSharedValue(0);
+  // React state only for dots display (synced via useAnimatedReaction)
+  const [displayIndex, setDisplayIndex] = useState(0);
+  const [cardImages, setCardImages] = useState<Record<string, string>>({});
 
   const goalLabel = useMemo(() => {
     if (primaryGoal === 'lose_weight') return 'Fat burning';
@@ -94,7 +94,7 @@ export function ActionCardStack({
         subtitle: 'Your AI coach explains your plan',
         loadingTitle: 'WATCH COACHING',
         loadingSubtitle: 'Your AI coach explains your plan',
-        icon: <Play size={22} color="#fff" />,
+        icon: <Play size={20} color="#fff" />,
         iconBg: Colors.success,
         onPress: onViewAvatar,
         isLoading: false,
@@ -108,7 +108,7 @@ export function ActionCardStack({
         subtitle: 'AI-generated meals for your goals',
         loadingTitle: 'GENERATING MEAL PLAN...',
         loadingSubtitle: 'Please wait while AI creates your plan',
-        icon: <Utensils size={22} color="#fff" />,
+        icon: <Utensils size={20} color="#fff" />,
         iconBg: Colors.error,
         onPress: onStartMealPlan,
         isLoading: isGeneratingMealPlan,
@@ -120,104 +120,128 @@ export function ActionCardStack({
         type: 'trainingPlan',
         title: 'START TRAINING PLAN',
         subtitle: `${workoutsPerWeek} days/week \u2022 ${goalLabel} focused`,
-        loadingTitle: 'GENERATING TRAINING PLAN...',
+        loadingTitle: 'GENERATING TRAINING...',
         loadingSubtitle: 'Please wait while AI creates your plan',
-        icon: <Dumbbell size={22} color="#fff" />,
+        icon: <Dumbbell size={20} color="#fff" />,
         iconBg: Colors.success,
         onPress: onStartTrainingPlan,
         isLoading: isGeneratingTrainingPlan,
       });
     }
     return list;
-  }, [onViewAvatar, onStartMealPlan, onStartTrainingPlan, isGeneratingMealPlan, isGeneratingTrainingPlan, workoutsPerWeek, goalLabel]);
+  }, [
+    onViewAvatar,
+    onStartMealPlan,
+    onStartTrainingPlan,
+    isGeneratingMealPlan,
+    isGeneratingTrainingPlan,
+    workoutsPerWeek,
+    goalLabel,
+  ]);
 
-  // Init card order when cards change
+  const totalCards = cards.length;
+
+  // Reset when card count changes (bug 8 fix)
   useEffect(() => {
-    setCardOrder(cards.map((_, i) => i));
-  }, [cards.length]);
+    currentIndex.value = 0;
+    translateX.value = 0;
+    setDisplayIndex(0);
+  }, [totalCards]);
+
+  // Sync shared value → React state for dots (bug 3 fix)
+  useAnimatedReaction(
+    () => currentIndex.value,
+    (val) => {
+      runOnJS(setDisplayIndex)(val);
+    },
+  );
 
   // Fetch card images
   useEffect(() => {
-    const types = cards.map((c) => c.type);
-    types.forEach(async (type) => {
-      if (cardImages[type]) return;
+    cards.forEach(async (card) => {
+      if (cardImages[card.type]) return;
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 45000);
-        const resp = await fetch(`${API_URL}/api/v1/card-image?type=${type}`, {
+        const resp = await fetch(`${API_URL}/api/v1/card-image?type=${card.type}`, {
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
         if (resp.ok) {
           const data = await resp.json();
           if (data.url) {
-            setCardImages((prev) => ({ ...prev, [type]: data.url }));
+            setCardImages((prev) => ({ ...prev, [card.type]: data.url }));
           }
         }
       } catch (err) {
-        console.log('[ActionCardStack] Image fetch error for', type, err);
+        console.log('[ActionCardStack] Image fetch error for', card.type);
       }
     });
   }, [cards]);
 
-  const cycleCards = useCallback(() => {
-    setCardOrder((prev) => {
-      if (prev.length <= 1) return prev;
-      const [first, ...rest] = prev;
-      return [...rest, first];
+  // Tap handler reads currentIndex directly (avoids displayIndex staleness)
+  const handleTapFront = useCallback(() => {
+    if (totalCards === 0) return;
+    const idx = currentIndex.value % totalCards;
+    const card = cards[idx];
+    if (card && !card.isLoading) card.onPress();
+  }, [cards, totalCards, currentIndex]);
+
+  // Memoized gesture to avoid teardown/re-attach on every render (bug 4 fix)
+  const gesture = useMemo(() => {
+    const n = totalCards;
+    if (n === 0) return Gesture.Tap();
+
+    const pan = Gesture.Pan()
+      .activeOffsetX([-15, 15])
+      .failOffsetY([-10, 10])
+      .onUpdate((e) => {
+        'worklet';
+        translateX.value = e.translationX;
+      })
+      .onEnd(() => {
+        'worklet';
+        if (n <= 1) {
+          translateX.value = withSpring(0, GLASS_SPRING);
+          return;
+        }
+        if (Math.abs(translateX.value) > SWIPE_THRESHOLD) {
+          const dir = translateX.value > 0 ? 1 : -1;
+          translateX.value = withTiming(
+            dir * CARD_WIDTH * 1.2,
+            { duration: 200 },
+            (finished) => {
+              'worklet';
+              if (finished) {
+                // Pure worklet update — no JS thread round-trip (bug 1 fix)
+                currentIndex.value = currentIndex.value + 1;
+                translateX.value = 0;
+              }
+            },
+          );
+        } else {
+          translateX.value = withSpring(0, GLASS_SPRING);
+        }
+      });
+
+    const tap = Gesture.Tap().onEnd(() => {
+      'worklet';
+      runOnJS(handleTapFront)();
     });
-  }, []);
 
-  const handleTap = useCallback(() => {
-    if (cardOrder.length === 0) return;
-    const frontIdx = cardOrder[0];
-    const card = cards[frontIdx];
-    if (card && !card.isLoading) {
-      card.onPress();
-    }
-  }, [cardOrder, cards]);
+    return Gesture.Exclusive(pan, tap);
+  }, [totalCards, handleTapFront]);
 
-  const panGesture = Gesture.Pan()
-    .activeOffsetX([-15, 15])
-    .failOffsetY([-10, 10])
-    .onStart(() => {
-      startX.value = translateX.value;
-    })
-    .onUpdate((e) => {
-      translateX.value = e.translationX;
-    })
-    .onEnd((e) => {
-      if (Math.abs(translateX.value) > SWIPE_THRESHOLD) {
-        // Animate off screen then cycle
-        const direction = translateX.value > 0 ? 1 : -1;
-        translateX.value = withTiming(
-          direction * CARD_WIDTH * 1.2,
-          { duration: 200 },
-          () => {
-            runOnJS(cycleCards)();
-            translateX.value = 0;
-          },
-        );
-      } else {
-        translateX.value = withSpring(0, GLASS_SPRING);
-      }
-    });
+  if (totalCards === 0) return null;
 
-  const tapGesture = Gesture.Tap().onEnd(() => {
-    runOnJS(handleTap)();
-  });
-
-  const composedGesture = Gesture.Exclusive(panGesture, tapGesture);
-
-  // Don't render if no cards
-  if (cards.length === 0 || cardOrder.length === 0) return null;
-
-  const singleCard = cards.length === 1;
+  const behindCount = Math.max(0, totalCards - 1);
+  const containerHeight = CARD_HEIGHT + behindCount * (PEEK_HEIGHT + CARD_GAP);
+  const activeIdx = displayIndex % totalCards;
 
   return (
     <View style={styles.container}>
-      {/* Page indicator dots */}
-      {!singleCard && (
+      {/* Page indicator dots — now track active card (bug 3 fix) */}
+      {totalCards > 1 && (
         <View style={styles.dotsContainer}>
           {cards.map((_, i) => (
             <View
@@ -225,11 +249,8 @@ export function ActionCardStack({
               style={[
                 styles.dot,
                 {
-                  backgroundColor:
-                    i === 0
-                      ? colors.text
-                      : colors.textMuted,
-                  opacity: i === 0 ? 1 : 0.4,
+                  backgroundColor: activeIdx === i ? colors.text : colors.textMuted,
+                  opacity: activeIdx === i ? 1 : 0.4,
                 },
               ]}
             />
@@ -237,164 +258,167 @@ export function ActionCardStack({
         </View>
       )}
 
-      {/* Card stack */}
-      <View style={[styles.stackContainer, { height: CARD_HEIGHT + 28 }]}>
-        {/* Render cards in reverse order so front card is on top */}
-        {[...cardOrder].reverse().map((cardIdx, visualIdx) => {
-          const stackPos = cardOrder.indexOf(cardIdx);
-          const card = cards[cardIdx];
-          if (!card) return null;
-          const isFront = stackPos === 0;
-
-          return (
-            <StackCard
+      {/* Single GestureDetector wraps entire stack (bug 4 fix) */}
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={[styles.stackContainer, { height: containerHeight }]}>
+          {cards.map((card, i) => (
+            <WalletCard
               key={card.id}
               card={card}
-              stackPos={stackPos}
-              isFront={isFront}
-              singleCard={singleCard}
+              cardIndex={i}
+              totalCards={totalCards}
+              currentIndex={currentIndex}
               translateX={translateX}
-              gesture={isFront ? composedGesture : undefined}
               imageUrl={cardImages[card.type]}
-              colors={colors}
-              totalCards={cards.length}
             />
-          );
-        })}
-      </View>
+          ))}
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 }
 
-interface StackCardProps {
+// ---------- Individual card ----------
+
+interface WalletCardProps {
   card: CardDef;
-  stackPos: number;
-  isFront: boolean;
-  singleCard: boolean;
-  translateX: Animated.SharedValue<number>;
-  gesture?: ReturnType<typeof Gesture.Exclusive>;
-  imageUrl?: string;
-  colors: typeof DarkColors;
+  cardIndex: number;
   totalCards: number;
+  currentIndex: Animated.SharedValue<number>;
+  translateX: Animated.SharedValue<number>;
+  imageUrl?: string;
 }
 
-function StackCard({
+function WalletCard({
   card,
-  stackPos,
-  isFront,
-  singleCard,
-  translateX,
-  gesture,
-  imageUrl,
-  colors,
+  cardIndex,
   totalCards,
-}: StackCardProps) {
+  currentIndex,
+  translateX,
+  imageUrl,
+}: WalletCardProps) {
+  // All position logic runs in worklet — no stale JS closures (bug 7 fix)
   const animatedStyle = useAnimatedStyle(() => {
-    if (isFront) {
-      const rotation = interpolate(
-        translateX.value,
-        [-CARD_WIDTH, 0, CARD_WIDTH],
-        [-8, 0, 8],
-        Extrapolation.CLAMP,
-      );
-      return {
-        transform: [
-          { translateX: translateX.value },
-          { translateY: 0 },
-          { scale: 1 },
-          { rotateZ: `${rotation}deg` },
-        ],
-        opacity: 1,
-        zIndex: 10,
-      };
-    }
+    'worklet';
+    const ci = currentIndex.value % totalCards;
+    const stackPos = ((cardIndex - ci) + totalCards) % totalCards;
+    const isFront = stackPos === 0;
 
-    // Behind cards - animate up as front card drags
-    const progress = interpolate(
+    const dragProgress = interpolate(
       Math.abs(translateX.value),
       [0, SWIPE_THRESHOLD],
       [0, 1],
       Extrapolation.CLAMP,
     );
 
-    const baseY = stackPos * 12;
-    const baseScale = 1 - stackPos * 0.05;
-    const baseOpacity = stackPos === 1 ? 0.7 : 0.4;
+    if (isFront) {
+      const rotation = interpolate(
+        translateX.value,
+        [-CARD_WIDTH, 0, CARD_WIDTH],
+        [-6, 0, 6],
+        Extrapolation.CLAMP,
+      );
+      return {
+        transform: [
+          { translateX: translateX.value },
+          { translateY: 0 },
+          { rotateZ: `${rotation}deg` },
+        ],
+        height: CARD_HEIGHT,
+        zIndex: 100,
+        elevation: 10,
+        opacity: 1,
+      };
+    }
 
-    const targetY = (stackPos - 1) * 12;
-    const targetScale = 1 - (stackPos - 1) * 0.05;
-    const targetOpacity = stackPos === 1 ? 1 : 0.7;
+    // Apple Wallet peek position for behind cards
+    const restY = CARD_HEIGHT + CARD_GAP + (stackPos - 1) * (PEEK_HEIGHT + CARD_GAP);
+
+    if (stackPos === 1) {
+      // Next card — rises to front position and expands as drag progresses
+      const y = restY * (1 - dragProgress);
+      const h = PEEK_HEIGHT + (CARD_HEIGHT - PEEK_HEIGHT) * dragProgress;
+      return {
+        transform: [
+          { translateX: 0 },
+          { translateY: y },
+          { rotateZ: '0deg' },
+        ],
+        height: h,
+        zIndex: 99,
+        elevation: 9,
+        opacity: 1,
+      };
+    }
+
+    // Further back — shift up one peek slot
+    const prevY = CARD_HEIGHT + CARD_GAP + (stackPos - 2) * (PEEK_HEIGHT + CARD_GAP);
+    const y = restY + (prevY - restY) * dragProgress;
 
     return {
       transform: [
         { translateX: 0 },
-        { translateY: baseY + (targetY - baseY) * progress },
-        { scale: baseScale + (targetScale - baseScale) * progress },
+        { translateY: y },
         { rotateZ: '0deg' },
       ],
-      opacity: baseOpacity + (targetOpacity - baseOpacity) * progress,
-      zIndex: 10 - stackPos,
+      height: PEEK_HEIGHT,
+      zIndex: 100 - stackPos,
+      elevation: Math.max(1, 10 - stackPos),
+      opacity: 1,
     };
   });
 
-  const content = (
-    <Animated.View style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT }, animatedStyle]}>
-      {/* Background image */}
-      {imageUrl ? (
-        <Image
-          source={{ uri: imageUrl }}
-          style={StyleSheet.absoluteFill}
-          contentFit="cover"
-          cachePolicy="memory-disk"
-          transition={200}
-        />
-      ) : null}
+  return (
+    <Animated.View style={[styles.card, { width: CARD_WIDTH }, animatedStyle]}>
+      {/* Fixed inner container so clipping reveals/hides image area */}
+      <View style={styles.cardInner}>
+        {/* Background image */}
+        {imageUrl ? (
+          <Image
+            source={{ uri: imageUrl }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={200}
+          />
+        ) : null}
 
-      {/* Gradient overlay for text readability */}
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)']}
-        locations={[0, 0.4, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-
-      {/* Fallback gradient when no image */}
-      {!imageUrl && (
+        {/* Top gradient for title bar readability */}
         <LinearGradient
-          colors={[card.iconBg + '40', card.iconBg + '90']}
+          colors={['rgba(0,0,0,0.7)', 'rgba(0,0,0,0.25)', 'transparent']}
+          locations={[0, 0.35, 0.65]}
           style={StyleSheet.absoluteFill}
         />
-      )}
 
-      {/* Content at bottom */}
-      <View style={styles.cardContent}>
-        <View style={[styles.iconCircle, { backgroundColor: card.iconBg }]}>
-          {card.isLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            card.icon
-          )}
-        </View>
-        <View style={styles.cardTextContainer}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
-            {card.isLoading ? card.loadingTitle : card.title}
-          </Text>
-          <Text style={styles.cardSubtitle} numberOfLines={1}>
-            {card.isLoading ? card.loadingSubtitle : card.subtitle}
-          </Text>
+        {/* Fallback gradient when no image loaded yet */}
+        {!imageUrl && (
+          <LinearGradient
+            colors={[card.iconBg + '55', card.iconBg + '18']}
+            style={StyleSheet.absoluteFill}
+          />
+        )}
+
+        {/* Title bar at TOP — always visible in peek and full modes */}
+        <View style={styles.titleBar}>
+          <View style={[styles.iconCircle, { backgroundColor: card.iconBg }]}>
+            {card.isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              card.icon
+            )}
+          </View>
+          <View style={styles.titleTextContainer}>
+            <Text style={styles.cardTitle} numberOfLines={1}>
+              {card.isLoading ? card.loadingTitle : card.title}
+            </Text>
+            <Text style={styles.cardSubtitle} numberOfLines={1}>
+              {card.isLoading ? card.loadingSubtitle : card.subtitle}
+            </Text>
+          </View>
         </View>
       </View>
     </Animated.View>
   );
-
-  if (gesture && isFront) {
-    return (
-      <GestureDetector gesture={gesture}>
-        {content}
-      </GestureDetector>
-    );
-  }
-
-  return content;
 }
 
 const styles = StyleSheet.create({
@@ -415,48 +439,49 @@ const styles = StyleSheet.create({
   },
   stackContainer: {
     alignItems: 'center',
-    justifyContent: 'flex-start',
   },
   card: {
     position: 'absolute',
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
+    backgroundColor: '#1a1a2e',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
-  cardContent: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+  cardInner: {
+    height: CARD_HEIGHT,
+    width: '100%',
+  },
+  titleBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
-    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 12,
+    height: PEEK_HEIGHT,
   },
   iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardTextContainer: {
+  titleTextContainer: {
     flex: 1,
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: Fonts.numericSemiBold,
     color: '#fff',
     letterSpacing: 0.5,
-    marginBottom: 3,
+    marginBottom: 2,
   },
   cardSubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: Fonts.numericRegular,
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(255,255,255,0.75)',
   },
 });
