@@ -449,14 +449,12 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
           <Text style={[styles.targetsSectionHeader, { color: colors.textMuted, fontFamily: Fonts.numericSemiBold }]}>YOUR DAILY TARGETS</Text>
           <View style={styles.targetsGrid}>
             <GlassCard style={styles.targetCard} interactive>
-              <Flame size={20} color={Colors.error} />
               <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                 {Math.round(state.results.calories).toLocaleString()}
               </NumberText>
               <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Calories</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Beef size={20} color={colors.protein} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.protein}
@@ -466,7 +464,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Protein</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Wheat size={20} color={colors.carbs} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.carbs}
@@ -476,7 +473,6 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Carbs</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
-              <Nut size={20} color={colors.fat} />
               <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.fat}
@@ -629,10 +625,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   targetsSectionHeader: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: Fonts.light,
     fontWeight: '200',
-    letterSpacing: 1.5,
+    letterSpacing: 0,
     color: Colors.textMuted,
     textAlign: 'center',
     marginBottom: 12,
