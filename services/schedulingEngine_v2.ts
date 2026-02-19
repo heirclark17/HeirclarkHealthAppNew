@@ -585,9 +585,23 @@ export class SchedulingEngineV2 {
       const candidateStart = startMinutes - requiredBuffer;
       const candidateEnd = endMinutes + requiredBuffer;
 
-      const overlaps =
-        (candidateStart < blockEnd && candidateEnd > blockStart) ||
-        (blockStart < candidateEnd && blockEnd > candidateStart);
+      // Handle overnight blocks (e.g., sleep 22:30-06:30)
+      const isOvernightBlock = blockEnd < blockStart;
+
+      let overlaps = false;
+      if (isOvernightBlock) {
+        // Block wraps around midnight - check both segments
+        // Night segment: blockStart to end-of-day (1440)
+        const overl apsNight = candidateStart < 1440 && candidateEnd > blockStart;
+        // Morning segment: start-of-day (0) to blockEnd
+        const overlapsMorning = candidateStart < blockEnd && candidateEnd > 0;
+        overlaps = overlapsNight || overlapsMorning;
+      } else {
+        // Normal same-day block
+        overlaps =
+          (candidateStart < blockEnd && candidateEnd > blockStart) ||
+          (blockStart < candidateEnd && blockEnd > candidateStart);
+      }
 
       if (overlaps) return false;
     }
@@ -670,10 +684,33 @@ export class SchedulingEngineV2 {
         const start2 = this.timeToMinutes(block2.startTime);
         const end2 = this.timeToMinutes(block2.endTime);
 
-        // Check for overlap
-        const overlaps =
-          (start1 < end2 && end1 > start2) ||
-          (start2 < end1 && end2 > start1);
+        // Handle overnight blocks
+        const isOvernight1 = end1 < start1;
+        const isOvernight2 = end2 < start2;
+
+        let overlaps = false;
+
+        if (isOvernight1 && isOvernight2) {
+          // Both blocks wrap around midnight - they always overlap
+          overlaps = true;
+        } else if (isOvernight1) {
+          // Block1 wraps, Block2 doesn't
+          // Check if Block2 overlaps with either segment of Block1
+          const overlapsNight = start2 < 1440 && end2 > start1;
+          const overlapsMorning = start2 < end1 && end2 > 0;
+          overlaps = overlapsNight || overlapsMorning;
+        } else if (isOvernight2) {
+          // Block2 wraps, Block1 doesn't
+          // Check if Block1 overlaps with either segment of Block2
+          const overlapsNight = start1 < 1440 && end1 > start2;
+          const overlapsMorning = start1 < end2 && end1 > 0;
+          overlaps = overlapsNight || overlapsMorning;
+        } else {
+          // Neither block wraps - normal overlap check
+          overlaps =
+            (start1 < end2 && end1 > start2) ||
+            (start2 < end1 && end2 > start1);
+        }
 
         if (overlaps) {
           conflicts.push({

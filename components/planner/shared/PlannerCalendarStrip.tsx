@@ -225,7 +225,6 @@ export function PlannerCalendarStrip({
               onPress={() => onDateChange(item.dateStr)}
               activeOpacity={0.7}
             >
-              {/* Background layer with absolute positioning */}
               <View
                 pointerEvents="none"
                 style={[
@@ -239,11 +238,10 @@ export function PlannerCalendarStrip({
                     opacity: 1,
                   } : {
                     backgroundColor: dayItemBg,
-                    opacity: opacity
+                    opacity: opacity,
                   },
                 ]}
               />
-              {/* Content layer */}
               <Text
                 style={[
                   styles.dayName,
