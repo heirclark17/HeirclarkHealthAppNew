@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: Fonts.numericBold,
+    fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0,
     marginBottom: 4,
     paddingHorizontal: 16,
