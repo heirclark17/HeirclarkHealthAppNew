@@ -327,16 +327,14 @@ export default function ProgramsScreen() {
   // Navigate to goals page at PrimaryGoalStep (step 1)
   const handleSetGoals = useCallback(() => {
     lightImpact();
-    if (goToStep) goToStep(1);
-    router.push('/goals');
-  }, [router, goToStep]);
+    router.push({ pathname: '/goals', params: { step: '1' } });
+  }, [router]);
 
   // Navigate to goals page at ProgramSelectionStep (step 5)
   const handleEditProgram = useCallback(() => {
     lightImpact();
-    if (goToStep) goToStep(5);
-    router.push('/goals');
-  }, [router, goToStep]);
+    router.push({ pathname: '/goals', params: { step: '5' } });
+  }, [router]);
 
   // Get goal summary - memoized
   const getGoalSummary = useCallback(() => {

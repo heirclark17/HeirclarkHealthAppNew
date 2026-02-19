@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { CheckCircle2 } from 'lucide-react-native';
 
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Colors, DarkColors, LightColors } from '../../constants/Theme';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -59,7 +59,8 @@ function AnimatedStep({ children, direction, stepKey }: AnimatedStepProps) {
 
 function GoalWizardContent() {
   const router = useRouter();
-  const { state, nextStep, prevStep, loadSavedProgress, resetWizard, startEditing, setSelectedProgram } = useGoalWizard();
+  const params = useLocalSearchParams<{ step?: string }>();
+  const { state, nextStep, prevStep, goToStep, loadSavedProgress, resetWizard, startEditing, setSelectedProgram } = useGoalWizard();
   const { generateAIMealPlan, state: mealPlanState } = useMealPlan();
   const { generateAIWorkoutPlan, state: trainingState, selectProgram, selectProgramAndGenerate, getEnhancedPrograms } = useTraining();
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
@@ -80,14 +81,22 @@ function GoalWizardContent() {
 
   useEffect(() => {
     // Load any saved progress when component mounts
-    loadSavedProgress();
+    loadSavedProgress().then(() => {
+      // If navigated with a step param, jump to that step after loading
+      if (params.step) {
+        const targetStep = parseInt(params.step, 10);
+        if (targetStep >= 1 && targetStep <= 6) {
+          goToStep(targetStep);
+        }
+      }
+    });
 
     // Track screen view
     capture('screen_viewed', {
       screen_name: 'Goal Wizard',
       screen_type: 'tab',
     });
-  }, [loadSavedProgress]);
+  }, [loadSavedProgress, params.step]);
 
   const getStepName = (step: number) => {
     const stepNames = [
