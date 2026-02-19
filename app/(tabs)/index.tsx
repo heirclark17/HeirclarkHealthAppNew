@@ -2420,7 +2420,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
     marginBottom: 2,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   mealTime: {
     fontSize: 12,
