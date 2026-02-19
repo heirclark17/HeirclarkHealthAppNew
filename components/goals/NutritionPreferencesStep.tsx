@@ -21,7 +21,9 @@ import {
   Moon,
   Footprints,
   Flame,
-  Salad
+  Salad,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
@@ -1011,15 +1013,28 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
       <View style={styles.bottomContainer}>
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            onPress={handleContinue}
+            onPress={onBack}
             activeOpacity={0.7}
             style={{ flex: 1 }}
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityHint="Returns to previous step"
+          >
+            <GlassCard style={styles.backButton} interactive>
+              <ChevronLeft size={28} color={colors.text} />
+            </GlassCard>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleContinue}
+            activeOpacity={0.7}
+            style={{ flex: 2 }}
             accessibilityLabel="Continue"
             accessibilityRole="button"
             accessibilityHint="Saves nutrition preferences and proceeds to next step"
           >
             <GlassCard style={[styles.continueButton, { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }]} interactive>
-              <Text style={[styles.continueButtonText, { color: colors.primary }]}>CONTINUE</Text>
+              <ChevronRight size={28} color={colors.primary} />
             </GlassCard>
           </TouchableOpacity>
         </View>

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Dumbbell } from 'lucide-react-native';
+import { Dumbbell, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -288,9 +288,25 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
         <View style={styles.bottomContainer}>
           <View style={styles.buttonRow}>
             <TouchableOpacity
-              onPress={handleContinue}
+              onPress={() => {
+                lightImpact();
+                onBack();
+              }}
               activeOpacity={0.7}
               style={{ flex: 1 }}
+              accessibilityLabel="Back"
+              accessibilityRole="button"
+              accessibilityHint="Returns to previous step"
+            >
+              <GlassCard style={styles.backButton} interactive>
+                <ChevronLeft size={28} color={colors.text} />
+              </GlassCard>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={handleContinue}
+              activeOpacity={0.7}
+              style={{ flex: 2 }}
               accessibilityLabel="Continue"
               accessibilityRole="button"
               accessibilityHint="Proceeds to next step (program selection optional)"
@@ -302,9 +318,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                 ]}
                 interactive
               >
-                <Text style={[styles.continueButtonText, { color: colors.primary }]}>
-                  CONTINUE
-                </Text>
+                <ChevronRight size={28} color={colors.primary} />
               </GlassCard>
             </TouchableOpacity>
           </View>
