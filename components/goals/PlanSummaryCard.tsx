@@ -81,7 +81,7 @@ function OutcomeCard({ outcome, index, colors, isDark }: { outcome: ExpectedOutc
           </Text>
         </View>
       </View>
-      <NumberText weight="semiBold" style={[styles.outcomeValue, { color: colors.text }]}>{outcome.targetValue}</NumberText>
+      <NumberText weight="regular" style={[styles.outcomeValue, { color: colors.text }]}>{outcome.targetValue}</NumberText>
       <NumberText weight="light" style={[styles.outcomeTimeframe, { color: colors.textMuted }]}>{outcome.timeframe}</NumberText>
     </View>
   );
