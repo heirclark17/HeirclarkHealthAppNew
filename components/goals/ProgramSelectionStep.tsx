@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Dumbbell } from 'lucide-react-native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -103,7 +104,8 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
         <WizardHeader
           currentStep={5}
           totalSteps={6}
-          title="💪 Training Program"
+          title="Training Program"
+          icon={<Dumbbell size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
           onBack={onBack}
           isDark={isDark}
         />

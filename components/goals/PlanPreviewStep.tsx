@@ -22,6 +22,7 @@ import {
   XCircle,
   Settings,
   Link,
+  ClipboardList,
 } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard } from '../../contexts/GoalWizardContext';
@@ -213,7 +214,8 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
       <WizardHeader
         currentStep={6}
         totalSteps={6}
-        title="📋 Review Your Plan"
+        title="Review Your Plan"
+        icon={<ClipboardList size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={onBack}
         isDark={isDark}
       />

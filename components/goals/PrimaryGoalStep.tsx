@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Flame, Dumbbell, ShieldCheck, Heart, Check } from 'lucide-react-native';
+import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -161,7 +161,8 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
       <WizardHeader
         currentStep={1}
         totalSteps={6}
-        title="🎯 What's Your Goal?"
+        title="What's Your Goal?"
+        icon={<Target size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={handleBack}
         isDark={isDark}
       />

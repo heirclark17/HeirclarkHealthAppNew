@@ -9,11 +9,12 @@ interface WizardHeaderProps {
   currentStep: number;
   totalSteps: number;
   title: string;
+  icon?: React.ReactNode;
   onBack: () => void;
   isDark?: boolean;
 }
 
-export function WizardHeader({ currentStep, totalSteps, title, onBack, isDark = true }: WizardHeaderProps) {
+export function WizardHeader({ currentStep, totalSteps, title, icon, onBack, isDark = true }: WizardHeaderProps) {
   const handleBack = async () => {
     await lightImpact();
     onBack();
@@ -61,9 +62,12 @@ export function WizardHeader({ currentStep, totalSteps, title, onBack, isDark = 
         </View>
 
         {/* Title */}
-        <Text style={[styles.title, { color: textColor }]} numberOfLines={1}>
-          {title}
-        </Text>
+        <View style={styles.titleRow}>
+          {icon}
+          <Text style={[styles.title, { color: textColor }]} numberOfLines={1}>
+            {title}
+          </Text>
+        </View>
 
         {/* Modern Progress Bar with Liquid Glass Aesthetic */}
         <View style={styles.progressContainer}>
@@ -155,10 +159,15 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.medium,
     letterSpacing: 0.5,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 20,
+  },
   title: {
     fontSize: 32,
     fontFamily: Fonts.numericSemiBold,
-    marginBottom: 20,
     letterSpacing: 0.5,
   },
   progressContainer: {

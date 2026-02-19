@@ -20,7 +20,8 @@ import {
   PlusCircle,
   Moon,
   Footprints,
-  Flame
+  Flame,
+  Salad
 } from 'lucide-react-native';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
@@ -264,7 +265,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
       <WizardHeader
         currentStep={4}
         totalSteps={6}
-        title="🥗 Nutrition Preferences"
+        title="Nutrition Preferences"
+        icon={<Salad size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={onBack}
         isDark={isDark}
       />

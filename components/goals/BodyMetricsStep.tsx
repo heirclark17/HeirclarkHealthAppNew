@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Ruler } from 'lucide-react-native';
 import {
   View,
   Text,
@@ -590,7 +591,8 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       <WizardHeader
         currentStep={2}
         totalSteps={6}
-        title="📏 Your Body Metrics"
+        title="Your Body Metrics"
+        icon={<Ruler size={28} color={isDark ? '#FFFFFF' : '#000000'} />}
         onBack={onBack}
         isDark={isDark}
       />
