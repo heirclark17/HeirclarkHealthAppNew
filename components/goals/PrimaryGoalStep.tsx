@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   stackContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -12,
+    marginTop: -30,
   },
   card: {
     position: 'absolute',
