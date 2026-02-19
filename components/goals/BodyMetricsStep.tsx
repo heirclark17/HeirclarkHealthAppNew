@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Ruler, ArrowLeft, ArrowRight } from 'lucide-react-native';
+import { Ruler } from 'lucide-react-native';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts, DarkColors, LightColors } from '../../constants/Theme';
 import { useGoalWizard, WeightUnit, HeightUnit } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -884,7 +885,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <ArrowLeft size={24} color={colors.text} />
+              <Icon name="hand-point-left" size={24} color={colors.text} solid />
             </GlassCard>
           </TouchableOpacity>
 
@@ -904,7 +905,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               ]}
               interactive
             >
-              <ArrowRight size={24} color={isValid() ? colors.primary : colors.textMuted} />
+              <Icon name="hand-point-right" size={24} color={isValid() ? colors.primary : colors.textMuted} solid />
             </GlassCard>
           </TouchableOpacity>
         </View>

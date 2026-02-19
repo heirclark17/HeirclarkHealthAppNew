@@ -21,10 +21,9 @@ import {
   Moon,
   Footprints,
   Flame,
-  Salad,
-  ArrowLeft,
-  ArrowRight
+  Salad
 } from 'lucide-react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
@@ -1020,7 +1019,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             accessibilityHint="Returns to previous step"
           >
             <GlassCard style={styles.backButton} interactive>
-              <ArrowLeft size={24} color={colors.text} />
+              <Icon name="hand-point-left" size={24} color={colors.text} solid />
             </GlassCard>
           </TouchableOpacity>
 
@@ -1032,7 +1031,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             accessibilityHint="Saves nutrition preferences and proceeds to next step"
           >
             <GlassCard style={[styles.continueButton, { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)' }]} interactive>
-              <ArrowRight size={24} color={colors.primary} />
+              <Icon name="hand-point-right" size={24} color={colors.primary} solid />
             </GlassCard>
           </TouchableOpacity>
         </View>

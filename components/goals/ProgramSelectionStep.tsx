@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Dumbbell, ArrowLeft, ArrowRight } from 'lucide-react-native';
+import { Dumbbell } from 'lucide-react-native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
@@ -298,7 +299,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
               accessibilityHint="Returns to previous step"
             >
               <GlassCard style={styles.backButton} interactive>
-                <ArrowLeft size={24} color={colors.text} />
+                <Icon name="hand-point-left" size={24} color={colors.text} solid />
               </GlassCard>
             </TouchableOpacity>
 
@@ -316,7 +317,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                 ]}
                 interactive
               >
-                <ArrowRight size={24} color={colors.primary} />
+                <Icon name="hand-point-right" size={24} color={colors.primary} solid />
               </GlassCard>
             </TouchableOpacity>
           </View>

@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
-import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target, ArrowRight } from 'lucide-react-native';
+import { Flame, Dumbbell, ShieldCheck, Heart, Check, Target } from 'lucide-react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
@@ -221,7 +222,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
               ]}
               interactive
             >
-              <ArrowRight size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} />
+              <Icon name="hand-point-right" size={24} color={state.primaryGoal ? colors.primary : colors.textMuted} solid />
             </GlassCard>
           </TouchableOpacity>
         </View>
