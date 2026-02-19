@@ -42,6 +42,8 @@ class ExerciseDbServiceClass {
   private apiKey: string | null = null;
   private cache: ExerciseDBCache | null = null;
   private initialized: boolean = false;
+  private requestQueue: Promise<any> = Promise.resolve();
+  private minRequestDelay: number = 500; // 500ms between requests to avoid rate limits
 
   /**
    * Initialize the service and load cache
@@ -80,6 +82,64 @@ class ExerciseDbServiceClass {
       'X-RapidAPI-Key': this.apiKey,
       'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com',
     };
+  }
+
+  /**
+   * Queue an API request with rate limiting
+   */
+  private async queueRequest<T>(requestFn: () => Promise<T>): Promise<T> {
+    // Chain this request after the previous one
+    this.requestQueue = this.requestQueue.then(async () => {
+      // Wait minimum delay before making request
+      await new Promise(resolve => setTimeout(resolve, this.minRequestDelay));
+      return requestFn();
+    });
+
+    return this.requestQueue;
+  }
+
+  /**
+   * Fetch with retry logic for rate limits
+   */
+  private async fetchWithRetry(
+    url: string,
+    options: RequestInit,
+    maxRetries: number = 3
+  ): Promise<Response> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await fetch(url, options);
+
+        // If rate limited (429), wait with exponential backoff
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After');
+          const waitTime = retryAfter
+            ? parseInt(retryAfter) * 1000
+            : Math.min(1000 * Math.pow(2, attempt), 10000); // Exponential backoff: 1s, 2s, 4s, max 10s
+
+          console.warn(
+            `[ExerciseDbService] Rate limited (429), waiting ${waitTime}ms before retry ${attempt + 1}/${maxRetries}`
+          );
+
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+
+        return response;
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`[ExerciseDbService] Request error (attempt ${attempt + 1}):`, error);
+
+        if (attempt < maxRetries - 1) {
+          const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
+    }
+
+    throw lastError || new Error('Max retries exceeded');
   }
 
   /**
@@ -158,17 +218,27 @@ class ExerciseDbServiceClass {
     }
 
     try {
-      const response = await fetch(`${EXERCISEDB_API_URL}/exercises/exercise/${id}`, {
-        method: 'GET',
-        headers: this.getHeaders(),
+      // Queue the request with rate limiting
+      const exercise = await this.queueRequest(async () => {
+        const response = await this.fetchWithRetry(
+          `${EXERCISEDB_API_URL}/exercises/exercise/${id}`,
+          {
+            method: 'GET',
+            headers: this.getHeaders(),
+          }
+        );
+
+        if (!response.ok) {
+          console.error('[ExerciseDbService] API error:', response.status);
+          return null;
+        }
+
+        return await response.json();
       });
 
-      if (!response.ok) {
-        console.error('[ExerciseDbService] API error:', response.status);
+      if (!exercise) {
         return null;
       }
-
-      const exercise: ExerciseDBExercise = await response.json();
 
       // Cache the result
       this.ensureCache();
@@ -227,24 +297,27 @@ class ExerciseDbServiceClass {
     }
 
     try {
-      const response = await fetch(
-        `${EXERCISEDB_API_URL}/exercises/name/${encodeURIComponent(searchTerm)}?limit=20`,
-        {
-          method: 'GET',
-          headers: this.getHeaders(),
+      // Queue the request with rate limiting
+      const exercises = await this.queueRequest(async () => {
+        const response = await this.fetchWithRetry(
+          `${EXERCISEDB_API_URL}/exercises/name/${encodeURIComponent(searchTerm)}?limit=20`,
+          {
+            method: 'GET',
+            headers: this.getHeaders(),
+          }
+        );
+
+        if (!response.ok) {
+          console.error('[ExerciseDbService] Search API error:', response.status);
+          return [];
         }
-      );
 
-      if (!response.ok) {
-        console.error('[ExerciseDbService] Search API error:', response.status);
-        return [];
-      }
-
-      const exercises: ExerciseDBExercise[] = await response.json();
+        return await response.json();
+      });
 
       // Cache all results
       this.ensureCache();
-      exercises.forEach(exercise => {
+      exercises.forEach((exercise: ExerciseDBExercise) => {
         this.cache!.exercises[exercise.id] = {
           ...exercise,
           cachedAt: new Date().toISOString(),
@@ -302,23 +375,26 @@ class ExerciseDbServiceClass {
     }
 
     try {
-      const response = await fetch(
-        `${EXERCISEDB_API_URL}/exercises/bodyPart/${encodeURIComponent(searchPart)}?limit=30`,
-        {
-          method: 'GET',
-          headers: this.getHeaders(),
+      // Queue the request with rate limiting
+      const rawExercises = await this.queueRequest(async () => {
+        const response = await this.fetchWithRetry(
+          `${EXERCISEDB_API_URL}/exercises/bodyPart/${encodeURIComponent(searchPart)}?limit=30`,
+          {
+            method: 'GET',
+            headers: this.getHeaders(),
+          }
+        );
+
+        if (!response.ok) {
+          console.error('[ExerciseDbService] Body part API error:', response.status);
+          return [];
         }
-      );
 
-      if (!response.ok) {
-        console.error('[ExerciseDbService] Body part API error:', response.status);
-        return [];
-      }
-
-      const rawExercises: any[] = await response.json();
+        return await response.json();
+      });
 
       // Map exercises and construct GIF URLs
-      const exercises: ExerciseDBExercise[] = rawExercises.map(ex => ({
+      const exercises: ExerciseDBExercise[] = rawExercises.map((ex: any) => ({
         id: ex.id,
         name: ex.name,
         bodyPart: ex.bodyPart,
