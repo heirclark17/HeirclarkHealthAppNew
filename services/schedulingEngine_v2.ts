@@ -469,7 +469,8 @@ export class SchedulingEngineV2 {
 
     // Priority 2: Try 5-7 PM zone (may require shifting dinner)
     console.log('[Scheduling V2] Preferred zone busy, trying 5-7 PM...');
-    for (let time = preferredEnd + 15; time <= windowEnd; time += 15) {
+    const fivePM = this.timeToMinutes('17:00'); // Start at actual 5 PM
+    for (let time = fivePM; time <= windowEnd; time += 15) {
       if (this.isSlotAvailable(time, duration, existingBlocks, 30)) {
         const workoutEnd = time + duration;
         const dinnerShiftNeeded = this.needsDinnerShift(workoutEnd, existingBlocks);
@@ -592,7 +593,7 @@ export class SchedulingEngineV2 {
       if (isOvernightBlock) {
         // Block wraps around midnight - check both segments
         // Night segment: blockStart to end-of-day (1440)
-        const overl apsNight = candidateStart < 1440 && candidateEnd > blockStart;
+        const overlapsNight = candidateStart < 1440 && candidateEnd > blockStart;
         // Morning segment: start-of-day (0) to blockEnd
         const overlapsMorning = candidateStart < blockEnd && candidateEnd > 0;
         overlaps = overlapsNight || overlapsMorning;

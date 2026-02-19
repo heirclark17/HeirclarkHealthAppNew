@@ -79,9 +79,9 @@ const DEFAULT_PREFS: PlannerPreferences = {
 describe('SchedulingEngineV2 - Test Case 1: Clean Day', () => {
   test('should place breakfast at 8 AM, lunch at 12 PM, dinner at 6:30 PM, workout at 2 PM', () => {
     const meals = [
-      createMeal('Scrambled Eggs'),        // Breakfast
-      createMeal('Chicken Salad Bowl'),    // Lunch
-      createMeal('Baked Salmon'),          // Dinner
+      createMeal('Breakfast - Scrambled Eggs'),
+      createMeal('Lunch - Chicken Salad Bowl'),
+      createMeal('Dinner - Baked Salmon'),
     ];
 
     const workout = createWorkout('Push Day');
@@ -132,9 +132,9 @@ describe('SchedulingEngineV2 - Test Case 1: Clean Day', () => {
 describe('SchedulingEngineV2 - Test Case 2: Packed Lunch Window', () => {
   test('should shift lunch earlier/later when 11 AM-2 PM is blocked', () => {
     const meals = [
-      createMeal('Oatmeal'),               // Breakfast
-      createMeal('Turkey Wrap'),           // Lunch
-      createMeal('Grilled Chicken'),       // Dinner
+      createMeal('Breakfast - Oatmeal'),
+      createMeal('Lunch - Turkey Wrap'),
+      createMeal('Dinner - Grilled Chicken'),
     ];
 
     const calendarEvents = [
@@ -186,9 +186,9 @@ describe('SchedulingEngineV2 - Test Case 2: Packed Lunch Window', () => {
 describe('SchedulingEngineV2 - Test Case 3: Late Workout Forces Dinner Shift', () => {
   test('should push dinner to after 6:30 PM when workout is at 5:30 PM', () => {
     const meals = [
-      createMeal('Protein Pancakes'),      // Breakfast
-      createMeal('Quinoa Bowl'),           // Lunch
-      createMeal('Steak and Veggies'),     // Dinner
+      createMeal('Breakfast - Protein Pancakes'),
+      createMeal('Lunch - Quinoa Bowl'),
+      createMeal('Dinner - Steak and Veggies'),
     ];
 
     const calendarEvents = [
@@ -250,9 +250,9 @@ describe('SchedulingEngineV2 - Test Case 3: Late Workout Forces Dinner Shift', (
 describe('SchedulingEngineV2 - Test Case 4: Fasting Window Constraints', () => {
   test('should constrain all meals to 12 PM - 8 PM eating window', () => {
     const meals = [
-      createMeal('First Meal'),            // Breakfast (will be in eating window)
-      createMeal('Second Meal'),           // Lunch
-      createMeal('Third Meal'),            // Dinner
+      createMeal('Breakfast - First Meal'),
+      createMeal('Lunch - Second Meal'),
+      createMeal('Dinner - Third Meal'),
     ];
 
     const workout = createWorkout('HIIT');
