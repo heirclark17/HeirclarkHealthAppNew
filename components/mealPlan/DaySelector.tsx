@@ -287,13 +287,17 @@ export function DaySelector({ weeklyPlan, selectedDayIndex, onSelectDay }: DaySe
                         : colors.textMuted;
                       return (
                         <>
-                          <NumberText weight="semiBold" style={[styles.caloriesSummary, { color: summaryColor }]}>
-                            {macros.calories}
-                          </NumberText>
-                          <Text style={[styles.mealSummary, { color: summaryColor }]}>cal</Text>
-                          <Text style={[styles.macroSummary, { color: summaryColor }]}>
+                          <View style={styles.caloriesRow}>
+                            <NumberText weight="semiBold" style={[styles.caloriesSummary, { color: summaryColor }]}>
+                              {macros.calories}
+                            </NumberText>
+                            <NumberText weight="regular" style={[styles.caloriesLabel, { color: summaryColor }]}>
+                              cal
+                            </NumberText>
+                          </View>
+                          <NumberText weight="regular" style={[styles.macroSummary, { color: summaryColor }]}>
                             P {macros.protein} · C {macros.carbs} · F {macros.fat}
-                          </Text>
+                          </NumberText>
                         </>
                       );
                     })()}
@@ -491,10 +495,21 @@ const styles = StyleSheet.create({
     color: Colors.text,
     // Font family handled by NumberText component (SF Pro Rounded)
   },
+  caloriesRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+    marginTop: 6,
+    gap: 2,
+  },
   caloriesSummary: {
     fontSize: 14,
-    marginTop: 6,
     textAlign: 'center',
+  },
+  caloriesLabel: {
+    fontSize: 9,
+    textAlign: 'center',
+    opacity: 0.8,
   },
   mealSummary: {
     fontSize: 8,
@@ -508,7 +523,6 @@ const styles = StyleSheet.create({
   },
   macroSummary: {
     fontSize: 7,
-    fontFamily: Fonts.medium,
     marginTop: 4,
     textAlign: 'center',
     letterSpacing: 0.2,
