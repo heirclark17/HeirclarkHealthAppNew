@@ -1387,7 +1387,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* Meals Content */}
-          <View style={styles.cardContent}>
+          <View style={[styles.cardContent, { marginTop: 4 }]}>
             {['breakfast', 'lunch', 'dinner', 'snack'].map((mealType) => {
           const mealList = meals.filter(m => m.mealType === mealType);
           const mealCals = mealList.reduce((sum, m) => sum + (m.calories || 0), 0);
