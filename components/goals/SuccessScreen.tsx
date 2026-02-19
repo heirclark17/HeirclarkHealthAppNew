@@ -447,7 +447,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
         <Text style={[styles.title, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
           {user?.firstName ? `${user.firstName}, ` : ''}You're All Set!
         </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: Fonts.light }]}>
+        <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: Fonts.numericRegular }]}>
           Your personalized nutrition plan is ready. Use this as your daily guide to reach your goals.
         </Text>
       </View>
@@ -462,7 +462,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
               <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                 {Math.round(state.results.calories).toLocaleString()}
               </NumberText>
-              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Calories</Text>
+              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Calories</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
               <Beef size={20} color={colors.protein} />
@@ -470,9 +470,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.protein}
                 </NumberText>
-                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.light }]}>g</Text>
+                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.numericRegular }]}>g</Text>
               </View>
-              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Protein</Text>
+              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Protein</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
               <Wheat size={20} color={colors.carbs} />
@@ -480,9 +480,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.carbs}
                 </NumberText>
-                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.light }]}>g</Text>
+                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.numericRegular }]}>g</Text>
               </View>
-              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Carbs</Text>
+              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Carbs</Text>
             </GlassCard>
             <GlassCard style={styles.targetCard} interactive>
               <Nut size={20} color={colors.fat} />
@@ -490,9 +490,9 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                 <NumberText weight="semiBold" style={[styles.targetValue, { color: colors.text }]}>
                   {state.results.fat}
                 </NumberText>
-                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.light }]}>g</Text>
+                <Text style={[styles.targetUnit, { color: colors.text, fontFamily: Fonts.numericRegular }]}>g</Text>
               </View>
-              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.light }]}>Fat</Text>
+              <Text style={[styles.targetLabel, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Fat</Text>
             </GlassCard>
           </View>
         </View>
@@ -537,7 +537,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                   </View>
                   <View style={styles.coachingTextContainer}>
                     <Text style={[styles.coachingButtonTitle, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>WATCH YOUR CUSTOMIZED COACHING</Text>
-                    <Text style={[styles.coachingButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>Your AI coach explains your personalized plan</Text>
+                    <Text style={[styles.coachingButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>Your AI coach explains your personalized plan</Text>
                   </View>
                   <ChevronRight size={20} color={colors.textMuted} />
                 </View>
@@ -575,7 +575,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                     )}
                     {isGeneratingMealPlan ? '' : '-DAY MEAL PLAN'}
                   </Text>
-                  <Text style={[styles.mealPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>
+                  <Text style={[styles.mealPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>
                     {isGeneratingMealPlan ? 'Please wait while AI creates your plan' : 'AI-generated meals tailored to your goals'}
                   </Text>
                 </View>
@@ -611,7 +611,7 @@ export function SuccessScreen({ onLogMeal, onViewDashboard, onAdjust, onViewAvat
                   <Text style={[styles.trainingPlanButtonTitle, { color: colors.text, fontFamily: Fonts.numericSemiBold }]}>
                     {isGeneratingTrainingPlan ? 'GENERATING AI TRAINING PLAN...' : 'START YOUR TRAINING PLAN'}
                   </Text>
-                  <Text style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.light }]}>
+                  <Text style={[styles.trainingPlanButtonSubtitle, { color: colors.textMuted, fontFamily: Fonts.numericRegular }]}>
                     {isGeneratingTrainingPlan
                       ? 'Please wait while AI creates your plan'
                       : (
