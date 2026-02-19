@@ -1382,7 +1382,7 @@ export default function DashboardScreen() {
         <View style={styles.cardHeader}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Salad size={42} color={colors.text} style={{ marginTop: -26 }} />
-            <Text style={[styles.sectionTitle, { color: colors.text, fontSize: 28, fontFamily: Fonts.numericSemiBold, letterSpacing: 1.5, lineHeight: 42 }]}>TODAY'S MEALS</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text, fontSize: 20, fontFamily: Fonts.numericSemiBold, letterSpacing: 1.5, lineHeight: 30 }]}>TODAY'S MEALS</Text>
           </View>
         </View>
 
