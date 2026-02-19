@@ -645,7 +645,7 @@ export default function MealsScreen() {
       {/* Sticky Action Buttons - Frosted Liquid Glass */}
       {weeklyPlan && !isCheatDay && (
         <View style={[styles.stickyButtonContainer, { paddingBottom: insets.bottom + 80 }]}>
-          {/* Instacart Button - Frosted Glass with Orange Tint */}
+          {/* Instacart Button - Navigation Bar Style Liquid Glass */}
           <TouchableOpacity
             onPress={() => setShowGroceryModal(true)}
             activeOpacity={0.8}
@@ -655,16 +655,16 @@ export default function MealsScreen() {
             accessibilityHint="Opens grocery list to view all ingredients and order through Instacart"
           >
             <BlurView
-              intensity={isDark ? 60 : 80}
-              tint={isDark ? 'dark' : 'light'}
+              intensity={100}
+              tint={isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight'}
               style={styles.glassButtonInner}
             >
               <View style={[
                 styles.glassButtonContent,
                 {
                   backgroundColor: isDark
-                    ? 'rgba(255, 140, 0, 0.15)'
-                    : 'rgba(255, 152, 0, 0.12)',
+                    ? 'rgba(255, 140, 0, 0.08)'
+                    : 'rgba(255, 152, 0, 0.06)',
                 }
               ]}>
                 <ShoppingCart
@@ -676,7 +676,7 @@ export default function MealsScreen() {
             </BlurView>
           </TouchableOpacity>
 
-          {/* AI Coach Button - Frosted Glass with Purple Tint */}
+          {/* AI Coach Button - Navigation Bar Style Liquid Glass */}
           <TouchableOpacity
             onPress={() => setShowCoachingModal(true)}
             activeOpacity={0.8}
@@ -686,16 +686,16 @@ export default function MealsScreen() {
             accessibilityHint="Opens AI coaching to get personalized guidance on your meal plan and nutrition goals"
           >
             <BlurView
-              intensity={isDark ? 60 : 80}
-              tint={isDark ? 'dark' : 'light'}
+              intensity={100}
+              tint={isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight'}
               style={styles.glassButtonInner}
             >
               <View style={[
                 styles.glassButtonContent,
                 {
                   backgroundColor: isDark
-                    ? 'rgba(139, 92, 246, 0.15)'
-                    : 'rgba(147, 51, 234, 0.12)',
+                    ? 'rgba(139, 92, 246, 0.08)'
+                    : 'rgba(147, 51, 234, 0.06)',
                 }
               ]}>
                 <Sparkles
