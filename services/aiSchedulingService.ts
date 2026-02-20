@@ -185,18 +185,138 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       });
     }
 
-    // VALIDATION: Detect conflicts between blocks
+    // VALIDATION: Resolve AI blocks that overlap with calendar events
+    // The AI prompt tells it to avoid calendar events, but LLMs sometimes ignore this.
+    // Calendar blocks are merged AFTER this step, so we must check proactively.
     const timeToMinutes = (time: string) => {
       const [hours, minutes] = time.split(':').map(Number);
       return hours * 60 + minutes;
     };
 
-    const detectConflicts = (blocks: TimeBlock[]) => {
+    const minToTimeStr = (minutes: number) => {
+      const h = Math.floor(minutes / 60) % 24;
+      const m = minutes % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+
+    if (request.calendarBlocks.length > 0) {
+      const calendarSlots = request.calendarBlocks
+        .filter(cb => !cb.isAllDay)
+        .map(cb => ({
+          start: timeToMinutes(cb.startTime),
+          end: timeToMinutes(cb.endTime),
+          title: cb.title,
+        }));
+
+      if (calendarSlots.length > 0) {
+        console.log('[AI Scheduler] Checking AI blocks against', calendarSlots.length, 'calendar events...');
+
+        blocks = blocks.map(block => {
+          // Only check workout and meal blocks — sleep is fixed
+          if (block.type !== 'workout' && block.type !== 'meal_eating') return block;
+
+          const blockStart = timeToMinutes(block.startTime);
+          const blockEnd = timeToMinutes(block.endTime);
+          const duration = block.duration || (blockEnd - blockStart);
+
+          // Check if this block overlaps ANY calendar event
+          const overlappingEvent = calendarSlots.find(cal =>
+            blockStart < cal.end && blockEnd > cal.start
+          );
+
+          if (!overlappingEvent) return block; // No conflict
+
+          console.warn(`[AI Scheduler] 🚨 CALENDAR CONFLICT: "${block.title}" (${to12Hour(block.startTime)}-${to12Hour(block.endTime)}) overlaps with "${overlappingEvent.title}" (${to12Hour(minToTimeStr(overlappingEvent.start))}-${to12Hour(minToTimeStr(overlappingEvent.end))})`);
+
+          // Build list of all occupied slots (other AI blocks + all calendar events)
+          const occupiedSlots = [
+            ...calendarSlots,
+            ...blocks
+              .filter(b => b.id !== block.id && !b.isAllDay)
+              .map(b => ({
+                start: timeToMinutes(b.startTime),
+                end: timeToMinutes(b.endTime),
+                title: b.title,
+              })),
+          ];
+
+          // Determine valid range for this block type
+          const wakeMin = timeToMinutes(request.preferences.wakeTime);
+          const sleepMin = timeToMinutes(request.preferences.sleepTime);
+          let rangeStart = wakeMin;
+          let rangeEnd = sleepMin > wakeMin ? sleepMin : wakeMin + 960;
+
+          // For meals, respect meal windows
+          if (block.type === 'meal_eating') {
+            const title = block.title.toLowerCase();
+            if (title.includes('breakfast')) { rangeStart = Math.max(rangeStart, 5 * 60); rangeEnd = Math.min(rangeEnd, 11 * 60); }
+            else if (title.includes('lunch')) { rangeStart = Math.max(rangeStart, 11 * 60); rangeEnd = Math.min(rangeEnd, 14 * 60); }
+            else if (title.includes('dinner')) { rangeStart = Math.max(rangeStart, 17 * 60); rangeEnd = Math.min(rangeEnd, 22 * 60); }
+
+            // Apply eating window if fasting
+            if (request.lifeContext?.isFasting && !request.lifeContext?.isCheatDay) {
+              const ewStart = timeToMinutes(request.lifeContext.fastingStart);
+              const ewEnd = timeToMinutes(request.lifeContext.fastingEnd);
+              rangeStart = Math.max(rangeStart, ewStart);
+              rangeEnd = Math.min(rangeEnd, ewEnd);
+            }
+          }
+
+          // For workouts, prefer afternoon window but allow full waking hours
+          const targetMin = block.type === 'workout'
+            ? Math.max(wakeMin + 60, timeToMinutes(block.startTime)) // Try near original time
+            : timeToMinutes(block.startTime); // Keep meal near original
+
+          // Scan outward from target for a conflict-free slot
+          const isSlotFree = (slotStart: number): boolean => {
+            const slotEnd = slotStart + duration;
+            if (slotStart < rangeStart || slotEnd > rangeEnd) return false;
+            for (const occ of occupiedSlots) {
+              if (slotStart < occ.end && slotEnd > occ.start) return false;
+            }
+            return true;
+          };
+
+          const clampedTarget = Math.max(rangeStart, Math.min(targetMin, rangeEnd - duration));
+          let chosenMin: number | null = null;
+
+          if (isSlotFree(clampedTarget)) {
+            chosenMin = clampedTarget;
+          } else {
+            let offset = 15;
+            const maxOffset = Math.max(clampedTarget - rangeStart, rangeEnd - clampedTarget);
+            while (offset <= maxOffset) {
+              const earlier = clampedTarget - offset;
+              if (earlier >= rangeStart && isSlotFree(earlier)) { chosenMin = earlier; break; }
+              const later = clampedTarget + offset;
+              if (later + duration <= rangeEnd && isSlotFree(later)) { chosenMin = later; break; }
+              offset += 15;
+            }
+          }
+
+          if (chosenMin !== null) {
+            console.log(`[AI Scheduler] ✅ Moved "${block.title}" from ${to12Hour(block.startTime)} to ${to12Hour(minToTimeStr(chosenMin))} to avoid calendar conflict`);
+            return {
+              ...block,
+              startTime: minToTimeStr(chosenMin),
+              endTime: minToTimeStr(chosenMin + duration),
+              duration,
+            };
+          } else {
+            console.warn(`[AI Scheduler] ⚠️ No conflict-free slot for "${block.title}" — keeping original (conflict will trigger V2 fallback)`);
+            return block;
+          }
+        });
+      }
+    }
+
+    const detectConflicts = (aiBlocks: TimeBlock[], calBlocks: TimeBlock[]) => {
       const conflicts: string[] = [];
-      for (let i = 0; i < blocks.length; i++) {
-        for (let j = i + 1; j < blocks.length; j++) {
-          const block1 = blocks[i];
-          const block2 = blocks[j];
+      const allBlocksToCheck = [...aiBlocks, ...calBlocks];
+      for (let i = 0; i < allBlocksToCheck.length; i++) {
+        for (let j = i + 1; j < allBlocksToCheck.length; j++) {
+          const block1 = allBlocksToCheck[i];
+          const block2 = allBlocksToCheck[j];
 
           // Skip all-day events
           if (block1.isAllDay || block2.isAllDay) continue;
@@ -221,7 +341,8 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       return conflicts;
     };
 
-    const conflicts = detectConflicts(blocks);
+    // Check AI blocks against BOTH each other AND calendar blocks
+    const conflicts = detectConflicts(blocks, request.calendarBlocks);
     if (conflicts.length > 0) {
       console.error('[AI Scheduler] 🚨 CONFLICTS DETECTED:');
       conflicts.forEach(conflict => console.error(`  ${conflict}`));
