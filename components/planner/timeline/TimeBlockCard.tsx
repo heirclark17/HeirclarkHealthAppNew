@@ -3,10 +3,13 @@
  *
  * Uses a plain View instead of GlassCard to avoid double padding
  * and overflow:hidden clipping that cut off text in short blocks.
+ *
+ * Supports side-by-side overlap layout (Google Calendar / Outlook style)
+ * via leftPercent and widthPercent props computed by overlapLayout utility.
  */
 
 import React, { useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -21,16 +24,26 @@ import { TimeBlock } from '../../../types/planner';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
 
+// Layout constants (must match TimeSlotGrid / DailyTimelineView)
+const TIME_LABEL_LEFT = 58; // 50px label + 8px gap
+const RIGHT_PADDING = 16;
+const OVERLAP_GAP = 2; // px gap between side-by-side blocks
+
 interface Props {
   block: TimeBlock;
   onPress: () => void;
   onSwipeRight: () => void;
   onSwipeLeft: () => void;
   wakeTime?: string; // Format: "HH:MM"
+  /** 0–1 fraction: horizontal offset within the content area (from overlap layout) */
+  leftPercent?: number;
+  /** 0–1 fraction: width within the content area (from overlap layout) */
+  widthPercent?: number;
 }
 
-export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeTime = '06:00' }: Props) {
+export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeTime = '06:00', leftPercent = 0, widthPercent = 1 }: Props) {
   const { settings } = useSettings();
+  const { width: screenWidth } = useWindowDimensions();
   const translateX = useSharedValue(0);
 
   // Dynamic theme colors
@@ -54,6 +67,19 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
 
   // For very short events (<30min), use compact single-line layout like Outlook
   const isCompact = block.duration < 30;
+
+  // Side-by-side layout for overlapping blocks (Google Calendar / Outlook style)
+  const isOverlapping = widthPercent < 1;
+
+  // Compute pixel-based positioning for overlap columns
+  // Content area: from TIME_LABEL_LEFT to (screenWidth - RIGHT_PADDING)
+  const contentWidth = screenWidth - TIME_LABEL_LEFT - RIGHT_PADDING;
+  const blockLeft = isOverlapping
+    ? TIME_LABEL_LEFT + leftPercent * contentWidth
+    : TIME_LABEL_LEFT;
+  const blockWidth = isOverlapping
+    ? widthPercent * contentWidth - OVERLAP_GAP
+    : contentWidth;
 
   // Gesture handler
   const panGesture = Gesture.Pan()
@@ -86,18 +112,25 @@ export function TimeBlockCard({ block, onPress, onSwipeRight, onSwipeLeft, wakeT
     ? (blockColor + (isCalendarEvent ? '35' : '25'))
     : (blockColor + (isCalendarEvent ? '22' : '15'));
 
-  // Use smaller text/icons for calendar events, normal size for meals/workouts
-  const titleSize = isCalendarEvent ? 11 : 13;
-  const timeSize = isCalendarEvent ? 10 : 11;
-  const iconSize = isCalendarEvent ? (isCompact ? 11 : 12) : (isCompact ? 12 : 14);
-  const statusIconSize = isCalendarEvent ? (isCompact ? 11 : 12) : (isCompact ? 12 : 14);
-  const compactTextSize = isCalendarEvent ? 10 : 11;
+  // Use smaller text/icons for overlapping or calendar events
+  const shouldShrinkText = isOverlapping || isCalendarEvent;
+  const titleSize = shouldShrinkText ? 11 : 13;
+  const timeSize = shouldShrinkText ? 10 : 11;
+  const iconSize = shouldShrinkText ? (isCompact ? 11 : 12) : (isCompact ? 12 : 14);
+  const statusIconSize = shouldShrinkText ? (isCompact ? 11 : 12) : (isCompact ? 12 : 14);
+  const compactTextSize = shouldShrinkText ? 10 : 11;
 
   return (
     <Animated.View
       style={[
-        styles.container,
-        { top, height },
+        {
+          position: 'absolute',
+          top,
+          height,
+          left: blockLeft,
+          width: blockWidth,
+          zIndex: 1,
+        },
         animatedStyle,
       ]}
     >
@@ -175,13 +208,6 @@ function to12h(time: string): string {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    left: 58, // Align with grid lines: 50px time label + 8px gap
-    right: 0,
-    paddingRight: 16,
-    zIndex: 1,
-  },
   card: {
     flex: 1,
     // Use minimal padding for short events (like Outlook/Teams)

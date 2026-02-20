@@ -33,6 +33,7 @@ import { WeeklyCoachCard } from '../coaching/WeeklyCoachCard';
 import { PlannerChatSheet, PlannerChatSheetRef } from '../chat/PlannerChatSheet';
 import { BlockDetailModal } from '../modals/BlockDetailModal';
 import { AnimatedSparkleIcon } from '../../AnimatedSparkleIcon';
+import { computeOverlapLayout, BlockLayout } from '../../../utils/overlapLayout';
 import { mediumImpact } from '../../../utils/haptics';
 
 // Must match _layout.tsx tab bar constants
@@ -331,6 +332,11 @@ export function DailyTimelineView() {
     !b.isAllDay && !['buffer', 'meal_prep'].includes(b.type)
   );
 
+  // Compute side-by-side overlap layout (Google Calendar / Outlook style)
+  const overlapLayoutMap = useMemo(() => {
+    return computeOverlapLayout(timedBlocks, state.preferences?.wakeTime || '06:00');
+  }, [timedBlocks, state.preferences?.wakeTime]);
+
   // DEBUG: Log block type breakdown for this day's timeline
   const calendarEventsInTimeline = timeline.blocks.filter((b) => b.type === 'calendar_event');
   if (calendarEventsInTimeline.length > 0) {
@@ -536,20 +542,25 @@ export function DailyTimelineView() {
 
           <CurrentTimeIndicator wakeTime={state.preferences?.wakeTime} />
 
-          {timedBlocks.map((block) => (
-            <TimeBlockCard
-              key={block.id}
-              block={block}
-              wakeTime={state.preferences?.wakeTime}
-              onPress={() => {
-                mediumImpact();
-                setSelectedTimedBlock(block);
-                setIsBlockDetailVisible(true);
-              }}
-              onSwipeRight={() => actions.markBlockComplete(block.id, timeline.date)}
-              onSwipeLeft={() => actions.skipBlock(block.id, timeline.date)}
-            />
-          ))}
+          {timedBlocks.map((block) => {
+            const layout = overlapLayoutMap.get(block.id);
+            return (
+              <TimeBlockCard
+                key={block.id}
+                block={block}
+                wakeTime={state.preferences?.wakeTime}
+                leftPercent={layout?.leftPercent}
+                widthPercent={layout?.widthPercent}
+                onPress={() => {
+                  mediumImpact();
+                  setSelectedTimedBlock(block);
+                  setIsBlockDetailVisible(true);
+                }}
+                onSwipeRight={() => actions.markBlockComplete(block.id, timeline.date)}
+                onSwipeLeft={() => actions.skipBlock(block.id, timeline.date)}
+              />
+            );
+          })}
         </View>
       </ScrollView>
         </View>
