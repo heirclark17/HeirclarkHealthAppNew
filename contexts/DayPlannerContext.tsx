@@ -427,6 +427,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           endDate: new Date(e.endDate),
         }));
         console.log('[Planner] Loaded', events.length, 'cached calendar events from AsyncStorage');
+        // Update stateRef immediately so any plan generation can access events
+        stateRef.current = { ...stateRef.current, deviceCalendarEvents: events };
         setState((prev) => ({ ...prev, deviceCalendarEvents: events }));
       }
 
@@ -1268,7 +1270,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     const mealBlocksInTimeline = timeline.blocks.filter(
       (b) => b.type === 'meal_eating'
     );
-    const missingMeals = mealBlocks.filter((inputMeal) => {
+    const missingMeals = filteredMealBlocks.filter((inputMeal) => {
       // Match by title substring (e.g., "Breakfast:" should match any breakfast block)
       const inputTitle = inputMeal.title.toLowerCase();
       return !mealBlocksInTimeline.some((tb) => {
@@ -1514,10 +1516,15 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       });
 
       // Store CLIENT-SIDE ONLY (never sent to backend)
+      const syncTimestamp = new Date().toISOString();
+      // Mark this sync as handled so the auto-regenerate useEffect doesn't
+      // trigger a redundant second generateWeeklyPlan() call.
+      lastSyncHandled.current = syncTimestamp;
+
       setState((prev) => ({
         ...prev,
         deviceCalendarEvents: events,
-        lastCalendarSync: new Date().toISOString(),
+        lastCalendarSync: syncTimestamp,
         isSyncingCalendar: false,
         loadingPhase: 'idle',
       }));
@@ -1526,7 +1533,13 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       await AsyncStorage.setItem(STORAGE_KEYS.CALENDAR_EVENTS, JSON.stringify(events));
       console.log(`[Planner] ✅ Synced ${events.length} calendar events (client-side only, cached to AsyncStorage)`);
 
-      // CRITICAL: Regenerate weekly plan with new calendar events
+      // CRITICAL: Update stateRef immediately so generateWeeklyPlan can access
+      // the events via stateRef.current.deviceCalendarEvents. Without this,
+      // setState is async and stateRef won't be updated until the next render,
+      // causing generateDailyTimeline to read an empty array.
+      stateRef.current = { ...stateRef.current, deviceCalendarEvents: events };
+
+      // Regenerate weekly plan with new calendar events
       console.log('[Planner] 🔄 Regenerating weekly plan with calendar events...');
       await generateWeeklyPlan();
 
