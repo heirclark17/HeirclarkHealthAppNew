@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heirclark - Your AI Health & Fitness Companion</title>
+  <style>
+    /* ==================== CSS VARIABLES ==================== */
+    :root {
+      /* iOS 26 Liquid Glass Colors */
+      --glass-white: rgba(255, 255, 255, 0.72);
+      --glass-light: rgba(255, 255, 255, 0.18);
+      --glass-border: rgba(255, 255, 255, 0.3);
+
+      /* Brand Colors */
+      --primary: #007AFF;
+      --primary-light: rgba(0, 122, 255, 0.15);
+      --accent: #5E5CE6;
+      --success: #34C759;
+      --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --gradient-mesh: radial-gradient(at 0% 0%, rgba(102, 126, 234, 0.08) 0px, transparent 50%),
+                       radial-gradient(at 80% 20%, rgba(245, 87, 108, 0.08) 0px, transparent 50%),
+                       radial-gradient(at 50% 100%, rgba(52, 199, 89, 0.06) 0px, transparent 50%);
+
+      /* Typography */
+      --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+      --font-rounded: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", ui-rounded, "Segoe UI", sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+
+      /* Spacing */
+      --section-padding: clamp(80px, 12vw, 160px);
+      --card-padding: clamp(32px, 4vw, 48px);
+
+      /* Shadows - Soft, diffuse iOS 26 style */
+      --shadow-sm: 0 2px 16px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.12);
+      --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.15);
+
+      /* Border Radius */
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 32px;
+      --radius-xl: 48px;
+    }
+
+    /* ==================== RESET & BASE ==================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: #fafafa;
+      color: #1d1d1f;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Atmospheric background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-mesh);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ==================== GLASS COMPONENTS ==================== */
+    .glass-card {
+      background: var(--glass-white);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-glass);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.8),
+        transparent
+      );
+      opacity: 0.6;
+    }
+
+    .glass-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 32px;
+      background: var(--glass-white);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 100px;
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 600;
+      color: #1d1d1f;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .glass-button.primary {
+      background: var(--primary);
+      color: white;
+      border-color: transparent;
+    }
+
+    .glass-button.primary:hover {
+      background: #0051D5;
+    }
+
+    /* ==================== HEADER ==================== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 16px 0;
+      background: rgba(250, 250, 250, 0.8);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      color: #1d1d1f;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    /* ==================== HERO SECTION ==================== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 32px 80px;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      max-width: 1200px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hero-text {
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s backwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--primary-light);
+      border-radius: 100px;
+      font-family: var(--font-rounded);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 24px;
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s backwards;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(48px, 7vw, 84px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #1d1d1f 0%, #4a4a4a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 21px;
+      line-height: 1.5;
+      color: #6e6e73;
+      margin-bottom: 40px;
+      max-width: 540px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-visual {
+      position: relative;
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s backwards;
+    }
+
+    .phone-mockup {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-20px) rotate(2deg);
+      }
+    }
+
+    .screenshot-placeholder {
+      width: 100%;
+      aspect-ratio: 9/19.5;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 48px;
+      box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.2),
+        inset 0 0 0 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-rounded);
+      font-size: 18px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screenshot-placeholder::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
+    }
+
+    /* Dynamic Island */
+    .screenshot-placeholder::after {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 32px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 100px;
+    }
+
+    /* ==================== FEATURES SECTION ==================== */
+    .features {
+      padding: var(--section-padding) 32px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .section-header {
+      max-width: 800px;
+      margin: 0 auto 80px;
+      text-align: center;
+    }
+
+    .section-eyebrow {
+      font-family: var(--font-rounded);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .section-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+      color: #1d1d1f;
+    }
+
+    .section-header p {
+      font-size: 19px;
+      color: #6e6e73;
+      line-height: 1.5;
+    }
+
+    .features-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      gap: 40px;
+    }
+
+    .feature-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      padding: var(--card-padding);
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+    }
+
+    .feature-card:nth-child(even) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .feature-card:nth-child(even) .feature-content {
+      order: 2;
+    }
+
+    .feature-content h3 {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+      color: #1d1d1f;
+    }
+
+    .feature-content p {
+      font-size: 19px;
+      line-height: 1.6;
+      color: #6e6e73;
+      margin-bottom: 32px;
+    }
+
+    .feature-highlights {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .highlight-item {
+      display: flex;
+      align-items: start;
+      gap: 12px;
+      padding: 16px;
+      background: var(--glass-light);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+    }
+
+    .highlight-item:hover {
+      transform: translateX(8px);
+      background: var(--glass-white);
+    }
+
+    .highlight-icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .highlight-text {
+      font-size: 16px;
+      color: #1d1d1f;
+      font-weight: 500;
+    }
+
+    .feature-image {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-image::before {
+      content: 'App Screenshot';
+      font-family: var(--font-rounded);
+      font-size: 21px;
+      color: white;
+      opacity: 0.7;
+    }
+
+    /* ==================== STATS SECTION ==================== */
+    .stats {
+      padding: 80px 32px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .stats-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--card-padding);
+      border-radius: var(--radius-xl);
+      background: var(--glass-white);
+      backdrop-filter: blur(40px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 48px;
+      text-align: center;
+    }
+
+    .stat-item {
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+    }
+
+    .stat-number {
+      font-family: var(--font-rounded);
+      font-size: clamp(48px, 6vw, 72px);
+      font-weight: 700;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .stat-label {
+      font-size: 17px;
+      color: #6e6e73;
+      font-weight: 500;
+    }
+
+    /* ==================== CTA SECTION ==================== */
+    .cta-section {
+      padding: var(--section-padding) 32px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .cta-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--card-padding);
+      border-radius: var(--radius-xl);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-container h2 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      color: white;
+      margin-bottom: 24px;
+    }
+
+    .cta-container p {
+      font-size: 21px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 40px;
+      line-height: 1.5;
+    }
+
+    /* ==================== FOOTER ==================== */
+    footer {
+      padding: 60px 32px 40px;
+      background: rgba(250, 250, 250, 0.8);
+      backdrop-filter: blur(40px);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 10;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .footer-brand h3 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .footer-brand p {
+      font-size: 15px;
+      color: #6e6e73;
+      line-height: 1.6;
+    }
+
+    .footer-links h4 {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      color: #1d1d1f;
+    }
+
+    .footer-links ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-links a {
+      font-size: 15px;
+      color: #6e6e73;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 32px;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: #6e6e73;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .social-links a {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--glass-light);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1d1d1f;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .social-links a:hover {
+      background: var(--glass-white);
+      transform: translateY(-2px);
+    }
+
+    /* ==================== SCROLL ANIMATIONS ==================== */
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(40px);
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Stagger delays for feature cards */
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+
+    /* Stagger delays for stats */
+    .stat-item:nth-child(1) { animation-delay: 0.1s; }
+    .stat-item:nth-child(2) { animation-delay: 0.2s; }
+    .stat-item:nth-child(3) { animation-delay: 0.3s; }
+    .stat-item:nth-child(4) { animation-delay: 0.4s; }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: 60px;
+        text-align: center;
+      }
+
+      .hero-text {
+        order: 1;
+      }
+
+      .hero-visual {
+        order: 2;
+      }
+
+      .hero p {
+        max-width: 100%;
+      }
+
+      .hero-cta {
+        justify-content: center;
+      }
+
+      .feature-card,
+      .feature-card:nth-child(even) {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .feature-card:nth-child(even) .feature-content {
+        order: 1;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+
+      .footer-brand {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 0 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding: 100px 20px 60px;
+      }
+
+      .features,
+      .stats,
+      .cta-section {
+        padding: 60px 20px;
+      }
+
+      .feature-image {
+        height: 400px;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <nav>
+      <div class="logo">Heirclark</div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#stats">Stats</a></li>
+        <li><a href="#download">Download</a></li>
+      </ul>
+      <a href="#download" class="glass-button primary">Download App</a>
+    </nav>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-eyebrow">
+          <span>✨</span>
+          <span>AI-Powered Health & Fitness</span>
+        </div>
+        <h1>Your intelligent companion for health transformation</h1>
+        <p>Heirclark combines cutting-edge AI with personalized nutrition and training to help you achieve your health goals faster than ever.</p>
+        <div class="hero-cta">
+          <a href="#download" class="glass-button primary">
+            <span>Download on App Store</span>
+            <span>→</span>
+          </a>
+          <a href="#features" class="glass-button">
+            <span>Explore Features</span>
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="phone-mockup">
+          <div class="screenshot-placeholder">
+            Add App Screenshot Here<br/>
+            (9:19.5 ratio)
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <div class="section-eyebrow">Features</div>
+      <h2>Everything you need to transform your health</h2>
+      <p>Powered by AI, designed for results. Heirclark brings together intelligent meal planning, personalized workouts, and comprehensive health tracking.</p>
+    </div>
+
+    <div class="features-grid">
+      <!-- Feature 1: AI Meal Planning -->
+      <div class="feature-card glass-card">
+        <div class="feature-content">
+          <h3>AI-Powered Meal Planning</h3>
+          <p>Get personalized meal plans that adapt to your goals, dietary preferences, and schedule. Our AI analyzes your nutrition needs and generates delicious, macro-balanced meals.</p>
+          <div class="feature-highlights">
+            <div class="highlight-item">
+              <div class="highlight-icon">🍽️</div>
+              <div class="highlight-text">Custom meal plans tailored to your macros</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">📸</div>
+              <div class="highlight-text">AI food photo analysis with instant nutrition data</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">🛒</div>
+              <div class="highlight-text">Automated grocery lists with Instacart integration</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">⏰</div>
+              <div class="highlight-text">Intermittent fasting support with smart scheduling</div>
+            </div>
+          </div>
+        </div>
+        <div class="feature-image">
+          <!-- Add screenshot of meal planning interface -->
+        </div>
+      </div>
+
+      <!-- Feature 2: Smart Training Programs -->
+      <div class="feature-card glass-card">
+        <div class="feature-content">
+          <h3>Intelligent Training Programs</h3>
+          <p>Multi-week workout plans generated by AI based on your goals, equipment, and fitness level. Track progress, log weights, and optimize every session.</p>
+          <div class="feature-highlights">
+            <div class="highlight-item">
+              <div class="highlight-icon">💪</div>
+              <div class="highlight-text">AI-generated programs for muscle gain or fat loss</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">📊</div>
+              <div class="highlight-text">Progressive overload tracking with trend analysis</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">🔄</div>
+              <div class="highlight-text">Equipment substitution for home or gym workouts</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">🎯</div>
+              <div class="highlight-text">Exercise alternatives based on your preferences</div>
+            </div>
+          </div>
+        </div>
+        <div class="feature-image">
+          <!-- Add screenshot of training program interface -->
+        </div>
+      </div>
+
+      <!-- Feature 3: AI Day Planner -->
+      <div class="feature-card glass-card">
+        <div class="feature-content">
+          <h3>AI Calendar Integration</h3>
+          <p>Intelligent scheduling that syncs workouts and meals with your calendar. The AI analyzes your availability, fasting windows, and recovery status to create conflict-free daily timelines.</p>
+          <div class="feature-highlights">
+            <div class="highlight-item">
+              <div class="highlight-icon">🗓️</div>
+              <div class="highlight-text">Auto-schedule around calendar events</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">🤖</div>
+              <div class="highlight-text">AI-optimized meal and workout timing</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">⚡</div>
+              <div class="highlight-text">Respects fasting windows and recovery needs</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">📱</div>
+              <div class="highlight-text">Swipe to complete with weekly adherence tracking</div>
+            </div>
+          </div>
+        </div>
+        <div class="feature-image">
+          <!-- Add screenshot of day planner interface -->
+        </div>
+      </div>
+
+      <!-- Feature 4: Apple Health Sync -->
+      <div class="feature-card glass-card">
+        <div class="feature-content">
+          <h3>Seamless Apple Health Integration</h3>
+          <p>Sync steps, calories, heart rate, sleep, and workouts from Apple Health. Get comprehensive insights into your daily activity and recovery metrics.</p>
+          <div class="feature-highlights">
+            <div class="highlight-item">
+              <div class="highlight-icon">❤️</div>
+              <div class="highlight-text">Heart rate and HRV monitoring</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">🚶</div>
+              <div class="highlight-text">Steps, distance, and active energy tracking</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">😴</div>
+              <div class="highlight-text">Sleep analysis with recovery scoring</div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">⚖️</div>
+              <div class="highlight-text">Weight tracking with progress predictions</div>
+            </div>
+          </div>
+        </div>
+        <div class="feature-image">
+          <!-- Add screenshot of health dashboard -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS SECTION -->
+  <section class="stats" id="stats">
+    <div class="stats-container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">10K+</div>
+          <div class="stat-label">Meal Plans Generated</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">50K+</div>
+          <div class="stat-label">Workouts Completed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">95%</div>
+          <div class="stat-label">Goal Achievement Rate</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">4.9★</div>
+          <div class="stat-label">App Store Rating</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="cta-section" id="download">
+    <div class="cta-container">
+      <div class="cta-content">
+        <h2>Start your transformation today</h2>
+        <p>Join thousands of users achieving their health goals with AI-powered guidance.</p>
+        <a href="#" class="glass-button" style="background: white; color: #667eea; border: none;">
+          <span>Download on App Store</span>
+          <span>→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>Heirclark</h3>
+        <p>Your AI-powered health and fitness companion. Personalized nutrition, intelligent training, and comprehensive health tracking—all in one beautiful app.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#download">Download</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Updates</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Heirclark Health. All rights reserved.</div>
+      <div class="social-links">
+        <a href="#" aria-label="Twitter">𝕏</a>
+        <a href="#" aria-label="Instagram">📷</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe all feature cards
+    document.querySelectorAll('.feature-card').forEach(card => {
+      observer.observe(card);
+    });
+
+    // Observe stat items
+    document.querySelectorAll('.stat-item').forEach(stat => {
+      observer.observe(stat);
+    });
+
+    // Add parallax effect to hero visual
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      const heroVisual = document.querySelector('.hero-visual');
+      if (heroVisual && scrolled < window.innerHeight) {
+        heroVisual.style.transform = `translateY(${scrolled * 0.3}px)`;
+      }
+    });
+
+    // Animate numbers on scroll into view
+    const animateNumber = (element, target) => {
+      const duration = 2000;
+      const start = 0;
+      const increment = target / (duration / 16);
+      let current = start;
+
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          element.textContent = target;
+          clearInterval(timer);
+        } else {
+          element.textContent = Math.floor(current);
+        }
+      }, 16);
+    };
+
+    const statObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !entry.target.classList.contains('animated')) {
+          entry.target.classList.add('animated');
+          const numberElement = entry.target.querySelector('.stat-number');
+          const text = numberElement.textContent;
+          const number = parseInt(text.replace(/\D/g, ''));
+
+          if (!isNaN(number)) {
+            numberElement.textContent = '0';
+            setTimeout(() => {
+              animateNumber(numberElement, number);
+              // Add suffix back
+              setTimeout(() => {
+                if (text.includes('K')) numberElement.textContent += 'K+';
+                if (text.includes('%')) numberElement.textContent += '%';
+                if (text.includes('★')) numberElement.textContent += '★';
+              }, 2000);
+            }, 100);
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-item').forEach(stat => {
+      statObserver.observe(stat);
+    });
+  </script>
+</body>
+</html>
