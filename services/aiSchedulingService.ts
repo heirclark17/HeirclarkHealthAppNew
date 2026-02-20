@@ -226,7 +226,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
 
           if (!overlappingEvent) return block; // No conflict
 
-          console.warn(`[AI Scheduler] 🚨 CALENDAR CONFLICT: "${block.title}" (${to12Hour(block.startTime)}-${to12Hour(block.endTime)}) overlaps with "${overlappingEvent.title}" (${to12Hour(minToTimeStr(overlappingEvent.start))}-${to12Hour(minToTimeStr(overlappingEvent.end))})`);
+          console.log(`[AI Scheduler] CALENDAR CONFLICT DETECTED: "${block.title}" (${to12Hour(block.startTime)}-${to12Hour(block.endTime)}) overlaps with "${overlappingEvent.title}" (${to12Hour(minToTimeStr(overlappingEvent.start))}-${to12Hour(minToTimeStr(overlappingEvent.end))}) — resolving...`);
 
           // Build list of all occupied slots (other AI blocks + all calendar events)
           const occupiedSlots = [
@@ -303,9 +303,15 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
               duration,
             };
           } else {
-            console.warn(`[AI Scheduler] ⚠️ No conflict-free slot for "${block.title}" — keeping original (conflict will trigger V2 fallback)`);
+            console.log(`[AI Scheduler] No conflict-free slot for "${block.title}" — keeping original (will trigger V2 fallback)`);
             return block;
           }
+        });
+
+        // Log final block positions after calendar conflict resolution
+        console.log('[AI Scheduler] Blocks AFTER calendar conflict resolution:');
+        blocks.filter(b => b.type === 'workout' || b.type === 'meal_eating').forEach(b => {
+          console.log(`  ${b.type}: ${b.title} | ${to12Hour(b.startTime)}-${to12Hour(b.endTime)}`);
         });
       }
     }
