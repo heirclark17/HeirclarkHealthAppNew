@@ -60,7 +60,7 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
       messages: [
         {
           role: 'system',
-          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. CRITICAL RULES: (1) Meals have STRICT TIME WINDOWS - Breakfast: 05:00-10:59 (target 08:00), Lunch: 11:00-14:00 (target 12:00), Dinner: 17:00-22:00 (target 18:30). (2) EACH MEAL MUST BE AT A DIFFERENT TIME - NEVER schedule two meals at the same time. (3) Leave at least 45 minutes between meals. (4) NEVER overlap meals with each other or with workouts. (5) Each meal type goes in its designated window only. If fasting is active, meals must ALSO be within the eating window.',
+          content: 'You schedule workouts and meals around calendar events. Use 24-hour format. CRITICAL RULES: (1) Meals have STRICT TIME WINDOWS - Breakfast: 05:00-10:59 (target 08:00), Lunch: 11:00-14:00 (target 12:00), Dinner: 17:00-22:00 (target 18:30). (2) EACH MEAL MUST BE AT A DIFFERENT TIME - NEVER schedule two meals at the same time. (3) Leave at least 45 minutes between meals. (4) NEVER overlap meals with each other or with workouts. (5) Each meal type goes in its designated window only. If fasting is active, meals must ALSO be within the eating window. (6) Keep at least 1 HOUR buffer between workouts/meals and calendar events — schedule them 1 hour before or 1 hour after any meeting.',
         },
         {
           role: 'user',
@@ -262,27 +262,48 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
             }
           }
 
-          // For workouts, prefer afternoon window but allow full waking hours
-          const targetMin = block.type === 'workout'
-            ? Math.max(wakeMin + 60, timeToMinutes(block.startTime)) // Try near original time
-            : timeToMinutes(block.startTime); // Keep meal near original
+          const BUFFER = 60; // 1 hour buffer from calendar events
 
-          // Scan outward from target for a conflict-free slot
+          // Check if a slot is free of all occupied blocks AND respects 1hr buffer from ALL calendar events
           const isSlotFree = (slotStart: number): boolean => {
             const slotEnd = slotStart + duration;
             if (slotStart < rangeStart || slotEnd > rangeEnd) return false;
+            // Check against other AI blocks (no buffer needed, just no overlap)
             for (const occ of occupiedSlots) {
               if (slotStart < occ.end && slotEnd > occ.start) return false;
+            }
+            // Enforce 1hr buffer from ALL calendar events
+            for (const cal of calendarSlots) {
+              if (slotStart < (cal.end + BUFFER) && slotEnd > (cal.start - BUFFER)) return false;
             }
             return true;
           };
 
-          const clampedTarget = Math.max(rangeStart, Math.min(targetMin, rangeEnd - duration));
+          // Strategy: Try 1 hour before or 1 hour after the conflicting calendar event
+          const candidateBefore = overlappingEvent.start - BUFFER - duration; // End 1hr before event
+          const candidateAfter = overlappingEvent.end + BUFFER;              // Start 1hr after event
+
+          const beforeValid = candidateBefore >= rangeStart && isSlotFree(candidateBefore);
+          const afterValid = candidateAfter + duration <= rangeEnd && isSlotFree(candidateAfter);
+
           let chosenMin: number | null = null;
 
-          if (isSlotFree(clampedTarget)) {
-            chosenMin = clampedTarget;
-          } else {
+          if (beforeValid && afterValid) {
+            // Both work — pick whichever is closer to original time
+            const originalStart = timeToMinutes(block.startTime);
+            chosenMin = Math.abs(candidateBefore - originalStart) <= Math.abs(candidateAfter - originalStart)
+              ? candidateBefore : candidateAfter;
+          } else if (beforeValid) {
+            chosenMin = candidateBefore;
+          } else if (afterValid) {
+            chosenMin = candidateAfter;
+          }
+
+          // If neither 1hr-before nor 1hr-after works, scan outward in 15-min steps as fallback
+          if (chosenMin === null) {
+            console.log(`[AI Scheduler] Neither 1hr-before nor 1hr-after worked, scanning for any free slot...`);
+            const originalStart = timeToMinutes(block.startTime);
+            const clampedTarget = Math.max(rangeStart, Math.min(originalStart, rangeEnd - duration));
             let offset = 15;
             const maxOffset = Math.max(clampedTarget - rangeStart, rangeEnd - clampedTarget);
             while (offset <= maxOffset) {
@@ -494,6 +515,18 @@ export async function generateAISchedule(request: SchedulingRequest): Promise<Da
   }
 }
 
+// Helpers for building blocked-zone strings in the prompt
+function timeToMinutesForPrompt(time: string): number {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+function minToTimeForPrompt(minutes: number): string {
+  const clamped = Math.max(0, Math.min(1439, minutes));
+  const h = Math.floor(clamped / 60);
+  const m = clamped % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 /**
  * Build comprehensive prompt for AI scheduler
  */
@@ -563,8 +596,8 @@ ${mealBlocks.length > 0 ? mealBlocks.map(m => {
    - Ideal times: After breakfast before lunch, After lunch before dinner
    - Keep 30-60 min gap from main meals
 
-**Calendar Events (DO NOT SCHEDULE OVER THESE):**
-${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title}`).join('\n') : '- None'}
+**Calendar Events (DO NOT SCHEDULE OVER THESE — keep 1 HOUR buffer):**
+${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endTime}: ${e.title} → BLOCKED ZONE: ${minToTimeForPrompt(timeToMinutesForPrompt(e.startTime) - 60)}-${minToTimeForPrompt(timeToMinutesForPrompt(e.endTime) + 60)}`).join('\n') : '- None'}
 
 **CRITICAL SCHEDULING RULES:**
 1. Include sleep block from ${preferences.sleepTime} to ${preferences.wakeTime}
@@ -578,15 +611,15 @@ ${calendarBlocks.length > 0 ? calendarBlocks.map(e => `- ${e.startTime}-${e.endT
 4. 🚨 IF FASTING: ALL meals MUST be between ${isFasting ? lifeContext.fastingStart : 'N/A'} and ${isFasting ? lifeContext.fastingEnd : 'N/A'}
 5. 🚨 NEVER overlap workouts with meals - they must be completely separate time blocks
 6. 🚨 NEVER overlap ANY blocks with each other (no two blocks at the same time)
-7. 🚨 NEVER overlap workouts/meals with calendar events
+7. 🚨 **1-HOUR CALENDAR BUFFER**: Schedule workouts and meals at least 1 HOUR before or 1 HOUR after any calendar event. Example: if a meeting is 9:00-9:30, the earliest a workout/meal can START is 10:30, and it must END by 8:00 at the latest.
 8. 🚨 Leave at least 15 minutes between consecutive blocks (workout→meal, meal→workout, etc.)
 9. Schedule workouts BEFORE or AFTER meals, never during
 10. **DO NOT use fixed meal times** - use the flexible windows above
 
 **Scheduling Strategy:**
-- Find all occupied time slots (calendar events + sleep)
+- Find all occupied time slots (calendar events + 1hr buffer on each side + sleep)
 - Identify free time windows
-- Place workouts in free windows (avoiding fasting eating time if possible)
+- Place workouts in free windows at least 1 HOUR from any calendar event
 - Place BREAKFAST within breakfast window (05:00-10:59)${isFasting ? ` BUT must start AFTER ${lifeContext.fastingStart}` : ''}
 - Place LUNCH within lunch window (11:00-14:00)${isFasting ? ` AND must end before ${lifeContext.fastingEnd}` : ''}
 - Place DINNER within dinner window (17:00-22:00)${isFasting ? ` AND must end before ${lifeContext.fastingEnd}` : ''}
