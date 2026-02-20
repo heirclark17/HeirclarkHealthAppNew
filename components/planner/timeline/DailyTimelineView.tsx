@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
   },
   chatFab: {
     position: 'absolute',
-    right: 16,
+    right: 32, // Align with action buttons (16px screen margin + 16px GlassCard padding)
   },
   chatFabGlass: {
     width: 52,
