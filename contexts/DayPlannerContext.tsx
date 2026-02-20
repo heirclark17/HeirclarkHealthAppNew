@@ -1488,10 +1488,16 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       const calendars = await Cal.getCalendarsAsync(Cal.EntityTypes.EVENT);
       console.log('[Planner] Found', calendars.length, 'calendars:', calendars.map((c: any) => c.title));
 
-      // Get events for next 7 days
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 7);
+      // Get events covering the FULL weekly plan range (Sunday of current week → next Saturday + buffer)
+      // The weekly plan runs Sunday–Saturday, so we must fetch events for those exact days.
+      // Previously we fetched "today + 7 days" which missed past days in the current week
+      // and included future events beyond the plan window.
+      const today = new Date();
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() - today.getDay()); // Roll back to Sunday
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 14); // Cover current week + next week
       console.log('[Planner] Fetching events from', startDate.toLocaleDateString(), 'to', endDate.toLocaleDateString());
 
       const events: DeviceCalendarEvent[] = [];
