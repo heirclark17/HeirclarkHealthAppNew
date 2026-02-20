@@ -126,6 +126,11 @@ interface DayPlannerState {
   // Tier 2: Completion patterns (learned behavior)
   completionPatterns: CompletionPatterns;
 
+  // Week navigation
+  viewedWeekStartDate: string; // Sunday of the displayed week (YYYY-MM-DD)
+  viewedWeeklyPlan: WeeklyPlan | null; // Plan for the displayed week
+  isLoadingWeek: boolean; // Loading spinner for week fetch
+
   // Loading states
   loadingPhase: PlannerLoadingPhase;
   isGeneratingPlan: boolean;
@@ -156,6 +161,8 @@ interface DayPlannerActions {
   resyncWorkouts: () => Promise<void>;
   setSelectedDay: (dayIndex: number) => void;
   setSelectedDate: (dateStr: string) => void;
+  navigateWeek: (direction: 'prev' | 'next') => Promise<void>;
+  jumpToCurrentWeek: () => void;
   clearError: () => void;
 }
 
@@ -217,6 +224,15 @@ const isOOOEvent = (title: string): boolean => OOO_REGEX.test(title);
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+/** Returns the YYYY-MM-DD of the current week's Sunday. */
+const getCurrentWeekSunday = (): string => {
+  const today = new Date();
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - today.getDay());
+  sunday.setHours(0, 0, 0, 0);
+  return formatLocalDate(sunday);
+};
+
 /**
  * Map a day-of-week name to an index (0=Sunday).
  */
@@ -238,6 +254,9 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     preferences: null,
     weeklyPlan: null,
     selectedDayIndex: new Date().getDay(), // Today (0=Sun)
+    viewedWeekStartDate: getCurrentWeekSunday(),
+    viewedWeeklyPlan: null,
+    isLoadingWeek: false,
     calendarPermission: false,
     deviceCalendarEvents: [],
     lastCalendarSync: null,
@@ -251,6 +270,9 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     isOptimizing: false,
     error: null,
   });
+
+  // In-memory cache for fetched week plans (keyed by weekStartDate)
+  const weekPlanCache = useRef<Map<string, WeeklyPlan>>(new Map());
 
   // Access sibling contexts for workout and meal data.
   // These are safe because DayPlannerProvider is nested inside
@@ -310,6 +332,17 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     loadCachedData();
   }, []);
+
+  // Sync viewedWeeklyPlan when weeklyPlan changes and user is on current week
+  useEffect(() => {
+    if (state.weeklyPlan && state.viewedWeekStartDate === getCurrentWeekSunday()) {
+      setState((prev) => ({ ...prev, viewedWeeklyPlan: prev.weeklyPlan }));
+      // Also update cache
+      if (state.weeklyPlan.weekStartDate) {
+        weekPlanCache.current.set(state.weeklyPlan.weekStartDate, state.weeklyPlan);
+      }
+    }
+  }, [state.weeklyPlan]);
 
   // Auto-regenerate plan when calendar events are synced so meals/workouts
   // get rescheduled around imported calendar events (no overlaps).
@@ -389,7 +422,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       const weeklyPlanData = await AsyncStorage.getItem(STORAGE_KEYS.WEEKLY_PLAN);
       if (weeklyPlanData) {
         const weeklyPlan = JSON.parse(weeklyPlanData);
-        setState((prev) => ({ ...prev, weeklyPlan }));
+        setState((prev) => ({ ...prev, weeklyPlan, viewedWeeklyPlan: weeklyPlan }));
       }
 
       // Then try backend (source of truth) - overwrites local cache if newer
@@ -403,7 +436,13 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         const backendPlan = await withRetry(() => api.getWeeklyPlan(weekStart));
         if (backendPlan) {
           console.log('[Planner] Backend plan loaded, updating local cache');
-          setState((prev) => ({ ...prev, weeklyPlan: backendPlan }));
+          const currentSunday = getCurrentWeekSunday();
+          setState((prev) => ({
+            ...prev,
+            weeklyPlan: backendPlan,
+            // Also update viewed plan if user is looking at current week
+            viewedWeeklyPlan: prev.viewedWeekStartDate === currentSunday ? backendPlan : prev.viewedWeeklyPlan,
+          }));
           await AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(backendPlan));
         }
       } catch (err) {
@@ -923,9 +962,15 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         console.warn('[Planner] Backend weekly plan save failed:', err)
       );
 
+      // Seed week plan cache
+      weekPlanCache.current.set(weeklyPlan.weekStartDate, weeklyPlan);
+
+      const currentSunday = getCurrentWeekSunday();
       setState((prev) => ({
         ...prev,
         weeklyPlan,
+        // Also update viewed plan if user is looking at current week
+        viewedWeeklyPlan: prev.viewedWeekStartDate === currentSunday ? weeklyPlan : prev.viewedWeeklyPlan,
         isGeneratingPlan: false,
         loadingPhase: 'ready',
       }));
@@ -2279,6 +2324,16 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
    * Finds the matching day in the weekly plan and updates selectedDayIndex.
    */
   const setSelectedDate = useCallback((dateStr: string) => {
+    // Search viewedWeeklyPlan first (what's currently displayed)
+    const viewedPlan = stateRef.current.viewedWeeklyPlan;
+    if (viewedPlan) {
+      const idx = viewedPlan.days.findIndex((d) => d.date === dateStr);
+      if (idx !== -1) {
+        setState((prev) => ({ ...prev, selectedDayIndex: idx }));
+        return;
+      }
+    }
+    // Fallback to current weeklyPlan
     const currentPlan = stateRef.current.weeklyPlan;
     if (currentPlan) {
       const idx = currentPlan.days.findIndex((d) => d.date === dateStr);
@@ -2287,9 +2342,98 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         return;
       }
     }
-    // If date is not in current weekly plan, still update index based on day of week
+    // If date is not in any plan, still update index based on day of week
     const date = parseLocalDate(dateStr);
     setState((prev) => ({ ...prev, selectedDayIndex: date.getDay() }));
+  }, []);
+
+  /**
+   * Navigate to previous or next week
+   */
+  const navigateWeek = useCallback(async (direction: 'prev' | 'next') => {
+    const currentViewed = stateRef.current.viewedWeekStartDate;
+    const currentSunday = parseLocalDate(currentViewed);
+    const targetSunday = new Date(currentSunday);
+    targetSunday.setDate(currentSunday.getDate() + (direction === 'next' ? 7 : -7));
+    const targetWeekStart = formatLocalDate(targetSunday);
+
+    const todaySunday = getCurrentWeekSunday();
+    const isTargetCurrentWeek = targetWeekStart === todaySunday;
+
+    // If navigating to current week, use the live weeklyPlan
+    if (isTargetCurrentWeek) {
+      const livePlan = stateRef.current.weeklyPlan;
+      if (livePlan) {
+        weekPlanCache.current.set(targetWeekStart, livePlan);
+      }
+      setState((prev) => ({
+        ...prev,
+        viewedWeekStartDate: targetWeekStart,
+        viewedWeeklyPlan: livePlan,
+        selectedDayIndex: new Date().getDay(), // today
+      }));
+      return;
+    }
+
+    // Check cache first
+    const cached = weekPlanCache.current.get(targetWeekStart);
+    if (cached) {
+      setState((prev) => ({
+        ...prev,
+        viewedWeekStartDate: targetWeekStart,
+        viewedWeeklyPlan: cached,
+        selectedDayIndex: 0, // Sunday for non-current weeks
+      }));
+      return;
+    }
+
+    // Fetch from backend
+    setState((prev) => ({ ...prev, isLoadingWeek: true }));
+    try {
+      const backendPlan = await api.getWeeklyPlan(targetWeekStart);
+      if (backendPlan) {
+        weekPlanCache.current.set(targetWeekStart, backendPlan);
+        setState((prev) => ({
+          ...prev,
+          viewedWeekStartDate: targetWeekStart,
+          viewedWeeklyPlan: backendPlan,
+          isLoadingWeek: false,
+          selectedDayIndex: 0,
+        }));
+      } else {
+        // No plan for this week
+        setState((prev) => ({
+          ...prev,
+          viewedWeekStartDate: targetWeekStart,
+          viewedWeeklyPlan: null,
+          isLoadingWeek: false,
+          selectedDayIndex: 0,
+        }));
+      }
+    } catch (err) {
+      console.warn('[Planner] Failed to fetch week plan for', targetWeekStart, err);
+      setState((prev) => ({
+        ...prev,
+        viewedWeekStartDate: targetWeekStart,
+        viewedWeeklyPlan: null,
+        isLoadingWeek: false,
+        selectedDayIndex: 0,
+      }));
+    }
+  }, []);
+
+  /**
+   * Jump back to current week
+   */
+  const jumpToCurrentWeek = useCallback(() => {
+    const todaySunday = getCurrentWeekSunday();
+    const livePlan = stateRef.current.weeklyPlan;
+    setState((prev) => ({
+      ...prev,
+      viewedWeekStartDate: todaySunday,
+      viewedWeeklyPlan: livePlan,
+      selectedDayIndex: new Date().getDay(),
+    }));
   }, []);
 
   /**
@@ -2525,6 +2669,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     resyncWorkouts,
     setSelectedDay,
     setSelectedDate,
+    navigateWeek,
+    jumpToCurrentWeek,
     clearError,
   };
 

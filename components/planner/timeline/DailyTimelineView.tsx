@@ -205,11 +205,22 @@ export function DailyTimelineView() {
     };
   }, [state.preferences?.sleepTime, state.preferences?.wakeTime, parseTime]);
 
+  // Determine if viewing current week
+  const isCurrentWeek = useMemo(() => {
+    const today = new Date();
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - today.getDay());
+    const y = sunday.getFullYear();
+    const m = String(sunday.getMonth() + 1).padStart(2, '0');
+    const d = String(sunday.getDate()).padStart(2, '0');
+    return state.viewedWeekStartDate === `${y}-${m}-${d}`;
+  }, [state.viewedWeekStartDate]);
+
   // Bottom padding: account for tab bar floating above safe area bottom
   const bottomPadding = TAB_BAR_HEIGHT + TAB_BAR_BOTTOM_MARGIN + (insets.bottom || 0) + 20;
 
-  // Get current day's timeline
-  const timeline = state.weeklyPlan?.days[state.selectedDayIndex];
+  // Get current day's timeline (from viewed plan, which may be a different week)
+  const timeline = state.viewedWeeklyPlan?.days[state.selectedDayIndex];
 
   // Collapsible banner state — reset when day changes
   const [bannerExpanded, setBannerExpanded] = useState(false);
@@ -276,29 +287,33 @@ export function DailyTimelineView() {
           <GlassCard style={styles.emptyCard}>
             <Calendar size={48} color={themeColors.primary} style={{ opacity: 0.5 }} />
             <Text style={[styles.emptyTitle, { color: themeColors.text }]}>
-              No Schedule Yet
+              {isCurrentWeek ? 'No Schedule Yet' : 'No Plan Saved'}
             </Text>
             <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>
-              Generate your personalized daily timeline based on your workouts, meals, and preferences.
+              {isCurrentWeek
+                ? 'Generate your personalized daily timeline based on your workouts, meals, and preferences.'
+                : 'No plan was saved for this week. Navigate back to the current week to view or generate your schedule.'}
             </Text>
-            <TouchableOpacity
-              style={[styles.generateButton, { backgroundColor: themeColors.primary }]}
-              onPress={actions.generateWeeklyPlan}
-              disabled={state.isGeneratingPlan}
-              activeOpacity={0.7}
-            >
-              {state.isGeneratingPlan ? (
-                <>
-                  <ActivityIndicator size="small" color="#fff" />
-                  <Text style={[styles.generateButtonText, { color: '#fff' }]}>Generating...</Text>
-                </>
-              ) : (
-                <>
-                  <RefreshCw size={20} color="#fff" />
-                  <Text style={[styles.generateButtonText, { color: '#fff' }]}>Generate Schedule</Text>
-                </>
-              )}
-            </TouchableOpacity>
+            {isCurrentWeek && (
+              <TouchableOpacity
+                style={[styles.generateButton, { backgroundColor: themeColors.primary }]}
+                onPress={actions.generateWeeklyPlan}
+                disabled={state.isGeneratingPlan}
+                activeOpacity={0.7}
+              >
+                {state.isGeneratingPlan ? (
+                  <>
+                    <ActivityIndicator size="small" color="#fff" />
+                    <Text style={[styles.generateButtonText, { color: '#fff' }]}>Generating...</Text>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={20} color="#fff" />
+                    <Text style={[styles.generateButtonText, { color: '#fff' }]}>Generate Schedule</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
             {state.error && (
               <Text style={[styles.errorText, { color: Colors.protein }]}>
                 {state.error}

@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-import { CalendarClock, RefreshCw, Trash2, UtensilsCrossed, Dumbbell } from 'lucide-react-native';
+import { CalendarClock, RefreshCw, Trash2, UtensilsCrossed, Dumbbell, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -25,6 +25,12 @@ interface Props {
   isRefreshing?: boolean;
   onClear?: () => void;
   allDayEventDots?: Record<string, string[]>; // dateStr -> array of up to 3 event colors
+  // Week navigation
+  onPrevWeek?: () => void;
+  onNextWeek?: () => void;
+  isCurrentWeek?: boolean;
+  isLoadingWeek?: boolean;
+  onJumpToToday?: () => void;
 }
 
 function parseLocalDate(dateStr: string): Date {
@@ -53,6 +59,11 @@ export function PlannerCalendarStrip({
   isRefreshing,
   onClear,
   allDayEventDots,
+  onPrevWeek,
+  onNextWeek,
+  isCurrentWeek = true,
+  isLoadingWeek,
+  onJumpToToday,
 }: Props) {
   const { settings } = useSettings();
 
@@ -114,6 +125,20 @@ export function PlannerCalendarStrip({
     const date = parseLocalDate(selectedDate);
     return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   }, [selectedDate]);
+
+  // Week range label (e.g. "Feb 16 - Feb 22, 2026")
+  const weekRangeLabel = useMemo(() => {
+    if (weekDays.length < 7) return '';
+    const first = parseLocalDate(weekDays[0].dateStr);
+    const last = parseLocalDate(weekDays[6].dateStr);
+    const firstMonth = first.toLocaleDateString('en-US', { month: 'short' });
+    const lastMonth = last.toLocaleDateString('en-US', { month: 'short' });
+    const year = last.getFullYear();
+    if (firstMonth === lastMonth) {
+      return `${firstMonth} ${first.getDate()} - ${last.getDate()}, ${year}`;
+    }
+    return `${firstMonth} ${first.getDate()} - ${lastMonth} ${last.getDate()}, ${year}`;
+  }, [weekDays]);
 
   const hasActions = onSyncCalendar || onRefresh;
 
@@ -190,6 +215,46 @@ export function PlannerCalendarStrip({
               </TouchableOpacity>
             )}
           </View>
+        </View>
+      )}
+
+      {/* Week navigation row */}
+      {(onPrevWeek || onNextWeek) && (
+        <View style={styles.weekNavRow}>
+          <TouchableOpacity
+            style={[styles.weekNavBtn, { backgroundColor: actionBtnBg }]}
+            onPress={onPrevWeek}
+            activeOpacity={0.7}
+          >
+            <ChevronLeft size={18} color={themeColors.text} />
+          </TouchableOpacity>
+
+          <View style={styles.weekNavCenter}>
+            {isLoadingWeek ? (
+              <ActivityIndicator size="small" color={themeColors.textSecondary} />
+            ) : (
+              <Text style={[styles.weekRangeLabel, { color: themeColors.textSecondary }]}>
+                {weekRangeLabel}
+              </Text>
+            )}
+            {!isCurrentWeek && onJumpToToday && (
+              <TouchableOpacity
+                style={[styles.todayPill, { backgroundColor: themeColors.primary }]}
+                onPress={onJumpToToday}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.todayPillText}>Today</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <TouchableOpacity
+            style={[styles.weekNavBtn, { backgroundColor: actionBtnBg }]}
+            onPress={onNextWeek}
+            activeOpacity={0.7}
+          >
+            <ChevronRight size={18} color={themeColors.text} />
+          </TouchableOpacity>
         </View>
       )}
 
@@ -297,6 +362,42 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  weekNavRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  weekNavBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  weekNavCenter: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  weekRangeLabel: {
+    fontSize: 13,
+    fontFamily: Fonts.numericLight,
+    fontWeight: '300' as const,
+  },
+  todayPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  todayPillText: {
+    fontSize: 12,
+    fontFamily: Fonts.semiBold,
+    fontWeight: '600' as const,
+    color: '#FFFFFF',
   },
   weekStrip: {
     flexDirection: 'row',

@@ -38,22 +38,34 @@ export default function PlannerScreen() {
   const isDark = settings.themeMode === 'dark';
   const [viewMode, setViewMode] = useState<'daily' | 'monthly'>('daily');
 
-  // Derive selected date from weekly plan + selectedDayIndex
+  // Determine if we're viewing the current week
+  const currentWeekSunday = useMemo(() => {
+    const today = new Date();
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - today.getDay());
+    return formatDateStr(sunday);
+  }, []);
+  const isCurrentWeek = state.viewedWeekStartDate === currentWeekSunday;
+
+  // Derive selected date from viewed weekly plan + selectedDayIndex
   const selectedDate = useMemo(() => {
-    if (state.weeklyPlan?.days?.[state.selectedDayIndex]) {
-      return state.weeklyPlan.days[state.selectedDayIndex].date;
+    if (state.viewedWeeklyPlan?.days?.[state.selectedDayIndex]) {
+      return state.viewedWeeklyPlan.days[state.selectedDayIndex].date;
     }
-    return formatDateStr(new Date());
-  }, [state.weeklyPlan, state.selectedDayIndex]);
+    // Fallback: compute date from viewedWeekStartDate + selectedDayIndex
+    const [y, m, d] = state.viewedWeekStartDate.split('-').map(Number);
+    const sunday = new Date(y, m - 1, d);
+    sunday.setDate(sunday.getDate() + state.selectedDayIndex);
+    return formatDateStr(sunday);
+  }, [state.viewedWeeklyPlan, state.selectedDayIndex, state.viewedWeekStartDate]);
 
-  const weekStartDate = state.weeklyPlan?.weekStartDate;
-
+  const weekStartDate = state.viewedWeekStartDate;
 
   // Compute colored dots for calendar strip (up to 3 per day from all-day events)
   const allDayEventDots = useMemo(() => {
     const dots: Record<string, string[]> = {};
-    if (!state.weeklyPlan?.days) return dots;
-    for (const day of state.weeklyPlan.days) {
+    if (!state.viewedWeeklyPlan?.days) return dots;
+    for (const day of state.viewedWeeklyPlan.days) {
       const allDayColors = day.blocks
         .filter((b) => b.isAllDay)
         .slice(0, 3)
@@ -63,7 +75,7 @@ export default function PlannerScreen() {
       }
     }
     return dots;
-  }, [state.weeklyPlan]);
+  }, [state.viewedWeeklyPlan]);
 
   const handleDateChange = (dateStr: string) => {
     actions.setSelectedDate(dateStr);
@@ -116,16 +128,21 @@ export default function PlannerScreen() {
           selectedDate={selectedDate}
           onDateChange={handleDateChange}
           weekStartDate={weekStartDate}
-          onSyncCalendar={actions.syncCalendar}
+          onSyncCalendar={isCurrentWeek ? actions.syncCalendar : undefined}
           isSyncingCalendar={state.isSyncingCalendar}
-          onResyncMeals={actions.resyncMeals}
+          onResyncMeals={isCurrentWeek ? actions.resyncMeals : undefined}
           isSyncingMeals={state.isSyncingMeals}
-          onResyncWorkouts={actions.resyncWorkouts}
+          onResyncWorkouts={isCurrentWeek ? actions.resyncWorkouts : undefined}
           isSyncingWorkouts={state.isSyncingWorkouts}
-          onRefresh={() => actions.generateWeeklyPlan()}
+          onRefresh={isCurrentWeek ? () => actions.generateWeeklyPlan() : undefined}
           isRefreshing={state.isGeneratingPlan}
-          onClear={actions.clearCalendar}
+          onClear={isCurrentWeek ? actions.clearCalendar : undefined}
           allDayEventDots={allDayEventDots}
+          onPrevWeek={() => actions.navigateWeek('prev')}
+          onNextWeek={() => actions.navigateWeek('next')}
+          isCurrentWeek={isCurrentWeek}
+          isLoadingWeek={state.isLoadingWeek}
+          onJumpToToday={actions.jumpToCurrentWeek}
         />
       )}
 
