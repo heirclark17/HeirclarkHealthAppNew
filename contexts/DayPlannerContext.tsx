@@ -2347,6 +2347,131 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, selectedDayIndex: date.getDay() }));
   }, []);
 
+  // ========================================================================
+  // Calendar-event helpers for week navigation
+  // ========================================================================
+
+  /**
+   * Fetch device calendar events for a specific 7-day week (Sunday→Saturday).
+   * Returns an array of 7 arrays – one per day – of TimeBlock[].
+   * Silently returns empty arrays if expo-calendar is unavailable or permission denied.
+   */
+  const fetchCalendarEventsForWeek = async (weekStartDate: string): Promise<TimeBlock[][]> => {
+    const empty: TimeBlock[][] = [[], [], [], [], [], [], []];
+    const Cal = getCalendar();
+    if (!Cal) return empty;
+
+    // Check permission – use cached flag, don't prompt user during navigation
+    const hasPermission = stateRef.current.calendarPermission;
+    if (!hasPermission) return empty;
+
+    try {
+      const weekStart = parseLocalDate(weekStartDate);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+
+      const calendars = await Cal.getCalendarsAsync(Cal.EntityTypes.EVENT);
+      const rawEvents: DeviceCalendarEvent[] = [];
+      for (const calendar of calendars) {
+        const calEvents = await Cal.getEventsAsync([calendar.id], weekStart, weekEnd);
+        rawEvents.push(
+          ...calEvents.map((e: any) => ({
+            id: e.id,
+            title: e.title,
+            startDate: new Date(e.startDate),
+            endDate: new Date(e.endDate),
+            isAllDay: e.allDay,
+            color: (calendar as any).color || undefined,
+            calendarName: (calendar as any).title || undefined,
+          }))
+        );
+      }
+
+      // Bucket events into 7 days
+      const result: TimeBlock[][] = [[], [], [], [], [], [], []];
+      for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+        const dayDate = new Date(weekStart);
+        dayDate.setDate(weekStart.getDate() + dayIdx);
+        const dayStart = new Date(dayDate);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(dayDate);
+        dayEnd.setHours(23, 59, 59, 999);
+
+        const dayEvents = rawEvents.filter((event) => {
+          if (/^cancell?ed:/i.test(event.title)) return false;
+          if (event.isAllDay) {
+            return event.startDate <= dayEnd && event.endDate > dayStart;
+          }
+          return isSameDay(event.startDate, dayDate);
+        });
+
+        result[dayIdx] = dayEvents.map((event) => convertCalendarEventToBlock(event));
+      }
+
+      console.log(`[Planner] Fetched calendar events for week ${weekStartDate}: ${rawEvents.length} total, bucketed into 7 days`);
+      return result;
+    } catch (err) {
+      console.warn('[Planner] Failed to fetch calendar events for week', weekStartDate, err);
+      return empty;
+    }
+  };
+
+  /**
+   * Build a skeleton WeeklyPlan that contains only calendar-event blocks.
+   * Used when navigating to a week with no saved plan so calendar events still render.
+   */
+  const buildCalendarOnlyPlan = (weekStartDate: string, calendarBlocksByDay: TimeBlock[][]): WeeklyPlan => {
+    const weekStart = parseLocalDate(weekStartDate);
+    const days: DailyTimeline[] = [];
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(weekStart);
+      dayDate.setDate(weekStart.getDate() + i);
+      days.push({
+        date: formatLocalDate(dayDate),
+        dayOfWeek: DAY_NAMES[dayDate.getDay()],
+        blocks: calendarBlocksByDay[i] || [],
+        totalScheduledMinutes: 0,
+        totalFreeMinutes: 1440,
+        completionRate: 0,
+      });
+    }
+    return {
+      weekStartDate,
+      days,
+      weeklyStats: {
+        workoutsCompleted: 0,
+        workoutsScheduled: 0,
+        mealsCompleted: 0,
+        mealsScheduled: 0,
+        avgFreeTime: 0,
+        productivityScore: 0,
+      },
+      generatedAt: new Date().toISOString(),
+    };
+  };
+
+  /**
+   * Merge freshly-fetched calendar blocks into an existing plan's days.
+   * If a day already has calendar_event blocks (from when it was generated), skip it.
+   * Returns a new WeeklyPlan (no mutation).
+   */
+  const mergeCalendarIntoViewedPlan = (plan: WeeklyPlan, calendarBlocksByDay: TimeBlock[][]): WeeklyPlan => {
+    const updatedDays = plan.days.map((day, idx) => {
+      const existingCalBlocks = day.blocks.filter((b) => b.type === 'calendar_event');
+      if (existingCalBlocks.length > 0) {
+        // Day already has calendar events embedded – skip
+        return day;
+      }
+      const newCalBlocks = calendarBlocksByDay[idx] || [];
+      if (newCalBlocks.length === 0) return day;
+      return {
+        ...day,
+        blocks: [...day.blocks, ...newCalBlocks],
+      };
+    });
+    return { ...plan, days: updatedDays };
+  };
+
   /**
    * Navigate to previous or next week
    */
@@ -2360,7 +2485,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     const todaySunday = getCurrentWeekSunday();
     const isTargetCurrentWeek = targetWeekStart === todaySunday;
 
-    // If navigating to current week, use the live weeklyPlan
+    // If navigating to current week, use the live weeklyPlan (already has calendar events)
     if (isTargetCurrentWeek) {
       const livePlan = stateRef.current.weeklyPlan;
       if (livePlan) {
@@ -2387,29 +2512,38 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Fetch from backend
+    // Fetch from backend + device calendar in parallel
     setState((prev) => ({ ...prev, isLoadingWeek: true }));
     try {
-      const backendPlan = await api.getWeeklyPlan(targetWeekStart);
+      const [backendPlan, calendarBlocksByDay] = await Promise.all([
+        api.getWeeklyPlan(targetWeekStart).catch(() => null),
+        fetchCalendarEventsForWeek(targetWeekStart),
+      ]);
+
+      let finalPlan: WeeklyPlan | null;
+
       if (backendPlan) {
-        weekPlanCache.current.set(targetWeekStart, backendPlan);
-        setState((prev) => ({
-          ...prev,
-          viewedWeekStartDate: targetWeekStart,
-          viewedWeeklyPlan: backendPlan,
-          isLoadingWeek: false,
-          selectedDayIndex: 0,
-        }));
+        // Merge device calendar events into saved plan (adds events to days that lack them)
+        finalPlan = mergeCalendarIntoViewedPlan(backendPlan, calendarBlocksByDay);
       } else {
-        // No plan for this week
-        setState((prev) => ({
-          ...prev,
-          viewedWeekStartDate: targetWeekStart,
-          viewedWeeklyPlan: null,
-          isLoadingWeek: false,
-          selectedDayIndex: 0,
-        }));
+        // No saved plan – build a calendar-only skeleton so events still render
+        const hasAnyEvents = calendarBlocksByDay.some((dayBlocks) => dayBlocks.length > 0);
+        finalPlan = hasAnyEvents
+          ? buildCalendarOnlyPlan(targetWeekStart, calendarBlocksByDay)
+          : null;
       }
+
+      if (finalPlan) {
+        weekPlanCache.current.set(targetWeekStart, finalPlan);
+      }
+
+      setState((prev) => ({
+        ...prev,
+        viewedWeekStartDate: targetWeekStart,
+        viewedWeeklyPlan: finalPlan,
+        isLoadingWeek: false,
+        selectedDayIndex: 0,
+      }));
     } catch (err) {
       console.warn('[Planner] Failed to fetch week plan for', targetWeekStart, err);
       setState((prev) => ({
