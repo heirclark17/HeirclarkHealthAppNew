@@ -11,7 +11,7 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Linking } from 'react-native';
-import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Brain, Moon, UtensilsCrossed } from 'lucide-react-native';
+import { Calendar, RefreshCw, Cake, Star, TreePalm, CalendarDays, ExternalLink, Brain } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -21,7 +21,6 @@ import {
 } from '@gorhom/bottom-sheet';
 import { useDayPlanner } from '../../../contexts/DayPlannerContext';
 import { useSettings } from '../../../contexts/SettingsContext';
-import { useSafeGoalWizard } from '../../../hooks/useSafeGoalWizard';
 import { TimeBlock } from '../../../types/planner';
 import { TimeSlotGrid } from './TimeSlotGrid';
 import { CurrentTimeIndicator } from './CurrentTimeIndicator';
@@ -110,101 +109,6 @@ export function DailyTimelineView() {
     return settings.themeMode === 'light' ? LightColors : DarkColors;
   }, [settings.themeMode]);
   const isDark = settings.themeMode === 'dark';
-
-  // Fasting overlay zones
-  const { state: goalWizardState } = useSafeGoalWizard();
-  const parseTime = useCallback((t: string) => {
-    const [h, m] = t.split(':').map(Number);
-    return h + (m || 0) / 60;
-  }, []);
-
-  const fastingZones = useMemo(() => {
-    if (!goalWizardState?.intermittentFasting) return null;
-    const wakeTime = state.preferences?.wakeTime;
-    if (!wakeTime) return null;
-
-    // fastingStart = eating window START, fastingEnd = eating window END
-    const eatStart = parseTime(goalWizardState.fastingStart || '12:00');
-    const eatEnd = parseTime(goalWizardState.fastingEnd || '20:00');
-    const wakeHour = parseTime(wakeTime);
-    const PX_PER_HOUR = 60;
-    const TIMELINE_MAX = 1440; // 24 hours * 60px - timeline boundary
-
-    // Calculate positions relative to wake time (timeline position 0 = wake time)
-    // Morning fasting: from midnight to eating window start
-    let morningStart = (24 - wakeHour) * PX_PER_HOUR; // Position from wake time to midnight
-    let morningHeight = eatStart * PX_PER_HOUR;
-
-    // Clamp morning zone to timeline bounds
-    if (morningStart >= TIMELINE_MAX) {
-      morningStart = 0;
-      morningHeight = 0;
-    } else if (morningStart + morningHeight > TIMELINE_MAX) {
-      morningHeight = TIMELINE_MAX - morningStart;
-    }
-
-    // Evening fasting: from eating window end to midnight
-    let eveningStart = eatEnd - wakeHour;
-    if (eveningStart < 0) eveningStart += 24; // Wrap around
-    eveningStart = eveningStart * PX_PER_HOUR;
-    let eveningHeight = (24 - eatEnd) * PX_PER_HOUR;
-
-    // Clamp evening zone to timeline bounds
-    if (eveningStart >= TIMELINE_MAX) {
-      eveningStart = 0;
-      eveningHeight = 0;
-    } else if (eveningStart + eveningHeight > TIMELINE_MAX) {
-      eveningHeight = TIMELINE_MAX - eveningStart;
-    }
-
-    return {
-      morning: { top: morningStart, height: morningHeight },
-      evening: { top: eveningStart, height: eveningHeight },
-    };
-  }, [goalWizardState?.intermittentFasting, goalWizardState?.fastingStart, goalWizardState?.fastingEnd, state.preferences?.wakeTime, parseTime]);
-
-  // Sleep overlay zone (calculated relative to wake time since timeline starts at wake time)
-  const sleepZone = useMemo(() => {
-    const sleepTime = state.preferences?.sleepTime;
-    const wakeTime = state.preferences?.wakeTime;
-    if (!sleepTime || !wakeTime) return null;
-    const sleepHour = parseTime(sleepTime);
-    const wakeHour = parseTime(wakeTime);
-    const PX_PER_HOUR = 60;
-    const TIMELINE_MAX = 1440; // 24 hours * 60px - timeline boundary
-
-    // Calculate positions relative to wake time (timeline position 0 = wake time)
-    // Evening sleep: from sleepTime to midnight
-    let eveningStart = sleepHour - wakeHour;
-    if (eveningStart < 0) eveningStart += 24; // Wrap around if sleep time is before wake time
-    eveningStart = eveningStart * PX_PER_HOUR;
-    let eveningHeight = (24 - sleepHour) * PX_PER_HOUR;
-
-    // Clamp evening zone to timeline bounds
-    if (eveningStart >= TIMELINE_MAX) {
-      eveningStart = 0;
-      eveningHeight = 0;
-    } else if (eveningStart + eveningHeight > TIMELINE_MAX) {
-      eveningHeight = TIMELINE_MAX - eveningStart;
-    }
-
-    // Morning sleep: from midnight to wakeTime
-    let morningStart = (24 - wakeHour) * PX_PER_HOUR; // Hours from wake time to midnight
-    let morningHeight = wakeHour * PX_PER_HOUR;
-
-    // Clamp morning zone to timeline bounds
-    if (morningStart >= TIMELINE_MAX) {
-      morningStart = 0;
-      morningHeight = 0;
-    } else if (morningStart + morningHeight > TIMELINE_MAX) {
-      morningHeight = TIMELINE_MAX - morningStart;
-    }
-
-    return {
-      evening: { top: eveningStart, height: eveningHeight },
-      morning: { top: morningStart, height: morningHeight },
-    };
-  }, [state.preferences?.sleepTime, state.preferences?.wakeTime, parseTime]);
 
   // Determine if viewing current week
   const isCurrentWeek = useMemo(() => {
@@ -448,97 +352,6 @@ export function DailyTimelineView() {
           >
             <View style={styles.timeline}>
               <TimeSlotGrid wakeTime={state.preferences?.wakeTime} />
-
-          {/* Sleep overlay zones - combined with single label */}
-          {sleepZone && (sleepZone.evening.height > 0 || sleepZone.morning.height > 0) && (
-            <>
-              {/* Evening sleep zone (no label) */}
-              {sleepZone.evening.height > 0 && (
-                <View
-                  style={[
-                    styles.overlayZone,
-                    {
-                      top: sleepZone.evening.top,
-                      height: sleepZone.evening.height,
-                      backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
-                      borderLeftColor: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)',
-                      borderLeftWidth: 3,
-                    },
-                  ]}
-                  pointerEvents="none"
-                />
-              )}
-              {/* Morning sleep zone (with label) */}
-              {sleepZone.morning.height > 0 && (
-                <View
-                  style={[
-                    styles.overlayZone,
-                    {
-                      top: sleepZone.morning.top,
-                      height: sleepZone.morning.height,
-                      backgroundColor: isDark ? 'rgba(147, 51, 234, 0.08)' : 'rgba(147, 51, 234, 0.06)',
-                      borderLeftColor: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)',
-                      borderLeftWidth: 3,
-                    },
-                  ]}
-                  pointerEvents="none"
-                >
-                  <View style={styles.overlayLabelRow}>
-                    <Moon size={12} color={isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)'} />
-                    <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(147, 51, 234, 0.5)' : 'rgba(147, 51, 234, 0.45)' }]}>
-                      Sleep
-                    </Text>
-                  </View>
-                </View>
-              )}
-            </>
-          )}
-
-          {/* Fasting overlay zones */}
-          {fastingZones && fastingZones.morning.height > 0 && (
-            <View
-              style={[
-                styles.overlayZone,
-                {
-                  top: fastingZones.morning.top,
-                  height: fastingZones.morning.height,
-                  backgroundColor: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.06)',
-                  borderLeftColor: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)',
-                  borderLeftWidth: 3,
-                },
-              ]}
-              pointerEvents="none"
-            >
-              <View style={styles.overlayLabelRow}>
-                <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
-                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
-                  Fasting
-                </Text>
-              </View>
-            </View>
-          )}
-          {fastingZones && fastingZones.evening.height > 0 && (
-            <View
-              style={[
-                styles.overlayZone,
-                {
-                  top: fastingZones.evening.top,
-                  height: fastingZones.evening.height,
-                  backgroundColor: isDark ? 'rgba(59, 130, 246, 0.08)' : 'rgba(59, 130, 246, 0.06)',
-                  borderLeftColor: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)',
-                  borderLeftWidth: 3,
-                },
-              ]}
-              pointerEvents="none"
-            >
-              <View style={styles.overlayLabelRow}>
-                <UtensilsCrossed size={12} color={isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)'} />
-                <Text style={[styles.overlayLabel, { color: isDark ? 'rgba(59, 130, 246, 0.5)' : 'rgba(59, 130, 246, 0.45)' }]}>
-                  Fasting
-                </Text>
-              </View>
-            </View>
-          )}
 
           <CurrentTimeIndicator wakeTime={state.preferences?.wakeTime} />
 
@@ -867,24 +680,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: 4,
     zIndex: 10,
-  },
-  overlayZone: {
-    position: 'absolute',
-    left: 58, // after time labels (50px) + gap (8px)
-    right: 0,
-    borderRadius: 8,
-    zIndex: 0, // behind time blocks
-  },
-  overlayLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingTop: 6,
-    paddingLeft: 8,
-  },
-  overlayLabel: {
-    fontSize: 11,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
   },
 });
