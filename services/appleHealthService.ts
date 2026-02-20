@@ -261,7 +261,7 @@ class AppleHealthService {
 
       AppleHealthKit.getSamples(options, (error: Object, results: any[]) => {
         if (error) {
-          console.error('[AppleHealth] Error getting workouts:', error);
+          console.warn('[AppleHealth] Workouts unavailable:', JSON.stringify(error));
           resolve([]);
           return;
         }
@@ -479,7 +479,7 @@ class AppleHealthService {
 
       AppleHealthKit.getHeartRateSamples(options, (error: Object, result: any[]) => {
         if (error) {
-          console.error('[AppleHealth] Error getting heart rate:', error);
+          console.warn('[AppleHealth] Heart rate unavailable:', JSON.stringify(error));
           resolve(0);
         } else {
           // Get the most recent heart rate sample
@@ -508,7 +508,7 @@ class AppleHealthService {
 
       AppleHealthKit.getBloodPressureSamples(options, (error: Object, result: any[]) => {
         if (error) {
-          console.error('[AppleHealth] Error getting blood pressure:', error);
+          console.warn('[AppleHealth] Blood pressure unavailable:', JSON.stringify(error));
           resolve({ systolic: 0, diastolic: 0 });
         } else {
           // Get the most recent blood pressure sample
@@ -538,7 +538,7 @@ class AppleHealthService {
 
       AppleHealthKit.getStepCount(options, (error: Object, result: any) => {
         if (error) {
-          console.error('[AppleHealth] Error getting steps:', error);
+          console.warn('[AppleHealth] Steps unavailable:', JSON.stringify(error));
           resolve(0);
         } else {
           resolve(result?.value || 0);
@@ -563,7 +563,7 @@ class AppleHealthService {
 
       AppleHealthKit.getActiveEnergyBurned(options, (error: Object, result: any[]) => {
         if (error) {
-          console.error('[AppleHealth] Error getting active energy:', error);
+          console.warn('[AppleHealth] Active energy unavailable:', JSON.stringify(error));
           resolve(0);
         } else {
           const total = Array.isArray(result)
@@ -591,7 +591,7 @@ class AppleHealthService {
 
       AppleHealthKit.getBasalEnergyBurned(options, (error: Object, result: any[]) => {
         if (error) {
-          console.error('[AppleHealth] Error getting basal energy:', error);
+          console.warn('[AppleHealth] Basal energy unavailable:', JSON.stringify(error));
           resolve(0);
         } else {
           const total = Array.isArray(result)
@@ -618,7 +618,7 @@ class AppleHealthService {
 
       AppleHealthKit.getDistanceWalkingRunning(options, (error: Object, result: any) => {
         if (error) {
-          console.error('[AppleHealth] Error getting distance:', error);
+          console.warn('[AppleHealth] Distance unavailable:', JSON.stringify(error));
           resolve(0);
         } else {
           // Convert meters to miles
@@ -653,7 +653,7 @@ class AppleHealthService {
 
       AppleHealthKit.getSleepSamples(options, (error: Object, results: any[]) => {
         if (error || !Array.isArray(results)) {
-          console.error('[AppleHealth] Error getting sleep data:', error);
+          console.warn('[AppleHealth] Sleep data unavailable:', JSON.stringify(error));
           resolve({ samples: [], totalSleepMinutes: 0 });
           return;
         }
@@ -702,7 +702,7 @@ class AppleHealthService {
 
       AppleHealthKit.getHeartRateVariabilitySamples(options, (error: Object, results: any[]) => {
         if (error || !Array.isArray(results) || results.length === 0) {
-          if (error) console.error('[AppleHealth] Error getting HRV data:', error);
+          if (error) console.warn('[AppleHealth] HRV data unavailable:', JSON.stringify(error));
           resolve(null);
           return;
         }
@@ -744,7 +744,7 @@ class AppleHealthService {
 
       AppleHealthKit.getLatestWeight(options, (error: Object, result: any) => {
         if (error) {
-          console.error('[AppleHealth] Error getting weight:', error);
+          console.warn('[AppleHealth] Weight unavailable:', JSON.stringify(error));
           resolve(null);
         } else {
           resolve(result?.value || null);
