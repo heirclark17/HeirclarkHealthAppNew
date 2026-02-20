@@ -377,12 +377,21 @@ export class SchedulingEngineV2 {
       const eatingStartMinutes = this.timeToMinutes(eatingWindow.start);
       const eatingEndMinutes = this.timeToMinutes(eatingWindow.end);
 
-      // Constrain flex window to eating window
-      effectiveFlexStart = Math.max(effectiveFlexStart, eatingStartMinutes);
-      effectiveFlexEnd = Math.min(effectiveFlexEnd, eatingEndMinutes - duration);
-
-      console.log('[Scheduling V2] Eating window constraint applied:',
-        this.minutesToTime(effectiveFlexStart), '-', this.minutesToTime(effectiveFlexEnd));
+      // Check if meal's flex window is entirely outside the eating window
+      // (e.g., breakfast 5:00-10:59 with IF eating window 12:00-20:00)
+      if (effectiveFlexEnd <= eatingStartMinutes || effectiveFlexStart >= eatingEndMinutes) {
+        // Meal window doesn't overlap eating window at all - shift into eating window
+        effectiveFlexStart = eatingStartMinutes;
+        effectiveFlexEnd = eatingEndMinutes - duration;
+        console.log('[Scheduling V2] Meal window shifted into eating window:',
+          this.minutesToTime(effectiveFlexStart), '-', this.minutesToTime(effectiveFlexEnd));
+      } else {
+        // Normal case: meal window overlaps eating window - constrain to intersection
+        effectiveFlexStart = Math.max(effectiveFlexStart, eatingStartMinutes);
+        effectiveFlexEnd = Math.min(effectiveFlexEnd, eatingEndMinutes - duration);
+        console.log('[Scheduling V2] Eating window constraint applied:',
+          this.minutesToTime(effectiveFlexStart), '-', this.minutesToTime(effectiveFlexEnd));
+      }
     }
 
     // Enforce minimum gap after last meal.

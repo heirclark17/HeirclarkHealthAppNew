@@ -1902,7 +1902,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         );
 
         // 2. Get fresh meal blocks from MealPlanContext
-        const freshMealBlocks = getMealBlocksForDay(date, currentPrefs);
+        let freshMealBlocks = getMealBlocksForDay(date, currentPrefs);
         if (freshMealBlocks.length === 0) {
           return { ...day, blocks: preservedBlocks };
         }
@@ -1915,15 +1915,41 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         const isCheatDay = (foodPrefs?.cheatDays || []).includes(dayName);
         const isFasting = goalState?.intermittentFasting ?? false;
 
+        // Pre-filter meals whose windows don't overlap the eating window (same as main generation path)
+        if (isFasting && !isCheatDay) {
+          const mealWindows: Record<string, { start: number; end: number }> = {
+            breakfast: { start: 300, end: 659 },  // 05:00 - 10:59
+            lunch: { start: 660, end: 840 },       // 11:00 - 14:00
+            dinner: { start: 1020, end: 1320 },    // 17:00 - 22:00
+          };
+          const eatStart = (() => { const [h, m] = (goalState?.fastingStart || '12:00').split(':').map(Number); return h * 60 + m; })();
+          const eatEnd = (() => { const [h, m] = (goalState?.fastingEnd || '20:00').split(':').map(Number); return h * 60 + m; })();
+          const beforeCount = freshMealBlocks.length;
+          freshMealBlocks = freshMealBlocks.filter(meal => {
+            const mealType = meal.title.toLowerCase().includes('breakfast')
+              ? 'breakfast'
+              : meal.title.toLowerCase().includes('lunch')
+              ? 'lunch'
+              : 'dinner';
+            const w = mealWindows[mealType];
+            if (!w) return true;
+            return w.start < eatEnd && w.end > eatStart;
+          });
+          if (freshMealBlocks.length < beforeCount) {
+            console.log(`[resyncMeals] Filtered ${beforeCount - freshMealBlocks.length} meals outside eating window for ${day.date}`);
+          }
+        }
+
         // ⚠️ CRITICAL FIX: Treat existing workouts as immovable anchors (like calendar events)
         // NOT as workouts to re-schedule. This prevents the scheduling engine from
         // trying to re-place workouts that already have valid times assigned.
         const existingWorkouts = preservedBlocks.filter(b => b.type === 'workout');
         const calendarEvents = preservedBlocks.filter(b => b.type === 'calendar_event');
-        const sleepBlocks = preservedBlocks.filter(b => b.type === 'sleep');
 
-        // Combine all immovable blocks (calendar events, sleep, and existing workouts)
-        const immovableBlocks = [...calendarEvents, ...sleepBlocks, ...existingWorkouts];
+        // Combine immovable blocks (calendar events and existing workouts)
+        // NOTE: Do NOT include sleep blocks here - buildDailySchedule creates its own sleep block,
+        // so passing existing ones causes duplicate sleep → overlap conflict
+        const immovableBlocks = [...calendarEvents, ...existingWorkouts];
 
         const request: SchedulingRequest = {
           date: day.date,
@@ -2128,10 +2154,11 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         // trying to re-anchor meals that already have valid times assigned.
         const existingMeals = preservedBlocks.filter(b => b.type === 'meal_eating' || b.type === 'meal_prep');
         const calendarEvents = preservedBlocks.filter(b => b.type === 'calendar_event');
-        const sleepBlocks = preservedBlocks.filter(b => b.type === 'sleep');
 
-        // Combine all immovable blocks (calendar events, sleep, and existing meals)
-        const immovableBlocks = [...calendarEvents, ...sleepBlocks, ...existingMeals];
+        // Combine immovable blocks (calendar events and existing meals)
+        // NOTE: Do NOT include sleep blocks here - buildDailySchedule creates its own sleep block,
+        // so passing existing ones causes duplicate sleep → overlap conflict
+        const immovableBlocks = [...calendarEvents, ...existingMeals];
 
         const request: SchedulingRequest = {
           date: day.date,
