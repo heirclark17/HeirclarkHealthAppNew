@@ -267,12 +267,14 @@ export class SchedulingEngine {
     const isFasting = lifeContext?.isFasting ?? false;
     const isCheatDay = lifeContext?.isCheatDay ?? false;
 
-    // Parse IF eating window (fastingEnd = eating starts, fastingStart = eating ends)
+    // Parse IF eating window
+    // NOTE: In GoalWizardContext, fastingStart = eating window start (e.g. 12:00),
+    // fastingEnd = eating window end (e.g. 20:00). Names are misleading.
     let eatingWindowStart = 0;   // minutes since midnight
     let eatingWindowEnd = 1440;  // minutes since midnight
     if (isFasting && lifeContext) {
-      eatingWindowStart = this.timeToMinutes(lifeContext.fastingEnd);   // e.g. 12:00 → 720
-      eatingWindowEnd = this.timeToMinutes(lifeContext.fastingStart);   // e.g. 20:00 → 1200
+      eatingWindowStart = this.timeToMinutes(lifeContext.fastingStart);  // e.g. 12:00 → 720
+      eatingWindowEnd = this.timeToMinutes(lifeContext.fastingEnd);      // e.g. 20:00 → 1200
     }
 
     for (const meal of meals) {
@@ -712,17 +714,18 @@ export class SchedulingEngine {
     lifeContext: LifeContext,
     preferences: PlannerPreferences
   ) {
-    const fastingStart = this.timeToMinutes(lifeContext.fastingStart); // e.g. 20:00 → 1200
+    // Fasting period starts when eating window closes (fastingEnd = eating window end)
+    const fastingBlockStart = this.timeToMinutes(lifeContext.fastingEnd); // e.g. 20:00 → 1200
     const sleepTime = this.timeToMinutes(preferences.sleepTime);
 
     // Only add fasting block between fasting start and sleep
-    if (fastingStart < sleepTime) {
-      const duration = sleepTime - fastingStart;
+    if (fastingBlockStart < sleepTime) {
+      const duration = sleepTime - fastingBlockStart;
       blocks.push({
         id: this.generateId('fasting'),
         type: 'buffer',
         title: 'Fasting Window',
-        startTime: lifeContext.fastingStart,
+        startTime: lifeContext.fastingEnd,
         endTime: preferences.sleepTime,
         duration,
         status: 'scheduled',

@@ -99,7 +99,7 @@ export default function HabitFormationCard() {
       dietStyle: goalState.dietStyle || 'standard',
       isFasting: goalState.intermittentFasting || false,
       fastingWindow: goalState.intermittentFasting
-        ? { start: goalState.fastingStart || '20:00', end: goalState.fastingEnd || '12:00' }
+        ? { start: goalState.fastingStart || '12:00', end: goalState.fastingEnd || '20:00' }
         : undefined,
       hydrationGoalOz: hydrationState.todayGoal || 64,
       hydrationAvgOz: Math.round(getAverageIntake()),

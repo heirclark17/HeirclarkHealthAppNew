@@ -1130,8 +1130,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
     const lifeContext: LifeContext = {
       isFasting,
-      fastingStart: goalState?.fastingStart || '20:00',
-      fastingEnd: goalState?.fastingEnd || '12:00',
+      fastingStart: goalState?.fastingStart || '12:00',
+      fastingEnd: goalState?.fastingEnd || '20:00',
       cheatDays: foodPrefs?.cheatDays || [],
       isCheatDay,
       isOOODay: false, // computed after calendar blocks are processed
@@ -1159,8 +1159,9 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         return h * 60 + m;
       };
 
-      const eatStart = timeToMinutes(lifeContext.fastingEnd || '12:00');
-      const eatEnd = timeToMinutes(lifeContext.fastingStart || '20:00');
+      // NOTE: In GoalWizardContext, fastingStart = eating window start, fastingEnd = eating window end
+      const eatStart = timeToMinutes(lifeContext.fastingStart || '12:00');
+      const eatEnd = timeToMinutes(lifeContext.fastingEnd || '20:00');
 
       filteredMealBlocks = mealBlocks.filter(meal => {
         const mealType = meal.title.toLowerCase().includes('breakfast')
@@ -1229,11 +1230,12 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         end: request.preferences.wakeTime,
       };
 
+      // NOTE: fastingStart = eating window start, fastingEnd = eating window end
       const eatingWindow =
         request.lifeContext.isFasting && !request.lifeContext.isCheatDay
           ? {
-              start: request.lifeContext.fastingEnd,
-              end: request.lifeContext.fastingStart,
+              start: request.lifeContext.fastingStart,
+              end: request.lifeContext.fastingEnd,
             }
           : null;
 
@@ -1376,12 +1378,13 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         let rangeStart = wakeMinutes;
         let rangeEnd = sleepMinutes > wakeMinutes ? sleepMinutes : wakeMinutes + 960; // 16hr day
         if (isFasting && !isCheatDay) {
+          // NOTE: fastingStart = eating window start, fastingEnd = eating window end
           const ewStart = (() => {
-            const [h, m] = (lifeContext.fastingEnd || '12:00').split(':').map(Number);
+            const [h, m] = (lifeContext.fastingStart || '12:00').split(':').map(Number);
             return h * 60 + m;
           })();
           const ewEnd = (() => {
-            const [h, m] = (lifeContext.fastingStart || '20:00').split(':').map(Number);
+            const [h, m] = (lifeContext.fastingEnd || '20:00').split(':').map(Number);
             return h * 60 + m;
           })();
           rangeStart = ewStart;
@@ -1931,8 +1934,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           completionPatterns: stateRef.current.completionPatterns,
           lifeContext: {
             isFasting,
-            fastingStart: goalState?.fastingStart || '20:00',
-            fastingEnd: goalState?.fastingEnd || '12:00',
+            fastingStart: goalState?.fastingStart || '12:00',
+            fastingEnd: goalState?.fastingEnd || '20:00',
             cheatDays: foodPrefs?.cheatDays || [],
             isCheatDay,
             isOOODay: day.isOOODay || false,
@@ -1946,11 +1949,12 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           end: request.preferences.wakeTime,
         };
 
+        // NOTE: fastingStart = eating window start, fastingEnd = eating window end
         const eatingWindow =
           request.lifeContext.isFasting && !request.lifeContext.isCheatDay
             ? {
-                start: request.lifeContext.fastingEnd,
-                end: request.lifeContext.fastingStart,
+                start: request.lifeContext.fastingStart,
+                end: request.lifeContext.fastingEnd,
               }
             : null;
 
@@ -2010,8 +2014,9 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
             let rangeStart = wakeMin;
             let rangeEnd = sleepMin > wakeMin ? sleepMin : wakeMin + 960;
             if (isFasting && !isCheatDay) {
-              const ewS = (() => { const [h, m] = (request.lifeContext.fastingEnd || '12:00').split(':').map(Number); return h * 60 + m; })();
-              const ewE = (() => { const [h, m] = (request.lifeContext.fastingStart || '20:00').split(':').map(Number); return h * 60 + m; })();
+              // NOTE: fastingStart = eating window start, fastingEnd = eating window end
+              const ewS = (() => { const [h, m] = (request.lifeContext.fastingStart || '12:00').split(':').map(Number); return h * 60 + m; })();
+              const ewE = (() => { const [h, m] = (request.lifeContext.fastingEnd || '20:00').split(':').map(Number); return h * 60 + m; })();
               rangeStart = ewS;
               rangeEnd = ewE;
               tgt = Math.max(tgt, ewS);
@@ -2137,8 +2142,8 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           completionPatterns: stateRef.current.completionPatterns,
           lifeContext: {
             isFasting,
-            fastingStart: goalState?.fastingStart || '20:00',
-            fastingEnd: goalState?.fastingEnd || '12:00',
+            fastingStart: goalState?.fastingStart || '12:00',
+            fastingEnd: goalState?.fastingEnd || '20:00',
             cheatDays: foodPrefs?.cheatDays || [],
             isCheatDay,
             isOOODay: day.isOOODay || false,
@@ -2152,11 +2157,12 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
           end: request.preferences.wakeTime,
         };
 
+        // NOTE: fastingStart = eating window start, fastingEnd = eating window end
         const eatingWindow =
           request.lifeContext.isFasting && !request.lifeContext.isCheatDay
             ? {
-                start: request.lifeContext.fastingEnd,
-                end: request.lifeContext.fastingStart,
+                start: request.lifeContext.fastingStart,
+                end: request.lifeContext.fastingEnd,
               }
             : null;
 
@@ -2284,7 +2290,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       const lifeContext = {
         isFasting: goalState?.intermittentFasting ?? false,
         fastingWindow: goalState?.intermittentFasting
-          ? `${goalState.fastingEnd || '12:00'} - ${goalState.fastingStart || '20:00'}`
+          ? `${goalState.fastingEnd || '20:00'} - ${goalState.fastingStart || '12:00'}`
           : 'none',
         cheatDays: foodPrefs?.cheatDays || [],
         oooThisWeek: hasOOOThisWeek,

@@ -154,8 +154,8 @@ export interface CompletionPatterns {
 
 export interface LifeContext {
   isFasting: boolean;
-  fastingStart: string;    // "20:00"
-  fastingEnd: string;      // "12:00"
+  fastingStart: string;    // eating window start, e.g. "12:00"
+  fastingEnd: string;      // eating window end, e.g. "20:00"
   cheatDays: string[];     // ["Saturday", "Sunday"]
   isCheatDay: boolean;
   isOOODay: boolean;
