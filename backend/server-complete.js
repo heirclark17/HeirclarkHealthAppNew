@@ -5132,6 +5132,88 @@ app.post('/api/v1/planner/weekly-plan', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/v1/planner/weekly-plans/batch - Batch save workout placeholder plans
+// Used when a training program is generated to pre-populate future weeks on the calendar.
+// Only overwrites existing rows that are workout placeholders; full AI plans are protected.
+app.post('/api/v1/planner/weekly-plans/batch', authenticateToken, async (req, res) => {
+  const userId = req.user.id;
+  const { plans } = req.body;
+
+  try {
+    if (!plans || !Array.isArray(plans) || plans.length === 0) {
+      return res.status(400).json({ error: 'Missing or empty plans array' });
+    }
+
+    if (plans.length > 16) {
+      return res.status(400).json({ error: 'Maximum 16 plans per batch' });
+    }
+
+    const client = await pool.connect();
+    let savedCount = 0;
+    let skippedCount = 0;
+
+    try {
+      await client.query('BEGIN');
+
+      for (const plan of plans) {
+        if (!plan || !plan.weekStartDate) {
+          skippedCount++;
+          continue;
+        }
+
+        // Sanitize: remove calendar events
+        const sanitizedPlan = {
+          ...plan,
+          days: (plan.days || []).map(day => ({
+            ...day,
+            blocks: (day.blocks || []).filter(block => block.type !== 'calendar_event')
+          }))
+        };
+
+        // Check if a row already exists for this week
+        const existing = await client.query(
+          'SELECT plan_data FROM planner_weekly_plans WHERE user_id = $1 AND week_start_date = $2',
+          [userId, plan.weekStartDate]
+        );
+
+        if (existing.rows.length > 0) {
+          // Row exists — only overwrite if it's a workout placeholder
+          const existingPlan = existing.rows[0].plan_data;
+          if (existingPlan && existingPlan.isWorkoutPlaceholder) {
+            await client.query(
+              'UPDATE planner_weekly_plans SET plan_data = $3, updated_at = NOW() WHERE user_id = $1 AND week_start_date = $2',
+              [userId, plan.weekStartDate, JSON.stringify(sanitizedPlan)]
+            );
+            savedCount++;
+          } else {
+            // Full plan exists — skip to protect it
+            skippedCount++;
+          }
+        } else {
+          // No row — insert
+          await client.query(
+            'INSERT INTO planner_weekly_plans (user_id, week_start_date, plan_data, updated_at) VALUES ($1, $2, $3, NOW())',
+            [userId, plan.weekStartDate, JSON.stringify(sanitizedPlan)]
+          );
+          savedCount++;
+        }
+      }
+
+      await client.query('COMMIT');
+      console.log(`[Planner] Batch saved ${savedCount} workout placeholder plans, skipped ${skippedCount} for user ${userId}`);
+      res.json({ success: true, savedCount, skippedCount });
+    } catch (txError) {
+      await client.query('ROLLBACK');
+      throw txError;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('[Planner] Batch save error:', error);
+    res.status(500).json({ error: 'Failed to batch save plans', message: error.message });
+  }
+});
+
 // GET /api/v1/planner/weekly-plan - Get weekly plan
 app.get('/api/v1/planner/weekly-plan', authenticateToken, async (req, res) => {
   const userId = req.user.id;

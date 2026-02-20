@@ -2794,6 +2794,65 @@ class HeirclarkAPI {
   }
 
   /**
+   * Batch save workout placeholder plans for future program weeks (fire-and-forget)
+   */
+  async saveBatchWeeklyPlans(plans: any[]): Promise<boolean> {
+    try {
+      // Slim each plan the same way as saveWeeklyPlan
+      const slimPlans = plans.map((plan: any) => ({
+        weekStartDate: plan.weekStartDate,
+        generatedAt: plan.generatedAt,
+        isWorkoutPlaceholder: plan.isWorkoutPlaceholder,
+        weeklyStats: plan.weeklyStats,
+        days: (plan.days || []).map((day: any) => ({
+          date: day.date,
+          dayOfWeek: day.dayOfWeek,
+          completionRate: day.completionRate,
+          totalScheduledMinutes: day.totalScheduledMinutes,
+          totalFreeMinutes: day.totalFreeMinutes,
+          blocks: (day.blocks || [])
+            .filter((b: any) => b.type !== 'calendar_event' && b.type !== 'buffer')
+            .map((b: any) => ({
+              id: b.id, type: b.type, title: b.title,
+              startTime: b.startTime, endTime: b.endTime,
+              duration: b.duration, status: b.status, color: b.color,
+            })),
+        })),
+      }));
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(`${this.baseUrl}/api/v1/planner/weekly-plans/batch`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify({ plans: slimPlans }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        console.warn('[API] Batch save weekly plans failed:', response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        console.log(`[API] ✅ Batch saved ${data.savedCount} plans, skipped ${data.skippedCount}`);
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.warn('[API] Batch save weekly plans timed out (non-blocking)');
+      } else {
+        console.warn('[API] Batch save weekly plans error:', error.message);
+      }
+      return false;
+    }
+  }
+
+  /**
    * Get weekly plan for a specific week
    */
   async getWeeklyPlan(weekStartDate: string): Promise<any | null> {

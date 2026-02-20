@@ -402,6 +402,24 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     }
   }, [trainingCtx?.state?.weeklyPlan, state.hasCompletedOnboarding, state.weeklyPlan]);
 
+  // Populate workout placeholder plans for all future program weeks
+  const lastMultiWeekPlanHandled = useRef<any>(null);
+  useEffect(() => {
+    const multiWeekPlan = trainingCtx?.state?.multiWeekPlan;
+    if (
+      multiWeekPlan &&
+      multiWeekPlan !== lastMultiWeekPlanHandled.current &&
+      state.hasCompletedOnboarding &&
+      state.preferences
+    ) {
+      lastMultiWeekPlanHandled.current = multiWeekPlan;
+      console.log('[Planner] 📅 Multi-week training plan detected – populating future week placeholders');
+      populateWorkoutPlaceholderPlans().catch((err) => {
+        console.warn('[Planner] Workout placeholder population failed:', err);
+      });
+    }
+  }, [trainingCtx?.state?.multiWeekPlan, state.hasCompletedOnboarding, state.preferences]);
+
   /**
    * Load cached data from AsyncStorage
    */
@@ -2311,6 +2329,134 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, isSyncingWorkouts: false }));
     }
   }, [getWorkoutBlocksForDay]);
+
+  /**
+   * Populate workout placeholder plans for ALL future weeks of the training program.
+   * Creates lightweight plans with only workout blocks at sensible default times,
+   * seeds the weekPlanCache for instant navigation, and batch-saves to backend.
+   * Skips the current week (it gets full AI scheduling via "Plan My Week").
+   */
+  const populateWorkoutPlaceholderPlans = useCallback(async () => {
+    const training = trainingRef.current;
+    const multiWeekPlan = training?.state?.multiWeekPlan;
+    const currentPrefs = stateRef.current.preferences;
+
+    if (!multiWeekPlan?.weeklyPlans?.length || !currentPrefs) {
+      return;
+    }
+
+    console.log('[Planner] 📅 Populating workout placeholder plans for', multiWeekPlan.weeklyPlans.length, 'program weeks');
+
+    const currentWeekSunday = getCurrentWeekSunday();
+    const placeholderPlans: WeeklyPlan[] = [];
+
+    // Determine default workout start time based on energy peak preference
+    const getWorkoutStartTime = (): string => {
+      switch (currentPrefs.energyPeak) {
+        case 'morning': return addMinutesToTime(currentPrefs.wakeTime, 60);
+        case 'afternoon': return '14:00';
+        case 'evening': return '18:00';
+        default: return addMinutesToTime(currentPrefs.wakeTime, 60);
+      }
+    };
+
+    const defaultWorkoutStart = getWorkoutStartTime();
+
+    for (const weekPlan of multiWeekPlan.weeklyPlans) {
+      if (!weekPlan.days?.length) continue;
+
+      // Find the Sunday for this week from the first day's calendarDate
+      const firstDayWithDate = weekPlan.days.find((d: any) => d.calendarDate);
+      if (!firstDayWithDate) continue;
+
+      const firstDate = parseLocalDate(firstDayWithDate.calendarDate);
+      const weekSunday = new Date(firstDate);
+      weekSunday.setDate(firstDate.getDate() - firstDate.getDay());
+      const weekStartDate = formatLocalDate(weekSunday);
+
+      // Skip current week — it gets full AI scheduling
+      if (weekStartDate === currentWeekSunday) continue;
+
+      // Build 7 daily timelines for this week
+      const days: DailyTimeline[] = [];
+      for (let i = 0; i < 7; i++) {
+        const dayDate = new Date(weekSunday);
+        dayDate.setDate(weekSunday.getDate() + i);
+        const dateStr = formatLocalDate(dayDate);
+        const dayName = DAY_NAMES[dayDate.getDay()];
+
+        // Find matching training day by calendarDate
+        const trainingDay = weekPlan.days.find((d: any) => d.calendarDate === dateStr);
+
+        const blocks: TimeBlock[] = [];
+
+        if (trainingDay && trainingDay.workout && !trainingDay.isRestDay) {
+          const workout = trainingDay.workout;
+          const durationMin = workout.duration || workout.estimatedDuration || 45;
+          const startTime = defaultWorkoutStart;
+          const endTime = addMinutesToTime(startTime, durationMin);
+
+          blocks.push({
+            id: `workout_placeholder_${dateStr}_${workout.id || 'main'}`,
+            type: 'workout' as const,
+            title: workout.name || `${workout.type || 'Workout'} Day`,
+            startTime,
+            endTime,
+            duration: durationMin,
+            status: 'scheduled' as const,
+            color: PLANNER_CONSTANTS.BLOCK_COLORS.workout,
+            icon: PLANNER_CONSTANTS.BLOCK_ICONS.workout,
+            priority: 4,
+            flexibility: 0.5,
+            aiGenerated: false,
+            relatedId: workout.id,
+          });
+        }
+
+        const totalScheduledMinutes = blocks.reduce((sum, b) => sum + (b.duration || 0), 0);
+        days.push({
+          date: dateStr,
+          dayOfWeek: dayName,
+          blocks,
+          totalScheduledMinutes,
+          totalFreeMinutes: 960 - totalScheduledMinutes, // ~16 waking hours
+          completionRate: 0,
+        });
+      }
+
+      const plan: WeeklyPlan & { isWorkoutPlaceholder: boolean } = {
+        weekStartDate,
+        days,
+        weeklyStats: {
+          workoutsCompleted: 0,
+          workoutsScheduled: days.reduce((s, d) => s + d.blocks.filter(b => b.type === 'workout').length, 0),
+          mealsCompleted: 0,
+          mealsScheduled: 0,
+          avgFreeTime: 960,
+          productivityScore: 0,
+        },
+        generatedAt: new Date().toISOString(),
+        isWorkoutPlaceholder: true,
+      };
+
+      placeholderPlans.push(plan);
+
+      // Seed the in-memory cache for instant navigation
+      weekPlanCache.current.set(weekStartDate, plan);
+    }
+
+    if (placeholderPlans.length === 0) {
+      console.log('[Planner] No future weeks to populate (all in current week)');
+      return;
+    }
+
+    console.log(`[Planner] ✅ Created ${placeholderPlans.length} workout placeholder plans, saving to backend`);
+
+    // Fire-and-forget batch save
+    api.saveBatchWeeklyPlans(placeholderPlans).catch((err: any) =>
+      console.warn('[Planner] Backend batch save failed:', err)
+    );
+  }, []);
 
   /**
    * Set selected day index
