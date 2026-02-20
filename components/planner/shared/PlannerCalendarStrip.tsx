@@ -385,8 +385,8 @@ const styles = StyleSheet.create({
   },
   weekRangeLabel: {
     fontSize: 13,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '300' as const,
+    fontFamily: Fonts.numericSemiBold,
+    fontWeight: '600' as const,
   },
   todayPill: {
     paddingHorizontal: 10,
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   todayPillText: {
     fontSize: 12,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     fontWeight: '600' as const,
     color: '#FFFFFF',
   },
