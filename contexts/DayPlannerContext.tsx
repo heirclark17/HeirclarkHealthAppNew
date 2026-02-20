@@ -448,16 +448,12 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
 
       console.log('[Planner] Cached data loaded');
 
-      // Auto-sync calendar if permission granted (bedrock data layer)
-      // This ensures calendar events are always fresh on app load
+      // Calendar events persist from the saved weekly plan.
+      // Do NOT auto-sync on every app load — this was regenerating the entire
+      // plan, overwriting the user's existing schedule.  Calendar sync only
+      // runs when the user explicitly taps the calendar-sync button.
       if (calendarPerm === 'true') {
-        console.log('[Planner] Calendar permission granted - auto-syncing calendar events...');
-        // Defer to avoid blocking initial render
-        setTimeout(() => {
-          syncCalendar().catch((err) => {
-            console.warn('[Planner] Auto-sync calendar failed (non-critical):', err);
-          });
-        }, 500);
+        console.log('[Planner] Calendar permission granted – using cached calendar events (no auto-sync)');
       }
     } catch (error) {
       console.error('[Planner] Error loading cached data:', error);
