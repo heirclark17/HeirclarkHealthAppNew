@@ -1107,6 +1107,7 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
     // Apple/Google Calendar sets all-day endDate to midnight of the day AFTER the last day,
     // so we use strict > for endDate comparison.
     const currentEvents = stateRef.current.deviceCalendarEvents;
+    console.log(`[generateDailyTimeline] ${dateStr}: stateRef has ${currentEvents.length} deviceCalendarEvents`);
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(date);
@@ -1117,11 +1118,16 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
         if (/^cancell?ed:/i.test(event.title)) return false;
         if (event.isAllDay) {
           // Range-overlap: event.startDate <= dayEnd && event.endDate > dayStart
-          return event.startDate <= dayEnd && event.endDate > dayStart;
+          const matches = event.startDate <= dayEnd && event.endDate > dayStart;
+          if (!matches) console.log(`[generateDailyTimeline]   ❌ All-day "${event.title}" filtered (${event.startDate.toISOString()} not on ${dateStr})`);
+          return matches;
         }
-        return isSameDay(event.startDate, date);
+        const matches = isSameDay(event.startDate, date);
+        if (!matches) console.log(`[generateDailyTimeline]   ❌ Timed "${event.title}" filtered (${event.startDate.toISOString()} not on ${dateStr})`);
+        return matches;
       })
       .map((event) => convertCalendarEventToBlock(event));
+    console.log(`[generateDailyTimeline] ${dateStr}: ${calendarBlocks.length} calendar blocks after date filter`);
 
     // Build life context (Tier 4)
     const goalState = goalWizardRef.current?.state;
@@ -1538,10 +1544,18 @@ export function DayPlannerProvider({ children }: { children: ReactNode }) {
       // setState is async and stateRef won't be updated until the next render,
       // causing generateDailyTimeline to read an empty array.
       stateRef.current = { ...stateRef.current, deviceCalendarEvents: events };
+      console.log(`[Planner] 📌 stateRef.current.deviceCalendarEvents manually set to ${stateRef.current.deviceCalendarEvents.length} events`);
 
       // Regenerate weekly plan with new calendar events
       console.log('[Planner] 🔄 Regenerating weekly plan with calendar events...');
       await generateWeeklyPlan();
+      // Verify calendar events made it into the generated plan
+      const generatedPlan = stateRef.current.weeklyPlan;
+      if (generatedPlan) {
+        const totalCalBlocks = generatedPlan.days.reduce((sum: number, d: any) =>
+          sum + d.blocks.filter((b: any) => b.type === 'calendar_event').length, 0);
+        console.log(`[Planner] 📊 Post-generation verification: ${totalCalBlocks} calendar_event blocks across ${generatedPlan.days.length} days`);
+      }
 
       Alert.alert('Calendar Synced', `${events.length} events imported and schedule optimized to avoid conflicts.`);
       return true;

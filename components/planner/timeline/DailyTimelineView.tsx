@@ -316,6 +316,15 @@ export function DailyTimelineView() {
     !b.isAllDay && !['buffer', 'meal_prep'].includes(b.type)
   );
 
+  // DEBUG: Log block type breakdown for this day's timeline
+  const calendarEventsInTimeline = timeline.blocks.filter((b) => b.type === 'calendar_event');
+  if (calendarEventsInTimeline.length > 0) {
+    console.log(`[DailyTimelineView] ${timeline.date}: ${calendarEventsInTimeline.length} calendar_event blocks found`);
+    calendarEventsInTimeline.forEach((b) => console.log(`  - ${b.title} (${b.startTime}-${b.endTime}) allDay=${b.isAllDay}`));
+  } else {
+    console.log(`[DailyTimelineView] ${timeline.date}: 0 calendar_event blocks (total blocks: ${timeline.blocks.length}, types: ${[...new Set(timeline.blocks.map(b => b.type))].join(', ')})`);
+  }
+
   // Collapsible logic
   const hasOverflow = allDayBlocks.length > MAX_VISIBLE_CHIPS;
   const visibleChips = bannerExpanded ? allDayBlocks : allDayBlocks.slice(0, MAX_VISIBLE_CHIPS);
