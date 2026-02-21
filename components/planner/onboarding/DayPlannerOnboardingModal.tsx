@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Modal, View, StyleSheet } from 'react-native';
+import { Modal, View, StyleSheet, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettings } from '../../../contexts/SettingsContext';
@@ -173,7 +173,14 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
       animationType="slide"
       onRequestClose={onClose}
     >
-      <BlurView intensity={isDark ? 60 : 80} tint={isDark ? 'dark' : 'light'} style={styles.blurContainer}>
+      <BlurView intensity={isDark ? 80 : 90} tint={isDark ? 'dark' : 'light'} style={styles.blurContainer}>
+        {/* Semi-transparent overlay for better text contrast */}
+        <View
+          style={[
+            styles.overlay,
+            { backgroundColor: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.5)' },
+          ]}
+        />
         <SafeAreaView style={styles.safeArea}>
           {renderStep()}
         </SafeAreaView>
@@ -185,6 +192,9 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
 const styles = StyleSheet.create({
   blurContainer: {
     flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   safeArea: {
     flex: 1,
