@@ -60,8 +60,6 @@ export function FlexibilityStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   return (
     <View style={styles.container}>
@@ -100,7 +98,7 @@ export function FlexibilityStep({
                         style={[
                           styles.optionLabel,
                           { color: themeColors.text },
-                          isSelected && { color: option.color, fontFamily: Fonts.semiBold },
+                          isSelected && { color: option.color, fontFamily: Fonts.numericSemiBold },
                         ]}
                       >
                         {option.label}
@@ -123,18 +121,20 @@ export function FlexibilityStep({
 
         {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity
-            onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
-          >
-            <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+          <TouchableOpacity onPress={onPrevious} activeOpacity={0.7} style={{ flex: 1 }}>
+            <GlassCard style={styles.actionButton} interactive>
+              <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+            </GlassCard>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={onNext}
             disabled={!value}
-            style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary, opacity: !value ? 0.5 : 1 }]}
+            activeOpacity={0.7}
+            style={{ flex: 2, opacity: !value ? 0.5 : 1 }}
           >
-            <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Next</Text>
+            <GlassCard style={styles.actionButton} interactive>
+              <Text style={[styles.actionButtonText, { color: themeColors.primary }]}>Next</Text>
+            </GlassCard>
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -157,12 +157,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -183,16 +183,16 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontSize: 16,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
   },
   optionDescription: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     lineHeight: 20,
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   actions: {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
     fontSize: 16,
   },
 });

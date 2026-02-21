@@ -30,8 +30,6 @@ export function ReviewStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(':').map(Number);
@@ -131,17 +129,15 @@ export function ReviewStep({
 
         {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity
-            onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
-          >
-            <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+          <TouchableOpacity onPress={onPrevious} activeOpacity={0.7} style={{ flex: 1 }}>
+            <GlassCard style={styles.actionButton} interactive>
+              <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+            </GlassCard>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={onConfirm}
-            style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
-          >
-            <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Complete Setup</Text>
+          <TouchableOpacity onPress={onConfirm} activeOpacity={0.7} style={{ flex: 2 }}>
+            <GlassCard style={styles.actionButton} interactive>
+              <Text style={[styles.actionButtonText, { color: themeColors.primary }]}>Complete Setup</Text>
+            </GlassCard>
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -192,14 +188,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -220,15 +214,13 @@ const styles = StyleSheet.create({
   },
   reviewLabel: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   reviewValue: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
   },
   editButton: {
     width: 32,
@@ -239,8 +231,7 @@ const styles = StyleSheet.create({
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   actions: {
@@ -254,8 +245,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     fontSize: 16,
   },
 });

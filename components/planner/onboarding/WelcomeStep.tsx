@@ -127,12 +127,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -151,16 +151,16 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: 16,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
   },
   featureDescription: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     lineHeight: 20,
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   actionButton: {
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
     fontSize: 16,
   },
 });

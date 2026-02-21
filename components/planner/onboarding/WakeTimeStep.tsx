@@ -30,8 +30,6 @@ export function WakeTimeStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   // Initialize with 6:00 AM or existing value
   const [time, setTime] = useState(() => {
@@ -105,17 +103,15 @@ export function WakeTimeStep({
 
         {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity
-            onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
-          >
-            <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+          <TouchableOpacity onPress={onPrevious} activeOpacity={0.7} style={{ flex: 1 }}>
+            <GlassCard style={styles.actionButton} interactive>
+              <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+            </GlassCard>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleNext}
-            style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
-          >
-            <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Next</Text>
+          <TouchableOpacity onPress={handleNext} activeOpacity={0.7} style={{ flex: 2 }}>
+            <GlassCard style={styles.actionButton} interactive>
+              <Text style={[styles.actionButtonText, { color: themeColors.primary }]}>Next</Text>
+            </GlassCard>
           </TouchableOpacity>
         </View>
       </GlassCard>
@@ -138,12 +134,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -162,7 +158,7 @@ const styles = StyleSheet.create({
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   actions: {
@@ -176,7 +172,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
     fontSize: 16,
   },
 });

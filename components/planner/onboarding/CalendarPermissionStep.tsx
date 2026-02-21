@@ -54,8 +54,6 @@ export function CalendarPermissionStep({
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
-  const surfaceColor = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
-  const surfaceBorder = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
 
   const handleRequestPermission = async () => {
     setIsRequesting(true);
@@ -134,38 +132,38 @@ export function CalendarPermissionStep({
 
         {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity
-            onPress={onPrevious}
-            style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
-          >
-            <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+          <TouchableOpacity onPress={onPrevious} activeOpacity={0.7} style={{ flex: 1 }}>
+            <GlassCard style={styles.actionButton} interactive>
+              <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+            </GlassCard>
           </TouchableOpacity>
 
           {permissionGranted ? (
-            <TouchableOpacity
-              onPress={handleContinue}
-              style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary }]}
-            >
-              <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Continue</Text>
+            <TouchableOpacity onPress={handleContinue} activeOpacity={0.7} style={{ flex: 2 }}>
+              <GlassCard style={styles.actionButton} interactive>
+                <Text style={[styles.actionButtonText, { color: themeColors.primary }]}>Continue</Text>
+              </GlassCard>
             </TouchableOpacity>
           ) : (
             <>
-              <TouchableOpacity
-                onPress={handleSkip}
-                style={[styles.actionButton, { backgroundColor: surfaceColor, borderColor: surfaceBorder, borderWidth: 1 }]}
-              >
-                <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Skip</Text>
+              <TouchableOpacity onPress={handleSkip} activeOpacity={0.7} style={{ flex: 1 }}>
+                <GlassCard style={styles.actionButton} interactive>
+                  <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Skip</Text>
+                </GlassCard>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleRequestPermission}
                 disabled={isRequesting}
-                style={[styles.actionButton, { flex: 2, backgroundColor: themeColors.primary, opacity: isRequesting ? 0.5 : 1 }]}
+                activeOpacity={0.7}
+                style={{ flex: 2, opacity: isRequesting ? 0.5 : 1 }}
               >
-                {isRequesting ? (
-                  <ActivityIndicator size="small" color={themeColors.primaryText} />
-                ) : (
-                  <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Allow Access</Text>
-                )}
+                <GlassCard style={styles.actionButton} interactive>
+                  {isRequesting ? (
+                    <ActivityIndicator size="small" color={themeColors.primary} />
+                  ) : (
+                    <Text style={[styles.actionButtonText, { color: themeColors.primary }]}>Allow Access</Text>
+                  )}
+                </GlassCard>
               </TouchableOpacity>
             </>
           )}
@@ -190,12 +188,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -210,7 +208,7 @@ const styles = StyleSheet.create({
   },
   privacyText: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   successBanner: {
     borderRadius: 12,
@@ -219,11 +217,11 @@ const styles = StyleSheet.create({
   },
   successText: {
     fontSize: 16,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
   },
   progress: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   actions: {
@@ -237,7 +235,7 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
   },
   actionButtonText: {
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
     fontSize: 16,
   },
 });
