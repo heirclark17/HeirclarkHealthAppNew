@@ -87,7 +87,7 @@ export default function PlannerScreen() {
       <DayPlannerOnboardingModal
         visible={true}
         onComplete={actions.completeOnboarding}
-        onClose={() => router.push('/(tabs)/')}
+        onClose={() => router.push('/')}
       />
     );
   }
