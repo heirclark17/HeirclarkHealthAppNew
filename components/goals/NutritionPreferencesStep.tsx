@@ -329,7 +329,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <NumberText
-                    weight="light"
+                    weight="semibold"
                     style={[
                       styles.mealChipText,
                       { color: colors.text },
@@ -398,7 +398,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                       ]}
                       interactive
                     >
-                      <NumberText weight="light" style={[styles.presetLabel, { color: colors.text }, isSelected && styles.presetLabelSelected]}>
+                      <NumberText weight="semibold" style={[styles.presetLabel, { color: colors.text }, isSelected && styles.presetLabelSelected]}>
                         {preset.label}
                       </NumberText>
                       <Text style={[styles.presetDesc, { color: colors.textMuted }]}>
@@ -412,7 +412,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             <GlassCard style={styles.windowDisplay} interactive>
               <View style={styles.windowTime}>
                 <Text style={[styles.windowLabel, { color: colors.textMuted }]}>Eating Window</Text>
-                <NumberText weight="light" style={[styles.windowValue, { color: colors.primary }]}>
+                <NumberText weight="semibold" style={[styles.windowValue, { color: colors.primary }]}>
                   {state.fastingStart} - {state.fastingEnd}
                 </NumberText>
               </View>
@@ -606,7 +606,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         </ScrollView>
         {cheatDays.length > 0 && (
           <Text style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
-            <NumberText weight="light" style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
+            <NumberText weight="semibold" style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
               {cheatDays.length}
             </NumberText>
             {' cheat day'}{cheatDays.length > 1 ? 's' : ''} selected - enjoy mindfully!
@@ -900,7 +900,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
             <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>
-              <NumberText weight="light" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+              <NumberText weight="semibold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
                 {state.waterGoalOz}
               </NumberText>
               {' oz'}
@@ -943,7 +943,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
             <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>
-              <NumberText weight="light" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+              <NumberText weight="semibold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
                 {state.sleepGoalHours}
               </NumberText>
               {' hrs'}
@@ -985,7 +985,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             >
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
-            <NumberText weight="light" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+            <NumberText weight="semibold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
               {(state.stepGoal / 1000).toFixed(0)}k
             </NumberText>
             <TouchableOpacity
