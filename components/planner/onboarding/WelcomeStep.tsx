@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Calendar, Clock, Zap, XCircle } from 'lucide-react-native';
+import { Calendar, Clock, Zap, XCircle, Hand } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -73,11 +73,12 @@ export function WelcomeStep({ onNext, onClose, currentStep, totalSteps }: Props)
         </Text>
 
         {/* Action Button */}
-        <TouchableOpacity
-          onPress={onNext}
-          style={[styles.actionButton, { backgroundColor: themeColors.primary }]}
-        >
-          <Text style={[styles.actionButtonText, { color: themeColors.primaryText }]}>Get Started</Text>
+        <TouchableOpacity onPress={onNext} activeOpacity={0.7}>
+          <GlassCard style={styles.actionButton} interactive>
+            <View style={{ transform: [{ rotate: '90deg' }] }}>
+              <Hand size={24} color={themeColors.primary} />
+            </View>
+          </GlassCard>
         </TouchableOpacity>
       </GlassCard>
     </View>
@@ -164,12 +165,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   actionButton: {
-    paddingVertical: 14,
-    borderRadius: 12,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center' as const,
-  },
-  actionButtonText: {
-    fontFamily: Fonts.numericSemiBold,
-    fontSize: 16,
+    justifyContent: 'center' as const,
   },
 });

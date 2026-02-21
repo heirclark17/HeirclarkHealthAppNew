@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { CheckCircle, Edit2 } from 'lucide-react-native';
+import { CheckCircle, Edit2, Hand } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -129,14 +129,18 @@ export function ReviewStep({
 
         {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity onPress={onPrevious} activeOpacity={0.7} style={{ flex: 1 }}>
+          <TouchableOpacity onPress={onPrevious} activeOpacity={0.7}>
             <GlassCard style={styles.actionButton} interactive>
-              <Text style={[styles.actionButtonText, { color: themeColors.text }]}>Back</Text>
+              <View style={{ transform: [{ rotate: '-90deg' }, { scaleX: -1 }] }}>
+                <Hand size={24} color={themeColors.text} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onConfirm} activeOpacity={0.7} style={{ flex: 2 }}>
+          <TouchableOpacity onPress={onConfirm} activeOpacity={0.7}>
             <GlassCard style={styles.actionButton} interactive>
-              <Text style={[styles.actionButtonText, { color: themeColors.primary }]}>Complete Setup</Text>
+              <View style={{ transform: [{ rotate: '90deg' }] }}>
+                <Hand size={24} color={themeColors.primary} />
+              </View>
             </GlassCard>
           </TouchableOpacity>
         </View>
@@ -237,15 +241,13 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: 12,
+    justifyContent: 'center',
   },
   actionButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center' as const,
-  },
-  actionButtonText: {
-    fontFamily: Fonts.numericSemiBold,
-    fontSize: 16,
+    justifyContent: 'center' as const,
   },
 });
