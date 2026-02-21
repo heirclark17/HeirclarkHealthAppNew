@@ -6,6 +6,7 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "channel": "development",
       "ios": {
         "simulator": false
       }
@@ -13,18 +14,21 @@
     "development-testflight": {
       "developmentClient": true,
       "distribution": "store",
+      "channel": "preview",
       "ios": {
         "simulator": false
       }
     },
     "preview": {
       "distribution": "internal",
+      "channel": "preview",
       "ios": {
         "simulator": false
       }
     },
     "production": {
       "distribution": "store",
+      "channel": "production",
       "ios": {
         "simulator": false,
         "buildConfiguration": "Release"
