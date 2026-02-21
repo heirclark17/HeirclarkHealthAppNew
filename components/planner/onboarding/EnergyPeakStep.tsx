@@ -32,9 +32,9 @@ const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||
   'https://heirclarkinstacartbackend-production.up.railway.app';
 
-// Card dimensions
+// Card dimensions - reduced height for better screen fit
 const CARD_WIDTH = SCREEN_WIDTH - 80;
-const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.25);
+const CARD_HEIGHT = Math.round(CARD_WIDTH * 0.95); // Reduced from 1.25 to 0.95 aspect ratio
 const SWIPE_THRESHOLD = CARD_WIDTH * 0.25;
 
 // Fan spread constants
@@ -429,12 +429,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   mainCard: {
-    padding: 24,
-    gap: 20,
+    padding: 20,
+    gap: 12,
   },
   header: {
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
   },
   title: {
     fontSize: 24,
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
   stackContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 20,
+    marginVertical: 8,
   },
   card: {
     position: 'absolute',
