@@ -83,11 +83,22 @@ export default function PlannerScreen() {
 
   // Show onboarding if not completed
   if (!state.hasCompletedOnboarding) {
+    const handleClose = () => {
+      console.log('[PlannerScreen] onClose called - attempting navigation to index');
+      console.log('[PlannerScreen] Current route:', router);
+      try {
+        router.replace('/');
+        console.log('[PlannerScreen] router.replace("/") executed');
+      } catch (error) {
+        console.error('[PlannerScreen] Navigation error:', error);
+      }
+    };
+
     return (
       <DayPlannerOnboardingModal
         visible={true}
         onComplete={actions.completeOnboarding}
-        onClose={() => router.replace('/')}
+        onClose={handleClose}
       />
     );
   }
