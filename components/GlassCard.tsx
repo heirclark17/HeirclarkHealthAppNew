@@ -48,8 +48,8 @@ const GLASS_COLORS = {
     shadow: 'rgba(0, 0, 0, 0.08)',
   },
   dark: {
-    background: 'rgba(255, 255, 255, 0.25)',   // Increased opacity for better visibility in dark mode
-    border: 'rgba(255, 255, 255, 0.25)',       // Increased for better definition
+    background: 'rgba(30, 30, 30, 0.50)',      // Dark gray background for dark mode (was white, causing invisible text)
+    border: 'rgba(255, 255, 255, 0.25)',       // White border for definition
     shadow: 'rgba(0, 0, 0, 0.25)',
   },
 };
