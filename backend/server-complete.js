@@ -1801,6 +1801,107 @@ app.get('/api/v1/favorite-exercises', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/v1/exercises/saved - Get unique exercises from user's AI workout plan
+app.get('/api/v1/exercises/saved', authenticateToken, async (req, res) => {
+  try {
+    console.log(`[Saved Exercises] Fetching exercises from workout plan for user ${req.userId}`);
+
+    // Get user's workout plan
+    const result = await pool.query(
+      'SELECT weekly_schedule FROM workout_plans WHERE user_id = $1',
+      [req.userId]
+    );
+
+    if (result.rows.length === 0 || !result.rows[0].weekly_schedule) {
+      console.log('[Saved Exercises] No workout plan found');
+      return res.json({ success: true, savedExercises: [] });
+    }
+
+    const weeklySchedule = result.rows[0].weekly_schedule;
+    const exerciseMap = new Map(); // Use Map to deduplicate by exercise name
+
+    // Extract exercises from all days in the weekly schedule
+    weeklySchedule.forEach(day => {
+      if (day.exercises && Array.isArray(day.exercises)) {
+        day.exercises.forEach(exercise => {
+          const exerciseName = exercise.name;
+
+          // Skip if already added (deduplicate)
+          if (exerciseMap.has(exerciseName.toLowerCase())) {
+            return;
+          }
+
+          // Map AI workout exercise to SavedExercise format
+          const savedExercise = {
+            id: exerciseName.toLowerCase().replace(/\s+/g, '-'),
+            name: exerciseName,
+            muscleGroups: exercise.targetMuscles || [],
+            category: exercise.targetMuscles?.[0] || 'general',
+            equipment: inferEquipment(exerciseName),
+            difficulty: inferDifficulty(exercise.sets, exercise.reps),
+            caloriesPerMinute: estimateCalories(exerciseName, exercise.sets),
+            instructions: exercise.notes ? [exercise.notes] : [],
+            tips: [],
+            videoUrl: undefined,
+          };
+
+          exerciseMap.set(exerciseName.toLowerCase(), savedExercise);
+        });
+      }
+    });
+
+    const savedExercises = Array.from(exerciseMap.values());
+    console.log(`[Saved Exercises] ✅ Found ${savedExercises.length} unique exercises`);
+
+    res.json({ success: true, savedExercises });
+  } catch (error) {
+    console.error('[Saved Exercises] Error:', error);
+    res.status(500).json({ error: 'Failed to get saved exercises' });
+  }
+});
+
+// Helper: Infer equipment from exercise name
+function inferEquipment(name) {
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes('barbell')) return 'barbell';
+  if (lowerName.includes('dumbbell') || lowerName.includes('db ')) return 'dumbbell';
+  if (lowerName.includes('cable')) return 'cable';
+  if (lowerName.includes('machine')) return 'machine';
+  if (lowerName.includes('kettlebell')) return 'kettlebell';
+  if (lowerName.includes('band')) return 'resistance band';
+  if (lowerName.includes('bodyweight') || lowerName.includes('push') || lowerName.includes('pull') || lowerName.includes('squat') || lowerName.includes('plank')) {
+    return 'body weight';
+  }
+  return 'body weight'; // Default
+}
+
+// Helper: Infer difficulty from sets and reps
+function inferDifficulty(sets, reps) {
+  // Parse reps string (e.g., "8-10" -> 8)
+  const repCount = typeof reps === 'string' ? parseInt(reps.split('-')[0]) : reps || 10;
+
+  if (sets >= 4 && repCount <= 6) return 'Advanced'; // Heavy strength work
+  if (sets >= 3 && repCount >= 12) return 'Intermediate'; // Hypertrophy
+  return 'Beginner'; // Default
+}
+
+// Helper: Estimate calories per minute based on exercise type
+function estimateCalories(name, sets) {
+  const lowerName = name.toLowerCase();
+
+  // Compound movements burn more
+  if (lowerName.includes('squat') || lowerName.includes('deadlift') || lowerName.includes('bench')) {
+    return sets >= 4 ? 8 : 6;
+  }
+
+  // Isolation exercises burn less
+  if (lowerName.includes('curl') || lowerName.includes('raise') || lowerName.includes('extension')) {
+    return 3;
+  }
+
+  return 5; // Average
+}
+
 // GET /api/v1/exercise-gif/:id - Serve exercise GIF images (with database caching)
 app.get('/api/v1/exercise-gif/:id', async (req, res) => {
   try {
