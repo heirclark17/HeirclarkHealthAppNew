@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Calendar, Clock, Zap, X } from 'lucide-react-native';
+import { Calendar, Clock, Zap, XCircle } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -32,7 +32,7 @@ export function WelcomeStep({ onNext, onClose, currentStep, totalSteps }: Props)
             activeOpacity={0.7}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <X size={24} color={themeColors.textSecondary} />
+            <XCircle size={24} color={themeColors.textSecondary} />
           </TouchableOpacity>
         )}
 
