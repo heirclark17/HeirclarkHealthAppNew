@@ -33,12 +33,6 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
   const { settings } = useSettings();
   const isDark = settings.themeMode === 'dark';
 
-  const handleClose = () => {
-    console.log('[DayPlannerOnboardingModal] handleClose called');
-    console.log('[DayPlannerOnboardingModal] Calling parent onClose...');
-    onClose();
-  };
-
   const totalSteps = 8;
 
   /**
@@ -101,7 +95,7 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
 
     switch (currentStep) {
       case 0:
-        return <WelcomeStep {...stepProps} onClose={handleClose} />;
+        return <WelcomeStep {...stepProps} onClose={onClose} />;
 
       case 1:
         return (
@@ -177,7 +171,7 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={handleClose}
+      onRequestClose={onClose}
     >
       <BlurView intensity={isDark ? 60 : 80} tint={isDark ? 'dark' : 'light'} style={styles.blurContainer}>
         <SafeAreaView style={styles.safeArea}>

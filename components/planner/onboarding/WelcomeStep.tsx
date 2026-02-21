@@ -21,18 +21,6 @@ export function WelcomeStep({ onNext, onClose, currentStep, totalSteps }: Props)
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
 
-  const handleClose = () => {
-    console.log('[WelcomeStep] Close button pressed');
-    console.log('[WelcomeStep] onClose callback exists:', !!onClose);
-    if (onClose) {
-      console.log('[WelcomeStep] Calling onClose...');
-      onClose();
-      console.log('[WelcomeStep] onClose called successfully');
-    } else {
-      console.warn('[WelcomeStep] No onClose callback provided');
-    }
-  };
-
   return (
     <View style={styles.container}>
       <GlassCard style={styles.card}>
@@ -40,7 +28,7 @@ export function WelcomeStep({ onNext, onClose, currentStep, totalSteps }: Props)
         {onClose && (
           <TouchableOpacity
             style={styles.closeButton}
-            onPress={handleClose}
+            onPress={onClose}
             activeOpacity={0.7}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >

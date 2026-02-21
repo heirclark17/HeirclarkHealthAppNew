@@ -84,8 +84,7 @@ export default function PlannerScreen() {
   // Show onboarding if not completed
   if (!state.hasCompletedOnboarding) {
     const handleClose = () => {
-      console.log('[PlannerScreen] Close button pressed - skipping onboarding');
-      // Mark onboarding as complete so user can access planner
+      // Skip onboarding with default preferences
       actions.completeOnboarding({
         wakeTime: '06:00',
         sleepTime: '22:00',
