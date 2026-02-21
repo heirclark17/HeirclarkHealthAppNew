@@ -578,20 +578,18 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 22,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   emptyText: {
     fontSize: 15,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
     lineHeight: 22,
   },
   errorText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
     marginTop: 4,
   },
@@ -606,8 +604,7 @@ const styles = StyleSheet.create({
   },
   generateButtonText: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200' as const,
+    fontFamily: Fonts.numericSemiBold,
   },
   // Bottom sheet styles
   sheetContent: {
