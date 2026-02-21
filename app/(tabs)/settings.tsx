@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, RefreshControl, Alert, Linking, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { ChevronRight, LogOut, Target, RotateCcw, Mail, Trash2, Image as ImageIcon } from 'lucide-react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { api } from '../../services/api';
 import { Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
@@ -236,7 +236,7 @@ export default function SettingsScreen() {
               <Text style={[styles.settingValue, { color: colors.textSecondary }]}>
                 {currentBackgroundName}
               </Text>
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              <ChevronRight size={18} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
         </GlassCard>
@@ -275,64 +275,8 @@ export default function SettingsScreen() {
                 accessibilityRole="button"
                 accessibilityHint="Signs you out of your account and returns you to the sign in screen"
               >
-                <Ionicons name="log-out-outline" size={18} color={colors.error} style={{ marginRight: 8 }} />
+                <LogOut size={18} color={colors.error} style={{ marginRight: 8 }} />
                 <Text style={[styles.signOutButtonText, { color: colors.error }]}>Sign Out</Text>
-              </TouchableOpacity>
-
-              {/* Nuclear option: Clear ALL auth data (debug) */}
-              <TouchableOpacity
-                style={[styles.signOutButton, { borderColor: colors.warningOrange, marginTop: 16 }]}
-                onPress={() => {
-                  Alert.alert(
-                    'Clear All Auth Data',
-                    'This will forcefully remove ALL authentication data including dev accounts. You will need to sign in again with your Apple ID.',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Clear Everything',
-                        style: 'destructive',
-                        onPress: async () => {
-                          try {
-                            console.log('[Settings] Clearing ALL auth data...');
-
-                            // Import AsyncStorage
-                            const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-
-                            // Clear all possible auth keys
-                            await AsyncStorage.removeItem('heirclark_auth_token');
-                            await AsyncStorage.removeItem('heirclark_auth_user');
-                            await AsyncStorage.removeItem('AUTH_TOKEN');
-                            await AsyncStorage.removeItem('USER_DATA');
-
-                            // Also call signOut to clear backend session
-                            await signOut();
-
-                            Alert.alert(
-                              'Success',
-                              'All authentication data cleared. The app will reload. Please sign in with your Apple ID.',
-                              [{
-                                text: 'OK',
-                                onPress: () => {
-                                  // Force reload by navigating to index
-                                  router.replace('/(tabs)');
-                                }
-                              }]
-                            );
-                          } catch (error) {
-                            console.error('[Settings] Clear auth error:', error);
-                            Alert.alert('Error', 'Failed to clear auth data');
-                          }
-                        },
-                      },
-                    ]
-                  );
-                }}
-                accessibilityLabel="Clear all auth data (debug)"
-                accessibilityRole="button"
-                accessibilityHint="Development option that forcefully clears all authentication data and requires sign in again"
-              >
-                <Ionicons name="nuclear-outline" size={18} color={colors.warningOrange} style={{ marginRight: 8 }} />
-                <Text style={[styles.signOutButtonText, { color: colors.warningOrange }]}>🔧 Clear All Auth (Debug)</Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -371,7 +315,7 @@ export default function SettingsScreen() {
             accessibilityHint="Opens the goals screen to view and edit your fitness goals and daily calorie targets"
           >
             <Text style={[styles.linkLabel, { color: colors.accent }]}>View Goals</Text>
-            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            <ChevronRight size={18} color={colors.textMuted} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.linkRow, { borderBottomColor: 'transparent' }]}
@@ -381,7 +325,7 @@ export default function SettingsScreen() {
             accessibilityHint="Restarts the goals wizard to reconfigure your fitness goals from the beginning"
           >
             <Text style={[styles.linkLabel, { color: colors.accent }]}>Redo Goals Setup</Text>
-            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            <ChevronRight size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </GlassCard>
 
@@ -400,7 +344,7 @@ export default function SettingsScreen() {
             accessibilityHint="Opens your email app to send a support request to the Heirclark team"
           >
             <Text style={[styles.linkLabel, { color: colors.accent }]}>Contact Support</Text>
-            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            <ChevronRight size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </GlassCard>
 
@@ -413,7 +357,7 @@ export default function SettingsScreen() {
             accessibilityRole="button"
             accessibilityHint="Permanently deletes all your app data including goals, meal plans, and progress tracking. This action cannot be undone."
           >
-            <Ionicons name="trash-outline" size={18} color={colors.error} style={{ marginRight: 8 }} />
+            <Trash2 size={18} color={colors.error} style={{ marginRight: 8 }} />
             <Text style={[styles.dangerButtonText, { color: colors.error }]}>Delete All Data</Text>
           </TouchableOpacity>
         </GlassCard>
@@ -469,12 +413,12 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 18,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   userHint: {
     fontSize: 13,
     marginTop: 2,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   statusBadge: {
     paddingVertical: 4,
@@ -483,7 +427,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   section: {
     marginHorizontal: 16,
@@ -499,18 +443,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 12,
     letterSpacing: 0.5,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   connectedCount: {
     fontSize: 12,
     marginBottom: 12,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   sectionHint: {
     fontSize: 12,
     marginTop: 8,
     lineHeight: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   settingRow: {
     flexDirection: 'row',
@@ -525,16 +469,16 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   settingDesc: {
     fontSize: 12,
     marginTop: 2,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   settingValue: {
     fontSize: 14,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   settingValueRow: {
     flexDirection: 'row',
@@ -554,7 +498,7 @@ const styles = StyleSheet.create({
   },
   linkLabel: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   appRow: {
     flexDirection: 'row',
@@ -565,7 +509,7 @@ const styles = StyleSheet.create({
   },
   appName: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   appStatusContainer: {
     flexDirection: 'row',
@@ -574,11 +518,11 @@ const styles = StyleSheet.create({
   },
   appStatus: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   connectLink: {
     fontSize: 12,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
   },
   dangerButton: {
     flexDirection: 'row',
@@ -591,7 +535,7 @@ const styles = StyleSheet.create({
   },
   dangerButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   signOutButton: {
     flexDirection: 'row',
@@ -604,7 +548,7 @@ const styles = StyleSheet.create({
   },
   signOutButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   appleSignInButton: {
     width: '100%',
@@ -618,7 +562,7 @@ const styles = StyleSheet.create({
   },
   signInButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
   },
   profileSection: {
     marginHorizontal: 16,
