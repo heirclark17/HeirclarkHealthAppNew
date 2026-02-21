@@ -398,8 +398,8 @@ function FanCard({
       )}
 
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.15)', 'rgba(0,0,0,0.75)']}
-        locations={[0.4, 0.65, 1]}
+        colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.85)']}
+        locations={[0.3, 0.55, 1]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -473,6 +473,7 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     paddingTop: 14,
     gap: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   iconPill: {
     width: 36,
@@ -491,10 +492,16 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   cardSubtitle: {
     fontSize: 12,
     fontFamily: Fonts.regular,
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.9)',
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });
