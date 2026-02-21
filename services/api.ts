@@ -65,6 +65,25 @@ export interface SavedMeal {
   lastUsedAt?: string;
 }
 
+export interface SavedExercise {
+  id: string;
+  name: string;
+  muscleGroups: string[];
+  category: string;
+  equipment: string;
+  difficulty: string;
+  caloriesPerMinute?: number;
+  instructions?: string[];
+  tips?: string[];
+  videoUrl?: string;
+  gifUrl?: string;
+  primaryMuscle?: string;
+  secondaryMuscles?: string[];
+  movementPattern?: string;
+  useCount?: number;
+  lastUsedAt?: string;
+}
+
 export interface UserGoals {
   dailyCalories: number;
   dailyProtein: number;
@@ -1030,6 +1049,54 @@ class HeirclarkAPI {
   async deleteSavedMeal(id: string): Promise<boolean> {
     try {
       const response = await fetch(`${this.baseUrl}/api/v1/meals/saved/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // ============================================
+  // SAVED EXERCISES (Favorites)
+  // ============================================
+
+  async getSavedExercises(): Promise<SavedExercise[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/exercises/saved`, {
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.success ? data.savedExercises : [];
+    } catch (error) {
+      console.error('[API] Get saved exercises error:', error);
+      return [];
+    }
+  }
+
+  async saveExercise(exercise: Omit<SavedExercise, 'id'>): Promise<SavedExercise | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/exercises/saved`, {
+        method: 'POST',
+        headers: this.getHeaders(true),
+        body: JSON.stringify(exercise),
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data.success ? data.savedExercise : null;
+    } catch (error) {
+      console.error('[API] Save exercise error:', error);
+      return null;
+    }
+  }
+
+  async deleteSavedExercise(id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/exercises/saved/${id}`, {
         method: 'DELETE',
         headers: this.getHeaders(),
       });
