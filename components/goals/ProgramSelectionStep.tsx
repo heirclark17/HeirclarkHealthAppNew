@@ -10,6 +10,7 @@ import { useTraining } from '../../contexts/TrainingContext';
 import { TrainingProgram, ProgramTemplate } from '../../types/training';
 import { ProgramPreviewModal } from '../training/ProgramPreviewModal';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
+import { WizardHeader } from './WizardHeader';
 
 interface ProgramSelectionStepProps {
   onContinue: (programId: string, programName: string) => void;
@@ -99,11 +100,23 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
   return (
     <>
       <View style={styles.container}>
+        {/* Header with Title and Icon */}
+        <WizardHeader
+          currentStep={5}
+          totalSteps={6}
+          title="Training Program"
+          icon={<Dumbbell size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
+          onBack={onBack}
+          isDark={isDark}
+        />
+
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Spacer for header */}
+          <View style={{ height: Platform.OS === 'ios' ? 160 : 130 }} />
 
           <View style={styles.subtitle}>
             <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>

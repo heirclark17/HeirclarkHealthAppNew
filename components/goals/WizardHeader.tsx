@@ -17,13 +17,7 @@ export function WizardHeader({ currentStep, totalSteps, title, icon, isDark = tr
   // iOS 26 Liquid Glass colors - adaptive based on theme
   const textColor = isDark ? '#FFFFFF' : '#000000';
   const textSecondary = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)';
-  const progressBg = isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(0, 0, 0, 0.08)';
-  const progressFill = isDark ? '#96CEB4' : '#4A9B7A';
   const glassOverlay = isDark ? 'rgba(0, 0, 0, 0.25)' : 'rgba(255, 255, 255, 0.35)';
-
-
-  // Calculate progress percentage
-  const progressPercentage = (currentStep / totalSteps) * 100;
 
   return (
     <View style={styles.headerContainer}>
@@ -48,52 +42,6 @@ export function WizardHeader({ currentStep, totalSteps, title, icon, isDark = tr
           <Text style={[styles.title, { color: textColor }]} numberOfLines={1}>
             {title}
           </Text>
-        </View>
-
-        {/* Modern Progress Bar with Liquid Glass Aesthetic */}
-        <View style={styles.progressContainer}>
-          {/* Background Track */}
-          <View style={[styles.progressTrack, { backgroundColor: progressBg }]}>
-            {/* Active Progress Fill with Glow Effect */}
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${progressPercentage}%`,
-                  backgroundColor: progressFill,
-                },
-              ]}
-            >
-              {/* Shimmer overlay for liquid glass effect */}
-              <View style={styles.shimmerOverlay} />
-            </View>
-          </View>
-
-          {/* Step Indicators (Dots) */}
-          <View style={styles.stepDots}>
-            {Array.from({ length: totalSteps }, (_, index) => {
-              const stepNumber = index + 1;
-              const isCompleted = stepNumber < currentStep;
-              const isCurrent = stepNumber === currentStep;
-              const isPast = stepNumber < currentStep;
-
-              return (
-                <View key={stepNumber} style={styles.dotContainer}>
-                  <View
-                    style={[
-                      styles.dot,
-                      {
-                        backgroundColor: isPast || isCurrent ? progressFill : progressBg,
-                        transform: [{ scale: isCurrent ? 1.2 : 1 }],
-                      },
-                    ]}
-                  >
-                    {isCurrent && <View style={styles.dotPulse} />}
-                  </View>
-                </View>
-              );
-            })}
-          </View>
         </View>
       </View>
     </View>
@@ -150,46 +98,5 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontFamily: Fonts.numericSemiBold,
     letterSpacing: 0.5,
-  },
-  progressContainer: {
-    gap: 12,
-  },
-  progressTrack: {
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 2,
-    position: 'relative',
-  },
-  shimmerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  stepDots: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  dotContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    position: 'relative',
-  },
-  dotPulse: {
-    position: 'absolute',
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: 'rgba(150, 206, 180, 0.2)',
-    top: -4,
-    left: -4,
   },
 });

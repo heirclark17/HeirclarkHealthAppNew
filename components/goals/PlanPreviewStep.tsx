@@ -32,6 +32,7 @@ import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { useTraining } from '../../contexts/TrainingContext';
 import { lightImpact, successNotification } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
+import { WizardHeader } from './WizardHeader';
 
 interface AnimatedNumberProps {
   value: number;
@@ -209,7 +210,19 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
 
   return (
     <View style={styles.container}>
+      {/* Header with Title and Icon */}
+      <WizardHeader
+        currentStep={6}
+        totalSteps={6}
+        title="Review Your Plan"
+        icon={<ClipboardList size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
+        onBack={onBack}
+        isDark={isDark}
+      />
+
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Spacer for header */}
+        <View style={{ height: Platform.OS === 'ios' ? 160 : 130 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>

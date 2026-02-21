@@ -21,6 +21,7 @@ import { PrimaryGoal, useGoalWizard } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
+import { WizardHeader } from './WizardHeader';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -356,8 +357,20 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
 
   return (
     <View style={styles.container}>
+      {/* Header with Title and Icon */}
+      <WizardHeader
+        currentStep={1}
+        totalSteps={6}
+        title="What's Your Goal?"
+        icon={<Target size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
+        onBack={handleBack}
+        isDark={isDark}
+      />
+
       {/* Content */}
       <View style={styles.contentArea}>
+        {/* Spacer for header */}
+        <View style={{ height: Platform.OS === 'ios' ? 160 : 130 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>

@@ -30,6 +30,7 @@ import { ActivityLevel } from '../../constants/goals';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
+import { WizardHeader } from './WizardHeader';
 
 // Scrollable Number Picker for 1RM values
 interface ScrollableNumberPickerProps {
@@ -531,7 +532,19 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
 
   return (
     <View style={styles.container}>
+      {/* Header with Title and Icon */}
+      <WizardHeader
+        currentStep={3}
+        totalSteps={6}
+        title="Activity & Lifestyle"
+        icon={<HeartPulse size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
+        onBack={onBack}
+        isDark={isDark}
+      />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Spacer for header */}
+        <View style={{ height: Platform.OS === 'ios' ? 160 : 130 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
