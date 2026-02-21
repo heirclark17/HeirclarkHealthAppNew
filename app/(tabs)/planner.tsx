@@ -84,14 +84,16 @@ export default function PlannerScreen() {
   // Show onboarding if not completed
   if (!state.hasCompletedOnboarding) {
     const handleClose = () => {
-      console.log('[PlannerScreen] onClose called - attempting navigation to index');
-      console.log('[PlannerScreen] Current route:', router);
-      try {
-        router.replace('/');
-        console.log('[PlannerScreen] router.replace("/") executed');
-      } catch (error) {
-        console.error('[PlannerScreen] Navigation error:', error);
-      }
+      console.log('[PlannerScreen] Close button pressed - skipping onboarding');
+      // Mark onboarding as complete so user can access planner
+      actions.completeOnboarding({
+        wakeTime: '06:00',
+        sleepTime: '22:00',
+        priorities: ['health'],
+        energyPeak: 'morning',
+        flexibility: 'somewhat',
+        calendarSyncEnabled: false,
+      });
     };
 
     return (
