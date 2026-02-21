@@ -274,7 +274,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Spacer for header */}
-        <View style={{ height: Platform.OS === 'ios' ? 160 : 130 }} />
+        <View style={{ height: Platform.OS === 'ios' ? 200 : 170 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>

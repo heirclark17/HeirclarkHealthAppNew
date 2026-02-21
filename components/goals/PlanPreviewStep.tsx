@@ -222,7 +222,7 @@ export function PlanPreviewStep({ onBack, onConfirm }: PlanPreviewStepProps) {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Spacer for header */}
-        <View style={{ height: Platform.OS === 'ios' ? 160 : 130 }} />
+        <View style={{ height: Platform.OS === 'ios' ? 200 : 170 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>

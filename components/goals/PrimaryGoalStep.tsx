@@ -370,7 +370,7 @@ export function PrimaryGoalStep({ onNext }: PrimaryGoalStepProps) {
       {/* Content */}
       <View style={styles.contentArea}>
         {/* Spacer for header */}
-        <View style={{ height: Platform.OS === 'ios' ? 160 : 130 }} />
+        <View style={{ height: Platform.OS === 'ios' ? 200 : 170 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
