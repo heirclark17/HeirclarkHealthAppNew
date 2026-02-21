@@ -3136,6 +3136,10 @@ const CARD_IMAGE_PROMPTS = {
   goal_build_muscle: 'Soft pastel aesthetic photo of a protein shake in a glass next to a small bowl of almonds and a resistance band on a light wood surface, muted teal and sage green tones, soft natural window light, clean minimal premium feel, no people no text no words no letters, portrait orientation',
   goal_maintain: 'Soft pastel aesthetic overhead photo of a balanced buddha bowl with quinoa avocado edamame and microgreens on a ceramic plate, soft sky blue and warm cream tones, linen tablecloth, gentle diffused light, clean minimal premium feel, no people no text no words no letters, portrait orientation',
   goal_improve_health: 'Soft pastel aesthetic photo of a smoothie bowl topped with fresh fruit granola and flower petals next to a yoga mat corner, soft lavender and lilac tones with warm gold accents, morning sunlight streaming in, clean minimal premium feel, no people no text no words no letters, portrait orientation',
+  // Energy peak selection card images - pastel aesthetic
+  energy_morning: 'Soft pastel aesthetic photo of sunrise over misty mountains with golden light breaking through clouds, warm peachy orange and soft amber tones, steaming coffee cup on a wooden deck railing in foreground, fresh morning dew on wildflowers, serene peaceful energy, clean minimal premium feel, no people no text no words no letters, portrait orientation',
+  energy_afternoon: 'Soft pastel aesthetic photo of midday sun streaming through palm leaves creating dappled shadows on a clean white surface, warm golden yellow and soft pink tones, fresh tropical fruit slices and iced tea glass, vibrant energetic feel, gentle natural light, clean minimal premium feel, no people no text no words no letters, portrait orientation',
+  energy_evening: 'Soft pastel aesthetic photo of sunset sky with deep purple and lavender clouds fading to warm amber horizon, cozy string lights glowing softly, open book and reading glasses on a blanket, peaceful contemplative energy, dreamy twilight atmosphere, clean minimal premium feel, no people no text no words no letters, portrait orientation',
 };
 
 const CARD_IMAGE_KEYS = {
@@ -3146,6 +3150,9 @@ const CARD_IMAGE_KEYS = {
   goal_build_muscle: 'card_goal_build_muscle_v1',
   goal_maintain: 'card_goal_maintain_v1',
   goal_improve_health: 'card_goal_improve_health_v1',
+  energy_morning: 'card_energy_morning_v1',
+  energy_afternoon: 'card_energy_afternoon_v1',
+  energy_evening: 'card_energy_evening_v1',
 };
 
 app.get('/api/v1/card-image', async (req, res) => {
