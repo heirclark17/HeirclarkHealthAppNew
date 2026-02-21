@@ -66,8 +66,8 @@ export function FlexibilityStep({
       <GlassCard style={styles.card}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: themeColors.text }]}>How flexible is your schedule?</Text>
-          <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>
+          <Text style={[styles.title, { color: isDark ? '#FFFFFF' : '#000000' }]}>How flexible is your schedule?</Text>
+          <Text style={[styles.subtitle, { color: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.7)' }]}>
             This helps us optimize your daily timeline
           </Text>
         </View>
@@ -97,13 +97,13 @@ export function FlexibilityStep({
                       <Text
                         style={[
                           styles.optionLabel,
-                          { color: themeColors.text },
+                          { color: isDark ? '#FFFFFF' : '#000000' },
                           isSelected && { color: option.color, fontFamily: Fonts.numericSemiBold },
                         ]}
                       >
                         {option.label}
                       </Text>
-                      <Text style={[styles.optionDescription, { color: themeColors.textSecondary }]}>
+                      <Text style={[styles.optionDescription, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)' }]}>
                         {option.description}
                       </Text>
                     </View>
@@ -115,7 +115,7 @@ export function FlexibilityStep({
         </View>
 
         {/* Progress */}
-        <Text style={[styles.progress, { color: themeColors.textSecondary }]}>
+        <Text style={[styles.progress, { color: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.7)' }]}>
           Step {currentStep} of {totalSteps}
         </Text>
 
