@@ -951,6 +951,58 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
           };
         });
 
+        // Save AI-generated exercises to database for persistent library
+        const saveExercisesToLibrary = async () => {
+          try {
+            const uniqueExercises = new Map<string, Exercise>();
+
+            // Extract all unique exercises from the generated workouts
+            days.forEach(day => {
+              if (day.workout?.exercises) {
+                day.workout.exercises.forEach((workoutEx) => {
+                  const ex = workoutEx.exercise;
+                  if (!uniqueExercises.has(ex.name)) {
+                    uniqueExercises.set(ex.name, ex);
+                  }
+                });
+              }
+            });
+
+            // Save each unique exercise to backend
+            console.log(`[Training] Saving ${uniqueExercises.size} unique exercises to library...`);
+            let savedCount = 0;
+
+            for (const exercise of uniqueExercises.values()) {
+              const savedExercise = await api.saveExercise({
+                name: exercise.name,
+                muscleGroups: exercise.muscleGroups || [],
+                category: exercise.category || 'compound',
+                equipment: exercise.equipment || 'bodyweight',
+                difficulty: exercise.difficulty || 'intermediate',
+                caloriesPerMinute: exercise.caloriesPerMinute || 8,
+                instructions: exercise.instructions,
+                tips: exercise.tips,
+                videoUrl: exercise.videoUrl,
+                gifUrl: exercise.gifUrl,
+                primaryMuscle: exercise.primaryMuscle,
+                secondaryMuscles: exercise.secondaryMuscles,
+                movementPattern: exercise.movementPattern,
+              });
+
+              if (savedExercise) {
+                savedCount++;
+              }
+            }
+
+            console.log(`[Training] ✅ Saved ${savedCount}/${uniqueExercises.size} exercises to library`);
+          } catch (error) {
+            console.error('[Training] Error saving exercises to library:', error);
+          }
+        };
+
+        // Fire-and-forget save to not block UI
+        saveExercisesToLibrary();
+
         // Calculate totals
         const totalWorkouts = days.filter(d => d.workout !== null).length;
         const endDate = new Date(startDate);
