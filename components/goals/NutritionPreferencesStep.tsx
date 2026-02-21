@@ -1057,7 +1057,7 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: 11,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textSecondary,
     lineHeight: 16,
     textAlign: 'center',
@@ -1077,7 +1077,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     marginBottom: 12,
     marginTop: -4,
@@ -1109,8 +1109,7 @@ const styles = StyleSheet.create({
   },
   dietTitle: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
     marginBottom: 2,
   },
@@ -1119,7 +1118,7 @@ const styles = StyleSheet.create({
   },
   dietDescription: {
     fontSize: 12,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
   },
   mealsRow: {
@@ -1149,7 +1148,7 @@ const styles = StyleSheet.create({
   mealsHint: {
     marginTop: 12,
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     textAlign: 'center',
     fontStyle: 'italic',
@@ -1174,7 +1173,7 @@ const styles = StyleSheet.create({
   },
   fastingSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
   },
   fastingOptions: {
@@ -1183,8 +1182,7 @@ const styles = StyleSheet.create({
   },
   presetsLabel: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     marginBottom: 10,
   },
@@ -1209,7 +1207,7 @@ const styles = StyleSheet.create({
   },
   presetDesc: {
     fontSize: 10,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     marginTop: 2,
   },
@@ -1222,8 +1220,7 @@ const styles = StyleSheet.create({
   },
   windowLabel: {
     fontSize: 11,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -1247,8 +1244,7 @@ const styles = StyleSheet.create({
   },
   allergyText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     color: Colors.text,
   },
   allergyTextSelected: {
@@ -1266,8 +1262,7 @@ const styles = StyleSheet.create({
   },
   optionButtonText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
   },
   foodChipsContainer: {
@@ -1283,8 +1278,7 @@ const styles = StyleSheet.create({
   },
   foodChipText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
   },
   cheatDaysContainer: {
     flexDirection: 'row',
@@ -1302,13 +1296,12 @@ const styles = StyleSheet.create({
   },
   cheatDayText: {
     fontSize: 11,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
   },
   cheatDaysHint: {
     marginTop: 12,
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -1319,7 +1312,7 @@ const styles = StyleSheet.create({
   textInput: {
     padding: 12,
     fontSize: 14,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     minHeight: 60,
     textAlignVertical: 'top',
   },
@@ -1337,14 +1330,14 @@ const styles = StyleSheet.create({
   },
   skillButtonLabel: {
     fontSize: 14,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
     marginTop: 8,
     textAlign: 'center',
     width: '100%', // Ensure label takes full width
   },
   skillButtonDescription: {
     fontSize: 11,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
     marginTop: 4,
     textAlign: 'center',
     width: '100%', // Ensure description takes full width
@@ -1408,12 +1401,11 @@ const styles = StyleSheet.create({
   },
   dailyGoalLabel: {
     fontSize: 15,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
   },
   dailyGoalHint: {
     fontSize: 12,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericSemiBold,
   },
   dailyGoalControls: {
     flexDirection: 'row',
@@ -1425,8 +1417,7 @@ const styles = StyleSheet.create({
   },
   dailyGoalValue: {
     fontSize: 18,
-    fontFamily: Fonts.light,
-    fontWeight: '100',
+    fontFamily: Fonts.numericSemiBold,
     minWidth: 60,
     textAlign: 'center',
   },
