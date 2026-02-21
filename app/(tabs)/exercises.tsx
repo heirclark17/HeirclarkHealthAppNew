@@ -1,6 +1,6 @@
 /**
- * Exercise Library Tab - Premium Version
- * 11,000+ exercises from ExerciseDB with database persistence
+ * Exercise Library Tab - AI-Generated Exercises
+ * Exercises from AI workout plans, persistently saved to database
  */
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
@@ -23,9 +23,6 @@ import {
   XCircle,
   Dumbbell,
   X,
-  Download,
-  Check,
-  ChevronRight,
   Heart,
   Target,
   Zap,
@@ -42,9 +39,7 @@ import { GlassCard } from '../../components/GlassCard';
 import { DarkColors, LightColors, Spacing, Fonts } from '../../constants/Theme';
 import { lightImpact, mediumImpact } from '../../utils/haptics';
 import { useSettings } from '../../contexts/SettingsContext';
-import { exerciseDbService } from '../../services/exerciseDbService';
-import { api } from '../../services/api';
-import type { ExerciseDBExercise } from '../../types/ai';
+import { api, SavedExercise } from '../../services/api';
 import type { Exercise, MuscleGroup, Equipment } from '../../types/training';
 
 // Filter types
@@ -98,127 +93,33 @@ export default function ExercisesScreen() {
   const [muscleFilter, setMuscleFilter] = useState<MuscleFilter>('all');
   const [equipmentFilter, setEquipmentFilter] = useState<EquipmentFilter>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all');
-  const [selectedExercise, setSelectedExercise] = useState<ExerciseDBExercise | null>(null);
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<SavedExercise | null>(null);
 
   // Exercise data
-  const [exercises, setExercises] = useState<ExerciseDBExercise[]>([]);
+  const [exercises, setExercises] = useState<SavedExercise[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Load All state
-  const [showLoadAllModal, setShowLoadAllModal] = useState(false);
-  const [isLoadingAll, setIsLoadingAll] = useState(false);
-  const [loadProgress, setLoadProgress] = useState(0);
-  const [loadProgressText, setLoadProgressText] = useState('');
-
-  // Initialize: Load exercises and favorites from database
+  // Initialize: Load exercises from saved library
   useEffect(() => {
     loadExercisesFromDatabase();
-    loadFavorites();
   }, []);
 
   const loadExercisesFromDatabase = async () => {
     try {
       setIsLoading(true);
-      console.log('[ExerciseLibrary] Loading exercises from database...');
+      console.log('[ExerciseLibrary] Loading saved exercises from database...');
 
-      // Get count and exercises from backend
-      const [count, dbExercises] = await Promise.all([
-        api.getExerciseCount(),
-        api.getExercises({ limit: 10000 }) // Get all exercises
-      ]);
+      // Get saved exercises from backend (from AI-generated workouts)
+      const savedExercises = await api.getSavedExercises();
 
-      setTotalCount(count);
-      setExercises(dbExercises);
-      console.log(`[ExerciseLibrary] ✅ Loaded ${dbExercises.length} exercises from database`);
+      setTotalCount(savedExercises.length);
+      setExercises(savedExercises);
+      console.log(`[ExerciseLibrary] ✅ Loaded ${savedExercises.length} saved exercises`);
     } catch (error) {
-      console.error('[ExerciseLibrary] Failed to load from database:', error);
+      console.error('[ExerciseLibrary] Failed to load saved exercises:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadFavorites = async () => {
-    try {
-      console.log('[ExerciseLibrary] Loading favorites...');
-      const favoriteExerciseIds = await api.getFavoriteExercises();
-      setFavoriteIds(new Set(favoriteExerciseIds));
-      console.log(`[ExerciseLibrary] ✅ Loaded ${favoriteExerciseIds.length} favorites`);
-    } catch (error) {
-      console.error('[ExerciseLibrary] Failed to load favorites:', error);
-    }
-  };
-
-  // Load All Exercises from API
-  const handleLoadAll = async () => {
-    try {
-      setIsLoadingAll(true);
-      setShowLoadAllModal(true);
-      setLoadProgress(0);
-      setLoadProgressText('Initializing...');
-
-      await exerciseDbService.initialize();
-
-      // Estimate total exercises (API doesn't provide total count)
-      const ESTIMATED_TOTAL = 1400;
-      const BATCH_SIZE = 10;
-      let offset = 0;
-      let allExercises: ExerciseDBExercise[] = [];
-      let hasMore = true;
-
-      while (hasMore) {
-        setLoadProgressText(`Loading exercises ${offset + 1}-${offset + BATCH_SIZE}...`);
-        setLoadProgress((offset / ESTIMATED_TOTAL) * 100);
-
-        const batch = await exerciseDbService.getAllExercises(BATCH_SIZE, offset);
-
-        if (batch.length === 0) {
-          hasMore = false;
-          break;
-        }
-
-        allExercises = [...allExercises, ...batch];
-
-        // Sync batch to backend in background
-        api.syncExercises(batch).catch(err =>
-          console.error('[ExerciseLibrary] Sync batch error:', err)
-        );
-
-        offset += BATCH_SIZE;
-
-        // Stop if we've loaded a reasonable amount
-        if (offset >= ESTIMATED_TOTAL) {
-          hasMore = false;
-        }
-
-        // Small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-
-      setLoadProgressText(`Finalizing ${allExercises.length} exercises...`);
-      setLoadProgress(90);
-
-      // Final sync to ensure all exercises are in database
-      await api.syncExercises(allExercises);
-
-      setLoadProgress(100);
-      setLoadProgressText(`✅ ${allExercises.length} exercises loaded!`);
-
-      // Reload from database
-      await loadExercisesFromDatabase();
-
-      // Wait a moment to show success
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setShowLoadAllModal(false);
-    } catch (error) {
-      console.error('[ExerciseLibrary] Load all error:', error);
-      setLoadProgressText('❌ Error loading exercises');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setShowLoadAllModal(false);
-    } finally {
-      setIsLoadingAll(false);
     }
   };
 
@@ -238,32 +139,29 @@ export default function ExercisesScreen() {
   const filteredExercises = useMemo(() => {
     let filtered = [...exercises];
 
-    // Favorites filter (apply first)
-    if (showFavoritesOnly) {
-      filtered = filtered.filter(ex => favoriteIds.has(ex.id));
-    }
-
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(ex =>
         ex.name.toLowerCase().includes(query) ||
-        ex.bodyPart.toLowerCase().includes(query) ||
-        ex.target.toLowerCase().includes(query)
+        (ex.muscleGroups && ex.muscleGroups.some(m => m.toLowerCase().includes(query))) ||
+        (ex.category && ex.category.toLowerCase().includes(query))
       );
     }
 
-    // Muscle filter
+    // Muscle filter - check if any muscle group matches
     if (muscleFilter !== 'all') {
-      filtered = filtered.filter(ex => ex.bodyPart === muscleFilter);
+      filtered = filtered.filter(ex => {
+        if (!ex.muscleGroups || ex.muscleGroups.length === 0) return false;
+        return ex.muscleGroups.some(m => m.toLowerCase().includes(muscleFilter.toLowerCase()));
+      });
     }
 
-    // Equipment filter (use includes for broader matching: 'barbell' matches 'ez barbell', 'machine' matches 'leverage machine', etc.)
+    // Equipment filter
     if (equipmentFilter !== 'all') {
       filtered = filtered.filter(ex => {
         const eq = ex.equipment.toLowerCase();
         const filter = equipmentFilter.toLowerCase();
-        // Match exact, or equipment contains filter keyword, or filter contains equipment keyword
         return eq === filter || eq.includes(filter) || filter.includes(eq);
       });
     }
@@ -271,62 +169,23 @@ export default function ExercisesScreen() {
     // Difficulty filter
     if (difficultyFilter !== 'all') {
       filtered = filtered.filter(ex => {
-        const exerciseDifficulty = getDifficultyFromEquipment(ex.equipment);
-        return exerciseDifficulty === difficultyFilter;
+        // Use actual difficulty from SavedExercise if available
+        const exerciseDifficulty = ex.difficulty || getDifficultyFromEquipment(ex.equipment);
+        return exerciseDifficulty.toLowerCase() === difficultyFilter.toLowerCase();
       });
     }
 
     return filtered;
-  }, [exercises, searchQuery, muscleFilter, equipmentFilter, difficultyFilter, showFavoritesOnly, favoriteIds, getDifficultyFromEquipment]);
+  }, [exercises, searchQuery, muscleFilter, equipmentFilter, difficultyFilter, getDifficultyFromEquipment]);
 
-  const handleExercisePress = useCallback((exercise: ExerciseDBExercise) => {
+  const handleExercisePress = useCallback((exercise: SavedExercise) => {
     lightImpact();
     setSelectedExercise(exercise);
   }, []);
 
-  const handleToggleFavorite = useCallback(async (id: string) => {
-    mediumImpact();
-
-    const isFavorited = favoriteIds.has(id);
-
-    // Optimistic update
-    setFavoriteIds(prev => {
-      const next = new Set(prev);
-      if (isFavorited) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-
-    // Sync with backend
-    try {
-      if (isFavorited) {
-        await api.removeFavoriteExercise(id);
-      } else {
-        await api.addFavoriteExercise(id);
-      }
-    } catch (error) {
-      console.error('[ExerciseLibrary] Failed to sync favorite:', error);
-      // Revert on error
-      setFavoriteIds(prev => {
-        const next = new Set(prev);
-        if (isFavorited) {
-          next.add(id);
-        } else {
-          next.delete(id);
-        }
-        return next;
-      });
-    }
-  }, [favoriteIds]);
-
   // Render Exercise Card
   const renderExerciseCard = useCallback(
-    ({ item }: { item: ExerciseDBExercise }) => {
-      const isFavorite = favoriteIds.has(item.id);
-
+    ({ item }: { item: SavedExercise }) => {
       // Helper: Title case exercise name
       const toTitleCase = (str: string) => {
         return str
@@ -335,16 +194,15 @@ export default function ExercisesScreen() {
           .join(' ');
       };
 
-
       // Helper: Get difficulty badge color (using theme tokens)
       const getDifficultyColor = (difficulty: string) => {
-        switch (difficulty) {
-          case 'Beginner':
-            return colors.successStrong; // #4ADE80
-          case 'Intermediate':
-            return colors.warningOrange; // #FB923C
-          case 'Advanced':
-            return colors.errorStrong; // #FF3B30
+        switch (difficulty.toLowerCase()) {
+          case 'beginner':
+            return colors.successStrong;
+          case 'intermediate':
+            return colors.warningOrange;
+          case 'advanced':
+            return colors.errorStrong;
           default:
             return colors.textMuted;
         }
@@ -352,31 +210,29 @@ export default function ExercisesScreen() {
 
       // Helper: Format equipment name
       const formatEquipment = (equipment: string) => {
-        if (equipment === 'body weight') return 'Bodyweight';
+        if (equipment === 'bodyweight') return 'Bodyweight';
         return toTitleCase(equipment);
       };
 
-      // Helper: Get icon and color for body part
-      const getBodyPartIcon = (bodyPart: string) => {
-        const bp = bodyPart.toLowerCase();
-        const size = 28;
-        const strokeWidth = 1.5;
-        if (bp === 'chest') return { Icon: StretchHorizontal, color: '#FF6B6B', bg: '#FF6B6B18' };
-        if (bp === 'back') return { Icon: ArrowUpFromLine, color: '#4ECDC4', bg: '#4ECDC418' };
-        if (bp === 'shoulders') return { Icon: PersonStanding, color: '#45B7D1', bg: '#45B7D118' };
-        if (bp === 'upper arms') return { Icon: Dumbbell, color: '#F7DC6F', bg: '#F7DC6F18' };
-        if (bp === 'lower arms') return { Icon: Hand, color: '#BB8FCE', bg: '#BB8FCE18' };
-        if (bp === 'upper legs') return { Icon: PersonStanding, color: '#82E0AA', bg: '#82E0AA18' };
-        if (bp === 'lower legs') return { Icon: Footprints, color: '#73C6B6', bg: '#73C6B618' };
-        if (bp === 'waist') return { Icon: Activity, color: '#F0B27A', bg: '#F0B27A18' };
-        if (bp === 'cardio') return { Icon: Activity, color: '#EC7063', bg: '#EC706318' };
-        if (bp === 'neck') return { Icon: PersonStanding, color: '#85C1E9', bg: '#85C1E918' };
+      // Helper: Get icon and color for muscle groups
+      const getMuscleGroupIcon = (muscleGroups: string[]) => {
+        if (!muscleGroups || muscleGroups.length === 0) {
+          return { Icon: Dumbbell, color: colors.accentCyan, bg: colors.accentCyan + '18' };
+        }
+        const mg = muscleGroups[0].toLowerCase();
+        if (mg.includes('chest')) return { Icon: StretchHorizontal, color: '#FF6B6B', bg: '#FF6B6B18' };
+        if (mg.includes('back')) return { Icon: ArrowUpFromLine, color: '#4ECDC4', bg: '#4ECDC418' };
+        if (mg.includes('shoulder')) return { Icon: PersonStanding, color: '#45B7D1', bg: '#45B7D118' };
+        if (mg.includes('arm') || mg.includes('bicep') || mg.includes('tricep')) return { Icon: Dumbbell, color: '#F7DC6F', bg: '#F7DC6F18' };
+        if (mg.includes('leg') || mg.includes('quad') || mg.includes('hamstring')) return { Icon: PersonStanding, color: '#82E0AA', bg: '#82E0AA18' };
+        if (mg.includes('calves')) return { Icon: Footprints, color: '#73C6B6', bg: '#73C6B618' };
+        if (mg.includes('core') || mg.includes('abs')) return { Icon: Activity, color: '#F0B27A', bg: '#F0B27A18' };
         return { Icon: Dumbbell, color: colors.accentCyan, bg: colors.accentCyan + '18' };
       };
 
-      const difficulty = getDifficultyFromEquipment(item.equipment);
+      const difficulty = item.difficulty || getDifficultyFromEquipment(item.equipment);
       const difficultyColor = getDifficultyColor(difficulty);
-      const { Icon: BodyPartIcon, color: iconColor, bg: iconBg } = getBodyPartIcon(item.bodyPart);
+      const { Icon: MuscleIcon, color: iconColor, bg: iconBg } = getMuscleGroupIcon(item.muscleGroups);
 
       return (
         <TouchableOpacity
@@ -385,9 +241,9 @@ export default function ExercisesScreen() {
         >
           <GlassCard style={styles.exerciseCard}>
             <View style={styles.cardContent}>
-              {/* Body Part Icon (no GIF in list - saves API calls) */}
+              {/* Muscle Group Icon */}
               <View style={[styles.bodyPartIcon, { backgroundColor: iconBg }]}>
-                <BodyPartIcon size={28} color={iconColor} strokeWidth={1.5} />
+                <MuscleIcon size={28} color={iconColor} strokeWidth={1.5} />
               </View>
 
               {/* Exercise Info */}
@@ -397,38 +253,42 @@ export default function ExercisesScreen() {
                   {toTitleCase(item.name)}
                 </Text>
 
-                {/* Target Muscle Badge - Primary Info with Frosted Glass */}
-                <BlurView
-                  intensity={isDark ? 20 : 35}
-                  tint={isDark ? 'dark' : 'light'}
-                  style={[styles.targetBadge, {
-                    backgroundColor: colors.accentCyan + '20',
-                    borderColor: colors.accentCyan + '40',
-                    overflow: 'hidden',
-                  }]}
-                >
-                  <Target size={14} color={colors.accentCyan} strokeWidth={2} />
-                  <Text style={[styles.targetText, { color: colors.accentCyan }]}>
-                    {toTitleCase(item.target)}
-                  </Text>
-                </BlurView>
-
-                {/* Metadata Badges - Secondary Info */}
-                <View style={styles.exerciseMeta}>
-                  {/* Body Part */}
+                {/* Primary Muscle Badge */}
+                {item.primaryMuscle && (
                   <BlurView
-                    intensity={isDark ? 15 : 30}
+                    intensity={isDark ? 20 : 35}
                     tint={isDark ? 'dark' : 'light'}
-                    style={[styles.metaBadge, {
-                      backgroundColor: colors.glassCard,
+                    style={[styles.targetBadge, {
+                      backgroundColor: colors.accentCyan + '20',
+                      borderColor: colors.accentCyan + '40',
                       overflow: 'hidden',
                     }]}
                   >
-                    <Zap size={12} color={colors.textSecondary} strokeWidth={2} />
-                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                      {toTitleCase(item.bodyPart)}
+                    <Target size={14} color={colors.accentCyan} strokeWidth={2} />
+                    <Text style={[styles.targetText, { color: colors.accentCyan }]}>
+                      {toTitleCase(item.primaryMuscle)}
                     </Text>
                   </BlurView>
+                )}
+
+                {/* Metadata Badges */}
+                <View style={styles.exerciseMeta}>
+                  {/* Category */}
+                  {item.category && (
+                    <BlurView
+                      intensity={isDark ? 15 : 30}
+                      tint={isDark ? 'dark' : 'light'}
+                      style={[styles.metaBadge, {
+                        backgroundColor: colors.glassCard,
+                        overflow: 'hidden',
+                      }]}
+                    >
+                      <Zap size={12} color={colors.textSecondary} strokeWidth={2} />
+                      <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                        {toTitleCase(item.category)}
+                      </Text>
+                    </BlurView>
+                  )}
 
                   {/* Equipment */}
                   <BlurView
@@ -457,7 +317,7 @@ export default function ExercisesScreen() {
                     }]}
                   >
                     <Text style={[styles.metaText, { color: difficultyColor }]}>
-                      {difficulty}
+                      {toTitleCase(difficulty)}
                     </Text>
                   </BlurView>
 
@@ -479,33 +339,12 @@ export default function ExercisesScreen() {
                   )}
                 </View>
               </View>
-
-              {/* Actions */}
-              <View style={styles.cardActions}>
-                <TouchableOpacity
-                  onPress={() => handleToggleFavorite(item.id)}
-                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel={isFavorite ?
-                    `Remove ${item.name} from favorites` :
-                    `Add ${item.name} to favorites`
-                  }
-                >
-                  <Heart
-                    size={22}
-                    color={isFavorite ? '#ff6b6b' : colors.textSecondary}
-                    fill={isFavorite ? '#ff6b6b' : 'transparent'}
-                    strokeWidth={2}
-                  />
-                </TouchableOpacity>
-              </View>
             </View>
           </GlassCard>
         </TouchableOpacity>
       );
     },
-    [colors, favoriteIds, handleExercisePress, handleToggleFavorite, isDark, getDifficultyFromEquipment]
+    [colors, handleExercisePress, isDark, getDifficultyFromEquipment]
   );
 
   return (
@@ -515,22 +354,9 @@ export default function ExercisesScreen() {
         <View>
           <Text style={[styles.title, { color: colors.text }]}>Exercise Library</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            {totalCount > 0 ? `${totalCount.toLocaleString()} exercises available` : 'Loading...'}
+            {totalCount > 0 ? `${totalCount.toLocaleString()} saved exercises` : 'No exercises yet'}
           </Text>
         </View>
-
-        {/* Load All Button */}
-        {totalCount < 1000 && (
-          <TouchableOpacity
-            onPress={handleLoadAll}
-            style={[styles.loadAllButton, { backgroundColor: colors.text }]}
-          >
-            <Download size={16} color={colors.background} strokeWidth={2} />
-            <Text style={[styles.loadAllText, { color: colors.background }]}>
-              Load All
-            </Text>
-          </TouchableOpacity>
-        )}
       </View>
 
       {/* Search Bar */}
@@ -549,43 +375,6 @@ export default function ExercisesScreen() {
           </TouchableOpacity>
         )}
       </View>
-
-      {/* Favorites Filter */}
-      {favoriteIds.size > 0 && (
-        <View style={styles.favoritesSection}>
-          <TouchableOpacity
-            onPress={() => {
-              lightImpact();
-              setShowFavoritesOnly(!showFavoritesOnly);
-            }}
-            style={[
-              styles.favoritesChip,
-              {
-                backgroundColor: showFavoritesOnly ? '#ff6b6b' : colors.backgroundSecondary,
-                borderColor: showFavoritesOnly ? '#ff6b6b' : 'transparent',
-              },
-            ]}
-          >
-            <Heart
-              size={18}
-              color={showFavoritesOnly ? '#ffffff' : colors.textSecondary}
-              fill={showFavoritesOnly ? '#ffffff' : 'transparent'}
-              strokeWidth={2}
-            />
-            <Text
-              style={[
-                styles.favoritesChipText,
-                {
-                  color: showFavoritesOnly ? '#ffffff' : colors.textSecondary,
-                  fontFamily: showFavoritesOnly ? Fonts.semiBold : Fonts.regular,
-                },
-              ]}
-            >
-              Favorites ({favoriteIds.size})
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
 
       {/* Muscle Group Filters */}
       <View style={styles.filterSection}>
@@ -731,10 +520,10 @@ export default function ExercisesScreen() {
             <View style={styles.emptyState}>
               <Dumbbell size={48} color={colors.textMuted} strokeWidth={1} />
               <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                {totalCount === 0 ? 'No exercises loaded' : 'No exercises found'}
+                {totalCount === 0 ? 'No saved exercises yet' : 'No exercises found'}
               </Text>
               <Text style={[styles.emptySubtext, { color: colors.textMuted }]}>
-                {totalCount === 0 ? 'Tap "Load All" to download exercises' : 'Try adjusting your filters'}
+                {totalCount === 0 ? 'Generate an AI workout plan to save exercises' : 'Try adjusting your filters'}
               </Text>
             </View>
           )
@@ -748,65 +537,18 @@ export default function ExercisesScreen() {
           visible={!!selectedExercise}
           onClose={() => setSelectedExercise(null)}
           isDark={isDark}
-          isFavorite={favoriteIds.has(selectedExercise.id)}
-          onToggleFavorite={() => handleToggleFavorite(selectedExercise.id)}
         />
       )}
-
-      {/* Load All Progress Modal */}
-      <Modal visible={showLoadAllModal} transparent animationType="fade">
-        <BlurView intensity={100} style={styles.modalOverlay}>
-          <View style={[styles.progressModal, { backgroundColor: colors.background }]}>
-            <Text style={[styles.progressTitle, { color: colors.text }]}>
-              Loading Exercises
-            </Text>
-            <Text style={[styles.progressSubtitle, { color: colors.textMuted }]}>
-              {loadProgressText}
-            </Text>
-
-            {/* Progress Bar */}
-            <View style={[styles.progressBarContainer, { backgroundColor: colors.backgroundSecondary }]}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    backgroundColor: colors.text,
-                    width: `${loadProgress}%`,
-                  },
-                ]}
-              />
-            </View>
-
-            <Text style={[styles.progressPercent, { color: colors.textSecondary }]}>
-              {Math.round(loadProgress)}%
-            </Text>
-
-            {!isLoadingAll && loadProgress === 100 && (
-              <TouchableOpacity
-                onPress={() => setShowLoadAllModal(false)}
-                style={[styles.closeProgressButton, { backgroundColor: colors.text }]}
-              >
-                <Check size={20} color={colors.background} strokeWidth={2} />
-                <Text style={[styles.closeProgressText, { color: colors.background }]}>
-                  Done
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </BlurView>
-      </Modal>
     </SafeAreaView>
   );
 }
 
 // Exercise Detail Modal Component
 interface ExerciseDetailModalProps {
-  exercise: ExerciseDBExercise;
+  exercise: SavedExercise;
   visible: boolean;
   onClose: () => void;
   isDark: boolean;
-  isFavorite: boolean;
-  onToggleFavorite: () => void;
 }
 
 function ExerciseDetailModal({
@@ -814,8 +556,6 @@ function ExerciseDetailModal({
   visible,
   onClose,
   isDark,
-  isFavorite,
-  onToggleFavorite,
 }: ExerciseDetailModalProps) {
   const colors = isDark ? DarkColors : LightColors;
   const [gifLoading, setGifLoading] = useState(true);
@@ -827,15 +567,15 @@ function ExerciseDetailModal({
   // Derive difficulty from equipment
   const getDifficulty = (equipment: string) => {
     const eq = equipment.toLowerCase();
-    if (eq.includes('body') || eq === 'assisted' || eq === 'stability ball') return 'Beginner';
-    if (eq.includes('dumbbell') || eq.includes('kettlebell') || eq.includes('band') || eq === 'ez barbell') return 'Intermediate';
-    return 'Advanced';
+    if (eq.includes('body') || eq === 'assisted' || eq === 'stability ball') return 'beginner';
+    if (eq.includes('dumbbell') || eq.includes('kettlebell') || eq.includes('band') || eq === 'ez barbell') return 'intermediate';
+    return 'advanced';
   };
 
-  const difficulty = getDifficulty(exercise.equipment);
+  const difficulty = exercise.difficulty || getDifficulty(exercise.equipment);
   const difficultyColor =
-    difficulty === 'Beginner' ? colors.successStrong :
-    difficulty === 'Intermediate' ? colors.warningOrange :
+    difficulty.toLowerCase() === 'beginner' ? colors.successStrong :
+    difficulty.toLowerCase() === 'intermediate' ? colors.warningOrange :
     colors.errorStrong;
 
   return (
@@ -852,14 +592,6 @@ function ExerciseDetailModal({
               <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                 <X size={24} color={colors.text} strokeWidth={1.5} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={onToggleFavorite} style={styles.modalFavoriteButton}>
-                <Heart
-                  size={24}
-                  color={isFavorite ? '#ff6b6b' : colors.text}
-                  fill={isFavorite ? '#ff6b6b' : 'transparent'}
-                  strokeWidth={1.5}
-                />
-              </TouchableOpacity>
             </View>
 
             <Text style={[styles.modalTitle, { color: colors.text }]}>
@@ -872,11 +604,11 @@ function ExerciseDetailModal({
               borderColor: difficultyColor + '40',
             }]}>
               <Text style={[styles.modalDifficultyText, { color: difficultyColor }]}>
-                {difficulty}
+                {toTitleCase(difficulty)}
               </Text>
             </View>
 
-            {/* Exercise GIF - use higher resolution for detail view */}
+            {/* Exercise GIF */}
             {exercise.gifUrl && (
               <View style={styles.gifContainer}>
                 {gifLoading && (
@@ -885,7 +617,7 @@ function ExerciseDetailModal({
                   </View>
                 )}
                 <Image
-                  source={{ uri: exercise.gifUrl.replace('resolution=180', 'resolution=360') }}
+                  source={{ uri: exercise.gifUrl }}
                   style={styles.exerciseGif}
                   resizeMode="contain"
                   onLoadStart={() => setGifLoading(true)}
@@ -899,27 +631,31 @@ function ExerciseDetailModal({
 
             {/* Stats */}
             <View style={styles.statsRow}>
-              <View style={[styles.statBox, { backgroundColor: colors.backgroundSecondary }]}>
-                <Target size={20} color={colors.text} strokeWidth={1.5} />
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Target</Text>
-                <Text style={[styles.statValue, { color: colors.text }]}>
-                  {toTitleCase(exercise.target)}
-                </Text>
-              </View>
+              {exercise.primaryMuscle && (
+                <View style={[styles.statBox, { backgroundColor: colors.backgroundSecondary }]}>
+                  <Target size={20} color={colors.text} strokeWidth={1.5} />
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Primary</Text>
+                  <Text style={[styles.statValue, { color: colors.text }]}>
+                    {toTitleCase(exercise.primaryMuscle)}
+                  </Text>
+                </View>
+              )}
               <View style={[styles.statBox, { backgroundColor: colors.backgroundSecondary }]}>
                 <Dumbbell size={20} color={colors.text} strokeWidth={1.5} />
                 <Text style={[styles.statLabel, { color: colors.textMuted }]}>Equipment</Text>
                 <Text style={[styles.statValue, { color: colors.text }]}>
-                  {exercise.equipment === 'body weight' ? 'Bodyweight' : toTitleCase(exercise.equipment)}
+                  {exercise.equipment === 'bodyweight' ? 'Bodyweight' : toTitleCase(exercise.equipment)}
                 </Text>
               </View>
-              <View style={[styles.statBox, { backgroundColor: colors.backgroundSecondary }]}>
-                <Zap size={20} color={colors.text} strokeWidth={1.5} />
-                <Text style={[styles.statLabel, { color: colors.textMuted }]}>Muscle</Text>
-                <Text style={[styles.statValue, { color: colors.text }]}>
-                  {toTitleCase(exercise.bodyPart)}
-                </Text>
-              </View>
+              {exercise.category && (
+                <View style={[styles.statBox, { backgroundColor: colors.backgroundSecondary }]}>
+                  <Zap size={20} color={colors.text} strokeWidth={1.5} />
+                  <Text style={[styles.statLabel, { color: colors.textMuted }]}>Category</Text>
+                  <Text style={[styles.statValue, { color: colors.text }]}>
+                    {toTitleCase(exercise.category)}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* Instructions */}
@@ -938,6 +674,28 @@ function ExerciseDetailModal({
                     </Text>
                   </View>
                 ))}
+              </View>
+            )}
+
+            {/* Muscle Groups */}
+            {exercise.muscleGroups && exercise.muscleGroups.length > 0 && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Muscle Groups</Text>
+                <View style={styles.muscleGroupsGrid}>
+                  {exercise.muscleGroups.map((muscle, idx) => (
+                    <View
+                      key={idx}
+                      style={[
+                        styles.muscleGroupChip,
+                        { backgroundColor: colors.backgroundSecondary },
+                      ]}
+                    >
+                      <Text style={[styles.muscleGroupText, { color: colors.text }]}>
+                        {toTitleCase(muscle)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             )}
 
