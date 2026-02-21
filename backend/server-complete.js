@@ -3139,7 +3139,7 @@ const CARD_IMAGE_PROMPTS = {
   // Energy peak selection card images - pastel aesthetic
   energy_morning: 'Soft pastel aesthetic photo of sunrise over misty mountains with golden light breaking through clouds, warm peachy orange and soft amber tones, steaming coffee cup on a wooden deck railing in foreground, fresh morning dew on wildflowers, serene peaceful energy, clean minimal premium feel, no people no text no words no letters, portrait orientation',
   energy_afternoon: 'Soft pastel aesthetic photo of midday sun streaming through palm leaves creating dappled shadows on a clean white surface, warm golden yellow and soft pink tones, fresh tropical fruit slices and iced tea glass, vibrant energetic feel, gentle natural light, clean minimal premium feel, no people no text no words no letters, portrait orientation',
-  energy_evening: 'Soft pastel aesthetic photo of sunset sky with deep purple and lavender clouds fading to warm amber horizon, cozy string lights glowing softly, open book and reading glasses on a blanket, peaceful contemplative energy, dreamy twilight atmosphere, clean minimal premium feel, no people no text no words no letters, portrait orientation',
+  energy_evening: 'Dramatic photo of deep night sky filled with stars and crescent moon, city skyline with glowing windows in distance, modern coffee shop window with warm amber light spilling out, laptop and headphones on table illuminated by screen glow, cool deep blue and indigo tones with warm golden accent lighting, energetic focused nighttime atmosphere, clean modern premium feel, no people no text no words no letters, portrait orientation',
 };
 
 const CARD_IMAGE_KEYS = {
