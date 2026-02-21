@@ -31,7 +31,6 @@ import { useGoalWizard, DietStyle } from '../../contexts/GoalWizardContext';
 import { useSettings } from '../../contexts/SettingsContext';
 import { useFoodPreferencesSafe } from '../../contexts/FoodPreferencesContext';
 import { lightImpact, selectionFeedback } from '../../utils/haptics';
-import { WizardHeader } from './WizardHeader';
 
 // iOS 26 Liquid Glass Section wrapper
 function GlassSection({ children, isDark, style }: { children: React.ReactNode; isDark: boolean; style?: any }) {
@@ -262,19 +261,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
   return (
     <View style={styles.container}>
-      {/* Modern Liquid Glass Sticky Header */}
-      <WizardHeader
-        currentStep={4}
-        totalSteps={6}
-        title="Nutrition Preferences"
-        icon={<Salad size={36} color={isDark ? '#FFFFFF' : '#000000'} />}
-        onBack={onBack}
-        isDark={isDark}
-      />
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Spacer for sticky header */}
-        <View style={{ height: Platform.OS === 'ios' ? 260 : 210 }} />
 
         <View style={styles.subtitle}>
           <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
