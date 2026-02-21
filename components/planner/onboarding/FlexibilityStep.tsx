@@ -61,13 +61,26 @@ export function FlexibilityStep({
   const isDark = settings.themeMode === 'dark';
   const themeColors = isDark ? DarkColors : LightColors;
 
+  // DEBUG: Log render and theme state
+  console.log('[FlexibilityStep] Rendering');
+  console.log('[FlexibilityStep] isDark:', isDark);
+  console.log('[FlexibilityStep] Title color:', isDark ? '#FFFFFF' : '#000000');
+  console.log('[FlexibilityStep] themeColors.text:', themeColors.text);
+  console.log('[FlexibilityStep] DarkColors:', DarkColors);
+  console.log('[FlexibilityStep] LightColors:', LightColors);
+
   return (
     <View style={styles.container}>
       <GlassCard style={styles.card}>
+        {/* DEBUG: Test view with solid background */}
+        <View style={{ backgroundColor: 'red', padding: 10, marginBottom: 10 }}>
+          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>DEBUG: Can you see this red box and white text?</Text>
+        </View>
+
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: isDark ? '#FFFFFF' : '#000000' }]}>How flexible is your schedule?</Text>
-          <Text style={[styles.subtitle, { color: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.7)' }]}>
+          <Text style={[styles.title, { color: isDark ? '#FFFFFF' : '#000000', backgroundColor: 'rgba(255,0,0,0.3)' }]}>How flexible is your schedule?</Text>
+          <Text style={[styles.subtitle, { color: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.7)', backgroundColor: 'rgba(0,255,0,0.3)' }]}>
             This helps us optimize your daily timeline
           </Text>
         </View>
@@ -97,13 +110,13 @@ export function FlexibilityStep({
                       <Text
                         style={[
                           styles.optionLabel,
-                          { color: isDark ? '#FFFFFF' : '#000000' },
+                          { color: isDark ? '#FFFFFF' : '#000000', backgroundColor: 'rgba(255,255,0,0.2)' },
                           isSelected && { color: option.color, fontFamily: Fonts.numericSemiBold },
                         ]}
                       >
-                        {option.label}
+                        {option.label} [DEBUG: {isDark ? 'DARK' : 'LIGHT'}]
                       </Text>
-                      <Text style={[styles.optionDescription, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)' }]}>
+                      <Text style={[styles.optionDescription, { color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)', backgroundColor: 'rgba(0,255,255,0.2)' }]}>
                         {option.description}
                       </Text>
                     </View>
