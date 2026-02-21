@@ -3,8 +3,8 @@
  * Guides users through setting up their daily scheduling preferences
  */
 
-import React, { useState } from 'react';
-import { Modal, View, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Modal, View, StyleSheet, Platform, Animated, Dimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettings } from '../../../contexts/SettingsContext';
@@ -24,6 +24,8 @@ interface Props {
   onClose: () => void;
 }
 
+const { width } = Dimensions.get('window');
+
 export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [preferences, setPreferences] = useState<Partial<PlannerPreferences>>({
@@ -34,6 +36,49 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
   const isDark = settings.themeMode === 'dark';
 
   const totalSteps = 8;
+
+  // Animation values
+  const opacity = useRef(new Animated.Value(1)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const previousStep = useRef(currentStep);
+
+  // Animate step transitions
+  useEffect(() => {
+    const direction = currentStep > previousStep.current ? 1 : -1;
+    previousStep.current = currentStep;
+
+    // Fade out and slide
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateX, {
+        toValue: -direction * width * 0.3,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      // Reset position to opposite side
+      translateX.setValue(direction * width * 0.3);
+
+      // Fade in and slide to center
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(translateX, {
+          toValue: 0,
+          tension: 65,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+  }, [currentStep]);
 
   /**
    * Update a single preference field
@@ -182,7 +227,15 @@ export function DayPlannerOnboardingModal({ visible, onComplete, onClose }: Prop
           ]}
         />
         <SafeAreaView style={styles.safeArea}>
-          {renderStep()}
+          <Animated.View
+            style={{
+              flex: 1,
+              opacity,
+              transform: [{ translateX }],
+            }}
+          >
+            {renderStep()}
+          </Animated.View>
         </SafeAreaView>
       </BlurView>
     </Modal>
