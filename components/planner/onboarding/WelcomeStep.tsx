@@ -73,13 +73,15 @@ export function WelcomeStep({ onNext, onClose, currentStep, totalSteps }: Props)
         </Text>
 
         {/* Action Button */}
-        <TouchableOpacity onPress={onNext} activeOpacity={0.7}>
-          <GlassCard style={styles.actionButton} interactive>
-            <View style={{ transform: [{ rotate: '90deg' }] }}>
-              <Hand size={24} color={themeColors.primary} />
-            </View>
-          </GlassCard>
-        </TouchableOpacity>
+        <View style={styles.actionContainer}>
+          <TouchableOpacity onPress={onNext} activeOpacity={0.7}>
+            <GlassCard style={styles.actionButton} interactive>
+              <View style={{ transform: [{ rotate: '90deg' }] }}>
+                <Hand size={24} color={themeColors.primary} />
+              </View>
+            </GlassCard>
+          </TouchableOpacity>
+        </View>
       </GlassCard>
     </View>
   );
@@ -163,6 +165,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.numericSemiBold,
     textAlign: 'center',
+  },
+  actionContainer: {
+    alignItems: 'center',
   },
   actionButton: {
     width: 56,
