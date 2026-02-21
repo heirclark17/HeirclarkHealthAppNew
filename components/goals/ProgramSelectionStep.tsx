@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Dumbbell, Hand } from 'lucide-react-native';
+import { Dumbbell, Hand, Flame, Heart, Activity, CheckCircle2, Calendar, Repeat, ChevronRight } from 'lucide-react-native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, DarkColors, LightColors } from '../../constants/Theme';
 import { GlassCard } from '../GlassCard';
 import { NumberText } from '../NumberText';
@@ -53,11 +52,11 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
     }
   };
 
-  const getProgramIcon = (id: string): keyof typeof Ionicons.glyphMap => {
-    if (id.includes('fat-loss') || id.includes('hiit')) return 'flame-outline';
-    if (id.includes('muscle') || id.includes('strength')) return 'barbell-outline';
-    if (id.includes('health') || id.includes('wellness')) return 'heart-outline';
-    return 'fitness-outline';
+  const getProgramIcon = (id: string) => {
+    if (id.includes('fat-loss') || id.includes('hiit')) return Flame;
+    if (id.includes('muscle') || id.includes('strength')) return Dumbbell;
+    if (id.includes('health') || id.includes('wellness')) return Heart;
+    return Activity;
   };
 
   const handleShowPreview = (program: TrainingProgram | ProgramTemplate) => {
@@ -158,11 +157,10 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                         { backgroundColor: isSelected ? greenBgMedium : secondaryBg },
                       ]}
                     >
-                      <Ionicons
-                        name={getProgramIcon(program.id)}
-                        size={24}
-                        color={isSelected ? greenColor : colors.text}
-                      />
+                      {React.createElement(getProgramIcon(program.id), {
+                        size: 24,
+                        color: isSelected ? greenColor : colors.text,
+                      })}
                     </View>
                     <View style={styles.headerText}>
                       <Text
@@ -191,7 +189,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                     </View>
                     {isSelected && (
                       <View style={[styles.selectedBadge, { backgroundColor: greenBgMedium }]}>
-                        <Ionicons name="checkmark-circle" size={22} color={greenColor} />
+                        <CheckCircle2 size={22} color={greenColor} />
                       </View>
                     )}
                   </View>
@@ -210,8 +208,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                   {/* Stats Row */}
                   <View style={styles.statsRow}>
                     <View style={styles.statItem}>
-                      <Ionicons
-                        name="calendar-outline"
+                      <Calendar
                         size={15}
                         color={isSelected ? greenColor : colors.textMuted}
                       />
@@ -225,8 +222,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                       </Text>
                     </View>
                     <View style={styles.statItem}>
-                      <Ionicons
-                        name="repeat-outline"
+                      <Repeat
                         size={15}
                         color={isSelected ? greenColor : colors.textMuted}
                       />
@@ -272,7 +268,7 @@ export function ProgramSelectionStep({ onContinue, onBack }: ProgramSelectionSte
                     <Text style={[styles.viewDetailsText, { color: colors.textMuted }]}>
                       Tap to preview full program details
                     </Text>
-                    <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+                    <ChevronRight size={14} color={colors.textMuted} />
                   </View>
                 </GlassCard>
               </TouchableOpacity>
@@ -349,7 +345,7 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     lineHeight: 19,
     textAlign: 'center',
   },
@@ -389,7 +385,7 @@ const styles = StyleSheet.create({
   },
   programName: {
     fontSize: 19,
-    fontFamily: Fonts.semiBold,
+    fontFamily: Fonts.numericSemiBold,
     marginBottom: 4,
   },
   difficultyBadge: {
@@ -400,7 +396,7 @@ const styles = StyleSheet.create({
   },
   difficultyText: {
     fontSize: 10,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.numericSemiBold,
     textTransform: 'capitalize',
     letterSpacing: 0.3,
   },
@@ -413,7 +409,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 13,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
     lineHeight: 19,
     marginBottom: 16,
   },
@@ -429,7 +425,7 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 12,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   tagsRow: {
     flexDirection: 'row',
@@ -444,7 +440,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   viewDetailsRow: {
     flexDirection: 'row',
@@ -456,7 +452,7 @@ const styles = StyleSheet.create({
   },
   viewDetailsText: {
     fontSize: 11,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericSemiBold,
   },
   bottomContainer: {
     position: 'absolute',
