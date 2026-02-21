@@ -40,10 +40,10 @@ const GLASS_SPRING = {
   mass: 0.8,
 };
 
-// iOS 26 Liquid Glass colors - Fixed for authentic translucency
+// iOS 26 Liquid Glass colors - Fixed for authentic translucency and text visibility
 const GLASS_COLORS = {
   light: {
-    background: 'rgba(255, 255, 255, 0.40)',  // Reduced opacity for lighter glass
+    background: 'rgba(255, 255, 255, 0.10)',  // Much lighter for text visibility (was 0.40, too opaque)
     border: 'rgba(0, 0, 0, 0.08)',             // Dark border for light mode contrast
     shadow: 'rgba(0, 0, 0, 0.08)',
   },
