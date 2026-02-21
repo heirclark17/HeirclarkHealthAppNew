@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Target, Briefcase, Heart, GraduationCap, Palette, Sparkles, Hand } from 'lucide-react-native';
+import { Target, Briefcase, Heart, BookOpen, Gamepad, Coffee, Hand } from 'lucide-react-native';
 import { GlassCard } from '../../GlassCard';
 import { useSettings } from '../../../contexts/SettingsContext';
 import { Colors, DarkColors, LightColors, Fonts } from '../../../constants/Theme';
@@ -28,9 +28,9 @@ const PRIORITY_OPTIONS: {
   { id: 'health', label: 'Health & Fitness', icon: Target, color: Colors.activeEnergy },
   { id: 'work', label: 'Work & Career', icon: Briefcase, color: Colors.restingEnergy },
   { id: 'family', label: 'Family & Friends', icon: Heart, color: Colors.protein },
-  { id: 'learning', label: 'Learning', icon: GraduationCap, color: Colors.carbs },
-  { id: 'hobbies', label: 'Hobbies', icon: Palette, color: Colors.fat },
-  { id: 'relaxation', label: 'Relaxation', icon: Sparkles, color: Colors.accentPurple },
+  { id: 'learning', label: 'Learning', icon: BookOpen, color: Colors.carbs },
+  { id: 'hobbies', label: 'Hobbies', icon: Gamepad, color: Colors.fat },
+  { id: 'relaxation', label: 'Relaxation', icon: Coffee, color: Colors.accentPurple },
 ];
 
 export function PrioritiesStep({
