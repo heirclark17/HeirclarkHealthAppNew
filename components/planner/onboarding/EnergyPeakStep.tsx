@@ -30,7 +30,7 @@ const ENERGY_OPTIONS: {
   {
     id: 'morning',
     label: 'Morning Person',
-    description: "I'm most productive and energetic in the morning",
+    description: "I wake up energized and ready to go. My mind is clearest and my body feels strongest in the morning hours. I prefer to tackle my toughest workouts and most demanding tasks early in the day.",
     time: '6 AM - 12 PM',
     icon: Sunrise,
     color: Colors.protein,
@@ -38,7 +38,7 @@ const ENERGY_OPTIONS: {
   {
     id: 'afternoon',
     label: 'Afternoon Peak',
-    description: 'I hit my stride after lunch',
+    description: "I hit my stride after lunch when my energy levels rise. Mid-day is when I feel most alert, focused, and physically capable. I prefer afternoon workouts when my body is warmed up and ready to perform.",
     time: '12 PM - 5 PM',
     icon: Sun,
     color: Colors.carbs,
@@ -46,7 +46,7 @@ const ENERGY_OPTIONS: {
   {
     id: 'evening',
     label: 'Night Owl',
-    description: "I'm most focused and creative in the evening",
+    description: "I'm most focused, creative, and energized in the evening hours. My body feels best later in the day after I've had time to fully wake up and settle into my rhythm. Evening workouts fit my natural energy cycle.",
     time: '5 PM - 10 PM',
     icon: Sunset,
     color: Colors.accentPurple,
