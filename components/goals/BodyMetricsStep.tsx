@@ -70,7 +70,8 @@ function ToggleButton({ options, selected, onSelect, colors }: ToggleButtonProps
           accessibilityState={{ selected: selected === option.value }}
           accessibilityHint={`Select ${option.label}`}
         >
-          <Text
+          <NumberText
+            weight={selected === option.value ? 'medium' : 'light'}
             style={[
               styles.toggleText,
               { color: colors.textMuted },
@@ -78,7 +79,7 @@ function ToggleButton({ options, selected, onSelect, colors }: ToggleButtonProps
             ]}
           >
             {option.label}
-          </Text>
+          </NumberText>
         </TouchableOpacity>
       ))}
     </View>
@@ -981,8 +982,7 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 12,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericLight,
     color: Colors.textMuted,
   },
   inputLabel: {
