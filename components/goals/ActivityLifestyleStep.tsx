@@ -1028,7 +1028,6 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 19,
     textAlign: 'center',
@@ -1064,7 +1063,6 @@ const styles = StyleSheet.create({
   },
   activityTitle: {
     fontSize: 15,
-    fontFamily: Fonts.semiBold,
     color: Colors.text,
     marginBottom: 2,
   },
@@ -1073,13 +1071,11 @@ const styles = StyleSheet.create({
   },
   activityDescription: {
     fontSize: 13,
-    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginBottom: 2,
   },
   activityExample: {
     fontSize: 12,
-    fontFamily: Fonts.light,
     color: Colors.textMuted,
     fontStyle: 'italic',
   },
@@ -1096,7 +1092,6 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 13,
-    fontFamily: Fonts.light,
     marginBottom: 16,
     lineHeight: 18,
   },
@@ -1115,7 +1110,6 @@ const styles = StyleSheet.create({
   },
   workoutChipText: {
     fontSize: 18,
-    fontWeight: '100',
     color: Colors.text,
     textAlign: 'center',
     includeFontPadding: false,
@@ -1135,8 +1129,6 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '100',
     color: Colors.text,
   },
   chipTextSelected: {
@@ -1155,7 +1147,6 @@ const styles = StyleSheet.create({
   summaryText: {
     flex: 1,
     fontSize: 13,
-    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
@@ -1211,7 +1202,6 @@ const styles = StyleSheet.create({
   },
   cardioSectionSubtitle: {
     fontSize: 13,
-    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginBottom: 16,
   },
@@ -1241,7 +1231,6 @@ const styles = StyleSheet.create({
   },
   cardioTitle: {
     fontSize: 16,
-    fontFamily: Fonts.semiBold,
     color: Colors.text,
     marginBottom: 2,
   },
@@ -1250,7 +1239,6 @@ const styles = StyleSheet.create({
   },
   cardioDescription: {
     fontSize: 13,
-    fontFamily: Fonts.light,
     color: Colors.textSecondary,
     marginBottom: 6,
   },
@@ -1265,7 +1253,6 @@ const styles = StyleSheet.create({
   },
   cardioMetaText: {
     fontSize: 11,
-    fontFamily: Fonts.light,
     color: Colors.textMuted,
   },
   // Equipment styles
@@ -1282,15 +1269,12 @@ const styles = StyleSheet.create({
   },
   equipmentChipText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
   },
   equipmentChipTextSelected: {
     color: Colors.background,
   },
   warningText: {
     fontSize: 12,
-    fontFamily: Fonts.light,
     marginTop: 12,
     fontStyle: 'italic',
   },
@@ -1307,8 +1291,6 @@ const styles = StyleSheet.create({
   },
   injuryChipLabel: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
     marginBottom: 2,
   },
   injuryChipLabelSelected: {
@@ -1316,7 +1298,6 @@ const styles = StyleSheet.create({
   },
   injuryChipDescription: {
     fontSize: 11,
-    fontFamily: Fonts.light,
   },
   injuryChipDescriptionSelected: {
     color: 'rgba(255, 255, 255, 0.8)',
@@ -1331,13 +1312,11 @@ const styles = StyleSheet.create({
   injuryNoteText: {
     flex: 1,
     fontSize: 12,
-    fontFamily: Fonts.light,
     lineHeight: 18,
   },
   // Strength baseline styles
   strengthSubheading: {
     fontSize: 13,
-    fontFamily: Fonts.light,
     marginBottom: 12,
     marginTop: 4,
   },
@@ -1349,17 +1328,13 @@ const styles = StyleSheet.create({
   },
   strengthLevelLabel: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
     marginBottom: 2,
   },
   strengthLevelDesc: {
     fontSize: 11,
-    fontFamily: Fonts.light,
   },
   strengthNote: {
     fontSize: 12,
-    fontFamily: Fonts.light,
     marginBottom: 12,
     fontStyle: 'italic',
   },
@@ -1375,8 +1350,6 @@ const styles = StyleSheet.create({
   },
   oneRMLabel: {
     fontSize: 13,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
     marginBottom: 8,
   },
   oneRMInputRow: {
@@ -1391,7 +1364,6 @@ const styles = StyleSheet.create({
   },
   oneRMUnit: {
     fontSize: 13,
-    fontFamily: Fonts.light,
   },
   oneRMNote: {
     flexDirection: 'row',
@@ -1403,7 +1375,6 @@ const styles = StyleSheet.create({
   oneRMNoteText: {
     flex: 1,
     fontSize: 12,
-    fontFamily: Fonts.light,
     lineHeight: 18,
   },
   // Scrollable Picker Styles
