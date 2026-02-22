@@ -620,7 +620,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Weight Section */}
       <GlassSection isDark={isDark}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>WEIGHT</Text>
+          <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>WEIGHT</NumberText>
           <ToggleButton
             options={[
               { value: 'lb', label: 'lb' },
@@ -661,7 +661,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Start Date Section */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>WHEN DO YOU WANT TO START?</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>WHEN DO YOU WANT TO START?</NumberText>
         <TouchableOpacity
           style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
           onPress={() => setShowStartDatePicker(true)}
@@ -705,7 +705,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Target Date Section - Show for all goals except maintain */}
       {state.primaryGoal !== 'maintain' && (
         <GlassSection isDark={isDark}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>WHEN DO YOU WANT TO REACH YOUR GOAL?</Text>
+          <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>WHEN DO YOU WANT TO REACH YOUR GOAL?</NumberText>
           <TouchableOpacity
             style={[styles.datePickerButton, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}
             onPress={() => setShowTargetDatePicker(true)}
@@ -751,7 +751,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       {/* Height Section */}
       <GlassSection isDark={isDark}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>HEIGHT</Text>
+          <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>HEIGHT</NumberText>
           <ToggleButton
             options={[
               { value: 'ft_in', label: 'ft/in' },
@@ -803,7 +803,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Age Section */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { marginBottom: 12, color: colors.text }]}>AGE</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { marginBottom: 12, color: colors.text }]}>AGE</NumberText>
         <VerticalScrollPicker
           min={13}
           max={120}
@@ -817,8 +817,8 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
       {/* Biological Sex Section */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>BIOLOGICAL SEX</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Used for accurate BMR calculation</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>BIOLOGICAL SEX</NumberText>
+        <NumberText weight="light" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Used for accurate BMR calculation</NumberText>
         <View style={styles.sexToggle}>
           <TouchableOpacity
             style={[
@@ -962,7 +962,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericLight,
     marginTop: 4,
     marginBottom: 12,
   },
