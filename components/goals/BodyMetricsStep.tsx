@@ -186,7 +186,7 @@ function HorizontalScalePicker({ min, max, value, onValueChange, unit, colors, i
         <NumberText weight="light" style={[scaleStyles.valueText, { color: colors.primary }]}>
           {value}
         </NumberText>
-        <Text style={[scaleStyles.unitText, { color: colors.textMuted }]}>{unit}</Text>
+        <NumberText weight="regular" style={[scaleStyles.unitText, { color: colors.textMuted }]}>{unit}</NumberText>
       </View>
 
       {/* Scale ruler */}
@@ -257,7 +257,7 @@ const scaleStyles = StyleSheet.create({
   },
   unitText: {
     fontSize: 16,
-    fontFamily: Fonts.regular,
+    fontFamily: Fonts.numericRegular,
   },
   scaleWrapper: {
     height: 72,
@@ -611,9 +611,9 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
         <View style={{ height: Platform.OS === 'ios' ? 200 : 170 }} />
 
         <View style={styles.subtitle}>
-          <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
+          <NumberText weight="light" style={[styles.subtitleText, { color: colors.textSecondary }]}>
             Help us calculate your ideal nutrition targets with accurate measurements.
-          </Text>
+          </NumberText>
         </View>
 
       {/* Weight Section */}
@@ -631,7 +631,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
           />
         </View>
 
-        <Text style={[styles.inputLabel, { color: colors.text }]}>Current Weight</Text>
+        <NumberText weight="light" style={[styles.inputLabel, { color: colors.text }]}>Current Weight</NumberText>
         <HorizontalScalePicker
           min={state.weightUnit === 'lb' ? 80 : 36}
           max={state.weightUnit === 'lb' ? 400 : 181}
@@ -644,7 +644,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
 
         {state.primaryGoal !== 'maintain' && (
           <>
-            <Text style={[styles.inputLabel, { color: colors.text, marginTop: 24 }]}>Target Weight</Text>
+            <NumberText weight="light" style={[styles.inputLabel, { color: colors.text, marginTop: 24 }]}>Target Weight</NumberText>
             <HorizontalScalePicker
               min={state.weightUnit === 'lb' ? 80 : 36}
               max={state.weightUnit === 'lb' ? 400 : 181}
@@ -935,7 +935,7 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: 13,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericLight,
     color: Colors.textSecondary,
     lineHeight: 19,
     textAlign: 'center',
@@ -987,8 +987,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 14,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericLight,
     color: Colors.text,
     marginBottom: 8,
   },
@@ -1004,8 +1003,7 @@ const styles = StyleSheet.create({
   },
   datePickerButtonText: {
     fontSize: 16,
-    fontFamily: Fonts.light,
-    fontWeight: '200',
+    fontFamily: Fonts.numericSemiBold,
   },
   datePickerDoneButton: {
     marginTop: 16,
