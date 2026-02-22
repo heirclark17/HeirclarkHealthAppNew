@@ -148,7 +148,7 @@ const initialState: WizardState = {
   heightIn: 10,
   heightCm: 178,
   heightUnit: 'ft_in',
-  age: 30,
+  age: 35,
   sex: 'male',
   startDate: new Date().toISOString().split('T')[0],
   targetDate: null,

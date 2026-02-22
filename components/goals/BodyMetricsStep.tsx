@@ -85,134 +85,6 @@ function ToggleButton({ options, selected, onSelect, colors }: ToggleButtonProps
   );
 }
 
-// ============================================
-// SIMPLE AGE PICKER WITH BUTTONS (iOS-friendly)
-// ============================================
-
-interface SimplePickerProps {
-  data: { value: number; label: string }[];
-  selectedValue: number;
-  onValueChange: (value: number) => void;
-  colors: typeof DarkColors;
-  isDark: boolean;
-}
-
-function SimplePicker({ data, selectedValue, onValueChange, colors, isDark }: SimplePickerProps) {
-  const currentIndex = useMemo(() => {
-    const idx = data.findIndex(item => item.value === selectedValue);
-    return idx >= 0 ? idx : 0;
-  }, [data, selectedValue]);
-
-  const handleIncrement = useCallback(async () => {
-    if (currentIndex < data.length - 1) {
-      await lightImpact();
-      onValueChange(data[currentIndex + 1].value);
-    }
-  }, [data, currentIndex, onValueChange]);
-
-  const handleDecrement = useCallback(async () => {
-    if (currentIndex > 0) {
-      await lightImpact();
-      onValueChange(data[currentIndex - 1].value);
-    }
-  }, [data, currentIndex, onValueChange]);
-
-  // Show 5 items centered around current value
-  const visibleItems = useMemo(() => {
-    const items = [];
-    for (let i = -2; i <= 2; i++) {
-      const idx = currentIndex + i;
-      if (idx >= 0 && idx < data.length) {
-        items.push({ ...data[idx], offset: i });
-      } else {
-        items.push({ value: -1, label: '', offset: i });
-      }
-    }
-    return items;
-  }, [data, currentIndex]);
-
-  const secondaryBg = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)';
-  const highlightBg = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)';
-
-  return (
-    <View style={[styles.simplePickerContainer, { backgroundColor: secondaryBg }]}>
-      {/* Up button */}
-      <TouchableOpacity
-        style={[styles.simplePickerButton, currentIndex <= 0 && styles.simplePickerButtonDisabled]}
-        onPress={handleDecrement}
-        disabled={currentIndex <= 0}
-        activeOpacity={0.6}
-        accessibilityLabel="Decrease value"
-        accessibilityRole="button"
-        accessibilityState={{ disabled: currentIndex <= 0 }}
-        accessibilityHint="Decreases the selected value by one"
-      >
-        <Ionicons name="chevron-up" size={28} color={currentIndex <= 0 ? colors.border : colors.textMuted} />
-      </TouchableOpacity>
-
-      {/* Visible items */}
-      <View style={styles.simplePickerItems}>
-        {visibleItems.map((item, idx) => {
-          const isSelected = item.offset === 0;
-          const distance = Math.abs(item.offset);
-          const opacity = distance === 0 ? 1 : distance === 1 ? 0.5 : 0.25;
-          const scale = distance === 0 ? 1 : distance === 1 ? 0.9 : 0.8;
-
-          if (item.value === -1) {
-            return <View key={`empty-${idx}`} style={styles.simplePickerItemEmpty} />;
-          }
-
-          return (
-            <TouchableOpacity
-              key={item.value}
-              style={[
-                styles.simplePickerItem,
-                isSelected && [styles.simplePickerItemSelected, { backgroundColor: highlightBg }],
-                { opacity, transform: [{ scale }] },
-              ]}
-              onPress={async () => {
-                if (!isSelected) {
-                  await lightImpact();
-                  onValueChange(item.value);
-                }
-              }}
-              activeOpacity={0.7}
-              accessibilityLabel={item.label}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isSelected }}
-              accessibilityHint="Selects this value"
-            >
-              <NumberText
-                weight={isSelected ? "semiBold" : "regular"}
-                style={[
-                  styles.simplePickerText,
-                  { color: isSelected ? colors.primary : colors.text },
-                  isSelected && styles.simplePickerTextSelected,
-                ]}
-              >
-                {item.label}
-              </NumberText>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* Down button */}
-      <TouchableOpacity
-        style={[styles.simplePickerButton, currentIndex >= data.length - 1 && styles.simplePickerButtonDisabled]}
-        onPress={handleIncrement}
-        disabled={currentIndex >= data.length - 1}
-        activeOpacity={0.6}
-        accessibilityLabel="Increase value"
-        accessibilityRole="button"
-        accessibilityState={{ disabled: currentIndex >= data.length - 1 }}
-        accessibilityHint="Increases the selected value by one"
-      >
-        <Ionicons name="chevron-down" size={28} color={currentIndex >= data.length - 1 ? colors.border : colors.textMuted} />
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 // ============================================
 // HORIZONTAL SCALE PICKER (Ruler-style swiper)
@@ -421,67 +293,170 @@ const scaleStyles = StyleSheet.create({
 });
 
 // ============================================
-// COMPACT STEPPER FOR HEIGHT
+// VERTICAL SCROLL PICKER (Drum/Wheel style)
 // ============================================
-interface NumberStepperProps {
-  value: number;
+
+const ITEM_HEIGHT = 44;
+const VISIBLE_ITEMS = 5;
+const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
+
+interface VerticalScrollPickerProps {
   min: number;
   max: number;
-  step?: number;
-  onChange: (value: number) => void;
+  value: number;
+  onValueChange: (value: number) => void;
   unit?: string;
   colors: typeof DarkColors;
   isDark: boolean;
 }
 
-function NumberStepper({ value, min, max, step = 1, onChange, unit, colors, isDark }: NumberStepperProps) {
-  const handleDecrement = async () => {
-    if (value > min) {
-      await lightImpact();
-      onChange(value - step);
-    }
-  };
+function VerticalScrollPicker({ min, max, value, onValueChange, unit, colors, isDark }: VerticalScrollPickerProps) {
+  const scrollRef = useRef<ScrollView>(null);
+  const lastValueRef = useRef(value);
+  const isUserScrolling = useRef(false);
+  const totalItems = max - min + 1;
+  const topPadding = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2);
 
-  const handleIncrement = async () => {
-    if (value < max) {
-      await lightImpact();
-      onChange(value + step);
+  // Scroll to value on mount and when value changes externally
+  useEffect(() => {
+    if (!isUserScrolling.current) {
+      const offset = (value - min) * ITEM_HEIGHT;
+      scrollRef.current?.scrollTo({ y: offset, animated: false });
     }
-  };
+  }, [value, min]);
 
-  const stepperBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  // Re-sync when range changes
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const offset = (value - min) * ITEM_HEIGHT;
+      scrollRef.current?.scrollTo({ y: offset, animated: false });
+    }, 50);
+    return () => clearTimeout(timeout);
+  }, [min, max]);
+
+  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    isUserScrolling.current = true;
+    const scrollY = e.nativeEvent.contentOffset.y;
+    const rawValue = min + Math.round(scrollY / ITEM_HEIGHT);
+    const clampedValue = Math.max(min, Math.min(max, rawValue));
+
+    if (clampedValue !== lastValueRef.current) {
+      lastValueRef.current = clampedValue;
+      onValueChange(clampedValue);
+      selectionFeedback();
+    }
+  }, [min, max, onValueChange]);
+
+  const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const scrollY = e.nativeEvent.contentOffset.y;
+    const rawValue = min + Math.round(scrollY / ITEM_HEIGHT);
+    const snappedValue = Math.max(min, Math.min(max, rawValue));
+    const snappedOffset = (snappedValue - min) * ITEM_HEIGHT;
+
+    scrollRef.current?.scrollTo({ y: snappedOffset, animated: true });
+    onValueChange(snappedValue);
+    isUserScrolling.current = false;
+  }, [min, max, onValueChange]);
+
+  const highlightBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+
+  // Render items
+  const items = useMemo(() => {
+    const arr: number[] = [];
+    for (let i = 0; i < totalItems; i++) {
+      arr.push(min + i);
+    }
+    return arr;
+  }, [min, max, totalItems]);
 
   return (
-    <View style={[styles.stepperContainer, { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)' }]}>
-      <TouchableOpacity
-        style={[styles.stepperButton, { backgroundColor: stepperBg }, value <= min && styles.stepperButtonDisabled]}
-        onPress={handleDecrement}
-        disabled={value <= min}
-        accessibilityLabel={`Decrease ${unit || 'value'}`}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: value <= min }}
-        accessibilityHint={`Decreases ${unit || 'value'} by ${step}`}
+    <View style={vPickerStyles.container}>
+      {/* Selection highlight band */}
+      <View style={[vPickerStyles.highlight, { backgroundColor: highlightBg, top: topPadding }]} pointerEvents="none" />
+
+      <ScrollView
+        ref={scrollRef}
+        showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        onMomentumScrollEnd={handleScrollEnd}
+        onScrollEndDrag={handleScrollEnd}
+        scrollEventThrottle={16}
+        decelerationRate="fast"
+        snapToInterval={ITEM_HEIGHT}
+        contentContainerStyle={{
+          paddingVertical: topPadding,
+        }}
+        bounces={false}
       >
-        <Ionicons name="remove" size={20} color={value <= min ? colors.textMuted : colors.text} />
-      </TouchableOpacity>
-      <View style={styles.stepperValueContainer}>
-        <NumberText weight="light" style={[styles.stepperValue, { color: colors.text }]}>{value}</NumberText>
-        {unit && <Text style={[styles.stepperUnit, { color: colors.textMuted }]}>{unit}</Text>}
-      </View>
-      <TouchableOpacity
-        style={[styles.stepperButton, { backgroundColor: stepperBg }, value >= max && styles.stepperButtonDisabled]}
-        onPress={handleIncrement}
-        disabled={value >= max}
-        accessibilityLabel={`Increase ${unit || 'value'}`}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: value >= max }}
-        accessibilityHint={`Increases ${unit || 'value'} by ${step}`}
-      >
-        <Ionicons name="add" size={20} color={value >= max ? colors.textMuted : colors.text} />
-      </TouchableOpacity>
+        {items.map((val) => {
+          const isSelected = val === value;
+          const distance = Math.abs(val - value);
+          const opacity = distance === 0 ? 1 : distance === 1 ? 0.5 : distance === 2 ? 0.25 : 0.12;
+
+          return (
+            <View key={val} style={[vPickerStyles.item, { opacity }]}>
+              <NumberText
+                weight={isSelected ? 'semiBold' : 'regular'}
+                style={[
+                  vPickerStyles.itemText,
+                  { color: isSelected ? colors.primary : colors.text },
+                  isSelected && vPickerStyles.itemTextSelected,
+                ]}
+              >
+                {val}
+              </NumberText>
+              {unit && (
+                <Text style={[
+                  vPickerStyles.itemUnit,
+                  { color: isSelected ? colors.primary : colors.textMuted },
+                  isSelected && { opacity: 0.8 },
+                ]}>
+                  {unit}
+                </Text>
+              )}
+            </View>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 }
+
+const vPickerStyles = StyleSheet.create({
+  container: {
+    height: PICKER_HEIGHT,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  highlight: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: ITEM_HEIGHT,
+    borderRadius: 12,
+    zIndex: 0,
+  },
+  item: {
+    height: ITEM_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  itemText: {
+    fontSize: 20,
+    fontFamily: Fonts.numericRegular,
+    textAlign: 'center',
+  },
+  itemTextSelected: {
+    fontSize: 26,
+    fontFamily: Fonts.numericSemiBold,
+  },
+  itemUnit: {
+    fontSize: 14,
+    fontFamily: Fonts.light,
+  },
+});
 
 // ============================================
 // MAIN COMPONENT
@@ -545,13 +520,6 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
       setLocalTargetDate(new Date(state.targetDate));
     }
   }, [state.targetDate]);
-
-  const ageData = useMemo(() => {
-    return Array.from({ length: 108 }, (_, i) => ({
-      value: 13 + i,
-      label: `${13 + i} years`,
-    }));
-  }, []);
 
   // Translucent primary color for frosted glass button
   const primaryGlassBg = isDark ? 'rgba(150, 206, 180, 0.25)' : 'rgba(150, 206, 180, 0.20)';
@@ -793,22 +761,22 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
         {state.heightUnit === 'ft_in' ? (
           <View style={styles.heightRow}>
             <View style={styles.heightInput}>
-              <NumberStepper
-                value={state.heightFt}
+              <VerticalScrollPicker
                 min={3}
                 max={8}
-                onChange={setHeightFt}
+                value={state.heightFt}
+                onValueChange={setHeightFt}
                 unit="ft"
                 colors={colors}
                 isDark={isDark}
               />
             </View>
             <View style={styles.heightInput}>
-              <NumberStepper
-                value={state.heightIn}
+              <VerticalScrollPicker
                 min={0}
                 max={11}
-                onChange={setHeightIn}
+                value={state.heightIn}
+                onValueChange={setHeightIn}
                 unit="in"
                 colors={colors}
                 isDark={isDark}
@@ -816,11 +784,11 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             </View>
           </View>
         ) : (
-          <NumberStepper
-            value={state.heightCm}
+          <VerticalScrollPicker
             min={91}
             max={244}
-            onChange={setHeightCm}
+            value={state.heightCm}
+            onValueChange={setHeightCm}
             unit="cm"
             colors={colors}
             isDark={isDark}
@@ -828,13 +796,15 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
         )}
       </GlassSection>
 
-      {/* Age Section - Using simple picker */}
+      {/* Age Section */}
       <GlassSection isDark={isDark}>
         <Text style={[styles.sectionTitle, { marginBottom: 12, color: colors.text }]}>AGE</Text>
-        <SimplePicker
-          data={ageData}
-          selectedValue={state.age}
+        <VerticalScrollPicker
+          min={13}
+          max={120}
+          value={state.age}
           onValueChange={setAge}
+          unit="years"
           colors={colors}
           isDark={isDark}
         />
@@ -1018,48 +988,6 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 8,
   },
-  // Simple Picker Styles (Age)
-  simplePickerContainer: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    paddingVertical: 8,
-  },
-  simplePickerButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-  },
-  simplePickerButtonDisabled: {
-    opacity: 0.3,
-  },
-  simplePickerItems: {
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  simplePickerItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    marginVertical: 2,
-  },
-  simplePickerItemSelected: {
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-  },
-  simplePickerItemEmpty: {
-    height: 40,
-  },
-  simplePickerText: {
-    fontSize: 18,
-    fontFamily: Fonts.numericRegular,
-    fontWeight: '400',
-    textAlign: 'center',
-  },
-  simplePickerTextSelected: {
-    fontSize: 24,
-    fontFamily: Fonts.numericSemiBold,
-    fontWeight: '600',
-  },
   // Date Picker Styles
   datePickerButton: {
     flexDirection: 'row',
@@ -1096,41 +1024,6 @@ const styles = StyleSheet.create({
   },
   heightInput: {
     flex: 1,
-  },
-  stepperContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  stepperButton: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-  },
-  stepperButtonDisabled: {
-    opacity: 0.3,
-  },
-  stepperValueContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  stepperValue: {
-    fontSize: 24,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '100',
-    color: Colors.text,
-  },
-  stepperUnit: {
-    fontSize: 14,
-    fontFamily: Fonts.light,
-    color: Colors.textMuted,
   },
   // Sex Toggle Styles
   sexToggle: {
