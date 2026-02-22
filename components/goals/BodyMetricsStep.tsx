@@ -410,13 +410,13 @@ function VerticalScrollPicker({ min, max, value, onValueChange, unit, colors, is
                 {val}
               </NumberText>
               {unit && (
-                <Text style={[
+                <NumberText weight={isSelected ? 'medium' : 'regular'} style={[
                   vPickerStyles.itemUnit,
                   { color: isSelected ? colors.primary : colors.textMuted },
                   isSelected && { opacity: 0.8 },
                 ]}>
                   {unit}
-                </Text>
+                </NumberText>
               )}
             </View>
           );
@@ -458,7 +458,7 @@ const vPickerStyles = StyleSheet.create({
   },
   itemUnit: {
     fontSize: 14,
-    fontFamily: Fonts.light,
+    fontFamily: Fonts.numericRegular,
   },
 });
 
