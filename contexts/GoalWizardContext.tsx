@@ -141,8 +141,8 @@ const STORAGE_KEY = 'hc_goal_wizard_progress';
 
 const initialState: WizardState = {
   primaryGoal: null,
-  currentWeight: 180,
-  targetWeight: 170,
+  currentWeight: 200,
+  targetWeight: 200,
   weightUnit: 'lb',
   heightFt: 5,
   heightIn: 10,

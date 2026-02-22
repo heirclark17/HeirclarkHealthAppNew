@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Ruler, Hand } from 'lucide-react-native';
 import {
   View,
@@ -8,6 +8,8 @@ import {
   ScrollView,
   Platform,
   Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -213,10 +215,12 @@ function SimplePicker({ data, selectedValue, onValueChange, colors, isDark }: Si
 }
 
 // ============================================
-// SIMPLE WEIGHT INPUT WITH BUTTONS (iOS-friendly)
+// HORIZONTAL SCALE PICKER (Ruler-style swiper)
 // ============================================
 
-interface SimpleWeightInputProps {
+const TICK_WIDTH = 10; // px per 1 unit
+
+interface HorizontalScalePickerProps {
   min: number;
   max: number;
   value: number;
@@ -226,151 +230,195 @@ interface SimpleWeightInputProps {
   isDark: boolean;
 }
 
-function SimpleWeightInput({ min, max, value, onValueChange, unit, colors, isDark }: SimpleWeightInputProps) {
-  const buttonBg = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
-  const trackBg = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)';
+function HorizontalScalePicker({ min, max, value, onValueChange, unit, colors, isDark }: HorizontalScalePickerProps) {
+  const scrollRef = useRef<ScrollView>(null);
+  const lastValueRef = useRef(value);
+  const isUserScrolling = useRef(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const halfWidth = containerWidth / 2;
+  const totalTicks = max - min;
 
-  // Increment/decrement handlers
-  const handleIncrement = useCallback(async (amount: number = 1) => {
-    if (value + amount <= max) {
-      await lightImpact();
-      onValueChange(value + amount);
+  // Generate tick marks
+  const ticks = useMemo(() => {
+    const items: { val: number; type: 'small' | 'medium' | 'large' }[] = [];
+    for (let i = 0; i <= totalTicks; i++) {
+      const v = min + i;
+      if (v % 10 === 0) items.push({ val: v, type: 'large' });
+      else if (v % 5 === 0) items.push({ val: v, type: 'medium' });
+      else items.push({ val: v, type: 'small' });
     }
-  }, [value, max, onValueChange]);
+    return items;
+  }, [min, max, totalTicks]);
 
-  const handleDecrement = useCallback(async (amount: number = 1) => {
-    if (value - amount >= min) {
-      await lightImpact();
-      onValueChange(value - amount);
+  // Scroll to value on mount and when value changes externally
+  useEffect(() => {
+    if (!isUserScrolling.current && containerWidth > 0) {
+      const offset = (value - min) * TICK_WIDTH;
+      scrollRef.current?.scrollTo({ x: offset, animated: false });
     }
-  }, [value, min, onValueChange]);
+  }, [value, min, containerWidth]);
 
-  // Quick jump to common values
-  const quickValues = useMemo(() => {
-    const range = max - min;
-    const step = Math.round(range / 4);
-    return [
-      Math.round(min + step),
-      Math.round(min + step * 2),
-      Math.round(min + step * 3),
-    ];
+  // Re-sync scroll position when unit changes (min/max change)
+  useEffect(() => {
+    if (containerWidth <= 0) return;
+    const timeout = setTimeout(() => {
+      const offset = (value - min) * TICK_WIDTH;
+      scrollRef.current?.scrollTo({ x: offset, animated: false });
+    }, 50);
+    return () => clearTimeout(timeout);
   }, [min, max]);
 
+  const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    isUserScrolling.current = true;
+    const scrollX = e.nativeEvent.contentOffset.x;
+    const rawValue = min + Math.round(scrollX / TICK_WIDTH);
+    const clampedValue = Math.max(min, Math.min(max, rawValue));
+
+    if (clampedValue !== lastValueRef.current) {
+      lastValueRef.current = clampedValue;
+      onValueChange(clampedValue);
+      selectionFeedback();
+    }
+  }, [min, max, onValueChange]);
+
+  const handleMomentumEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const scrollX = e.nativeEvent.contentOffset.x;
+    const rawValue = min + Math.round(scrollX / TICK_WIDTH);
+    const snappedValue = Math.max(min, Math.min(max, rawValue));
+    const snappedOffset = (snappedValue - min) * TICK_WIDTH;
+
+    scrollRef.current?.scrollTo({ x: snappedOffset, animated: true });
+    onValueChange(snappedValue);
+    isUserScrolling.current = false;
+  }, [min, max, onValueChange]);
+
+  const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const scrollX = e.nativeEvent.contentOffset.x;
+    const rawValue = min + Math.round(scrollX / TICK_WIDTH);
+    const snappedValue = Math.max(min, Math.min(max, rawValue));
+    const snappedOffset = (snappedValue - min) * TICK_WIDTH;
+
+    scrollRef.current?.scrollTo({ x: snappedOffset, animated: true });
+    onValueChange(snappedValue);
+    isUserScrolling.current = false;
+  }, [min, max, onValueChange]);
+
+  const tickColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
+  const tickMedColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.20)';
+  const tickLargeColor = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)';
+
   return (
-    <View style={styles.simpleWeightContainer}>
-      {/* Main value display with large +/- buttons */}
-      <View style={styles.simpleWeightValueRow}>
-        {/* -10 button */}
-        <TouchableOpacity
-          style={[styles.simpleWeightSmallButton, { backgroundColor: buttonBg }]}
-          onPress={() => handleDecrement(10)}
-          disabled={value - 10 < min}
-          activeOpacity={0.6}
-          accessibilityLabel="Decrease weight by 10"
-          accessibilityRole="button"
-          accessibilityState={{ disabled: value - 10 < min }}
-          accessibilityHint="Decreases weight value by 10 units"
-        >
-          <NumberText weight="medium" style={[styles.simpleWeightSmallButtonText, { color: colors.textMuted }]}>-10</NumberText>
-        </TouchableOpacity>
-
-        {/* -1 button */}
-        <TouchableOpacity
-          style={[styles.simpleWeightButton, { backgroundColor: buttonBg }]}
-          onPress={() => handleDecrement(1)}
-          disabled={value <= min}
-          activeOpacity={0.6}
-          accessibilityLabel="Decrease weight by 1"
-          accessibilityRole="button"
-          accessibilityState={{ disabled: value <= min }}
-          accessibilityHint="Decreases weight value by 1 unit"
-        >
-          <Ionicons name="remove" size={28} color={value <= min ? colors.border : colors.text} />
-        </TouchableOpacity>
-
-        {/* Value display */}
-        <View style={styles.simpleWeightValueDisplay}>
-          <NumberText weight="light" style={[styles.simpleWeightValue, { color: colors.primary }]}>{value}</NumberText>
-          <Text style={[styles.simpleWeightUnit, { color: colors.textMuted }]}>{unit}</Text>
-        </View>
-
-        {/* +1 button */}
-        <TouchableOpacity
-          style={[styles.simpleWeightButton, { backgroundColor: buttonBg }]}
-          onPress={() => handleIncrement(1)}
-          disabled={value >= max}
-          activeOpacity={0.6}
-          accessibilityLabel="Increase weight by 1"
-          accessibilityRole="button"
-          accessibilityState={{ disabled: value >= max }}
-          accessibilityHint="Increases weight value by 1 unit"
-        >
-          <Ionicons name="add" size={28} color={value >= max ? colors.border : colors.text} />
-        </TouchableOpacity>
-
-        {/* +10 button */}
-        <TouchableOpacity
-          style={[styles.simpleWeightSmallButton, { backgroundColor: buttonBg }]}
-          onPress={() => handleIncrement(10)}
-          disabled={value + 10 > max}
-          activeOpacity={0.6}
-          accessibilityLabel="Increase weight by 10"
-          accessibilityRole="button"
-          accessibilityState={{ disabled: value + 10 > max }}
-          accessibilityHint="Increases weight value by 10 units"
-        >
-          <NumberText weight="medium" style={[styles.simpleWeightSmallButtonText, { color: colors.textMuted }]}>+10</NumberText>
-        </TouchableOpacity>
+    <View style={scaleStyles.container}>
+      {/* Large value display */}
+      <View style={scaleStyles.valueContainer}>
+        <NumberText weight="light" style={[scaleStyles.valueText, { color: colors.primary }]}>
+          {value}
+        </NumberText>
+        <Text style={[scaleStyles.unitText, { color: colors.textMuted }]}>{unit}</Text>
       </View>
 
-      {/* Quick select buttons */}
-      <View style={styles.simpleWeightQuickRow}>
-        {quickValues.map((qv) => (
-          <TouchableOpacity
-            key={qv}
-            style={[
-              styles.simpleWeightQuickButton,
-              { backgroundColor: trackBg },
-              value === qv && { backgroundColor: colors.primary + '30', borderColor: colors.primary },
-            ]}
-            onPress={async () => {
-              await lightImpact();
-              onValueChange(qv);
+      {/* Scale ruler */}
+      <View
+        style={scaleStyles.scaleWrapper}
+        onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+      >
+        {/* Center indicator line */}
+        {containerWidth > 0 && (
+          <View style={[scaleStyles.centerIndicator, { backgroundColor: colors.primary, left: halfWidth - 1 }]} />
+        )}
+
+        {containerWidth > 0 && (
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            onMomentumScrollEnd={handleMomentumEnd}
+            onScrollEndDrag={handleScrollEnd}
+            scrollEventThrottle={16}
+            decelerationRate="fast"
+            contentContainerStyle={{
+              paddingHorizontal: halfWidth,
             }}
-            activeOpacity={0.7}
-            accessibilityLabel={`Set weight to ${qv} ${unit}`}
-            accessibilityRole="button"
-            accessibilityState={{ selected: value === qv }}
-            accessibilityHint="Quick select preset weight value"
+            bounces={false}
           >
-            <NumberText weight="medium" style={[
-              styles.simpleWeightQuickText,
-              { color: colors.textMuted },
-              value === qv && { color: colors.primary },
-            ]}>
-              {qv}
-            </NumberText>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Visual progress bar */}
-      <View style={[styles.simpleWeightTrack, { backgroundColor: trackBg }]}>
-        <View
-          style={[
-            styles.simpleWeightFill,
-            { backgroundColor: colors.primary, width: `${((value - min) / (max - min)) * 100}%` },
-          ]}
-        />
-        <View style={[styles.simpleWeightThumb, { left: `${((value - min) / (max - min)) * 100}%`, backgroundColor: colors.primary }]} />
-      </View>
-      <View style={styles.simpleWeightRangeLabels}>
-        <NumberText weight="regular" style={[styles.simpleWeightRangeLabel, { color: colors.textMuted }]}>{min}</NumberText>
-        <NumberText weight="regular" style={[styles.simpleWeightRangeLabel, { color: colors.textMuted }]}>{max}</NumberText>
+            <View style={scaleStyles.tickRow}>
+              {ticks.map((tick, i) => (
+                <View key={i} style={scaleStyles.tickContainer}>
+                  <View
+                    style={[
+                      scaleStyles.tick,
+                      tick.type === 'small' && { height: 16, backgroundColor: tickColor },
+                      tick.type === 'medium' && { height: 26, backgroundColor: tickMedColor },
+                      tick.type === 'large' && { height: 36, backgroundColor: tickLargeColor },
+                    ]}
+                  />
+                  {tick.type === 'large' && (
+                    <NumberText weight="regular" style={[scaleStyles.tickLabel, { color: colors.textMuted }]}>
+                      {tick.val}
+                    </NumberText>
+                  )}
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        )}
       </View>
     </View>
   );
 }
+
+const scaleStyles = StyleSheet.create({
+  container: {
+    marginVertical: 8,
+  },
+  valueContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+    gap: 4,
+    marginBottom: 12,
+  },
+  valueText: {
+    fontSize: 44,
+    fontFamily: Fonts.numericLight,
+  },
+  unitText: {
+    fontSize: 16,
+    fontFamily: Fonts.regular,
+  },
+  scaleWrapper: {
+    height: 72,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  centerIndicator: {
+    position: 'absolute',
+    top: 0,
+    width: 2,
+    height: 44,
+    borderRadius: 1,
+    zIndex: 10,
+  },
+  tickRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    height: 72,
+  },
+  tickContainer: {
+    width: TICK_WIDTH,
+    alignItems: 'center',
+  },
+  tick: {
+    width: 1.5,
+    borderRadius: 1,
+  },
+  tickLabel: {
+    fontSize: 9,
+    marginTop: 4,
+    fontFamily: Fonts.numericRegular,
+  },
+});
 
 // ============================================
 // COMPACT STEPPER FOR HEIGHT
@@ -498,17 +546,6 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
     }
   }, [state.targetDate]);
 
-  // Generate picker data
-  const weightData = useMemo(() => {
-    const min = state.weightUnit === 'lb' ? 80 : 36;
-    const max = state.weightUnit === 'lb' ? 400 : 181;
-    const unit = state.weightUnit === 'lb' ? 'lbs' : 'kg';
-    return Array.from({ length: max - min + 1 }, (_, i) => ({
-      value: min + i,
-      label: `${min + i} ${unit}`,
-    }));
-  }, [state.weightUnit]);
-
   const ageData = useMemo(() => {
     return Array.from({ length: 108 }, (_, i) => ({
       value: 13 + i,
@@ -623,7 +660,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
         </View>
 
         <Text style={[styles.inputLabel, { color: colors.text }]}>Current Weight</Text>
-        <SimpleWeightInput
+        <HorizontalScalePicker
           min={state.weightUnit === 'lb' ? 80 : 36}
           max={state.weightUnit === 'lb' ? 400 : 181}
           value={Math.round(state.currentWeight)}
@@ -636,7 +673,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
         {state.primaryGoal !== 'maintain' && (
           <>
             <Text style={[styles.inputLabel, { color: colors.text, marginTop: 24 }]}>Target Weight</Text>
-            <SimpleWeightInput
+            <HorizontalScalePicker
               min={state.weightUnit === 'lb' ? 80 : 36}
               max={state.weightUnit === 'lb' ? 400 : 181}
               value={Math.round(state.targetWeight)}
@@ -1022,97 +1059,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: Fonts.numericSemiBold,
     fontWeight: '600',
-  },
-  // Simple Weight Input Styles
-  simpleWeightContainer: {
-    marginVertical: 8,
-  },
-  simpleWeightValueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  simpleWeightButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  simpleWeightSmallButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  simpleWeightSmallButtonText: {
-    fontSize: 12,
-    fontFamily: Fonts.numericMedium,
-    fontWeight: '500',
-  },
-  simpleWeightValueDisplay: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'center',
-    gap: 4,
-    minWidth: 100,
-  },
-  simpleWeightValue: {
-    fontSize: 44,
-    fontFamily: Fonts.numericLight,
-    fontWeight: '200',
-  },
-  simpleWeightUnit: {
-    fontSize: 16,
-    fontFamily: Fonts.regular,
-    fontWeight: '400',
-  },
-  simpleWeightQuickRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-  simpleWeightQuickButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  simpleWeightQuickText: {
-    fontSize: 14,
-    fontFamily: Fonts.numericMedium,
-    fontWeight: '500',
-  },
-  simpleWeightTrack: {
-    height: 6,
-    borderRadius: 4,
-    overflow: 'visible',
-    position: 'relative',
-  },
-  simpleWeightFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  simpleWeightThumb: {
-    position: 'absolute',
-    top: -5,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginLeft: -8,
-  },
-  simpleWeightRangeLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  simpleWeightRangeLabel: {
-    fontSize: 11,
   },
   // Date Picker Styles
   datePickerButton: {
