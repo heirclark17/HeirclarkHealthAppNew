@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput, Platform } from 'react-native';
 import {
   Apple,
   Egg,
@@ -133,10 +133,10 @@ function DietCard({ option, isSelected, onSelect, colors, isDark }: DietCardProp
             />
           </View>
           <View style={styles.dietContent}>
-            <Text style={[styles.dietTitle, { color: colors.text }, isSelected && styles.dietTitleSelected]}>
+            <NumberText weight="semiBold" style={[styles.dietTitle, { color: colors.text }, isSelected && styles.dietTitleSelected]}>
               {option.title}
-            </Text>
-            <Text style={[styles.dietDescription, { color: colors.textMuted }]}>{option.description}</Text>
+            </NumberText>
+            <NumberText weight="semiBold" style={[styles.dietDescription, { color: colors.textMuted }]}>{option.description}</NumberText>
           </View>
           {isSelected && (
             <CheckCircle2 size={20} color={Colors.successMuted} />
@@ -277,14 +277,14 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
         <View style={{ height: Platform.OS === 'ios' ? 200 : 170 }} />
 
         <View style={styles.subtitle}>
-          <Text style={[styles.subtitleText, { color: colors.textSecondary }]}>
+          <NumberText weight="semiBold" style={[styles.subtitleText, { color: colors.textSecondary }]}>
             Customize your meal plan to match your lifestyle and dietary needs.
-          </Text>
+          </NumberText>
         </View>
 
       {/* Diet Style Selection */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>DIET STYLE</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>DIET STYLE</NumberText>
         <View style={styles.dietGrid}>
           {DIET_OPTIONS.map((option) => (
             <DietCard
@@ -301,7 +301,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Meals Per Day */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>MEALS PER DAY</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>MEALS PER DAY</NumberText>
         <View style={styles.mealsRow}>
           {[2, 3, 4, 5, 6].map((num) => {
             const isSelected = state.mealsPerDay === num;
@@ -329,7 +329,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   <NumberText
-                    weight="semibold"
+                    weight="semiBold"
                     style={[
                       styles.mealChipText,
                       { color: colors.text },
@@ -342,11 +342,11 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             );
           })}
         </View>
-        <Text style={[styles.mealsHint, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.mealsHint, { color: colors.textMuted }]}>
           {state.mealsPerDay <= 3 ? 'Larger, more filling meals' :
            state.mealsPerDay <= 4 ? 'Balanced meal frequency' :
            'Smaller, more frequent meals'}
-        </Text>
+        </NumberText>
       </GlassSection>
 
       {/* Intermittent Fasting */}
@@ -355,8 +355,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           <View style={styles.fastingInfo}>
             <Clock size={20} color={colors.textSecondary} />
             <View style={styles.fastingTextContainer}>
-              <Text style={[styles.fastingTitle, { color: colors.text }]}>Intermittent Fasting</Text>
-              <Text style={[styles.fastingSubtitle, { color: colors.textMuted }]}>Restrict eating to a time window</Text>
+              <NumberText weight="semiBold" style={[styles.fastingTitle, { color: colors.text }]}>Intermittent Fasting</NumberText>
+              <NumberText weight="semiBold" style={[styles.fastingSubtitle, { color: colors.textMuted }]}>Restrict eating to a time window</NumberText>
             </View>
           </View>
           <Switch
@@ -371,7 +371,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           <View
             style={styles.fastingOptions}
           >
-            <Text style={[styles.presetsLabel, { color: colors.textMuted }]}>Quick Presets</Text>
+            <NumberText weight="semiBold" style={[styles.presetsLabel, { color: colors.textMuted }]}>Quick Presets</NumberText>
             <View style={styles.fastingPresets}>
               {FASTING_PRESETS.map((preset) => {
                 const isSelected =
@@ -398,12 +398,12 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                       ]}
                       interactive
                     >
-                      <NumberText weight="semibold" style={[styles.presetLabel, { color: colors.text }, isSelected && styles.presetLabelSelected]}>
+                      <NumberText weight="semiBold" style={[styles.presetLabel, { color: colors.text }, isSelected && styles.presetLabelSelected]}>
                         {preset.label}
                       </NumberText>
-                      <Text style={[styles.presetDesc, { color: colors.textMuted }]}>
+                      <NumberText weight="semiBold" style={[styles.presetDesc, { color: colors.textMuted }]}>
                         {preset.description}
-                      </Text>
+                      </NumberText>
                     </GlassCard>
                   </TouchableOpacity>
                 );
@@ -411,8 +411,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             </View>
             <GlassCard style={styles.windowDisplay} interactive>
               <View style={styles.windowTime}>
-                <Text style={[styles.windowLabel, { color: colors.textMuted }]}>Eating Window</Text>
-                <NumberText weight="semibold" style={[styles.windowValue, { color: colors.primary }]}>
+                <NumberText weight="semiBold" style={[styles.windowLabel, { color: colors.textMuted }]}>Eating Window</NumberText>
+                <NumberText weight="semiBold" style={[styles.windowValue, { color: colors.primary }]}>
                   {state.fastingStart} - {state.fastingEnd}
                 </NumberText>
               </View>
@@ -423,10 +423,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Allergies & Restrictions */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>ALLERGIES & RESTRICTIONS</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>ALLERGIES & RESTRICTIONS</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select any foods you need to avoid (optional)
-        </Text>
+        </NumberText>
         <View style={styles.allergyGrid}>
           {ALLERGIES.map((allergy) => {
             const isSelected = state.allergies.includes(allergy);
@@ -451,9 +451,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   ]}
                   interactive
                 >
-                  <Text style={[styles.allergyText, { color: colors.text }, isSelected && styles.allergyTextSelected]}>
+                  <NumberText weight="semiBold" style={[styles.allergyText, { color: colors.text }, isSelected && styles.allergyTextSelected]}>
                     {allergy}
-                  </Text>
+                  </NumberText>
                   {isSelected && (
                     <XCircle size={16} color={Colors.error} />
                   )}
@@ -466,10 +466,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Meal Variety */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>MEAL VARIETY</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>MEAL VARIETY</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Different meals daily or meal prep friendly?
-        </Text>
+        </NumberText>
         <View style={styles.optionsRow}>
           <TouchableOpacity
             style={{ flex: 1 }}
@@ -488,7 +488,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               interactive
             >
               <Shuffle size={20} color={mealDiversity === 'diverse' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
-              <Text style={[styles.optionButtonText, { color: colors.text }, mealDiversity === 'diverse' && { color: Colors.successMuted }]}>Diverse daily</Text>
+              <NumberText weight="semiBold" style={[styles.optionButtonText, { color: colors.text }, mealDiversity === 'diverse' && { color: Colors.successMuted }]}>Diverse daily</NumberText>
             </GlassCard>
           </TouchableOpacity>
           <TouchableOpacity
@@ -508,7 +508,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               interactive
             >
               <Repeat size={20} color={mealDiversity === 'sameDaily' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
-              <Text style={[styles.optionButtonText, { color: colors.text }, mealDiversity === 'sameDaily' && { color: Colors.successMuted }]}>Same meals (prep)</Text>
+              <NumberText weight="semiBold" style={[styles.optionButtonText, { color: colors.text }, mealDiversity === 'sameDaily' && { color: Colors.successMuted }]}>Same meals (prep)</NumberText>
             </GlassCard>
           </TouchableOpacity>
         </View>
@@ -516,10 +516,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Snack Preferences */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>SNACK PREFERENCES</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>SNACK PREFERENCES</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Include snacks or stick to main meals?
-        </Text>
+        </NumberText>
         <View style={styles.optionsRow}>
           <TouchableOpacity
             style={{ flex: 1 }}
@@ -538,7 +538,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               interactive
             >
               <Coffee size={20} color={mealStyle === 'threePlusSnacks' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
-              <Text style={[styles.optionButtonText, { color: colors.text }, mealStyle === 'threePlusSnacks' && { color: Colors.successMuted }]}>3 meals + snacks</Text>
+              <NumberText weight="semiBold" style={[styles.optionButtonText, { color: colors.text }, mealStyle === 'threePlusSnacks' && { color: Colors.successMuted }]}>3 meals + snacks</NumberText>
             </GlassCard>
           </TouchableOpacity>
           <TouchableOpacity
@@ -558,7 +558,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
               interactive
             >
               <UtensilsCrossed size={20} color={mealStyle === 'fewerLarger' ? Colors.successMuted : colors.textMuted} style={{ marginBottom: 4 }} />
-              <Text style={[styles.optionButtonText, { color: colors.text }, mealStyle === 'fewerLarger' && { color: Colors.successMuted }]}>Fewer, larger meals</Text>
+              <NumberText weight="semiBold" style={[styles.optionButtonText, { color: colors.text }, mealStyle === 'fewerLarger' && { color: Colors.successMuted }]}>Fewer, larger meals</NumberText>
             </GlassCard>
           </TouchableOpacity>
         </View>
@@ -566,10 +566,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Cheat Days */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>CHEAT DAYS</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>CHEAT DAYS</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select days when you want flexibility (no meal plan generated)
-        </Text>
+        </NumberText>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -596,28 +596,25 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   interactive
                 >
                   {isSelected && <Pizza size={14} color={Colors.warning} />}
-                  <Text style={[styles.cheatDayText, { color: colors.text }, isSelected && { color: Colors.warning }]}>
+                  <NumberText weight="semiBold" style={[styles.cheatDayText, { color: colors.text }, isSelected && { color: Colors.warning }]}>
                     {shortDay}
-                  </Text>
+                  </NumberText>
                 </GlassCard>
               </TouchableOpacity>
             );
           })}
         </ScrollView>
         {cheatDays.length > 0 && (
-          <Text style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
-            <NumberText weight="semibold" style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
-              {cheatDays.length}
-            </NumberText>
-            {' cheat day'}{cheatDays.length > 1 ? 's' : ''} selected - enjoy mindfully!
-          </Text>
+          <NumberText weight="semiBold" style={[styles.cheatDaysHint, { color: colors.textMuted }]}>
+            {cheatDays.length}{' cheat day'}{cheatDays.length > 1 ? 's' : ''}{' selected - enjoy mindfully!'}
+          </NumberText>
         )}
       </GlassSection>
 
       {/* Favorite Proteins */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE PROTEINS</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select proteins you enjoy</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE PROTEINS</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select proteins you enjoy</NumberText>
         <View style={styles.foodChipsContainer}>
           {PROTEIN_OPTIONS.map((protein) => {
             const isSelected = proteins.includes(protein);
@@ -635,7 +632,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
                 >
-                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{protein}</Text>
+                  <NumberText weight="semiBold" style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{protein}</NumberText>
                   {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
@@ -646,8 +643,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Vegetables */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE VEGETABLES</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select vegetables you enjoy</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE VEGETABLES</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select vegetables you enjoy</NumberText>
         <View style={styles.foodChipsContainer}>
           {VEGETABLE_OPTIONS.map((veg) => {
             const isSelected = vegetables.includes(veg);
@@ -665,7 +662,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
                 >
-                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{veg}</Text>
+                  <NumberText weight="semiBold" style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{veg}</NumberText>
                   {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
@@ -676,8 +673,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Starches */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE CARBS & STARCHES</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select starches you enjoy</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE CARBS & STARCHES</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select starches you enjoy</NumberText>
         <View style={styles.foodChipsContainer}>
           {STARCH_OPTIONS.map((starch) => {
             const isSelected = starches.includes(starch);
@@ -695,7 +692,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
                 >
-                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{starch}</Text>
+                  <NumberText weight="semiBold" style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{starch}</NumberText>
                   {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
@@ -706,8 +703,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Snacks */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE SNACKS</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select snacks you enjoy</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE SNACKS</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Select snacks you enjoy</NumberText>
         <View style={styles.foodChipsContainer}>
           {SNACK_OPTIONS.map((snack) => {
             const isSelected = snacks.includes(snack);
@@ -725,7 +722,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
                 >
-                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{snack}</Text>
+                  <NumberText weight="semiBold" style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{snack}</NumberText>
                   {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
@@ -736,8 +733,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Favorite Cuisines */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE CUISINES</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Cuisines you enjoy most</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>FAVORITE CUISINES</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Cuisines you enjoy most</NumberText>
         <View style={styles.foodChipsContainer}>
           {CUISINE_OPTIONS.map((cuisine) => {
             const isSelected = cuisines.includes(cuisine);
@@ -755,7 +752,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(150, 206, 180, 0.18)' : 'rgba(150, 206, 180, 0.15)' }]}
                   interactive
                 >
-                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{cuisine}</Text>
+                  <NumberText weight="semiBold" style={[styles.foodChipText, { color: colors.text }, isSelected && { color: Colors.successMuted }]}>{cuisine}</NumberText>
                   {isSelected && <CheckCircle2 size={16} color={Colors.successMuted} style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
@@ -766,8 +763,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Disliked Foods */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>DISLIKED FOODS</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Foods to avoid in your meal plans</Text>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>DISLIKED FOODS</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>Foods to avoid in your meal plans</NumberText>
         <View style={styles.foodChipsContainer}>
           {DISLIKED_OPTIONS.map((food) => {
             const isSelected = disliked.includes(food);
@@ -785,7 +782,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                   style={[styles.foodChip, isSelected && { backgroundColor: isDark ? 'rgba(249, 115, 22, 0.18)' : 'rgba(249, 115, 22, 0.15)' }]}
                   interactive
                 >
-                  <Text style={[styles.foodChipText, { color: colors.text }, isSelected && { color: '#f97316' }]}>{food}</Text>
+                  <NumberText weight="semiBold" style={[styles.foodChipText, { color: colors.text }, isSelected && { color: '#f97316' }]}>{food}</NumberText>
                   {isSelected && <XCircle size={16} color="#f97316" style={{ marginLeft: 4 }} />}
                 </GlassCard>
               </TouchableOpacity>
@@ -806,10 +803,10 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Cooking Skill */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>COOKING SKILL LEVEL</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>COOKING SKILL LEVEL</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Help us tailor recipe complexity to your experience
-        </Text>
+        </NumberText>
         <View style={styles.skillButtonsContainer}>
           {[
             { value: 'beginner', label: 'Beginner', icon: Egg, description: 'Simple recipes' },
@@ -845,7 +842,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                     size={24}
                     color={isSelected ? Colors.successMuted : colors.textMuted}
                   />
-                  <Text
+                  <NumberText
+                    weight="semiBold"
                     style={[
                       styles.skillButtonLabel,
                       { color: colors.text },
@@ -856,13 +854,14 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
                     minimumFontScale={0.8}
                   >
                     {option.label}
-                  </Text>
-                  <Text
+                  </NumberText>
+                  <NumberText
+                    weight="semiBold"
                     style={[styles.skillButtonDescription, { color: colors.textMuted }]}
                     numberOfLines={1}
                   >
                     {option.description}
-                  </Text>
+                  </NumberText>
                 </GlassCard>
               </TouchableOpacity>
             );
@@ -872,18 +871,18 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
 
       {/* Daily Goals */}
       <GlassSection isDark={isDark}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>DAILY GOALS</Text>
-        <Text style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>DAILY GOALS</NumberText>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Customize your daily health targets
-        </Text>
+        </NumberText>
 
         {/* Water Goal */}
         <View style={styles.dailyGoalRow}>
           <View style={styles.dailyGoalInfo}>
             <Droplet size={24} color={colors.primary} />
             <View style={styles.dailyGoalTextContainer}>
-              <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Water Intake</Text>
-              <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Daily hydration goal</Text>
+              <NumberText weight="semiBold" style={[styles.dailyGoalLabel, { color: colors.text }]}>Water Intake</NumberText>
+              <NumberText weight="semiBold" style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Daily hydration goal</NumberText>
             </View>
           </View>
           <View style={styles.dailyGoalControls}>
@@ -899,12 +898,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             >
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
-            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>
-              <NumberText weight="semibold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
-                {state.waterGoalOz}
-              </NumberText>
-              {' oz'}
-            </Text>
+            <NumberText weight="semiBold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+              {state.waterGoalOz} oz
+            </NumberText>
             <TouchableOpacity
               onPress={async () => {
                 await selectionFeedback();
@@ -925,8 +921,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           <View style={styles.dailyGoalInfo}>
             <Moon size={24} color={colors.primary} />
             <View style={styles.dailyGoalTextContainer}>
-              <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Sleep Duration</Text>
-              <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Nightly sleep target</Text>
+              <NumberText weight="semiBold" style={[styles.dailyGoalLabel, { color: colors.text }]}>Sleep Duration</NumberText>
+              <NumberText weight="semiBold" style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Nightly sleep target</NumberText>
             </View>
           </View>
           <View style={styles.dailyGoalControls}>
@@ -942,12 +938,9 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             >
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
-            <Text style={[styles.dailyGoalValue, { color: colors.primary }]}>
-              <NumberText weight="semibold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
-                {state.sleepGoalHours}
-              </NumberText>
-              {' hrs'}
-            </Text>
+            <NumberText weight="semiBold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+              {state.sleepGoalHours} hrs
+            </NumberText>
             <TouchableOpacity
               onPress={async () => {
                 await selectionFeedback();
@@ -968,8 +961,8 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
           <View style={styles.dailyGoalInfo}>
             <Footprints size={24} color={colors.primary} />
             <View style={styles.dailyGoalTextContainer}>
-              <Text style={[styles.dailyGoalLabel, { color: colors.text }]}>Daily Steps</Text>
-              <Text style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Activity target</Text>
+              <NumberText weight="semiBold" style={[styles.dailyGoalLabel, { color: colors.text }]}>Daily Steps</NumberText>
+              <NumberText weight="semiBold" style={[styles.dailyGoalHint, { color: colors.textMuted }]}>Activity target</NumberText>
             </View>
           </View>
           <View style={styles.dailyGoalControls}>
@@ -985,7 +978,7 @@ export function NutritionPreferencesStep({ onNext, onBack }: NutritionPreference
             >
               <MinusCircle size={28} color={colors.textMuted} />
             </TouchableOpacity>
-            <NumberText weight="semibold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
+            <NumberText weight="semiBold" style={[styles.dailyGoalValue, { color: colors.primary }]}>
               {(state.stepGoal / 1000).toFixed(0)}k
             </NumberText>
             <TouchableOpacity
@@ -1057,7 +1050,7 @@ const styles = StyleSheet.create({
   },
   subtitleText: {
     fontSize: 11,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.textSecondary,
     lineHeight: 16,
     textAlign: 'center',
@@ -1069,7 +1062,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontFamily: Fonts.numericSemiBold,
+
     letterSpacing: 1.5,
     color: Colors.text,
     textTransform: 'uppercase',
@@ -1077,7 +1070,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 13,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.textMuted,
     marginBottom: 12,
     marginTop: -4,
@@ -1109,7 +1102,7 @@ const styles = StyleSheet.create({
   },
   dietTitle: {
     fontSize: 14,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.text,
     marginBottom: 2,
   },
@@ -1118,7 +1111,7 @@ const styles = StyleSheet.create({
   },
   dietDescription: {
     fontSize: 12,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.textMuted,
   },
   mealsRow: {
@@ -1136,7 +1129,7 @@ const styles = StyleSheet.create({
   },
   mealChipText: {
     fontSize: 20,
-    fontWeight: '100',
+
     color: Colors.text,
     textAlign: 'center',
     includeFontPadding: false,
@@ -1148,7 +1141,7 @@ const styles = StyleSheet.create({
   mealsHint: {
     marginTop: 12,
     fontSize: 13,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.textMuted,
     textAlign: 'center',
     fontStyle: 'italic',
@@ -1168,12 +1161,12 @@ const styles = StyleSheet.create({
   },
   fastingTitle: {
     fontSize: 15,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.text,
   },
   fastingSubtitle: {
     fontSize: 12,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.textMuted,
   },
   fastingOptions: {
@@ -1182,7 +1175,7 @@ const styles = StyleSheet.create({
   },
   presetsLabel: {
     fontSize: 12,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.textMuted,
     marginBottom: 10,
   },
@@ -1199,7 +1192,7 @@ const styles = StyleSheet.create({
   },
   presetLabel: {
     fontSize: 16,
-    fontWeight: '100',
+
     color: Colors.text,
   },
   presetLabelSelected: {
@@ -1207,7 +1200,7 @@ const styles = StyleSheet.create({
   },
   presetDesc: {
     fontSize: 10,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.textMuted,
     marginTop: 2,
   },
@@ -1220,14 +1213,14 @@ const styles = StyleSheet.create({
   },
   windowLabel: {
     fontSize: 11,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   windowValue: {
     fontSize: 20,
-    fontWeight: '100',
+
     marginTop: 4,
   },
   allergyGrid: {
@@ -1244,7 +1237,7 @@ const styles = StyleSheet.create({
   },
   allergyText: {
     fontSize: 13,
-    fontFamily: Fonts.numericSemiBold,
+
     color: Colors.text,
   },
   allergyTextSelected: {
@@ -1262,7 +1255,7 @@ const styles = StyleSheet.create({
   },
   optionButtonText: {
     fontSize: 13,
-    fontFamily: Fonts.numericSemiBold,
+
     textAlign: 'center',
   },
   foodChipsContainer: {
@@ -1278,7 +1271,7 @@ const styles = StyleSheet.create({
   },
   foodChipText: {
     fontSize: 13,
-    fontFamily: Fonts.numericSemiBold,
+
   },
   cheatDaysContainer: {
     flexDirection: 'row',
@@ -1296,12 +1289,12 @@ const styles = StyleSheet.create({
   },
   cheatDayText: {
     fontSize: 11,
-    fontFamily: Fonts.numericSemiBold,
+
   },
   cheatDaysHint: {
     marginTop: 12,
     fontSize: 13,
-    fontFamily: Fonts.numericSemiBold,
+
     textAlign: 'center',
     fontStyle: 'italic',
   },
@@ -1330,14 +1323,14 @@ const styles = StyleSheet.create({
   },
   skillButtonLabel: {
     fontSize: 14,
-    fontFamily: Fonts.numericSemiBold,
+
     marginTop: 8,
     textAlign: 'center',
     width: '100%', // Ensure label takes full width
   },
   skillButtonDescription: {
     fontSize: 11,
-    fontFamily: Fonts.numericSemiBold,
+
     marginTop: 4,
     textAlign: 'center',
     width: '100%', // Ensure description takes full width
@@ -1364,7 +1357,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.numericSemiBold,
+
     letterSpacing: 1,
     color: Colors.text,
   },
@@ -1377,7 +1370,7 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     fontSize: 14,
-    fontFamily: Fonts.numericSemiBold,
+
     letterSpacing: 1,
     color: Colors.primaryText,
   },
@@ -1401,11 +1394,11 @@ const styles = StyleSheet.create({
   },
   dailyGoalLabel: {
     fontSize: 15,
-    fontFamily: Fonts.numericSemiBold,
+
   },
   dailyGoalHint: {
     fontSize: 12,
-    fontFamily: Fonts.numericSemiBold,
+
   },
   dailyGoalControls: {
     flexDirection: 'row',
@@ -1417,7 +1410,7 @@ const styles = StyleSheet.create({
   },
   dailyGoalValue: {
     fontSize: 18,
-    fontFamily: Fonts.numericSemiBold,
+
     minWidth: 60,
     textAlign: 'center',
   },
