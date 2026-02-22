@@ -314,6 +314,7 @@ function VerticalScrollPicker({ min, max, value, onValueChange, unit, colors, is
   const scrollRef = useRef<ScrollView>(null);
   const lastValueRef = useRef(value);
   const isUserScrolling = useRef(false);
+  const [scrollValue, setScrollValue] = useState(value);
   const totalItems = max - min + 1;
   const topPadding = ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2);
 
@@ -322,6 +323,7 @@ function VerticalScrollPicker({ min, max, value, onValueChange, unit, colors, is
     if (!isUserScrolling.current) {
       const offset = (value - min) * ITEM_HEIGHT;
       scrollRef.current?.scrollTo({ y: offset, animated: false });
+      setScrollValue(value);
     }
   }, [value, min]);
 
@@ -334,6 +336,7 @@ function VerticalScrollPicker({ min, max, value, onValueChange, unit, colors, is
     return () => clearTimeout(timeout);
   }, [min, max]);
 
+  // Track scroll position for visual updates only (no state change = no re-render lag)
   const handleScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     isUserScrolling.current = true;
     const scrollY = e.nativeEvent.contentOffset.y;
@@ -342,11 +345,12 @@ function VerticalScrollPicker({ min, max, value, onValueChange, unit, colors, is
 
     if (clampedValue !== lastValueRef.current) {
       lastValueRef.current = clampedValue;
-      onValueChange(clampedValue);
+      setScrollValue(clampedValue);
       selectionFeedback();
     }
-  }, [min, max, onValueChange]);
+  }, [min, max]);
 
+  // Commit value only when scrolling stops
   const handleScrollEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollY = e.nativeEvent.contentOffset.y;
     const rawValue = min + Math.round(scrollY / ITEM_HEIGHT);
@@ -355,6 +359,7 @@ function VerticalScrollPicker({ min, max, value, onValueChange, unit, colors, is
 
     scrollRef.current?.scrollTo({ y: snappedOffset, animated: true });
     onValueChange(snappedValue);
+    setScrollValue(snappedValue);
     isUserScrolling.current = false;
   }, [min, max, onValueChange]);
 
@@ -380,18 +385,17 @@ function VerticalScrollPicker({ min, max, value, onValueChange, unit, colors, is
         onScroll={handleScroll}
         onMomentumScrollEnd={handleScrollEnd}
         onScrollEndDrag={handleScrollEnd}
-        scrollEventThrottle={16}
-        decelerationRate="fast"
+        scrollEventThrottle={32}
+        decelerationRate={0.985}
         snapToInterval={ITEM_HEIGHT}
         contentContainerStyle={{
           paddingVertical: topPadding,
         }}
-        bounces={false}
       >
         {items.map((val) => {
-          const isSelected = val === value;
-          const distance = Math.abs(val - value);
+          const distance = Math.abs(val - scrollValue);
           const opacity = distance === 0 ? 1 : distance === 1 ? 0.5 : distance === 2 ? 0.25 : 0.12;
+          const isSelected = val === scrollValue;
 
           return (
             <View key={val} style={[vPickerStyles.item, { opacity }]}>
