@@ -368,7 +368,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                       part.isNumber ? (
                         <NumberText
                           key={index}
-                          weight="light"
+                          weight="semiBold"
                           style={[styles.activityDescription, { color: colors.textSecondary }]}
                         >
                           {part.text}
@@ -474,11 +474,11 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
                 <View style={styles.cardioMeta}>
                   <View style={styles.cardioMetaItem}>
                     <Flame size={12} color={colors.textMuted} />
-                    <NumberText weight="light" style={[styles.cardioMetaText, { color: colors.textMuted }]}>{option.calorieInfo}</NumberText>
+                    <NumberText weight="semiBold" style={[styles.cardioMetaText, { color: colors.textMuted }]}>{option.calorieInfo}</NumberText>
                   </View>
                   <View style={styles.cardioMetaItem}>
                     <Calendar size={12} color={colors.textMuted} />
-                    <NumberText weight="light" style={[styles.cardioMetaText, { color: colors.textMuted }]}>{option.frequency}</NumberText>
+                    <NumberText weight="semiBold" style={[styles.cardioMetaText, { color: colors.textMuted }]}>{option.frequency}</NumberText>
                   </View>
                 </View>
               </View>
@@ -599,7 +599,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                   interactive
                 >
                   <NumberText
-                    weight="light"
+                    weight="semiBold"
                     style={[
                       styles.workoutChipText,
                       { color: colors.text },
@@ -635,7 +635,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
               >
                 <GlassCard style={[styles.chip, isSelected && { backgroundColor: primaryGlassBg }, { borderWidth: 0 }]} borderColor="transparent" interactive>
                   <Text style={[styles.chipText, { color: colors.text }]}>
-                    <NumberText weight="light" style={[{ fontSize: 14 }, { color: colors.text }]}>
+                    <NumberText weight="semiBold" style={[{ fontSize: 14 }, { color: colors.text }]}>
                       {duration}
                     </NumberText>
                     {' min'}
@@ -753,9 +753,9 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                     <Text style={[styles.strengthLevelLabel, { color: colors.text }]}>
                       {level.label}
                     </Text>
-                    <Text style={[styles.strengthLevelDesc, { color: colors.textMuted }]}>
+                    <NumberText weight="semiBold" style={[styles.strengthLevelDesc, { color: colors.textMuted }]}>
                       {level.desc}
-                    </Text>
+                    </NumberText>
                   </GlassCard>
                 </TouchableOpacity>
               ))}
@@ -765,7 +765,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
             {(state.strengthLevel === 'intermediate' || state.strengthLevel === 'advanced') && (
               <>
                 <Text style={[styles.strengthSubheading, { color: colors.textMuted, marginTop: 16 }]}>
-                  Optional: Enter your 1-rep max (1RM) for key lifts
+                  Optional: Enter your <NumberText weight="semiBold" style={[styles.strengthSubheading, { color: colors.textMuted }]}>1</NumberText>-rep max (<NumberText weight="semiBold" style={[styles.strengthSubheading, { color: colors.textMuted }]}>1</NumberText>RM) for key lifts
                 </Text>
                 <Text style={[styles.strengthNote, { color: colors.textMuted }]}>
                   This helps us recommend appropriate starting weights. Leave blank if unsure.
@@ -786,7 +786,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                           colors={colors}
                           isDark={isDark}
                         />
-                        <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                        <NumberText weight="semiBold" style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</NumberText>
                       </View>
                     </GlassCard>
                   </View>
@@ -806,7 +806,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                           colors={colors}
                           isDark={isDark}
                         />
-                        <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                        <NumberText weight="semiBold" style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</NumberText>
                       </View>
                     </GlassCard>
                   </View>
@@ -826,7 +826,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                           colors={colors}
                           isDark={isDark}
                         />
-                        <Text style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</Text>
+                        <NumberText weight="semiBold" style={[styles.oneRMUnit, { color: colors.textMuted }]}>lbs</NumberText>
                       </View>
                     </GlassCard>
                   </View>
@@ -834,7 +834,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                 <GlassCard style={styles.oneRMNote} interactive>
                   <TrendingUp size={18} color={Colors.accentCyan} />
                   <Text style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>
-                    We'll use these values to calculate appropriate training weights (usually 60-85% of 1RM)
+                    We'll use these values to calculate appropriate training weights (usually <NumberText weight="semiBold" style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>60-85%</NumberText> of <NumberText weight="semiBold" style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>1</NumberText>RM)
                   </Text>
                 </GlassCard>
               </>
