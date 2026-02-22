@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Fonts } from '../../constants/Theme';
+import { NumberText } from '../NumberText';
 
 interface WizardHeaderProps {
   currentStep: number;
@@ -31,17 +32,17 @@ export function WizardHeader({ currentStep, totalSteps, title, icon, isDark = tr
       <View style={styles.headerContent}>
         {/* Top Row: Step Counter */}
         <View style={styles.topRow}>
-          <Text style={[styles.stepCounter, { color: textSecondary }]}>
+          <NumberText weight="medium" style={[styles.stepCounter, { color: textSecondary }]}>
             Step {currentStep} of {totalSteps}
-          </Text>
+          </NumberText>
         </View>
 
         {/* Title */}
         <View style={styles.titleRow}>
           {icon}
-          <Text style={[styles.title, { color: textColor }]} numberOfLines={1}>
+          <NumberText weight="semiBold" style={[styles.title, { color: textColor }]} numberOfLines={1}>
             {title}
-          </Text>
+          </NumberText>
         </View>
       </View>
     </View>
