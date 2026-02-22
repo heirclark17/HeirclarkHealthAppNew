@@ -840,14 +840,15 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               size={24}
               color={state.sex === 'male' ? colors.primary : colors.textMuted}
             />
-            <Text
+            <NumberText
+              weight="semiBold"
               style={[
                 styles.sexText,
                 { color: colors.text },
               ]}
             >
               Male
-            </Text>
+            </NumberText>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
@@ -869,14 +870,15 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               size={24}
               color={state.sex === 'female' ? colors.primary : colors.textMuted}
             />
-            <Text
+            <NumberText
+              weight="semiBold"
               style={[
                 styles.sexText,
                 { color: colors.text },
               ]}
             >
               Female
-            </Text>
+            </NumberText>
           </TouchableOpacity>
         </View>
       </GlassSection>
