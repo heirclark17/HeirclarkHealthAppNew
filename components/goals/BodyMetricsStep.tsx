@@ -697,7 +697,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
             accessibilityRole="button"
             accessibilityHint="Confirms selected start date and closes date picker"
           >
-            <Text style={[styles.datePickerDoneText, { color: colors.primaryText }]}>Done</Text>
+            <NumberText weight="medium" style={[styles.datePickerDoneText, { color: colors.primaryText }]}>Done</NumberText>
           </TouchableOpacity>
         )}
       </GlassSection>
@@ -742,7 +742,7 @@ export function BodyMetricsStep({ onNext, onBack }: BodyMetricsStepProps) {
               accessibilityRole="button"
               accessibilityHint="Confirms selected target date and closes date picker"
             >
-              <Text style={[styles.datePickerDoneText, { color: colors.primaryText }]}>Done</Text>
+              <NumberText weight="medium" style={[styles.datePickerDoneText, { color: colors.primaryText }]}>Done</NumberText>
             </TouchableOpacity>
           )}
         </GlassSection>
