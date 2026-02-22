@@ -362,7 +362,7 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                 <NumberText weight="semiBold" style={[styles.activityTitle, { color: isSelected ? iconColor : colors.text }]}>
                   {option.title}
                 </NumberText>
-                <NumberText weight="light" style={[styles.activityDescription, { color: colors.textSecondary }]}>
+                <NumberText weight="semiBold" style={[styles.activityDescription, { color: colors.textSecondary }]}>
                   {option.descriptionParts ? (
                     option.descriptionParts.map((part, index) =>
                       part.isNumber ? (
@@ -374,14 +374,14 @@ function ActivityCard({ option, isSelected, onSelect, index, colors, isDark }: A
                           {part.text}
                         </NumberText>
                       ) : (
-                        <NumberText key={index} weight="light">{part.text}</NumberText>
+                        <NumberText key={index} weight="semiBold">{part.text}</NumberText>
                       )
                     )
                   ) : (
                     option.description
                   )}
                 </NumberText>
-                <NumberText weight="light" style={[styles.activityExample, { color: colors.textMuted }]}>{option.example}</NumberText>
+                <NumberText weight="semiBold" style={[styles.activityExample, { color: colors.textMuted }]}>{option.example}</NumberText>
               </View>
               {isSelected && (
                 <CheckCircle2 size={24} color={iconColor} />
@@ -470,7 +470,7 @@ function CardioCard({ option, isSelected, onSelect, index, colors, isDark }: Car
                 <NumberText weight="semiBold" style={[styles.cardioTitle, { color: colors.text }, isSelected && styles.cardioTitleSelected]}>
                   {option.title}
                 </NumberText>
-                <NumberText weight="light" style={[styles.cardioDescription, { color: colors.textSecondary }]}>{option.description}</NumberText>
+                <NumberText weight="semiBold" style={[styles.cardioDescription, { color: colors.textSecondary }]}>{option.description}</NumberText>
                 <View style={styles.cardioMeta}>
                   <View style={styles.cardioMetaItem}>
                     <Flame size={12} color={colors.textMuted} />
@@ -547,7 +547,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         <View style={{ height: Platform.OS === 'ios' ? 200 : 170 }} />
 
         <View style={styles.subtitle}>
-          <NumberText weight="light" style={[styles.subtitleText, { color: colors.textSecondary }]}>
+          <NumberText weight="semiBold" style={[styles.subtitleText, { color: colors.textSecondary }]}>
             Tell us about your typical day and exercise habits for accurate calorie calculations.
           </NumberText>
         </View>
@@ -555,7 +555,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Activity Level Selection */}
       <GlassSection isDark={isDark}>
         <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>EXERCISE HABITS</NumberText>
-        <NumberText weight="light" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select your typical weekly activity level
         </NumberText>
         <View style={styles.activityList}>
@@ -648,7 +648,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Cardio Preference */}
       <GlassSection isDark={isDark}>
         <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>PREFERRED CARDIO TYPE</NumberText>
-        <NumberText weight="light" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Choose your preferred style of cardiovascular exercise
         </NumberText>
         <View style={styles.cardioList}>
@@ -669,7 +669,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Fitness Level */}
       <GlassSection>
         <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>FITNESS EXPERIENCE LEVEL</NumberText>
-        <NumberText weight="light" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Help us tailor workout intensity and complexity
         </NumberText>
         <View style={styles.durationChips}>
@@ -693,12 +693,12 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Strength Training Baseline */}
       <GlassSection>
         <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>STRENGTH TRAINING BASELINE</NumberText>
-        <NumberText weight="light" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Help us personalize weight recommendations for strength workouts
         </NumberText>
 
         {/* Has Lifting Experience */}
-        <NumberText weight="light" style={[styles.strengthSubheading, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.strengthSubheading, { color: colors.textMuted }]}>
           Do you have weight lifting experience?
         </NumberText>
         <View style={styles.durationChips}>
@@ -721,7 +721,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         {/* Strength Level (only if has experience) */}
         {state.hasLiftingExperience && (
           <>
-            <NumberText weight="light" style={[styles.strengthSubheading, { color: colors.textMuted, marginTop: 16 }]}>
+            <NumberText weight="semiBold" style={[styles.strengthSubheading, { color: colors.textMuted, marginTop: 16 }]}>
               What's your strength training level?
             </NumberText>
             <View style={styles.durationChips}>
@@ -762,10 +762,10 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
             {/* 1RM Input (only if intermediate or advanced) */}
             {(state.strengthLevel === 'intermediate' || state.strengthLevel === 'advanced') && (
               <>
-                <NumberText weight="light" style={[styles.strengthSubheading, { color: colors.textMuted, marginTop: 16 }]}>
-                  Optional: Enter your <NumberText weight="semiBold" style={[styles.strengthSubheading, { color: colors.textMuted }]}>1</NumberText>-rep max (<NumberText weight="semiBold" style={[styles.strengthSubheading, { color: colors.textMuted }]}>1</NumberText>RM) for key lifts
+                <NumberText weight="semiBold" style={[styles.strengthSubheading, { color: colors.textMuted, marginTop: 16 }]}>
+                  Optional: Enter your 1-rep max (1RM) for key lifts
                 </NumberText>
-                <NumberText weight="light" style={[styles.strengthNote, { color: colors.textMuted }]}>
+                <NumberText weight="semiBold" style={[styles.strengthNote, { color: colors.textMuted }]}>
                   This helps us recommend appropriate starting weights. Leave blank if unsure.
                 </NumberText>
                 <View style={styles.oneRMContainer}>
@@ -831,8 +831,8 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
                 </View>
                 <GlassCard style={styles.oneRMNote} interactive>
                   <TrendingUp size={18} color={Colors.accentCyan} />
-                  <NumberText weight="light" style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>
-                    We'll use these values to calculate appropriate training weights (usually <NumberText weight="semiBold" style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>60-85%</NumberText> of <NumberText weight="semiBold" style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>1</NumberText>RM)
+                  <NumberText weight="semiBold" style={[styles.oneRMNoteText, { color: colors.textSecondary }]}>
+                    We'll use these values to calculate appropriate training weights (usually 60-85% of 1RM)
                   </NumberText>
                 </GlassCard>
               </>
@@ -844,7 +844,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Available Equipment */}
       <GlassSection>
         <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>AVAILABLE EQUIPMENT</NumberText>
-        <NumberText weight="light" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select all equipment you have access to (select multiple)
         </NumberText>
         <View style={styles.equipmentGrid}>
@@ -891,7 +891,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
           })}
         </View>
         {state.availableEquipment.length === 0 && (
-          <NumberText weight="light" style={[styles.warningText, { color: Colors.warning }]}>
+          <NumberText weight="semiBold" style={[styles.warningText, { color: Colors.warning }]}>
             Please select at least one equipment option
           </NumberText>
         )}
@@ -900,7 +900,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       {/* Injuries / Limitations */}
       <GlassSection>
         <NumberText weight="semiBold" style={[styles.sectionTitle, { color: colors.text }]}>INJURIES OR LIMITATIONS</NumberText>
-        <NumberText weight="light" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
+        <NumberText weight="semiBold" style={[styles.sectionSubtitle, { color: colors.textMuted }]}>
           Select any areas to avoid or modify exercises for (optional)
         </NumberText>
         <View style={styles.injuryGrid}>
@@ -957,7 +957,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
         {state.injuries.length > 0 && (
           <GlassCard style={styles.injuryNote} interactive>
             <Info size={20} color={Colors.accentCyan} />
-            <NumberText weight="light" style={[styles.injuryNoteText, { color: colors.textSecondary }]}>
+            <NumberText weight="semiBold" style={[styles.injuryNoteText, { color: colors.textSecondary }]}>
               Workouts will be modified to avoid or reduce stress on these areas.
             </NumberText>
           </GlassCard>
@@ -968,7 +968,7 @@ export function ActivityLifestyleStep({ onNext, onBack }: ActivityLifestyleStepP
       <GlassCard style={styles.summaryCard} interactive>
         <View style={styles.summaryCardInner}>
           <Lightbulb size={28} color={Colors.warning} />
-          <NumberText weight="light" style={[styles.summaryText, { color: colors.textSecondary }]}>
+          <NumberText weight="semiBold" style={[styles.summaryText, { color: colors.textSecondary }]}>
             Based on your activity level, we'll calculate your Total Daily Energy Expenditure (TDEE)
             to determine the right calorie target for your goal.
           </NumberText>
